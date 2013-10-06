@@ -1,0 +1,41 @@
+
+rule cc
+  command = $cc $cwarn $cflags $incdirs $extra_incs $defs -c $in -o $out
+  description = C ($in)
+
+rule cxx
+  command = $cxx $cxxwarn $cflags $cxxflags $incdirs $extra_incs $defs -MMD -MF $out.d -c $in -o $out
+  description = C++ ($in)
+  depfile = $out.d
+
+rule link_exe
+  command = $ld $rpath $ldflags $in $libs -o $out $silent_link
+  description = Linking ($out)
+
+rule link_static_lib
+  command = $ar $arflags -c -r $out $in ; ranlib $out
+  description = Static ($out)
+
+rule link_shared_lib
+  command = $ld -shared $ldflags $in -o $out
+  description = Shared ($out)
+
+rule data_compile
+  command = objcopy -I binary -O elf64-x86-64 -B i386 $renames $in $out
+  description = Data ($in)
+
+rule luac
+  command = $luac $luaflags -o $out $in
+  description = Lua ($in)
+
+rule run
+  command = mkdir -p $dir ; cd $dir ; $cmd $args > /dev/null
+  description = Running $cmd
+
+rule moc
+  command = $moc $defs -o $out $in
+  description = MOC $in
+
+rule rcc
+  command = $rcc -name $name -o $out $in
+  description = RCC $in
