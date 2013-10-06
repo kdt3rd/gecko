@@ -26,7 +26,7 @@ CFlags( "-flax-vector-conversions" )
 CFlags( "-fPIC", "-Wl,-export-dynamic" )
 CXXFlags( "-msse", "-msse2", "-msse3" )
 CXXFlags( "-flax-vector-conversions" )
-CXXFlags( "--std=c++0x" )
+CXXFlags( "--std=c++11" )
 
 -- C/C++ warnings
 Warning( "all", "extra", "no-unused-parameter", "init-self", "comment", "cast-align", "switch", "format", "multichar", "missing-braces", "parentheses", "pointer-arith", "sign-compare", "return-type", "write-strings", "cast-align" )
@@ -71,4 +71,5 @@ ALLEG_FLAGS, ALLEG_INCLUDE, ALLEG_LIBS = Package( "allegro-5" )
 MAIN_FLAGS, MAIN_INCLUDE, MAIN_LIBS = Package( "allegro_main-5" )
 IMG_FLAGS, IMG_INCLUDE, IMG_LIBS = Package( "allegro_image-5" )
 PRIM_FLAGS, PRIM_INCLUDE, PRIM_LIBS = Package( "allegro_primitives-5" )
+BOTAN_FLAGS, BOTAN_INCLUDE, BOTAN_LIBS = Package( "botan-1.10" )
 
