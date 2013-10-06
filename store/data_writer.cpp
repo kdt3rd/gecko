@@ -280,20 +280,20 @@ data_writer::write_noop( void )
 ////////////////////////////////////////
 
 void
-data_writer::write_object( size_t size )
+data_writer::write_map( size_t size )
 {
 	if ( size < 255 )
 	{
-		*_file << data_type::object8;
+		*_file << data_type::map8;
 		uint8_t s = uint8_t( size );
 		_file->write( (char *)&s, sizeof(s) );
-		update( &data_type::object8, 1 );
+		update( &data_type::map8, 1 );
 		update( &s, 1 );
 	}
 	else
 	{
-		*_file << data_type::object32;
-		update( &data_type::object32, 1 );
+		*_file << data_type::map32;
+		update( &data_type::map32, 1 );
 		write32( uint32_t( size ) );
 	}
 }
@@ -321,12 +321,12 @@ data_writer::write_array( size_t size )
 
 ////////////////////////////////////////
 
-void data_writer::write_object( void )
+void data_writer::write_map( void )
 {
-	*_file << data_type::object8;
+	*_file << data_type::map8;
 	uint8_t s = 255;
 	_file->write( (char *)&s, sizeof(s) );
-	update( &data_type::object8, 1 );
+	update( &data_type::map8, 1 );
 	update( &s, 1 );
 }
 

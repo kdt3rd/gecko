@@ -233,13 +233,13 @@ data_reader::read_noop( void )
 ////////////////////////////////////////
 
 size_t
-data_reader::read_object( void )
+data_reader::read_map( void )
 {
 	char t = _file->get();
 	uint32_t size = 0;
 	switch ( t )
 	{
-		case data_type::object8:
+		case data_type::map8:
 		{
 			uint8_t s = _file->get();
 			size = s;
@@ -248,12 +248,12 @@ data_reader::read_object( void )
 			break;
 		}
 
-		case data_type::object32:
+		case data_type::map32:
 			size = read32();
 			break;
 
 		default:
-			throw std::runtime_error( "expecte type object" );
+			throw std::runtime_error( "expecte type map" );
 	}
 
 	return size;

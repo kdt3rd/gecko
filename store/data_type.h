@@ -23,8 +23,8 @@ namespace data_type
 	const char float64 = 'd';
 	const char string8 = 's';
 	const char string32 = 'S';
-	const char object8 = 'o';
-	const char object32 = 'O';
+	const char map8 = 'm';
+	const char map32 = 'M';
 	const char array8 = 'a';
 	const char array32 = 'A';
 	const char noop = 'N';

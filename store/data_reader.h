@@ -57,8 +57,8 @@ public:
 	// Read no-op
 	void read_noop();
 
-	// Begin reading an object
-	size_t read_object( void );
+	// Begin reading a map
+	size_t read_map( void );
 
 	// Begin reading an array
 	size_t read_array( void );

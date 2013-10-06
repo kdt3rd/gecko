@@ -58,21 +58,21 @@ public:
 	// Write no-op
 	void write_noop( void );
 
-	// Begin writing an object of a fixed size
-	void write_object( size_t size );
+	// Begin writing a map of a fixed size
+	void write_map( size_t size );
 
 	// Begin writing an array of a fixed size
 	void write_array( size_t size );
 
-	// Begin writing an object of a unknown size
+	// Begin writing a map of a unknown size
 	// Must be followed by write_end()
-	void write_object( void );
+	void write_map( void );
 
 	// Begin writing an array of a unknown size
 	// Must be followed by write_end()
 	void write_array( void );
 
-	// End an object or array of unknown size
+	// End a map or array of unknown size
 	void write_end( void );
 
 	// Close the writer
