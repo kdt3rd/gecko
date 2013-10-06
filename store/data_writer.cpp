@@ -178,7 +178,12 @@ data_writer::write( uint64_t v )
 void
 data_writer::write( float f )
 {
-	uint32_t &v = *( reinterpret_cast<uint32_t*>( &f ) );
+	union {
+		float f;
+		uint32_t i;
+	} tmp;
+	tmp.f = f;
+	uint32_t &v = tmp.i;
 	uint8_t data[4];
 	data[0] = ( v >> 24 ) & 0xFF;
 	data[1] = ( v >> 16 ) & 0xFF;
@@ -195,7 +200,12 @@ data_writer::write( float f )
 void
 data_writer::write( double f )
 {
-	uint64_t &v = *( reinterpret_cast<uint64_t*>( &f ) );
+	union {
+		double f;
+		uint64_t i;
+	} tmp;
+	tmp.f = f;
+	uint64_t &v = tmp.i;
 	uint8_t data[8];
 	data[0] = ( v >> 56 ) & 0xFF;
 	data[1] = ( v >> 48 ) & 0xFF;

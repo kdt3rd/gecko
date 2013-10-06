@@ -166,8 +166,12 @@ data_reader::read( float &f )
 		throw std::runtime_error( "expected type float32" );
 	uint8_t data[sizeof(f)];
 	_file->read( (char *)data, sizeof(f) );
-	uint32_t v = ( data[0] << 24 ) + ( data[1] << 16 ) + ( data[2] << 8 ) + data[3];
-	f = *(reinterpret_cast<float*>( &v ));
+	union {
+		uint32_t i;
+		float f;
+	} tmp;
+	tmp.i = ( data[0] << 24 ) + ( data[1] << 16 ) + ( data[2] << 8 ) + data[3];
+	f = tmp.f;
 }
 
 ////////////////////////////////////////
@@ -180,8 +184,12 @@ data_reader::read( double &f )
 		throw std::runtime_error( "expected type uint64" );
 	uint8_t data[sizeof(f)];
 	_file->read( (char *)data, sizeof(f) );
-	uint64_t v = ( uint64_t(data[0]) << 56 ) + ( uint64_t(data[1]) << 48 ) + ( uint64_t(data[2]) << 40 ) + ( uint64_t(data[3]) << 32 ) + ( uint64_t(data[4]) << 24 ) + ( uint64_t(data[5]) << 16 ) + ( uint64_t(data[6]) << 8 ) + uint64_t(data[7]);
-	f = *(reinterpret_cast<double*>( &v ));
+	union {
+		uint64_t i;
+		double f;
+	} tmp;
+	tmp.i = ( uint64_t(data[0]) << 56 ) + ( uint64_t(data[1]) << 48 ) + ( uint64_t(data[2]) << 40 ) + ( uint64_t(data[3]) << 32 ) + ( uint64_t(data[4]) << 24 ) + ( uint64_t(data[5]) << 16 ) + ( uint64_t(data[6]) << 8 ) + uint64_t(data[7]);
+	f = tmp.f;
 }
 
 ////////////////////////////////////////
