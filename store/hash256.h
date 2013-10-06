@@ -22,3 +22,11 @@ private:
 
 ////////////////////////////////////////
 
+inline std::ostream &operator<<( std::ostream &out, const hash256 &h )
+{
+	out << h.string();
+	return out;
+}
+
+////////////////////////////////////////
+
