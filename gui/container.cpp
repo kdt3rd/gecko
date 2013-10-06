@@ -1,0 +1,12 @@
+
+#include "container.h"
+
+////////////////////////////////////////
+
+container::container( void )
+{
+	_areas.push_back( std::make_shared<area>() );
+}
+
+////////////////////////////////////////
+
