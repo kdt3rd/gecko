@@ -13,6 +13,8 @@ public:
 	void add_area( const std::shared_ptr<area> &a, double weight = 0.0 );
 	void remove_area( size_t i );
 
+	void set_direction( direction d ) { _dir = d; }
+
 	void recompute_minimum( void );
 	void recompute_constraint( void );
 

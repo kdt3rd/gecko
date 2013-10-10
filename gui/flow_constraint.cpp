@@ -1,4 +1,5 @@
 
+#include <core/reverse.h>
 #include "flow_constraint.h"
 
 ////////////////////////////////////////
@@ -51,13 +52,27 @@ void flow_constraint::recompute_constraint( void )
 
 		double x = _area->x1();
 		double extra = _area->width() - w;
-		for ( auto a: _areas )
+		if ( _dir == direction::RIGHT )
 		{
-			double w = a.first->minimum_width();
-			if ( t > 0.0 )
-				w += extra * a.second / t;
-			a.first->set_horizontal( x, x + w );
-			x += w;
+			for ( auto a: _areas )
+			{
+				double w = a.first->minimum_width();
+				if ( t > 0.0 )
+					w += extra * a.second / t;
+				a.first->set_horizontal( x, x + w );
+				x += w;
+			}
+		}
+		else
+		{
+			for ( auto a: reverse( _areas ) )
+			{
+				double w = a.first->minimum_width();
+				if ( t > 0.0 )
+					w += extra * a.second / t;
+				a.first->set_horizontal( x, x + w );
+				x += w;
+			}
 		}
 	}
 	else
@@ -72,14 +87,29 @@ void flow_constraint::recompute_constraint( void )
 
 		double y = _area->y1();
 		double extra = _area->height() - h;
-		for ( auto a: _areas )
+		if ( _dir == direction::DOWN )
 		{
-			double h = a.first->minimum_height();
-			if ( t > 0.0 )
-				h += extra * a.second / t;
-			a.first->set_vertical( y, y + h );
-			y += h;
+			for ( auto a: _areas )
+			{
+				double h = a.first->minimum_height();
+				if ( t > 0.0 )
+					h += extra * a.second / t;
+				a.first->set_vertical( y, y + h );
+				y += h;
+			}
 		}
+		else
+		{
+			for ( auto a: reverse( _areas ) )
+			{
+				double h = a.first->minimum_height();
+				if ( t > 0.0 )
+					h += extra * a.second / t;
+				a.first->set_vertical( y, y + h );
+				y += h;
+			}
+		}
+
 	}
 }
 
