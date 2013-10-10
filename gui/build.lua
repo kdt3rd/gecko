@@ -2,9 +2,9 @@
 srcs = {
 	"area.cpp";
 	"container.cpp";
---	"constraint.cpp";
 	"tight_constraint.cpp";
 	"flow_constraint.cpp";
+	"form_layout.cpp";
 	"simple_controller.cpp";
 }
 
