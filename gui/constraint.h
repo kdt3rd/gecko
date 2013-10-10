@@ -2,7 +2,9 @@
 #pragma once
 
 #include "area.h"
+#include <core/contract.h>
 #include <memory>
+#include <iostream>
 
 ////////////////////////////////////////
 
@@ -30,6 +32,7 @@ public:
 	constraint( const std::shared_ptr<area> &a )
 		: _area( a )
 	{
+		precondition( bool(_area), "missing area" );
 	}
 
 	virtual ~constraint( void )
