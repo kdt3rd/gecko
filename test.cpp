@@ -11,19 +11,11 @@
 #include <allegro/event_queue.h>
 
 #include <gui/container.h>
-#include <gui/tight_constraint.h>
-#include <gui/flow_constraint.h>
+#include <gui/form_layout.h>
 
-#include <core/any.h>
-
-int main( int argc, char **argv )
+namespace {
+int safemain( int argc, char **argv )
 {
-	any a = int(1);
-	any b = "Hello";
-
-	std::cout << a.as<int>();
-	std::cout << ' ' << b.as<char*>() << std::endl;
-
 	allegro::system sys;
 	al_set_new_display_flags( ALLEGRO_WINDOWED | ALLEGRO_RESIZABLE );
 
@@ -42,59 +34,31 @@ int main( int argc, char **argv )
 	allegro::color black( 0, 0, 0 );
 	allegro::color white( 255, 255, 255 );
 
-	container c;
+	std::shared_ptr<container> c = std::make_shared<container>();
 
-	auto left_area = c.new_area();
-	auto right_area = c.new_area();
-	flow_constraint columns( c.bounds(), direction::LEFT );
-	columns.add_area( left_area, 0.5 );
-	columns.add_area( right_area, 1.0 );
-
-	tight_constraint left( left_area, orientation::HORIZONTAL );
-	tight_constraint right( right_area, orientation::HORIZONTAL );
-	std::vector<tight_constraint> rows;
-	flow_constraint down( c.bounds(), direction::DOWN );
+	form_layout layout( c );
 
 	auto add = [&]
 	{
-		auto box = c.new_area();
-		auto a = c.new_area();
-		auto b = c.new_area();
+		std::shared_ptr<area> a, b;
 
-		rows.emplace_back( box, orientation::VERTICAL );
-		rows.back().add_area( a );
-		rows.back().add_area( b );
-
-		down.add_area( box );
+		std::tie( a, b ) = layout.new_line();
 
 		a->set_minimum_width( 100 );
 		a->set_minimum_height( 24 );
 		b->set_minimum_width( 100 );
 		b->set_minimum_height( 24 );
-
-		left.add_area( a );
-		right.add_area( b );
 	};
 
 	for ( size_t i = 0; i < 5; ++i )
 		add();
 	
 	auto recompute_layout = [&] ( double w, double h ) {
-		c.bounds()->set_horizontal( 0, w );
-		c.bounds()->set_vertical( 0, h );
-		for ( auto t: rows )
-			t.recompute_minimum();
-		left.recompute_minimum();
-		right.recompute_minimum();
-		down.recompute_minimum();
-		columns.recompute_minimum();
+		c->bounds()->set_horizontal( 0, w );
+		c->bounds()->set_vertical( 0, h );
 
-		columns.recompute_constraint();
-		down.recompute_constraint();
-		right.recompute_constraint();
-		left.recompute_constraint();
-		for ( auto t: rows )
-			t.recompute_constraint();
+		layout.recompute_minimum();
+		layout.recompute_layout();
 	};
 
 	recompute_layout( 640, 480 );
@@ -121,7 +85,7 @@ int main( int argc, char **argv )
 			{
 				allegro::target t( win );
 				t.clear( white );
-				for ( auto a: c )
+				for ( auto a: *c )
 				{
 					std::cout << a->x1() << ',' << a->y1() << " - " << a->x2() << ',' << a->y2() << std::endl;
 					t.draw_rect( a->x1(), a->y1(), a->x2(), a->y2(), black, 1.F );
@@ -138,3 +102,23 @@ int main( int argc, char **argv )
 
 	return 0;
 }
+}
+
+////////////////////////////////////////
+
+int main( int argc, char *argv[] )
+{
+	int ret = -1;
+	try
+	{
+		ret = safemain( argc, argv );
+	}
+	catch ( std::exception &e )
+	{
+		print_exception( std::cerr, e );
+	}
+	return ret;
+}
+
+////////////////////////////////////////
+
