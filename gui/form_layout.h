@@ -23,9 +23,10 @@ public:
 
 	void set_direction( direction d ) { _columns.set_direction( d ); }
 
-	std::pair<std::shared_ptr<area>,std::shared_ptr<area>> new_line( void );
+	std::pair<std::shared_ptr<area>,std::shared_ptr<area>> new_row( void );
 
-	std::pair<std::shared_ptr<area>,std::shared_ptr<area>> get_line( size_t i ) { return _areas.at( i ); }
+	std::pair<std::shared_ptr<area>,std::shared_ptr<area>> get_row_areas( size_t i ) { return _areas.at( i ); }
+	std::shared_ptr<area> get_row( size_t i ) { return _rows.at( i ).get_area( 0 ); }
 
 	void recompute_minimum( void );
 	void recompute_layout( void );

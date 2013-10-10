@@ -16,7 +16,7 @@ form_layout::form_layout( const std::shared_ptr<container> &c, const std::shared
 
 ////////////////////////////////////////
 
-std::pair<std::shared_ptr<area>,std::shared_ptr<area>> form_layout::new_line( void )
+std::pair<std::shared_ptr<area>,std::shared_ptr<area>> form_layout::new_row( void )
 {
 	auto box = _container->new_area();
 	auto a = _container->new_area();
