@@ -12,6 +12,7 @@
 
 #include <gui/container.h>
 #include <gui/form_layout.h>
+#include <gui/box_layout.h>
 
 namespace {
 int safemain( int argc, char **argv )
@@ -28,7 +29,7 @@ int safemain( int argc, char **argv )
 	allegro::keyboard keyb;
 	queue.add_source( keyb );
 
-	allegro::timer timer( 1.0 );
+	allegro::timer timer( 0.1 );
 	queue.add_source( timer );
 
 	allegro::color black( 0, 0, 0 );
@@ -36,18 +37,14 @@ int safemain( int argc, char **argv )
 
 	std::shared_ptr<container> c = std::make_shared<container>();
 
-	form_layout layout( c );
+	box_layout layout( c, direction::DOWN );
 
 	auto add = [&]
 	{
-		std::shared_ptr<area> a, b;
-
-		std::tie( a, b ) = layout.new_line();
+		auto a = layout.new_area();
 
 		a->set_minimum_width( 100 );
 		a->set_minimum_height( 24 );
-		b->set_minimum_width( 100 );
-		b->set_minimum_height( 24 );
 	};
 
 	for ( size_t i = 0; i < 5; ++i )
@@ -86,11 +83,7 @@ int safemain( int argc, char **argv )
 				allegro::target t( win );
 				t.clear( white );
 				for ( auto a: *c )
-				{
-					std::cout << a->x1() << ',' << a->y1() << " - " << a->x2() << ',' << a->y2() << std::endl;
-					t.draw_rect( a->x1(), a->y1(), a->x2(), a->y2(), black, 1.F );
-				}
-				std::cout << std::endl;
+					t.draw_rect( a->x1() + 0.5, a->y1() + 0.5, a->x2() - 0.5, a->y2() - 0.5, black, 1.F );
 				t.flip();
 				break;
 			}
