@@ -3,12 +3,12 @@
 
 ////////////////////////////////////////
 
-form_layout::form_layout( const std::shared_ptr<container> &c, const std::shared_ptr<area> &a )
+form_layout::form_layout( const std::shared_ptr<container> &c, const std::shared_ptr<area> &a, direction dir )
 	: _container( c ),
 		_left_area( c->new_area() ), _right_area( c->new_area() ),
 		_left( _left_area, orientation::HORIZONTAL ), _right( _right_area, orientation::HORIZONTAL ),
 		_down( a, direction::DOWN ),
-		_columns( a, direction::LEFT )
+		_columns( a, dir )
 {
 	_columns.add_area( _left_area, 0.0 );
 	_columns.add_area( _right_area, 1.0 );

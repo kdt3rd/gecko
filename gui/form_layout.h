@@ -12,14 +12,16 @@
 class form_layout
 {
 public:
-	form_layout( const std::shared_ptr<container> &c )
+	form_layout( const std::shared_ptr<container> &c, direction dir = direction::RIGHT )
 		: form_layout( c, c->bounds() )
 	{
 	}
 
-	form_layout( const std::shared_ptr<container> &c, const std::shared_ptr<area> &a );
+	form_layout( const std::shared_ptr<container> &c, const std::shared_ptr<area> &a, direction dir = direction::RIGHT );
 
 	size_t size( void ) const { return _areas.size(); }
+
+	void set_direction( direction d ) { _columns.set_direction( d ); }
 
 	std::pair<std::shared_ptr<area>,std::shared_ptr<area>> new_line( void );
 
