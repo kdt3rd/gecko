@@ -8,7 +8,7 @@
 class flow_constraint : public constraint
 {
 public:
-	flow_constraint( const std::shared_ptr<area> &a, direction d );
+	flow_constraint( const std::shared_ptr<area> &a, direction d = direction::RIGHT );
 
 	void add_area( const std::shared_ptr<area> &a, double weight = 0.0 );
 	void remove_area( size_t i );
