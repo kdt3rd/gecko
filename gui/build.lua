@@ -7,6 +7,7 @@ srcs = {
 	"form_layout.cpp";
 	"box_layout.cpp";
 	"grid_layout.cpp";
+	"tree_layout.cpp";
 	"simple_controller.cpp";
 }
 
