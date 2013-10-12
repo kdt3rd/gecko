@@ -6,4 +6,4 @@ SubDir( "core" )
 SubDir( "store" )
 SubDir( "gui" )
 
-Executable( "test", Compile( "test.cpp" ), LinkLibs( "core", "allegropp", "gui" ), LinkSys( ALLEG_LIBS, IMG_LIBS, MAIN_LIBS, PRIM_LIBS ) )
+Executable( "test_layout", Compile( "test_layout.cpp" ), LinkLibs( "core", "allegropp", "gui" ), LinkSys( ALLEG_LIBS, IMG_LIBS, MAIN_LIBS, PRIM_LIBS ) )
