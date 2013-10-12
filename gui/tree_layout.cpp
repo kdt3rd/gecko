@@ -6,8 +6,8 @@
 tree_layout::tree_layout( const std::shared_ptr<container> &c, const std::shared_ptr<area> &a, double tab )
 	: _tab( tab ), _container( c ), _tabbed( c, a, direction::RIGHT ), _layout( c )
 {
-	auto t = _tabbed.new_area();
-	auto box = _tabbed.new_area();
+	auto t = _tabbed.new_area( 0.0 );
+	auto box = _tabbed.new_area( 1.0 );
 	t->set_minimum( tab, 0 );
 
 	_layout = box_layout( _container, box, direction::DOWN ); 
