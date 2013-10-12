@@ -20,8 +20,8 @@ public:
 
 	grid_layout( const std::shared_ptr<container> &c, const std::shared_ptr<area> &a );
 
-	void new_row( double w = 0.0 );
-	void new_column( double w = 0.0 );
+	std::vector<std::shared_ptr<area>> new_row( double w = 0.0 );
+	std::vector<std::shared_ptr<area>> new_column( double w = 0.0 );
 
 	void recompute_minimum( void );
 	void recompute_layout( void );

@@ -12,8 +12,9 @@ grid_layout::grid_layout( const std::shared_ptr<container> &c, const std::shared
 
 ////////////////////////////////////////
 
-void grid_layout::new_row( double w )
+std::vector<std::shared_ptr<area>> grid_layout::new_row( double w )
 {
+	std::vector<std::shared_ptr<area>> ret;
 	auto r = _container->new_area();
 	_rows.box.add_area( r, w );
 	_rows.cells.emplace_back( r, orientation::VERTICAL );
@@ -21,15 +22,19 @@ void grid_layout::new_row( double w )
 	for ( auto &col: _columns.cells )
 	{
 		auto a = _container->new_area();
+		ret.push_back( a );
 		row.add_area( a );
 		col.add_area( a );
 	}
+
+	return ret;
 }
 
 ////////////////////////////////////////
 
-void grid_layout::new_column( double w )
+std::vector<std::shared_ptr<area>> grid_layout::new_column( double w )
 {
+	std::vector<std::shared_ptr<area>> ret;
 	auto c = _container->new_area();
 	_columns.box.add_area( c, w );
 	_columns.cells.emplace_back( c, orientation::HORIZONTAL );
@@ -37,9 +42,12 @@ void grid_layout::new_column( double w )
 	for ( auto &row: _rows.cells )
 	{
 		auto a = _container->new_area();
+		ret.push_back( a );
 		col.add_area( a );
 		row.add_area( a );
 	}
+
+	return ret;
 }
 
 ////////////////////////////////////////
