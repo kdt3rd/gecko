@@ -2,6 +2,7 @@
 #pragma once
 
 #include <memory>
+#include "layout.h"
 #include "area.h"
 #include "container.h"
 #include "tight_constraint.h"
@@ -9,7 +10,7 @@
 
 ////////////////////////////////////////
 
-class grid_layout
+class grid_layout : public layout
 {
 public:
 	grid_layout( const std::shared_ptr<container> &c )

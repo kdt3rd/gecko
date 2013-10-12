@@ -2,13 +2,14 @@
 #pragma once
 
 #include <memory>
+#include "layout.h"
 #include "area.h"
 #include "container.h"
 #include "box_layout.h"
 
 ////////////////////////////////////////
 
-class tree_layout
+class tree_layout : public layout
 {
 public:
 	tree_layout( const std::shared_ptr<container> &c, double tab )

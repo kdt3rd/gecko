@@ -2,6 +2,7 @@
 #pragma once
 
 #include <memory>
+#include "layout.h"
 #include "area.h"
 #include "container.h"
 #include "tight_constraint.h"
@@ -9,7 +10,7 @@
 
 ////////////////////////////////////////
 
-class form_layout
+class form_layout : public layout
 {
 public:
 	form_layout( const std::shared_ptr<container> &c, direction dir = direction::RIGHT )
