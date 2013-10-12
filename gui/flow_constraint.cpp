@@ -51,7 +51,7 @@ void flow_constraint::recompute_constraint( void )
 		}
 
 		double x = _area->x1();
-		double extra = _area->width() - w;
+		double extra = std::max( _area->width() - w, 0.0 );
 		if ( _dir == direction::RIGHT )
 		{
 			for ( auto a: _areas )
@@ -86,7 +86,7 @@ void flow_constraint::recompute_constraint( void )
 		}
 
 		double y = _area->y1();
-		double extra = _area->height() - h;
+		double extra = std::max( _area->height() - h, 0.0 );
 		if ( _dir == direction::DOWN )
 		{
 			for ( auto a: _areas )
