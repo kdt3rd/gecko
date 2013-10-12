@@ -1,5 +1,7 @@
 
 #include <iostream>
+#include <map>
+#include <functional>
 
 #include <allegro/system.h>
 #include <allegro/color.h>
@@ -96,8 +98,20 @@ std::shared_ptr<layout> test_grid( std::shared_ptr<container> c )
 
 ////////////////////////////////////////
 
+std::map<std::string,std::function<std::shared_ptr<layout>(std::shared_ptr<container>)>> tests =
+{
+	{ "grid", test_grid },
+	{ "box", test_box },
+	{ "form", test_form },
+	{ "tree", test_tree },
+};
+
+////////////////////////////////////////
+
 int safemain( int argc, char **argv )
 {
+	precondition( argc > 1, "expected argument" );
+
 	allegro::system sys;
 	al_set_new_display_flags( ALLEGRO_WINDOWED | ALLEGRO_RESIZABLE );
 
@@ -118,7 +132,7 @@ int safemain( int argc, char **argv )
 
 	std::shared_ptr<container> c = std::make_shared<container>();
 
-	auto layout = test_grid( c );
+	auto layout = tests[argv[1]]( c );
 
 	auto recompute_layout = [&] ( double w, double h ) {
 		c->bounds()->set_horizontal( 0, w );
