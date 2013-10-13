@@ -1,0 +1,14 @@
+
+#pragma once
+
+////////////////////////////////////////
+
+class pixmap
+{
+public:
+	pixmap( void );
+	virtual ~pixmap( void );
+};
+
+////////////////////////////////////////
+

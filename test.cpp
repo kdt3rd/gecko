@@ -1,97 +1,33 @@
 
 #include <iostream>
+#include <unistd.h>
 
-#include <allegro/system.h>
-#include <allegro/color.h>
-#include <allegro/target.h>
-#include <allegro/display.h>
-#include <allegro/keyboard.h>
-#include <allegro/timer.h>
-#include <allegro/event.h>
-#include <allegro/event_queue.h>
-
-#include <gui/container.h>
-#include <gui/form_layout.h>
-#include <gui/box_layout.h>
+#include <core/contract.h>
+#include <platform/sdl/system.h>
 
 namespace {
 int safemain( int argc, char **argv )
 {
-	allegro::system sys;
-	al_set_new_display_flags( ALLEGRO_WINDOWED | ALLEGRO_RESIZABLE );
+	auto sys = std::make_shared<sdl::system>();
+	std::cout << sys->name() << " - " << sys->description() << std::endl;
 
-	allegro::event_queue queue;
+	auto screens = sys->screens();
+	for ( auto s: screens )
+		std::cout << ' ' << s->bounds().width() << 'x' << s->bounds().height() << std::endl;
 
-	allegro::display win( 640, 480 );
-	win.set_title( "Hello World" );
-	queue.add_source( win );
+	auto win = sys->new_window();
+	win->resize( 320, 240 );
+	win->set_title( "Hello World" );
+	win->show();
 
-	allegro::keyboard keyb;
-	queue.add_source( keyb );
-
-	allegro::timer timer( 0.1 );
-	queue.add_source( timer );
-
-	allegro::color black( 0, 0, 0 );
-	allegro::color white( 255, 255, 255 );
-
-	std::shared_ptr<container> c = std::make_shared<container>();
-
-	box_layout layout( c, direction::DOWN );
-
-	auto add = [&]
-	{
-		auto a = layout.new_area();
-
-		a->set_minimum_width( 100 );
-		a->set_minimum_height( 24 );
-	};
-
+	auto painter = win->paint();
+	std::vector<rectangle> ps;
 	for ( size_t i = 0; i < 5; ++i )
-		add();
-	
-	auto recompute_layout = [&] ( double w, double h ) {
-		c->bounds()->set_horizontal( 0, w );
-		c->bounds()->set_vertical( 0, h );
+		ps.emplace_back( 10 + i * 5, 10 + i * 5, 5, 5 );
+	painter->draw_rects( ps.data(), ps.size() );
+	painter->present();
 
-		layout.recompute_minimum();
-		layout.recompute_layout();
-	};
-
-	recompute_layout( 640, 480 );
-
-	timer.start();
-	bool done = false;
-	do
-	{
-		allegro::event ev;
-		queue.wait( ev );
-		switch ( ev.type() )
-		{
-			case allegro::EVENT_KEY_DOWN:
-			case allegro::EVENT_DISPLAY_CLOSE:
-				done = true;
-				break;
-
-			case allegro::EVENT_DISPLAY_RESIZE:
-				recompute_layout( ev.width(), ev.height() );
-				ev.acknowledge_resize();
-				break;
-
-			case allegro::EVENT_TIMER:
-			{
-				allegro::target t( win );
-				t.clear( white );
-				for ( auto a: *c )
-					t.draw_rect( a->x1() + 0.5, a->y1() + 0.5, a->x2() - 0.5, a->y2() - 0.5, black, 1.F );
-				t.flip();
-				break;
-			}
-
-			default:
-				break;
-		}
-	} while ( !done );
+	sleep( 5 );
 
 	return 0;
 }

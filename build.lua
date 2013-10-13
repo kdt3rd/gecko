@@ -5,5 +5,7 @@ SubDir( "allegro" )
 SubDir( "core" )
 SubDir( "store" )
 SubDir( "layout" )
+SubDir( "platform" )
 
 Executable( "test_layout", Compile( "test_layout.cpp" ), LinkLibs( "core", "allegropp", "layout" ), LinkSys( ALLEG_LIBS, IMG_LIBS, MAIN_LIBS, PRIM_LIBS, FONT_LIBS, BOTAN_LIBS ) )
+Executable( "test", Compile( "test.cpp" ), LinkLibs( "core", "platform-sdl", "platform" ), LinkSys( SDL_LIBS ) )
