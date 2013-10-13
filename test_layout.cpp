@@ -11,6 +11,7 @@
 #include <allegro/timer.h>
 #include <allegro/event.h>
 #include <allegro/event_queue.h>
+#include <allegro/font.h>
 
 #include <gui/container.h>
 #include <gui/form_layout.h>
@@ -113,7 +114,7 @@ int safemain( int argc, char **argv )
 	precondition( argc > 1, "expected argument" );
 
 	allegro::system sys;
-	al_set_new_display_flags( ALLEGRO_WINDOWED | ALLEGRO_RESIZABLE );
+	callegro::al_set_new_display_flags( callegro::ALLEGRO_WINDOWED | callegro::ALLEGRO_RESIZABLE );
 
 	allegro::event_queue queue;
 
@@ -129,17 +130,34 @@ int safemain( int argc, char **argv )
 
 	allegro::color black( 0, 0, 0 );
 	allegro::color white( 255, 255, 255 );
+	allegro::font font( "/usr/share/fonts/TTF/Ubuntu-R.ttf", -24 );
 
 	std::shared_ptr<container> c = std::make_shared<container>();
 
 	auto layout = tests[argv[1]]( c );
 
 	auto recompute_layout = [&] ( double w, double h ) {
-		c->bounds()->set_horizontal( 0, w );
-		c->bounds()->set_vertical( 0, h );
-
 		layout->recompute_minimum();
+		std::shared_ptr<area> b = c->bounds();
+
+		bool resize = false;
+		if ( w < b->minimum_width() )
+		{
+			w = b->minimum_width();
+			resize = true;
+		}
+		if ( h < b->minimum_height() )
+		{
+			h = b->minimum_height();
+			resize = true;
+		}
+		b->set_horizontal( 0, w );
+		b->set_vertical( 0, h );
+
 		layout->recompute_layout();
+
+		if ( resize )
+			win.resize( w, h );
 	};
 
 	recompute_layout( 640, 480 );
@@ -168,6 +186,7 @@ int safemain( int argc, char **argv )
 				t.clear( white );
 				for ( auto a: *c )
 					t.draw_rect( a->x1() + 0.5, a->y1() + 0.5, a->x2() - 0.5, a->y2() - 0.5, black, 1.F );
+				t.draw( "Hello World", font, 0, 0, black );
 				t.flip();
 				break;
 			}
