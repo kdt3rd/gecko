@@ -1,9 +1,7 @@
 
 #pragma once
 
-extern "C" {
-#include <allegro5/allegro.h>
-}
+#include "callegro.h"
 
 #include <stdexcept>
 
@@ -17,55 +15,55 @@ class mouse
 public:
 	mouse( void )
 	{
-		if ( al_is_mouse_installed() )
+		if ( callegro::al_is_mouse_installed() )
 			throw std::runtime_error( "only one mouse allowed" );
 
-		if ( !al_install_mouse() )
+		if ( !callegro::al_install_mouse() )
 			throw std::runtime_error( "error installing mouse" );
 	}
 
 	~mouse( void )
 	{
-		al_uninstall_mouse();
+		callegro::al_uninstall_mouse();
 	}
 
 	int num_axes( void )
 	{
-		return al_get_mouse_num_axes();
+		return callegro::al_get_mouse_num_axes();
 	}
 
 	int num_buttons( void )
 	{
-		return al_get_mouse_num_buttons();
+		return callegro::al_get_mouse_num_buttons();
 	}
 
 	void update_state( void )
 	{
-		al_get_mouse_state( &m_state );
+		callegro::al_get_mouse_state( &m_state );
 	}
 
 	int get_axis( int axis )
 	{
-		return al_get_mouse_state_axis( &m_state, axis );
+		return callegro::al_get_mouse_state_axis( &m_state, axis );
 	}
 
 	bool button_down( int button )
 	{
-		return al_mouse_button_down( &m_state, button + 1 );
+		return callegro::al_mouse_button_down( &m_state, button + 1 );
 	}
 
 	bool set_z( int z )
 	{
-		return al_set_mouse_z( z );
+		return callegro::al_set_mouse_z( z );
 	}
 
 	bool set_w( int w )
 	{
-		return al_set_mouse_w( w );
+		return callegro::al_set_mouse_w( w );
 	}
 
 private:
-	ALLEGRO_MOUSE_STATE m_state;
+	callegro::ALLEGRO_MOUSE_STATE m_state;
 };
 
 ////////////////////////////////////////

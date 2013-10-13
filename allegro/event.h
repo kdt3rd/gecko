@@ -1,16 +1,14 @@
 
 #pragma once
 
-extern "C" {
-#include <allegro5/allegro.h>
-}
+#include "callegro.h"
 
 namespace allegro
 {
 
 ////////////////////////////////////////
 
-#define EVENT_TYPE( x ) EVENT_ ## x = ALLEGRO_EVENT_ ## x
+#define EVENT_TYPE( x ) EVENT_ ## x = callegro::ALLEGRO_EVENT_ ## x
 enum event_type
 {
 	EVENT_TYPE( KEY_DOWN ),
@@ -63,13 +61,13 @@ public:
 	int width( void ) const { return m_event.display.width; }
 	int height( void ) const { return m_event.display.height; }
 
-	bool acknowledge_resize( void ) { return al_acknowledge_resize( m_event.display.source ); }
+	bool acknowledge_resize( void ) { return callegro::al_acknowledge_resize( m_event.display.source ); }
 
 
-	ALLEGRO_EVENT *internal( void ) { return &m_event; }
+	callegro::ALLEGRO_EVENT *internal( void ) { return &m_event; }
 
 private:
-	ALLEGRO_EVENT m_event;
+	callegro::ALLEGRO_EVENT m_event;
 };
 
 ////////////////////////////////////////

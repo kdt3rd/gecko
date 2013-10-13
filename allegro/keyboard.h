@@ -1,16 +1,14 @@
 
 #pragma once
 
-extern "C" {
-#include <allegro5/allegro.h>
-}
+#include "callegro.h"
 
 #include <stdexcept>
 
 namespace allegro
 {
 
-#define KEYCODE( x ) KEY_ ## x = ALLEGRO_KEY_ ## x
+#define KEYCODE( x ) KEY_ ## x = callegro::ALLEGRO_KEY_ ## x
 enum key_code
 {
 	KEYCODE( A ), KEYCODE( B ), KEYCODE( C ), KEYCODE( D ), KEYCODE( E ),
@@ -94,7 +92,7 @@ enum key_code
 };
 #undef KEYCODE
 
-#define KEYMOD( x ) MOD_ ## x = ALLEGRO_KEYMOD_ ## x
+#define KEYMOD( x ) MOD_ ## x = callegro::ALLEGRO_KEYMOD_ ## x
 enum key_mod
 {
 	KEYMOD( SHIFT ),
@@ -123,35 +121,35 @@ class keyboard
 public:
 	keyboard( void )
 	{
-		if ( al_is_keyboard_installed() )
+		if ( callegro::al_is_keyboard_installed() )
 			throw std::runtime_error( "only one keyboard allowed" );
 
-		if ( !al_install_keyboard() )
+		if ( !callegro::al_install_keyboard() )
 			throw std::runtime_error( "error installing keyboard" );
 	}
 
 	~keyboard( void )
 	{
-		al_uninstall_keyboard();
+		callegro::al_uninstall_keyboard();
 	}
 
 	void update_state( void )
 	{
-		al_get_keyboard_state( &m_state );
+		callegro::al_get_keyboard_state( &m_state );
 	}
 
 	bool key_down( int kc )
 	{
-		return al_key_down( &m_state, int(kc) );
+		return callegro::al_key_down( &m_state, int(kc) );
 	}
 
 	const char *key_name( int kc )
 	{
-		return al_keycode_to_name( int(kc) );
+		return callegro::al_keycode_to_name( int(kc) );
 	}
 
 private:
-	ALLEGRO_KEYBOARD_STATE m_state;
+	callegro::ALLEGRO_KEYBOARD_STATE m_state;
 
 };
 
