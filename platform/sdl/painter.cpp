@@ -40,6 +40,22 @@ void painter::draw_polygon( const point *ps, size_t pn )
 
 ////////////////////////////////////////
 
+void painter::draw_lines( const line *ls, size_t ln )
+{
+	std::vector<SDL_Point> points( ln * 2 );
+	for ( size_t i = 0; i < ln; ++i )
+	{
+		points[i*2].x = ls[i].x1();
+		points[i*2].y = ls[i].y1();
+		points[i*2+1].x = ls[i].x2();
+		points[i*2+1].y = ls[i].y2();
+	}
+
+	SDL_RenderDrawLines( _render, points.data(), points.size() );
+}
+
+////////////////////////////////////////
+
 void painter::draw_rects( const rectangle *rs, size_t rn )
 {
 	std::vector<SDL_Rect> rects( rn );
