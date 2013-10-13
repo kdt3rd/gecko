@@ -71,5 +71,6 @@ ALLEG_FLAGS, ALLEG_INCLUDE, ALLEG_LIBS = Package( "allegro-5" )
 MAIN_FLAGS, MAIN_INCLUDE, MAIN_LIBS = Package( "allegro_main-5" )
 IMG_FLAGS, IMG_INCLUDE, IMG_LIBS = Package( "allegro_image-5" )
 PRIM_FLAGS, PRIM_INCLUDE, PRIM_LIBS = Package( "allegro_primitives-5" )
+FONT_FLAGS, FONT_INCLUDE, FONT_LIBS = Package( "allegro_font-5", "allegro_ttf-5" )
 BOTAN_FLAGS, BOTAN_INCLUDE, BOTAN_LIBS = Package( "botan-1.10" )
 
