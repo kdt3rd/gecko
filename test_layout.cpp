@@ -13,11 +13,11 @@
 #include <allegro/event_queue.h>
 #include <allegro/font.h>
 
-#include <gui/container.h>
-#include <gui/form_layout.h>
-#include <gui/box_layout.h>
-#include <gui/grid_layout.h>
-#include <gui/tree_layout.h>
+#include <layout/container.h>
+#include <layout/form_layout.h>
+#include <layout/box_layout.h>
+#include <layout/grid_layout.h>
+#include <layout/tree_layout.h>
 
 namespace {
 

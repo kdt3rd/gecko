@@ -10,5 +10,5 @@ srcs = {
 	"tree_layout.cpp";
 }
 
-Library( "gui", Compile( srcs ) );
+Library( "layout", Compile( srcs ) );
 
