@@ -30,6 +30,8 @@ public:
 	double minimum_width( void ) const { return _minw; }
 	double minimum_height( void ) const { return _minh; }
 
+	bool fits( double w, double h ) const { return w >= _minw && h >= _minh; }
+
 	double x1( void ) const { return _x1; }
 	double y1( void ) const { return _y1; }
 	double x2( void ) const { return _x2; }
