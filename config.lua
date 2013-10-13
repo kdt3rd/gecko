@@ -73,4 +73,5 @@ IMG_FLAGS, IMG_INCLUDE, IMG_LIBS = Package( "allegro_image-5" )
 PRIM_FLAGS, PRIM_INCLUDE, PRIM_LIBS = Package( "allegro_primitives-5" )
 FONT_FLAGS, FONT_INCLUDE, FONT_LIBS = Package( "allegro_font-5", "allegro_ttf-5" )
 BOTAN_FLAGS, BOTAN_INCLUDE, BOTAN_LIBS = Package( "botan-1.10" )
+SDL_FLAGS, SDL_INCLUDE, SDL_LIBS = Package( "sdl2" )
 
