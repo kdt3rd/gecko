@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "area.h"
+#include <core/area.h>
 #include <core/contract.h>
 #include <memory>
 #include <iostream>

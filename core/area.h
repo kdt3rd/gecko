@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <core/signal.h>
+#include "signal.h"
 
 ////////////////////////////////////////
 

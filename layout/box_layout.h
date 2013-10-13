@@ -2,9 +2,9 @@
 #pragma once
 
 #include <memory>
+#include <core/area.h>
+#include <core/container.h>
 #include "layout.h"
-#include "area.h"
-#include "container.h"
 #include "tight_constraint.h"
 #include "flow_constraint.h"
 
