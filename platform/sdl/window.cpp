@@ -77,6 +77,13 @@ void window::resize( double w, double h )
 
 ////////////////////////////////////////
 
+void window::set_minimum_size( double w, double h )
+{
+	SDL_SetWindowMinimumSize( _window, w, h );
+}
+
+////////////////////////////////////////
+
 void window::set_title( const std::string &t )
 {
 	SDL_SetWindowTitle( _window, t.c_str() );

@@ -25,6 +25,7 @@ public:
 //	virtual rect geometry( void );
 //	virtual void set_position( double x, double y );
 	virtual void resize( double w, double h );
+	virtual void set_minimum_size( double w, double h );
 
 	virtual void set_title( const std::string &t );
 //	virtual void set_icon( const icon &i );

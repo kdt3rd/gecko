@@ -26,6 +26,7 @@ public:
 //	virtual rect geometry( void ) = 0;
 //	virtual void set_geometry( const rect &r ) = 0;
 	virtual void resize( double w, double h ) = 0;
+	virtual void set_minimum_size( double w, double h ) = 0;
 
 	virtual void set_title( const std::string &t ) = 0;
 //	virtual void set_icon( const icon &i );
