@@ -114,7 +114,8 @@ int safemain( int argc, char **argv )
 
 	auto layout = tests[argv[1]]( c );
 
-	auto recompute_layout = [&] ( double w, double h ) {
+	auto recompute_layout = [&] ( double w, double h )
+	{
 		std::cout << "Resized to " << w << 'x' << h << std::endl;
 		layout->recompute_minimum();
 		std::shared_ptr<area> b = c->bounds();
@@ -130,7 +131,27 @@ int safemain( int argc, char **argv )
 		layout->recompute_layout();
 	};
 
+	auto redraw_window = [&] ( void )
+	{
+		std::cout << "Redraw" << std::endl;
+
+		auto painter = win->paint();
+
+		painter->set_color( color( 0, 0, 0 )  );
+		painter->clear();
+
+		painter->set_color( color( 1, 1, 1 ) );
+		rectangle r;
+		for ( auto a: *c )
+		{
+			r = *a;
+			painter->draw_rects( &r, 1 );
+		}
+		painter->present();
+	};
+
 	win->when_resized( recompute_layout );
+	win->when_exposed( redraw_window );
 
 	recompute_layout( 640, 480 );
 
