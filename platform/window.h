@@ -3,6 +3,8 @@
 
 #include <string>
 #include <memory>
+#include <functional>
+
 #include "painter.h"
 
 namespace platform
@@ -32,6 +34,23 @@ public:
 //	virtual void set_icon( const icon &i );
 
 	virtual std::shared_ptr<painter> paint( void ) = 0;
+
+	void when_closed( std::function<void(void)> f ) { _closed = f; }
+	void when_shown( std::function<void(void)> f ) { _shown = f; }
+	void when_hidden( std::function<void(void)> f ) { _hidden = f; }
+	void when_minimized( std::function<void(void)> f ) { _minimized = f; }
+	void when_maximized( std::function<void(void)> f ) { _maximized = f; }
+	void when_moved( std::function<void(double,double)> f ) { _moved = f; }
+	void when_resized( std::function<void(double,double)> f ) { _resized = f; }
+
+private:
+	std::function<void(void)> _closed;
+	std::function<void(void)> _shown;
+	std::function<void(void)> _hidden;
+	std::function<void(void)> _minimized;
+	std::function<void(void)> _maximized;
+	std::function<void(double,double)> _moved;
+	std::function<void(double,double)> _resized;
 };
 
 ////////////////////////////////////////
