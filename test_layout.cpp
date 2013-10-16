@@ -108,6 +108,7 @@ int safemain( int argc, char **argv )
 	auto win = sys->new_window();
 	win->resize( 640, 480 );
 	win->set_title( "Hello World" );
+	win->show();
 
 	std::shared_ptr<container> c = std::make_shared<container>();
 
