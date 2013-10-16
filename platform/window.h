@@ -43,6 +43,8 @@ public:
 	void when_moved( std::function<void(double,double)> f ) { _moved = f; }
 	void when_resized( std::function<void(double,double)> f ) { _resized = f; }
 
+	void resized( double w, double h ) { _resized( w, h ); }
+
 private:
 	std::function<void(void)> _closed;
 	std::function<void(void)> _shown;
