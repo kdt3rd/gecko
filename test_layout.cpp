@@ -3,15 +3,7 @@
 #include <map>
 #include <functional>
 
-#include <allegro/system.h>
-#include <allegro/color.h>
-#include <allegro/target.h>
-#include <allegro/display.h>
-#include <allegro/keyboard.h>
-#include <allegro/timer.h>
-#include <allegro/event.h>
-#include <allegro/event_queue.h>
-#include <allegro/font.h>
+#include <platform/sdl/system.h>
 
 #include <layout/form_layout.h>
 #include <layout/box_layout.h>
@@ -112,24 +104,10 @@ int safemain( int argc, char **argv )
 {
 	precondition( argc > 1, "expected argument" );
 
-	allegro::system sys;
-	callegro::al_set_new_display_flags( callegro::ALLEGRO_WINDOWED | callegro::ALLEGRO_RESIZABLE );
-
-	allegro::event_queue queue;
-
-	allegro::display win( 640, 480 );
-	win.set_title( "Hello World" );
-	queue.add_source( win );
-
-	allegro::keyboard keyb;
-	queue.add_source( keyb );
-
-	allegro::timer timer( 0.1 );
-	queue.add_source( timer );
-
-	allegro::color black( 0, 0, 0 );
-	allegro::color white( 255, 255, 255 );
-	allegro::font font( "/usr/share/fonts/TTF/Ubuntu-R.ttf", -24 );
+	auto sys = std::make_shared<sdl::system>();
+	auto win = sys->new_window();
+	win->resize( 640, 480 );
+	win->set_title( "Hello World" );
 
 	std::shared_ptr<container> c = std::make_shared<container>();
 
@@ -138,30 +116,26 @@ int safemain( int argc, char **argv )
 	auto recompute_layout = [&] ( double w, double h ) {
 		layout->recompute_minimum();
 		std::shared_ptr<area> b = c->bounds();
+		win->set_minimum_size( b->minimum_width(), b->minimum_height() );
 
-		bool resize = false;
 		if ( w < b->minimum_width() )
-		{
 			w = b->minimum_width();
-			resize = true;
-		}
 		if ( h < b->minimum_height() )
-		{
 			h = b->minimum_height();
-			resize = true;
-		}
 		b->set_horizontal( 0, w );
 		b->set_vertical( 0, h );
 
 		layout->recompute_layout();
-
-		if ( resize )
-			win.resize( w, h );
 	};
 
 	recompute_layout( 640, 480 );
 
-	timer.start();
+	std::shared_ptr<platform::dispatcher> dispatcher = sys->dispatch();
+
+//	std::shared_ptr<sdl::timer> timer = sys->new_timer( 1.0 );
+//	timer->start();
+
+	/*
 	bool done = false;
 	do
 	{
@@ -194,8 +168,9 @@ int safemain( int argc, char **argv )
 				break;
 		}
 	} while ( !done );
+	*/
 
-	return 0;
+	return dispatcher->execute();
 }
 }
 
