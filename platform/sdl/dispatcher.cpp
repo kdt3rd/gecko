@@ -38,12 +38,40 @@ int dispatcher::execute( void )
 			case SDL_WINDOWEVENT:
 				switch ( event.window.event )
 				{
-					case SDL_WINDOWEVENT_RESIZED:
-						_windows[event.window.windowID]->resized( event.window.data1, event.window.data2 );
+					case SDL_WINDOWEVENT_CLOSE:
+						_windows[event.window.windowID]->closed();
+						break;
+
+					case SDL_WINDOWEVENT_SHOWN:
+						_windows[event.window.windowID]->shown();
+						break;
+
+					case SDL_WINDOWEVENT_HIDDEN:
+						_windows[event.window.windowID]->hidden();
+						break;
+
+					case SDL_WINDOWEVENT_MINIMIZED:
+						_windows[event.window.windowID]->minimized();
+						break;
+
+					case SDL_WINDOWEVENT_MAXIMIZED:
+						_windows[event.window.windowID]->maximized();
+						break;
+
+					case SDL_WINDOWEVENT_RESTORED:
+						_windows[event.window.windowID]->restored();
 						break;
 
 					case SDL_WINDOWEVENT_EXPOSED:
 						_windows[event.window.windowID]->exposed();
+						break;
+
+					case SDL_WINDOWEVENT_MOVED:
+						_windows[event.window.windowID]->moved( event.window.data1, event.window.data2 );
+						break;
+
+					case SDL_WINDOWEVENT_RESIZED:
+						_windows[event.window.windowID]->resized( event.window.data1, event.window.data2 );
 						break;
 				}
 		}
