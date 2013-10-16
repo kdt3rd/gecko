@@ -15,11 +15,15 @@ public:
 	painter( SDL_Renderer *r );
 	virtual ~painter( void );
 
+	virtual void set_color( const color &c );
+
 	virtual void draw_points( const point *ls, size_t ln );
 	virtual void draw_polygon( const point *ps, size_t pn );
 
 	virtual void draw_lines( const line *ps, size_t pn );
 	virtual void draw_rects( const rectangle *rs, size_t rn );
+
+	virtual void clear( void );
 
 	virtual void present( void );
 private:

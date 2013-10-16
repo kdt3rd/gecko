@@ -1,5 +1,6 @@
 
 #include <vector>
+#include <stdexcept>
 #include "painter.h"
 
 namespace sdl
@@ -16,6 +17,14 @@ painter::painter( SDL_Renderer *r )
 
 painter::~painter( void )
 {
+}
+
+////////////////////////////////////////
+
+void painter::set_color( const color &c )
+{
+	if ( SDL_SetRenderDrawColor( _render, c.red() * 255.0, c.green() * 255.0, c.blue() * 255.0, c.alpha() * 255.0 ) != 0 )
+		throw std::runtime_error( SDL_GetError() );
 }
 
 ////////////////////////////////////////
@@ -68,6 +77,14 @@ void painter::draw_rects( const rectangle *rs, size_t rn )
 	}
 
 	SDL_RenderDrawRects( _render, rects.data(), rects.size() );
+}
+
+////////////////////////////////////////
+
+void painter::clear( void )
+{
+	if ( SDL_RenderClear( _render ) != 0 )
+		throw std::runtime_error( SDL_GetError() );
 }
 
 ////////////////////////////////////////
