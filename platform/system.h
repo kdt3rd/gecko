@@ -7,6 +7,7 @@
 
 #include "screen.h"
 #include "window.h"
+#include "dispatcher.h"
 
 namespace platform
 {
@@ -24,6 +25,8 @@ public:
 
 	virtual std::vector<std::shared_ptr<screen>> screens( void ) = 0;
 	virtual std::shared_ptr<window> new_window( void ) = 0;
+
+	virtual std::shared_ptr<dispatcher> dispatch( void ) = 0;
 
 private:
 	std::string _name;

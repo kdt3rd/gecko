@@ -2,6 +2,7 @@
 #include "system.h"
 #include "screen.h"
 #include "window.h"
+#include "dispatcher.h"
 
 #include <stdexcept>
 #include <SDL2/SDL.h>
@@ -34,6 +35,14 @@ std::shared_ptr<platform::window> system::new_window( void )
 {
 	return std::make_shared<window>();
 }
+
+////////////////////////////////////////
+
+std::shared_ptr<platform::dispatcher> system::dispatch( void )
+{
+	return std::make_shared<sdl::dispatcher>();
+}
+
 
 ////////////////////////////////////////
 
