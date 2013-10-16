@@ -34,6 +34,14 @@ int dispatcher::execute( void )
 			case SDL_QUIT:
 				done = true;
 				break;
+
+			case SDL_WINDOWEVENT:
+				switch ( event.window.event )
+				{
+					case SDL_WINDOWEVENT_RESIZED:
+						_windows[event.window.windowID]->resized( event.window.data1, event.window.data2 );
+						break;
+				}
 		}
 	}
 
