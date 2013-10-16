@@ -32,6 +32,8 @@ public:
 
 	virtual std::shared_ptr<platform::painter> paint( void );
 
+	uint32_t id( void ) const;
+
 private:
 	SDL_Window *_window;
 	SDL_Renderer *_render;

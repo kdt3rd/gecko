@@ -98,5 +98,12 @@ std::shared_ptr<platform::painter> window::paint( void )
 
 ////////////////////////////////////////
 
+uint32_t window::id( void ) const
+{
+	return SDL_GetWindowID( _window );
+}
+
+////////////////////////////////////////
+
 }
 
