@@ -20,6 +20,8 @@ system::system( void )
 
 	for ( int i = 0; i < SDL_GetNumVideoDisplays(); ++i )
 		_screens.push_back( std::make_shared<screen>( i ) );
+
+	_dispatcher = std::make_shared<sdl::dispatcher>();
 }
 
 ////////////////////////////////////////
@@ -33,14 +35,16 @@ system::~system( void )
 
 std::shared_ptr<platform::window> system::new_window( void )
 {
-	return std::make_shared<window>();
+	auto ret = std::make_shared<window>();
+	_dispatcher->add_window( ret );
+	return ret;
 }
 
 ////////////////////////////////////////
 
 std::shared_ptr<platform::dispatcher> system::dispatch( void )
 {
-	return std::make_shared<sdl::dispatcher>();
+	return _dispatcher;
 }
 
 
