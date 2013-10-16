@@ -115,9 +115,10 @@ int safemain( int argc, char **argv )
 	auto layout = tests[argv[1]]( c );
 
 	auto recompute_layout = [&] ( double w, double h ) {
+		std::cout << "Resized to " << w << 'x' << h << std::endl;
 		layout->recompute_minimum();
 		std::shared_ptr<area> b = c->bounds();
-		win->set_minimum_size( b->minimum_width(), b->minimum_height() );
+//		win->set_minimum_size( b->minimum_width(), b->minimum_height() );
 
 		if ( w < b->minimum_width() )
 			w = b->minimum_width();
@@ -128,6 +129,8 @@ int safemain( int argc, char **argv )
 
 		layout->recompute_layout();
 	};
+
+	win->when_resized( recompute_layout );
 
 	recompute_layout( 640, 480 );
 
