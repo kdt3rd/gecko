@@ -40,12 +40,20 @@ public:
 	void when_hidden( std::function<void(void)> f ) { _hidden = f; }
 	void when_minimized( std::function<void(void)> f ) { _minimized = f; }
 	void when_maximized( std::function<void(void)> f ) { _maximized = f; }
+	void when_restored( std::function<void(void)> f ) { _restored = f; }
 	void when_exposed( std::function<void()> f ) { _exposed = f; }
 	void when_moved( std::function<void(double,double)> f ) { _moved = f; }
 	void when_resized( std::function<void(double,double)> f ) { _resized = f; }
 
-	void exposed( void ) { _exposed(); }
-	void resized( double w, double h ) { _resized( w, h ); }
+	void closed( void ) { if ( _closed ) _closed(); }
+	void shown( void ) { if ( _shown ) _shown(); }
+	void hidden( void ) { if ( _hidden ) _hidden(); }
+	void minimized( void ) { if ( _minimized ) _minimized(); }
+	void maximized( void ) { if ( _maximized ) _maximized(); }
+	void restored( void ) { if ( _restored ) _restored(); }
+	void exposed( void ) { if ( _exposed ) _exposed(); }
+	void moved( double w, double h ) { if ( _moved ) _moved( w, h ); }
+	void resized( double w, double h ) { if ( _resized ) _resized( w, h ); }
 
 private:
 	std::function<void(void)> _closed;
@@ -53,6 +61,7 @@ private:
 	std::function<void(void)> _hidden;
 	std::function<void(void)> _minimized;
 	std::function<void(void)> _maximized;
+	std::function<void(void)> _restored;
 	std::function<void(void)> _exposed;
 	std::function<void(double,double)> _moved;
 	std::function<void(double,double)> _resized;
