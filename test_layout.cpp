@@ -106,9 +106,6 @@ int safemain( int argc, char **argv )
 
 	auto sys = std::make_shared<sdl::system>();
 	auto win = sys->new_window();
-	win->resize( 640, 480 );
-	win->set_title( "Hello World" );
-	win->show();
 
 	std::shared_ptr<container> c = std::make_shared<container>();
 
@@ -116,10 +113,8 @@ int safemain( int argc, char **argv )
 
 	auto recompute_layout = [&] ( double w, double h )
 	{
-		std::cout << "Resized to " << w << 'x' << h << std::endl;
 		layout->recompute_minimum();
 		std::shared_ptr<area> b = c->bounds();
-//		win->set_minimum_size( b->minimum_width(), b->minimum_height() );
 
 		if ( w < b->minimum_width() )
 			w = b->minimum_width();
@@ -133,8 +128,6 @@ int safemain( int argc, char **argv )
 
 	auto redraw_window = [&] ( void )
 	{
-		std::cout << "Redraw" << std::endl;
-
 		auto painter = win->paint();
 
 		painter->set_color( color( 0, 0, 0 )  );
@@ -153,49 +146,13 @@ int safemain( int argc, char **argv )
 	win->when_resized( recompute_layout );
 	win->when_exposed( redraw_window );
 
+	win->set_title( "Hello World" );
+	win->resize( 640, 480 );
+	win->show();
+
 	recompute_layout( 640, 480 );
 
-	std::shared_ptr<platform::dispatcher> dispatcher = sys->dispatch();
-
-//	std::shared_ptr<sdl::timer> timer = sys->new_timer( 1.0 );
-//	timer->start();
-
-	/*
-	bool done = false;
-	do
-	{
-		allegro::event ev;
-		queue.wait( ev );
-		switch ( ev.type() )
-		{
-			case allegro::EVENT_KEY_DOWN:
-			case allegro::EVENT_DISPLAY_CLOSE:
-				done = true;
-				break;
-
-			case allegro::EVENT_DISPLAY_RESIZE:
-				recompute_layout( ev.width(), ev.height() );
-				ev.acknowledge_resize();
-				break;
-
-			case allegro::EVENT_TIMER:
-			{
-				allegro::target t( win );
-				t.clear( white );
-				for ( auto a: *c )
-					t.draw_rect( a->x1() + 0.5, a->y1() + 0.5, a->x2() - 0.5, a->y2() - 0.5, black, 1.F );
-				t.draw( "Hello World", font, 0, 0, black );
-				t.flip();
-				break;
-			}
-
-			default:
-				break;
-		}
-	} while ( !done );
-	*/
-
-	return dispatcher->execute();
+	return sys->dispatch()->execute();
 }
 }
 
