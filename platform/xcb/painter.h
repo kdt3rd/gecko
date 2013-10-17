@@ -12,7 +12,7 @@ namespace xcb
 class painter : public platform::painter
 {
 public:
-	painter( xcb_connection_t *c );
+	painter( xcb_connection_t *c, xcb_screen_t *screen, xcb_window_t win );
 	virtual ~painter( void );
 
 	virtual void set_color( const color &c );
@@ -29,6 +29,9 @@ public:
 
 private:
 	xcb_connection_t *_connection;
+	xcb_window_t _win;
+	xcb_colormap_t _colormap;
+	xcb_gcontext_t _context;
 };
 
 ////////////////////////////////////////

@@ -21,10 +21,10 @@ int safemain( int argc, char **argv )
 	win->show();
 
 	auto painter = win->paint();
-	std::vector<line> ls;
+	std::vector<point> ls;
 	for ( size_t i = 0; i < 5; ++i )
-		ls.emplace_back( 10 + i * 5, 10 + i * 5, 5, 5 );
-	painter->draw_lines( ls.data(), ls.size() );
+		ls.emplace_back( 10 + i * 5, 10 + i * 5 ); //, 5, 5 );
+	painter->draw_points( ls.data(), ls.size() );
 	painter->present();
 
 	sleep( 5 );

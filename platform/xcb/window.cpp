@@ -11,20 +11,25 @@ namespace xcb
 ////////////////////////////////////////
 
 window::window( xcb_connection_t *c, xcb_screen_t *screen )
-	: _connection( c )
+	: _connection( c ), _screen( screen )
 {
 	precondition( _connection, "null connection" );
+	precondition( _screen, "null screen" );
 	_win = xcb_generate_id( _connection );
+
 	xcb_create_window( _connection,    // Connection
 		XCB_COPY_FROM_PARENT,          // depth (same as root)
 		_win,                          // window Id
-		screen->root,                  // parent window
+		_screen->root,                  // parent window
 		0, 0,                          // x, y
 		100, 100,                      // width, height
 		10,                            // border_width
 		XCB_WINDOW_CLASS_INPUT_OUTPUT, // class
 		screen->root_visual,           // visual
-		0, NULL);                      // masks, not used yet
+		0, NULL );   // masks, not used yet
+
+	const uint32_t values[] = { screen->black_pixel };
+	xcb_change_window_attributes( _connection, _win, XCB_CW_BACK_PIXEL, values );
 }
 
 ////////////////////////////////////////
@@ -105,7 +110,7 @@ void window::set_title( const std::string &t )
 
 std::shared_ptr<platform::painter> window::paint( void )
 {
-	return std::make_shared<painter>( _connection );
+	return std::make_shared<painter>( _connection, _screen, _win );
 }
 
 ////////////////////////////////////////

@@ -36,6 +36,7 @@ public:
 
 private:
 	xcb_connection_t *_connection;
+	xcb_screen_t *_screen;
 	xcb_window_t _win;
 };
 
