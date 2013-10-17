@@ -63,8 +63,26 @@ int dispatcher::execute( void )
 						break;
 
 					case SDL_WINDOWEVENT_EXPOSED:
-						_windows[event.window.windowID]->exposed();
+					{
+						SDL_Event peek[5];
+						int n = SDL_PeepEvents( peek, 5, SDL_PEEKEVENT, SDL_WINDOWEVENT, SDL_WINDOWEVENT );
+						if ( n < 0 )
+							throw std::runtime_error( SDL_GetError() );
+						bool doit = true;
+						for ( int i = 0; i < n; ++i )
+						{
+							if ( peek[i].window.event == SDL_WINDOWEVENT_EXPOSED &&
+								 peek[i].window.windowID == event.window.windowID )
+							{
+								doit = false;
+								break;
+							}
+
+						}
+						if ( doit )
+							_windows[event.window.windowID]->exposed();
 						break;
+					}
 
 					case SDL_WINDOWEVENT_MOVED:
 						_windows[event.window.windowID]->moved( event.window.data1, event.window.data2 );
