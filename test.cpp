@@ -3,12 +3,12 @@
 #include <unistd.h>
 
 #include <core/contract.h>
-#include <platform/sdl/system.h>
+#include <platform/xcb/system.h>
 
 namespace {
 int safemain( int argc, char **argv )
 {
-	auto sys = std::make_shared<sdl::system>();
+	auto sys = std::make_shared<xcb::system>();
 	std::cout << sys->name() << " - " << sys->description() << std::endl;
 
 	auto screens = sys->screens();

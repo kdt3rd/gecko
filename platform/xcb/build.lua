@@ -1,6 +1,5 @@
 
-SubDir( "sdl" )
-SubDir( "xcb" )
+Include( XCB_INCLUDE )
 
 srcs = {
 	"system.cpp";
@@ -11,5 +10,5 @@ srcs = {
 	"painter.cpp";
 }
 
-Library( "platform", Compile( srcs ) )
+Library( "platform-xcb", Compile( srcs ), LinkSys( XCB_LIBS ) )
 
