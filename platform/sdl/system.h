@@ -17,6 +17,7 @@ public:
 
 	virtual std::vector<std::shared_ptr<platform::screen>> screens( void ) { return _screens; }
 	virtual std::shared_ptr<platform::window> new_window( void );
+	virtual std::shared_ptr<platform::timer> new_timer( void );
 
 	virtual std::shared_ptr<platform::dispatcher> dispatch( void );
 
