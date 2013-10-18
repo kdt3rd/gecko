@@ -17,11 +17,15 @@ public:
 
 	virtual void set_color( const color &c );
 
-	virtual void draw_points( const point *ls, size_t ln );
-	virtual void draw_polygon( const point *ps, size_t pn );
+	virtual std::shared_ptr<platform::points> new_points( void );
+	virtual void draw_points( const std::shared_ptr<platform::points> &ps );
+	virtual void draw_polygon( const std::shared_ptr<platform::points> &ps );
 
 	virtual void draw_lines( const line *ps, size_t pn );
-	virtual void draw_rects( const rectangle *rs, size_t rn );
+
+	virtual std::shared_ptr<platform::rectangles> new_rectangles( void );
+	virtual void draw_rects( const std::shared_ptr<platform::rectangles> &rs );
+	virtual void fill_rects( const std::shared_ptr<platform::rectangles> &rs );
 
 	virtual void clear( void );
 

@@ -21,7 +21,9 @@ public:
 	virtual void draw_polygon( const point *ps, size_t pn );
 
 	virtual void draw_lines( const line *ps, size_t pn );
+
 	virtual void draw_rects( const rectangle *rs, size_t rn );
+	virtual void fill_rects( const rectangle *rs, size_t rn );
 
 	virtual void clear( void );
 

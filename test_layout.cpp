@@ -3,7 +3,7 @@
 #include <map>
 #include <functional>
 
-#include <platform/sdl/system.h>
+#include <platform/xcb/system.h>
 
 #include <layout/form_layout.h>
 #include <layout/box_layout.h>
@@ -104,15 +104,32 @@ int safemain( int argc, char **argv )
 {
 	precondition( argc > 1, "expected argument" );
 
-	auto sys = std::make_shared<sdl::system>();
+	auto sys = std::make_shared<xcb::system>();
 	auto win = sys->new_window();
 
 	std::shared_ptr<container> c = std::make_shared<container>();
 
 	auto layout = tests[argv[1]]( c );
 
+	auto redraw_window = [&] ( void )
+	{
+		std::cout << "redraw" << std::endl;
+		auto painter = win->paint();
+
+		painter->set_color( color( 0.5, 0.5, 0.5 )  );
+		painter->clear();
+
+		auto rs = painter->new_rectangles();
+		for ( auto a: *c )
+			rs->add_rectangle( a->x1(), a->y1(), a->width()-1, a->height()-1 );
+		painter->set_color( color( 1, 0, 1 ) );
+		painter->draw_rects( rs );
+		painter->present();
+	};
+
 	auto recompute_layout = [&] ( double w, double h )
 	{
+		std::cout << "resize " << w << ' ' <<  h << std::endl;
 		layout->recompute_minimum();
 		std::shared_ptr<area> b = c->bounds();
 
@@ -124,24 +141,10 @@ int safemain( int argc, char **argv )
 		b->set_vertical( 0, h );
 
 		layout->recompute_layout();
+		redraw_window();
 	};
 
-	auto redraw_window = [&] ( void )
-	{
-		auto painter = win->paint();
-
-		painter->set_color( color( 0, 0, 0 )  );
-		painter->clear();
-
-		painter->set_color( color( 1, 1, 1 ) );
-		rectangle r;
-		for ( auto a: *c )
-		{
-			r = *a;
-			painter->draw_rects( &r, 1 );
-		}
-		painter->present();
-	};
+	recompute_layout( 640, 480 );
 
 	win->when_resized( recompute_layout );
 	win->when_exposed( redraw_window );
@@ -150,10 +153,20 @@ int safemain( int argc, char **argv )
 	win->resize( 640, 480 );
 	win->show();
 
-	recompute_layout( 640, 480 );
+	std::shared_ptr<platform::timer> t = sys->new_timer();
+	t->when_elapsed( [&]
+	{
+		std::cout << "Timeout!" << std::endl;
+		t->schedule( 10.0 );
+	} );
+
+	t->schedule( 1.0 );
 
 	return sys->dispatch()->execute();
 }
+
+////////////////////////////////////////
+
 }
 
 ////////////////////////////////////////

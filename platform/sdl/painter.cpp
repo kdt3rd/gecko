@@ -81,6 +81,22 @@ void painter::draw_rects( const rectangle *rs, size_t rn )
 
 ////////////////////////////////////////
 
+void painter::fill_rects( const rectangle *rs, size_t rn )
+{
+	std::vector<SDL_Rect> rects( rn );
+	for ( size_t i = 0; i < rn; ++i )
+	{
+		rects[i].x = rs[i].x1();
+		rects[i].y = rs[i].y1();
+		rects[i].w = rs[i].width();
+		rects[i].h = rs[i].height();
+	}
+
+	SDL_RenderDrawRects( _render, rects.data(), rects.size() );
+}
+
+////////////////////////////////////////
+
 void painter::clear( void )
 {
 	if ( SDL_RenderClear( _render ) != 0 )
