@@ -1,5 +1,5 @@
 
-SubDir( "sdl" )
+--SubDir( "sdl" )
 SubDir( "xcb" )
 
 srcs = {
