@@ -17,16 +17,19 @@ window::window( xcb_connection_t *c, xcb_screen_t *screen )
 	precondition( _screen, "null screen" );
 	_win = xcb_generate_id( _connection );
 
+	uint32_t mask = XCB_CW_EVENT_MASK;
+	const uint32_t cwvals[] = { XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_STRUCTURE_NOTIFY };
+
 	xcb_create_window( _connection,    // Connection
 		XCB_COPY_FROM_PARENT,          // depth (same as root)
 		_win,                          // window Id
 		_screen->root,                  // parent window
 		0, 0,                          // x, y
-		100, 100,                      // width, height
+		320, 240,                      // width, height
 		10,                            // border_width
 		XCB_WINDOW_CLASS_INPUT_OUTPUT, // class
 		screen->root_visual,           // visual
-		0, NULL );   // masks, not used yet
+		mask, cwvals );   // masks, not used yet
 
 	const uint32_t values[] = { screen->black_pixel };
 	xcb_change_window_attributes( _connection, _win, XCB_CW_BACK_PIXEL, values );
