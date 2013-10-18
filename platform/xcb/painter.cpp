@@ -79,9 +79,9 @@ void painter::draw_polygon( const std::shared_ptr<platform::points> &ps )
 
 ////////////////////////////////////////
 
-void painter::draw_lines( const line *ls, size_t ln )
-{
-}
+//void painter::draw_lines( const line *ls, size_t ln )
+//{
+//}
 
 ////////////////////////////////////////
 

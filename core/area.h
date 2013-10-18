@@ -2,7 +2,6 @@
 #pragma once
 
 #include "signal.h"
-#include "rectangle.h"
 
 ////////////////////////////////////////
 
@@ -45,11 +44,6 @@ public:
 	double height( void ) const { return _y2 - _y1; }
 
 	bool contains( double x, double y ) const;
-
-	operator rectangle() const
-	{
-		return rectangle( x1(), y1(), x2(), y2() );
-	}
 
 private:
 	double _x1 = 0.0, _y1 = 0.0, _x2 = 0.0, _y2 = 0.0;

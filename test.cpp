@@ -21,8 +21,8 @@ int safemain( int argc, char **argv )
 	auto draw_stuff = [&]
 	{
 		auto painter = win->paint();
-		std::vector<point> ls;
 		/*
+		std::vector<point> ls;
 		painter->set_color( color( 1.0, 1.0, 1.0 ) );
 		for ( size_t i = 0; i < 5; ++i )
 			ls.emplace_back( 10 + i * 5, 10 + i * 5 ); //, 5, 5 );

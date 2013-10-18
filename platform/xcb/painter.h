@@ -21,7 +21,7 @@ public:
 	virtual void draw_points( const std::shared_ptr<platform::points> &ps );
 	virtual void draw_polygon( const std::shared_ptr<platform::points> &ps );
 
-	virtual void draw_lines( const line *ps, size_t pn );
+//	virtual void draw_lines( const line *ps, size_t pn );
 
 	virtual std::shared_ptr<platform::rectangles> new_rectangles( void );
 	virtual void draw_rects( const std::shared_ptr<platform::rectangles> &rs );
