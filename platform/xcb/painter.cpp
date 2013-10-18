@@ -68,12 +68,23 @@ void painter::draw_lines( const line *ls, size_t ln )
 
 void painter::draw_rects( const rectangle *rs, size_t rn )
 {
+	std::vector<xcb_rectangle_t> rects( rn );
+	for ( size_t i = 0; i < rn; ++i )
+	{
+		rects[i].x = rs[i].x1();
+		rects[i].y = rs[i].y1();
+		rects[i].width = rs[i].width() - 1;
+		rects[i].height = rs[i].height() - 1;
+	}
+
+	xcb_poly_rectangle( _connection, _win, _context, rects.size(), rects.data() );
 }
 
 ////////////////////////////////////////
 
 void painter::clear( void )
 {
+	xcb_clear_area( _connection, 0, _win, 0, 0, 0, 0 );
 }
 
 ////////////////////////////////////////
