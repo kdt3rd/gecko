@@ -5,6 +5,7 @@
 #include "timer.h"
 #include "dispatcher.h"
 
+#include <core/contract.h>
 #include <stdexcept>
 
 namespace xcb
@@ -19,6 +20,8 @@ system::system( void )
 	_connection = xcb_connect( nullptr, &prefScreen );
 
 	const xcb_setup_t *setup = xcb_get_setup( _connection );
+	precondition( setup, "not xcb setup" );
+
 	xcb_screen_iterator_t iter = xcb_setup_roots_iterator( setup );
 	_screen = iter.data;
 
@@ -28,7 +31,7 @@ system::system( void )
 		xcb_screen_next( &iter );
 	}
 
-	_dispatcher = std::make_shared<dispatcher>();
+	_dispatcher = std::make_shared<dispatcher>( _connection );
 }
 
 ////////////////////////////////////////

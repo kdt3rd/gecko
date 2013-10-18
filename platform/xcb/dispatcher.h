@@ -14,7 +14,7 @@ namespace xcb
 class dispatcher : public platform::dispatcher
 {
 public:
-	dispatcher( void );
+	dispatcher( xcb_connection_t *c );
 	virtual ~dispatcher( void );
 
 	int execute( void );
@@ -24,7 +24,8 @@ public:
 
 private:
 	int _exit_code = 0;
-	std::map<uint32_t, std::shared_ptr<window>> _windows;
+	xcb_connection_t *_connection = nullptr;
+	std::map<xcb_window_t, std::shared_ptr<window>> _windows;
 };
 
 ////////////////////////////////////////

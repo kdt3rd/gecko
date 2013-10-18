@@ -1,14 +1,19 @@
 
 #include <iostream>
+#include <stdlib.h>
+#include <core/contract.h>
 #include "dispatcher.h"
+#include <xcb/xcb.h>
 
 namespace xcb
 {
 
 ////////////////////////////////////////
 
-dispatcher::dispatcher( void )
+dispatcher::dispatcher( xcb_connection_t *c )
+	: _connection( c )
 {
+	precondition( _connection, "null connection" );
 }
 
 ////////////////////////////////////////
@@ -21,11 +26,33 @@ dispatcher::~dispatcher( void )
 
 int dispatcher::execute( void )
 {
+	xcb_flush( _connection );
 	_exit_code = 0;
 
+	std::shared_ptr<xcb_generic_event_t> event;
 	bool done = false;
 	while ( !done )
 	{
+		event.reset( xcb_wait_for_event( _connection ), free );
+		if ( !event )
+			break;
+		switch ( event->response_type & ~0x80 )
+		{
+			case XCB_EXPOSE:
+			{
+				xcb_expose_event_t *ev = reinterpret_cast<xcb_expose_event_t*>( event.get() );
+				if ( ev->count == 0 )
+					_windows[ev->window]->exposed();
+				break;
+			}
+
+			case XCB_CONFIGURE_NOTIFY:
+			{
+				xcb_configure_notify_event_t *ev = reinterpret_cast<xcb_configure_notify_event_t*>( event.get() );
+				_windows[ev->window]->resized( ev->width, ev->height );
+				break;
+			}
+		}
 	/*
 		SDL_Event event;
 		if ( SDL_WaitEvent( &event ) == 0 )
@@ -95,8 +122,8 @@ int dispatcher::execute( void )
 						break;
 				}
 		}
-		*/
 		break;
+		*/
 	}
 
 	return _exit_code;
