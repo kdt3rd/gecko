@@ -107,6 +107,7 @@ void window::set_minimum_size( double w, double h )
 
 void window::set_title( const std::string &t )
 {
+	xcb_change_property( _connection, XCB_PROP_MODE_REPLACE, _win, XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8, t.size(), t.c_str() );
 }
 
 ////////////////////////////////////////
