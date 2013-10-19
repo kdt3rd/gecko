@@ -34,10 +34,16 @@ public:
 
 	xcb_window_t id( void ) const;
 
+	bool check_last_position( int16_t x, int16_t y ) { if ( _last_x != x || _last_y != y ) { _last_x = x; _last_y = y; return true; } return false; }
+	bool check_last_size( uint16_t w, uint16_t h ) { if ( _last_w != w || _last_h != h ) { _last_w = w; _last_h = h; return true; } return false; }
+
 private:
 	xcb_connection_t *_connection;
 	xcb_screen_t *_screen;
 	xcb_window_t _win;
+
+	int16_t _last_x, _last_y;
+	uint16_t _last_w, _last_h;
 };
 
 ////////////////////////////////////////

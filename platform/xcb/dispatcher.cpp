@@ -40,18 +40,51 @@ int dispatcher::execute( void )
 		{
 			case XCB_EXPOSE:
 			{
-				xcb_expose_event_t *ev = reinterpret_cast<xcb_expose_event_t*>( event.get() );
+				auto *ev = reinterpret_cast<xcb_expose_event_t*>( event.get() );
 				if ( ev->count == 0 )
 					_windows[ev->window]->exposed();
+				xcb_flush( _connection );
 				break;
 			}
 
 			case XCB_CONFIGURE_NOTIFY:
 			{
-				xcb_configure_notify_event_t *ev = reinterpret_cast<xcb_configure_notify_event_t*>( event.get() );
-				_windows[ev->window]->resized( ev->width, ev->height );
+				auto *ev = reinterpret_cast<xcb_configure_notify_event_t*>( event.get() );
+				auto w = _windows[ev->window];
+				if ( w->check_last_position( ev->x, ev->y ) )
+					w->moved( ev->x, ev->y );
+				if ( w->check_last_size( ev->width, ev->height ) )
+					w->resized( ev->width, ev->height );
 				break;
 			}
+
+			case XCB_DESTROY_NOTIFY:
+			{
+				auto *ev = reinterpret_cast<xcb_destroy_notify_event_t*>( event.get() );
+				auto w = _windows[ev->window];
+				w->closed();
+				break;
+			}
+
+			case XCB_MAP_NOTIFY:
+			{
+				auto *ev = reinterpret_cast<xcb_map_notify_event_t*>( event.get() );
+				auto w = _windows[ev->window];
+				w->shown();
+				w->restored();
+				break;
+			}
+
+			case XCB_UNMAP_NOTIFY:
+			{
+				auto *ev = reinterpret_cast<xcb_unmap_notify_event_t*>( event.get() );
+				auto w = _windows[ev->window];
+				w->hidden();
+				w->minimized();
+				break;
+			}
+
+
 		}
 	/*
 		SDL_Event event;
@@ -67,18 +100,6 @@ int dispatcher::execute( void )
 			case SDL_WINDOWEVENT:
 				switch ( event.window.event )
 				{
-					case SDL_WINDOWEVENT_CLOSE:
-						_windows[event.window.windowID]->closed();
-						break;
-
-					case SDL_WINDOWEVENT_SHOWN:
-						_windows[event.window.windowID]->shown();
-						break;
-
-					case SDL_WINDOWEVENT_HIDDEN:
-						_windows[event.window.windowID]->hidden();
-						break;
-
 					case SDL_WINDOWEVENT_MINIMIZED:
 						_windows[event.window.windowID]->minimized();
 						break;
@@ -89,36 +110,6 @@ int dispatcher::execute( void )
 
 					case SDL_WINDOWEVENT_RESTORED:
 						_windows[event.window.windowID]->restored();
-						break;
-
-					case SDL_WINDOWEVENT_EXPOSED:
-					{
-						SDL_Event peek[5];
-						int n = SDL_PeepEvents( peek, 5, SDL_PEEKEVENT, SDL_WINDOWEVENT, SDL_WINDOWEVENT );
-						if ( n < 0 )
-							throw std::runtime_error( SDL_GetError() );
-						bool doit = true;
-						for ( int i = 0; i < n; ++i )
-						{
-							if ( peek[i].window.event == SDL_WINDOWEVENT_EXPOSED &&
-								 peek[i].window.windowID == event.window.windowID )
-							{
-								doit = false;
-								break;
-							}
-
-						}
-						if ( doit )
-							_windows[event.window.windowID]->exposed();
-						break;
-					}
-
-					case SDL_WINDOWEVENT_MOVED:
-						_windows[event.window.windowID]->moved( event.window.data1, event.window.data2 );
-						break;
-
-					case SDL_WINDOWEVENT_RESIZED:
-						_windows[event.window.windowID]->resized( event.window.data1, event.window.data2 );
 						break;
 				}
 		}

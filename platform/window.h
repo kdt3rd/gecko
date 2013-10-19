@@ -52,7 +52,7 @@ public:
 	void maximized( void ) { if ( _maximized ) _maximized(); }
 	void restored( void ) { if ( _restored ) _restored(); }
 	void exposed( void ) { if ( _exposed ) _exposed(); }
-	void moved( double w, double h ) { if ( _moved ) _moved( w, h ); }
+	void moved( double x, double y ) { if ( _moved ) _moved( x, y ); }
 	void resized( double w, double h ) { if ( _resized ) _resized( w, h ); }
 
 private:
