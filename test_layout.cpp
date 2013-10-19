@@ -160,9 +160,12 @@ int safemain( int argc, char **argv )
 		t->schedule( 10.0 );
 	} );
 
+	win->when_entered( [&] { std::cout << "Entered!" << std::endl; } );
+	win->when_exited( [&] { std::cout << "Exited!" << std::endl; } );
+
 	t->schedule( 1.0 );
 
-	return sys->dispatch()->execute();
+	return sys->get_dispatcher()->execute();
 }
 
 ////////////////////////////////////////

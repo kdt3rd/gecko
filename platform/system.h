@@ -9,6 +9,7 @@
 #include "window.h"
 #include "timer.h"
 #include "dispatcher.h"
+#include "keyboard.h"
 
 namespace platform
 {
@@ -28,7 +29,8 @@ public:
 	virtual std::shared_ptr<window> new_window( void ) = 0;
 	virtual std::shared_ptr<timer> new_timer( void ) = 0;
 
-	virtual std::shared_ptr<dispatcher> dispatch( void ) = 0;
+	virtual std::shared_ptr<dispatcher> get_dispatcher( void ) = 0;
+	virtual std::shared_ptr<keyboard> get_keyboard( void ) = 0;
 
 private:
 	std::string _name;

@@ -38,7 +38,7 @@ int safemain( int argc, char **argv )
 
 	draw_stuff();
 
-	auto dispatcher = sys->dispatch();
+	auto dispatcher = sys->get_dispatcher();
 	dispatcher->execute();
 	return 0;
 }

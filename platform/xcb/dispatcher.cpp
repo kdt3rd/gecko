@@ -2,6 +2,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <core/contract.h>
+#include <core/pointer.h>
 #include "dispatcher.h"
 #include <xcb/xcb.h>
 
@@ -10,8 +11,8 @@ namespace xcb
 
 ////////////////////////////////////////
 
-dispatcher::dispatcher( xcb_connection_t *c )
-	: _connection( c )
+dispatcher::dispatcher( xcb_connection_t *c, const std::shared_ptr<keyboard> &k )
+	: _connection( c ), _keyboard( k )
 {
 	precondition( _connection, "null connection" );
 }
@@ -29,11 +30,10 @@ int dispatcher::execute( void )
 	xcb_flush( _connection );
 	_exit_code = 0;
 
-	std::shared_ptr<xcb_generic_event_t> event;
 	bool done = false;
 	while ( !done )
 	{
-		event.reset( xcb_wait_for_event( _connection ), free );
+		auto event = core::wrap_cptr( xcb_wait_for_event( _connection ) );
 		if ( !event )
 			break;
 		switch ( event->response_type & ~0x80 )

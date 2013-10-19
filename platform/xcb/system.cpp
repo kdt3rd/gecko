@@ -25,13 +25,14 @@ system::system( void )
 	xcb_screen_iterator_t iter = xcb_setup_roots_iterator( setup );
 	_screen = iter.data;
 
-	while ( iter.rem > 0 )
+	while ( iter.rem )
 	{
 		_screens.push_back( std::make_shared<screen>( iter.data ) );
 		xcb_screen_next( &iter );
 	}
 
-	_dispatcher = std::make_shared<dispatcher>( _connection );
+	_keyboard = std::make_shared<keyboard>();
+	_dispatcher = std::make_shared<dispatcher>( _connection, _keyboard );
 }
 
 ////////////////////////////////////////
@@ -59,11 +60,17 @@ std::shared_ptr<platform::timer> system::new_timer( void )
 
 ////////////////////////////////////////
 
-std::shared_ptr<platform::dispatcher> system::dispatch( void )
+std::shared_ptr<platform::dispatcher> system::get_dispatcher( void )
 {
 	return _dispatcher;
 }
 
+////////////////////////////////////////
+
+std::shared_ptr<platform::keyboard> system::get_keyboard( void )
+{
+	return _keyboard;
+}
 
 ////////////////////////////////////////
 

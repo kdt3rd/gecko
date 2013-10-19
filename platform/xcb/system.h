@@ -4,6 +4,7 @@
 #include <platform/system.h>
 #include <xcb/xcb.h>
 #include "dispatcher.h"
+#include "keyboard.h"
 
 namespace xcb
 {
@@ -20,12 +21,14 @@ public:
 	virtual std::shared_ptr<platform::window> new_window( void );
 	virtual std::shared_ptr<platform::timer> new_timer( void );
 
-	virtual std::shared_ptr<platform::dispatcher> dispatch( void );
+	virtual std::shared_ptr<platform::dispatcher> get_dispatcher( void );
+	virtual std::shared_ptr<platform::keyboard> get_keyboard( void );
 
 private:
 	xcb_connection_t *_connection;
 	xcb_screen_t *_screen;
 	std::shared_ptr<dispatcher> _dispatcher;
+	std::shared_ptr<keyboard> _keyboard;
 	std::vector<std::shared_ptr<platform::screen>> _screens;
 };
 
