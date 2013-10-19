@@ -18,7 +18,11 @@ window::window( xcb_connection_t *c, xcb_screen_t *screen )
 	_win = xcb_generate_id( _connection );
 
 	uint32_t mask = XCB_CW_EVENT_MASK;
-	const uint32_t cwvals[] = { XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_STRUCTURE_NOTIFY };
+	const uint32_t cwvals[] = {
+		XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW |
+		XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_KEY_RELEASE | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE |
+		XCB_EVENT_MASK_VISIBILITY_CHANGE
+	};
 
 	xcb_create_window( _connection,    // Connection
 		XCB_COPY_FROM_PARENT,          // depth (same as root)

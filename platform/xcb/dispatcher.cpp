@@ -84,37 +84,22 @@ int dispatcher::execute( void )
 				break;
 			}
 
-
-		}
-	/*
-		SDL_Event event;
-		if ( SDL_WaitEvent( &event ) == 0 )
-			throw std::runtime_error( SDL_GetError() );
-
-		switch ( event.type )
-		{
-			case SDL_QUIT:
-				done = true;
+			case XCB_ENTER_NOTIFY:
+			{
+				auto *ev = reinterpret_cast<xcb_enter_notify_event_t*>( event.get() );
+				auto w = _windows[ev->event];
+				w->entered();
 				break;
+			}
 
-			case SDL_WINDOWEVENT:
-				switch ( event.window.event )
-				{
-					case SDL_WINDOWEVENT_MINIMIZED:
-						_windows[event.window.windowID]->minimized();
-						break;
-
-					case SDL_WINDOWEVENT_MAXIMIZED:
-						_windows[event.window.windowID]->maximized();
-						break;
-
-					case SDL_WINDOWEVENT_RESTORED:
-						_windows[event.window.windowID]->restored();
-						break;
-				}
+			case XCB_LEAVE_NOTIFY:
+			{
+				auto *ev = reinterpret_cast<xcb_leave_notify_event_t*>( event.get() );
+				auto w = _windows[ev->event];
+				w->exited();
+				break;
+			}
 		}
-		break;
-		*/
 	}
 
 	return _exit_code;

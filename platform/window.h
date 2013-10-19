@@ -44,6 +44,8 @@ public:
 	void when_exposed( std::function<void()> f ) { _exposed = f; }
 	void when_moved( std::function<void(double,double)> f ) { _moved = f; }
 	void when_resized( std::function<void(double,double)> f ) { _resized = f; }
+	void when_entered( std::function<void(void)> f ) { _entered = f; }
+	void when_exited( std::function<void(void)> f ) { _exited = f; }
 
 	void closed( void ) { if ( _closed ) _closed(); }
 	void shown( void ) { if ( _shown ) _shown(); }
@@ -54,6 +56,8 @@ public:
 	void exposed( void ) { if ( _exposed ) _exposed(); }
 	void moved( double x, double y ) { if ( _moved ) _moved( x, y ); }
 	void resized( double w, double h ) { if ( _resized ) _resized( w, h ); }
+	void entered( void ) { if ( _entered ) _entered(); }
+	void exited( void ) { if ( _exited ) _exited(); }
 
 private:
 	std::function<void(void)> _closed;
@@ -65,6 +69,8 @@ private:
 	std::function<void(void)> _exposed;
 	std::function<void(double,double)> _moved;
 	std::function<void(double,double)> _resized;
+	std::function<void(void)> _entered;
+	std::function<void(void)> _exited;
 };
 
 ////////////////////////////////////////
