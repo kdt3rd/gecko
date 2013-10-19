@@ -6,6 +6,7 @@ namespace platform
 
 ////////////////////////////////////////
 
+// USB scancodes are used
 enum class scancode
 {
 	KEY_A = 4,
@@ -161,7 +162,15 @@ public:
 	keyboard( void );
 	virtual ~keyboard( void );
 
+	void when_pressed( std::function<void(scancode)> f ) { _pressed = f; }
+	void when_released( std::function<void(scancode)> f ) { _released = f; }
+
+	void pressed( scancode sc ) { if ( _pressed ) _pressed( sc ); }
+	void released( scancode sc ) { if ( _released ) _released( sc ); }
+
 private:
+	std::function<void(scancode)> _pressed;
+	std::function<void(scancode)> _released;
 };
 
 ////////////////////////////////////////
