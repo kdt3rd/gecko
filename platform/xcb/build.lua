@@ -7,6 +7,7 @@ srcs = {
 	"window.cpp";
 	"timer.cpp";
 	"keyboard.cpp";
+	"mouse.cpp";
 	"dispatcher.cpp";
 	"painter.cpp";
 }

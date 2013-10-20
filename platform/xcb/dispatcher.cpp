@@ -11,8 +11,8 @@ namespace xcb
 
 ////////////////////////////////////////
 
-dispatcher::dispatcher( xcb_connection_t *c, const std::shared_ptr<keyboard> &k )
-	: _connection( c ), _keyboard( k )
+dispatcher::dispatcher( xcb_connection_t *c, const std::shared_ptr<keyboard> &k, const std::shared_ptr<mouse> &m )
+	: _connection( c ), _keyboard( k ), _mouse( m )
 {
 	precondition( _connection, "null connection" );
 }

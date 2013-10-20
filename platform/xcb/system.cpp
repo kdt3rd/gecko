@@ -32,7 +32,8 @@ system::system( void )
 	}
 
 	_keyboard = std::make_shared<keyboard>( _connection );
-	_dispatcher = std::make_shared<dispatcher>( _connection, _keyboard );
+	_mouse = std::make_shared<mouse>();
+	_dispatcher = std::make_shared<dispatcher>( _connection, _keyboard, _mouse );
 }
 
 ////////////////////////////////////////
@@ -70,6 +71,13 @@ std::shared_ptr<platform::dispatcher> system::get_dispatcher( void )
 std::shared_ptr<platform::keyboard> system::get_keyboard( void )
 {
 	return _keyboard;
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<platform::mouse> system::get_mouse( void )
+{
+	return _mouse;
 }
 
 ////////////////////////////////////////

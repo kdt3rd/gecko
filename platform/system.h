@@ -10,6 +10,7 @@
 #include "timer.h"
 #include "dispatcher.h"
 #include "keyboard.h"
+#include "mouse.h"
 
 namespace platform
 {
@@ -31,6 +32,7 @@ public:
 
 	virtual std::shared_ptr<dispatcher> get_dispatcher( void ) = 0;
 	virtual std::shared_ptr<keyboard> get_keyboard( void ) = 0;
+	virtual std::shared_ptr<mouse> get_mouse( void ) = 0;
 
 private:
 	std::string _name;
