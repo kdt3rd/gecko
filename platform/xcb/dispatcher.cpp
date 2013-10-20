@@ -123,6 +123,63 @@ int dispatcher::execute( void )
 					_keyboard->update_mapping();
 				break;
 			}
+
+			case XCB_BUTTON_PRESS:
+			{
+				auto *ev = reinterpret_cast<xcb_button_press_event_t*>( event.get() );
+				auto w = _windows[ev->event];
+				switch ( ev->detail )
+				{
+					case 1:
+					case 2:
+					case 3:
+						_mouse->pressed( w, ev->detail );
+						break;
+
+					case 4: // Mouse wheel up
+					case 5: // Mouse wheel down
+						break;
+				}
+				break;
+			}
+
+			case XCB_BUTTON_RELEASE:
+			{
+				auto *ev = reinterpret_cast<xcb_button_press_event_t*>( event.get() );
+				auto w = _windows[ev->event];
+				switch ( ev->detail )
+				{
+					case 1:
+					case 2:
+					case 3:
+						_mouse->released( w, ev->detail );
+						break;
+
+					case 4: // Mouse wheel up
+					case 5: // Mouse wheel down
+						break;
+				}
+				break;
+			}
+
+			case XCB_MOTION_NOTIFY:
+			{
+				auto *ev = reinterpret_cast<xcb_button_press_event_t*>( event.get() );
+				auto w = _windows[ev->event];
+				switch ( ev->detail )
+				{
+					case 1:
+					case 2:
+					case 3:
+						_mouse->released( w, ev->detail );
+						break;
+
+					case 4: // Mouse wheel up
+					case 5: // Mouse wheel down
+						break;
+				}
+				break;
+			}
 		}
 	}
 
