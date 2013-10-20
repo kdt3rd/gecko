@@ -99,6 +99,30 @@ int dispatcher::execute( void )
 				w->exited();
 				break;
 			}
+
+			case XCB_KEY_PRESS:
+			{
+				auto *ev = reinterpret_cast<xcb_key_press_event_t*>( event.get() );
+				platform::scancode sc = _keyboard->get_scancode( ev->detail );
+				_keyboard->pressed( sc );
+				break;
+			}
+
+			case XCB_KEY_RELEASE:
+			{
+				auto *ev = reinterpret_cast<xcb_key_press_event_t*>( event.get() );
+				platform::scancode sc = _keyboard->get_scancode( ev->detail );
+				_keyboard->released( sc );
+				break;
+			}
+
+			case XCB_MAPPING_NOTIFY:
+			{
+				auto *ev = reinterpret_cast<xcb_mapping_notify_event_t*>( event.get() );
+				if ( ev->request == XCB_MAPPING_MODIFIER || ev->request == XCB_MAPPING_KEYBOARD )
+					_keyboard->update_mapping();
+				break;
+			}
 		}
 	}
 

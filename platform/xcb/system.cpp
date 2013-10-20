@@ -31,7 +31,7 @@ system::system( void )
 		xcb_screen_next( &iter );
 	}
 
-	_keyboard = std::make_shared<keyboard>();
+	_keyboard = std::make_shared<keyboard>( _connection );
 	_dispatcher = std::make_shared<dispatcher>( _connection, _keyboard );
 }
 

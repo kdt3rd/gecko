@@ -69,5 +69,5 @@ Include( source_dir .. "/lib" )
 
 BOTAN_FLAGS, BOTAN_INCLUDE, BOTAN_LIBS = Package( "botan-1.10" )
 SDL_FLAGS, SDL_INCLUDE, SDL_LIBS = Package( "sdl2" )
-XCB_FLAGS, XCB_INCLUDE, XCB_LIBS = Package( "xcb" )
+XCB_FLAGS, XCB_INCLUDE, XCB_LIBS = Package( "xcb", "xcb-xinput", "xcb-keysyms" )
 

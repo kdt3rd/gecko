@@ -9,8 +9,10 @@ namespace platform
 ////////////////////////////////////////
 
 // USB scancodes are used
-enum class scancode
+enum class scancode : uint32_t
 {
+	KEY_UNKNOWN = 0,
+
 	KEY_A = 4,
 	KEY_B = 5,
 	KEY_C = 6,

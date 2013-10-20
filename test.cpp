@@ -38,6 +38,14 @@ int safemain( int argc, char **argv )
 
 	draw_stuff();
 
+	auto keypress = [&]( platform::scancode sc )
+	{
+		std::cout << "Key pressed " << static_cast<uint32_t>(sc) << std::endl;
+	};
+
+	auto kbd = sys->get_keyboard();
+	kbd->when_pressed( keypress );
+
 	auto dispatcher = sys->get_dispatcher();
 	dispatcher->execute();
 	return 0;
