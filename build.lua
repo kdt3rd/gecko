@@ -2,6 +2,7 @@
 Include( source_dir, SDL_INCLUDE, BOTAN_INCLUDE )
 
 SubDir( "core" )
+SubDir( "draw" )
 SubDir( "store" )
 SubDir( "layout" )
 SubDir( "platform" )
