@@ -116,13 +116,13 @@ int safemain( int argc, char **argv )
 		std::cout << "redraw" << std::endl;
 		auto painter = win->paint();
 
-		painter->set_color( color( 0.5, 0.5, 0.5 )  );
+		painter->set_color( draw::color( 0.5, 0.5, 0.5 )  );
 		painter->clear();
 
 		auto rs = painter->new_rectangles();
 		for ( auto a: *c )
 			rs->add_rectangle( a->x1(), a->y1(), a->width()-1, a->height()-1 );
-		painter->set_color( color( 1, 0, 1 ) );
+		painter->set_color( draw::color( 1, 0, 1 ) );
 		painter->draw_rects( rs );
 		painter->present();
 	};

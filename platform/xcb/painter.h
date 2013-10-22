@@ -15,11 +15,14 @@ public:
 	painter( xcb_connection_t *c, xcb_screen_t *screen, xcb_window_t win );
 	virtual ~painter( void );
 
-	virtual void set_color( const color &c );
+	virtual void set_color( const draw::color &c );
 
 	virtual std::shared_ptr<platform::points> new_points( void );
+
 	virtual void draw_points( const std::shared_ptr<platform::points> &ps );
+
 	virtual void draw_polygon( const std::shared_ptr<platform::points> &ps );
+	virtual void fill_polygon( const std::shared_ptr<platform::points> &ps );
 
 //	virtual void draw_lines( const line *ps, size_t pn );
 

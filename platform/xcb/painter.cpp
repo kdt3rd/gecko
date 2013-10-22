@@ -19,8 +19,15 @@ painter::painter( xcb_connection_t *c, xcb_screen_t *screen, xcb_window_t win )
 	_context = xcb_generate_id( _connection );
 	_colormap = screen->default_colormap;
 
-	const uint32_t values[] = { screen->black_pixel };
-	xcb_create_gc( _connection, _context, win, XCB_GC_FOREGROUND, values );
+	{
+		const uint32_t values[] = { screen->black_pixel };
+		xcb_create_gc( _connection, _context, win, XCB_GC_FOREGROUND, values );
+	}
+
+	{
+		const uint32_t values[] = { XCB_FILL_RULE_WINDING };
+		xcb_change_gc( _connection, _context, XCB_GC_FILL_RULE, values );
+	}
 }
 
 ////////////////////////////////////////
@@ -31,7 +38,7 @@ painter::~painter( void )
 
 ////////////////////////////////////////
 
-void painter::set_color( const color &c )
+void painter::set_color( const draw::color &c )
 {
 	auto reply = xcb_alloc_color( _connection, _colormap, c.red() * 65535 + 0.5, c.green() * 65535 + 0.5, c.blue() * 65535 + 0.5 );
 	xcb_alloc_color_reply_t *col = xcb_alloc_color_reply( _connection, reply, NULL );
@@ -72,6 +79,20 @@ void painter::draw_polygon( const std::shared_ptr<platform::points> &ps )
 	{
 		const std::vector<xcb_point_t> &points = tmp->get_list();
 		xcb_poly_line( _connection, XCB_COORD_MODE_ORIGIN, _win, _context, points.size(), points.data() );
+	}
+	else
+		throw std::runtime_error( "invalid points" );
+}
+
+////////////////////////////////////////
+
+void painter::fill_polygon( const std::shared_ptr<platform::points> &ps )
+{
+	auto tmp = std::dynamic_pointer_cast<points>( ps );
+	if ( tmp )
+	{
+		const std::vector<xcb_point_t> &points = tmp->get_list();
+		xcb_fill_poly( _connection, _win, _context, XCB_POLY_SHAPE_COMPLEX, XCB_COORD_MODE_ORIGIN, points.size(), points.data() );
 	}
 	else
 		throw std::runtime_error( "invalid points" );

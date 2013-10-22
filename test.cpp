@@ -18,21 +18,23 @@ int safemain( int argc, char **argv )
 
 	auto win = sys->new_window();
 
+	std::shared_ptr<platform::points> ps;
 	auto draw_stuff = [&]
 	{
 		auto painter = win->paint();
-		/*
-		std::vector<point> ls;
-		painter->set_color( color( 1.0, 1.0, 1.0 ) );
-		for ( size_t i = 0; i < 5; ++i )
-			ls.emplace_back( 10 + i * 5, 10 + i * 5 ); //, 5, 5 );
-		painter->draw_points( ls.data(), ls.size() );
-		*/
+		if ( !ps )
+			ps = painter->make_star( 200.0, 200.0, 150.0, 9, 4 );
+
+		painter->set_color( draw::color( 0.0, 0.0, 0.0 ) );
+		painter->clear();
+
+		painter->set_color( draw::color( 1.0, 0.0, 1.0 ) );
+		painter->fill_polygon( ps );
 		painter->present();
 	};
 	win->when_exposed( draw_stuff );
 
-	win->resize( 320, 240 );
+	win->resize( 400, 400 );
 	win->set_title( "Hello World" );
 	win->show();
 
