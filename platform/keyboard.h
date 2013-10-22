@@ -8,7 +8,8 @@ namespace platform
 
 ////////////////////////////////////////
 
-// USB scancodes are used
+/// @brief Scan codes for keys
+/// USB scan codes are used for keys
 enum class scancode : uint32_t
 {
 	KEY_UNKNOWN = 0,
@@ -160,16 +161,35 @@ enum class scancode : uint32_t
 
 ////////////////////////////////////////
 
+/// @brief Keyboard device
+/// A keyboard device that can send key press/release events.
 class keyboard
 {
 public:
+	/// @brief Constructor
 	keyboard( void );
+
+	/// @brief Destructor
 	virtual ~keyboard( void );
 
+	/// @brief Set the callback for press events
+	/// Set the callback function for key press events.
+	/// @param f Function to call
 	void when_pressed( std::function<void(scancode)> f ) { _pressed = f; }
+
+	/// @brief Set the callback for release events
+	/// Set the callback function for key release events.
+	/// @param f Function to call
 	void when_released( std::function<void(scancode)> f ) { _released = f; }
 
+	/// @brief Send a key press event
+	/// Send a key press event with the given scan code.
+	/// @param sc Key which was pressed
 	void pressed( scancode sc ) { if ( _pressed ) _pressed( sc ); }
+
+	/// @brief Send a key release event
+	/// Send a key release event with the given scan code.
+	/// @param sc Key which was release
 	void released( scancode sc ) { if ( _released ) _released( sc ); }
 
 private:

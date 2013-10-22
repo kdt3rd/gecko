@@ -20,6 +20,7 @@ Variable( "ar", "ar" )
 Variable( "moc", "moc-qt4" )
 Variable( "rcc", "rcc" )
 Variable( "luac", "luac" )
+Variable( "doxygen", "doxygen" )
 
 CFlags( "-msse", "-msse2", "-msse3" )
 CFlags( "-flax-vector-conversions" )

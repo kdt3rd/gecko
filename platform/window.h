@@ -12,25 +12,55 @@ namespace platform
 
 ////////////////////////////////////////
 
+/// @brief A rectangular area of the screen
 class window
 {
 public:
+	/// @brief Constructor
 	window( void );
+
+	/// @brief Destructor
 	virtual ~window( void );
 
+	/// @brief Raise the window
+	/// Raise the window above all other windows.
 	virtual void raise( void ) = 0;
+
 //	virtual void lower( void ) = 0;
 
+	/// @brief Show the window
+	/// Make the window visible.
 	virtual void show( void ) = 0;
+
+	/// @brief Hide the window
+	/// Make the window invisible.
 	virtual void hide( void ) = 0;
+
+	/// @brief Query if the window is visible
+	/// @return Whether the window is visible or not
 	virtual bool is_visible( void ) = 0;
 
 //	virtual rect geometry( void ) = 0;
+
 //	virtual void set_geometry( const rect &r ) = 0;
+
+	/// @brief Resize the window
+	/// Resize the window to the given size.
+	/// @param w New width of the window
+	/// @param h New height of the window
 	virtual void resize( double w, double h ) = 0;
+
+	/// @brief Set minimum window size
+	/// The window will not be allowed to resize smaller than the minimum given.
+	/// @param w Minimum width for the window
+	/// @param h Minimum height for the window
 	virtual void set_minimum_size( double w, double h ) = 0;
 
+	/// @brief Set the window title
+	/// Set the window title shown in the title bar.
+	/// @param t The window title
 	virtual void set_title( const std::string &t ) = 0;
+
 //	virtual void set_icon( const icon &i );
 
 	virtual std::shared_ptr<painter> paint( void ) = 0;

@@ -39,3 +39,8 @@ rule moc
 rule rcc
   command = $rcc -name $name -o $out $in
   description = RCC $in
+
+rule doxygen
+  command = env DOX_OUTPUT_DIR=$out DOX_SOURCE_DIR=$srcdir $doxygen $in
+  description = Doxygen $out
+

@@ -556,6 +556,13 @@ function Glob( dir, pattern )
 	return list
 end
 
+function Doxygen( name, config, src, out )
+	assert( ninja, "Invalid build dir" )
+	ninja:write( "build " .. name .. ": phony " .. BuildFile( out ) .. "\n" )
+	ninja:write( "build " .. BuildFile( out ) .. ": doxygen " .. SourceFile( config ) .. " | always\n" )
+	ninja:write( "  srcdir = " .. SourceFile( src ) .. "\n" )
+end
+
 ----------------------------------------
 -- Compile a source file
 ----------------------------------------
@@ -574,7 +581,7 @@ function Compile( ... )
 		if file:match( "[.]cpp$" ) then
 			table.insert( cpps, file )
 		elseif file:match( "[.]c$" ) then
-			table.insert( cs, file )
+			jtable.insert( cs, file )
 		elseif file:match( "[.]cu$" ) then
 			table.insert( cus, file )
 		elseif file:match( "[.]h$" ) then
@@ -649,6 +656,11 @@ end
 -- Link an executable
 ----------------------------------------
 function Executable( name, ... )
+	OptExecutable( name, ... )
+	ninja:write( "default " .. name .. "\n" )
+end
+
+function OptExecutable( name, ... )
 	assert( ninja, "Invalid build dir" )
 	local file = BinFile( name )
 	local objs = array_concat( ... )
