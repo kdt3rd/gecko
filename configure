@@ -790,6 +790,7 @@ function BaseLibrary( name, link_cmd, file, ... )
 		end
 	end
 	ninja:write( "\n" )
+	ninja:write( "default " .. name .. "\n" )
 	return file
 end
 
