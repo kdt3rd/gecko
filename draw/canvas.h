@@ -35,6 +35,10 @@ public:
 	/// @param c Paint to apply to path
 	virtual void draw_path( const std::shared_ptr<path> &p, const paint &c ) = 0;
 
+	/// @brief Present the canvas
+	/// Finalize the drawing of the canvas and display it.
+	virtual void present( void );
+
 };
 
 ////////////////////////////////////////

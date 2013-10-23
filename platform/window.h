@@ -4,8 +4,7 @@
 #include <string>
 #include <memory>
 #include <functional>
-
-#include "painter.h"
+#include <draw/canvas.h>
 
 namespace platform
 {
@@ -63,7 +62,7 @@ public:
 
 //	virtual void set_icon( const icon &i );
 
-	virtual std::shared_ptr<painter> paint( void ) = 0;
+	virtual std::shared_ptr<draw::canvas> canvas( void ) = 0;
 
 	void when_closed( std::function<void(void)> f ) { _closed = f; }
 	void when_shown( std::function<void(void)> f ) { _shown = f; }
@@ -85,7 +84,7 @@ public:
 	void restored( void ) { if ( _restored ) _restored(); }
 	void exposed( void ) { if ( _exposed ) _exposed(); }
 	void moved( double x, double y ) { if ( _moved ) _moved( x, y ); }
-	void resized( double w, double h ) { if ( _resized ) _resized( w, h ); }
+	virtual void resized( double w, double h ) { if ( _resized ) _resized( w, h ); }
 	void entered( void ) { if ( _entered ) _entered(); }
 	void exited( void ) { if ( _exited ) _exited(); }
 

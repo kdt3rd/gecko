@@ -10,7 +10,6 @@ srcs = {
 	"keyboard.cpp";
 	"mouse.cpp";
 	"dispatcher.cpp";
-	"painter.cpp";
 }
 
 Library( "platform", Compile( srcs ) )

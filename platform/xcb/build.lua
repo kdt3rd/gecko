@@ -1,5 +1,5 @@
 
-Include( XCB_INCLUDE )
+Include( XCB_INCLUDE, CAIRO_INCLUDE )
 
 srcs = {
 	"system.cpp";
@@ -9,8 +9,7 @@ srcs = {
 	"keyboard.cpp";
 	"mouse.cpp";
 	"dispatcher.cpp";
-	"painter.cpp";
 }
 
-Library( "platform-xcb", Compile( srcs ), LinkSys( XCB_LIBS ) )
+Library( "platform-xcb", Compile( srcs ), LinkSys( XCB_LIBS, CAIRO_LIBS ) )
 

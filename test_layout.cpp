@@ -114,6 +114,7 @@ int safemain( int argc, char **argv )
 	auto redraw_window = [&] ( void )
 	{
 		std::cout << "redraw" << std::endl;
+		/*
 		auto painter = win->paint();
 
 		painter->set_color( draw::color( 0.5, 0.5, 0.5 )  );
@@ -125,6 +126,7 @@ int safemain( int argc, char **argv )
 		painter->set_color( draw::color( 1, 0, 1 ) );
 		painter->draw_rects( rs );
 		painter->present();
+		*/
 	};
 
 	auto recompute_layout = [&] ( double w, double h )

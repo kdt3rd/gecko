@@ -18,27 +18,20 @@ int safemain( int argc, char **argv )
 
 	auto win = sys->new_window();
 
-	std::shared_ptr<platform::points> ps;
+//	std::shared_ptr<platform::points> ps;
 	auto draw_stuff = [&]
 	{
-		auto painter = win->paint();
-		if ( !ps )
-			ps = painter->make_star( 200.0, 200.0, 150.0, 9, 4 );
-
-		painter->set_color( draw::color( 0.0, 0.0, 0.0 ) );
-		painter->clear();
-
-		painter->set_color( draw::color( 1.0, 0.0, 1.0 ) );
-		painter->fill_polygon( ps );
-		painter->present();
+		std::cout << "Drawing" << std::endl;
+		auto canvas = win->canvas();
+		canvas->fill( draw::color( 1.0, 0.0, 1.0 ) );
+		canvas->present();
 	};
-	win->when_exposed( draw_stuff );
 
 	win->resize( 400, 400 );
 	win->set_title( "Hello World" );
 	win->show();
 
-	draw_stuff();
+	win->when_exposed( draw_stuff );
 
 	auto keypress = [&]( platform::scancode sc )
 	{

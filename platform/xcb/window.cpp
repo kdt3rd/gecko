@@ -1,8 +1,12 @@
 
 #include "window.h"
-#include "painter.h"
+#include <draw/cairo/canvas.h>
+
 #include <core/contract.h>
 #include <stdexcept>
+
+#include <cairo/cairo.h>
+#include <cairo/cairo-xcb.h>
 #include <xcb/xcb.h>
 
 namespace xcb
@@ -15,6 +19,7 @@ window::window( xcb_connection_t *c, xcb_screen_t *screen )
 {
 	precondition( _connection, "null connection" );
 	precondition( _screen, "null screen" );
+
 	_win = xcb_generate_id( _connection );
 
 	uint32_t mask = XCB_CW_EVENT_MASK;
@@ -37,6 +42,24 @@ window::window( xcb_connection_t *c, xcb_screen_t *screen )
 
 	const uint32_t values[] = { screen->black_pixel };
 	xcb_change_window_attributes( _connection, _win, XCB_CW_BACK_PIXEL, values );
+
+	auto depth_iter = xcb_screen_allowed_depths_iterator( screen );
+	while ( depth_iter.rem )
+	{
+		auto visual_iter = xcb_depth_visuals_iterator( depth_iter.data );
+		while ( visual_iter.rem )
+		{
+			if ( screen->root_visual == visual_iter.data->visual_id )
+			{
+				_visual = visual_iter.data;
+				break;
+			}
+			xcb_visualtype_next( &visual_iter );
+		}
+		xcb_depth_next( &depth_iter );
+	}
+
+	postcondition( _visual, "visual not found" );
 }
 
 ////////////////////////////////////////
@@ -103,6 +126,16 @@ void window::resize( double w, double h )
 
 ////////////////////////////////////////
 
+void window::resized( double w, double h )
+{
+	if ( _canvas )
+		_canvas->set_size( uint32_t(w+0.5), uint32_t(h+0.5) );
+
+	platform::window::resized( w, h );
+}
+
+////////////////////////////////////////
+
 void window::set_minimum_size( double w, double h )
 {
 }
@@ -116,9 +149,14 @@ void window::set_title( const std::string &t )
 
 ////////////////////////////////////////
 
-std::shared_ptr<platform::painter> window::paint( void )
+std::shared_ptr<draw::canvas> window::canvas( void )
 {
-	return std::make_shared<painter>( _connection, _screen, _win );
+	if ( !_canvas )
+	{
+		cairo_surface_t *surf = cairo_xcb_surface_create( _connection, _win, _visual, _last_w, _last_h );
+		_canvas = std::make_shared<cairo::canvas>( surf );
+	}
+	return _canvas;
 }
 
 ////////////////////////////////////////
