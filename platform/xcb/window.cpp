@@ -1,6 +1,9 @@
 
 #include "window.h"
 #include <draw/cairo/canvas.h>
+#include <core/pointer.h>
+
+#include <iostream>
 
 #include <core/contract.h>
 #include <stdexcept>
@@ -128,9 +131,7 @@ void window::resize( double w, double h )
 
 void window::resized( double w, double h )
 {
-	if ( _canvas )
-		_canvas->set_size( uint32_t(w+0.5), uint32_t(h+0.5) );
-
+	update_canvas( w, h );
 	platform::window::resized( w, h );
 }
 
@@ -153,8 +154,11 @@ std::shared_ptr<draw::canvas> window::canvas( void )
 {
 	if ( !_canvas )
 	{
-		cairo_surface_t *surf = cairo_xcb_surface_create( _connection, _win, _visual, _last_w, _last_h );
-		_canvas = std::make_shared<cairo::canvas>( surf );
+		_canvas = std::make_shared<cairo::canvas>();
+
+		auto cookie = xcb_get_geometry( _connection, _win );
+		auto geom = core::wrap_cptr( xcb_get_geometry_reply( _connection, cookie, nullptr ) );
+		update_canvas( geom->width, geom->height );
 	}
 	return _canvas;
 }
@@ -164,6 +168,27 @@ std::shared_ptr<draw::canvas> window::canvas( void )
 xcb_window_t window::id( void ) const
 {
 	return _win;
+}
+
+////////////////////////////////////////
+
+void window::update_canvas( double ww, double hh )
+{
+	if ( !_canvas )
+		return;
+
+	uint32_t w = uint32_t(ww+0.5);
+	uint32_t h = uint32_t(hh+0.5);
+
+	if ( w > 0 && h > 0 )
+	{
+		if ( _canvas->has_surface() )
+			_canvas->set_size( w, h );
+		else
+			_canvas->set_surface( cairo_xcb_surface_create( _connection, _win, _visual, w, h ) );
+	}
+	else
+		_canvas->clear_surface();
 }
 
 ////////////////////////////////////////

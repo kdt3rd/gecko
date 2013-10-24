@@ -41,6 +41,8 @@ public:
 	virtual void resized( double w, double h );
 
 private:
+	void update_canvas( double w, double h );
+
 	xcb_connection_t *_connection = nullptr;
 	xcb_screen_t *_screen = nullptr;
 	xcb_visualtype_t *_visual = nullptr;
