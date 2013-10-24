@@ -80,6 +80,15 @@ void path::rounded_rect( const point &p1, const point &p2, double r )
 	const double y = std::min( p1.y(), p2.y() );
 	const double w = std::abs( p2.x() - p1.x() );
 	const double h = std::abs( p2.y() - p1.y() );
+	rounded_rect( { x, y }, w, h, r );
+}
+
+////////////////////////////////////////
+
+void path::rounded_rect( const point &p1, double w, double h, double r )
+{
+	const double x = p1.x();
+	const double y = p1.y();
 
 	const double degrees = M_PI / 180.0;
 

@@ -45,6 +45,7 @@ public:
 	void close( void );
 
 	void rounded_rect( const point &p1, const point &p2, double r );
+	void rounded_rect( const point &p1, double w, double h, double r );
 
 	const point &get_point( std::size_t i ) const { return _points.at( i ); }
 	const std::vector<point> &get_points( void ) const { return _points; }
