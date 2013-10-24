@@ -18,12 +18,16 @@ int safemain( int argc, char **argv )
 
 	auto win = sys->new_window();
 
+	draw::path round_rect;
+	round_rect.rounded_rect( { 10.5, 10.5 }, { 350.5, 100.5 }, 10 );
+
 //	std::shared_ptr<platform::points> ps;
 	auto draw_stuff = [&]
 	{
 		std::cout << "Drawing" << std::endl;
 		auto canvas = win->canvas();
-		canvas->fill( draw::color( 1.0, 0.0, 1.0 ) );
+		canvas->fill( draw::color( 0, 0, 0 ) );
+		canvas->draw_path( round_rect, draw::color( 1, 1, 1 ) );
 		canvas->present();
 	};
 
