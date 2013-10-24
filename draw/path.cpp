@@ -74,5 +74,23 @@ void path::close( void )
 
 ////////////////////////////////////////
 
+void path::rounded_rect( const point &p1, const point &p2, double r )
+{
+	const double x = std::min( p1.x(), p2.x() );
+	const double y = std::min( p1.y(), p2.y() );
+	const double w = std::abs( p2.x() - p1.x() );
+	const double h = std::abs( p2.y() - p1.y() );
+
+	const double degrees = M_PI / 180.0;
+
+	arc_to( { x + w - r, y + r }, r, -90.0 * degrees, 0.0 * degrees );
+	arc_to( { x + w - r, y + h - r }, r, 0.0 * degrees, 90.0 * degrees );
+	arc_to( { x + r, y + h - r }, r, 90.0 * degrees, 180.0 * degrees );
+	arc_to( { x + r, y + r }, r, 180.0 * degrees, 270.0 * degrees );
+	close();
+}
+
+////////////////////////////////////////
+
 }
 
