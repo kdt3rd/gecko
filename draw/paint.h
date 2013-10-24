@@ -27,7 +27,7 @@ public:
 private:
 	color _color;
 	bool _anti_aliasing = true;
-	double _stroke_width = 0.0;
+	double _stroke_width = 1.0;
 };
 
 ////////////////////////////////////////
