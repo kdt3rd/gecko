@@ -12,8 +12,13 @@ namespace cairo
 class canvas : public draw::canvas
 {
 public:
-	canvas( cairo_surface_t *surf );
+	canvas( void );
 	virtual ~canvas( void );
+
+	bool has_surface( void ) const { return bool(_surface); }
+	void set_surface( cairo_surface_t *surf );
+	void clear_surface( void );
+	void set_size( int w, int h );
 
 	virtual void fill( const draw::paint &c );
 
@@ -21,13 +26,14 @@ public:
 
 	virtual void present( void );
 
-	void set_size( int w, int h );
 
 private:
 	void set_cairo_source( const draw::paint &p );
 
-	cairo_surface_t *_surface;
-	cairo_t *_context;
+	void check_error( void );
+
+	cairo_surface_t *_surface = nullptr;
+	cairo_t *_context = nullptr;
 };
 
 ////////////////////////////////////////
