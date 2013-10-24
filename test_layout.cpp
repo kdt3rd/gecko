@@ -114,19 +114,16 @@ int safemain( int argc, char **argv )
 	auto redraw_window = [&] ( void )
 	{
 		std::cout << "redraw" << std::endl;
-		/*
-		auto painter = win->paint();
+		auto canvas = win->canvas();
+		canvas->fill( draw::color( 0.5, 0.5, 0.5 ) );
 
-		painter->set_color( draw::color( 0.5, 0.5, 0.5 )  );
-		painter->clear();
-
-		auto rs = painter->new_rectangles();
 		for ( auto a: *c )
-			rs->add_rectangle( a->x1(), a->y1(), a->width()-1, a->height()-1 );
-		painter->set_color( draw::color( 1, 0, 1 ) );
-		painter->draw_rects( rs );
-		painter->present();
-		*/
+		{
+			draw::path p;
+			p.rounded_rect( { a->x1(), a->y1() }, a->width(), a->height(), 5 );
+			canvas->draw_path( p, draw::color( 1, 1, 1 ) );
+		}
+		canvas->present();
 	};
 
 	auto recompute_layout = [&] ( double w, double h )
@@ -143,7 +140,6 @@ int safemain( int argc, char **argv )
 		b->set_vertical( 0, h );
 
 		layout->recompute_layout();
-		redraw_window();
 	};
 
 	recompute_layout( 640, 480 );
