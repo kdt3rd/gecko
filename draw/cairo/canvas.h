@@ -26,9 +26,10 @@ public:
 
 	virtual void present( void );
 
-
 private:
-	void set_cairo_source( const draw::paint &p );
+	void set_cairo( const draw::paint &p );
+	void set_cairo_stroke( const draw::paint &p );
+	bool set_cairo_fill( const draw::paint &p );
 
 	void check_error( void );
 

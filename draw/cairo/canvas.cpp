@@ -64,7 +64,9 @@ void canvas::fill( const draw::paint &c )
 	if( !_context )
 		return;
 
-	set_cairo_source( c );
+	set_cairo( c );
+	if ( !set_cairo_fill( c ) )
+		set_cairo_stroke( c );
 	cairo_paint( _context );
 	check_error();
 }
@@ -76,7 +78,6 @@ void canvas::draw_path( const draw::path &path, const draw::paint &c )
 	if( !_context )
 		return;
 
-	set_cairo_source( c );
 	size_t p = 0;
 	for ( auto v: path.get_verbs() )
 	{
@@ -100,7 +101,7 @@ void canvas::draw_path( const draw::path &path, const draw::paint &c )
 			{
 				p += 2;
 				throw std::runtime_error( "not yet implemented" );
-				break;
+//				break;
 			}
 
 			case draw::path::verb::CUBIC:
@@ -129,7 +130,12 @@ void canvas::draw_path( const draw::path &path, const draw::paint &c )
 		}
 	}
 
+	set_cairo( c );
+	if ( set_cairo_fill( c ) )
+		cairo_fill_preserve( _context );
+	set_cairo_stroke( c );
 	cairo_stroke( _context );
+
 	check_error();
 }
 
@@ -146,11 +152,65 @@ void canvas::present( void )
 
 ////////////////////////////////////////
 
-void canvas::set_cairo_source( const draw::paint &p )
+void canvas::set_cairo( const draw::paint &p )
 {
-	const draw::color &c = p.get_color();
+	cairo_set_antialias( _context, p.has_antialias() ? CAIRO_ANTIALIAS_GOOD : CAIRO_ANTIALIAS_NONE );
+}
+
+////////////////////////////////////////
+
+void canvas::set_cairo_stroke( const draw::paint &p )
+{
+	const draw::color &c = p.get_stroke_color();
 	cairo_set_source_rgba( _context, c.red(), c.green(), c.blue(), c.alpha() );
 	cairo_set_line_width( _context, p.get_stroke_width() );
+}
+
+////////////////////////////////////////
+
+bool canvas::set_cairo_fill( const draw::paint &p )
+{
+	if ( p.has_fill_color() )
+	{
+		const draw::color &c = p.get_fill_color();
+		cairo_pattern_t *pat = cairo_pattern_create_rgba( c.red(), c.green(), c.blue(), c.alpha() );
+		cairo_set_source( _context, pat );
+		cairo_pattern_destroy( pat );
+		return true;
+	}
+	else if ( p.has_fill_linear() )
+	{
+		const draw::point &p1 = p.get_fill_linear_p1();
+		const draw::point &p2 = p.get_fill_linear_p2();
+		cairo_pattern_t *pat = cairo_pattern_create_linear( p1.x(), p1.y(), p2.x(), p2.y() );
+		for ( auto s: p.get_fill_linear_stops() )
+		{
+			const draw::color &c = s.second;
+			cairo_pattern_add_color_stop_rgba( pat, s.first, c.red(), c.green(), c.blue(), c.alpha() );
+		}
+		cairo_set_source( _context, pat );
+		cairo_pattern_destroy( pat );
+		return true;
+	}
+	else if ( p.has_fill_radial() )
+	{
+		const draw::point &p1 = p.get_fill_radial_p1();
+		const draw::point &p2 = p.get_fill_radial_p2();
+		double r1 = p.get_fill_radial_r1();
+		double r2 = p.get_fill_radial_r2();
+
+		cairo_pattern_t *pat = cairo_pattern_create_radial( p1.x(), p1.y(), r1, p2.x(), p2.y(), r2 );
+		for ( auto s: p.get_fill_radial_stops() )
+		{
+			const draw::color &c = s.second;
+			cairo_pattern_add_color_stop_rgba( pat, s.first, c.red(), c.green(), c.blue(), c.alpha() );
+		}
+		cairo_set_source( _context, pat );
+		cairo_pattern_destroy( pat );
+		return true;
+	}
+
+	return false;
 }
 
 ////////////////////////////////////////

@@ -111,24 +111,35 @@ int safemain( int argc, char **argv )
 
 	auto layout = tests[argv[1]]( c );
 
+	draw::gradient grad;
+	grad.add_stop( 0.0, draw::color( 0.6, 0.6, 0.6 ) );
+	grad.add_stop( 1.0, draw::color( 0.3, 0.3, 0.3 ) );
+
 	auto redraw_window = [&] ( void )
 	{
-		std::cout << "redraw" << std::endl;
 		auto canvas = win->canvas();
 		canvas->fill( draw::color( 0.5, 0.5, 0.5 ) );
 
+		bool skip = true;
 		for ( auto a: *c )
 		{
-			draw::path p;
-			p.rounded_rect( { a->x1(), a->y1() }, a->width(), a->height(), 5 );
-			canvas->draw_path( p, draw::color( 1, 1, 1 ) );
+			if ( ( a->width() * a->height() > 0 ) && !skip )
+			{
+				draw::path p;
+				p.rounded_rect( { a->x1() + 0.5, a->y1() + 0.5 }, a->width(), a->height(), 10 );
+				draw::paint paint( draw::color( 1, 1, 1 ) );
+				paint.set_fill_linear( { a->x1(), a->y1() }, 0, a->height(), grad );
+//				paint.set_fill_radial( { a->x1() + a->width()/2.0, a->y1() + a->height()/2.0 }, std::max( a->width(), a->height() ) / 2.0, grad );
+				canvas->draw_path( p, paint );
+			}
+			else
+				skip = false;
 		}
 		canvas->present();
 	};
 
 	auto recompute_layout = [&] ( double w, double h )
 	{
-		std::cout << "resize " << w << ' ' <<  h << std::endl;
 		layout->recompute_minimum();
 		std::shared_ptr<area> b = c->bounds();
 
@@ -154,12 +165,11 @@ int safemain( int argc, char **argv )
 	std::shared_ptr<platform::timer> t = sys->new_timer();
 	t->when_elapsed( [&]
 	{
-		std::cout << "Timeout!" << std::endl;
 		t->schedule( 10.0 );
 	} );
 
-	win->when_entered( [&] { std::cout << "Entered!" << std::endl; } );
-	win->when_exited( [&] { std::cout << "Exited!" << std::endl; } );
+//	win->when_entered( [&] { std::cout << "Entered!" << std::endl; } );
+//	win->when_exited( [&] { std::cout << "Exited!" << std::endl; } );
 
 	t->schedule( 1.0 );
 

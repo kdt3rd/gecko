@@ -13,7 +13,7 @@ paint::paint( void )
 ////////////////////////////////////////
 
 paint::paint( const color &c )
-	: _color( c )
+	: _stroke_color( c )
 {
 }
 
