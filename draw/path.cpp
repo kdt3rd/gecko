@@ -21,7 +21,7 @@ path::~path( void )
 void path::move_to( const point &p )
 {
 	_points.push_back( p );
-	_verbs.push_back( verb::MOVE );
+	_actions.push_back( action::MOVE );
 }
 
 ////////////////////////////////////////
@@ -29,7 +29,7 @@ void path::move_to( const point &p )
 void path::line_to( const point &p )
 {
 	_points.push_back( p );
-	_verbs.push_back( verb::LINE );
+	_actions.push_back( action::LINE );
 }
 
 ////////////////////////////////////////
@@ -38,7 +38,7 @@ void path::quadratic_to( const point &p1, const point &p2 )
 {
 	_points.push_back( p1 );
 	_points.push_back( p2 );
-	_verbs.push_back( verb::QUADRATIC );
+	_actions.push_back( action::QUADRATIC );
 }
 
 ////////////////////////////////////////
@@ -48,7 +48,7 @@ void path::cubic_to( const point &p1, const point &p2, const point &p3 )
 	_points.push_back( p1 );
 	_points.push_back( p2 );
 	_points.push_back( p3 );
-	_verbs.push_back( verb::CUBIC );
+	_actions.push_back( action::CUBIC );
 }
 
 ////////////////////////////////////////
@@ -58,7 +58,7 @@ void path::arc_to( const point &center, const point &radius, double angle1, doub
 	_points.push_back( center );
 	_points.push_back( radius );
 	_points.emplace_back( angle1, angle2 );
-	_verbs.push_back( verb::ARC );
+	_actions.push_back( action::ARC );
 }
 
 ////////////////////////////////////////
@@ -67,7 +67,7 @@ void path::close( void )
 {
 	if ( _start < _points.size() )
 	{
-		_verbs.push_back( verb::CLOSE );
+		_actions.push_back( action::CLOSE );
 		_start = _points.size();
 	}
 }

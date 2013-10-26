@@ -79,32 +79,32 @@ void canvas::draw_path( const draw::path &path, const draw::paint &c )
 		return;
 
 	size_t p = 0;
-	for ( auto v: path.get_verbs() )
+	for ( auto v: path.get_actions() )
 	{
 		switch ( v )
 		{
-			case draw::path::verb::MOVE:
+			case draw::path::action::MOVE:
 			{
 				auto &p1 = path.get_point( p++ );
 				cairo_move_to( _context, p1.x(), p1.y() );
 				break;
 			}
 
-			case draw::path::verb::LINE:
+			case draw::path::action::LINE:
 			{
 				auto &p1 = path.get_point( p++ );
 				cairo_line_to( _context, p1.x(), p1.y() );
 				break;
 			}
 
-			case draw::path::verb::QUADRATIC:
+			case draw::path::action::QUADRATIC:
 			{
 				p += 2;
 				throw std::runtime_error( "not yet implemented" );
 //				break;
 			}
 
-			case draw::path::verb::CUBIC:
+			case draw::path::action::CUBIC:
 			{
 				auto &p1 = path.get_point( p++ );
 				auto &p2 = path.get_point( p++ );
@@ -113,7 +113,7 @@ void canvas::draw_path( const draw::path &path, const draw::paint &c )
 				break;
 			}
 
-			case draw::path::verb::ARC:
+			case draw::path::action::ARC:
 			{
 				auto &c = path.get_point( p++ );
 				auto &r = path.get_point( p++ );
@@ -122,13 +122,14 @@ void canvas::draw_path( const draw::path &path, const draw::paint &c )
 				break;
 			}
 
-			case draw::path::verb::CLOSE:
+			case draw::path::action::CLOSE:
 			{
 				cairo_close_path( _context );
 				break;
 			}
 		}
 	}
+	postcondition ( p == path.get_points().size(), "too many points?" );
 
 	set_cairo( c );
 	if ( set_cairo_fill( c ) )

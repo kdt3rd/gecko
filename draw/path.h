@@ -9,10 +9,12 @@ namespace draw
 
 ////////////////////////////////////////
 
+/// @brief Path used to draw
 class path
 {
 public:
-	enum class verb
+	/// @brief Actions the path can take
+	enum class action
 	{
 		MOVE,
 		LINE,
@@ -22,9 +24,14 @@ public:
 		CLOSE
 	};
 
+	/// @brief Constructor
 	path( void );
+	/// @brief Destructor
 	~path( void );
 
+	/// @brief Move the cursor
+	/// Move the cursor to the given position
+	/// @param p
 	void move_to( const point &p );
 	void line_to( const point &p );
 	void quadratic_to( const point &p1, const point &p2 );
@@ -51,14 +58,14 @@ public:
 
 	const point &get_point( std::size_t i ) const { return _points.at( i ); }
 	const std::vector<point> &get_points( void ) const { return _points; }
-	const std::vector<verb> &get_verbs( void ) const { return _verbs; }
+	const std::vector<action> &get_actions( void ) const { return _actions; }
 
 private:
 	point next_point( const point &d );
 
 	std::size_t _start = 0;
 	std::vector<point> _points;
-	std::vector<verb> _verbs;
+	std::vector<action> _actions;
 };
 
 ////////////////////////////////////////
