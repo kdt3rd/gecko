@@ -74,29 +74,44 @@ void path::close( void )
 
 ////////////////////////////////////////
 
+void path::rectangle( const point &p1, const point &p2 )
+{
+	const double x1 = std::min( p1.x(), p2.x() );
+	const double y1 = std::min( p1.y(), p2.y() );
+	const double x2 = std::max( p1.x(), p2.x() );
+	const double y2 = std::max( p1.y(), p2.y() );
+
+	move_to( { x1, y1 } );
+	line_to( { x2, y1 } );
+	line_to( { x2, y2 } );
+	line_to( { x1, y2 } );
+	close();
+}
+
+////////////////////////////////////////
+
 void path::rounded_rect( const point &p1, const point &p2, double r )
 {
-	const double x = std::min( p1.x(), p2.x() );
-	const double y = std::min( p1.y(), p2.y() );
-	const double w = std::abs( p2.x() - p1.x() );
-	const double h = std::abs( p2.y() - p1.y() );
-	rounded_rect( { x, y }, w, h, r );
+	const double x1 = std::min( p1.x(), p2.x() );
+	const double y1 = std::min( p1.y(), p2.y() );
+	const double x2 = std::max( p1.x(), p2.x() );
+	const double y2 = std::max( p1.y(), p2.y() );
+
+	const double degrees = M_PI / 180.0;
+
+	move_to( { x1 + r, y1 } );
+	arc_to( { x2 - r, y1 + r }, r, -90.0 * degrees, 0.0 * degrees );
+	arc_to( { x2 - r, y2 - r }, r, 0.0 * degrees, 90.0 * degrees );
+	arc_to( { x1 + r, y2 - r }, r, 90.0 * degrees, 180.0 * degrees );
+	arc_to( { x1 + r, y1 + r }, r, 180.0 * degrees, 270.0 * degrees );
+	close();
 }
 
 ////////////////////////////////////////
 
 void path::rounded_rect( const point &p1, double w, double h, double r )
 {
-	const double x = p1.x();
-	const double y = p1.y();
-
-	const double degrees = M_PI / 180.0;
-
-	arc_to( { x + w - r, y + r }, r, -90.0 * degrees, 0.0 * degrees );
-	arc_to( { x + w - r, y + h - r }, r, 0.0 * degrees, 90.0 * degrees );
-	arc_to( { x + r, y + h - r }, r, 90.0 * degrees, 180.0 * degrees );
-	arc_to( { x + r, y + r }, r, 180.0 * degrees, 270.0 * degrees );
-	close();
+	rounded_rect( p1, { p1.x() + w - 1.0, p1.y() + h - 1.0 }, r );
 }
 
 ////////////////////////////////////////
