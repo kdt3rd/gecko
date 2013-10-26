@@ -12,6 +12,17 @@ int safemain( int argc, char **argv )
 	auto sys = std::make_shared<xcb::system>();
 	std::cout << sys->name() << " - " << sys->description() << std::endl;
 
+	auto fontmgr = sys->get_font_manager();
+	std::cout << fontmgr->name() << " - " << fontmgr->version() << std::endl;
+
+	std::cout << "Font families:\n";
+	for ( auto &f: fontmgr->get_families() )
+		std::cout << "  " << f << '\n';
+
+	std::cout << "Font styles:\n";
+	for ( auto &f: fontmgr->get_styles() )
+		std::cout << "  " << f << '\n';
+
 	auto screens = sys->screens();
 	for ( auto s: screens )
 		std::cout << ' ' << s->bounds().width() << 'x' << s->bounds().height() << std::endl;
@@ -53,17 +64,18 @@ int safemain( int argc, char **argv )
 
 	win->when_exposed( draw_stuff );
 
+	auto dispatcher = sys->get_dispatcher();
+
 	auto keypress = [&]( platform::scancode sc )
 	{
 		std::cout << "Key pressed " << static_cast<uint32_t>(sc) << std::endl;
+		dispatcher->exit( 0 );
 	};
 
 	auto kbd = sys->get_keyboard();
 	kbd->when_pressed( keypress );
 
-	auto dispatcher = sys->get_dispatcher();
-	dispatcher->execute();
-	return 0;
+	return dispatcher->execute();
 }
 
 }

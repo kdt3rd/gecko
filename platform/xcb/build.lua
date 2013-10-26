@@ -8,6 +8,7 @@ srcs = {
 	"timer.cpp";
 	"keyboard.cpp";
 	"mouse.cpp";
+	"font_manager.cpp";
 	"dispatcher.cpp";
 }
 
