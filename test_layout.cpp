@@ -9,6 +9,10 @@
 #include <layout/box_layout.h>
 #include <layout/grid_layout.h>
 #include <layout/tree_layout.h>
+#include <draw/cairo/font.h>
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 namespace {
 
@@ -111,6 +115,12 @@ int safemain( int argc, char **argv )
 
 	auto layout = tests[argv[1]]( c );
 
+	FT_Library ftlib;
+	if ( FT_Init_FreeType( &ftlib ) != 0 )
+		throw std::runtime_error( "Freetype initialization failed" );
+
+	auto font = std::make_shared<cairo::font>( ftlib, "/usr/share/fonts/TTF/Ubuntu-R.ttf", 0 );
+
 	draw::gradient grad;
 	grad.add_stop( 0.0, draw::color( 0.6, 0.6, 0.6 ) );
 	grad.add_stop( 1.0, draw::color( 0.3, 0.3, 0.3 ) );
@@ -126,15 +136,17 @@ int safemain( int argc, char **argv )
 			if ( ( a->width() * a->height() > 0 ) && !skip )
 			{
 				draw::path p;
-				p.rounded_rect( { a->x1() + 0.5, a->y1() + 0.5 }, a->width(), a->height(), 10 );
+				p.rounded_rect( { a->x1() + 0.5, a->y1() + 0.5 }, a->width(), a->height(), 5 );
 				draw::paint paint( draw::color( 1, 1, 1 ) );
 				paint.set_fill_linear( { a->x1(), a->y1() }, 0, a->height(), grad );
-//				paint.set_fill_radial( { a->x1() + a->width()/2.0, a->y1() + a->height()/2.0 }, std::max( a->width(), a->height() ) / 2.0, grad );
 				canvas->draw_path( p, paint );
 			}
 			else
 				skip = false;
 		}
+		draw::paint paint2( draw::color( 1, 1, 1 ) );
+		paint2.set_fill_color( { 0, 0, 0 } );
+		canvas->draw_text( font, { 50, 150 }, "Hello World!", paint2 );
 		canvas->present();
 	};
 
