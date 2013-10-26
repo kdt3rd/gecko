@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <sstream>
 
+#include <draw/cairo/font.h>
+
 namespace xcb
 {
 
@@ -23,6 +25,9 @@ font_manager::font_manager( void )
 
 	_config = FcConfigGetCurrent();
 	FcConfigSetRescanInterval( _config, 0 );
+
+	if ( FT_Init_FreeType( &_ft_lib ) != 0 )
+		throw std::runtime_error( "freetype initialization failed" );
 }
 
 ////////////////////////////////////////
@@ -106,6 +111,36 @@ std::set<std::string> font_manager::get_styles( void )
 	}
 	FcObjectSetDestroy( os );
 	FcPatternDestroy( pat );
+
+	return ret;
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<draw::font> font_manager::get_font( const std::string &family, const std::string &style, double pixsize )
+{
+	FcPattern *pat = FcPatternBuild( nullptr,
+		FC_FAMILY, FcTypeString, family.c_str(),
+		FC_STYLE, FcTypeString, style.c_str(),
+		FC_PIXEL_SIZE, FcTypeDouble, pixsize,
+		nullptr );
+
+	FcResult result;
+	FcPattern *matched = FcFontMatch( _config, pat, &result );
+
+	std::shared_ptr<cairo::font> ret;
+	if ( matched && result == FcResultMatch )
+	{
+		FcChar8 *filename = nullptr;
+		int fontid = 0;
+		if ( FcPatternGetString( matched, FC_FILE, 0, &filename ) == FcResultMatch &&
+			 FcPatternGetInteger( matched, FC_INDEX, 0, &fontid ) == FcResultMatch )
+		{
+			ret = std::make_shared<cairo::font>( _ft_lib, reinterpret_cast<const char*>( filename ), fontid, pixsize );
+		}
+	}
+	FcPatternDestroy( pat );
+	FcPatternDestroy( matched );
 
 	return ret;
 }

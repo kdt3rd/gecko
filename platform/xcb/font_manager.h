@@ -4,6 +4,9 @@
 #include <platform/font_manager.h>
 #include <fontconfig/fontconfig.h>
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 namespace xcb
 {
 
@@ -19,8 +22,11 @@ public:
 	virtual std::set<std::string> get_families( void );
 	virtual std::set<std::string> get_styles( void );
 
+	virtual std::shared_ptr<draw::font> get_font( const std::string &family, const std::string &style, double pixsize );
+
 private:
 	FcConfig *_config = nullptr;
+	FT_Library _ft_lib;
 };
 
 ////////////////////////////////////////

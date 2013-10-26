@@ -3,6 +3,8 @@
 
 #include <string>
 #include <set>
+#include <memory>
+#include <draw/font.h>
 
 namespace platform
 {
@@ -21,6 +23,8 @@ public:
 	virtual std::set<std::string> get_foundries( void ) = 0;
 	virtual std::set<std::string> get_families( void ) = 0;
 	virtual std::set<std::string> get_styles( void ) = 0;
+
+	virtual std::shared_ptr<draw::font> get_font( const std::string &family, const std::string &style, double pixsize ) = 0;
 
 protected:
 	void set_manager_name( std::string s ) { _name = std::move( s ); }

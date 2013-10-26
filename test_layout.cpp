@@ -115,11 +115,10 @@ int safemain( int argc, char **argv )
 
 	auto layout = tests[argv[1]]( c );
 
-	FT_Library ftlib;
-	if ( FT_Init_FreeType( &ftlib ) != 0 )
-		throw std::runtime_error( "Freetype initialization failed" );
-
-	auto font = std::make_shared<cairo::font>( ftlib, "/usr/share/fonts/TTF/Ubuntu-R.ttf", 0, 24 );
+	auto fontmgr = sys->get_font_manager();
+	auto font = fontmgr->get_font( "ubuntu", "bold", 48.0 );
+	if ( !font )
+		throw std::runtime_error( "font not found" );
 
 	draw::gradient grad;
 	grad.add_stop( 0.0, draw::color( 0.6, 0.6, 0.6 ) );
@@ -144,9 +143,9 @@ int safemain( int argc, char **argv )
 			else
 				skip = false;
 		}
-		draw::paint paint2( draw::color( 1, 1, 1 ) );
-		paint2.set_fill_color( { 0, 0, 0 } );
-		canvas->draw_text( font, { 50, 150 }, "Hello World!", paint2 );
+		draw::paint paint2( { 1, 1, 1, 0 } );
+		paint2.set_fill_color( { 1, 1, 1 } );
+		canvas->draw_text( font, { 50, 150 }, "Hell0 World!", paint2 );
 		canvas->present();
 	};
 
