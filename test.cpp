@@ -18,16 +18,32 @@ int safemain( int argc, char **argv )
 
 	auto win = sys->new_window();
 
+	draw::color bg( 0.188, 0.188, 0.188 );
+	draw::color fg = bg.change( 0.64 ).desaturate( -0.10 );
+	draw::color textbg = bg.change( 0.30 );
+	draw::color textfg = bg.change( -0.64 ).desaturate( -0.10 );
+
 	draw::path round_rect;
-	round_rect.rounded_rect( { 10.5, 10.5 }, { 350.5, 100.5 }, 10 );
+	round_rect.rounded_rect( { 10.5, 10.5 }, 150, 24, 6 );
+
+	draw::gradient grad;
+	{
+		draw::color c = bg.change( 0.10 );
+		grad.add_stop( 0.0, c );
+		grad.add_stop( 0.7, c.change( -0.13 ) );
+		grad.add_stop( 1.0, c.change( -0.13 ) );
+	}
 
 //	std::shared_ptr<platform::points> ps;
 	auto draw_stuff = [&]
 	{
 		std::cout << "Drawing" << std::endl;
 		auto canvas = win->canvas();
-		canvas->fill( draw::color( 0, 0, 0 ) );
-		canvas->draw_path( round_rect, draw::color( 1, 1, 1 ) );
+		canvas->fill( bg );
+
+		draw::paint paint( draw::color( 1, 1, 1 ) );
+		paint.set_fill_linear( { 10.5, 10.5 }, 0, 24, grad );
+		canvas->draw_path( round_rect, paint );
 		canvas->present();
 	};
 
