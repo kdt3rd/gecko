@@ -24,6 +24,8 @@ public:
 
 	virtual void draw_path( const draw::path &p, const draw::paint &c );
 
+	virtual void draw_text( const std::shared_ptr<draw::font> &font, const draw::point &p, const std::string &utf8, const draw::paint &c );
+
 	virtual void present( void );
 
 private:

@@ -4,6 +4,7 @@
 #include <memory>
 #include "paint.h"
 #include "path.h"
+#include "font.h"
 
 namespace draw
 {

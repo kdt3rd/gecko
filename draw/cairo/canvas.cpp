@@ -1,5 +1,6 @@
 
 #include "canvas.h"
+#include "font.h"
 #include <draw/path.h>
 #include <cairo-xcb.h>
 #include <core/contract.h>
@@ -75,6 +76,7 @@ void canvas::fill( const draw::paint &c )
 
 void canvas::draw_path( const draw::path &path, const draw::paint &c )
 {
+	cairo_save( _context );
 	if( !_context )
 		return;
 
@@ -138,6 +140,30 @@ void canvas::draw_path( const draw::path &path, const draw::paint &c )
 	cairo_stroke( _context );
 
 	check_error();
+	cairo_restore( _context );
+}
+
+////////////////////////////////////////
+
+void canvas::draw_text( const std::shared_ptr<draw::font> &bfont, const draw::point &p, const std::string &utf8, const draw::paint &c )
+{
+	cairo_save( _context );
+	auto *font = dynamic_cast<cairo::font*>( bfont.get() );
+	precondition( font, "draw_text with null font" );
+
+	cairo_set_font_face( _context, font->cairo_font() );
+	cairo_set_font_size( _context, 48.0 );
+	cairo_move_to( _context, p.x(), p.y() );
+	cairo_text_path( _context, utf8.c_str() );
+
+	set_cairo( c );
+	if ( set_cairo_fill( c ) )
+		cairo_fill_preserve( _context );
+	set_cairo_stroke( c );
+	cairo_stroke( _context );
+
+	check_error();
+	cairo_restore( _context );
 }
 
 ////////////////////////////////////////
