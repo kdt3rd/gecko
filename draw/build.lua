@@ -1,6 +1,4 @@
 
-SubDir( "cairo" )
-
 srcs = {
 	"color.cpp";
 	"canvas.cpp";
@@ -9,4 +7,6 @@ srcs = {
 	"font.cpp";
 }
 
-Library( "draw", Compile( srcs ) );
+Library( "draw", Compile( srcs ), LinkLibs( "core" ) );
+
+SubDir( "cairo" )

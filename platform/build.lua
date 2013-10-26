@@ -1,7 +1,4 @@
 
---SubDir( "sdl" )
-SubDir( "xcb" )
-
 srcs = {
 	"system.cpp";
 	"screen.cpp";
@@ -12,5 +9,8 @@ srcs = {
 	"dispatcher.cpp";
 }
 
-Library( "platform", Compile( srcs ) )
+Library( "platform", Compile( srcs ), LinkLibs( "draw" ) )
+
+--SubDir( "sdl" )
+SubDir( "xcb" )
 

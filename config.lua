@@ -73,4 +73,5 @@ SDL_FLAGS, SDL_INCLUDE, SDL_LIBS = Package( "sdl2" )
 XCB_FLAGS, XCB_INCLUDE, XCB_LIBS = Package( "xcb", "xcb-xinput", "xcb-keysyms" )
 CAIRO_FLAGS, CAIRO_INCLUDE, CAIRO_LIBS = Package( "cairo" )
 FREETYPE_FLAGS, FREETYPE_INCLUDE, FREETYPE_LIBS = Package( "freetype2" )
+FONTCONFIG_FLAGS, FONTCONFIG_INCLUDE, FONTCONFIG_LIBS = Package( "fontconfig" )
 

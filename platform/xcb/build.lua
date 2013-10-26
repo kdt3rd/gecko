@@ -1,5 +1,5 @@
 
-Include( XCB_INCLUDE, CAIRO_INCLUDE )
+Include( XCB_INCLUDE, CAIRO_INCLUDE, FONTCONFIG_INCLUDE )
 
 srcs = {
 	"system.cpp";
@@ -11,5 +11,5 @@ srcs = {
 	"dispatcher.cpp";
 }
 
-Library( "platform-xcb", Compile( srcs ), LinkSys( XCB_LIBS, CAIRO_LIBS ) )
+Library( "platform-xcb", Compile( srcs ), LinkLibs( "platform", "draw-cairo" ), LinkSys( XCB_LIBS, CAIRO_LIBS, FREETYPE_LIBS, FONTCONFIG_LIBS ) )
 
