@@ -119,7 +119,7 @@ int safemain( int argc, char **argv )
 	if ( FT_Init_FreeType( &ftlib ) != 0 )
 		throw std::runtime_error( "Freetype initialization failed" );
 
-	auto font = std::make_shared<cairo::font>( ftlib, "/usr/share/fonts/TTF/Ubuntu-R.ttf", 0 );
+	auto font = std::make_shared<cairo::font>( ftlib, "/usr/share/fonts/TTF/Ubuntu-R.ttf", 0, 24 );
 
 	draw::gradient grad;
 	grad.add_stop( 0.0, draw::color( 0.6, 0.6, 0.6 ) );

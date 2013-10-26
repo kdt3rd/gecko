@@ -8,7 +8,8 @@ namespace cairo
 
 ////////////////////////////////////////
 
-font::font( FT_Library &lib, const std::string &filename, int font_idx )
+font::font( FT_Library &lib, const std::string &filename, int font_idx, double size )
+	: _size( size )
 {
 	auto error = FT_New_Face( lib, filename.c_str(), font_idx, &_ft_face );
 	if ( error )

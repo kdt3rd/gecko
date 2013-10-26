@@ -152,7 +152,7 @@ void canvas::draw_text( const std::shared_ptr<draw::font> &bfont, const draw::po
 	precondition( font, "draw_text with null font" );
 
 	cairo_set_font_face( _context, font->cairo_font() );
-	cairo_set_font_size( _context, 48.0 );
+	cairo_set_font_size( _context, font->size() );
 	cairo_move_to( _context, p.x(), p.y() );
 	cairo_text_path( _context, utf8.c_str() );
 
