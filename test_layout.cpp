@@ -9,10 +9,6 @@
 #include <layout/box_layout.h>
 #include <layout/grid_layout.h>
 #include <layout/tree_layout.h>
-#include <draw/cairo/font.h>
-
-#include <ft2build.h>
-#include FT_FREETYPE_H
 
 namespace {
 
