@@ -15,6 +15,7 @@ public:
 	font_manager( void );
 	virtual ~font_manager( void );
 
+	virtual std::set<std::string> get_foundries( void );
 	virtual std::set<std::string> get_families( void );
 	virtual std::set<std::string> get_styles( void );
 

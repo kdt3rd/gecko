@@ -18,6 +18,7 @@ public:
 	const std::string &name( void ) const { return _name; }
 	const std::string &version( void ) const { return _version; }
 
+	virtual std::set<std::string> get_foundries( void ) = 0;
 	virtual std::set<std::string> get_families( void ) = 0;
 	virtual std::set<std::string> get_styles( void ) = 0;
 
