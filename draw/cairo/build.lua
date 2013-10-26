@@ -3,6 +3,7 @@ Include( CAIRO_INCLUDE )
 
 srcs = {
 	"canvas.cpp";
+	"font.cpp";
 }
 
 Library( "draw-cairo", Compile( srcs ) )
