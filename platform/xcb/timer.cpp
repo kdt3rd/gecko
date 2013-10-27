@@ -1,4 +1,5 @@
 
+#include <string>
 #include <core/contract.h>
 #include "timer.h"
 

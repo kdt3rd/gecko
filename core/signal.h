@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <vector>
 #include "slot.h"
 
 using namespace std;
@@ -81,7 +82,7 @@ private:
 		_slots.erase( remove_if( _slots.begin(), _slots.end(), test ), _slots.end() );
 	}
 
-	vector<pair<slot<function> *,connection_id>> _slots;
+	std::vector<std::pair<slot<function> *,connection_id>> _slots;
 };
 
 ////////////////////////////////////////

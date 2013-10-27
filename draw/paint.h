@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "color.h"
 #include "point.h"
 #include "gradient.h"
