@@ -8,6 +8,11 @@ rule cxx
   description = C++ ($in)
   depfile = $out.d
 
+rule objcxx
+  command = $cxx $cxxwarn $cflags $cxxflags $incdirs $extra_incs $defs -MMD -MF $out.d -c $in -o $out
+  description = Obj-C++ ($in)
+  depfile = $out.d
+
 rule link_exe
   command = $ld $rpath $ldflags $in $libs -o $out $silent_link
   description = Linking ($out)

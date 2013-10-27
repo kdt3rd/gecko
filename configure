@@ -575,11 +575,14 @@ function Compile( ... )
 	local cpps = {}
 	local cs = {}
 	local cus = {}
+	local mms = {}
 
 	-- sort the file types
 	for k, file in pairs( srcs ) do
 		if file:match( "[.]cpp$" ) then
 			table.insert( cpps, file )
+		elseif file:match( "[.]mm$" ) then
+			table.insert( mms, file )
 		elseif file:match( "[.]c$" ) then
 			jtable.insert( cs, file )
 		elseif file:match( "[.]cu$" ) then
@@ -605,6 +608,15 @@ function Compile( ... )
 	for k, file in pairs( cpps ) do
 		local obj = BuildFile( file:gsub( "[.]cpp$", ".o" ) )
 		ninja:write( "build " .. obj .. ": cxx " .. SourceFile( file ) .. hdrs .. "\n" )
+		if incs then
+			ninja:write( incs )
+		end
+		table.insert( ret, obj )
+	end
+
+	for k, file in pairs( mms ) do
+		local obj = BuildFile( file:gsub( "[.]mm$", ".o" ) )
+		ninja:write( "build " .. obj .. ": objcxx " .. SourceFile( file ) .. hdrs .. "\n" )
 		if incs then
 			ninja:write( incs )
 		end
