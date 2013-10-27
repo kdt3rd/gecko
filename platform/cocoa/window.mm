@@ -8,6 +8,8 @@
 #include <core/contract.h>
 #include <stdexcept>
 
+#include <Cocoa.h>
+
 #include <cairo/cairo.h>
 #include <cairo/cairo-xcb.h>
 #include <xcb/xcb.h>
@@ -17,8 +19,24 @@ namespace cocoa
 
 ////////////////////////////////////////
 
-window::window( void )
+struct window::objcwrapper
 {
+	NSWindow *win;
+};
+
+////////////////////////////////////////
+
+window::window( void )
+	: _impl( new objcwrapper )
+{
+	int style = NSTitledWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask;
+	NSWindow *win = [[[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 200, 200)
+		styleMask:style backing:NSBackingStoreBuffered defer:YES]
+			autorelease];
+	[win orderOut:nil];
+	[win cascadeTopLeftFromPoint:NSMakePoint(20,20)];
+
+	_impl->win = win;
 }
 
 ////////////////////////////////////////
@@ -47,12 +65,14 @@ void window::lower( void )
 
 void window::show( void )
 {
+	[_impl->win makeKeyAndOrderFront:nil];
 }
 
 ////////////////////////////////////////
 
 void window::hide( void )
 {
+	[_impl->win orderOut:nil];
 }
 
 ////////////////////////////////////////
@@ -95,6 +115,8 @@ void window::set_minimum_size( double w, double h )
 
 void window::set_title( const std::string &t )
 {
+	NSString *tstring = [[NSString alloc] initWithUTF8String:t.c_str()];
+	[_impl->win setTitle:tstring];
 }
 
 ////////////////////////////////////////

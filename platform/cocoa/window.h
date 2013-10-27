@@ -40,6 +40,9 @@ public:
 private:
 	void update_canvas( double w, double h );
 
+	struct objcwrapper;
+	objcwrapper *_impl;
+
 	std::shared_ptr<cairo::canvas> _canvas;
 	int16_t _last_x = 0, _last_y = 0;
 	uint16_t _last_w = 0, _last_h = 0;
