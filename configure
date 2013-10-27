@@ -954,10 +954,11 @@ function Package( ... )
 
 		return cflags, iflags, lflags
 	elseif System() == "Darwin" then
+		local cflags = {}
 		local iflags = {}
 		local lflags = {}
 		local found = {}
-		local dirlist = array_concat( posix.glob( "/Library/Frameworks/*.framework" ) )
+		local dirlist = array_concat( posix.glob( "/Library/Frameworks/*.framework" ), posix.glob( "/System/Library/Frameworks/*.framework" ) )
 		for j, lib in pairs( libs ) do
 			local found = false
 			for i, dir in pairs( dirlist ) do
@@ -969,9 +970,21 @@ function Package( ... )
 					break
 				end
 			end
-			assert( found, "Framework " .. lib .. " not found" )
+			if not found then
+				local cflag, err = command( "pkg-config --cflags-only-other " .. lib )
+				assert( err == 0, cflags )
+				table.insert( cflags, cflag )
+
+				local iflag, err = command( "pkg-config --cflags-only-I " .. lib )
+				assert( err == 0, iflags )
+				table.insert( iflags, iflag )
+
+				local lflag, err = command( "pkg-config --libs " .. lib )
+				assert( err == 0, lflags )
+				table.insert( lflags, lflag )
+			end
 		end
-		return "", table.concat( iflags, " " ), table.concat( lflags, " " )
+		return table.concat( cflags, " " ), table.concat( iflags, " " ), table.concat( lflags, " " )
 	end
 end
 
