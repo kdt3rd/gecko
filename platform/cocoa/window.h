@@ -38,8 +38,6 @@ public:
 	virtual void resized( double w, double h );
 
 private:
-	void update_canvas( double w, double h );
-
 	struct objcwrapper;
 	objcwrapper *_impl;
 
