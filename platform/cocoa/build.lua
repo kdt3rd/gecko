@@ -4,7 +4,7 @@ Include( COCOA_INCLUDE, CAIRO_INCLUDE )
 srcs = {
 	"system.mm";
 	"screen.cpp";
-	"window.cpp";
+	"window.mm";
 	"timer.cpp";
 	"keyboard.cpp";
 	"mouse.cpp";
