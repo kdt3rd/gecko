@@ -3,13 +3,15 @@
 #include <unistd.h>
 
 #include <core/contract.h>
-#include <platform/xcb/system.h>
+
+#define PLATFORM_H <platform/PLATFORM/system.h>
+#include PLATFORM_H
 
 namespace {
 
 int safemain( int argc, char **argv )
 {
-	auto sys = std::make_shared<xcb::system>();
+	auto sys = std::make_shared<platform::native_system>();
 	std::cout << sys->name() << " - " << sys->description() << std::endl;
 
 	auto fontmgr = sys->get_font_manager();

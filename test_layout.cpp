@@ -3,7 +3,8 @@
 #include <map>
 #include <functional>
 
-#include <platform/xcb/system.h>
+#define PLATFORM_H <platform/PLATFORM/system.h>
+#include PLATFORM_H
 
 #include <layout/form_layout.h>
 #include <layout/box_layout.h>
@@ -104,7 +105,7 @@ int safemain( int argc, char **argv )
 {
 	precondition( argc > 1, "expected argument" );
 
-	auto sys = std::make_shared<xcb::system>();
+	auto sys = std::make_shared<platform::native_system>();
 	auto win = sys->new_window();
 
 	std::shared_ptr<container> c = std::make_shared<container>();
