@@ -10,9 +10,11 @@ if System() == "Linux" then
 	Variable( "cc", "gcc" )
 	Variable( "ld", "g++" )
 elseif System() == "Darwin" then
-	Variable( "cxx", "/usr/local/bin/g++" )
-	Variable( "cc", "/usr/local/bin/gcc" )
-	Variable( "ld", "/usr/local/bin/g++" )
+	Variable( "cxx", "clang++" )
+	Variable( "cc", "clang" )
+	Variable( "ld", "clang++" )
+	CXXFlags( "--stdlib=libc++" )
+	LDFlags( "--stdlib=libc++" )
 end
 
 Variable( "binld", "ld" )
@@ -24,7 +26,7 @@ Variable( "doxygen", "doxygen" )
 
 CFlags( "-msse", "-msse2", "-msse3" )
 CFlags( "-flax-vector-conversions" )
-CFlags( "-fPIC", "-Wl,-export-dynamic" )
+CFlags( "-fPIC" )
 CXXFlags( "-msse", "-msse2", "-msse3" )
 CXXFlags( "-flax-vector-conversions" )
 CXXFlags( "--std=c++11" )
@@ -36,7 +38,7 @@ Warning( "all", "extra", "no-unused-parameter", "init-self", "comment", "cast-al
 CWarning( "unused" )
 
 -- C++ warnings
-CXXWarning( "unused", "overloaded-virtual", "no-ctor-dtor-privacy", "non-virtual-dtor", "pmf-conversions", "sign-promo", "missing-field-initializers" )
+CXXWarning( "unused", "overloaded-virtual", "no-ctor-dtor-privacy", "non-virtual-dtor", "sign-promo", "missing-field-initializers" )
 
 if Building( "debug" ) then
 	CFlags( "-ggdb", "-fvar-tracking-uninit", "-fbounds-check", "-fcheck-data-deps" )
@@ -70,8 +72,13 @@ Include( source_dir .. "/lib" )
 
 BOTAN_FLAGS, BOTAN_INCLUDE, BOTAN_LIBS = Package( "botan-1.10" )
 SDL_FLAGS, SDL_INCLUDE, SDL_LIBS = Package( "sdl2" )
-XCB_FLAGS, XCB_INCLUDE, XCB_LIBS = Package( "xcb", "xcb-xinput", "xcb-keysyms" )
 CAIRO_FLAGS, CAIRO_INCLUDE, CAIRO_LIBS = Package( "cairo" )
+XCB_FLAGS, XCB_INCLUDE, XCB_LIBS = Package( "xcb", "xcb-keysyms" )
 FREETYPE_FLAGS, FREETYPE_INCLUDE, FREETYPE_LIBS = Package( "freetype2" )
 FONTCONFIG_FLAGS, FONTCONFIG_INCLUDE, FONTCONFIG_LIBS = Package( "fontconfig" )
+
+if System() == "Linux" then
+elseif System() == "Darwin" then
+	COCOA_FLAGS, COCOA_INCLUDE, COCOA_LIBS = Package( "Cocoa" )
+end
 
