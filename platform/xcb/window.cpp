@@ -8,8 +8,8 @@
 #include <core/contract.h>
 #include <stdexcept>
 
-#include <cairo/cairo.h>
-#include <cairo/cairo-xcb.h>
+#include <cairo.h>
+#include <cairo-xcb.h>
 #include <xcb/xcb.h>
 
 namespace xcb
@@ -183,7 +183,10 @@ void window::update_canvas( double ww, double hh )
 	if ( w > 0 && h > 0 )
 	{
 		if ( _canvas->has_surface() )
-			_canvas->set_size( w, h );
+		{
+			cairo_xcb_surface_set_size( _canvas->get_surface(), w, h );
+			cairo_surface_flush( _canvas->get_surface() );
+		}
 		else
 			_canvas->set_surface( cairo_xcb_surface_create( _connection, _win, _visual, w, h ) );
 	}

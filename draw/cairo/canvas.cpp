@@ -2,7 +2,6 @@
 #include "canvas.h"
 #include "font.h"
 #include <draw/path.h>
-#include <cairo-xcb.h>
 #include <core/contract.h>
 
 namespace cairo
@@ -43,19 +42,6 @@ void canvas::clear_surface( void )
 	check_error();
 	_context = nullptr;
 	_surface = nullptr;
-}
-
-////////////////////////////////////////
-
-void canvas::set_size( int w, int h )
-{
-	precondition( w > 0 && h > 0, "invalid surface size" );
-	if ( _surface )
-	{
-		cairo_xcb_surface_set_size( _surface, w, h );
-		cairo_surface_flush( _surface );
-		check_error();
-	}
 }
 
 ////////////////////////////////////////
