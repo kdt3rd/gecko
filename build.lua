@@ -11,7 +11,7 @@ if System() == "Linux" then
 	platform = "platform-xcb"
 	CXXFlags( "-DPLATFORM=xcb" )
 elseif System() == "Darwin" then
-	platform = { "platform-cocoa", "platform-xcb" }
+	platform = "platform-cocoa"
 	CXXFlags( "-DPLATFORM=cocoa" )
 else
 	error( "unknown platform" )

@@ -72,13 +72,16 @@ Include( source_dir .. "/lib" )
 
 BOTAN_FLAGS, BOTAN_INCLUDE, BOTAN_LIBS = Package( "botan-1.10" )
 SDL_FLAGS, SDL_INCLUDE, SDL_LIBS = Package( "sdl2" )
-CAIRO_FLAGS, CAIRO_INCLUDE, CAIRO_LIBS = Package( "cairo" )
 XCB_FLAGS, XCB_INCLUDE, XCB_LIBS = Package( "xcb", "xcb-keysyms" )
 FREETYPE_FLAGS, FREETYPE_INCLUDE, FREETYPE_LIBS = Package( "freetype2" )
 FONTCONFIG_FLAGS, FONTCONFIG_INCLUDE, FONTCONFIG_LIBS = Package( "fontconfig" )
 
 if System() == "Linux" then
+	CAIRO_FLAGS, CAIRO_INCLUDE, CAIRO_LIBS = Package( "cairo", "cairo-xcb" )
 elseif System() == "Darwin" then
+	CAIRO_FLAGS, CAIRO_INCLUDE, CAIRO_LIBS = Package( "cairo", "cairo-quartz" )
 	COCOA_FLAGS, COCOA_INCLUDE, COCOA_LIBS = Package( "Cocoa" )
 end
+
+print( CAIRO_LIBS )
 
