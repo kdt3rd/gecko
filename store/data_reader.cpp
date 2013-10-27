@@ -244,7 +244,7 @@ data_reader::read_map( void )
 			uint8_t s = _file->get();
 			size = s;
 			if ( size == 255 )
-				size = std::numeric_limits<size_t>::max();
+				size = std::numeric_limits<uint32_t>::max();
 			break;
 		}
 
@@ -273,7 +273,7 @@ data_reader::read_array( void )
 			uint8_t s = _file->get();
 			size = s;
 			if ( size == 255 )
-				size = std::numeric_limits<size_t>::max();
+				size = std::numeric_limits<uint32_t>::max();
 			break;
 		}
 
