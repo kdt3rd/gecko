@@ -18,6 +18,11 @@ public:
 	{
 	}
 
+	gradient( std::initializer_list<std::pair<double,color>> l )
+		: _stops( l )
+	{
+	}
+
 	~gradient( void ) {}
 
 	void add_stop( double v, const color &c ) { _stops.emplace_back( v, c ); }
