@@ -38,10 +38,14 @@ void canvas::set_surface( cairo_surface_t *surf )
 
 void canvas::clear_surface( void )
 {
-	cairo_destroy( _context );
-	check_error();
-	_context = nullptr;
-	_surface = nullptr;
+	if( _context )
+	{
+		cairo_surface_finish( _surface );
+		cairo_destroy( _context );
+		check_error();
+		_context = nullptr;
+		_surface = nullptr;
+	}
 }
 
 ////////////////////////////////////////
