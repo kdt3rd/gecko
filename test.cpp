@@ -64,11 +64,11 @@ int safemain( int argc, char **argv )
 		canvas->present();
 	};
 
+	win->when_exposed( draw_stuff );
 	win->resize( 400, 400 );
 	win->set_title( "Hello World" );
 	win->show();
 
-	win->when_exposed( draw_stuff );
 
 	auto dispatcher = sys->get_dispatcher();
 
