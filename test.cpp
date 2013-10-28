@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include <core/contract.h>
+#include <view/cocoa/button.h>
 
 #define PLATFORM_H <platform/PLATFORM/system.h>
 #include PLATFORM_H
@@ -29,19 +30,23 @@ int safemain( int argc, char **argv )
 	for ( auto &f: fontmgr->get_styles() )
 		std::cout << "  " << f << '\n';
 
+	auto font = fontmgr->get_font( "Lucida Grande", "bold", 30.0 );
+	if ( !font )
+		throw std::runtime_error( "font not found" );
+
 	auto screens = sys->screens();
 	for ( auto s: screens )
 		std::cout << ' ' << s->bounds().width() << 'x' << s->bounds().height() << std::endl;
 
 	auto win = sys->new_window();
 
-	draw::color bg( 0.188, 0.188, 0.188 );
+	draw::color bg( 0.8118, 0.8118, 0.8118 );
 	draw::color fg = bg.change( 0.64 ).desaturate( -0.10 );
 	draw::color textbg = bg.change( 0.30 );
 	draw::color textfg = bg.change( -0.64 ).desaturate( -0.10 );
 
 	draw::path round_rect;
-	round_rect.rounded_rect( { 10.5, 10.5 }, 150, 24, 6 );
+	round_rect.rounded_rect( { 10, 10 }, 150, 24, 6 );
 
 	draw::gradient grad;
 	{
@@ -58,9 +63,13 @@ int safemain( int argc, char **argv )
 		auto canvas = win->canvas();
 		canvas->fill( bg );
 
-		draw::paint paint( draw::color( 1, 1, 1 ) );
-		paint.set_fill_linear( { 10.5, 10.5 }, 0, 24, grad );
-		canvas->draw_path( round_rect, paint );
+		cocoa::button b;
+		b.paint( canvas, draw::rect( { 10, 10 }, 150, 43 ) );
+
+		draw::paint paint2( { 0.1961, 0.1961, 0.1961, 0 } );
+		paint2.set_fill_color( { 0.1961, 0.1961, 0.1961 } );
+		canvas->draw_text( font, { 18, 10+34 }, "Hello", paint2 );
+
 		canvas->present();
 	};
 
