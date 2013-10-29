@@ -18,16 +18,8 @@ int safemain( int argc, char **argv )
 	auto fontmgr = sys->get_font_manager();
 	std::cout << fontmgr->name() << " - " << fontmgr->version() << std::endl;
 
-	std::cout << "Font foundries:\n";
-	for ( auto &f: fontmgr->get_foundries() )
-		std::cout << "  " << f << '\n';
-
 	std::cout << "Font families:\n";
 	for ( auto &f: fontmgr->get_families() )
-		std::cout << "  " << f << '\n';
-
-	std::cout << "Font styles:\n";
-	for ( auto &f: fontmgr->get_styles() )
 		std::cout << "  " << f << '\n';
 
 	auto font = fontmgr->get_font( "Lucida Grande", "bold", 14.0 );
