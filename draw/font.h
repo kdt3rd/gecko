@@ -11,12 +11,17 @@ namespace draw
 class font
 {
 public:
-	font( void );
+	font( std::string fam, std::string sty, double sz );
 	virtual ~font( void );
 
-	virtual std::string family( void ) const = 0;
-	virtual std::string style( void ) const = 0;
-	virtual double size( void ) const = 0;
+	std::string family( void ) const { return _family; }
+	std::string style( void ) const { return _style; }
+	double size( void ) const { return _size; }
+
+private:
+	std::string _family;
+	std::string _style;
+	double _size;
 };
 
 ////////////////////////////////////////

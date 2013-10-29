@@ -6,7 +6,8 @@ namespace draw
 
 ////////////////////////////////////////
 
-font::font( void )
+font::font( std::string fam, std::string sty, double sz )
+	: _family( std::move(fam) ), _style( std::move(sty) ), _size( sz )
 {
 }
 

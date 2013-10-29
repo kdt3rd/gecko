@@ -6,5 +6,5 @@ srcs = {
 	"font.cpp";
 }
 
-Library( "draw-cairo", Compile( srcs ), LinkLibs( { "core", "draw" } ), LinkSys( CAIRO_LIBS, FREETYPE_LIBS ) )
+Library( "draw-cairo", Compile( srcs ), LinkLibs( { "core", "draw" } ), LinkSys( CAIRO_LIBS ) )
 
