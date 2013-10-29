@@ -83,5 +83,3 @@ elseif System() == "Darwin" then
 	COCOA_FLAGS, COCOA_INCLUDE, COCOA_LIBS = Package( "Cocoa" )
 end
 
-print( CAIRO_LIBS )
-
