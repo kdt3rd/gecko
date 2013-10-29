@@ -13,12 +13,7 @@
 class form_layout : public layout
 {
 public:
-	form_layout( const std::shared_ptr<container> &c, direction dir = direction::RIGHT )
-		: form_layout( c, c->bounds() )
-	{
-	}
-
-	form_layout( const std::shared_ptr<container> &c, const std::shared_ptr<area> &a, direction dir = direction::RIGHT );
+	form_layout( const std::shared_ptr<area> &a, direction dir = direction::RIGHT );
 
 	size_t size( void ) const { return _areas.size(); }
 
@@ -33,7 +28,7 @@ public:
 	void recompute_layout( void );
 
 private:
-	std::shared_ptr<container> _container;
+	std::shared_ptr<area> _container;
 	std::shared_ptr<area> _left_area;
 	std::shared_ptr<area> _right_area;
 

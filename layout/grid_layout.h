@@ -13,12 +13,7 @@
 class grid_layout : public layout
 {
 public:
-	grid_layout( const std::shared_ptr<container> &c )
-		: grid_layout( c, c->bounds() )
-	{
-	}
-
-	grid_layout( const std::shared_ptr<container> &c, const std::shared_ptr<area> &a );
+	grid_layout( const std::shared_ptr<area> &c );
 
 	std::vector<std::shared_ptr<area>> new_row( double w = 0.0 );
 	std::vector<std::shared_ptr<area>> new_column( double w = 0.0 );
@@ -27,7 +22,7 @@ public:
 	void recompute_layout( void );
 
 private:
-	std::shared_ptr<container> _container;
+	std::shared_ptr<area> _container;
 
 	struct group
 	{

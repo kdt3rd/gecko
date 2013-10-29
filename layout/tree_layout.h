@@ -12,12 +12,7 @@
 class tree_layout : public layout
 {
 public:
-	tree_layout( const std::shared_ptr<container> &c, double tab )
-		: tree_layout( c, c->bounds(), tab )
-	{
-	}
-
-	tree_layout( const std::shared_ptr<container> &c, const std::shared_ptr<area> &a, double tab );
+	tree_layout( const std::shared_ptr<area> &c, double tab );
 
 	std::shared_ptr<area>  new_area( double w = 0.0 );
 	std::shared_ptr<tree_layout> new_branch( double w = 0.0 );
@@ -27,7 +22,7 @@ public:
 
 private:
 	double _tab;
-	std::shared_ptr<container> _container;
+	std::shared_ptr<area> _container;
 	box_layout _tabbed;
 	box_layout _layout;
 

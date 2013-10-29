@@ -15,7 +15,7 @@ namespace {
 
 ////////////////////////////////////////
 
-std::shared_ptr<layout> test_box( std::shared_ptr<container> c )
+std::shared_ptr<layout> test_box( std::shared_ptr<area> c )
 {
 	auto l =  std::make_shared<box_layout>( c, direction::DOWN );
 	for ( size_t i = 0; i < 5; ++i )
@@ -28,7 +28,7 @@ std::shared_ptr<layout> test_box( std::shared_ptr<container> c )
 
 ////////////////////////////////////////
 
-std::shared_ptr<layout> test_tree( std::shared_ptr<container> c )
+std::shared_ptr<layout> test_tree( std::shared_ptr<area> c )
 {
 	auto l = std::make_shared<tree_layout>( c, 24.0 );
 	for ( size_t i = 0; i < 2; ++i )
@@ -54,7 +54,7 @@ std::shared_ptr<layout> test_tree( std::shared_ptr<container> c )
 
 ////////////////////////////////////////
 
-std::shared_ptr<layout> test_form( std::shared_ptr<container> c )
+std::shared_ptr<layout> test_form( std::shared_ptr<area> c )
 {
 	std::shared_ptr<area> a, b;
 
@@ -72,7 +72,7 @@ std::shared_ptr<layout> test_form( std::shared_ptr<container> c )
 
 ////////////////////////////////////////
 
-std::shared_ptr<layout> test_grid( std::shared_ptr<container> c )
+std::shared_ptr<layout> test_grid( std::shared_ptr<area> c )
 {
 	auto l = std::make_shared<grid_layout>( c );
 
@@ -91,7 +91,7 @@ std::shared_ptr<layout> test_grid( std::shared_ptr<container> c )
 
 ////////////////////////////////////////
 
-std::map<std::string,std::function<std::shared_ptr<layout>(std::shared_ptr<container>)>> tests =
+std::map<std::string,std::function<std::shared_ptr<layout>(std::shared_ptr<area>)>> tests =
 {
 	{ "grid", test_grid },
 	{ "box", test_box },
@@ -108,7 +108,7 @@ int safemain( int argc, char **argv )
 	auto sys = std::make_shared<platform::native_system>();
 	auto win = sys->new_window();
 
-	std::shared_ptr<container> c = std::make_shared<container>();
+	std::shared_ptr<area> c = std::make_shared<area>();
 
 	auto layout = tests[argv[1]]( c );
 
@@ -127,6 +127,7 @@ int safemain( int argc, char **argv )
 		canvas->fill( draw::color( 0.5, 0.5, 0.5 ) );
 
 		bool skip = true;
+		/*
 		for ( auto a: *c )
 		{
 			if ( ( a->width() * a->height() > 0 ) && !skip )
@@ -140,6 +141,7 @@ int safemain( int argc, char **argv )
 			else
 				skip = false;
 		}
+		*/
 //		draw::paint paint2( { 1, 1, 1, 0 } );
 //		paint2.set_fill_color( { 1, 1, 1 } );
 //		canvas->draw_text( font, { 50, 150 }, "Hell0 World!", paint2 );
@@ -149,14 +151,13 @@ int safemain( int argc, char **argv )
 	auto recompute_layout = [&] ( double w, double h )
 	{
 		layout->recompute_minimum();
-		std::shared_ptr<area> b = c->bounds();
 
-		if ( w < b->minimum_width() )
-			w = b->minimum_width();
-		if ( h < b->minimum_height() )
-			h = b->minimum_height();
-		b->set_horizontal( 0, w );
-		b->set_vertical( 0, h );
+		if ( w < c->minimum_width() )
+			w = c->minimum_width();
+		if ( h < c->minimum_height() )
+			h = c->minimum_height();
+		c->set_horizontal( 0, w );
+		c->set_vertical( 0, h );
 
 		layout->recompute_layout();
 	};

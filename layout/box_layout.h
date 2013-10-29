@@ -13,12 +13,7 @@
 class box_layout : public layout
 {
 public:
-	box_layout( const std::shared_ptr<container> &c, direction dir = direction::RIGHT )
-		: box_layout( c, c->bounds(), dir )
-	{
-	}
-
-	box_layout( const std::shared_ptr<container> &c, const std::shared_ptr<area> &a, direction dir );
+	box_layout( const std::shared_ptr<area> &a, direction dir = direction::RIGHT );
 
 	void set_direction( direction d );
 
@@ -32,7 +27,7 @@ public:
 	void recompute_layout( void );
 
 private:
-	std::shared_ptr<container> _container;
+	std::shared_ptr<area> _container;
 
 	flow_constraint _flow;
 	tight_constraint _cross;

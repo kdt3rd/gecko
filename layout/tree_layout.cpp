@@ -3,14 +3,14 @@
 
 ////////////////////////////////////////
 
-tree_layout::tree_layout( const std::shared_ptr<container> &c, const std::shared_ptr<area> &a, double tab )
-	: _tab( tab ), _container( c ), _tabbed( c, a, direction::RIGHT ), _layout( c )
+tree_layout::tree_layout( const std::shared_ptr<area> &c, double tab )
+	: _tab( tab ), _container( c ), _tabbed( c ), _layout( c )
 {
 	auto t = _tabbed.new_area( 0.0 );
 	auto box = _tabbed.new_area( 1.0 );
 	t->set_minimum( tab, 0 );
 
-	_layout = box_layout( _container, box, direction::DOWN ); 
+	_layout = box_layout( box, direction::DOWN ); 
 }
 
 ////////////////////////////////////////
@@ -25,7 +25,7 @@ std::shared_ptr<area> tree_layout::new_area( double w )
 std::shared_ptr<tree_layout> tree_layout::new_branch( double w  )
 {
 	auto a = new_area( w );
-	_children.push_back( std::make_shared<tree_layout>( _container, a, _tab ) );
+	_children.push_back( std::make_shared<tree_layout>( a, _tab ) );
 	return _children.back();
 }
 
