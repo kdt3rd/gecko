@@ -30,7 +30,7 @@ int safemain( int argc, char **argv )
 	for ( auto &f: fontmgr->get_styles() )
 		std::cout << "  " << f << '\n';
 
-	auto font = fontmgr->get_font( "Lucida Grande", "bold", 30.0 );
+	auto font = fontmgr->get_font( "Lucida Grande", "bold", 14.0 );
 	if ( !font )
 		throw std::runtime_error( "font not found" );
 
@@ -40,10 +40,10 @@ int safemain( int argc, char **argv )
 
 	auto win = sys->new_window();
 
-	draw::color bg( 0.8118, 0.8118, 0.8118 );
-	draw::color fg = bg.change( 0.64 ).desaturate( -0.10 );
-	draw::color textbg = bg.change( 0.30 );
-	draw::color textfg = bg.change( -0.64 ).desaturate( -0.10 );
+	draw::color bg( 0.9294, 0.9294, 0.9294 );
+	draw::color fg( 0, 0, 0 );
+//	draw::color textbg = bg.change( 0.30 );
+//	draw::color textfg = bg.change( -0.64 ).desaturate( -0.10 );
 
 	draw::path round_rect;
 	round_rect.rounded_rect( { 10, 10 }, 150, 24, 6 );
@@ -57,18 +57,18 @@ int safemain( int argc, char **argv )
 	}
 
 //	std::shared_ptr<platform::points> ps;
+	cocoa::button b;
 	auto draw_stuff = [&]
 	{
 		std::cout << "Drawing" << std::endl;
 		auto canvas = win->canvas();
 		canvas->fill( bg );
 
-		cocoa::button b;
-		b.paint( canvas, draw::rect( { 10, 10 }, 150, 43 ) );
+		b.paint( canvas, draw::rect( { 10.5, 10.5 }, 150, 21 ) );
 
 		draw::paint paint2( { 0.1961, 0.1961, 0.1961, 0 } );
 		paint2.set_fill_color( { 0.1961, 0.1961, 0.1961 } );
-		canvas->draw_text( font, { 18, 10+34 }, "Hello", paint2 );
+		canvas->draw_text( font, { 18, 10+16 }, "Hello", paint2 );
 
 		canvas->present();
 	};
