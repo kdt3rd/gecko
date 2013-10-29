@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include <draw/cairo/font.h>
+#include <cairo/cairo-ft.h>
 
 namespace xcb
 {
@@ -136,7 +137,11 @@ std::shared_ptr<draw::font> font_manager::get_font( const std::string &family, c
 		if ( FcPatternGetString( matched, FC_FILE, 0, &filename ) == FcResultMatch &&
 			 FcPatternGetInteger( matched, FC_INDEX, 0, &fontid ) == FcResultMatch )
 		{
-			ret = std::make_shared<cairo::font>( _ft_lib, reinterpret_cast<const char*>( filename ), fontid, pixsize );
+			FT_Face ftface;
+			auto error = FT_New_Face( _ft_lib, reinterpret_cast<const char*>( filename ), fontid, &ftface );
+			if ( error )
+				throw std::runtime_error( "freetype error" );
+			ret = std::make_shared<cairo::font>( cairo_ft_font_face_create_for_ft_face( ftface, 0 ), family, style, pixsize );
 		}
 	}
 	FcPatternDestroy( pat );
