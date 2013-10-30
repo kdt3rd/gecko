@@ -28,6 +28,8 @@ public:
 
 	virtual void present( void );
 
+	virtual void screenshot_png( const char *filename );
+
 private:
 	void set_cairo( const draw::paint &p );
 	void set_cairo_stroke( const draw::paint &p );

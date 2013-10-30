@@ -169,6 +169,16 @@ void canvas::present( void )
 
 ////////////////////////////////////////
 
+void canvas::screenshot_png( const char *filename )
+{
+	if ( !_surface )
+		throw std::runtime_error( "missing surface" );
+
+	cairo_surface_write_to_png( _surface, filename );
+}
+
+////////////////////////////////////////
+
 void canvas::set_cairo( const draw::paint &p )
 {
 	cairo_set_antialias( _context, p.has_antialias() ? CAIRO_ANTIALIAS_GOOD : CAIRO_ANTIALIAS_NONE );

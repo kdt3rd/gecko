@@ -47,6 +47,8 @@ public:
 	/// @brief Present the canvas
 	/// Finalize the drawing of the canvas and display it.
 	virtual void present( void );
+
+	virtual void screenshot_png( const char *filename ) = 0;
 };
 
 ////////////////////////////////////////
