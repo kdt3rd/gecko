@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include <core/signal.h>
 #include "rect.h"
 
 namespace draw
@@ -33,9 +32,6 @@ public:
 
 	void set_minimum( double w, double h ) { _minw = w; _minh = h; }
 
-	core::signal<void(void)> &minimum_changed( void ) { return _minimum; }
-	core::signal<void(void)> &area_changed( void ) { return _area; }
-
 	double minimum_width( void ) const { return _minw; }
 	double minimum_height( void ) const { return _minh; }
 
@@ -64,9 +60,6 @@ public:
 private:
 	rect _rect;
 	double _minw = 0.0, _minh = 0.0;
-
-	core::signal<void(void)> _minimum;
-	core::signal<void(void)> _area;
 };
 
 ////////////////////////////////////////
