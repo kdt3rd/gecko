@@ -1,6 +1,9 @@
 
 #include "tree_layout.h"
 
+namespace layout
+{
+
 ////////////////////////////////////////
 
 tree_layout::tree_layout( const std::shared_ptr<draw::area> &c, double tab )
@@ -50,4 +53,6 @@ void tree_layout::recompute_layout( void )
 }
 
 ////////////////////////////////////////
+
+}
 

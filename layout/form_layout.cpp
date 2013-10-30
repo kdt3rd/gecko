@@ -1,6 +1,9 @@
 
 #include "form_layout.h"
 
+namespace layout
+{
+
 ////////////////////////////////////////
 
 form_layout::form_layout( const std::shared_ptr<draw::area> &a, direction dir )
@@ -59,3 +62,6 @@ void form_layout::recompute_layout( void )
 }
 
 ////////////////////////////////////////
+
+}
+

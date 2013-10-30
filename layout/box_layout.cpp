@@ -1,6 +1,9 @@
 
 #include "box_layout.h"
 
+namespace layout
+{
+
 ////////////////////////////////////////
 
 box_layout::box_layout( const std::shared_ptr<draw::area> &c, direction dir )
@@ -58,3 +61,4 @@ void box_layout::recompute_layout( void )
 
 ////////////////////////////////////////
 
+}

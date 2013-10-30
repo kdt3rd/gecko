@@ -6,6 +6,9 @@
 #include <draw/area.h>
 #include "box_layout.h"
 
+namespace layout
+{
+
 ////////////////////////////////////////
 
 class tree_layout : public layout
@@ -29,4 +32,6 @@ private:
 };
 
 ////////////////////////////////////////
+
+}
 

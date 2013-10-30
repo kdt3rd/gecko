@@ -15,9 +15,9 @@ namespace {
 
 ////////////////////////////////////////
 
-std::shared_ptr<layout> test_box( const std::shared_ptr<draw::area> &c )
+std::shared_ptr<layout::layout> test_box( const std::shared_ptr<draw::area> &c )
 {
-	auto l =  std::make_shared<box_layout>( c, direction::DOWN );
+	auto l =  std::make_shared<layout::box_layout>( c, layout::direction::DOWN );
 	for ( size_t i = 0; i < 5; ++i )
 	{
 		auto a = l->new_area( i == 2 ? 1.0 : 0.0 );
@@ -28,9 +28,9 @@ std::shared_ptr<layout> test_box( const std::shared_ptr<draw::area> &c )
 
 ////////////////////////////////////////
 
-std::shared_ptr<layout> test_tree( const std::shared_ptr<draw::area> &c )
+std::shared_ptr<layout::layout> test_tree( const std::shared_ptr<draw::area> &c )
 {
-	auto l = std::make_shared<tree_layout>( c, 24.0 );
+	auto l = std::make_shared<layout::tree_layout>( c, 24.0 );
 	for ( size_t i = 0; i < 2; ++i )
 	{
 		auto a = l->new_area( 0.0 );
@@ -54,11 +54,11 @@ std::shared_ptr<layout> test_tree( const std::shared_ptr<draw::area> &c )
 
 ////////////////////////////////////////
 
-std::shared_ptr<layout> test_form( const std::shared_ptr<draw::area> &c )
+std::shared_ptr<layout::layout> test_form( const std::shared_ptr<draw::area> &c )
 {
 	std::shared_ptr<draw::area> a, b;
 
-	auto l = std::make_shared<form_layout>( c );
+	auto l = std::make_shared<layout::form_layout>( c );
 
 	for ( size_t i = 0; i < 5; ++i )
 	{
@@ -72,9 +72,9 @@ std::shared_ptr<layout> test_form( const std::shared_ptr<draw::area> &c )
 
 ////////////////////////////////////////
 
-std::shared_ptr<layout> test_grid( std::shared_ptr<draw::area> c )
+std::shared_ptr<layout::layout> test_grid( std::shared_ptr<draw::area> c )
 {
-	auto l = std::make_shared<grid_layout>( c );
+	auto l = std::make_shared<layout::grid_layout>( c );
 
 	for ( size_t i = 0; i < 5; ++i )
 		auto tmp = l->new_column( i == 2 ? 1.0 : 0.0 );
@@ -91,7 +91,7 @@ std::shared_ptr<layout> test_grid( std::shared_ptr<draw::area> c )
 
 ////////////////////////////////////////
 
-std::map<std::string,std::function<std::shared_ptr<layout>(std::shared_ptr<draw::area>)>> tests =
+std::map<std::string,std::function<std::shared_ptr<layout::layout>(std::shared_ptr<draw::area>)>> tests =
 {
 	{ "grid", test_grid },
 	{ "box", test_box },

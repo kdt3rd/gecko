@@ -7,6 +7,9 @@
 #include "tight_constraint.h"
 #include "flow_constraint.h"
 
+namespace layout
+{
+
 ////////////////////////////////////////
 
 class grid_layout : public layout
@@ -39,4 +42,6 @@ private:
 };
 
 ////////////////////////////////////////
+
+}
 

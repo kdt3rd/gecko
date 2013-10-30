@@ -7,6 +7,9 @@
 #include "tight_constraint.h"
 #include "flow_constraint.h"
 
+namespace layout
+{
+
 ////////////////////////////////////////
 
 class box_layout : public layout
@@ -35,4 +38,6 @@ private:
 };
 
 ////////////////////////////////////////
+
+}
 

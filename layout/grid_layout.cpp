@@ -1,6 +1,9 @@
 
 #include "grid_layout.h"
 
+namespace layout
+{
+
 ////////////////////////////////////////
 
 grid_layout::grid_layout( const std::shared_ptr<draw::area> &c )
@@ -77,4 +80,6 @@ void grid_layout::recompute_layout( void )
 }
 
 ////////////////////////////////////////
+
+}
 

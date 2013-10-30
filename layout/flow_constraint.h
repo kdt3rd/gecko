@@ -4,6 +4,9 @@
 #include <vector>
 #include "constraint.h"
 
+namespace layout
+{
+
 ////////////////////////////////////////
 
 class flow_constraint : public constraint
@@ -25,4 +28,6 @@ private:
 };
 
 ////////////////////////////////////////
+
+}
 

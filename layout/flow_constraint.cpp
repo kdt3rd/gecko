@@ -2,6 +2,9 @@
 #include <core/reverse.h>
 #include "flow_constraint.h"
 
+namespace layout
+{
+
 ////////////////////////////////////////
 
 flow_constraint::flow_constraint( const std::shared_ptr<draw::area> &a, direction d )
@@ -114,3 +117,6 @@ void flow_constraint::recompute_constraint( void )
 }
 
 ////////////////////////////////////////
+
+}
+

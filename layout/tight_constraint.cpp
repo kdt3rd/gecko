@@ -1,6 +1,9 @@
 
 #include "tight_constraint.h"
 
+namespace layout
+{
+
 ////////////////////////////////////////
 
 tight_constraint::tight_constraint( const std::shared_ptr<draw::area> &a, orientation o )
@@ -56,3 +59,6 @@ void tight_constraint::recompute_constraint( void )
 }
 
 ////////////////////////////////////////
+
+}
+

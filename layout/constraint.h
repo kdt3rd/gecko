@@ -6,6 +6,9 @@
 #include <memory>
 #include <iostream>
 
+namespace layout
+{
+
 ////////////////////////////////////////
 
 enum class direction
@@ -48,3 +51,4 @@ protected:
 
 ////////////////////////////////////////
 
+}

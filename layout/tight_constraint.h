@@ -4,6 +4,9 @@
 #include <vector>
 #include "constraint.h"
 
+namespace layout
+{
+
 ////////////////////////////////////////
 
 class tight_constraint : public constraint
@@ -28,4 +31,6 @@ private:
 };
 
 ////////////////////////////////////////
+
+}
 
