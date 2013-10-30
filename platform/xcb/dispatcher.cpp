@@ -164,22 +164,18 @@ int dispatcher::execute( void )
 
 			case XCB_MOTION_NOTIFY:
 			{
-				auto *ev = reinterpret_cast<xcb_button_press_event_t*>( event.get() );
+				auto *ev = reinterpret_cast<xcb_motion_notify_event_t*>( event.get() );
 				auto w = _windows[ev->event];
-				switch ( ev->detail )
-				{
-					case 1:
-					case 2:
-					case 3:
-						_mouse->released( w, ev->detail );
-						break;
-
-					case 4: // Mouse wheel up
-					case 5: // Mouse wheel down
-						break;
-				}
+				_mouse->moved( w, { double(ev->event_x), double(ev->event_y) } );
 				break;
 			}
+
+			case XCB_VISIBILITY_NOTIFY:
+			case XCB_REPARENT_NOTIFY:
+				break;
+
+			default:
+				std::cout << "Unknown event: " << ( event->response_type & ~0x80 ) << std::endl;
 		}
 	}
 

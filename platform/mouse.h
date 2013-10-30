@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <functional>
+#include <draw/point.h>
 #include "window.h"
 
 namespace platform
@@ -35,7 +36,7 @@ public:
 	/// @brief Set the callback for motion events
 	/// Set the callback function for mouse motion events.
 	/// @param f Function to call
-	void when_moved( std::function<void(const std::shared_ptr<window>&,double,double)> f ) { _moved = f; }
+	void when_moved( std::function<void(const std::shared_ptr<window>&,const draw::point &)> f ) { _moved = f; }
 
 	/// @brief Send a press event
 	/// Sends a mouse button press event of the given button.
@@ -54,10 +55,10 @@ public:
 	/// @param w Window in which the mouse moved
 	/// @param x New x location of the mouse
 	/// @param y New y location of the mouse
-	void moved( const std::shared_ptr<window> &w, double x, double y ) { if ( _moved ) _moved( w, x, y ); }
+	void moved( const std::shared_ptr<window> &w, const draw::point &p ) { if ( _moved ) _moved( w, p ); }
 
 private:
-	std::function<void(const std::shared_ptr<window>&,double,double)> _moved;
+	std::function<void(const std::shared_ptr<window>&,const draw::point&)> _moved;
 	std::function<void(const std::shared_ptr<window>&,int)> _pressed;
 	std::function<void(const std::shared_ptr<window>&,int)> _released;
 };
