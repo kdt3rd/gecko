@@ -6,7 +6,8 @@ namespace view
 
 ////////////////////////////////////////
 
-view::view( void )
+view::view( const std::shared_ptr<draw::area> &a )
+	: _area( a )
 {
 }
 

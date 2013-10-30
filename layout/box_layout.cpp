@@ -3,7 +3,7 @@
 
 ////////////////////////////////////////
 
-box_layout::box_layout( const std::shared_ptr<area> &c, direction dir )
+box_layout::box_layout( const std::shared_ptr<draw::area> &c, direction dir )
 	: _container( c ), _flow( c ), _cross( c )
 {
 	set_direction( dir );
@@ -30,9 +30,9 @@ void box_layout::set_direction( direction d )
 
 ////////////////////////////////////////
 
-std::shared_ptr<area> box_layout::new_area( double w )
+std::shared_ptr<draw::area> box_layout::new_area( double w )
 {
-	auto a = std::make_shared<area>();
+	auto a = std::make_shared<draw::area>();
 	_areas.push_back( a );
 	_flow.add_area( a, w );
 	_cross.add_area( a );

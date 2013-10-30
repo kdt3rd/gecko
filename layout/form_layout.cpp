@@ -3,9 +3,9 @@
 
 ////////////////////////////////////////
 
-form_layout::form_layout( const std::shared_ptr<area> &a, direction dir )
+form_layout::form_layout( const std::shared_ptr<draw::area> &a, direction dir )
 	: _container( a ),
-		_left_area( std::make_shared<area>() ), _right_area( std::make_shared<area>() ),
+		_left_area( std::make_shared<draw::area>() ), _right_area( std::make_shared<draw::area>() ),
 		_left( _left_area, orientation::HORIZONTAL ), _right( _right_area, orientation::HORIZONTAL ),
 		_down( a, direction::DOWN ),
 		_columns( a, dir )
@@ -16,11 +16,11 @@ form_layout::form_layout( const std::shared_ptr<area> &a, direction dir )
 
 ////////////////////////////////////////
 
-std::pair<std::shared_ptr<area>,std::shared_ptr<area>> form_layout::new_row( void )
+std::pair<std::shared_ptr<draw::area>,std::shared_ptr<draw::area>> form_layout::new_row( void )
 {
-	auto box = std::make_shared<area>();
-	auto a = std::make_shared<area>();
-	auto b = std::make_shared<area>();
+	auto box = std::make_shared<draw::area>();
+	auto a = std::make_shared<draw::area>();
+	auto b = std::make_shared<draw::area>();
 
 	_rows.emplace_back( box, orientation::VERTICAL );
 	_rows.back().add_area( a );

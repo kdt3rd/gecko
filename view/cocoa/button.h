@@ -11,10 +11,10 @@ namespace cocoa
 class button : public view::view
 {
 public:
-	button( void );
+	button( const std::shared_ptr<draw::area> &a );
 	virtual ~button( void );
 
-	virtual void paint( const std::shared_ptr<draw::canvas> &canvas, const draw::rect &area );
+	virtual void paint( const std::shared_ptr<draw::canvas> &canvas );
 };
 
 ////////////////////////////////////////

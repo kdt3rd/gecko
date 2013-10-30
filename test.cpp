@@ -49,20 +49,22 @@ int safemain( int argc, char **argv )
 	}
 
 //	std::shared_ptr<platform::points> ps;
-	cocoa::button b;
+	auto area = std::make_shared<draw::area>( draw::point( 10.5, 10.5 ), 150, 21 );
+	cocoa::button b( area );
 	auto draw_stuff = [&]
 	{
 		std::cout << "Drawing" << std::endl;
 		auto canvas = win->canvas();
 		canvas->fill( bg );
 
-		b.paint( canvas, draw::rect( { 10.5, 10.5 }, 150, 21 ) );
+		b.paint( canvas );
 
 		draw::paint paint2( { 0.1961, 0.1961, 0.1961, 0 } );
 		paint2.set_fill_color( { 0.1961, 0.1961, 0.1961 } );
 		canvas->draw_text( font, { 18, 10+16 }, "Hello", paint2 );
 
 		canvas->present();
+
 	};
 
 	win->when_exposed( draw_stuff );
@@ -75,12 +77,28 @@ int safemain( int argc, char **argv )
 
 	auto keypress = [&]( platform::scancode sc )
 	{
-		std::cout << "Key pressed " << static_cast<uint32_t>(sc) << std::endl;
+		auto canvas = win->canvas();
+		canvas->screenshot_png( "test.png" );
+		std::cout << "Screenshot " << static_cast<uint32_t>(sc) << std::endl;
 		dispatcher->exit( 0 );
+	};
+
+	auto mousepress = [&]( const std::shared_ptr<platform::window> &w, int b )
+	{
+		std::cout << "Press: " << b << std::endl;
+	};
+
+	auto mousemove = [&]( const std::shared_ptr<platform::window> &w, const draw::point &p )
+	{
+		std::cout << "Moved: " << p.x() << ',' << p.y() << std::endl;
 	};
 
 	auto kbd = sys->get_keyboard();
 	kbd->when_pressed( keypress );
+
+	auto mouse = sys->get_mouse();
+	mouse->when_pressed( mousepress );
+	mouse->when_moved( mousemove );
 
 	return dispatcher->execute();
 }

@@ -3,14 +3,14 @@
 
 ////////////////////////////////////////
 
-tight_constraint::tight_constraint( const std::shared_ptr<area> &a, orientation o )
+tight_constraint::tight_constraint( const std::shared_ptr<draw::area> &a, orientation o )
 	: constraint( a ), _orient( o )
 {
 }
 
 ////////////////////////////////////////
 
-void tight_constraint::add_area( const std::shared_ptr<area> &a )
+void tight_constraint::add_area( const std::shared_ptr<draw::area> &a )
 {
 	_areas.push_back( a );
 }

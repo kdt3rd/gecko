@@ -4,14 +4,14 @@
 
 ////////////////////////////////////////
 
-flow_constraint::flow_constraint( const std::shared_ptr<area> &a, direction d )
+flow_constraint::flow_constraint( const std::shared_ptr<draw::area> &a, direction d )
 	: constraint( a ), _dir( d )
 {
 }
 
 ////////////////////////////////////////
 
-void flow_constraint::add_area( const std::shared_ptr<area> &a, double weight )
+void flow_constraint::add_area( const std::shared_ptr<draw::area> &a, double weight )
 {
 	_areas.emplace_back( a, weight );
 }

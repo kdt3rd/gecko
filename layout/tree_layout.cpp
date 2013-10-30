@@ -3,7 +3,7 @@
 
 ////////////////////////////////////////
 
-tree_layout::tree_layout( const std::shared_ptr<area> &c, double tab )
+tree_layout::tree_layout( const std::shared_ptr<draw::area> &c, double tab )
 	: _tab( tab ), _container( c ), _tabbed( c ), _layout( c )
 {
 	auto t = _tabbed.new_area( 0.0 );
@@ -15,7 +15,7 @@ tree_layout::tree_layout( const std::shared_ptr<area> &c, double tab )
 
 ////////////////////////////////////////
 
-std::shared_ptr<area> tree_layout::new_area( double w )
+std::shared_ptr<draw::area> tree_layout::new_area( double w )
 {
 	return _layout.new_area( w );
 }

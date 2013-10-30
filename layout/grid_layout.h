@@ -2,8 +2,7 @@
 #pragma once
 
 #include <memory>
-#include <core/area.h>
-#include <core/container.h>
+#include <draw/area.h>
 #include "layout.h"
 #include "tight_constraint.h"
 #include "flow_constraint.h"
@@ -13,20 +12,20 @@
 class grid_layout : public layout
 {
 public:
-	grid_layout( const std::shared_ptr<area> &c );
+	grid_layout( const std::shared_ptr<draw::area> &c );
 
-	std::vector<std::shared_ptr<area>> new_row( double w = 0.0 );
-	std::vector<std::shared_ptr<area>> new_column( double w = 0.0 );
+	std::vector<std::shared_ptr<draw::area>> new_row( double w = 0.0 );
+	std::vector<std::shared_ptr<draw::area>> new_column( double w = 0.0 );
 
 	void recompute_minimum( void );
 	void recompute_layout( void );
 
 private:
-	std::shared_ptr<area> _container;
+	std::shared_ptr<draw::area> _container;
 
 	struct group
 	{
-		group( const std::shared_ptr<area> &a )
+		group( const std::shared_ptr<draw::area> &a )
 			: box( a )
 		{
 		}

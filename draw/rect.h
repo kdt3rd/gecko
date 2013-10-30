@@ -41,6 +41,11 @@ public:
 	void set_width( double w ) { _w = w; }
 	void set_height( double h ) { _h = h; }
 
+	void set_horizontal( double x1, double x2 );
+	void set_vertical( double y1, double y2 );
+
+	bool contains( double x, double y ) const;
+
 private:
 	point _position;
 	double _w = 0.0, _h = 0.0;

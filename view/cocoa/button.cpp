@@ -35,7 +35,8 @@ namespace cocoa
 
 ////////////////////////////////////////
 
-button::button( void )
+button::button( const std::shared_ptr<draw::area> &a )
+	: view::view( a )
 {
 }
 
@@ -47,14 +48,14 @@ button::~button( void )
 
 ////////////////////////////////////////
 
-void button::paint( const std::shared_ptr<draw::canvas> &canvas, const draw::rect &area )
+void button::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
 	draw::paint p( border2 );
 	p.set_stroke_width( 1.0 );
-	p.set_fill_linear( area.top_left(), area.bottom_left(), grad2 );
+	p.set_fill_linear( _area->top_left(), _area->bottom_left(), grad2 );
 
 	draw::path rpath;
-	rpath.rounded_rect( area.top_left(), area.bottom_right(), 3 );
+	rpath.rounded_rect( _area->top_left(), _area->bottom_right(), 3 );
 
 	canvas->draw_path( rpath, p );
 }
