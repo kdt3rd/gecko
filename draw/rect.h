@@ -23,6 +23,9 @@ public:
 
 	double x( void ) const { return _position.x(); }
 	double y( void ) const { return _position.y(); }
+	double width( void ) const { return _w; }
+	double height( void ) const { return _h; }
+
 	double x1( void ) const { return _position.x(); }
 	double y1( void ) const { return _position.y(); }
 	double x2( void ) const { return _position.x() + _w - 1.0; }
@@ -32,9 +35,6 @@ public:
 	point top_right( void ) const { return point( x2(), y1() ); }
 	point bottom_left( void ) const { return point( x1(), y2() ); }
 	point bottom_right( void ) const { return point( x2(), y2() ); }
-
-	double width( void ) const { return _w; }
-	double height( void ) const { return _h; }
 
 	void set_x( double x ) { _position.set_x( x ); }
 	void set_y( double y ) { _position.set_y( y ); }
