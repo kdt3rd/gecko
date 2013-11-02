@@ -14,6 +14,8 @@ public:
 	cocoa_style( void );
 	virtual ~cocoa_style( void );
 
+	virtual std::shared_ptr<view::view> bg_frame( const std::shared_ptr<draw::area> &area );
+
 	virtual std::shared_ptr<view::view> button_frame( const std::shared_ptr<draw::area> &area );
 	virtual std::shared_ptr<view::view> button_text( const std::shared_ptr<draw::area> &area, const std::string &txt );
 

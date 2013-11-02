@@ -13,6 +13,9 @@ namespace gui
 builder::builder( const std::shared_ptr<window> &w )
 	: _container( w->get_container() )
 {
+	auto sty = application::current()->get_style();
+	auto bg = sty->bg_frame( _container->area() );
+	_container->add_view( bg );
 }
 
 ////////////////////////////////////////

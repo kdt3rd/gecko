@@ -2,6 +2,7 @@
 #include "cocoa_style.h"
 #include <core/contract.h>
 #include <view/text.h>
+#include <view/flat.h>
 #include <view/cocoa/button.h>
 #include "application.h"
 
@@ -20,6 +21,15 @@ cocoa_style::cocoa_style( void )
 
 cocoa_style::~cocoa_style( void )
 {
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<view::view> cocoa_style::bg_frame( const std::shared_ptr<draw::area> &area )
+{
+	auto ret = std::make_shared<view::flat>( area );
+	ret->set_color( { 0.9294, 0.9294, 0.9294, 1.0 } );
+	return ret;
 }
 
 ////////////////////////////////////////
