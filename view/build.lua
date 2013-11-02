@@ -2,6 +2,7 @@
 srcs = {
 	"view.cpp";
 	"text.cpp";
+	"flat.cpp";
 }
 
 cocoa = {
