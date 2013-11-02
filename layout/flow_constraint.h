@@ -19,11 +19,16 @@ public:
 
 	void set_direction( direction d ) { _dir = d; }
 
+	void set_spacing( double s ) { _spacing = s; }
+	void set_pad( double start, double end ) { _pad = { start, end }; }
+
 	void recompute_minimum( void );
 	void recompute_constraint( void );
 
 private:
-	direction _dir;
+	direction _dir = direction::RIGHT;
+	double _spacing = 0.0;
+	std::pair<double,double> _pad = { 0.0, 0.0 };
 	std::vector<std::pair<std::shared_ptr<draw::area>,double>> _areas;
 };
 
