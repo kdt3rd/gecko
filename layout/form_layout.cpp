@@ -23,6 +23,7 @@ void form_layout::set_pad( double left, double right, double top, double bottom 
 {
 	_left.set_pad( left, 0.0 );
 	_right.set_pad( 0.0, right );
+	_down.set_pad( top, bottom );
 }
 
 ////////////////////////////////////////
