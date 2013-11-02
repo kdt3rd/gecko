@@ -6,9 +6,12 @@ BuildDir( "debug", "debug" )
 BuildDir( "release", "release" )
 
 if System() == "Linux" then
-	Variable( "cxx", "g++" )
-	Variable( "cc", "gcc" )
-	Variable( "ld", "g++" )
+--	Variable( "cxx", "g++" )
+--	Variable( "cc", "gcc" )
+--	Variable( "ld", "g++" )
+	Variable( "cxx", "clang++" )
+	Variable( "cc", "clang" )
+	Variable( "ld", "clang++" )
 elseif System() == "Darwin" then
 	Variable( "cxx", "clang++" )
 	Variable( "cc", "clang" )
@@ -41,7 +44,7 @@ CWarning( "unused" )
 CXXWarning( "unused", "overloaded-virtual", "no-ctor-dtor-privacy", "non-virtual-dtor", "sign-promo", "missing-field-initializers" )
 
 if Building( "debug" ) then
-	CFlags( "-ggdb", "-fvar-tracking-uninit", "-fbounds-check", "-fcheck-data-deps" )
+	CFlags( "-ggdb" ) --, "-fvar-tracking-uninit", "-fbounds-check", "-fcheck-data-deps" )
 --	Library = SharedLibrary
 --	LinkLibs = LinkSharedLibs
 	Library = StaticLibrary
