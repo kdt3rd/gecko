@@ -13,6 +13,8 @@ void build_window( const std::shared_ptr<gui::window> &win )
 
 	gui::builder builder( win );
 	auto layout = builder.new_layout<form_layout>( layout::direction::RIGHT );
+	layout->set_pad( 12.0, 12.0, 12.0, 12.0 );
+	layout->set_spacing( 12.0, 12.0 );
 
 	auto row = layout->new_row();
 	builder.make_label( row.first, "Hello World" );

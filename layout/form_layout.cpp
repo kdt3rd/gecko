@@ -19,6 +19,23 @@ form_layout::form_layout( const std::shared_ptr<draw::area> &a, direction dir )
 
 ////////////////////////////////////////
 
+void form_layout::set_pad( double left, double right, double top, double bottom )
+{
+	_left.set_pad( left, 0.0 );
+	_right.set_pad( 0.0, right );
+}
+
+////////////////////////////////////////
+
+void form_layout::set_spacing( double horiz, double vert )
+{
+	_columns.set_spacing( horiz );
+	_down.set_spacing( vert );
+}
+
+
+////////////////////////////////////////
+
 std::pair<std::shared_ptr<draw::area>,std::shared_ptr<draw::area>> form_layout::new_row( void )
 {
 	auto box = std::make_shared<draw::area>();

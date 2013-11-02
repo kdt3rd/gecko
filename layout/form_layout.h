@@ -21,6 +21,9 @@ public:
 
 	void set_direction( direction d ) { _columns.set_direction( d ); }
 
+	void set_pad( double left, double right, double top, double bottom );
+	void set_spacing( double horiz, double vert );
+
 	std::pair<std::shared_ptr<draw::area>,std::shared_ptr<draw::area>> new_row( void );
 
 	std::pair<std::shared_ptr<draw::area>,std::shared_ptr<draw::area>> get_row_areas( size_t i ) { return _areas.at( i ); }
