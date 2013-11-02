@@ -29,12 +29,16 @@ public:
 
 	virtual void present( void );
 
+	virtual draw::font_extents font_extents( const std::shared_ptr<draw::font> &font );
+	virtual draw::text_extents text_extents( const std::shared_ptr<draw::font> &font, const std::string &utf8 );
+
 	virtual void screenshot_png( const char *filename );
 
 private:
 	void set_cairo( const draw::paint &p );
 	void set_cairo_stroke( const draw::paint &p );
 	bool set_cairo_fill( const draw::paint &p );
+	void set_cairo_font( const std::shared_ptr<draw::font> &font );
 
 	void check_error( void );
 

@@ -150,14 +150,12 @@ void canvas::draw_path( const draw::path &path, const draw::paint &c )
 
 ////////////////////////////////////////
 
-void canvas::draw_text( const std::shared_ptr<draw::font> &bfont, const draw::point &p, const std::string &utf8, const draw::paint &c )
+void canvas::draw_text( const std::shared_ptr<draw::font> &font, const draw::point &p, const std::string &utf8, const draw::paint &c )
 {
 	cairo_save( _context );
-	auto *font = dynamic_cast<cairo::font*>( bfont.get() );
-	precondition( font, "draw_text with null font" );
 
-	cairo_set_font_face( _context, font->cairo_font() );
-	cairo_set_font_size( _context, font->size() );
+	set_cairo_font( font );
+
 	cairo_move_to( _context, p.x(), p.y() );
 	cairo_text_path( _context, utf8.c_str() );
 
@@ -180,6 +178,38 @@ void canvas::present( void )
 
 	cairo_surface_flush( _surface );
 	check_error();
+}
+
+////////////////////////////////////////
+
+draw::font_extents canvas::font_extents( const std::shared_ptr<draw::font> &font )
+{
+	cairo_save( _context );
+	set_cairo_font( font );
+
+	cairo_font_extents_t ex;
+	cairo_font_extents( _context, &ex );
+
+	check_error();
+	cairo_restore( _context );
+
+	return { ex.ascent, ex.descent, ex.height, ex.max_x_advance, ex.max_y_advance };
+}
+
+////////////////////////////////////////
+
+draw::text_extents canvas::text_extents( const std::shared_ptr<draw::font> &font, const std::string &utf8 )
+{
+	cairo_save( _context );
+	set_cairo_font( font );
+
+	cairo_text_extents_t ex;
+	cairo_text_extents( _context, utf8.c_str(), &ex );
+
+	check_error();
+	cairo_restore( _context );
+
+	return { ex.x_bearing, ex.y_bearing, ex.width, ex.height, ex.x_advance, ex.y_advance };
 }
 
 ////////////////////////////////////////
@@ -253,6 +283,17 @@ bool canvas::set_cairo_fill( const draw::paint &p )
 	}
 
 	return false;
+}
+
+////////////////////////////////////////
+
+void canvas::set_cairo_font( const std::shared_ptr<draw::font> &bfont )
+{
+	auto *font = dynamic_cast<cairo::font*>( bfont.get() );
+	precondition( font, "draw_text with null font" );
+
+	cairo_set_font_face( _context, font->cairo_font() );
+	cairo_set_font_size( _context, font->size() );
 }
 
 ////////////////////////////////////////

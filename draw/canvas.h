@@ -6,6 +6,7 @@
 #include "path.h"
 #include "font.h"
 #include "rect.h"
+#include "extents.h"
 
 namespace draw
 {
@@ -52,6 +53,19 @@ public:
 	/// @brief Present the canvas
 	/// Finalize the drawing of the canvas and display it.
 	virtual void present( void );
+
+	/// @brief The general size of the font
+	/// The general distances needed to properly position and align text using this font.
+	/// @param font Font to measure
+	/// @return The font extents
+	virtual font_extents font_extents( const std::shared_ptr<font> &font ) = 0;
+
+	/// @brief The specific size of the text
+	/// The specific distances and dimensions of the text when drawn with the given font.
+	/// @param font Font to measure
+	/// @param utf8 The utf8 string to measure
+	/// @return The text extents
+	virtual text_extents text_extents( const std::shared_ptr<font> &font, const std::string &utf8 ) = 0;
 
 	virtual void screenshot_png( const char *filename ) = 0;
 };
