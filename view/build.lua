@@ -1,8 +1,12 @@
 
 srcs = {
 	"view.cpp";
+	"text.cpp";
 }
 
-Library( "view", Compile( srcs ), LinkLibs( "draw" ) );
+cocoa = {
+	"cocoa/button.cpp";
+}
 
-SubDir( "cocoa" );
+Library( "view", Compile( srcs, cocoa ), LinkLibs( "draw" ) );
+
