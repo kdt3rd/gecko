@@ -20,6 +20,9 @@ public:
 	std::vector<std::shared_ptr<draw::area>> new_row( double w = 0.0 );
 	std::vector<std::shared_ptr<draw::area>> new_column( double w = 0.0 );
 
+	void set_pad( double left, double right, double top, double bottom );
+	void set_spacing( double horiz, double vert );
+
 	void recompute_minimum( void );
 	void recompute_layout( void );
 

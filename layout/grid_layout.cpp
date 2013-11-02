@@ -55,6 +55,22 @@ std::vector<std::shared_ptr<draw::area>> grid_layout::new_column( double w )
 
 ////////////////////////////////////////
 
+void grid_layout::set_pad( double left, double right, double top, double bottom )
+{
+	_rows.box.set_pad( left, right );
+	_columns.box.set_pad( top, bottom );
+}
+
+////////////////////////////////////////
+
+void grid_layout::set_spacing( double horiz, double vert )
+{
+	_rows.box.set_spacing( horiz );
+	_columns.box.set_spacing( vert );
+}
+
+////////////////////////////////////////
+
 void grid_layout::recompute_minimum( void )
 {
 	for ( auto r: _rows.cells )
