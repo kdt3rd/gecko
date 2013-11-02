@@ -17,6 +17,7 @@ SubDir( "view" )
 SubDir( "store" )
 SubDir( "layout" )
 SubDir( "platform" )
+SubDir( "react" )
 SubDir( "gui" )
 
 Executable( "test_layout", Compile( "test_layout.cpp" ), LinkLibs( "layout", platform ), LinkSys( BOTAN_LIBS ) )
