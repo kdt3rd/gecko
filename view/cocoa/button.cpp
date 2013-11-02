@@ -38,13 +38,19 @@ namespace cocoa
 button::button( const std::shared_ptr<draw::area> &a )
 	: _area( a )
 {
-	_area->set_minimum( 0, 21 );
 }
 
 ////////////////////////////////////////
 
 button::~button( void )
 {
+}
+
+////////////////////////////////////////
+
+void button::layout( const std::shared_ptr<draw::canvas> &canvs )
+{
+	_area->set_minimum( 150, 21 );
 }
 
 ////////////////////////////////////////

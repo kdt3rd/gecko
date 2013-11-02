@@ -18,6 +18,7 @@ public:
 	void set_color( const draw::color &c ) { _color = c; }
 	void set_text( std::string txt ) { _text = std::move( txt ); }
 
+	virtual void layout( const std::shared_ptr<draw::canvas> &canvas );
 	virtual void paint( const std::shared_ptr<draw::canvas> &canvas );
 
 private:
