@@ -64,6 +64,21 @@ void canvas::fill( const draw::paint &c )
 
 ////////////////////////////////////////
 
+void canvas::fill( const draw::rect &r, const draw::paint &c )
+{
+	cairo_rectangle( _context, r.x(), r.y(), r.width(), r.height() );
+	if( !_context )
+		return;
+
+	set_cairo( c );
+	if ( !set_cairo_fill( c ) )
+		set_cairo_stroke( c );
+	cairo_fill( _context );
+	check_error();
+}
+
+////////////////////////////////////////
+
 void canvas::draw_path( const draw::path &path, const draw::paint &c )
 {
 	cairo_save( _context );

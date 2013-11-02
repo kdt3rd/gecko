@@ -21,6 +21,7 @@ public:
 	void clear_surface( void );
 
 	virtual void fill( const draw::paint &c );
+	virtual void fill( const draw::rect &r, const draw::paint &c );
 
 	virtual void draw_path( const draw::path &p, const draw::paint &c );
 

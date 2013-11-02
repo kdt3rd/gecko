@@ -5,6 +5,7 @@
 #include "paint.h"
 #include "path.h"
 #include "font.h"
+#include "rect.h"
 
 namespace draw
 {
@@ -29,6 +30,10 @@ public:
 	/// @brief Fill the entire canvas
 	/// @param p Paint to fill with
 	virtual void fill( const paint &p ) = 0;
+
+	/// @brief Fill the entire canvas
+	/// @param p Paint to fill with
+	virtual void fill( const rect &r, const paint &p ) = 0;
 
 	/// @brief Draw a path
 	/// Draw a path on the canvas
