@@ -1,0 +1,29 @@
+
+#pragma once
+
+#include "style.h"
+
+namespace gui
+{
+
+////////////////////////////////////////
+
+class cocoa_style : public style
+{
+public:
+	cocoa_style( void );
+	virtual ~cocoa_style( void );
+
+	virtual std::shared_ptr<view::view> button_frame( const std::shared_ptr<draw::area> &area );
+	virtual std::shared_ptr<view::view> button_text( const std::shared_ptr<draw::area> &area, const std::string &txt );
+
+	virtual std::shared_ptr<view::view> label_text( const std::shared_ptr<draw::area> &area, const std::string &txt );
+
+private:
+	std::shared_ptr<draw::font> _font_button;
+};
+
+////////////////////////////////////////
+
+}
+

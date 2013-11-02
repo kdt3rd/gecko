@@ -21,7 +21,8 @@ SubDir( "react" )
 SubDir( "gui" )
 
 Executable( "test_layout", Compile( "test_layout.cpp" ), LinkLibs( "layout", platform ), LinkSys( BOTAN_LIBS ) )
-Executable( "test", Compile( "test.cpp" ), LinkLibs( "view-cocoa", platform ), LinkSys( BOTAN_LIBS ) )
+Executable( "test", Compile( "test.cpp" ), LinkLibs( "view", platform ), LinkSys( BOTAN_LIBS ) )
+Executable( "test_app", Compile( "test_app.cpp" ), LinkLibs( "gui", platform ) )
 
 Doxygen( "docs", "doxyfile", "", "docs" );
 
