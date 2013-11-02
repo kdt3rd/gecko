@@ -18,6 +18,7 @@ public:
 	void remove_area( size_t i );
 
 	void set_direction( direction d ) { _dir = d; }
+	direction get_direction( void ) const { return _dir; }
 
 	void set_spacing( double s ) { _spacing = s; }
 	void set_pad( double start, double end ) { _pad = { start, end }; }
