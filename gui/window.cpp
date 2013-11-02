@@ -1,5 +1,4 @@
 
-#include <iostream>
 #include "window.h"
 #include <platform/window.h>
 
@@ -42,7 +41,6 @@ void window::show( void )
 
 void window::paint( void )
 {
-	std::cout << "Paint!" << std::endl;
 	auto canvas = _window->canvas();
 	_container->paint( canvas );
 }
@@ -51,7 +49,6 @@ void window::paint( void )
 
 void window::resize( double w, double h )
 {
-	std::cout << "Resize!" << std::endl;
 	_area->set_horizontal( 0.0, w - 1.0 );
 	_area->set_vertical( 0.0, h - 1.0 );
 	_area->set_minimum( w, h );
