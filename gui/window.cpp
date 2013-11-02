@@ -42,6 +42,8 @@ void window::show( void )
 void window::paint( void )
 {
 	auto canvas = _window->canvas();
+
+	_container->layout( canvas );
 	_container->paint( canvas );
 }
 
@@ -52,8 +54,6 @@ void window::resize( double w, double h )
 	_area->set_horizontal( 0.0, w - 1.0 );
 	_area->set_vertical( 0.0, h - 1.0 );
 	_area->set_minimum( w, h );
-	_container->recompute_minimum();
-	_container->recompute_layout();
 }
 
 ////////////////////////////////////////

@@ -22,6 +22,7 @@ public:
 	void add_layout( const std::shared_ptr<layout::layout> &l ) { _layouts.push_back( l ); }
 	void add_view( const std::shared_ptr<view::view> &v ) { _views.push_back( v ); }
 
+	virtual void layout( const std::shared_ptr<draw::canvas> &c );
 	virtual void paint( const std::shared_ptr<draw::canvas> &c );
 
 	virtual void recompute_minimum( void );
@@ -34,7 +35,7 @@ public:
 private:
 	std::shared_ptr<draw::area> _area;
 	std::vector<std::shared_ptr<view::view>> _views;
-	std::vector<std::shared_ptr<layout>> _layouts;
+	std::vector<std::shared_ptr<layout::layout>> _layouts;
 	std::vector<std::shared_ptr<reactor>> _reactors;
 };
 

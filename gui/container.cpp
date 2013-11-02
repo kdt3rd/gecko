@@ -20,6 +20,16 @@ container::~container( void )
 
 ////////////////////////////////////////
 
+void container::layout( const std::shared_ptr<draw::canvas> &c )
+{
+	for ( auto v: _views )
+		v->layout( c );
+	recompute_minimum();
+	recompute_layout();
+}
+
+////////////////////////////////////////
+
 void container::paint( const std::shared_ptr<draw::canvas> &c )
 {
 	for ( auto v: _views )

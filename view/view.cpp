@@ -18,5 +18,12 @@ view::~view( void )
 
 ////////////////////////////////////////
 
+void view::layout( const std::shared_ptr<draw::canvas> &canvas )
+{
+	// Do nothing by default.
+}
+
+////////////////////////////////////////
+
 }
 

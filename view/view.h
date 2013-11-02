@@ -16,6 +16,7 @@ public:
 	view( void );
 	virtual ~view( void );
 
+	virtual void layout( const std::shared_ptr<draw::canvas> &canvas );
 	virtual void paint( const std::shared_ptr<draw::canvas> &canvas ) = 0;
 };
 
