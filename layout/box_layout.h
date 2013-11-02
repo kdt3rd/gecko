@@ -19,6 +19,9 @@ public:
 
 	void set_direction( direction d );
 
+	void set_pad( double left, double right, double top, double bottom );
+	void set_spacing( double horiz, double vert );
+
 	size_t size( void ) const { return _areas.size(); }
 
 	std::shared_ptr<draw::area> new_area( double weight = 0.0 );
