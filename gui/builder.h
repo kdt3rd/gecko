@@ -25,6 +25,8 @@ public:
 		return ret;
 	}
 
+	void add_layout( const std::shared_ptr<layout::layout> &l ) { _container->add_layout( l ); }
+
 	void make_label( const std::shared_ptr<draw::area> &a, const std::string &txt );
 	void make_button( const std::shared_ptr<draw::area> &a, const std::string &txt );
 
