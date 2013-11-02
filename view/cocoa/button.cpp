@@ -36,8 +36,9 @@ namespace cocoa
 ////////////////////////////////////////
 
 button::button( const std::shared_ptr<draw::area> &a )
-	: view::view( a )
+	: _area( a )
 {
+	_area->set_minimum( 0, 21 );
 }
 
 ////////////////////////////////////////

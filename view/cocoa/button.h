@@ -15,6 +15,9 @@ public:
 	virtual ~button( void );
 
 	virtual void paint( const std::shared_ptr<draw::canvas> &canvas );
+
+private:
+	std::shared_ptr<draw::area> _area;
 };
 
 ////////////////////////////////////////
