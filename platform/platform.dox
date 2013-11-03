@@ -1,6 +1,9 @@
 
 /// @brief Platform specific classes
-/// Contains platform specific classes.
+///
+/// Contains cross-platform specific classes.
+/// The platform::system class represents the overall system.
+/// From this class, windows can be created, as well as access to various devices (keyboard, mouse, timers).
 namespace platform
 {
 }

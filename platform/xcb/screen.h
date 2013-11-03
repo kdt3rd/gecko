@@ -10,14 +10,17 @@ namespace xcb
 
 ////////////////////////////////////////
 
+/// @brief XCB implementation of platform::screen
 class screen : public platform::screen
 {
 public:
+	/// @brief Constructor.
 	screen( xcb_screen_t *scr );
 	virtual ~screen( void );
 
 	virtual size bounds( void );
 
+	/// @brief XCB identifier for the screen.
 	xcb_screen_t *id( void ) { return _screen; }
 
 private:

@@ -12,6 +12,7 @@ namespace xcb
 
 ////////////////////////////////////////
 
+/// @brief XCB implementation of platform::font_manager
 class font_manager : public platform::font_manager
 {
 public:

@@ -14,6 +14,12 @@ namespace draw
 ////////////////////////////////////////
 
 /// @brief Paint to color with.
+///
+/// Paint describes how to draw paths and text.
+/// It is made of 2 parts: stroke and fill.
+/// The stroke is the line width, style, and color used to outline the path or text.
+/// The fill is used to fill the inside of the path or text.
+/// The fill can be a single color, a gradient (linear or radial).
 class paint
 {
 public:

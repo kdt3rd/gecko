@@ -11,6 +11,7 @@ namespace xcb
 
 ////////////////////////////////////////
 
+/// @brief XCB implementation of platform::system.
 class system : public platform::system
 {
 public:

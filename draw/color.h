@@ -7,9 +7,10 @@ namespace draw
 ////////////////////////////////////////
 
 
-/// @brief Color.
+/// @brief A color.
 ///
 /// Color represented by red, green, blue, and alpha.
+/// Valid colors should be between 0 and 1.
 class color
 {
 public:

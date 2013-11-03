@@ -1,5 +1,7 @@
 
 /// @brief Classes used to draw.
+///
+/// The draw::canvas class is the primary class, used to draw draw::path and draw::font using draw::paint.
 namespace draw
 {
 }

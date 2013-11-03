@@ -8,9 +8,11 @@ namespace xcb
 
 ////////////////////////////////////////
 
+/// @brief XCB implementation of platform::timer.
 class timer : public platform::timer
 {
 public:
+	/// @brief Constructor.
 	timer( void );
 	virtual ~timer( void );
 

@@ -13,18 +13,22 @@ namespace xcb
 
 ////////////////////////////////////////
 
-/// @brief XCB dispatcher.
+/// @brief XCB implementation of platform::dispatcher.
 ///
 /// Dispatcher implemented using XCB.
 class dispatcher : public platform::dispatcher
 {
 public:
+	/// @brief Constructor.
 	dispatcher( xcb_connection_t *c, const std::shared_ptr<keyboard> &k, const std::shared_ptr<mouse> &m );
 	virtual ~dispatcher( void );
 
 	int execute( void );
 	void exit( int code );
 
+	/// @brief Add a window.
+	///
+	/// Add a window for the dispatcher to handle events.
 	void add_window( const std::shared_ptr<window> &w );
 
 private:
