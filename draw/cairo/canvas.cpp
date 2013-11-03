@@ -292,8 +292,7 @@ void canvas::set_cairo_font( const std::shared_ptr<draw::font> &bfont )
 	auto *font = dynamic_cast<cairo::font*>( bfont.get() );
 	precondition( font, "draw_text with null font" );
 
-	cairo_set_font_face( _context, font->cairo_font() );
-	cairo_set_font_size( _context, font->size() );
+	cairo_set_scaled_font( _context, font->cairo_font() );
 }
 
 ////////////////////////////////////////
