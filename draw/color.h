@@ -6,6 +6,10 @@ namespace draw
 
 ////////////////////////////////////////
 
+
+/// @brief Color.
+///
+/// Color represented by red, green, blue, and alpha.
 class color
 {
 public:

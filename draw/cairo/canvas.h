@@ -9,6 +9,7 @@ namespace cairo
 
 ////////////////////////////////////////
 
+/// @brief Cairo implementation of canvas.
 class canvas : public draw::canvas
 {
 public:

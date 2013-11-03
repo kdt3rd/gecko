@@ -1,0 +1,7 @@
+
+/// @brief XCB platform implementation.
+///
+/// Implementation of the platform classes using X protocol C-language bindings (XCB).
+namespace xcb
+{
+}

@@ -10,6 +10,7 @@ namespace cocoa
 
 ////////////////////////////////////////
 
+/// @brief Cocoa implementation of system.
 class system : public platform::system
 {
 public:

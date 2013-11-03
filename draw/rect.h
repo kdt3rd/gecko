@@ -9,6 +9,9 @@ namespace draw
 
 ////////////////////////////////////////
 
+/// @brief Rectangle.
+///
+/// Thing with parallel sides, with opposing sides being equal in length.
 class rect
 {
 public:

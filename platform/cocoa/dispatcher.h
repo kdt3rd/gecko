@@ -13,6 +13,7 @@ namespace cocoa
 
 ////////////////////////////////////////
 
+/// @brief Cocoa implementation of dispatcher.
 class dispatcher : public platform::dispatcher
 {
 public:

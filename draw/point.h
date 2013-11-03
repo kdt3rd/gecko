@@ -8,6 +8,7 @@ namespace draw
 
 ////////////////////////////////////////
 
+/// @brief Point.
 class point
 {
 public:

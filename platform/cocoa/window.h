@@ -9,6 +9,7 @@ namespace cocoa
 
 ////////////////////////////////////////
 
+/// @brief Cocoa implementation of window.
 class window : public platform::window
 {
 public:

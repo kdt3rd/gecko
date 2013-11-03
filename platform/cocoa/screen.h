@@ -9,6 +9,7 @@ namespace cocoa
 
 ////////////////////////////////////////
 
+/// @brief Cocoa implementation of screen.
 class screen : public platform::screen
 {
 public:

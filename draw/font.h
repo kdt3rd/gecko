@@ -9,6 +9,8 @@ namespace draw
 
 ////////////////////////////////////////
 
+
+/// @brief Font
 class font
 {
 public:

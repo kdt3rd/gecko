@@ -8,6 +8,7 @@ namespace cocoa
 
 ////////////////////////////////////////
 
+/// @brief Cocoa implementation of keyboard.
 class keyboard : public platform::keyboard
 {
 public:

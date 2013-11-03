@@ -1,0 +1,7 @@
+
+/// @brief Cocoa platform implementation.
+///
+/// Implementation of the platform classes using Cocoa for OS X.
+namespace cocoa
+{
+}

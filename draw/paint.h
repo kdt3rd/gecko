@@ -13,6 +13,7 @@ namespace draw
 
 ////////////////////////////////////////
 
+/// @brief Paint to color with.
 class paint
 {
 public:

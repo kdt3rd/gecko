@@ -9,6 +9,7 @@ namespace draw
 
 ////////////////////////////////////////
 
+/// @brief Gradient.
 class gradient
 {
 public:

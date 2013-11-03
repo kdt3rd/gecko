@@ -13,6 +13,9 @@ namespace xcb
 
 ////////////////////////////////////////
 
+/// @brief XCB dispatcher.
+///
+/// Dispatcher implemented using XCB.
 class dispatcher : public platform::dispatcher
 {
 public:

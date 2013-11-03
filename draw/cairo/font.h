@@ -9,6 +9,7 @@ namespace cairo
 
 ////////////////////////////////////////
 
+/// @brief Cairo implementation of font.
 class font : public draw::font
 {
 public:

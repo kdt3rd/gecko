@@ -6,6 +6,7 @@ namespace draw
 
 ////////////////////////////////////////
 
+/// @brief Extents of a string.
 struct text_extents
 {
 	double x_bearing;
@@ -18,6 +19,7 @@ struct text_extents
 
 ////////////////////////////////////////
 
+/// @brief Extents of a font.
 struct font_extents
 {
 	double ascent;

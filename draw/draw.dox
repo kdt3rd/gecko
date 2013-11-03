@@ -1,0 +1,5 @@
+
+/// @brief Classes used to draw.
+namespace draw
+{
+}

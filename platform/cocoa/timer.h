@@ -8,6 +8,7 @@ namespace cocoa
 
 ////////////////////////////////////////
 
+/// @brief Cocoa implementation of timer.
 class timer : public platform::timer
 {
 public:

@@ -8,6 +8,7 @@ namespace cocoa
 
 ////////////////////////////////////////
 
+/// @brief Cocoa implementation of mouse.
 class mouse : public platform::mouse
 {
 public:
