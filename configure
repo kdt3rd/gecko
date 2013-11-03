@@ -756,6 +756,7 @@ function LinkStaticLibs( ... )
 	local list = {}
 	for k, lib in pairs( libs ) do
 		table.insert( list, top_build_dir .. "/lib/lib" .. lib .. ".a" )
+		assert( libs_needed[lib], "library not found: " .. lib )
 		for i, extra in pairs( libs_needed[lib] ) do
 			table.insert( list, extra )
 		end
