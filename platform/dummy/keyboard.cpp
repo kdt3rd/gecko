@@ -1,0 +1,25 @@
+
+#include <iostream>
+#include <map>
+#include <core/pointer.h>
+#include "keyboard.h"
+
+namespace dummy
+{
+
+////////////////////////////////////////
+
+keyboard::keyboard( void )
+{
+}
+
+////////////////////////////////////////
+
+keyboard::~keyboard( void )
+{
+}
+
+////////////////////////////////////////
+
+}
+

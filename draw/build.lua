@@ -12,3 +12,4 @@ srcs = {
 Library( "draw", Compile( srcs ), LinkLibs( "core" ) );
 
 SubDir( "cairo" )
+SubDir( "dummy" )

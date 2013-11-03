@@ -1,0 +1,7 @@
+
+/// @brief Dummy platform implementation
+///
+/// Implementation of the platform classes that mostly do nothing.
+namespace dummy
+{
+}

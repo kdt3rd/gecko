@@ -18,4 +18,5 @@ elseif System() == "Darwin" then
 	SubDir( "xcb" )
 	SubDir( "cocoa" )
 end
+SubDir( "dummy" )
 
