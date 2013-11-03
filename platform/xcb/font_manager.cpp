@@ -40,32 +40,6 @@ font_manager::~font_manager( void )
 
 ////////////////////////////////////////
 
-std::set<std::string> font_manager::get_foundries( void )
-{
-	std::set<std::string> ret;
-
-	FcPattern *pat = FcPatternCreate();
-	FcObjectSet *os = FcObjectSetBuild( FC_FOUNDRY, nullptr );
-	FcFontSet *fs = FcFontList( _config, pat, os );
-	if ( fs )
-	{
-		FcChar8 *name = nullptr;
-		for ( int i = 0; i < fs->nfont; ++i )
-		{
-			FcPattern *font = fs->fonts[i];
-			if ( FcPatternGetString( font, FC_FOUNDRY, 0, &name ) == FcResultMatch )
-				ret.emplace( reinterpret_cast<const char*>( name ) );
-		}
-		FcFontSetDestroy( fs );
-	}
-	FcObjectSetDestroy( os );
-	FcPatternDestroy( pat );
-
-	return ret;
-}
-
-////////////////////////////////////////
-
 std::set<std::string> font_manager::get_families( void )
 {
 	std::set<std::string> ret;
