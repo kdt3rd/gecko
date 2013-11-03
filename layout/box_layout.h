@@ -12,6 +12,10 @@ namespace layout
 
 ////////////////////////////////////////
 
+/// @brief Box layout.
+///
+/// Organizes areas in single row (or column).
+/// Each area can have a weight.  Extra space will be distributed among the areas by weight.
 class box_layout : public layout
 {
 public:

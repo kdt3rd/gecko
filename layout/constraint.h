@@ -11,6 +11,8 @@ namespace layout
 
 ////////////////////////////////////////
 
+
+/// @brief Directions
 enum class direction
 {
 	LEFT,
@@ -21,6 +23,7 @@ enum class direction
 
 ////////////////////////////////////////
 
+/// @brief Orientations
 enum class orientation
 {
 	HORIZONTAL,
@@ -29,6 +32,11 @@ enum class orientation
 
 ////////////////////////////////////////
 
+/// @brief Layout constraint.
+///
+/// Constraints on a layout.
+/// Constraints are generally one dimensional (either horizontal or vertical).
+/// A layout is made of several constraints working together.
 class constraint
 {
 public:

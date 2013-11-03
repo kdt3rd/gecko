@@ -1,7 +1,7 @@
 
-/// @brief Dummy platform implementation
+/// @brief Dummy platform and draw implementation
 ///
-/// Implementation of the platform classes that mostly do nothing.
+/// Implementation of the platform and draw classes that do nothing.
 namespace dummy
 {
 }

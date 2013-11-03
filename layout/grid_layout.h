@@ -12,6 +12,9 @@ namespace layout
 
 ////////////////////////////////////////
 
+/// @brief Grid layout.
+///
+/// Lays out areas in a grid of rows and columns.
 class grid_layout : public layout
 {
 public:

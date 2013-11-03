@@ -9,6 +9,7 @@ namespace layout
 
 ////////////////////////////////////////
 
+/// @brief Flow areas in a direction.
 class flow_constraint : public constraint
 {
 public:

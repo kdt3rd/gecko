@@ -11,6 +11,9 @@ namespace layout
 
 ////////////////////////////////////////
 
+/// @brief Tree layout.
+///
+/// Layout 
 class tree_layout : public layout
 {
 public:

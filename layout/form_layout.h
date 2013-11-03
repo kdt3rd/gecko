@@ -12,6 +12,9 @@ namespace layout
 
 ////////////////////////////////////////
 
+/// @brief Form layout.
+///
+/// Lays out areas in 2 columns, one for labels, another for widgets.
 class form_layout : public layout
 {
 public:

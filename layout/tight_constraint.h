@@ -9,6 +9,9 @@ namespace layout
 
 ////////////////////////////////////////
 
+/// @brief Tight constraint.
+///
+/// Superimpose areas on top of each other.
 class tight_constraint : public constraint
 {
 public:
