@@ -18,6 +18,23 @@ tree_layout::tree_layout( const std::shared_ptr<draw::area> &c, double tab )
 
 ////////////////////////////////////////
 
+void tree_layout::set_pad( double left, double right, double top, double bottom )
+{
+	_layout.set_pad( left, right, top, bottom );
+}
+
+////////////////////////////////////////
+
+void tree_layout::set_spacing( double s )
+{
+	_spacing = s;
+	_layout.set_spacing( s, s );
+	for ( auto c: _children )
+		c->set_spacing( s );
+}
+
+////////////////////////////////////////
+
 std::shared_ptr<draw::area> tree_layout::new_area( double w )
 {
 	return _layout.new_area( w );
@@ -28,8 +45,10 @@ std::shared_ptr<draw::area> tree_layout::new_area( double w )
 std::shared_ptr<tree_layout> tree_layout::new_branch( double w  )
 {
 	auto a = new_area( w );
-	_children.push_back( std::make_shared<tree_layout>( a, _tab ) );
-	return _children.back();
+	auto l = std::make_shared<tree_layout>( a, _tab );
+	l->set_spacing( _spacing );
+	_children.push_back( l );
+	return l;
 }
 
 ////////////////////////////////////////
