@@ -1,0 +1,7 @@
+
+/// @brief Platform specific classes
+/// Contains platform specific classes.
+namespace platform
+{
+}
+

@@ -11,37 +11,45 @@ namespace platform
 
 ////////////////////////////////////////
 
+/// @brief Font manager
+///
+/// Allows creation and listing of fonts.
 class font_manager
 {
 public:
-	/// @brief Constructor
+	/// @brief Constructor.
 	font_manager( void );
 
-	/// @brief Destructor
+	/// @brief Destructor.
 	virtual ~font_manager( void );
 
-	/// @brief Name of font manager
+	/// @brief Name of font manager.
+	///
 	/// The name of the font manager being used.
 	/// @return The name of the font manager
 	const std::string &name( void ) const { return _name; }
 
-	/// @brief Version of the font manager
+	/// @brief Version of the font manager.
+	///
 	/// The version of the font manager being used.
 	/// @return The version of the font manager
 	const std::string &version( void ) const { return _version; }
 
 
-	/// @brief List of families
+	/// @brief List of families.
+	///
 	/// Get a list of families of all managed fonts.
 	/// @return The list of families
 	virtual std::set<std::string> get_families( void ) = 0;
 
-	/// @brief List of style
+	/// @brief List of style.
+	///
 	/// Get a list of styles available.
 	/// @return The list of styles.
 	virtual std::set<std::string> get_styles( void ) = 0;
 
-	/// @brief Get a particular font
+	/// @brief Get a particular font.
+	///
 	/// Create and return a font with the given attributes.
 	/// @param family Family of the font to create
 	/// @param style Style of the font to create
