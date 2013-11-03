@@ -23,8 +23,8 @@ text::~text( void )
 
 void text::layout( const std::shared_ptr<draw::canvas> &canvas )
 {
-	draw::font_extents fex = canvas->font_extents( _font );
-	draw::text_extents tex = canvas->text_extents( _font, _text );
+	draw::font_extents fex = _font->extents();
+	draw::text_extents tex = _font->text_extents( _text );
 
 	_area->set_minimum( tex.width - tex.x_bearing, fex.height );
 }
@@ -33,8 +33,8 @@ void text::layout( const std::shared_ptr<draw::canvas> &canvas )
 
 void text::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
-	draw::font_extents fex = canvas->font_extents( _font );
-	draw::text_extents tex = canvas->text_extents( _font, _text );
+	draw::font_extents fex = _font->extents();
+	draw::text_extents tex = _font->text_extents( _text );
 
 	draw::paint paint;
 	paint.set_fill_color( _color );

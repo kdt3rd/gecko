@@ -182,38 +182,6 @@ void canvas::present( void )
 
 ////////////////////////////////////////
 
-draw::font_extents canvas::font_extents( const std::shared_ptr<draw::font> &font )
-{
-	cairo_save( _context );
-	set_cairo_font( font );
-
-	cairo_font_extents_t ex;
-	cairo_font_extents( _context, &ex );
-
-	check_error();
-	cairo_restore( _context );
-
-	return { ex.ascent, ex.descent, ex.height, ex.max_x_advance, ex.max_y_advance };
-}
-
-////////////////////////////////////////
-
-draw::text_extents canvas::text_extents( const std::shared_ptr<draw::font> &font, const std::string &utf8 )
-{
-	cairo_save( _context );
-	set_cairo_font( font );
-
-	cairo_text_extents_t ex;
-	cairo_text_extents( _context, utf8.c_str(), &ex );
-
-	check_error();
-	cairo_restore( _context );
-
-	return { ex.x_bearing, ex.y_bearing, ex.width, ex.height, ex.x_advance, ex.y_advance };
-}
-
-////////////////////////////////////////
-
 void canvas::screenshot_png( const char *filename )
 {
 	if ( !_surface )
