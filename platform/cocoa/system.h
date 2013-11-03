@@ -14,7 +14,9 @@ namespace cocoa
 class system : public platform::system
 {
 public:
+	/// @brief Constructor.
 	system( void );
+
 	virtual ~system( void );
 
 	virtual std::vector<std::shared_ptr<platform::screen>> screens( void ) { return _screens; }

@@ -12,7 +12,10 @@ namespace cocoa
 class font_manager : public platform::font_manager
 {
 public:
+	/// @brief Constructor.
 	font_manager( void );
+
+	/// @brief Destructor.
 	virtual ~font_manager( void );
 
 	virtual std::set<std::string> get_families( void );

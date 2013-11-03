@@ -16,9 +16,16 @@ public:
 	canvas( void );
 	virtual ~canvas( void );
 
+	/// @brief Get the cairo surface.
 	cairo_surface_t *get_surface( void ) const { return _surface; }
+
+	/// @brief Check if the canvas has a cairo surface.
 	bool has_surface( void ) const { return bool(_surface); }
+
+	/// @brief Set the cairo surface.
 	void set_surface( cairo_surface_t *surf );
+
+	/// @brief Clear the cairo surface.
 	void clear_surface( void );
 
 	virtual void fill( const draw::paint &c );
