@@ -30,14 +30,6 @@ font_manager::~font_manager( void )
 
 ////////////////////////////////////////
 
-std::set<std::string> font_manager::get_foundries( void )
-{
-	std::set<std::string> ret;
-	return ret;
-}
-
-////////////////////////////////////////
-
 std::set<std::string> font_manager::get_families( void )
 {
 	std::set<std::string> ret;
