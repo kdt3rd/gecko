@@ -742,13 +742,15 @@ end
 -- Create Mac application
 ----------------------------------------
 function Application( name, exe, ... )
-	local dir = BuildFile( exe .. ".app/Contents/MacOS" )
-	local plist = BuildFile( exe .. ".app/Contents/Info.plist" )
-	Mkdir( dir )
-	local newexe = dir .. "/" ..exe
-	Copy( newexe, BinFile( exe ), dir )
-	ninja:write( "default " .. newexe .. "\n" )
-	InfoPList( plist, name )
+	if System() == "Darwin" then
+		local dir = BuildFile( exe .. ".app/Contents/MacOS" )
+		local plist = BuildFile( exe .. ".app/Contents/Info.plist" )
+		Mkdir( dir )
+		local newexe = dir .. "/" ..exe
+		Copy( newexe, BinFile( exe ), dir )
+		ninja:write( "default " .. newexe .. "\n" )
+		InfoPList( plist, name )
+	end
 end
 
 ----------------------------------------
