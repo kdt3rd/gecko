@@ -11,10 +11,36 @@ function string:split( sep )
 	return fields
 end
 
-local function mkdir( name )
+local function table_slice (values,i1,i2)
+	local res = {}
+	local n = #values
+	-- default values for range
+	i1 = i1 or 1
+	i2 = i2 or n
+	if i2 < 0 then
+		i2 = n + i2 + 1
+	elseif i2 > n then
+		i2 = n
+	end
+	if i1 < 1 or i1 > n then
+		return {}
+	end
+	local k = 1
+	for i = i1,i2 do
+		res[k] = values[i]
+		k = k + 1
+	end
+	return res
+end
+
+local function mkdir( name, file )
 	local sep = "/";
 	local build = ""
-	for k, d in pairs( name:split( "/" ) ) do
+	local list = name:split( "/" )
+	if file then
+		list = table_slice( list, 1, -2 )
+	end
+	for k, d in pairs( list ) do
 		if d ~= "" then
 			build = build .. "/" .. d
 			posix.mkdir( build )
@@ -664,6 +690,67 @@ function Version( ver )
 	return name
 end
 
+function InfoPList( plist, name, dep )
+	assert( ninja, "Invalid build dir" )
+	local text = {
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+		"<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">";
+		"<plist version=\"1.0\">";
+		"<dict>";
+		"	<key>CFBundleName</key>";
+		"	<string>" .. name .. "</string>";
+		"	<key>CFDisplayName</key>";
+		"	<string>" .. name .. "</string>";
+		"	<key>CFBundleIdentifier</key>";
+		"	<string></string>";
+		"	<key>CFBundleVersion</key>";
+		"	<string>0.0</string>";
+		"	<key>CFBundlePackageType</key>";
+		"	<string>APPL</string>";
+		"	<key>CFBundleSignature</key>";
+		"	<string>????</string>";
+		"	<key>CFBundleExecutable</key>";
+		"	<string>test_app</string>";
+		"</dict>";
+		"</plist>";
+	}
+	if file_diff( plist, text ) then
+		mkdir( plist, true )
+		local file, err = io.open( plist, "w+" )
+		assert( file, err )
+		for i = 1, #text do
+			file:write( text[i] )
+			file:write( "\n" )
+		end
+		file:close()
+	end
+end
+
+function Mkdir( dir )
+	ninja:write( "build " .. dir .. ": mkdir\n" )
+end
+
+function Copy( out, inp, dep )
+	ninja:write( "build " .. out .. ": copy " .. inp )
+	if dep ~= nil then
+		ninja:write( " | " .. dep )
+	end
+	ninja:write( "\n" )
+end
+
+----------------------------------------
+-- Create Mac application
+----------------------------------------
+function Application( name, exe, ... )
+	local dir = BuildFile( exe .. ".app/Contents/MacOS" )
+	local plist = BuildFile( exe .. ".app/Contents/Info.plist" )
+	Mkdir( dir )
+	local newexe = dir .. "/" ..exe
+	Copy( newexe, BinFile( exe ), dir )
+	ninja:write( "default " .. newexe .. "\n" )
+	InfoPList( plist, name )
+end
+
 ----------------------------------------
 -- Link an executable
 ----------------------------------------
@@ -709,30 +796,6 @@ end
 
 function SilentLink()
 	ninja:write( "  silent_link = 2>/dev/null\n" )
-end
-
-----------------------------------------
--- Link a FlexLM executable
-----------------------------------------
-function FlexLM( name )
-	if name then
-		name = "lmnew_" .. name .. "/"
-	else
-		name = ""
-	end
-	local out = {
-		BuildFile( name .. "lm_new.c" ),
-		BuildFile( name .. "lmprikey.h" ),
-		BuildFile( name .. "lmseeds.h" )
-	}
-	local bin = BinFile( "lmnewgen" )
-	local ins = {}
-	if Building( "dist" ) then
-		ins = { "always" }
-	end
-	Run( ins, out, BuildFile( name ), bin, "rmimage", "-o lm_new.c" )
-	local obj = Compile( out[1] )
-	return obj, { out[2], out[3] }
 end
 
 ----------------------------------------

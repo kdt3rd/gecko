@@ -24,5 +24,7 @@ Executable( "test_layout", Compile( "test_layout.cpp" ), LinkLibs( "layout", pla
 Executable( "test", Compile( "test.cpp" ), LinkLibs( "view", platform ), LinkSys( BOTAN_LIBS ) )
 Executable( "test_app", Compile( "test_app.cpp" ), LinkLibs( "gui", platform ) )
 
+Application( "Test Application", "test_app" )
+
 Doxygen( "docs", "doxyfile", "", "docs" );
 
