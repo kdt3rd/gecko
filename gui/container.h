@@ -28,9 +28,9 @@ public:
 	virtual void recompute_minimum( void );
 	virtual void recompute_layout( void );
 
-	virtual bool mousePress( const draw::point &p, int button );
-	virtual bool mouseRelease( const draw::point &p, int button );
-	virtual bool mouseMove( const draw::point &p );
+	virtual bool mouse_press( const draw::point &p, int button );
+	virtual bool mouse_release( const draw::point &p, int button );
+	virtual bool mouse_move( const draw::point &p );
 
 private:
 	std::shared_ptr<draw::area> _area;
