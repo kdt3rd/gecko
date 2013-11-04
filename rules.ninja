@@ -34,8 +34,16 @@ rule luac
   description = Lua ($in)
 
 rule run
-  command = mkdir -p $dir ; cd $dir ; $cmd $args > /dev/null
+  command = $mkdir -p $dir ; cd $dir ; $cmd $args > /dev/null
   description = Running $cmd
+
+rule mkdir
+  command = $mkdir -p $out
+  description = Mkdir $out
+
+rule copy
+  command = $copy $in $out
+  description = Copy $out
 
 rule moc
   command = $moc $defs -o $out $in

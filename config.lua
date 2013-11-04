@@ -26,6 +26,8 @@ Variable( "moc", "moc-qt4" )
 Variable( "rcc", "rcc" )
 Variable( "luac", "luac" )
 Variable( "doxygen", "doxygen" )
+Variable( "mkdir", "mkdir" )
+Variable( "copy", "cp" )
 
 CFlags( "-msse", "-msse2", "-msse3" )
 CFlags( "-flax-vector-conversions" )
