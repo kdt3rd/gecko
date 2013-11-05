@@ -44,7 +44,7 @@ draw::font_extents font::extents( void )
 
 ////////////////////////////////////////
 
-draw::text_extents font::text_extents( const std::string &utf8 )
+draw::text_extents font::extents( const std::string &utf8 )
 {
 	cairo_text_extents_t ex;
 	cairo_scaled_font_text_extents( _font, utf8.c_str(), &ex );

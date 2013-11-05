@@ -16,7 +16,7 @@ public:
 	virtual ~font( void );
 
 	virtual draw::font_extents extents( void );
-	virtual draw::text_extents text_extents( const std::string &utf8 );
+	virtual draw::text_extents extents( const std::string &utf8 );
 };
 
 ////////////////////////////////////////

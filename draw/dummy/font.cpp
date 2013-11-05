@@ -27,7 +27,7 @@ draw::font_extents font::extents( void )
 
 ////////////////////////////////////////
 
-draw::text_extents font::text_extents( const std::string &utf8 )
+draw::text_extents font::extents( const std::string &utf8 )
 {
 	return { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 }

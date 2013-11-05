@@ -32,7 +32,7 @@ public:
 	/// @param font Font to measure
 	/// @param utf8 The utf8 string to measure
 	/// @return The text extents
-	virtual text_extents text_extents( const std::string &utf8 ) = 0;
+	virtual text_extents extents( const std::string &utf8 ) = 0;
 
 private:
 	std::string _family;
