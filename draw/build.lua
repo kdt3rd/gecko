@@ -11,5 +11,7 @@ srcs = {
 
 Library( "draw", Compile( srcs ), LinkLibs( "core" ) );
 
-SubDir( "cairo" )
+if not Building( "mingw" ) then
+	SubDir( "cairo" )
+end
 SubDir( "dummy" )

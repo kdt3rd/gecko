@@ -7,14 +7,17 @@ if System() == "Linux" then
 elseif System() == "Darwin" then
 	platform = "platform-cocoa"
 	CXXFlags( "-DPLATFORM=cocoa" )
+elseif System() == "Windows" then
+	platform = "platform-dummy"
+	CXXFlags( "-DPLATFORM=dummy" )
 else
 	error( "unknown platform" )
 end
+print( platform )
 
 SubDir( "core" )
 SubDir( "draw" )
 SubDir( "view" )
-SubDir( "store" )
 SubDir( "layout" )
 SubDir( "platform" )
 SubDir( "react" )

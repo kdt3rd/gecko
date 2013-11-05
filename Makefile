@@ -1,6 +1,6 @@
 .SUFFIXES:
 .DEFAULT: default
-.PHONY: default debug dist build clean graph config cmake
+.PHONY: default debug release mingw build clean graph config cmake
 .NOTPARALLEL:
 .SILENT:
 .ONESHELL:
@@ -11,16 +11,18 @@ ifeq ($(findstring debug,${MAKECMDGOALS}),debug)
 BUILD_TYPE := debug
 BUILD_DIR := debug
 else
-ifeq ($(findstring dist,${MAKECMDGOALS}),dist)
+ifeq ($(findstring release,${MAKECMDGOALS}),release)
 BUILD_TYPE := release
 BUILD_DIR := release
+else
+ifeq ($(findstring mingw,${MAKECMDGOALS}),mingw)
+BUILD_TYPE := mingw
+BUILD_DIR := mingw
 endif
 endif
-ifeq ($(findstring cmake,${MAKECMDGOALS}),cmake)
-$(warning CMake is no longer used, just run make)
 endif
 
-TARGETS := $(filter-out default debug dist build clean graph config cmake,${MAKECMDGOALS})
+TARGETS := $(filter-out default debug release build mingw clean graph config cmake,${MAKECMDGOALS})
 override MAKECMDGOALS :=
 
 default:
@@ -29,7 +31,9 @@ default:
 
 debug: default
 
-dist: default
+mingw: default
+
+release: default
 
 build: default
 
@@ -37,11 +41,12 @@ cmake: config
 
 config:
 	./configure build
-	./configure dist
+	./configure release
 	./configure debug
+	./configure mingw
 
 clean:
-	rm -rf debug release build
+	rm -rf debug release build mingw
 
 graph:
 	ninja -C build -t graph ${TARGETS} | sed s\"`pwd`/\"\"g > deps.dot

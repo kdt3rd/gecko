@@ -181,6 +181,11 @@ function System()
 	return system
 end
 
+function CrossCompile( m, s )
+	machine = m
+	system = s
+end
+
 ----------------------------------------
 -- Recurse into a subdirectory
 ----------------------------------------
@@ -559,6 +564,7 @@ end
 -- Query the build type
 ----------------------------------------
 function Building( name )
+	print( build_type, name )
 	if build_type == name then
 		return true
 	end

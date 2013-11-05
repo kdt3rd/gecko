@@ -4,6 +4,11 @@ DefaultBuildType( "build" )
 BuildDir( "build", "build" )
 BuildDir( "debug", "debug" )
 BuildDir( "release", "release" )
+BuildDir( "mingw", "mingw" )
+
+if Building( "mingw" ) then
+	CrossCompile( "x86_64", "Windows" )
+end
 
 if System() == "Linux" then
 --	Variable( "cxx", "g++" )
@@ -12,16 +17,36 @@ if System() == "Linux" then
 	Variable( "cxx", "clang++" )
 	Variable( "cc", "clang" )
 	Variable( "ld", "clang++" )
+	Variable( "binld", "ld" )
+	Variable( "ar", "ar" )
+	Variable( "ranlib", "ranlib" )
 elseif System() == "Darwin" then
+	assert( not Building( "mingw" ), "MingW build only under linux" )
 	Variable( "cxx", "clang++" )
 	Variable( "cc", "clang" )
 	Variable( "ld", "clang++" )
+	Variable( "binld", "ld" )
+	Variable( "ar", "ar" )
+	Variable( "ranlib", "ranlib" )
 	CXXFlags( "--stdlib=libc++" )
 	LDFlags( "--stdlib=libc++" )
+elseif System() == "Windows" then
+	if Building( "mingw" ) then
+		Variable( "cxx", "i686-w64-mingw32-g++" )
+		Variable( "cc", "i686-w64-mingw32-gcc" )
+		Variable( "ld", "i686-w64-mingw32-g++" )
+		Variable( "binld", "i686-w64-mingw32-ld" )
+		Variable( "ar", "i686-w64-mingw32-ar" )
+		Variable( "ranlib", "i686-w64-mingw32-ranlib" )
+--		Variable( "cxx", "i486-mingw32-g++" )
+--		Variable( "cc", "i486-mingw32-gcc" )
+--		Variable( "ld", "i486-mingw32-g++" )
+		LDFlags( "-static-libgcc", "-static-libstdc++" )
+	else
+		error( "Windows compile not supported yet" )
+	end
 end
 
-Variable( "binld", "ld" )
-Variable( "ar", "ar" )
 Variable( "moc", "moc-qt4" )
 Variable( "rcc", "rcc" )
 Variable( "luac", "luac" )
@@ -31,7 +56,9 @@ Variable( "copy", "cp" )
 
 CFlags( "-msse", "-msse2", "-msse3" )
 CFlags( "-flax-vector-conversions" )
-CFlags( "-fPIC" )
+if System() == "Linux" then
+	CFlags( "-fPIC" )
+end
 CXXFlags( "-msse", "-msse2", "-msse3" )
 CXXFlags( "-flax-vector-conversions" )
 CXXFlags( "--std=c++11" )
@@ -56,6 +83,14 @@ end
 if Building( "build" ) then
 	CFlags( "-O3" )
 	Definition( "NDEBUG" )
+	Library = StaticLibrary
+	LinkLibs = LinkStaticLibs
+end
+
+if Building( "mingw" ) then
+	CFlags( "-m32", "-O3" )
+	Definition( "NDEBUG" )
+	LDFlags( "-m32" )
 	Library = StaticLibrary
 	LinkLibs = LinkStaticLibs
 end
