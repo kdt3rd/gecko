@@ -4,7 +4,6 @@
 #include <core/contract.h>
 #include <string>
 #include <stdexcept>
-#include <xcb/xcb.h>
 
 namespace dummy
 {
@@ -25,6 +24,7 @@ screen::~screen( void )
 
 size screen::bounds( void )
 {
+	return { 0, 0 };
 }
 
 ////////////////////////////////////////
