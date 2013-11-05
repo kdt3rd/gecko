@@ -57,9 +57,9 @@ void button::layout( const std::shared_ptr<draw::canvas> &canvs )
 
 void button::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
-	draw::paint p( border2 );
+	draw::paint p( border1 );
 	p.set_stroke_width( 1.0 );
-	p.set_fill_linear( _area->top_left(), _area->bottom_left(), grad2 );
+	p.set_fill_linear( _area->top_left(), _area->bottom_left(), grad1 );
 
 	draw::path rpath;
 	rpath.rounded_rect( _area->top_left(), _area->bottom_right(), 3 );
