@@ -20,6 +20,8 @@ if System() == "Linux" then
 elseif System() == "Darwin" then
 	SubDir( "xcb" )
 	SubDir( "cocoa" )
+elseif System() == "Windows" then
+	SubDir( "mswin" )
 end
 SubDir( "dummy" )
 

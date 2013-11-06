@@ -1,6 +1,4 @@
 
-Include( XCB_INCLUDE, CAIRO_INCLUDE, FONTCONFIG_INCLUDE )
-
 srcs = {
 	"system.cpp";
 	"screen.cpp";

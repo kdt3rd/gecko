@@ -194,7 +194,7 @@ void canvas::screenshot_png( const char *filename )
 
 void canvas::set_cairo( const draw::paint &p )
 {
-	cairo_set_antialias( _context, p.has_antialias() ? CAIRO_ANTIALIAS_GOOD : CAIRO_ANTIALIAS_NONE );
+	cairo_set_antialias( _context, p.has_antialias() ? CAIRO_ANTIALIAS_SUBPIXEL : CAIRO_ANTIALIAS_NONE );
 }
 
 ////////////////////////////////////////
