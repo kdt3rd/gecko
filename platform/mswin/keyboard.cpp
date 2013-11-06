@@ -1,0 +1,25 @@
+
+#include <iostream>
+#include <map>
+#include <core/pointer.h>
+#include "keyboard.h"
+
+namespace mswin
+{
+
+////////////////////////////////////////
+
+keyboard::keyboard( void )
+{
+}
+
+////////////////////////////////////////
+
+keyboard::~keyboard( void )
+{
+}
+
+////////////////////////////////////////
+
+}
+
