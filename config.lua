@@ -4,11 +4,6 @@ DefaultBuildType( "build" )
 BuildDir( "build", "build" )
 BuildDir( "debug", "debug" )
 BuildDir( "release", "release" )
-BuildDir( "mingw", "mingw" )
-
-if Building( "mingw" ) then
-	CrossCompile( "x86_64", "Windows" )
-end
 
 if System() == "Linux" then
 --	Variable( "cxx", "g++" )
@@ -21,7 +16,6 @@ if System() == "Linux" then
 	Variable( "ar", "ar" )
 	Variable( "ranlib", "ranlib" )
 elseif System() == "Darwin" then
-	assert( not Building( "mingw" ), "MingW build only under linux" )
 	Variable( "cxx", "clang++" )
 	Variable( "cc", "clang" )
 	Variable( "ld", "clang++" )
@@ -31,20 +25,19 @@ elseif System() == "Darwin" then
 	CXXFlags( "--stdlib=libc++" )
 	LDFlags( "--stdlib=libc++" )
 elseif System() == "Windows" then
-	if Building( "mingw" ) then
-		Variable( "cxx", "i686-w64-mingw32-g++" )
-		Variable( "cc", "i686-w64-mingw32-gcc" )
-		Variable( "ld", "i686-w64-mingw32-g++" )
-		Variable( "binld", "i686-w64-mingw32-ld" )
-		Variable( "ar", "i686-w64-mingw32-ar" )
-		Variable( "ranlib", "i686-w64-mingw32-ranlib" )
---		Variable( "cxx", "i486-mingw32-g++" )
---		Variable( "cc", "i486-mingw32-gcc" )
---		Variable( "ld", "i486-mingw32-g++" )
-		LDFlags( "-static-libgcc", "-static-libstdc++" )
-	else
-		error( "Windows compile not supported yet" )
-	end
+	Variable( "cxx", "x86_64-w64-mingw32-g++" )
+	Variable( "cc", "x86_64-w64-mingw32-gcc" )
+	Variable( "ld", "x86_64-w64-mingw32-g++" )
+	Variable( "binld", "x86_64-w64-mingw32-ld" )
+	Variable( "ar", "x86_64-w64-mingw32-ar" )
+	Variable( "ranlib", "x86_64-w64-mingw32-ranlib" )
+	CFlags( "-mwindows" )
+	LDFlags( "-mwindows" )
+	LDFlags( "-static-libgcc", "-static-libstdc++" )
+	LDFlags( "-static" )
+--	Variable( "cxx", "i486-mingw32-g++" )
+--	Variable( "cc", "i486-mingw32-gcc" )
+--	Variable( "ld", "i486-mingw32-g++" )
 end
 
 Variable( "moc", "moc-qt4" )
@@ -87,14 +80,6 @@ if Building( "build" ) then
 	LinkLibs = LinkStaticLibs
 end
 
-if Building( "mingw" ) then
-	CFlags( "-m32", "-O3" )
-	Definition( "NDEBUG" )
-	LDFlags( "-m32" )
-	Library = StaticLibrary
-	LinkLibs = LinkStaticLibs
-end
-
 if Building( "release" ) then
 	CFlags( "-O3" )
 	Definition( "NDEBUG" )
@@ -110,7 +95,7 @@ LDFlags( "-L" .. build_dir .. "/lib" )
 
 Include( source_dir .. "/lib" )
 
-BOTAN_FLAGS, BOTAN_INCLUDE, BOTAN_LIBS = Package( "botan-1.10" )
+--BOTAN_FLAGS, BOTAN_INCLUDE, BOTAN_LIBS = Package( "botan-1.10" )
 --SDL_FLAGS, SDL_INCLUDE, SDL_LIBS = Package( "sdl2" )
 
 if System() == "Linux" then
@@ -121,5 +106,9 @@ if System() == "Linux" then
 elseif System() == "Darwin" then
 	CAIRO_FLAGS, CAIRO_INCLUDE, CAIRO_LIBS = Package( "cairo", "cairo-quartz" )
 	COCOA_FLAGS, COCOA_INCLUDE, COCOA_LIBS = Package( "Cocoa" )
+elseif System() == "Windows" then
+	CAIRO_FLAGS, CAIRO_INCLUDE, CAIRO_LIBS = Package( "cairo", "cairo-win32", "cairo-png", "pixman-1", "zlib" )
+	FREETYPE_FLAGS, FREETYPE_INCLUDE, FREETYPE_LIBS = Package( "freetype2" )
+	FONTCONFIG_FLAGS, FONTCONFIG_INCLUDE, FONTCONFIG_LIBS = Package( "fontconfig", "expat" )
 end
 
