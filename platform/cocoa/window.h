@@ -36,6 +36,8 @@ public:
 	virtual void resized( double w, double h );
 	virtual void exposed( void );
 
+	void set_ns_window( void *nswin );
+
 private:
 	struct objcwrapper;
 	objcwrapper *_impl;

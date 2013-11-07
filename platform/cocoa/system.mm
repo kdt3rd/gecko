@@ -35,6 +35,8 @@ system::system( void )
     [appMenu addItem:quitMenuItem];
     [appMenuItem setSubmenu:appMenu];
 
+    [NSApp activateIgnoringOtherApps:YES];
+
 	_keyboard = std::make_shared<keyboard>();
 	_mouse = std::make_shared<mouse>();
 	_font_manager = std::make_shared<font_manager>();

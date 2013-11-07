@@ -13,64 +13,13 @@
 #include <cairo.h>
 #include <cairo-quartz.h>
 
-@interface MyView : NSView
-{
-	cocoa::window *win;
-}
-@end
-
-@implementation MyView
-
-- (id)initWithWindow: (cocoa::window *)w
-{
-	self = [super init];
-	if ( self )
-		win = w;
-
-	return self;
-}
-
-- (void)drawRect:(NSRect)rect
-{
-	std::cout << "Drawing view of " << (void *)win << std::endl;
-	CGContextRef ctxt = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
-	std::cout << "Context: " << (void*)ctxt << std::endl;
-	try
-	{
-		win->exposed();
-	}
-	catch ( std::exception &e )
-	{
-		std::cout << "Ooops: " << e.what() << std::endl;
-	}
-}
-
-- (void)setFrameSize:(NSSize)newSize
-{
-	[super setFrameSize:newSize];
-	std::cout << "Resized: " << newSize.width << 'x' << newSize.height << std::endl;
-	try
-	{
-		win->resized( newSize.width, newSize.height );
-	}
-	catch ( std::exception &e )
-	{
-		std::cout << "Ooops: " << e.what() << std::endl;
-	}
-}
-
-@end
-
 namespace cocoa
 {
-
-////////////////////////////////////////
 
 struct window::objcwrapper
 {
 	NSWindow *win;
-	MyView *view;
-	CGContextRef ctxt;
+	CGContext *ctxt;
 };
 
 ////////////////////////////////////////
@@ -78,23 +27,8 @@ struct window::objcwrapper
 window::window( void )
 	: _impl( new objcwrapper )
 {
-	int style = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
-	_impl->win = [[[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 200, 200)
-		styleMask:style backing:NSBackingStoreBuffered defer:YES]
-			autorelease];
-
-	_last_w = 200;
-	_last_h = 200;
-
-	[_impl->win orderOut:nil];
-	[_impl->win cascadeTopLeftFromPoint:NSMakePoint(20,20)];
-
-	_impl->view = [[MyView alloc] initWithWindow:this];
-	[_impl->win setContentView:_impl->view];
-
+	_impl->win = nullptr;
 	_impl->ctxt = nullptr;
-
-	std::cout << "Window created: " << (void*)this << std::endl;
 }
 
 ////////////////////////////////////////
@@ -216,6 +150,13 @@ std::shared_ptr<draw::canvas> window::canvas( void )
 		_canvas->set_surface( cairo_quartz_surface_create_for_cg_context( _impl->ctxt, _last_w, _last_h ) );
 	}
 	return _canvas;
+}
+
+////////////////////////////////////////
+
+void window::set_ns_window( void *w )
+{
+	_impl->win = (NSWindow *)w;
 }
 
 ////////////////////////////////////////

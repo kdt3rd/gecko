@@ -29,8 +29,10 @@ private:
 	int _exit_code = 0;
 	std::shared_ptr<keyboard> _keyboard;
 	std::shared_ptr<mouse> _mouse;
+	std::map<void*,std::shared_ptr<window>> _windows;
 };
 
 ////////////////////////////////////////
 
 }
+
