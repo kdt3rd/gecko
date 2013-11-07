@@ -9,28 +9,6 @@
 #include <core/contract.h>
 #include <stdexcept>
 
-namespace {
-
-LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    switch(msg)
-    {
-        case WM_CLOSE:
-            DestroyWindow(hwnd);
-        break;
-        case WM_DESTROY:
-            PostQuitMessage(0);
-        break;
-        default:
-            return DefWindowProc(hwnd, msg, wParam, lParam);
-    }
-    return 0;
-}
-
-}
-
-
-
 namespace mswin
 {
 
@@ -39,23 +17,6 @@ namespace mswin
 system::system( void )
 	: platform::system( "mswin", "Microsoft Windows" )
 {
-	WNDCLASSEX wc;
-	wc.cbSize        = sizeof(WNDCLASSEX);
-    wc.style         = 0;
-    wc.lpfnWndProc   = WndProc;
-    wc.cbClsExtra    = 0;
-    wc.cbWndExtra    = 0;
-    wc.hInstance     = GetModuleHandle( NULL );
-    wc.hIcon         = LoadIcon( NULL, IDI_APPLICATION );
-    wc.hCursor       = LoadCursor( NULL, IDC_ARROW );
-    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
-    wc.lpszMenuName  = NULL;
-    wc.lpszClassName = "WindowClass";
-    wc.hIconSm       = LoadIcon( NULL, IDI_APPLICATION );
-
-	if ( !RegisterClassEx( &wc ) )
-		throw std::runtime_error( "window registration failed" );
-
 	_keyboard = std::make_shared<keyboard>();
 	_mouse = std::make_shared<mouse>();
 	_font_manager = std::make_shared<font_manager>();
@@ -73,6 +34,7 @@ system::~system( void )
 std::shared_ptr<platform::window> system::new_window( void )
 {
 	auto ret = std::make_shared<window>();
+	_dispatcher->add_window( ret );
 	return ret;
 }
 

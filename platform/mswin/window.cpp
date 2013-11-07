@@ -18,14 +18,16 @@ window::window( void )
 {
 	_hwnd = CreateWindowEx(
 		WS_EX_CLIENTEDGE,
-		"WindowClass",
-		"Title",
+		L"WindowClass",
+		L"Title",
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-		NULL, NULL, GetModuleHandle(NULL), NULL);
+		NULL, NULL, GetModuleHandle(NULL), NULL );
 
 	if ( _hwnd == nullptr )
 		throw std::runtime_error( "window creation failed" );
+
+	std::cout << "CREATED WINDOW: " << _hwnd << std::endl;
 }
 
 ////////////////////////////////////////
@@ -113,6 +115,16 @@ std::shared_ptr<draw::canvas> window::canvas( void )
 	}
 
 	return _canvas;
+}
+
+////////////////////////////////////////
+
+void window::exposed( void )
+{
+	PAINTSTRUCT ps;
+	BeginPaint( _hwnd, &ps );
+	platform::window::exposed();
+	EndPaint( _hwnd, &ps );
 }
 
 ////////////////////////////////////////

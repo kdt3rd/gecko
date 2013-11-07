@@ -22,6 +22,8 @@ public:
 	int execute( void );
 	void exit( int code );
 
+	void add_window( const std::shared_ptr<window> &win );
+
 private:
 	int _exit_code = 0;
 	std::shared_ptr<keyboard> _keyboard;
