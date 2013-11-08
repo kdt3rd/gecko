@@ -2,6 +2,7 @@
 #pragma once
 
 #include "container.h"
+#include <view/delegate.h>
 
 namespace platform
 {
@@ -13,7 +14,7 @@ namespace gui
 
 ////////////////////////////////////////
 
-class window
+class window : public view::delegate
 {
 public:
 	window( const std::shared_ptr<platform::window> &w );
@@ -24,6 +25,8 @@ public:
 	void show( void );
 
 	std::shared_ptr<container> get_container( void ) { return _container; }
+
+	void invalidate( const draw::rect &r );
 
 private:
 	void paint( void );

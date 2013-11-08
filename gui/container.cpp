@@ -20,6 +20,14 @@ container::~container( void )
 
 ////////////////////////////////////////
 
+void container::add_view( const std::shared_ptr<::view::view> &v )
+{
+	v->set_delegate( get_delegate() );
+	_views.push_back( v );
+}
+
+////////////////////////////////////////
+
 void container::layout( const std::shared_ptr<draw::canvas> &c )
 {
 	for ( auto v: reverse( _views ) )

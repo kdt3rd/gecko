@@ -1,4 +1,5 @@
 
+#include <iostream>
 #include "window.h"
 #include <platform/window.h>
 
@@ -13,6 +14,7 @@ window::window( const std::shared_ptr<platform::window> &w )
 	precondition( bool(_window), "null window" );
 	_area = std::make_shared<draw::area>();
 	_container = std::make_shared<container>( _area );
+	_container->set_delegate( this );
 	_window->when_exposed( [=] { this->paint(); } );
 	_window->when_resized( [=]( double w, double h ) { this->resize( w, h ); } );
 	_window->when_mouse_pressed( [=]( const std::shared_ptr<platform::mouse> &, const draw::point &p, int b ) { this->mouse_press( p, b ); } );
@@ -36,6 +38,14 @@ void window::set_title( const std::string &t )
 void window::show( void )
 {
 	_window->show();
+}
+
+////////////////////////////////////////
+
+void window::invalidate( const draw::rect &r )
+{
+	std::cout << "Invalidate! " << std::endl;
+	_window->invalidate( r );
 }
 
 ////////////////////////////////////////

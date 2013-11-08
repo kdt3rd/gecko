@@ -20,7 +20,7 @@ public:
 	const std::shared_ptr<draw::area> &area( void ) { return _area; }
 
 	void add_layout( const std::shared_ptr<::layout::layout> &l ) { _layouts.push_back( l ); }
-	void add_view( const std::shared_ptr<::view::view> &v ) { _views.push_back( v ); }
+	void add_view( const std::shared_ptr<::view::view> &v );
 	void add_reactor( const std::shared_ptr<::react::reactor> &r ) { _reactors.push_back( r ); }
 
 	virtual void layout( const std::shared_ptr<draw::canvas> &c );
