@@ -17,7 +17,7 @@ namespace {
 
 std::shared_ptr<layout::layout> test_box( const std::shared_ptr<draw::area> &c )
 {
-	auto l =  std::make_shared<layout::box_layout>( c, layout::direction::DOWN );
+	auto l =  std::make_shared<layout::box_layout>( c, direction::DOWN );
 	for ( size_t i = 0; i < 5; ++i )
 	{
 		auto a = l->new_area( i == 2 ? 1.0 : 0.0 );

@@ -17,7 +17,7 @@ namespace {
 void build_form_layout( const std::shared_ptr<gui::window> &win )
 {
 	gui::builder builder( win );
-	auto layout = builder.new_layout<layout::form_layout>( layout::direction::RIGHT );
+	auto layout = builder.new_layout<layout::form_layout>( direction::RIGHT );
 	layout->set_pad( 12.0, 12.0, 12.0, 12.0 );
 	layout->set_spacing( 12.0, 12.0 );
 
@@ -33,7 +33,7 @@ void build_form_layout( const std::shared_ptr<gui::window> &win )
 void build_box_layout( const std::shared_ptr<gui::window> &win )
 {
 	gui::builder builder( win );
-	auto layout = builder.new_layout<layout::box_layout>( layout::direction::DOWN );
+	auto layout = builder.new_layout<layout::box_layout>( direction::DOWN );
 	layout->set_pad( 12.0, 12.0, 12.0, 12.0 );
 	layout->set_spacing( 12.0, 12.0 );
 
@@ -100,7 +100,7 @@ void build_tree_layout( const std::shared_ptr<gui::window> &win )
 void build_button( const std::shared_ptr<gui::window> &win )
 {
 	gui::builder builder( win );
-	auto layout = builder.new_layout<layout::box_layout>( layout::direction::DOWN );
+	auto layout = builder.new_layout<layout::box_layout>( direction::DOWN );
 	layout->set_pad( 12.0, 12.0, 12.0, 12.0 );
 	layout->set_spacing( 12.0, 12.0 );
 

@@ -2,33 +2,14 @@
 #pragma once
 
 #include <core/contract.h>
+#include <core/direction.h>
+#include <core/orientation.h>
 #include <draw/area.h>
 #include <memory>
 #include <iostream>
 
 namespace layout
 {
-
-////////////////////////////////////////
-
-
-/// @brief Directions
-enum class direction
-{
-	LEFT,
-	RIGHT,
-	UP,
-	DOWN,
-};
-
-////////////////////////////////////////
-
-/// @brief Orientations
-enum class orientation
-{
-	HORIZONTAL,
-	VERTICAL,
-};
 
 ////////////////////////////////////////
 

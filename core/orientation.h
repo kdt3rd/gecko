@@ -1,0 +1,14 @@
+
+#pragma once
+
+////////////////////////////////////////
+
+/// @brief Orientations
+enum class orientation
+{
+	HORIZONTAL,
+	VERTICAL,
+};
+
+////////////////////////////////////////
+

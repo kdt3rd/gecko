@@ -1,0 +1,15 @@
+
+#pragma once
+
+////////////////////////////////////////
+
+/// @brief Directions
+enum class direction
+{
+	LEFT,
+	RIGHT,
+	UP,
+	DOWN,
+};
+
+////////////////////////////////////////
