@@ -138,7 +138,7 @@ int dispatcher::execute( void )
 					case 1:
 					case 2:
 					case 3:
-						_mouse->pressed( w, ev->detail );
+						w->mouse_pressed( _mouse, ev->detail );
 						break;
 
 					case 4: // Mouse wheel up
@@ -157,7 +157,7 @@ int dispatcher::execute( void )
 					case 1:
 					case 2:
 					case 3:
-						_mouse->released( w, ev->detail );
+						w->mouse_released( _mouse, ev->detail );
 						break;
 
 					case 4: // Mouse wheel up
@@ -171,7 +171,7 @@ int dispatcher::execute( void )
 			{
 				auto *ev = reinterpret_cast<xcb_motion_notify_event_t*>( event.get() );
 				auto w = _windows[ev->event];
-				_mouse->moved( w, { double(ev->event_x), double(ev->event_y) } );
+				w->mouse_moved( _mouse, { double(ev->event_x), double(ev->event_y) } );
 				break;
 			}
 
