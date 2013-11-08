@@ -70,7 +70,11 @@
 
 - (void)mouseDown:(NSEvent*)event
 {
-	mouse->pressed( win, 1 );
+	NSPoint p = [event locationInWindow];
+	p = [self convertPoint:p fromView:nil];
+	std::cout << "Size: " << self.frame.size.height << ' ' << self.bounds.size.height << std::endl;
+	std::cout << "Mouse down! " << p.x << ' ' << self.frame.size.width - p.y << std::endl;
+	win->mouse_pressed( mouse, { p.x, self.frame.size.width - p.y }, 1 );
 }
 
 ////////////////////////////////////////
@@ -126,9 +130,11 @@ void dispatcher::add_window( const std::shared_ptr<window> &w )
 
 	[nswin orderOut:nil];
 	[nswin cascadeTopLeftFromPoint:NSMakePoint(20,20)];
+	[nswin setIgnoresMouseEvents:NO];
 
 	MyView *view = [[MyView alloc] initWithWindow:w andMouse:_mouse];
 	[nswin setContentView:view];
+	[nswin setInitialFirstResponder:view];
 }
 
 ////////////////////////////////////////
