@@ -89,13 +89,13 @@ public:
 	///
 	/// Set the callback function for mouse button press events.
 	/// @param f Function to call
-	void when_mouse_pressed( std::function<void(const std::shared_ptr<mouse>&,int)> f ) { _mouse_pressed = f; }
+	void when_mouse_pressed( std::function<void(const std::shared_ptr<mouse>&,const draw::point &,int)> f ) { _mouse_pressed = f; }
 
 	/// @brief Set the callback for mouse release events.
 	///
 	/// Set the callback function for mouse button release events.
 	/// @param f Function to call
-	void when_mouse_released( std::function<void(const std::shared_ptr<mouse>&,int)> f ) { _mouse_released = f; }
+	void when_mouse_released( std::function<void(const std::shared_ptr<mouse>&,const draw::point &,int)> f ) { _mouse_released = f; }
 
 	/// @brief Set the callback for mouse motion events.
 	///
@@ -132,14 +132,14 @@ public:
 	/// Sends a mouse button press event of the given button.
 	/// @param w Window in which the press event occurred
 	/// @param button Button which was pressed
-	void mouse_pressed( const std::shared_ptr<mouse> &w, int button ) { if ( _mouse_pressed ) _mouse_pressed( w, button ); }
+	void mouse_pressed( const std::shared_ptr<mouse> &w, const draw::point &p, int button ) { if ( _mouse_pressed ) _mouse_pressed( w, p, button ); }
 
 	/// @brief Send a mouse release event.
 	///
 	/// Sends a mouse button release event of the given button.
 	/// @param w Window in which the release event occurred
 	/// @param button Button which was released
-	void mouse_released( const std::shared_ptr<mouse> &w, int button ) { if ( _mouse_released ) _mouse_released( w, button ); }
+	void mouse_released( const std::shared_ptr<mouse> &w, const draw::point &p, int button ) { if ( _mouse_released ) _mouse_released( w, p, button ); }
 
 	/// @brief Send a mouse motion event.
 	///
@@ -176,8 +176,8 @@ private:
 	std::function<void(void)> _exited;
 
 	std::function<void(const std::shared_ptr<mouse>&,const draw::point&)> _mouse_moved;
-	std::function<void(const std::shared_ptr<mouse>&,int)> _mouse_pressed;
-	std::function<void(const std::shared_ptr<mouse>&,int)> _mouse_released;
+	std::function<void(const std::shared_ptr<mouse>&,const draw::point&,int)> _mouse_pressed;
+	std::function<void(const std::shared_ptr<mouse>&,const draw::point&,int)> _mouse_released;
 
 	std::function<void(const std::shared_ptr<keyboard>&,scancode)> _key_pressed;
 	std::function<void(const std::shared_ptr<keyboard>&,scancode)> _key_released;

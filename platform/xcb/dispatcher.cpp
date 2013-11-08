@@ -140,7 +140,7 @@ int dispatcher::execute( void )
 					case 1:
 					case 2:
 					case 3:
-						w->mouse_pressed( _mouse, ev->detail );
+						w->mouse_pressed( _mouse, { double(ev->event_x), double(ev->event_y) }, ev->detail );
 						break;
 
 					case 4: // Mouse wheel up
@@ -159,7 +159,7 @@ int dispatcher::execute( void )
 					case 1:
 					case 2:
 					case 3:
-						w->mouse_released( _mouse, ev->detail );
+						w->mouse_released( _mouse, { double(ev->event_x), double(ev->event_y) }, ev->detail );
 						break;
 
 					case 4: // Mouse wheel up
