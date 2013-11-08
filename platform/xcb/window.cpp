@@ -153,6 +153,7 @@ void window::set_title( const std::string &t )
 void window::invalidate( const draw::rect &r )
 {
 	exposed();
+	xcb_flush( _connection );
 //	xcb_clear_area( _connection, 1, _win, std::floor( r.x() ), std::floor( r.y() ), std::ceil( r.width() ), std::ceil( r.height() ) );
 }
 
