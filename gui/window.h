@@ -33,6 +33,7 @@ private:
 	void resize( double w, double h );
 
 	void mouse_press( const draw::point &p, int button );
+	void mouse_release( const draw::point &p, int button );
 
 	std::shared_ptr<draw::area> _area;
 	std::shared_ptr<platform::window> _window;

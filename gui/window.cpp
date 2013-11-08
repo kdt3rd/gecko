@@ -18,6 +18,7 @@ window::window( const std::shared_ptr<platform::window> &w )
 	_window->when_exposed( [=] { this->paint(); } );
 	_window->when_resized( [=]( double w, double h ) { this->resize( w, h ); } );
 	_window->when_mouse_pressed( [=]( const std::shared_ptr<platform::mouse> &, const draw::point &p, int b ) { this->mouse_press( p, b ); } );
+	_window->when_mouse_released( [=]( const std::shared_ptr<platform::mouse> &, const draw::point &p, int b ) { this->mouse_release( p, b ); } );
 }
 
 ////////////////////////////////////////
@@ -72,6 +73,13 @@ void window::resize( double w, double h )
 void window::mouse_press( const draw::point &p, int b )
 {
 	_container->mouse_press( p, b );
+}
+
+////////////////////////////////////////
+
+void window::mouse_release( const draw::point &p, int b )
+{
+	_container->mouse_release( p, b );
 }
 
 ////////////////////////////////////////
