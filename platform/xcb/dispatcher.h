@@ -34,6 +34,8 @@ public:
 private:
 	int _exit_code = 0;
 	xcb_connection_t *_connection = nullptr;
+	xcb_atom_t _atom_wm_protocols;
+	xcb_atom_t _atom_delete_window;
 	std::shared_ptr<keyboard> _keyboard;
 	std::shared_ptr<mouse> _mouse;
 	std::map<xcb_window_t, std::shared_ptr<window>> _windows;

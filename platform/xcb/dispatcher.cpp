@@ -4,7 +4,9 @@
 #include <core/contract.h>
 #include <core/pointer.h>
 #include "dispatcher.h"
+#include "atom.h"
 #include <xcb/xcb.h>
+#include <xcb/xcb_icccm.h>
 
 namespace xcb
 {
@@ -15,6 +17,9 @@ dispatcher::dispatcher( xcb_connection_t *c, const std::shared_ptr<keyboard> &k,
 	: _connection( c ), _keyboard( k ), _mouse( m )
 {
 	precondition( _connection, "null connection" );
+
+	_atom_wm_protocols = get_atom( _connection, "WM_PROTOCOLS" );
+	_atom_delete_window = get_atom( _connection, "WM_DELETE_WINDOW" );
 }
 
 ////////////////////////////////////////
@@ -174,8 +179,17 @@ int dispatcher::execute( void )
 			case XCB_REPARENT_NOTIFY:
 				break;
 
+			case XCB_CLIENT_MESSAGE:
+			{
+				auto *ev = reinterpret_cast<xcb_client_message_event_t*>( event.get() );
+				std::cout << "CLIENT MESSAGE! " << ev->data.data32[0] << std::endl;
+				if ( ev->data.data32[0] == _atom_delete_window )
+					done = true;
+				break;
+			}
+
 			default:
-				std::cout << "Unknown event: " << ( event->response_type & ~0x80 ) << std::endl;
+				std::cout << "Unknown event: " << uint32_t( event->response_type & ~0x80 ) << ' ' << uint32_t( event->response_type ) << std::endl;
 		}
 	}
 
@@ -201,6 +215,7 @@ void dispatcher::exit( int code )
 void dispatcher::add_window( const std::shared_ptr<window> &w )
 {
 	_windows[w->id()] = w;
+	xcb_change_property( _connection, XCB_PROP_MODE_REPLACE, w->id(), _atom_wm_protocols, XCB_ATOM_ATOM, 32, 1, &_atom_delete_window );
 }
 
 ////////////////////////////////////////
