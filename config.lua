@@ -12,16 +12,36 @@ if System() == "Linux" then
 	Variable( "cxx", "clang++" )
 	Variable( "cc", "clang" )
 	Variable( "ld", "clang++" )
+	Variable( "binld", "ld" )
+	Variable( "ar", "ar" )
+	Variable( "ranlib", "ranlib" )
 elseif System() == "Darwin" then
 	Variable( "cxx", "clang++" )
 	Variable( "cc", "clang" )
 	Variable( "ld", "clang++" )
+	Variable( "binld", "ld" )
+	Variable( "ar", "ar" )
+	Variable( "ranlib", "ranlib" )
 	CXXFlags( "--stdlib=libc++" )
 	LDFlags( "--stdlib=libc++" )
+elseif System() == "Windows" then
+	local cross = "i686-w64-mingw32-"
+	Variable( "cxx", cross .. "g++" )
+	Variable( "cc", cross .. "gcc" )
+	Variable( "ld", cross .. "g++" )
+	Variable( "binld", cross .. "ld" )
+	Variable( "ar", cross .. "ar" )
+	Variable( "ranlib", cross .. "ranlib" )
+	CFlags( "-mwindows" )
+	LDFlags( "-mwindows" )
+--	LDFlags( "-static-libgcc", "-static-libstdc++" )
+	LDFlags( "-static" )
+	Definition( "UNICODE" )
+--	Variable( "cxx", "i486-mingw32-g++" )
+--	Variable( "cc", "i486-mingw32-gcc" )
+--	Variable( "ld", "i486-mingw32-g++" )
 end
 
-Variable( "binld", "ld" )
-Variable( "ar", "ar" )
 Variable( "moc", "moc-qt4" )
 Variable( "rcc", "rcc" )
 Variable( "luac", "luac" )
@@ -31,7 +51,9 @@ Variable( "copy", "cp" )
 
 CFlags( "-msse", "-msse2", "-msse3" )
 CFlags( "-flax-vector-conversions" )
-CFlags( "-fPIC" )
+if System() == "Linux" then
+	CFlags( "-fPIC" )
+end
 CXXFlags( "-msse", "-msse2", "-msse3" )
 CXXFlags( "-flax-vector-conversions" )
 CXXFlags( "--std=c++11" )
@@ -75,7 +97,7 @@ LDFlags( "-L" .. build_dir .. "/lib" )
 
 Include( source_dir .. "/lib" )
 
-BOTAN_FLAGS, BOTAN_INCLUDE, BOTAN_LIBS = Package( "botan-1.10" )
+--BOTAN_FLAGS, BOTAN_INCLUDE, BOTAN_LIBS = Package( "botan-1.10" )
 --SDL_FLAGS, SDL_INCLUDE, SDL_LIBS = Package( "sdl2" )
 
 if System() == "Linux" then
@@ -86,5 +108,9 @@ if System() == "Linux" then
 elseif System() == "Darwin" then
 	CAIRO_FLAGS, CAIRO_INCLUDE, CAIRO_LIBS = Package( "cairo", "cairo-quartz" )
 	COCOA_FLAGS, COCOA_INCLUDE, COCOA_LIBS = Package( "Cocoa" )
+elseif System() == "Windows" then
+	CAIRO_FLAGS, CAIRO_INCLUDE, CAIRO_LIBS = Package( "cairo", "cairo-win32", "cairo-png", "pixman-1", "zlib" )
+	FREETYPE_FLAGS, FREETYPE_INCLUDE, FREETYPE_LIBS = Package( "freetype2" )
+	FONTCONFIG_FLAGS, FONTCONFIG_INCLUDE, FONTCONFIG_LIBS = Package( "fontconfig", "expat" )
 end
 

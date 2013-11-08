@@ -15,6 +15,7 @@ window::window( const std::shared_ptr<platform::window> &w )
 	_container = std::make_shared<container>( _area );
 	_window->when_exposed( [=] { this->paint(); } );
 	_window->when_resized( [=]( double w, double h ) { this->resize( w, h ); } );
+	_window->when_mouse_pressed( [=]( const std::shared_ptr<platform::mouse> &, const draw::point &p, int b ) { this->mouse_press( p, b ); } );
 }
 
 ////////////////////////////////////////
@@ -54,6 +55,13 @@ void window::resize( double w, double h )
 	_area->set_horizontal( 0.0, w - 1.0 );
 	_area->set_vertical( 0.0, h - 1.0 );
 	_area->set_minimum( w, h );
+}
+
+////////////////////////////////////////
+
+void window::mouse_press( const draw::point &p, int b )
+{
+	_container->mouse_press( p, b );
 }
 
 ////////////////////////////////////////

@@ -4,7 +4,6 @@
 #include <core/contract.h>
 #include <core/pointer.h>
 #include "dispatcher.h"
-#include <xcb/xcb.h>
 
 namespace dummy
 {

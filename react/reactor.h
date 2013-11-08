@@ -14,9 +14,9 @@ public:
 	reactor( void );
 	virtual ~reactor( void );
 
-	virtual bool mousePress( const draw::point &p, int button ) = 0;
-	virtual bool mouseRelease( const draw::point &p, int button ) = 0;
-	virtual bool mouseMove( const draw::point &p ) = 0;
+	virtual bool mouse_press( const draw::point &p, int button ) = 0;
+	virtual bool mouse_release( const draw::point &p, int button ) = 0;
+	virtual bool mouse_move( const draw::point &p ) = 0;
 };
 
 ////////////////////////////////////////

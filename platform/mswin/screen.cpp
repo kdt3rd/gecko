@@ -5,7 +5,7 @@
 #include <string>
 #include <stdexcept>
 
-namespace dummy
+namespace mswin
 {
 
 ////////////////////////////////////////

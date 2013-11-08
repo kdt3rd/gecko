@@ -18,7 +18,7 @@ rule link_exe
   description = Linking ($out)
 
 rule link_static_lib
-  command = $ar $arflags -c -r $out $in ; ranlib $out
+  command = $ar $arflags -c -r $out $in ; $ranlib $out
   description = Static ($out)
 
 rule link_shared_lib

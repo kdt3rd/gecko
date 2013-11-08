@@ -168,7 +168,7 @@ end
 local machine
 function Machine()
 	if machine == nil then
-		machine = posix.uname( "%m" )
+		machine = os.getenv( "CROSS_MACHINE" ) or posix.uname( "%m" )
 	end
 	return machine
 end
@@ -176,9 +176,14 @@ end
 local system
 function System()
 	if system == nil then
-		system = posix.uname( "%s" )
+		system = os.getenv( "CROSS_SYSTEM" ) or posix.uname( "%s" )
 	end
 	return system
+end
+
+function CrossCompile( m, s )
+	machine = m
+	system = s
 end
 
 ----------------------------------------
@@ -764,6 +769,9 @@ end
 function OptExecutable( name, ... )
 	assert( ninja, "Invalid build dir" )
 	local file = BinFile( name )
+	if System() == "Windows" then
+		file = file .. ".exe"
+	end
 	local objs = array_concat( ... )
 	local shared = {}
 	local libs = {}
@@ -1006,7 +1014,7 @@ end
 ----------------------------------------
 function Package( ... )
 	local libs = array_concat( ... )
-	if System() == "Linux" then
+	if System() == "Linux" or System() == "Windows" then
 		libs = table.concat( libs, " " )
 
 		local cflags, err = command( "pkg-config --cflags-only-other " .. libs )

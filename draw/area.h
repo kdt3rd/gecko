@@ -92,6 +92,7 @@ public:
 	void set_vertical( double y1, double y2 ) { _rect.set_vertical( y1, y2 ); }
 
 	bool contains( double x, double y ) const { return _rect.contains( x, y ); }
+	bool contains( const point &p ) const { return _rect.contains( p.x(), p.y() ); }
 
 private:
 	rect _rect;

@@ -1,6 +1,11 @@
 
 #include "path.h"
 
+namespace 
+{
+	const double PI = 3.14159265358979323846;
+}
+
 namespace draw
 {
 
@@ -97,7 +102,7 @@ void path::rounded_rect( const point &p1, const point &p2, double r )
 	const double x2 = std::max( p1.x(), p2.x() );
 	const double y2 = std::max( p1.y(), p2.y() );
 
-	const double degrees = M_PI / 180.0;
+	const double degrees = PI / 180.0;
 
 	move_to( { x1 + r, y1 } );
 	arc_to( { x2 - r, y1 + r }, r, -90.0 * degrees, 0.0 * degrees );
