@@ -24,6 +24,8 @@ public:
 	virtual void layout( const std::shared_ptr<draw::canvas> &canvas );
 	virtual void paint( const std::shared_ptr<draw::canvas> &canvas ) = 0;
 
+	void invalidate( const draw::rect &r ) { if ( _delegate ) _delegate->invalidate( r ); }
+
 private:
 	delegate *_delegate;
 };

@@ -69,6 +69,8 @@ public:
 	/// @param t The window title
 	virtual void set_title( const std::string &t ) = 0;
 
+	virtual void invalidate( const draw::rect &r ) = 0;
+
 //	virtual void set_icon( const icon &i );
 
 	virtual std::shared_ptr<draw::canvas> canvas( void ) = 0;

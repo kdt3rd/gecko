@@ -33,6 +33,8 @@ public:
 	virtual void set_title( const std::string &t );
 //	virtual void set_icon( const icon &i );
 
+	virtual void invalidate( const draw::rect &r );
+
 	/// @brief Canvas to draw on the window.
 	virtual std::shared_ptr<draw::canvas> canvas( void );
 

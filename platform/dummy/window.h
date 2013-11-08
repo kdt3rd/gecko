@@ -29,6 +29,8 @@ public:
 
 	virtual void set_title( const std::string &t );
 //	virtual void set_icon( const icon &i );
+//
+	virtual void invalidate( const draw::rect &r );
 
 	virtual std::shared_ptr<draw::canvas> canvas( void );
 
