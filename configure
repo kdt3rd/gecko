@@ -695,7 +695,7 @@ function Version( ver )
 	return name
 end
 
-function InfoPList( plist, name, dep )
+function InfoPList( plist, name, exe, dep )
 	assert( ninja, "Invalid build dir" )
 	local text = {
 		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -715,7 +715,7 @@ function InfoPList( plist, name, dep )
 		"	<key>CFBundleSignature</key>";
 		"	<string>????</string>";
 		"	<key>CFBundleExecutable</key>";
-		"	<string>test_app</string>";
+		"	<string>" .. exe .. "</string>";
 		"</dict>";
 		"</plist>";
 	}
@@ -754,7 +754,7 @@ function Application( name, exe, ... )
 		local newexe = dir .. "/" ..exe
 		Copy( newexe, BinFile( exe ), dir )
 		ninja:write( "default " .. newexe .. "\n" )
-		InfoPList( plist, name )
+		InfoPList( plist, name, exe )
 	end
 end
 
