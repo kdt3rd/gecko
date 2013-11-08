@@ -78,19 +78,19 @@ void build_tree_layout( const std::shared_ptr<gui::window> &win )
 	std::default_random_engine rand( rd() );
 	std::uniform_int_distribution<int> uniform_dist( 1, 6 );
 
-	std::function<void(std::shared_ptr<layout::tree_layout>,int)> make_tree =
-		[&]( std::shared_ptr<layout::tree_layout> l, int level )
+	std::function<void(std::shared_ptr<layout::tree_layout>,int)> make_tree;
+	make_tree = [&]( std::shared_ptr<layout::tree_layout> l, int level )
+	{
+		int count = uniform_dist( rand );
+		for ( int i = 0; i < count; ++i )
 		{
-			int count = uniform_dist( rand );
-			for ( int i = 0; i < count; ++i )
-			{
-				std::stringstream tmp;
-				tmp << char( 'A' + i );
-				builder.make_label( l->new_area( 0.0 ), tmp.str() );
-				if ( level < 2 )
-					make_tree( l->new_branch( 0.0 ), level + 1 );
-			}
-		};
+			std::stringstream tmp;
+			tmp << char( 'A' + i );
+			builder.make_label( l->new_area( 0.0 ), tmp.str() );
+			if ( level < 2 )
+				make_tree( l->new_branch( 0.0 ), level + 1 );
+		}
+	};
 
 	make_tree( layout, 0 );
 }
