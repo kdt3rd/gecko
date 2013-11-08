@@ -10,6 +10,7 @@ srcs = {
 	"mouse.cpp";
 	"font_manager.cpp";
 	"dispatcher.cpp";
+	"atom.cpp";
 }
 
 Library( "platform-xcb", Compile( srcs ), LinkLibs( "platform", "draw-cairo" ), LinkSys( XCB_LIBS, CAIRO_LIBS, FREETYPE_LIBS, FONTCONFIG_LIBS ) )
