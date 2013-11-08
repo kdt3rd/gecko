@@ -97,27 +97,44 @@ void build_tree_layout( const std::shared_ptr<gui::window> &win )
 
 ////////////////////////////////////////
 
+void build_button( const std::shared_ptr<gui::window> &win )
+{
+	gui::builder builder( win );
+	auto layout = builder.new_layout<layout::box_layout>( layout::direction::DOWN );
+	layout->set_pad( 12.0, 12.0, 12.0, 12.0 );
+	layout->set_spacing( 12.0, 12.0 );
+
+	auto area = layout->new_area();
+	builder.make_button( area, "Button" );
+}
+
+////////////////////////////////////////
+
 int safemain( int argc, char **argv )
 {
 	auto app = std::make_shared<gui::application>();
 	app->push();
 	app->set_style( std::make_shared<gui::cocoa_style>() );
 
-	auto win1 = app->new_window();
-	build_form_layout( win1 );
-	win1->show();
+//	auto win1 = app->new_window();
+//	build_form_layout( win1 );
+//	win1->show();
 
-	auto win2 = app->new_window();
-	build_box_layout( win2 );
-	win2->show();
+//	auto win2 = app->new_window();
+//	build_box_layout( win2 );
+//	win2->show();
 
-	auto win3 = app->new_window();
-	build_grid_layout( win3 );
-	win3->show();
+//	auto win3 = app->new_window();
+//	build_grid_layout( win3 );
+//	win3->show();
 
-	auto win4 = app->new_window();
-	build_tree_layout( win4 );
-	win4->show();
+//	auto win4 = app->new_window();
+//	build_tree_layout( win4 );
+//	win4->show();
+
+	auto win5 = app->new_window();
+	build_button( win5 );
+	win5->show();
 
 	int code = app->run();
 	app->pop();
