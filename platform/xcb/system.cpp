@@ -19,6 +19,8 @@ system::system( void )
 {
 	int prefScreen = 0;
 	_connection = xcb_connect( nullptr, &prefScreen );
+	if ( xcb_connection_has_error( _connection ) )
+		throw std::runtime_error( "no xbc connection" );
 
 	const xcb_setup_t *setup = xcb_get_setup( _connection );
 	precondition( setup, "not xcb setup" );
