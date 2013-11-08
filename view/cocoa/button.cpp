@@ -57,14 +57,36 @@ void button::layout( const std::shared_ptr<draw::canvas> &canvs )
 
 void button::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
-	draw::paint p( border1 );
-	p.set_stroke_width( 1.0 );
-	p.set_fill_linear( _area->top_left(), _area->bottom_left(), grad1 );
+	draw::paint p;
+
+	if ( _pressed )
+	{
+		p.set_stroke_color( border2 );
+		p.set_stroke_width( 1.0 );
+		p.set_fill_linear( _area->top_left(), _area->bottom_left(), grad2 );
+	}
+	else
+	{
+		p.set_stroke_color( border1 );
+		p.set_stroke_width( 1.0 );
+		p.set_fill_linear( _area->top_left(), _area->bottom_left(), grad1 );
+	}
 
 	draw::path rpath;
 	rpath.rounded_rect( _area->top_left(), _area->bottom_right(), 3 );
 
 	canvas->draw_path( rpath, p );
+}
+
+////////////////////////////////////////
+
+void button::set_pressed( bool p )
+{
+	if ( p != _pressed )
+	{
+		_pressed = p;
+		invalidate( _area->rectangle() );
+	}
 }
 
 ////////////////////////////////////////

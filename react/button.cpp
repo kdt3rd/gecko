@@ -24,7 +24,8 @@ bool button::mouse_press( const draw::point &p, int button )
 {
 	if ( _area->contains( p ) )
 	{
-		std::cout << "Button pressed" << std::endl;
+		if ( _pressed )
+			_pressed( true );
 		return true;
 	}
 	return false;
@@ -34,6 +35,7 @@ bool button::mouse_press( const draw::point &p, int button )
 
 bool button::mouse_release( const draw::point &p, int button )
 {
+	_pressed( false );
 	return false;
 }
 
