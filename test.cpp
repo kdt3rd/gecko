@@ -50,7 +50,9 @@ int safemain( int argc, char **argv )
 
 //	std::shared_ptr<platform::points> ps;
 	auto area = std::make_shared<draw::area>( draw::point( 10.5, 10.5 ), 150, 21 );
+
 	cocoa::button b( area );
+
 	auto draw_stuff = [&]
 	{
 		std::cout << "Drawing" << std::endl;
@@ -83,7 +85,7 @@ int safemain( int argc, char **argv )
 		dispatcher->exit( 0 );
 	};
 
-	auto mousepress = [&]( const std::shared_ptr<platform::mouse> &m, int b )
+	auto mousepress = [&]( const std::shared_ptr<platform::mouse> &m, const draw::point &p, int b )
 	{
 		std::cout << "Press: " << b << std::endl;
 	};
