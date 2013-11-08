@@ -4,6 +4,7 @@
 #include "application.h"
 #include "style.h"
 #include <view/cocoa/button.h>
+#include <react/button.h>
 
 namespace gui
 {
@@ -44,6 +45,9 @@ void builder::make_button( const std::shared_ptr<draw::area> &a, const std::stri
 
 	auto text = sty->button_text( a, txt );
 	_container->add_view( text );
+
+	auto react = std::make_shared<react::button>( a );
+	_container->add_reactor( react );
 }
 
 ////////////////////////////////////////
