@@ -6,6 +6,7 @@
 #include <functional>
 #include <draw/canvas.h>
 #include "mouse.h"
+#include "keyboard.h"
 
 namespace platform
 {
@@ -102,6 +103,18 @@ public:
 	/// @param f Function to call
 	void when_mouse_moved( std::function<void(const std::shared_ptr<mouse>&,const draw::point &)> f ) { _mouse_moved = f; }
 
+	/// @brief Set the callback for key press events.
+	///
+	/// Set the callback function for key press events.
+	/// @param f Function to call
+	void when_key_pressed( std::function<void(const std::shared_ptr<keyboard>&,scancode)> f ) { _key_pressed = f; }
+
+	/// @brief Set the callback for key release events.
+	///
+	/// Set the callback function for key release events.
+	/// @param f Function to call
+	void when_key_released( std::function<void(const std::shared_ptr<keyboard>&,scancode)> f ) { _key_released = f; }
+
 	void closed( void ) { if ( _closed ) _closed(); }
 	void shown( void ) { if ( _shown ) _shown(); }
 	void hidden( void ) { if ( _hidden ) _hidden(); }
@@ -136,6 +149,18 @@ public:
 	/// @param y New y location of the mouse
 	void mouse_moved( const std::shared_ptr<mouse> &w, const draw::point &p ) { if ( _mouse_moved ) _mouse_moved( w, p ); }
 
+	/// @brief Send a key press event.
+	///
+	/// Send a key press event with the given scan code.
+	/// @param sc Key which was pressed
+	void key_pressed( const std::shared_ptr<keyboard> &k, scancode sc ) { if ( _key_pressed ) _key_pressed( k, sc ); }
+
+	/// @brief Send a key release event.
+	///
+	/// Send a key release event with the given scan code.
+	/// @param sc Key which was release
+	void key_released( const std::shared_ptr<keyboard> &k, scancode sc ) { if ( _key_released ) _key_released( k, sc ); }
+
 
 private:
 	std::function<void(void)> _closed;
@@ -153,6 +178,9 @@ private:
 	std::function<void(const std::shared_ptr<mouse>&,const draw::point&)> _mouse_moved;
 	std::function<void(const std::shared_ptr<mouse>&,int)> _mouse_pressed;
 	std::function<void(const std::shared_ptr<mouse>&,int)> _mouse_released;
+
+	std::function<void(const std::shared_ptr<keyboard>&,scancode)> _key_pressed;
+	std::function<void(const std::shared_ptr<keyboard>&,scancode)> _key_released;
 };
 
 ////////////////////////////////////////

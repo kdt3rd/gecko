@@ -75,7 +75,7 @@ int safemain( int argc, char **argv )
 
 	auto dispatcher = sys->get_dispatcher();
 
-	auto keypress = [&]( platform::scancode sc )
+	auto keypress = [&]( const std::shared_ptr<platform::keyboard> &k, platform::scancode sc )
 	{
 		auto canvas = win->canvas();
 		canvas->screenshot_png( "test.png" );
@@ -83,22 +83,20 @@ int safemain( int argc, char **argv )
 		dispatcher->exit( 0 );
 	};
 
-	auto mousepress = [&]( const std::shared_ptr<platform::window> &w, int b )
+	auto mousepress = [&]( const std::shared_ptr<platform::mouse> &m, int b )
 	{
 		std::cout << "Press: " << b << std::endl;
 	};
 
-	auto mousemove = [&]( const std::shared_ptr<platform::window> &w, const draw::point &p )
+	auto mousemove = [&]( const std::shared_ptr<platform::mouse> &m, const draw::point &p )
 	{
 		std::cout << "Moved: " << p.x() << ',' << p.y() << std::endl;
 	};
 
-	auto kbd = sys->get_keyboard();
-	kbd->when_pressed( keypress );
+	win->when_key_pressed( keypress );
 
-	auto mouse = sys->get_mouse();
-	mouse->when_pressed( mousepress );
-	mouse->when_moved( mousemove );
+	win->when_mouse_pressed( mousepress );
+	win->when_mouse_moved( mousemove );
 
 	return dispatcher->execute();
 }

@@ -108,16 +108,18 @@ int dispatcher::execute( void )
 			case XCB_KEY_PRESS:
 			{
 				auto *ev = reinterpret_cast<xcb_key_press_event_t*>( event.get() );
+				auto w = _windows[ev->event];
 				platform::scancode sc = _keyboard->get_scancode( ev->detail );
-				_keyboard->pressed( sc );
+				w->key_pressed( _keyboard, sc );
 				break;
 			}
 
 			case XCB_KEY_RELEASE:
 			{
 				auto *ev = reinterpret_cast<xcb_key_press_event_t*>( event.get() );
+				auto w = _windows[ev->event];
 				platform::scancode sc = _keyboard->get_scancode( ev->detail );
-				_keyboard->released( sc );
+				w->key_released( _keyboard, sc );
 				break;
 			}
 
