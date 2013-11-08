@@ -48,6 +48,12 @@ void builder::make_button( const std::shared_ptr<draw::area> &a, const std::stri
 
 	auto react = std::make_shared<react::button>( a );
 	_container->add_reactor( react );
+
+	auto cbutton = std::dynamic_pointer_cast<cocoa::button>( frame );
+	if ( !cbutton )
+		throw std::runtime_error( "not a cocoa button" );
+
+	react->when_pressed( [=]( bool p ) { cbutton->set_pressed( p ); } );
 }
 
 ////////////////////////////////////////
