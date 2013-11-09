@@ -24,6 +24,14 @@ font::font( cairo_font_face_t *face, std::string fam, std::string sty, double sz
 	_font = cairo_scaled_font_create( face, &mat, &ctm, opts );
 
 	cairo_font_options_destroy( opts );
+
+	cairo_font_extents_t ex;
+	cairo_scaled_font_extents( _font, &ex );
+
+	cairo_text_extents_t tex;
+	cairo_scaled_font_text_extents( _font, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", &tex );
+
+	_extents = { -tex.y_bearing, ex.descent, ex.height, ex.max_x_advance, ex.max_y_advance };
 }
 
 ////////////////////////////////////////
@@ -37,9 +45,7 @@ font::~font( void )
 
 draw::font_extents font::extents( void )
 {
-	cairo_font_extents_t ex;
-	cairo_scaled_font_extents( _font, &ex );
-	return { ex.ascent, ex.descent, ex.height, ex.max_x_advance, ex.max_y_advance };
+	return _extents;
 }
 
 ////////////////////////////////////////

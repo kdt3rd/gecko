@@ -3,6 +3,7 @@
 
 #include <cairo.h>
 #include <draw/font.h>
+#include <draw/extents.h>
 
 namespace cairo
 {
@@ -23,6 +24,7 @@ public:
 
 private:
 	cairo_scaled_font_t *_font = nullptr;
+	draw::font_extents _extents;
 };
 
 ////////////////////////////////////////
