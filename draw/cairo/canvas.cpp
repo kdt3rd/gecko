@@ -42,9 +42,9 @@ void canvas::clear_surface( void )
 	{
 		cairo_surface_finish( _surface );
 		cairo_destroy( _context );
-		check_error();
 		_context = nullptr;
 		_surface = nullptr;
+		check_error();
 	}
 }
 
@@ -267,8 +267,9 @@ void canvas::set_cairo_font( const std::shared_ptr<draw::font> &bfont )
 
 void canvas::check_error( void )
 {
-	if ( cairo_status( _context ) )
-		throw std::runtime_error( cairo_status_to_string( cairo_status( _context ) ) );
+	if ( _context )
+		if ( cairo_status( _context ) )
+			throw std::runtime_error( cairo_status_to_string( cairo_status( _context ) ) );
 }
 
 ////////////////////////////////////////

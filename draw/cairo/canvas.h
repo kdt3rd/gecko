@@ -20,7 +20,7 @@ public:
 	cairo_surface_t *get_surface( void ) const { return _surface; }
 
 	/// @brief Check if the canvas has a cairo surface.
-	bool has_surface( void ) const { return bool(_surface); }
+	bool has_surface( void ) const { return _surface != nullptr; }
 
 	/// @brief Set the cairo surface.
 	void set_surface( cairo_surface_t *surf );
