@@ -19,8 +19,13 @@ public:
 	{
 	}
 
-	rect( const point &p, double ww, double hh )
-		: _position( p ), _w( ww ), _h( hh )
+	rect( const point &p, double w, double h )
+		: _position( p ), _w( w ), _h( h )
+	{
+	}
+
+	rect( double w, double h )
+		: _w( w ), _h( h )
 	{
 	}
 
