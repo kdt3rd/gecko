@@ -45,7 +45,6 @@ void window::show( void )
 
 void window::invalidate( const draw::rect &r )
 {
-	std::cout << "Invalidate! " << std::endl;
 	_window->invalidate( r );
 }
 

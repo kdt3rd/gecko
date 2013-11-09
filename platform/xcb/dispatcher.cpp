@@ -184,7 +184,6 @@ int dispatcher::execute( void )
 			case XCB_CLIENT_MESSAGE:
 			{
 				auto *ev = reinterpret_cast<xcb_client_message_event_t*>( event.get() );
-				std::cout << "CLIENT MESSAGE! " << ev->data.data32[0] << std::endl;
 				if ( ev->data.data32[0] == _atom_delete_window )
 					done = true;
 				break;
