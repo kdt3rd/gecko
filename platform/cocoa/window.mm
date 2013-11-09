@@ -19,6 +19,7 @@ namespace cocoa
 struct window::objcwrapper
 {
 	NSWindow *win;
+	NSView *view;
 	CGContext *ctxt;
 };
 
@@ -95,21 +96,11 @@ void window::resized( double w, double h )
 {
 	_last_w = w;
 	_last_h = h;
-	_canvas.reset();
-/*
 	if ( _canvas )
 	{
-		if ( _canvas->has_surface() )
-		{
-			cairo_surface_t *surf = _canvas->get_surface();
-//			_canvas->clear_surface();
-			cairo_surface_destroy( _canvas->get_surface() );
-		}
-		CGContextTranslateCTM( _impl->ctxt, 0.0, _last_h );
-		CGContextScaleCTM( _impl->ctxt, 1.0, -1.0 );
-		_canvas->set_surface( cairo_quartz_surface_create_for_cg_context( _impl->ctxt, _last_w, _last_h ) );
+		_canvas->clear_surface();
+		_impl->ctxt = nullptr;
 	}
-*/
 	platform::window::resized( w, h );
 }
 
@@ -117,8 +108,14 @@ void window::resized( double w, double h )
 
 void window::exposed( void )
 {
-	std::cout << "EXPOSED" << std::endl;
 	platform::window::exposed();
+}
+
+////////////////////////////////////////
+
+void window::invalidate( const draw::rect &r )
+{
+	[_impl->view setNeedsDisplay:YES];
 }
 
 ////////////////////////////////////////
@@ -140,23 +137,26 @@ void window::set_title( const std::string &t )
 std::shared_ptr<draw::canvas> window::canvas( void )
 {
 	if ( !_canvas )
-	{
 		_canvas = std::make_shared<cairo::canvas>();
+
+	if ( _canvas->get_surface() == nullptr )
+	{
 		NSGraphicsContext *nsgctxt = [_impl->win graphicsContext];
 		_impl->ctxt = (CGContextRef)[nsgctxt graphicsPort];
-		CGContextTranslateCTM( _impl->ctxt, 0.0, _last_h );
-		CGContextScaleCTM( _impl->ctxt, 1.0, -1.0 );
-		std::cout << "Created with context: " << (void*)_impl->ctxt << std::endl;
+//		CGContextTranslateCTM( _impl->ctxt, 0.0, _last_h );
+//		CGContextScaleCTM( _impl->ctxt, 1.0, -1.0 );
 		_canvas->set_surface( cairo_quartz_surface_create_for_cg_context( _impl->ctxt, _last_w, _last_h ) );
 	}
+
 	return _canvas;
 }
 
 ////////////////////////////////////////
 
-void window::set_ns_window( void *w )
+void window::set_ns( void *w, void *v )
 {
 	_impl->win = (NSWindow *)w;
+	_impl->view = (NSView *)v;
 }
 
 ////////////////////////////////////////

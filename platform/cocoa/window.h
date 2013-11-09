@@ -36,7 +36,9 @@ public:
 	virtual void resized( double w, double h );
 	virtual void exposed( void );
 
-	void set_ns_window( void *nswin );
+	virtual void invalidate( const draw::rect &r );
+
+	void set_ns( void *nswin, void *nsview );
 
 private:
 	struct objcwrapper;
