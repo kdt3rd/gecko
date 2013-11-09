@@ -163,6 +163,8 @@ public:
 	/// @param sc Key which was release
 	void key_released( const std::shared_ptr<keyboard> &k, scancode sc ) { if ( _key_released ) _key_released( k, sc ); }
 
+	virtual double width( void ) = 0;
+	virtual double height( void ) = 0;
 
 private:
 	std::function<void(void)> _closed;

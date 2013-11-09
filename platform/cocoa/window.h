@@ -40,6 +40,9 @@ public:
 
 	void set_ns( void *nswin, void *nsview );
 
+	virtual double width( void ) { return _last_w; }
+	virtual double height( void ) { return _last_h; }
+
 private:
 	struct objcwrapper;
 	objcwrapper *_impl;
