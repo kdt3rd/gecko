@@ -50,6 +50,9 @@ public:
 	/// @brief Called when the window has resized.
 	virtual void resized( double w, double h );
 
+	virtual double width( void ) { return _last_w; }
+	virtual double height( void ) { return _last_h; }
+
 private:
 	void update_canvas( double w, double h );
 
