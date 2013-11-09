@@ -13,10 +13,7 @@ srcs = {
 Library( "platform", Compile( srcs ), LinkLibs( "draw" ) )
 
 if System() == "Linux" then
-	if Building( "mingw" ) then
-	else
-		SubDir( "xcb" )
-	end
+	SubDir( "xcb" )
 elseif System() == "Darwin" then
 	SubDir( "xcb" )
 	SubDir( "cocoa" )
