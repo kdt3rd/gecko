@@ -38,6 +38,15 @@ public:
 	{
 	}
 
+	/// @brief Constructor.
+	///
+	/// @param w Width of the area
+	/// @param h Height of the area
+	area( double w, double h )
+		: _rect( { 0, 0 }, w, h )
+	{
+	}
+
 	/// @brief The rectangle.
 	///
 	/// The rectangle representing the area.
