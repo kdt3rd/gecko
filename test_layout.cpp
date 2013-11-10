@@ -164,8 +164,8 @@ int safemain( int argc, char **argv )
 
 	recompute_layout( 640, 480 );
 
-	win->when_resized( recompute_layout );
-	win->when_exposed( redraw_window );
+	win->resized.callback( recompute_layout );
+	win->exposed.callback( redraw_window );
 
 	win->set_title( "Hello World" );
 	win->resize( 640, 480 );

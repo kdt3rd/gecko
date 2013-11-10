@@ -125,14 +125,15 @@ void window::resize( double w, double h )
 {
 	const static uint32_t values[] = { uint32_t(w+0.5), uint32_t(h+0.5) };
 	xcb_configure_window( _connection, _win, XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, values );
+	resize_canvas( w, h );
 }
 
 ////////////////////////////////////////
 
-void window::resized( double w, double h )
+void window::resize_canvas( double w, double h )
 {
 	update_canvas( w, h );
-	platform::window::resized( w, h );
+	resized( w, h );
 }
 
 ////////////////////////////////////////

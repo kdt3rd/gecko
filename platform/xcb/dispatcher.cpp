@@ -59,7 +59,7 @@ int dispatcher::execute( void )
 				if ( w->check_last_position( ev->x, ev->y ) )
 					w->moved( ev->x, ev->y );
 				if ( w->check_last_size( ev->width, ev->height ) )
-					w->resized( ev->width, ev->height );
+					w->resize_canvas( ev->width, ev->height );
 				break;
 			}
 

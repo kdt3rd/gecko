@@ -69,7 +69,7 @@ int safemain( int argc, char **argv )
 
 	};
 
-	win->when_exposed( draw_stuff );
+	win->exposed.callback( draw_stuff );
 	win->resize( 400, 400 );
 	win->set_title( "Hello World" );
 	win->show();
@@ -95,10 +95,10 @@ int safemain( int argc, char **argv )
 		std::cout << "Moved: " << p.x() << ',' << p.y() << std::endl;
 	};
 
-	win->when_key_pressed( keypress );
+	win->key_pressed.callback( keypress );
 
-	win->when_mouse_pressed( mousepress );
-	win->when_mouse_moved( mousemove );
+	win->mouse_pressed.callback( mousepress );
+	win->mouse_moved.callback( mousemove );
 
 	return dispatcher->execute();
 }

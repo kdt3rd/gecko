@@ -15,10 +15,10 @@ window::window( const std::shared_ptr<platform::window> &w )
 	_area = std::make_shared<draw::area>( _window->width(), _window->height() );
 	_container = std::make_shared<container>( _area );
 	_container->set_delegate( this );
-	_window->when_exposed( [=] { this->paint(); } );
-	_window->when_resized( [=]( double w, double h ) { this->resize( w, h ); } );
-	_window->when_mouse_pressed( [=]( const std::shared_ptr<platform::mouse> &, const draw::point &p, int b ) { this->mouse_press( p, b ); } );
-	_window->when_mouse_released( [=]( const std::shared_ptr<platform::mouse> &, const draw::point &p, int b ) { this->mouse_release( p, b ); } );
+	_window->exposed.callback( [=] { this->paint(); } );
+	_window->resized.callback( [=]( double w, double h ) { this->resize( w, h ); } );
+	_window->mouse_pressed.callback( [=]( const std::shared_ptr<platform::mouse> &, const draw::point &p, int b ) { this->mouse_press( p, b ); } );
+	_window->mouse_released.callback( [=]( const std::shared_ptr<platform::mouse> &, const draw::point &p, int b ) { this->mouse_release( p, b ); } );
 }
 
 ////////////////////////////////////////
