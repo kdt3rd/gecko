@@ -3,6 +3,7 @@
 
 #include <memory>
 #include "reactor.h"
+#include <core/action.h>
 #include <draw/area.h>
 
 namespace react
@@ -16,7 +17,8 @@ public:
 	button( const std::shared_ptr<draw::area> &a );
 	~button( void );
 
-	void when_pressed( const std::function<void(bool)> &f ) { _pressed = f; }
+	action<void( bool )> pressed;
+	action<void( void )> activated;
 
 	virtual bool mouse_press( const draw::point &p, int button );
 	virtual bool mouse_release( const draw::point &p, int button );
@@ -24,7 +26,6 @@ public:
 
 private:
 	std::shared_ptr<draw::area> _area;
-	std::function<void(bool)> _pressed;
 };
 
 ////////////////////////////////////////
