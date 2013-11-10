@@ -172,7 +172,7 @@ int safemain( int argc, char **argv )
 	win->show();
 
 	std::shared_ptr<platform::timer> t = sys->new_timer();
-	t->when_elapsed( [&]
+	t->elapsed.callback( [&]
 	{
 		t->schedule( 10.0 );
 	} );

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <functional>
+#include <core/action.h>
 
 namespace platform
 {
@@ -29,17 +29,10 @@ public:
 	/// @brief Cancel the timer.
 	virtual void cancel( void ) = 0;
 
-	/// @brief Set the callback for the timer.
+	/// @brief Callback for the timer.
 	///
 	/// The callback will be called once the timer is elapsed.
-	/// @param f Function to call
-	void when_elapsed( const std::function<void(void)> &f ) { _elapsed = f; }
-
-	/// @brief Send a timer elapsed event.
-	void elapsed( void ) { if ( _elapsed ) _elapsed(); }
-
-private:
-	std::function<void(void)> _elapsed;
+	action<void( void )> elapsed;
 };
 
 ////////////////////////////////////////
