@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <functional>
+
 template<typename> class action; // undefined
 
 template<typename Result, typename ... Args>
