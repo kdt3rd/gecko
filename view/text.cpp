@@ -8,7 +8,7 @@ namespace view
 
 ////////////////////////////////////////
 
-text::text( const std::shared_ptr<draw::area> &a )
+text::text( const std::shared_ptr<layout::area> &a )
 	: _area( a )
 {
 }

@@ -12,7 +12,7 @@ window::window( const std::shared_ptr<platform::window> &w )
 	: _window( w )
 {
 	precondition( bool(_window), "null window" );
-	_area = std::make_shared<draw::area>( _window->width(), _window->height() );
+	_area = std::make_shared<layout::area>( _window->width(), _window->height() );
 	_container = std::make_shared<container>( _area );
 	_container->set_delegate( this );
 	_window->exposed.callback( [=] { this->paint(); } );

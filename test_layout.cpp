@@ -15,7 +15,7 @@ namespace {
 
 ////////////////////////////////////////
 
-std::shared_ptr<layout::layout> test_box( const std::shared_ptr<draw::area> &c )
+std::shared_ptr<layout::layout> test_box( const std::shared_ptr<layout::area> &c )
 {
 	auto l =  std::make_shared<layout::box_layout>( c, direction::DOWN );
 	for ( size_t i = 0; i < 5; ++i )
@@ -28,7 +28,7 @@ std::shared_ptr<layout::layout> test_box( const std::shared_ptr<draw::area> &c )
 
 ////////////////////////////////////////
 
-std::shared_ptr<layout::layout> test_tree( const std::shared_ptr<draw::area> &c )
+std::shared_ptr<layout::layout> test_tree( const std::shared_ptr<layout::area> &c )
 {
 	auto l = std::make_shared<layout::tree_layout>( c, 24.0 );
 	for ( size_t i = 0; i < 2; ++i )
@@ -54,9 +54,9 @@ std::shared_ptr<layout::layout> test_tree( const std::shared_ptr<draw::area> &c 
 
 ////////////////////////////////////////
 
-std::shared_ptr<layout::layout> test_form( const std::shared_ptr<draw::area> &c )
+std::shared_ptr<layout::layout> test_form( const std::shared_ptr<layout::area> &c )
 {
-	std::shared_ptr<draw::area> a, b;
+	std::shared_ptr<layout::area> a, b;
 
 	auto l = std::make_shared<layout::form_layout>( c );
 
@@ -72,7 +72,7 @@ std::shared_ptr<layout::layout> test_form( const std::shared_ptr<draw::area> &c 
 
 ////////////////////////////////////////
 
-std::shared_ptr<layout::layout> test_grid( std::shared_ptr<draw::area> c )
+std::shared_ptr<layout::layout> test_grid( std::shared_ptr<layout::area> c )
 {
 	auto l = std::make_shared<layout::grid_layout>( c );
 
@@ -91,7 +91,7 @@ std::shared_ptr<layout::layout> test_grid( std::shared_ptr<draw::area> c )
 
 ////////////////////////////////////////
 
-std::map<std::string,std::function<std::shared_ptr<layout::layout>(std::shared_ptr<draw::area>)>> tests =
+std::map<std::string,std::function<std::shared_ptr<layout::layout>(std::shared_ptr<layout::area>)>> tests =
 {
 	{ "grid", test_grid },
 	{ "box", test_box },
@@ -108,7 +108,7 @@ int safemain( int argc, char **argv )
 	auto sys = std::make_shared<platform::native_system>();
 	auto win = sys->new_window();
 
-	auto c = std::make_shared<draw::area>();
+	auto c = std::make_shared<layout::area>();
 
 	auto layout = tests[argv[1]]( c );
 

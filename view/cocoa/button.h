@@ -11,7 +11,7 @@ namespace cocoa
 class button : public view::view
 {
 public:
-	button( const std::shared_ptr<draw::area> &a );
+	button( const std::shared_ptr<layout::area> &a );
 	virtual ~button( void );
 
 	virtual void layout( const std::shared_ptr<draw::canvas> &canvas );
@@ -21,7 +21,7 @@ public:
 
 private:
 	bool _pressed = false;
-	std::shared_ptr<draw::area> _area;
+	std::shared_ptr<layout::area> _area;
 };
 
 ////////////////////////////////////////

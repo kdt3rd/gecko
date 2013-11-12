@@ -49,7 +49,7 @@ int safemain( int argc, char **argv )
 	}
 
 //	std::shared_ptr<platform::points> ps;
-	auto area = std::make_shared<draw::area>( draw::point( 10.5, 10.5 ), 150, 21 );
+	auto area = std::make_shared<layout::area>( draw::point( 10.5, 10.5 ), 150, 21 );
 
 	cocoa::button b( area );
 

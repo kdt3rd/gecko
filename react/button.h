@@ -4,7 +4,7 @@
 #include <memory>
 #include "reactor.h"
 #include <core/action.h>
-#include <draw/area.h>
+#include <layout/area.h>
 
 namespace react
 {
@@ -14,7 +14,7 @@ namespace react
 class button : public reactor
 {
 public:
-	button( const std::shared_ptr<draw::area> &a );
+	button( const std::shared_ptr<layout::area> &a );
 	~button( void );
 
 	action<void( bool )> pressed;
@@ -25,7 +25,7 @@ public:
 	virtual bool mouse_move( const draw::point &p );
 
 private:
-	std::shared_ptr<draw::area> _area;
+	std::shared_ptr<layout::area> _area;
 };
 
 ////////////////////////////////////////

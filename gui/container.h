@@ -14,10 +14,10 @@ namespace gui
 class container : public view::view, public layout::layout, public react::reactor
 {
 public:
-	container( const std::shared_ptr<draw::area> &a );
+	container( const std::shared_ptr<::layout::area> &a );
 	~container( void );
 
-	const std::shared_ptr<draw::area> &area( void ) { return _area; }
+	const std::shared_ptr<::layout::area> &area( void ) { return _area; }
 
 	void add_layout( const std::shared_ptr<::layout::layout> &l ) { _layouts.push_back( l ); }
 	void add_view( const std::shared_ptr<::view::view> &v );
@@ -34,7 +34,7 @@ public:
 	virtual bool mouse_move( const draw::point &p );
 
 private:
-	std::shared_ptr<draw::area> _area;
+	std::shared_ptr<::layout::area> _area;
 	std::vector<std::shared_ptr<::view::view>> _views;
 	std::vector<std::shared_ptr<::layout::layout>> _layouts;
 	std::vector<std::shared_ptr<reactor>> _reactors;

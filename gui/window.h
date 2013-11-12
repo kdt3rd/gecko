@@ -35,7 +35,7 @@ private:
 	void mouse_press( const draw::point &p, int button );
 	void mouse_release( const draw::point &p, int button );
 
-	std::shared_ptr<draw::area> _area;
+	std::shared_ptr<layout::area> _area;
 	std::shared_ptr<platform::window> _window;
 	std::shared_ptr<container> _container;
 };

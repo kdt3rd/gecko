@@ -25,7 +25,7 @@ cocoa_style::~cocoa_style( void )
 
 ////////////////////////////////////////
 
-std::shared_ptr<view::view> cocoa_style::bg_frame( const std::shared_ptr<draw::area> &area )
+std::shared_ptr<view::view> cocoa_style::bg_frame( const std::shared_ptr<layout::area> &area )
 {
 	auto ret = std::make_shared<view::flat>( area );
 	ret->set_color( { 0.9294, 0.9294, 0.9294, 1.0 } );
@@ -34,14 +34,14 @@ std::shared_ptr<view::view> cocoa_style::bg_frame( const std::shared_ptr<draw::a
 
 ////////////////////////////////////////
 
-std::shared_ptr<view::view> cocoa_style::button_frame( const std::shared_ptr<draw::area> &area )
+std::shared_ptr<view::view> cocoa_style::button_frame( const std::shared_ptr<layout::area> &area )
 {
 	return std::make_shared<cocoa::button>( area );
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<view::view> cocoa_style::button_text( const std::shared_ptr<draw::area> &area, const std::string &txt )
+std::shared_ptr<view::view> cocoa_style::button_text( const std::shared_ptr<layout::area> &area, const std::string &txt )
 {
 	auto ret = std::make_shared<view::text>( area );
 	ret->set_font( _font_button );
@@ -52,7 +52,7 @@ std::shared_ptr<view::view> cocoa_style::button_text( const std::shared_ptr<draw
 
 ////////////////////////////////////////
 
-std::shared_ptr<view::view> cocoa_style::label_text( const std::shared_ptr<draw::area> &area, const std::string &txt )
+std::shared_ptr<view::view> cocoa_style::label_text( const std::shared_ptr<layout::area> &area, const std::string &txt )
 {
 	auto ret = std::make_shared<view::text>( area );
 	ret->set_font( _font_button );

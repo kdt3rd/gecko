@@ -27,7 +27,7 @@ builder::~builder( void )
 
 ////////////////////////////////////////
 
-void builder::make_label( const std::shared_ptr<draw::area> &a, const std::string &txt )
+void builder::make_label( const std::shared_ptr<layout::area> &a, const std::string &txt )
 {
 	auto sty = application::current()->get_style();
 	auto text = sty->label_text( a, txt );
@@ -36,7 +36,7 @@ void builder::make_label( const std::shared_ptr<draw::area> &a, const std::strin
 
 ////////////////////////////////////////
 
-void builder::make_button( const std::shared_ptr<draw::area> &a, const std::string &txt )
+void builder::make_button( const std::shared_ptr<layout::area> &a, const std::string &txt )
 {
 	auto react = std::make_shared<react::button>( a );
 	_container->add_reactor( react );

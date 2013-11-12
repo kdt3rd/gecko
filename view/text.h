@@ -12,7 +12,7 @@ namespace view
 class text : public view
 {
 public:
-	text( const std::shared_ptr<draw::area> &a );
+	text( const std::shared_ptr<layout::area> &a );
 	virtual ~text( void );
 
 	void set_font( const std::shared_ptr<draw::font> &fnt ) { _font = fnt; }
@@ -25,7 +25,7 @@ public:
 
 private:
 	alignment _align = alignment::CENTER;
-	std::shared_ptr<draw::area> _area;
+	std::shared_ptr<layout::area> _area;
 	std::shared_ptr<draw::font> _font;
 	draw::color _color;
 	std::string _text;

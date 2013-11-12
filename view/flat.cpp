@@ -9,7 +9,7 @@ namespace view
 
 ////////////////////////////////////////
 
-flat::flat( const std::shared_ptr<draw::area> &a )
+flat::flat( const std::shared_ptr<layout::area> &a )
 	: _area( a )
 {
 	_area->set_minimum( 100, 21 );

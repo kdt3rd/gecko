@@ -35,7 +35,7 @@ namespace cocoa
 
 ////////////////////////////////////////
 
-button::button( const std::shared_ptr<draw::area> &a )
+button::button( const std::shared_ptr<layout::area> &a )
 	: _area( a )
 {
 }

@@ -2,7 +2,6 @@
 srcs = {
 	"color.cpp";
 	"rect.cpp";
-	"area.cpp";
 	"canvas.cpp";
 	"paint.cpp";
 	"path.cpp";

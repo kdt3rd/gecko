@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <draw/area.h>
+#include <layout/area.h>
 #include "container.h"
 
 namespace gui
@@ -27,8 +27,8 @@ public:
 
 	void add_layout( const std::shared_ptr<layout::layout> &l ) { _container->add_layout( l ); }
 
-	void make_label( const std::shared_ptr<draw::area> &a, const std::string &txt );
-	void make_button( const std::shared_ptr<draw::area> &a, const std::string &txt );
+	void make_label( const std::shared_ptr<layout::area> &a, const std::string &txt );
+	void make_button( const std::shared_ptr<layout::area> &a, const std::string &txt );
 
 private:
 	std::shared_ptr<container> _container;

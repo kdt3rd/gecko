@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "rect.h"
+#include <draw/rect.h>
 
-namespace draw
+namespace layout
 {
 
 ////////////////////////////////////////
@@ -23,7 +23,7 @@ public:
 	///
 	/// Create an area with the given rectangle.
 	/// @param r Rectangle to initialize the area with.
-	area( const rect &r )
+	area( const draw::rect &r )
 		: _rect( r )
 	{
 	}
@@ -33,7 +33,7 @@ public:
 	/// @param p Position of the top-left corner of the area
 	/// @param w Width of the area
 	/// @param h Height of the area
-	area( const point &p, double w, double h )
+	area( const draw::point &p, double w, double h )
 		: _rect( p, w, h )
 	{
 	}
@@ -50,7 +50,7 @@ public:
 	/// @brief The rectangle.
 	///
 	/// The rectangle representing the area.
-	const rect &rectangle( void ) const { return _rect; }
+	const draw::rect &rectangle( void ) const { return _rect; }
 
 	/// @brief Set minimum width.
 	///
@@ -92,19 +92,19 @@ public:
 	double width( void ) const { return _rect.width(); }
 	double height( void ) const { return _rect.height(); }
 
-	point top_left( void ) const { return _rect.top_left(); }
-	point top_right( void ) const { return _rect.top_right(); }
-	point bottom_left( void ) const { return _rect.bottom_left(); }
-	point bottom_right( void ) const { return _rect.bottom_right(); }
+	draw::point top_left( void ) const { return _rect.top_left(); }
+	draw::point top_right( void ) const { return _rect.top_right(); }
+	draw::point bottom_left( void ) const { return _rect.bottom_left(); }
+	draw::point bottom_right( void ) const { return _rect.bottom_right(); }
 
 	void set_horizontal( double x1, double x2 ) { _rect.set_horizontal( x1, x2 ); }
 	void set_vertical( double y1, double y2 ) { _rect.set_vertical( y1, y2 ); }
 
 	bool contains( double x, double y ) const { return _rect.contains( x, y ); }
-	bool contains( const point &p ) const { return _rect.contains( p.x(), p.y() ); }
+	bool contains( const draw::point &p ) const { return _rect.contains( p.x(), p.y() ); }
 
 private:
-	rect _rect;
+	draw::rect _rect;
 	double _minw = 0.0, _minh = 0.0;
 };
 

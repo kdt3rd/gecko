@@ -1,5 +1,6 @@
 
 srcs = {
+	"area.cpp";
 	"tight_constraint.cpp";
 	"flow_constraint.cpp";
 	"form_layout.cpp";

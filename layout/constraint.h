@@ -4,9 +4,9 @@
 #include <core/contract.h>
 #include <core/direction.h>
 #include <core/orientation.h>
-#include <draw/area.h>
 #include <memory>
 #include <iostream>
+#include "area.h"
 
 namespace layout
 {
@@ -21,7 +21,7 @@ namespace layout
 class constraint
 {
 public:
-	constraint( const std::shared_ptr<draw::area> &a )
+	constraint( const std::shared_ptr<area> &a )
 		: _area( a )
 	{
 		precondition( bool(_area), "missing area" );
@@ -35,7 +35,7 @@ public:
 	virtual void recompute_constraint( void ) = 0;
 
 protected:
-	std::shared_ptr<draw::area> _area;
+	std::shared_ptr<area> _area;
 };
 
 ////////////////////////////////////////
