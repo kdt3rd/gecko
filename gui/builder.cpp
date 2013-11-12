@@ -38,6 +38,9 @@ void builder::make_label( const std::shared_ptr<draw::area> &a, const std::strin
 
 void builder::make_button( const std::shared_ptr<draw::area> &a, const std::string &txt )
 {
+	auto react = std::make_shared<react::button>( a );
+	_container->add_reactor( react );
+
 	auto sty = application::current()->get_style();
 
 	auto frame = sty->button_frame( a );
@@ -46,14 +49,11 @@ void builder::make_button( const std::shared_ptr<draw::area> &a, const std::stri
 	auto text = sty->button_text( a, txt );
 	_container->add_view( text );
 
-	auto react = std::make_shared<react::button>( a );
-	_container->add_reactor( react );
-
 	auto cbutton = std::dynamic_pointer_cast<cocoa::button>( frame );
 	if ( !cbutton )
 		throw std::runtime_error( "not a cocoa button" );
 
-	react->when_pressed( [=]( bool p ) { cbutton->set_pressed( p ); } );
+	react->pressed.callback( [=]( bool p ) { cbutton->set_pressed( p ); } );
 }
 
 ////////////////////////////////////////
