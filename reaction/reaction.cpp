@@ -1,18 +1,18 @@
 
-#include "reactor.h"
+#include "reaction.h"
 
-namespace react
+namespace reaction
 {
 
 ////////////////////////////////////////
 
-reactor::reactor( void )
+reaction::reaction( void )
 {
 }
 
 ////////////////////////////////////////
 
-reactor::~reactor( void )
+reaction::~reaction( void )
 {
 }
 

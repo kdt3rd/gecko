@@ -8,5 +8,5 @@ srcs = {
 	"cocoa_style.cpp";
 }
 
-Library( "gui", Compile( srcs ), LinkLibs( "view", "layout", "react" ) );
+Library( "gui", Compile( srcs ), LinkLibs( "view", "layout", "reaction" ) );
 

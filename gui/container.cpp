@@ -64,7 +64,7 @@ void container::recompute_layout( void )
 
 bool container::mouse_press( const draw::point &p, int button )
 {
-	for ( auto r: _reactors )
+	for ( auto r: _reactions )
 	{
 		if ( r->mouse_press( p, button ) )
 			return true;
@@ -76,7 +76,7 @@ bool container::mouse_press( const draw::point &p, int button )
 
 bool container::mouse_release( const draw::point &p, int button )
 {
-	for ( auto r: _reactors )
+	for ( auto r: _reactions )
 	{
 		if ( r->mouse_release( p, button ) )
 			return true;
@@ -88,7 +88,7 @@ bool container::mouse_release( const draw::point &p, int button )
 
 bool container::mouse_move( const draw::point &p )
 {
-	for ( auto r: _reactors )
+	for ( auto r: _reactions )
 	{
 		if ( r->mouse_move( p ) )
 			return true;

@@ -4,7 +4,7 @@
 #include "application.h"
 #include "style.h"
 #include <view/cocoa/button.h>
-#include <react/button.h>
+#include <reaction/button.h>
 
 namespace gui
 {
@@ -38,8 +38,8 @@ void builder::make_label( const std::shared_ptr<layout::area> &a, const std::str
 
 void builder::make_button( const std::shared_ptr<layout::area> &a, const std::string &txt )
 {
-	auto react = std::make_shared<react::button>( a );
-	_container->add_reactor( react );
+	auto react = std::make_shared<reaction::button>( a );
+	_container->add_reaction( react );
 
 	auto sty = application::current()->get_style();
 

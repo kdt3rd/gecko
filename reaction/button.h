@@ -2,16 +2,16 @@
 #pragma once
 
 #include <memory>
-#include "reactor.h"
+#include "reaction.h"
 #include <core/action.h>
 #include <layout/area.h>
 
-namespace react
+namespace reaction
 {
 
 ////////////////////////////////////////
 
-class button : public reactor
+class button : public reaction
 {
 public:
 	button( const std::shared_ptr<layout::area> &a );

@@ -2,7 +2,7 @@
 #include <iostream>
 #include "button.h"
 
-namespace react
+namespace reaction
 {
 
 ////////////////////////////////////////

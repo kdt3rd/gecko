@@ -3,7 +3,7 @@
 
 #include <view/view.h>
 #include <layout/layout.h>
-#include <react/reactor.h>
+#include <reaction/reaction.h>
 #include <map>
 
 namespace gui
@@ -11,7 +11,7 @@ namespace gui
 
 ////////////////////////////////////////
 
-class container : public view::view, public layout::layout, public react::reactor
+class container : public view::view, public layout::layout, public reaction::reaction
 {
 public:
 	container( const std::shared_ptr<::layout::area> &a );
@@ -21,7 +21,7 @@ public:
 
 	void add_layout( const std::shared_ptr<::layout::layout> &l ) { _layouts.push_back( l ); }
 	void add_view( const std::shared_ptr<::view::view> &v );
-	void add_reactor( const std::shared_ptr<::react::reactor> &r ) { _reactors.push_back( r ); }
+	void add_reaction( const std::shared_ptr<::reaction::reaction> &r ) { _reactions.push_back( r ); }
 
 	virtual void layout( const std::shared_ptr<draw::canvas> &c );
 	virtual void paint( const std::shared_ptr<draw::canvas> &c );
@@ -37,7 +37,7 @@ private:
 	std::shared_ptr<::layout::area> _area;
 	std::vector<std::shared_ptr<::view::view>> _views;
 	std::vector<std::shared_ptr<::layout::layout>> _layouts;
-	std::vector<std::shared_ptr<reactor>> _reactors;
+	std::vector<std::shared_ptr<reaction>> _reactions;
 };
 
 ////////////////////////////////////////

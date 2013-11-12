@@ -19,7 +19,7 @@ SubDir( "draw" )
 SubDir( "view" )
 SubDir( "layout" )
 SubDir( "platform" )
-SubDir( "react" )
+SubDir( "reaction" )
 SubDir( "gui" )
 
 Executable( "test_layout", Compile( "test_layout.cpp" ), LinkLibs( "layout", platform ) )

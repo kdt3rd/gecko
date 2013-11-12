@@ -3,16 +3,16 @@
 
 #include <draw/point.h>
 
-namespace react
+namespace reaction
 {
 
 ////////////////////////////////////////
 
-class reactor
+class reaction
 {
 public:
-	reactor( void );
-	virtual ~reactor( void );
+	reaction( void );
+	virtual ~reaction( void );
 
 	virtual bool mouse_press( const draw::point &p, int button ) = 0;
 	virtual bool mouse_release( const draw::point &p, int button ) = 0;
