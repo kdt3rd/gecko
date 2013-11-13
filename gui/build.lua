@@ -1,6 +1,7 @@
 
 srcs = {
 	"application.cpp";
+	"label.cpp";
 	"container.cpp";
 	"window.cpp";
 	"builder.cpp";
