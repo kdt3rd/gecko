@@ -39,9 +39,19 @@ void form_layout::set_spacing( double horiz, double vert )
 
 std::pair<std::shared_ptr<area>,std::shared_ptr<area>> form_layout::new_row( void )
 {
-	auto box = std::make_shared<area>();
 	auto a = std::make_shared<area>();
 	auto b = std::make_shared<area>();
+
+	add_row( a, b );
+
+	return std::make_pair( a, b );
+}
+
+////////////////////////////////////////
+
+void form_layout::add_row( const std::shared_ptr<area> &a, const std::shared_ptr<area> &b )
+{
+	auto box = std::make_shared<area>();
 
 	_rows.emplace_back( box, orientation::VERTICAL );
 	_rows.back().add_area( a );
@@ -51,8 +61,6 @@ std::pair<std::shared_ptr<area>,std::shared_ptr<area>> form_layout::new_row( voi
 
 	_left.add_area( a );
 	_right.add_area( b );
-
-	return std::make_pair( a, b );
 }
 
 ////////////////////////////////////////

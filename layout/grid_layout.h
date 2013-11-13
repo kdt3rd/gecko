@@ -23,6 +23,9 @@ public:
 	std::vector<std::shared_ptr<area>> new_row( double w = 0.0 );
 	std::vector<std::shared_ptr<area>> new_column( double w = 0.0 );
 
+	void add_row( const std::vector<std::shared_ptr<area>> &add, double w );
+	void add_column( const std::vector<std::shared_ptr<area>> &add, double w );
+
 	void set_pad( double left, double right, double top, double bottom );
 	void set_spacing( double horiz, double vert );
 

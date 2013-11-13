@@ -29,6 +29,7 @@ public:
 	size_t size( void ) const { return _areas.size(); }
 
 	std::shared_ptr<area> new_area( double weight = 0.0 );
+	void add_area( const std::shared_ptr<area> &a, double weight = 0.0 );
 
 	std::shared_ptr<area> get_area( size_t i ) { return _areas.at( i ); }
 

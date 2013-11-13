@@ -28,6 +28,7 @@ public:
 	void set_spacing( double horiz, double vert );
 
 	std::pair<std::shared_ptr<area>,std::shared_ptr<area>> new_row( void );
+	void add_row( const std::shared_ptr<area> &l, const std::shared_ptr<area> &a );
 
 	std::pair<std::shared_ptr<area>,std::shared_ptr<area>> get_row_areas( size_t i ) { return _areas.at( i ); }
 	std::shared_ptr<area> get_row( size_t i ) { return _rows.at( i ).get_area( 0 ); }

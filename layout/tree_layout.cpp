@@ -42,6 +42,13 @@ std::shared_ptr<area> tree_layout::new_area( double w )
 
 ////////////////////////////////////////
 
+void tree_layout::add_area( const std::shared_ptr<area> &a, double w )
+{
+	_layout.add_area( a, w );
+}
+
+////////////////////////////////////////
+
 std::shared_ptr<tree_layout> tree_layout::new_branch( double w  )
 {
 	auto a = new_area( w );

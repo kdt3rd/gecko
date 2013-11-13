@@ -74,11 +74,17 @@ void box_layout::set_spacing( double horiz, double vert )
 std::shared_ptr<area> box_layout::new_area( double w )
 {
 	auto a = std::make_shared<area>();
+	add_area( a, w );
+	return a;
+}
+
+////////////////////////////////////////
+
+void box_layout::add_area( const std::shared_ptr<area> &a, double w )
+{
 	_areas.push_back( a );
 	_flow.add_area( a, w );
 	_cross.add_area( a );
-
-	return a;
 }
 
 ////////////////////////////////////////

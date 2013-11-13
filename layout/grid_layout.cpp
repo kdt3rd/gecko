@@ -35,6 +35,22 @@ std::vector<std::shared_ptr<area>> grid_layout::new_row( double w )
 
 ////////////////////////////////////////
 
+void grid_layout::add_row( const std::vector<std::shared_ptr<area>> &add, double w )
+{
+	precondition( add.size() == _columns.cells.size(), "invalid row size" );
+	auto r = std::make_shared<area>();
+	_rows.box.add_area( r, w );
+	_rows.cells.emplace_back( r, orientation::VERTICAL );
+	auto &row = _rows.cells.back();
+	for ( size_t i = 0; i < add.size(); ++i )
+	{
+		row.add_area( add[i] );
+		_columns.cells[i].add_area( add[i] );
+	}
+}
+
+////////////////////////////////////////
+
 std::vector<std::shared_ptr<area>> grid_layout::new_column( double w )
 {
 	std::vector<std::shared_ptr<area>> ret;
@@ -51,6 +67,21 @@ std::vector<std::shared_ptr<area>> grid_layout::new_column( double w )
 	}
 
 	return ret;
+} 
+////////////////////////////////////////
+
+void grid_layout::add_column( const std::vector<std::shared_ptr<area>> &add, double w )
+{
+	precondition( add.size() == _rows.cells.size(), "invalid columns size" );
+	auto c = std::make_shared<area>();
+	_columns.box.add_area( c, w );
+	_columns.cells.emplace_back( c, orientation::HORIZONTAL );
+	auto &col = _columns.cells.back();
+	for ( size_t i = 0; i < add.size(); ++i )
+	{
+		col.add_area( add[i] );
+		_rows.cells[i].add_area( add[i] );
+	}
 }
 
 ////////////////////////////////////////

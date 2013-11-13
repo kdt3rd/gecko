@@ -22,7 +22,9 @@ public:
 	void set_pad( double left, double right, double top, double bottom );
 	void set_spacing( double s );
 
-	std::shared_ptr<area>  new_area( double w = 0.0 );
+	std::shared_ptr<area> new_area( double w = 0.0 );
+	void add_area( const std::shared_ptr<area> &a, double w = 0.0 );
+
 	std::shared_ptr<tree_layout> new_branch( double w = 0.0 );
 
 	void recompute_minimum( void );
