@@ -4,5 +4,5 @@ srcs = {
 	"button.cpp";
 }
 
-Library( "reaction", Compile( srcs ) )
+Library( "reaction", Compile( srcs ), LinkLibs( "layout" ) )
 
