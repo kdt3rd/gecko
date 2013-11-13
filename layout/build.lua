@@ -9,5 +9,5 @@ srcs = {
 	"tree_layout.cpp";
 }
 
-Library( "layout", Compile( srcs ) );
+Library( "layout", Compile( srcs ), LinkLibs( "core" ) );
 

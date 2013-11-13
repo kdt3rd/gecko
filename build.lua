@@ -16,10 +16,10 @@ end
 
 SubDir( "core" )
 SubDir( "draw" )
-SubDir( "view" )
 SubDir( "layout" )
-SubDir( "platform" )
 SubDir( "reaction" )
+SubDir( "view" )
+SubDir( "platform" )
 SubDir( "gui" )
 
 Executable( "test_layout", Compile( "test_layout.cpp" ), LinkLibs( "layout", platform ) )

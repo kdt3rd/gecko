@@ -9,5 +9,5 @@ cocoa = {
 	"cocoa/button.cpp";
 }
 
-Library( "view", Compile( srcs, cocoa ), LinkLibs( "draw" ) );
+Library( "view", Compile( srcs, cocoa ), LinkLibs( "draw", "layout" ) );
 
