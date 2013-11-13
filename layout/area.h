@@ -47,6 +47,8 @@ public:
 	{
 	}
 
+	virtual ~area( void );
+
 	/// @brief The rectangle.
 	///
 	/// The rectangle representing the area.
@@ -102,6 +104,8 @@ public:
 
 	bool contains( double x, double y ) const { return _rect.contains( x, y ); }
 	bool contains( const draw::point &p ) const { return _rect.contains( p.x(), p.y() ); }
+
+	virtual void recompute_minimum( void );
 
 private:
 	draw::rect _rect;
