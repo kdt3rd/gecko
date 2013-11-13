@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <layout/area.h>
 #include <draw/point.h>
 
 namespace reaction
@@ -8,7 +9,7 @@ namespace reaction
 
 ////////////////////////////////////////
 
-class reaction
+class reaction : public layout::area
 {
 public:
 	reaction( void );
