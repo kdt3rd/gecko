@@ -1,13 +1,24 @@
 
 #include "label.h"
+#include "application.h"
+#include "style.h"
 
 namespace gui
 {
 
 ////////////////////////////////////////
 
+label::label( const std::string &t )
+{
+	_text = t;
+	_font = application::current()->get_style()->default_font();
+}
+
+////////////////////////////////////////
+
 label::label( void )
 {
+	_font = application::current()->get_style()->default_font();
 }
 
 ////////////////////////////////////////

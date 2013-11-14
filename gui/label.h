@@ -3,13 +3,14 @@
 
 #include "widget.h"
 #include <core/alignment.h>
+#include <reaction/passive.h>
 
 namespace gui
 {
 
 ////////////////////////////////////////
 
-class label : public widget<reaction::reaction>
+class label : public widget<reaction::passive>
 {
 public:
 	label( void );
