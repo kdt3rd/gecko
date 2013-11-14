@@ -1,6 +1,7 @@
 
 srcs = {
 	"reaction.cpp";
+	"passive.cpp";
 	"button.cpp";
 }
 
