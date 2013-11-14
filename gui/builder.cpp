@@ -38,8 +38,8 @@ void builder::make_label( const std::shared_ptr<layout::area> &a, const std::str
 
 void builder::make_button( const std::shared_ptr<layout::area> &a, const std::string &txt )
 {
-	auto react = std::make_shared<reaction::button>( a );
-	_container->add_reaction( react );
+//	auto react = std::make_shared<reaction::button>( a );
+//	_container->add_reaction( react );
 
 	auto sty = application::current()->get_style();
 
@@ -53,7 +53,7 @@ void builder::make_button( const std::shared_ptr<layout::area> &a, const std::st
 	if ( !cbutton )
 		throw std::runtime_error( "not a cocoa button" );
 
-	react->pressed.callback( [=]( bool p ) { cbutton->set_pressed( p ); } );
+//	react->pressed.callback( [=]( bool p ) { cbutton->set_pressed( p ); } );
 }
 
 ////////////////////////////////////////

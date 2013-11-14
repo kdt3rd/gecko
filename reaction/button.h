@@ -14,7 +14,7 @@ namespace reaction
 class button : public reaction
 {
 public:
-	button( const std::shared_ptr<layout::area> &a );
+	button( void );
 	~button( void );
 
 	action<void( bool )> pressed;
@@ -23,9 +23,6 @@ public:
 	virtual bool mouse_press( const draw::point &p, int button );
 	virtual bool mouse_release( const draw::point &p, int button );
 	virtual bool mouse_move( const draw::point &p );
-
-private:
-	std::shared_ptr<layout::area> _area;
 };
 
 ////////////////////////////////////////
