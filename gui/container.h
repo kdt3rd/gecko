@@ -1,9 +1,8 @@
 
 #pragma once
 
-#include <view/view.h>
-#include <layout/layout.h>
-#include <reaction/reaction.h>
+#include "widget.h"
+#include <reaction/passive.h>
 #include <map>
 
 namespace gui
@@ -11,33 +10,69 @@ namespace gui
 
 ////////////////////////////////////////
 
-class container : public view::view, public layout::layout, public reaction::reaction
+template<typename layout>
+class container : public widget, public layout
 {
 public:
-	container( const std::shared_ptr<::layout::area> &a );
-	~container( void );
+	using layout::layout;
 
-	const std::shared_ptr<::layout::area> &area( void ) { return _area; }
+	virtual ~container( void )
+	{
+	}
 
-	void add_layout( const std::shared_ptr<::layout::layout> &l ) { _layouts.push_back( l ); }
-	void add_view( const std::shared_ptr<::view::view> &v );
-	void add_reaction( const std::shared_ptr<::reaction::reaction> &r ) { _reactions.push_back( r ); }
+	virtual void layout( void )
+	{
+		for ( auto w: _widgets )
+			w->layout();
 
-	virtual void layout( const std::shared_ptr<draw::canvas> &c );
-	virtual void paint( const std::shared_ptr<draw::canvas> &c );
+		this->recompute_minimum( *this );
+		this->recompute_layout( *this );
+	}
 
-	virtual void recompute_minimum( void );
-	virtual void recompute_layout( void );
+	virtual bool mouse_press( const draw::point &p, int button )
+	{
+		for ( auto w: _widgets )
+		{
+			if ( w->mouse_press( p, button ) )
+				return true;
+		}
+		return widget::mouse_press( p, button );
+	}
 
-	virtual bool mouse_press( const draw::point &p, int button );
-	virtual bool mouse_release( const draw::point &p, int button );
-	virtual bool mouse_move( const draw::point &p );
+	virtual bool mouse_release( const draw::point &p, int button )
+	{
+		for ( auto w: _widgets )
+		{
+			if ( w->mouse_release( p, button ) )
+				return true;
+		}
+		return widget::mouse_release( p, button );
+	}
+
+	virtual bool mouse_move( const draw::point &p )
+	{
+		for ( auto w: _widgets )
+		{
+			if ( w->mouse_move( p ) )
+				return true;
+		}
+		return widget::mouse_move( p );
+	}
+
+	virtual void paint( const std::shared_ptr<draw::canvas> &c )
+	{
+		for ( auto w: _widgets )
+			w->paint( c );
+	}
+
+protected:
+	void added( const std::shared_ptr<widget> &w )
+	{
+		_widgets.push_back( w );
+	}
 
 private:
-	std::shared_ptr<::layout::area> _area;
-	std::vector<std::shared_ptr<::view::view>> _views;
-	std::vector<std::shared_ptr<::layout::layout>> _layouts;
-	std::vector<std::shared_ptr<reaction>> _reactions;
+	std::vector<std::shared_ptr<widget>> _widgets;
 };
 
 ////////////////////////////////////////

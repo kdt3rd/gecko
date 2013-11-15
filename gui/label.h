@@ -10,7 +10,7 @@ namespace gui
 
 ////////////////////////////////////////
 
-class label : public widget<reaction::passive>
+class label : public widget
 {
 public:
 	label( void );
@@ -24,7 +24,7 @@ public:
 
 	virtual void paint( const std::shared_ptr<draw::canvas> &c );
 
-	virtual void recompute_minimum( void );
+	virtual void layout( void );
 
 private:
 	std::string _text;

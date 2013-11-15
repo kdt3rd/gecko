@@ -1,8 +1,7 @@
 
 #pragma once
 
-#include "container.h"
-#include <view/delegate.h>
+#include "widget.h"
 
 namespace platform
 {
@@ -14,7 +13,7 @@ namespace gui
 
 ////////////////////////////////////////
 
-class window : public view::delegate
+class window
 {
 public:
 	window( const std::shared_ptr<platform::window> &w );
@@ -24,7 +23,8 @@ public:
 
 	void show( void );
 
-	std::shared_ptr<container> get_container( void ) { return _container; }
+	void set_widget( const std::shared_ptr<widget> &w );
+	std::shared_ptr<widget> get_widget( void ) { return _widget; }
 
 	void invalidate( const draw::rect &r );
 
@@ -35,9 +35,9 @@ private:
 	void mouse_press( const draw::point &p, int button );
 	void mouse_release( const draw::point &p, int button );
 
-	std::shared_ptr<layout::area> _area;
+	std::shared_ptr<layout::simple_area> _area;
 	std::shared_ptr<platform::window> _window;
-	std::shared_ptr<container> _container;
+	std::shared_ptr<widget> _widget;
 };
 
 ////////////////////////////////////////

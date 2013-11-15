@@ -16,18 +16,17 @@ end
 
 SubDir( "core" )
 SubDir( "draw" )
+SubDir( "platform" )
 SubDir( "layout" )
 SubDir( "reaction" )
-SubDir( "view" )
-SubDir( "platform" )
 SubDir( "gui" )
 
-Executable( "test_layout", Compile( "test_layout.cpp" ), LinkLibs( "layout", platform ) )
-Executable( "test", Compile( "test.cpp" ), LinkLibs( "view", platform ) )
+--Executable( "test_layout", Compile( "test_layout.cpp" ), LinkLibs( "layout", platform ) )
+--Executable( "test", Compile( "test.cpp" ), LinkLibs( platform ) )
 Executable( "test_app", Compile( "test_app.cpp" ), LinkLibs( "gui", platform ) )
 
-Application( "Test Application", "test_app" )
-Application( "Test", "test" )
+--Application( "Test Application", "test_app" )
+--Application( "Test", "test" )
 
 Doxygen( "docs", "doxyfile", "", "docs" );
 

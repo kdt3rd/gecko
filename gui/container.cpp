@@ -7,8 +7,7 @@ namespace gui
 
 ////////////////////////////////////////
 
-container::container( const std::shared_ptr<::layout::area> &a )
-	: _area( a )
+container::container( void )
 {
 }
 
@@ -16,6 +15,13 @@ container::container( const std::shared_ptr<::layout::area> &a )
 
 container::~container( void )
 {
+}
+
+////////////////////////////////////////
+
+void container::add_widget( const std::shared_ptr<gui::base_widget> &w )
+{
+	add( w );
 }
 
 ////////////////////////////////////////
@@ -34,14 +40,6 @@ void container::layout( const std::shared_ptr<draw::canvas> &c )
 		v->layout( c );
 	recompute_minimum();
 	recompute_layout();
-}
-
-////////////////////////////////////////
-
-void container::paint( const std::shared_ptr<draw::canvas> &c )
-{
-	for ( auto v: _views )
-		v->paint( c );
 }
 
 ////////////////////////////////////////
@@ -69,7 +67,7 @@ bool container::mouse_press( const draw::point &p, int button )
 		if ( r->mouse_press( p, button ) )
 			return true;
 	}
-	return false;
+	return parent::mouse_press( p, button );
 }
 
 ////////////////////////////////////////
@@ -81,7 +79,7 @@ bool container::mouse_release( const draw::point &p, int button )
 		if ( r->mouse_release( p, button ) )
 			return true;
 	}
-	return false;
+	return parent::mouse_release( p, button );
 }
 
 ////////////////////////////////////////
@@ -93,7 +91,15 @@ bool container::mouse_move( const draw::point &p )
 		if ( r->mouse_move( p ) )
 			return true;
 	}
-	return false;
+	return parent::mouse_move( p );
+}
+
+////////////////////////////////////////
+
+void container::paint( const std::shared_ptr<draw::canvas> &c )
+{
+	for ( auto v: _views )
+		v->paint( c );
 }
 
 ////////////////////////////////////////

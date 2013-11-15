@@ -10,11 +10,8 @@ namespace gui
 
 ////////////////////////////////////////
 
-template<typename action>
-class widget : public action
+class widget : public layout::simple_area
 {
-	static_assert( std::is_base_of<reaction::reaction, action>::value, "action class must be derived from reaction::reaction" );
-
 public:
 	widget( void )
 	{
@@ -28,7 +25,29 @@ public:
 	{
 	}
 
-private:
+	virtual bool mouse_press( const draw::point &p, int button )
+	{
+		if ( _action )
+			return _action->mouse_press( *this, p, button );
+		return false;
+	}
+
+	virtual bool mouse_release( const draw::point &p, int button )
+	{
+		if ( _action )
+			return _action->mouse_release( *this, p, button );
+		return false;
+	}
+
+	virtual bool mouse_move( const draw::point &p )
+	{
+		if ( _action )
+			return _action->mouse_move( *this, p );
+		return false;
+	}
+
+protected:
+	std::unique_ptr<reaction::reaction> _action;
 };
 
 ////////////////////////////////////////

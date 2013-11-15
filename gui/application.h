@@ -2,7 +2,6 @@
 #pragma once
 
 #include <memory>
-#include "builder.h"
 #include "window.h"
 
 namespace gui
