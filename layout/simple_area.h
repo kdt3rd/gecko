@@ -11,11 +11,11 @@ namespace layout
 /// @brief Rectangular area
 ///
 /// Represents an area, with a minimum size.  Used by layouts, views, and reactions.
-class area
+class simple_area
 {
 public:
 	/// @brief Constructor.
-	area( void )
+	simple_area( void )
 	{
 	}
 
@@ -23,7 +23,7 @@ public:
 	///
 	/// Create an area with the given rectangle.
 	/// @param r Rectangle to initialize the area with.
-	area( const draw::rect &r )
+	simple_area( const draw::rect &r )
 		: _rect( r )
 	{
 	}
@@ -33,7 +33,7 @@ public:
 	/// @param p Position of the top-left corner of the area
 	/// @param w Width of the area
 	/// @param h Height of the area
-	area( const draw::point &p, double w, double h )
+	simple_area( const draw::point &p, double w, double h )
 		: _rect( p, w, h )
 	{
 	}
@@ -42,12 +42,12 @@ public:
 	///
 	/// @param w Width of the area
 	/// @param h Height of the area
-	area( double w, double h )
+	simple_area( double w, double h )
 		: _rect( { 0, 0 }, w, h )
 	{
 	}
 
-	virtual ~area( void );
+	virtual ~simple_area( void );
 
 	/// @brief The rectangle.
 	///
@@ -105,7 +105,7 @@ public:
 	bool contains( double x, double y ) const { return _rect.contains( x, y ); }
 	bool contains( const draw::point &p ) const { return _rect.contains( p.x(), p.y() ); }
 
-	virtual void recompute_minimum( void );
+	virtual void layout( void );
 
 private:
 	draw::rect _rect;

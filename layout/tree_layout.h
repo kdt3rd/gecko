@@ -3,8 +3,8 @@
 
 #include <memory>
 #include "layout.h"
-#include "area.h"
 #include "box_layout.h"
+#include "simple_area.h"
 
 namespace layout
 {
@@ -14,32 +14,76 @@ namespace layout
 /// @brief Tree layout.
 ///
 /// Layout 
-class tree_layout : public layout
+template<typename container, typename area>
+class tree_layout : public layout<container, area>
 {
 public:
-	tree_layout( double tab = 12.0 );
+	tree_layout( double tab = 12.0 )
+	{
+		_box = std::make_shared<simple_area>();
+		_tab = std::make_shared<simple_area>();
+		_tab->set_minimum( tab, 0 );
 
-	void set_pad( double left, double right, double top, double bottom );
-	void set_spacing( double s );
+		_tabbed.add( _tab );
+		_tabbed.add( _box );
 
-	void add( const std::shared_ptr<area> &a, double w = 0.0 );
+		_layout.set_direction( direction::DOWN );
+	}
 
-	std::shared_ptr<tree_layout> new_branch( double w = 0.0 );
+	virtual void set_pad( double left, double right, double top, double bottom )
+	{
+		_layout.set_pad( left, right, top, bottom );
+	}
 
-	virtual void recompute_minimum( area &a );
-	virtual void recompute_layout( area &a );
+	virtual void set_spacing( double horiz, double vert )
+	{
+		_spacing = horiz;
+		_layout.set_spacing( horiz, vert );
+		for ( auto c: _children )
+			c.tree->set_spacing( horiz, vert );
+	}
+
+	void add( const std::shared_ptr<area> &a, double w = 0.0 )
+	{
+		_layout.add( a, w );
+	}
+
+	std::shared_ptr<tree_layout> new_branch( double w = 0.0 )
+	{
+		auto l = std::make_shared<tree_layout>( _tab->minimum_width() );
+		l->set_spacing( _spacing, _spacing );
+//		_children.push_back( l );
+//		add( _children.back().a );
+		return l;
+	}
+
+	virtual void recompute_minimum( container &master )
+	{
+		for ( auto c: _children )
+			c.recompute_minimum();
+		_layout.recompute_minimum( *_box );
+		_tabbed.recompute_minimum( master );
+	}
+
+	virtual void recompute_layout( container &master )
+	{
+		_tabbed.recompute_layout( master );
+		_layout.recompute_layout( *_box );
+		for ( auto c: _children )
+			c.recompute_layout();
+	}
 
 private:
-	std::shared_ptr<area> _tab;
-	std::shared_ptr<area> _box;
+	std::shared_ptr<simple_area> _tab;
+	std::shared_ptr<simple_area> _box;
 	double _spacing = 0.0;
-	box_layout _tabbed;
-	box_layout _layout;
+	box_layout<container,simple_area> _tabbed;
+	box_layout<simple_area,area> _layout;
 
 	struct child
 	{
-		child( const std::shared_ptr<tree_layout> &t )
-			: tree( t ), a( std::make_shared<area>() )
+		child( const std::shared_ptr<tree_layout<simple_area,area>> &t )
+			: tree( t ), a( std::make_shared<simple_area>() )
 		{
 		}
 
@@ -53,8 +97,8 @@ private:
 			tree->recompute_minimum( *a );
 		}
 
-		std::shared_ptr<tree_layout> tree;
-		std::shared_ptr<area> a;
+		std::shared_ptr<tree_layout<simple_area,area>> tree;
+		std::shared_ptr<simple_area> a;
 	};
 
 	std::vector<child> _children;

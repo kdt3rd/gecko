@@ -1,18 +1,18 @@
 
-#include "area.h"
+#include "simple_area.h"
 
 namespace layout
 {
 
 ////////////////////////////////////////
 
-area::~area( void )
+simple_area::~simple_area( void )
 {
 }
 
 ////////////////////////////////////////
 
-void area::recompute_minimum( void )
+void simple_area::layout( void )
 {
 }
 

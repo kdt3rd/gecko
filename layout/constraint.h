@@ -6,7 +6,6 @@
 #include <core/orientation.h>
 #include <memory>
 #include <iostream>
-#include "area.h"
 
 namespace layout
 {
@@ -18,6 +17,7 @@ namespace layout
 /// Constraints on a layout.
 /// Constraints are generally one dimensional (either horizontal or vertical).
 /// A layout is made of several constraints working together.
+template<typename container>
 class constraint
 {
 public:
@@ -29,8 +29,8 @@ public:
 	{
 	}
 
-	virtual void recompute_minimum( area &a ) = 0;
-	virtual void recompute_constraint( area &a ) = 0;
+	virtual void recompute_minimum( container &a ) = 0;
+	virtual void recompute_constraint( container &a ) = 0;
 };
 
 ////////////////////////////////////////
