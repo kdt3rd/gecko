@@ -1,111 +1,37 @@
 
+#include <iostream>
 #include <sstream>
 #include <random>
 #include <functional>
 
-#include <layout/form_layout.h>
-#include <layout/box_layout.h>
-#include <layout/grid_layout.h>
-#include <layout/tree_layout.h>
 #include <gui/application.h>
 #include <gui/cocoa_style.h>
+#include <gui/label.h>
+#include <gui/container.h>
+#include <gui/layouts.h>
 
 namespace {
 
 ////////////////////////////////////////
 
-void build_form_layout( const std::shared_ptr<gui::window> &win )
-{
-	gui::builder builder( win );
-	auto layout = builder.new_layout<layout::form_layout>( direction::RIGHT );
-	layout->set_pad( 12.0, 12.0, 12.0, 12.0 );
-	layout->set_spacing( 12.0, 12.0 );
-
-	auto row = layout->new_row();
-	builder.make_label( row.first, "Hello World" );
-	builder.make_button( row.second, "Press Me" );
-
-	row = layout->new_row();
-	builder.make_label( row.first, "Goodbye World" );
-	builder.make_button( row.second, "Me Too" );
-}
-
-void build_box_layout( const std::shared_ptr<gui::window> &win )
-{
-	gui::builder builder( win );
-	auto layout = builder.new_layout<layout::box_layout>( direction::DOWN );
-	layout->set_pad( 12.0, 12.0, 12.0, 12.0 );
-	layout->set_spacing( 12.0, 12.0 );
-
-	builder.make_label( layout->new_area(), "Hello World" );
-	builder.make_button( layout->new_area(), "Press Me" );
-
-	builder.make_label( layout->new_area(), "Goodbye World" );
-	builder.make_button( layout->new_area(), "Me Too" );
-}
-
-void build_grid_layout( const std::shared_ptr<gui::window> &win )
-{
-	gui::builder builder( win );
-	auto layout = builder.new_layout<layout::grid_layout>();
-	layout->set_pad( 12.0, 12.0, 12.0, 12.0 );
-	layout->set_spacing( 12.0, 12.0 );
-
-	for ( size_t i = 0; i < 5; ++i )
-		layout->new_column( 1.0 );
-
-	int count = 0;
-	for ( size_t i = 0; i < 5; ++i )
-	{
-		auto cols = layout->new_row();
-		for ( auto a: cols )
-		{
-			std::stringstream tmp;
-			tmp << ++count;
-			builder.make_label( a, tmp.str() );
-		}
-	}
-}
-
-void build_tree_layout( const std::shared_ptr<gui::window> &win )
-{
-	gui::builder builder( win );
-	auto layout = builder.new_layout<layout::tree_layout>( 24.0 );
-	layout->set_pad( 12.0, 12.0, 12.0, 12.0 );
-	layout->set_spacing( 12.0 );
-
-	std::random_device rd;
-	std::default_random_engine rand( rd() );
-	std::uniform_int_distribution<int> uniform_dist( 1, 6 );
-
-	std::function<void(std::shared_ptr<layout::tree_layout>,int)> make_tree;
-	make_tree = [&]( std::shared_ptr<layout::tree_layout> l, int level )
-	{
-		int count = uniform_dist( rand );
-		for ( int i = 0; i < count; ++i )
-		{
-			std::stringstream tmp;
-			tmp << char( 'A' + i );
-			builder.make_label( l->new_area( 0.0 ), tmp.str() );
-			if ( level < 2 )
-				make_tree( l->new_branch( 0.0 ), level + 1 );
-		}
-	};
-
-	make_tree( layout, 0 );
-}
-
 ////////////////////////////////////////
 
 void build_button( const std::shared_ptr<gui::window> &win )
 {
-	gui::builder builder( win );
-	auto layout = builder.new_layout<layout::box_layout>( direction::DOWN );
-	layout->set_pad( 12.0, 12.0, 12.0, 12.0 );
-	layout->set_spacing( 12.0, 12.0 );
+	auto container = std::make_shared<gui::container<gui::box_layout>>( direction::DOWN );
+	container->add( std::make_shared<gui::label>( "Hello World" ) );
+	container->add( std::make_shared<gui::label>( "Goodbye World" ) );
+	container->add( std::make_shared<gui::label>( "Another World" ) );
 
-	auto area = layout->new_area();
-	builder.make_button( area, "Button" );
+	win->set_widget( container );
+//	gui::builder builder( win );
+//	auto layout = builder.new_layout<layout::box_layout>( direction::DOWN );
+//	layout->set_pad( 12.0, 12.0, 12.0, 12.0 );
+//	layout->set_spacing( 12.0, 12.0 );
+
+//	auto area = layout->new_area();
+//	builder.make_button( area, "Button" );
+
 }
 
 ////////////////////////////////////////
