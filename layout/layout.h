@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "area.h"
+
 namespace layout
 {
 
@@ -18,8 +20,8 @@ public:
 	{
 	}
 
-	virtual void recompute_minimum( void ) = 0;
-	virtual void recompute_layout( void ) = 0;
+	virtual void recompute_minimum( area &a ) = 0;
+	virtual void recompute_layout( area &a ) = 0;
 };
 
 ////////////////////////////////////////

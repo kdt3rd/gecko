@@ -21,21 +21,16 @@ namespace layout
 class constraint
 {
 public:
-	constraint( const std::shared_ptr<area> &a )
-		: _area( a )
+	constraint( void )
 	{
-		precondition( bool(_area), "missing area" );
 	}
 
 	virtual ~constraint( void )
 	{
 	}
 
-	virtual void recompute_minimum( void ) = 0;
-	virtual void recompute_constraint( void ) = 0;
-
-protected:
-	std::shared_ptr<area> _area;
+	virtual void recompute_minimum( area &a ) = 0;
+	virtual void recompute_constraint( area &a ) = 0;
 };
 
 ////////////////////////////////////////

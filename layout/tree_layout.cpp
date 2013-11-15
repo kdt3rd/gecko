@@ -6,14 +6,16 @@ namespace layout
 
 ////////////////////////////////////////
 
-tree_layout::tree_layout( const std::shared_ptr<area> &c, double tab )
-	: _tab( tab ), _container( c ), _tabbed( c ), _layout( c )
+tree_layout::tree_layout( double tab )
 {
-	auto t = _tabbed.new_area( 0.0 );
-	auto box = _tabbed.new_area( 1.0 );
-	t->set_minimum( tab, 0 );
+	_box = std::make_shared<area>();
+	_tab = std::make_shared<area>();
+	_tab->set_minimum( tab, 0 );
 
-	_layout = box_layout( box, direction::DOWN ); 
+	_tabbed.add( _tab );
+	_tabbed.add( _box );
+
+	_layout = box_layout( direction::DOWN ); 
 }
 
 ////////////////////////////////////////
@@ -30,52 +32,45 @@ void tree_layout::set_spacing( double s )
 	_spacing = s;
 	_layout.set_spacing( s, s );
 	for ( auto c: _children )
-		c->set_spacing( s );
+		c.tree->set_spacing( s );
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<area> tree_layout::new_area( double w )
+void tree_layout::add( const std::shared_ptr<area> &a, double w )
 {
-	return _layout.new_area( w );
-}
-
-////////////////////////////////////////
-
-void tree_layout::add_area( const std::shared_ptr<area> &a, double w )
-{
-	_layout.add_area( a, w );
+	_layout.add( a, w );
 }
 
 ////////////////////////////////////////
 
 std::shared_ptr<tree_layout> tree_layout::new_branch( double w  )
 {
-	auto a = new_area( w );
-	auto l = std::make_shared<tree_layout>( a, _tab );
+	auto l = std::make_shared<tree_layout>( _tab->minimum_width() );
 	l->set_spacing( _spacing );
 	_children.push_back( l );
+	add( _children.back().a );
 	return l;
 }
 
 ////////////////////////////////////////
 
-void tree_layout::recompute_minimum( void )
+void tree_layout::recompute_minimum( area &master )
 {
 	for ( auto c: _children )
-		c->recompute_minimum();
-	_layout.recompute_minimum();
-	_tabbed.recompute_minimum();
+		c.recompute_minimum();
+	_layout.recompute_minimum( *_box );
+	_tabbed.recompute_minimum( master );
 }
 
 ////////////////////////////////////////
 
-void tree_layout::recompute_layout( void )
+void tree_layout::recompute_layout( area &master )
 {
-	_tabbed.recompute_layout();
-	_layout.recompute_layout();
+	_tabbed.recompute_layout( master );
+	_layout.recompute_layout( *_box );
 	for ( auto c: _children )
-		c->recompute_layout();
+		c.recompute_layout();
 }
 
 ////////////////////////////////////////

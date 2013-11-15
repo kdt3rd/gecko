@@ -15,7 +15,7 @@ namespace layout
 class tight_constraint : public constraint
 {
 public:
-	tight_constraint( const std::shared_ptr<area> &a, orientation o = orientation::VERTICAL );
+	tight_constraint( orientation o = orientation::VERTICAL );
 	virtual ~tight_constraint( void )
 	{
 	}
@@ -27,8 +27,8 @@ public:
 	void add_area( const std::shared_ptr<area> &a );
 	std::shared_ptr<area> get_area( size_t i ) { return _areas.at( i ); }
 
-	void recompute_minimum( void );
-	void recompute_constraint( void );
+	void recompute_minimum( area &a );
+	void recompute_constraint( area &a );
 
 private:
 	orientation _orient = orientation::VERTICAL;

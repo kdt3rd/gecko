@@ -6,8 +6,7 @@ namespace layout
 
 ////////////////////////////////////////
 
-grid_layout::grid_layout( const std::shared_ptr<area> &c )
-	: _container( c ), _rows( c ), _columns( c )
+grid_layout::grid_layout( void )
 {
 	_rows.box.set_direction( direction::DOWN );
 	_columns.box.set_direction( direction::RIGHT );
@@ -15,72 +14,31 @@ grid_layout::grid_layout( const std::shared_ptr<area> &c )
 
 ////////////////////////////////////////
 
-std::vector<std::shared_ptr<area>> grid_layout::new_row( double w )
-{
-	std::vector<std::shared_ptr<area>> ret;
-	auto r = std::make_shared<area>();
-	_rows.box.add_area( r, w );
-	_rows.cells.emplace_back( r, orientation::VERTICAL );
-	auto &row = _rows.cells.back();
-	for ( auto &col: _columns.cells )
-	{
-		auto a = std::make_shared<area>();
-		ret.push_back( a );
-		row.add_area( a );
-		col.add_area( a );
-	}
-
-	return ret;
-}
-
-////////////////////////////////////////
-
 void grid_layout::add_row( const std::vector<std::shared_ptr<area>> &add, double w )
 {
 	precondition( add.size() == _columns.cells.size(), "invalid row size" );
-	auto r = std::make_shared<area>();
-	_rows.box.add_area( r, w );
-	_rows.cells.emplace_back( r, orientation::VERTICAL );
+	_rows.cells.emplace_back( std::make_pair( std::make_shared<tight_constraint>( orientation::VERTICAL ), std::make_shared<area>() ) );
+	_rows.box.add_area( _rows.cells.back().second, w );
 	auto &row = _rows.cells.back();
 	for ( size_t i = 0; i < add.size(); ++i )
 	{
-		row.add_area( add[i] );
-		_columns.cells[i].add_area( add[i] );
+		row.first->add_area( add[i] );
+		_columns.cells[i].first->add_area( add[i] );
 	}
 }
 
-////////////////////////////////////////
-
-std::vector<std::shared_ptr<area>> grid_layout::new_column( double w )
-{
-	std::vector<std::shared_ptr<area>> ret;
-	auto c = std::make_shared<area>();
-	_columns.box.add_area( c, w );
-	_columns.cells.emplace_back( c, orientation::HORIZONTAL );
-	auto &col = _columns.cells.back();
-	for ( auto &row: _rows.cells )
-	{
-		auto a = std::make_shared<area>();
-		ret.push_back( a );
-		col.add_area( a );
-		row.add_area( a );
-	}
-
-	return ret;
-} 
 ////////////////////////////////////////
 
 void grid_layout::add_column( const std::vector<std::shared_ptr<area>> &add, double w )
 {
 	precondition( add.size() == _rows.cells.size(), "invalid columns size" );
-	auto c = std::make_shared<area>();
-	_columns.box.add_area( c, w );
-	_columns.cells.emplace_back( c, orientation::HORIZONTAL );
-	auto &col = _columns.cells.back();
+	_columns.cells.emplace_back( std::make_pair( std::make_shared<tight_constraint>( orientation::HORIZONTAL ), std::make_shared<area>() ) );
+	_columns.box.add_area( _columns.cells.back().second, w );
+	auto &col = _columns.cells.back().first;
 	for ( size_t i = 0; i < add.size(); ++i )
 	{
-		col.add_area( add[i] );
-		_rows.cells[i].add_area( add[i] );
+		col->add_area( add[i] );
+		_rows.cells[i].first->add_area( add[i] );
 	}
 }
 
@@ -102,28 +60,28 @@ void grid_layout::set_spacing( double horiz, double vert )
 
 ////////////////////////////////////////
 
-void grid_layout::recompute_minimum( void )
+void grid_layout::recompute_minimum( area &master )
 {
 	for ( auto r: _rows.cells )
-		r.recompute_minimum();
+		r.first->recompute_minimum( *r.second );
 	for ( auto c: _columns.cells )
-		c.recompute_minimum();
+		c.first->recompute_minimum( *c.second );
 
-	_rows.box.recompute_minimum();
-	_columns.box.recompute_minimum();
+	_rows.box.recompute_minimum( master );
+	_columns.box.recompute_minimum( master );
 }
 
 ////////////////////////////////////////
 
-void grid_layout::recompute_layout( void )
+void grid_layout::recompute_layout( area &master )
 {
-	_rows.box.recompute_constraint();
-	_columns.box.recompute_constraint();
+	_rows.box.recompute_constraint( master );
+	_columns.box.recompute_constraint( master );
 
 	for ( auto r: _rows.cells )
-		r.recompute_constraint();
+		r.first->recompute_constraint( *r.second );
 	for ( auto c: _columns.cells )
-		c.recompute_constraint();
+		c.first->recompute_constraint( *c.second );
 }
 
 ////////////////////////////////////////

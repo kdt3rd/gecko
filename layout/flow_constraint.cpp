@@ -7,8 +7,8 @@ namespace layout
 
 ////////////////////////////////////////
 
-flow_constraint::flow_constraint( const std::shared_ptr<area> &a, direction d )
-	: constraint( a ), _dir( d )
+flow_constraint::flow_constraint( direction d )
+	: _dir( d )
 {
 }
 
@@ -21,27 +21,27 @@ void flow_constraint::add_area( const std::shared_ptr<area> &a, double weight )
 
 ////////////////////////////////////////
 
-void flow_constraint::recompute_minimum( void )
+void flow_constraint::recompute_minimum( area &master )
 {
 	if ( _dir == direction::LEFT || _dir == direction::RIGHT )
 	{
 		double w = 0.0;
 		for ( auto a: _areas )
 			w += a.first->minimum_width();
-		_area->set_minimum_width( w + _pad.first + _pad.second + ( _spacing * ( _areas.size() - 1 ) ) );
+		master.set_minimum_width( w + _pad.first + _pad.second + ( _spacing * ( _areas.size() - 1 ) ) );
 	}
 	else
 	{
 		double h = 0.0;
 		for ( auto a: _areas )
 			h += a.first->minimum_height();
-		_area->set_minimum_height( h + _pad.first + _pad.second + ( _spacing * ( _areas.size() - 1 ) ) );
+		master.set_minimum_height( h + _pad.first + _pad.second + ( _spacing * ( _areas.size() - 1 ) ) );
 	}
 }
 
 ////////////////////////////////////////
 
-void flow_constraint::recompute_constraint( void )
+void flow_constraint::recompute_constraint( area &master )
 {
 	if ( _dir == direction::LEFT || _dir == direction::RIGHT )
 	{
@@ -53,8 +53,8 @@ void flow_constraint::recompute_constraint( void )
 			w += a.first->minimum_width();
 		}
 
-		double x = _area->x1() + _pad.first;
-		double extra = std::max( _area->width() - w, 0.0 );
+		double x = master.x1() + _pad.first;
+		double extra = std::max( master.width() - w, 0.0 );
 		if ( _dir == direction::RIGHT )
 		{
 			for ( auto a: _areas )
@@ -88,8 +88,8 @@ void flow_constraint::recompute_constraint( void )
 			h += a.first->minimum_height();
 		}
 
-		double y = _area->y1() + _pad.first;
-		double extra = std::max( _area->height() - h, 0.0 );
+		double y = master.y1() + _pad.first;
+		double extra = std::max( master.height() - h, 0.0 );
 		if ( _dir == direction::DOWN )
 		{
 			for ( auto a: _areas )

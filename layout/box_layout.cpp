@@ -6,8 +6,7 @@ namespace layout
 
 ////////////////////////////////////////
 
-box_layout::box_layout( const std::shared_ptr<area> &c, direction dir )
-	: _container( c ), _flow( c ), _cross( c )
+box_layout::box_layout( direction dir )
 {
 	set_direction( dir );
 }
@@ -71,36 +70,26 @@ void box_layout::set_spacing( double horiz, double vert )
 
 ////////////////////////////////////////
 
-std::shared_ptr<area> box_layout::new_area( double w )
+void box_layout::add( const std::shared_ptr<area> &a, double w )
 {
-	auto a = std::make_shared<area>();
-	add_area( a, w );
-	return a;
-}
-
-////////////////////////////////////////
-
-void box_layout::add_area( const std::shared_ptr<area> &a, double w )
-{
-	_areas.push_back( a );
 	_flow.add_area( a, w );
 	_cross.add_area( a );
 }
 
 ////////////////////////////////////////
 
-void box_layout::recompute_minimum( void )
+void box_layout::recompute_minimum( area &master )
 {
-	_flow.recompute_minimum();
-	_cross.recompute_minimum();
+	_flow.recompute_minimum( master );
+	_cross.recompute_minimum( master );
 }
 
 ////////////////////////////////////////
 
-void box_layout::recompute_layout( void )
+void box_layout::recompute_layout( area &master )
 {
-	_flow.recompute_constraint();
-	_cross.recompute_constraint();
+	_flow.recompute_constraint( master );
+	_cross.recompute_constraint( master );
 }
 
 ////////////////////////////////////////

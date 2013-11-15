@@ -6,12 +6,10 @@ namespace layout
 
 ////////////////////////////////////////
 
-form_layout::form_layout( const std::shared_ptr<area> &a, direction dir )
-	: _container( a ),
-		_left_area( std::make_shared<area>() ), _right_area( std::make_shared<area>() ),
-		_left( _left_area, orientation::HORIZONTAL ), _right( _right_area, orientation::HORIZONTAL ),
-		_down( a, direction::DOWN ),
-		_columns( a, dir )
+form_layout::form_layout( direction dir )
+	: _left_area( std::make_shared<area>() ), _right_area( std::make_shared<area>() ),
+		_left( orientation::HORIZONTAL ), _right( orientation::HORIZONTAL ),
+		_down( direction::DOWN ), _columns( dir )
 {
 	_columns.add_area( _left_area, 0.0 );
 	_columns.add_area( _right_area, 1.0 );
@@ -37,6 +35,7 @@ void form_layout::set_spacing( double horiz, double vert )
 
 ////////////////////////////////////////
 
+/*
 std::pair<std::shared_ptr<area>,std::shared_ptr<area>> form_layout::new_row( void )
 {
 	auto a = std::make_shared<area>();
@@ -46,16 +45,17 @@ std::pair<std::shared_ptr<area>,std::shared_ptr<area>> form_layout::new_row( voi
 
 	return std::make_pair( a, b );
 }
+*/
 
 ////////////////////////////////////////
 
-void form_layout::add_row( const std::shared_ptr<area> &a, const std::shared_ptr<area> &b )
+void form_layout::add( const std::shared_ptr<area> &a, const std::shared_ptr<area> &b )
 {
 	auto box = std::make_shared<area>();
 
-	_rows.emplace_back( box, orientation::VERTICAL );
-	_rows.back().add_area( a );
-	_rows.back().add_area( b );
+	_rows.emplace_back( tight_constraint( orientation::VERTICAL ), area() );
+	_rows.back().first.add_area( a );
+	_rows.back().first.add_area( b );
 
 	_down.add_area( box );
 
@@ -65,26 +65,26 @@ void form_layout::add_row( const std::shared_ptr<area> &a, const std::shared_ptr
 
 ////////////////////////////////////////
 
-void form_layout::recompute_minimum( void )
+void form_layout::recompute_minimum( area &master )
 {
 	for ( auto t: _rows )
-		t.recompute_minimum();
-	_left.recompute_minimum();
-	_right.recompute_minimum();
-	_down.recompute_minimum();
-	_columns.recompute_minimum();
+		t.first.recompute_minimum( t.second );
+	_left.recompute_minimum( *_left_area );
+	_right.recompute_minimum( *_right_area );
+	_down.recompute_minimum( master );
+	_columns.recompute_minimum( master );
 }
 
 ////////////////////////////////////////
 
-void form_layout::recompute_layout( void )
+void form_layout::recompute_layout( area &master )
 {
-	_columns.recompute_constraint();
-	_down.recompute_constraint();
-	_right.recompute_constraint();
-	_left.recompute_constraint();
+	_columns.recompute_constraint( master );
+	_down.recompute_constraint( master );
+	_right.recompute_constraint( *_right_area );
+	_left.recompute_constraint( *_left_area );
 	for ( auto t: _rows )
-		t.recompute_constraint();
+		t.first.recompute_constraint( t.second );
 }
 
 ////////////////////////////////////////

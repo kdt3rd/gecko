@@ -13,7 +13,7 @@ namespace layout
 class flow_constraint : public constraint
 {
 public:
-	flow_constraint( const std::shared_ptr<area> &a, direction d = direction::RIGHT );
+	flow_constraint( direction d = direction::RIGHT );
 
 	void add_area( const std::shared_ptr<area> &a, double weight = 0.0 );
 	void remove_area( size_t i );
@@ -24,8 +24,8 @@ public:
 	void set_spacing( double s ) { _spacing = s; }
 	void set_pad( double start, double end ) { _pad = { start, end }; }
 
-	void recompute_minimum( void );
-	void recompute_constraint( void );
+	void recompute_minimum( area &a );
+	void recompute_constraint( area &a );
 
 private:
 	direction _dir = direction::RIGHT;

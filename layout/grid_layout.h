@@ -18,7 +18,7 @@ namespace layout
 class grid_layout : public layout
 {
 public:
-	grid_layout( const std::shared_ptr<area> &c );
+	grid_layout( void );
 
 	std::vector<std::shared_ptr<area>> new_row( double w = 0.0 );
 	std::vector<std::shared_ptr<area>> new_column( double w = 0.0 );
@@ -29,21 +29,23 @@ public:
 	void set_pad( double left, double right, double top, double bottom );
 	void set_spacing( double horiz, double vert );
 
-	void recompute_minimum( void );
-	void recompute_layout( void );
+protected:
+	void recompute_minimum( area &m );
+	void recompute_layout( area &m );
 
 private:
 	std::shared_ptr<area> _container;
 
 	struct group
 	{
-		group( const std::shared_ptr<area> &a )
-			: box( a )
+		group( void )
+			: a( std::make_shared<area>() )
 		{
 		}
 
+		std::shared_ptr<area> a;
 		flow_constraint box;
-		std::vector<tight_constraint> cells;
+		std::vector<std::pair<std::shared_ptr<tight_constraint>,std::shared_ptr<area>>> cells;
 	};
 
 	group _rows;
