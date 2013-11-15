@@ -10,11 +10,11 @@ namespace gui
 
 ////////////////////////////////////////
 
-template<typename layout>
-class container : public widget, public layout
+template<typename the_layout>
+class container : public widget, public the_layout
 {
 public:
-	using layout::layout;
+	using the_layout::the_layout;
 
 	virtual ~container( void )
 	{
