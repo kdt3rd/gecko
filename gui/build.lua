@@ -2,10 +2,11 @@
 srcs = {
 	"application.cpp";
 	"layouts.cpp";
-	"label.cpp";
 	"window.cpp";
 	"style.cpp";
 	"cocoa_style.cpp";
+	"label.cpp";
+	"button.cpp";
 }
 
 Library( "gui", Compile( srcs ), LinkLibs( "layout", "reaction" ) );
