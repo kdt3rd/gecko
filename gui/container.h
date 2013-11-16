@@ -20,6 +20,12 @@ public:
 	{
 	}
 
+	virtual void set_delegate( delegate *d )
+	{
+		for ( auto w: _widgets )
+			w->set_delegate( d );
+	}
+
 	virtual void layout( void )
 	{
 		for ( auto w: _widgets )
@@ -69,6 +75,7 @@ protected:
 	void added( const std::shared_ptr<widget> &w )
 	{
 		_widgets.push_back( w );
+		w->set_delegate( _delegate );
 	}
 
 private:

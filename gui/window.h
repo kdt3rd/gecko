@@ -2,6 +2,7 @@
 #pragma once
 
 #include "widget.h"
+#include "delegate.h"
 
 namespace platform
 {
@@ -13,7 +14,7 @@ namespace gui
 
 ////////////////////////////////////////
 
-class window
+class window : public delegate
 {
 public:
 	window( const std::shared_ptr<platform::window> &w );
