@@ -2,6 +2,7 @@
 #pragma once
 
 #include <memory>
+#include <core/alignment.h>
 #include "paint.h"
 #include "path.h"
 #include "font.h"
@@ -48,6 +49,8 @@ public:
 	/// @param utf8 The text to draw
 	/// @param c The paint to color with
 	virtual void draw_text( const std::shared_ptr<font> &font, const point &p, const std::string &utf8, const paint &c ) = 0;
+
+	virtual draw::point align_text( const std::shared_ptr<font> &font, const std::string &text, const draw::rect &rect, alignment a );
 
 	/// @brief Present the canvas
 	/// Finalize the drawing of the canvas and display it.
