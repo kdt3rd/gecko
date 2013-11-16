@@ -3,7 +3,6 @@
 
 #include "widget.h"
 #include <core/alignment.h>
-#include <reaction/passive.h>
 
 namespace gui
 {
