@@ -14,10 +14,13 @@ public:
 	cocoa_style( void );
 	virtual ~cocoa_style( void );
 
-	virtual std::shared_ptr<draw::font> default_font( void );
+	virtual std::shared_ptr<draw::font> default_font( bool bold = false );
+
+	virtual void button_frame( const std::shared_ptr<draw::canvas> &c, const draw::rect &r, bool pressed );
 
 private:
 	std::shared_ptr<draw::font> _default_font;
+	std::shared_ptr<draw::font> _default_bold_font;
 };
 
 ////////////////////////////////////////

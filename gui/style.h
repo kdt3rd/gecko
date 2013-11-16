@@ -4,6 +4,8 @@
 #include <memory>
 #include <string>
 #include <draw/font.h>
+#include <draw/canvas.h>
+#include <core/alignment.h>
 
 namespace gui
 {
@@ -16,7 +18,9 @@ public:
 	style( void );
 	virtual ~style( void );
 
-	virtual std::shared_ptr<draw::font> default_font( void ) = 0;
+	virtual std::shared_ptr<draw::font> default_font( bool bold = false ) = 0;
+
+	virtual void button_frame( const std::shared_ptr<draw::canvas> &c, const draw::rect &r, bool pressed ) = 0;
 };
 
 ////////////////////////////////////////

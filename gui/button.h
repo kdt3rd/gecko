@@ -30,7 +30,7 @@ public:
 private:
 	bool _pressed = false;
 	std::string _text;
-	alignment _align = alignment::LEFT;
+	alignment _align = alignment::CENTER;
 	draw::color _color = { 0, 0, 0, 1 };
 	std::shared_ptr<draw::font> _font;
 };
