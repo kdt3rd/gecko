@@ -2,6 +2,7 @@
 #pragma once
 
 #include "point.h"
+#include <algorithm>
 #include <cmath>
 
 namespace draw
@@ -43,6 +44,9 @@ public:
 	point top_right( void ) const { return point( x2(), y1() ); }
 	point bottom_left( void ) const { return point( x1(), y2() ); }
 	point bottom_right( void ) const { return point( x2(), y2() ); }
+
+	point center( void ) const { return point( ( x1() + x2() ) / 2.0, ( y1() + y2() ) / 2.0 ); }
+	double radius( void ) const { return std::min( width(), height() ) / 2.0; }
 
 	void set_x( double x ) { _position.set_x( x ); }
 	void set_y( double y ) { _position.set_y( y ); }
