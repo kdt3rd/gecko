@@ -25,7 +25,7 @@ SubDir( "gui" )
 --Executable( "test", Compile( "test.cpp" ), LinkLibs( platform ) )
 Executable( "test_app", Compile( "test_app.cpp" ), LinkLibs( "gui", platform ) )
 
---Application( "Test Application", "test_app" )
+Application( "Test Application", "test_app" )
 --Application( "Test", "test" )
 
 Doxygen( "docs", "doxyfile", "", "docs" );
