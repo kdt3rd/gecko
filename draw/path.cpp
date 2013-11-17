@@ -1,9 +1,10 @@
 
+#include <iostream>
 #include "path.h"
 
 namespace 
 {
-	const double PI = 3.14159265358979323846;
+	constexpr double PI = 3.14159265358979323846;
 }
 
 namespace draw
@@ -79,6 +80,14 @@ void path::close( void )
 
 ////////////////////////////////////////
 
+void path::circle( const point &center, double radius )
+{
+	move_to( { center.x() + radius, center.y() } );
+	arc_to( center, radius, 0.0, PI * 2.0 );
+}
+
+////////////////////////////////////////
+
 void path::rectangle( const point &p1, const point &p2 )
 {
 	const double x1 = std::min( p1.x(), p2.x() );
@@ -99,8 +108,8 @@ void path::rounded_rect( const point &p1, const point &p2, double r )
 {
 	const double x1 = std::min( p1.x(), p2.x() );
 	const double y1 = std::min( p1.y(), p2.y() );
-	const double x2 = std::max( p1.x(), p2.x() );
-	const double y2 = std::max( p1.y(), p2.y() );
+	const double x2 = std::max( p1.x(), p2.x() ) - 1.0;
+	const double y2 = std::max( p1.y(), p2.y() ) - 1.0;
 
 	const double degrees = PI / 180.0;
 

@@ -51,6 +51,8 @@ public:
 
 	void close( void );
 
+	void circle( const point &center, double radius );
+
 	void rectangle( const point &p1, const point &p2 );
 
 	void rounded_rect( const point &p1, const point &p2, double r );
