@@ -91,5 +91,53 @@ void cocoa_style::button_frame( const std::shared_ptr<draw::canvas> &c, const dr
 
 ////////////////////////////////////////
 
+void cocoa_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const draw::rect &rect )
+{
+	draw::rect r = rect;
+	double extra = r.height() - 5.0;
+	if ( extra > 0.0 )
+	{
+		r.set_x( r.x() + extra/2.0 );
+		r.set_height( 5.0 );
+	}
+
+	draw::paint p;
+	p.set_stroke_color( border2 );
+	p.set_stroke_width( 1.0 );
+	p.set_fill_linear( r.top_left(), r.bottom_left(), grad2 );
+
+	draw::path rpath;
+	rpath.rounded_rect( r.top_left(), r.bottom_right(), 2 );
+
+	c->draw_path( rpath, p );
+}
+
+////////////////////////////////////////
+
+void cocoa_style::slider_button( const std::shared_ptr<draw::canvas> &c, const draw::rect &r, bool pressed )
+{
+	draw::paint p;
+
+	if ( pressed )
+	{
+		p.set_stroke_color( border2 );
+		p.set_stroke_width( 1.0 );
+		p.set_fill_linear( r.top_left(), r.bottom_left(), grad2 );
+	}
+	else
+	{
+		p.set_stroke_color( border1 );
+		p.set_stroke_width( 1.0 );
+		p.set_fill_linear( r.top_left(), r.bottom_left(), grad1 );
+	}
+
+	draw::path rpath;
+	rpath.circle( r.center(), r.radius() );
+
+	c->draw_path( rpath, p );
+}
+
+////////////////////////////////////////
+
 }
 
