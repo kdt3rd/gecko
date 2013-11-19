@@ -13,13 +13,16 @@ namespace draw
 class gradient
 {
 public:
-	gradient( void ) {}
+	gradient( void )
+	{
+	}
+
 	gradient( const gradient &g )
 		: _stops( g._stops )
 	{
 	}
 
-	gradient( std::initializer_list<std::pair<double,color>> l )
+	constexpr gradient( std::initializer_list<std::pair<double,color>> l )
 		: _stops( l )
 	{
 	}
@@ -34,6 +37,7 @@ public:
 
 private:
 	gradient( gradient && ) = delete;
+
 	std::vector<std::pair<double,color>> _stops;
 };
 
