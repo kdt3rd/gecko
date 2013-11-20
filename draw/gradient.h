@@ -22,7 +22,7 @@ public:
 	{
 	}
 
-	constexpr gradient( std::initializer_list<std::pair<double,color>> l )
+	gradient( std::initializer_list<std::pair<double,color>> l )
 		: _stops( l )
 	{
 	}
