@@ -115,7 +115,7 @@ public:
 	}
 
 private:
-	direction _dir = direction::RIGHT;
+	direction _dir = direction::DOWN;
 	double _pad[4];
 	double _hspacing, _vspacing;
 	std::vector<std::shared_ptr<area>> _areas;
