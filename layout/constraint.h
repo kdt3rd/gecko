@@ -13,7 +13,7 @@ namespace layout
 ////////////////////////////////////////
 
 template<typename list, typename area>
-void overlap_minimum( list &areas, area &master, orientation orient, double pad1 = 0.0, double pad2 = 0.0 )
+void overlap_minimum( const list &areas, area &master, orientation orient, double pad1 = 0.0, double pad2 = 0.0 )
 {
 	if ( orient == orientation::HORIZONTAL )
 	{
@@ -32,7 +32,7 @@ void overlap_minimum( list &areas, area &master, orientation orient, double pad1
 }
 
 template<typename list, typename area>
-void overlap_constraint( list &areas, area &master, orientation orient, double pad1 = 0.0, double pad2 = 0.0 )
+void overlap_constraint( const list &areas, const area &master, orientation orient, double pad1 = 0.0, double pad2 = 0.0 )
 {
 	if ( orient == orientation::HORIZONTAL )
 	{
@@ -51,7 +51,7 @@ void overlap_constraint( list &areas, area &master, orientation orient, double p
 }
 
 template<typename list, typename area>
-void flow_minimum( list &areas, area &master, direction dir, double spacing = 0.0, double pad1 = 0.0, double pad2 = 0.0 )
+void flow_minimum( const list &areas, area &master, direction dir, double spacing = 0.0, double pad1 = 0.0, double pad2 = 0.0 )
 {
 	if ( dir == direction::LEFT || dir == direction::RIGHT )
 	{
@@ -70,7 +70,7 @@ void flow_minimum( list &areas, area &master, direction dir, double spacing = 0.
 }
 
 template<typename list, typename wlist, typename area>
-void xflow_constraint( list &areas, wlist &weights, area &master, direction dir, double spacing = 0.0, double pad1 = 0.0, double pad2 = 0.0 )
+void flow_constraint( const list &areas, const wlist &weights, const area &master, direction dir, double spacing = 0.0, double pad1 = 0.0, double pad2 = 0.0 )
 {
 	double t = 0.0;
 	double s = pad1 + pad2 + ( spacing * ( areas.size() - 1 ) ); 
