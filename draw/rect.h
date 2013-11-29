@@ -2,6 +2,7 @@
 #pragma once
 
 #include "point.h"
+#include <iostream>
 #include <cmath>
 
 namespace draw
@@ -60,6 +61,12 @@ private:
 	point _position;
 	double _w = 0.0, _h = 0.0;
 };
+
+inline std::ostream &operator<<( std::ostream &out, const rect &r )
+{
+	out << r.x() << ',' << r.y() << ' ' << r.width() << 'x' << r.height();
+	return out;
+}
 
 ////////////////////////////////////////
 
