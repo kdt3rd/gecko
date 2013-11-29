@@ -13,13 +13,14 @@ class label : public widget
 {
 public:
 	label( void );
-	label( const std::string &l );
+	label( const std::string &l, alignment a = alignment::LEFT );
 	~label( void );
 
 	const std::string &text( void ) { return _text; }
 	void set_text( const std::string &t ) { _text = t; }
 
 	void set_font( std::shared_ptr<draw::font> &f ) { _font = f; }
+	void set_align( alignment a ) { _align = a; }
 
 	virtual void paint( const std::shared_ptr<draw::canvas> &c );
 
