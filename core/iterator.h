@@ -22,6 +22,22 @@ public:
 		return _end;
 	}
 
+	size_t size( void ) const
+	{
+		return _end - _begin;
+	}
+
+	typename It::value_type &operator[]( int i )
+	{
+		return (* (_begin + i ));
+	}
+
+	const typename It::value_type &operator[]( int i ) const
+	{
+		return (* (_begin + i ));
+	}
+
+
 private:
 	It _begin;
 	It _end;
@@ -58,17 +74,17 @@ public:
 		return *this;
 	}
 
-	column_iterator<I,T> operator+( int i )
+	column_iterator<I,T> operator+( int i ) const
 	{
 		return column_iterator<I,T>( _iterator + i, _n );
 	}
 
-	column_iterator<I,T> operator-( int i )
+	column_iterator<I,T> operator-( int i ) const
 	{
 		return column_iterator<I,T>( _iterator - i, _n );
 	}
 
-	int operator-( const column_iterator<I,T> &i )
+	int operator-( const column_iterator<I,T> &i ) const
 	{
 		return _iterator - i._iterator;
 	}
@@ -82,6 +98,11 @@ public:
 	bool operator!=( const column_iterator<I,T> &e )
 	{
 		return _iterator != e._iterator;
+	}
+
+	T &operator[]( int i )
+	{
+		return (* (_iterator + i ))[_n];
 	}
 
 	/*
