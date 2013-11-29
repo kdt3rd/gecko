@@ -3,8 +3,7 @@
 
 #include <memory>
 #include "layout.h"
-#include "tight_constraint.h"
-#include "flow_constraint.h"
+#include "constraint.h"
 
 namespace layout
 {
@@ -19,84 +18,98 @@ template<typename container, typename area>
 class box_layout : public layout<container,area>
 {
 public:
-	box_layout( direction dir = direction::RIGHT )
+	box_layout( direction dir = direction::DOWN )
+		: _dir( dir )
 	{
-		set_direction( dir );
 	}
 
 	void set_direction( direction d )
 	{
-		_flow.set_direction( d );
-		switch ( d )
-		{
-			case direction::LEFT:
-			case direction::RIGHT:
-				_cross.set_orientation( orientation::VERTICAL );
-				break;
-
-			case direction::UP:
-			case direction::DOWN:
-				_cross.set_orientation( orientation::HORIZONTAL );
-				break;
-		}
+		_dir = d;
 	}
 
 	virtual void set_pad( double left, double right, double top, double bottom )
 	{
-		switch ( _flow.get_direction() )
-		{
-			case direction::LEFT:
-			case direction::RIGHT:
-				_flow.set_pad( left, right );
-				_cross.set_pad( top, bottom );
-				break;
-
-			case direction::UP:
-			case direction::DOWN:
-				_flow.set_pad( top, bottom );
-				_cross.set_pad( left, right );
-				break;
-		}
+		_pad[0] = left;
+		_pad[1] = right;
+		_pad[2] = top;
+		_pad[3] = bottom;
 	}
 
 	virtual void set_spacing( double horiz, double vert )
 	{
-		switch ( _flow.get_direction() )
-		{
-			case direction::LEFT:
-			case direction::RIGHT:
-				_flow.set_spacing( horiz );
-				break;
-
-			case direction::UP:
-			case direction::DOWN:
-				_flow.set_spacing( vert );
-				break;
-		}
+		_hspacing = horiz;
+		_vspacing = vert;
 	}
 
 	void add( const std::shared_ptr<area> &a, double weight = 0.0 )
 	{
-		_flow.add_area( a, weight );
-		_cross.add_area( a );
+		_areas.push_back( a );
+		_weights.push_back( weight );
 		this->added( a );
 	}
 
 	virtual void recompute_minimum( container &master )
 	{
-		_flow.recompute_minimum( master );
-		_cross.recompute_minimum( master );
+		for ( auto &a: _areas )
+			a->layout();
+
+		switch ( _dir )
+		{
+			case direction::LEFT:
+				flow_minimum( _areas, master, _dir, _hspacing, _pad[0], _pad[1] );
+				overlap_minimum( _areas, master, orientation::VERTICAL, _pad[2], _pad[3] );
+				break;
+
+			case direction::RIGHT:
+				flow_minimum( _areas, master, _dir, _hspacing, _pad[1], _pad[0] );
+				overlap_minimum( _areas, master, orientation::VERTICAL, _pad[2], _pad[3] );
+				break;
+
+			case direction::UP:
+				flow_minimum( _areas, master, _dir, _vspacing, _pad[2], _pad[3] );
+				overlap_minimum( _areas, master, orientation::HORIZONTAL, _pad[0], _pad[1] );
+				break;
+
+			case direction::DOWN:
+				flow_minimum( _areas, master, _dir, _vspacing, _pad[2], _pad[3] );
+				overlap_minimum( _areas, master, orientation::HORIZONTAL, _pad[0], _pad[1] );
+				break;
+		}
 	}
 
 	virtual void recompute_layout( container &master )
 	{
-		_flow.recompute_constraint( master );
-		_cross.recompute_constraint( master );
+		switch ( _dir )
+		{
+			case direction::LEFT:
+				flow_constraint( _areas, _weights, master, _dir, _hspacing, _pad[0], _pad[1] );
+				overlap_constraint( _areas, master, orientation::VERTICAL, _pad[2], _pad[3] );
+				break;
+
+			case direction::RIGHT:
+				flow_constraint( _areas, _weights, master, _dir, _hspacing, _pad[1], _pad[0] );
+				overlap_constraint( _areas, master, orientation::VERTICAL, _pad[2], _pad[3] );
+				break;
+
+			case direction::UP:
+				flow_constraint( _areas, _weights, master, _dir, _vspacing, _pad[2], _pad[3] );
+				overlap_constraint( _areas, master, orientation::HORIZONTAL, _pad[0], _pad[1] );
+				break;
+
+			case direction::DOWN:
+				flow_constraint( _areas, _weights, master, _dir, _vspacing, _pad[2], _pad[3] );
+				overlap_constraint( _areas, master, orientation::HORIZONTAL, _pad[0], _pad[1] );
+				break;
+		}
 	}
 
-private:
-	flow_constraint<container, area> _flow;
-	tight_constraint<container, area> _cross;
+protected:
+	direction _dir = direction::DOWN;
+	double _pad[4] = { 0.0, 0.0, 0.0, 0.0 };
+	double _hspacing = 0.0, _vspacing = 0.0;
+	std::vector<std::shared_ptr<area>> _areas;
+	std::vector<double> _weights;
 };
 
 ////////////////////////////////////////

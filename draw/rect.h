@@ -56,6 +56,8 @@ public:
 	void set_horizontal( double x1, double x2 );
 	void set_vertical( double y1, double y2 );
 
+	void set_size( double w, double h ) { _w = w; _h = h; }
+
 	bool contains( double x, double y ) const;
 
 private:

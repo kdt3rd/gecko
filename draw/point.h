@@ -12,17 +12,17 @@ namespace draw
 class point
 {
 public:
-	point( void )
+	constexpr point( void )
 	{
 	}
 
-	point( double xx, double yy )
+	constexpr point( double xx, double yy )
 		: _x( xx ), _y( yy )
 	{
 	}
 
-	double x( void ) const { return _x; }
-	double y( void ) const { return _y; }
+	constexpr double x( void ) const { return _x; }
+	constexpr double y( void ) const { return _y; }
 
 	void set( double xx, double yy )
 	{
@@ -33,7 +33,7 @@ public:
 	void set_x( double xx ) { _x = xx; }
 	void set_y( double yy ) { _y = yy; }
 
-	static double distance( const point &p1, const point &p2 )
+	static inline double distance( const point &p1, const point &p2 )
 	{
 		double dx = p1.x() - p2.x();
 		double dy = p1.y() - p2.y();

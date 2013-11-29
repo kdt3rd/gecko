@@ -102,6 +102,8 @@ public:
 	void set_horizontal( double x1, double x2 ) { _rect.set_horizontal( x1, x2 ); }
 	void set_vertical( double y1, double y2 ) { _rect.set_vertical( y1, y2 ); }
 
+	void set_size( double w, double h ) { _rect.set_size( w, h ); }
+
 	bool contains( double x, double y ) const { return _rect.contains( x, y ); }
 	bool contains( const draw::point &p ) const { return _rect.contains( p.x(), p.y() ); }
 

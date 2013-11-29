@@ -20,11 +20,11 @@ public:
 		LAB
 	};
 
-	color( void )
+	constexpr color( void )
 	{
 	}
 
-	color( double r, double g, double b, double a = 1.0 )
+	constexpr color( double r, double g, double b, double a = 1.0 )
 		: _r( r ), _g( g ), _b( b ), _a( a )
 	{
 	}
@@ -39,10 +39,10 @@ public:
 		}
 	}
 
-	double red( void ) const { return _r; }
-	double green( void ) const { return _g; }
-	double blue( void ) const { return _b; }
-	double alpha( void ) const { return _a; }
+	constexpr double red( void ) const { return _r; }
+	constexpr double green( void ) const { return _g; }
+	constexpr double blue( void ) const { return _b; }
+	constexpr double alpha( void ) const { return _a; }
 
 	void set( double r, double g, double b, double a = 1.0 )
 	{
