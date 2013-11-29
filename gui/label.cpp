@@ -10,7 +10,8 @@ namespace gui
 
 ////////////////////////////////////////
 
-label::label( const std::string &t )
+label::label( const std::string &t, alignment a )
+	: _align( a )
 {
 	_text = t;
 	_font = application::current()->get_style()->default_font();
