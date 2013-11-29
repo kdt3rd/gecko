@@ -33,6 +33,11 @@ public:
 	void set_x( double xx ) { _x = xx; }
 	void set_y( double yy ) { _y = yy; }
 
+	point delta( const point &p ) const
+	{
+		return { _x - p._x, _y - p._y };
+	}
+
 	static inline double distance( const point &p1, const point &p2 )
 	{
 		double dx = p1.x() - p2.x();
