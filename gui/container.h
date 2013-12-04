@@ -40,13 +40,23 @@ public:
 		for ( auto w: _widgets )
 		{
 			if ( w->mouse_press( p, button ) )
+			{
+				_mouse_grab = w;
 				return true;
+			}
 		}
 		return widget::mouse_press( p, button );
 	}
 
 	virtual bool mouse_release( const draw::point &p, int button )
 	{
+		if ( _mouse_grab )
+		{
+			auto tmp = _mouse_grab;
+			_mouse_grab.reset();
+			return tmp->mouse_release( p, button );
+		}
+
 		for ( auto w: _widgets )
 		{
 			if ( w->mouse_release( p, button ) )
@@ -57,6 +67,9 @@ public:
 
 	virtual bool mouse_move( const draw::point &p )
 	{
+		if ( _mouse_grab )
+			return _mouse_grab->mouse_move( p );
+
 		for ( auto w: _widgets )
 		{
 			if ( w->mouse_move( p ) )
@@ -82,6 +95,7 @@ protected:
 
 private:
 	std::vector<std::shared_ptr<widget>> _widgets;
+	std::shared_ptr<widget> _mouse_grab;
 };
 
 ////////////////////////////////////////
