@@ -58,6 +58,12 @@ public:
 			_delegate->invalidate( r );
 	}
 
+	void invalidate( void )
+	{
+		if ( _delegate )
+			_delegate->invalidate( rectangle() );
+	}
+
 protected:
 	std::unique_ptr<reaction::reaction> _action;
 	delegate *_delegate = nullptr;
