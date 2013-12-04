@@ -36,6 +36,9 @@ public:
 	double width( void ) const { return _w; }
 	double height( void ) const { return _h; }
 
+	double x( double percent, double radius = 0.0 ) const { return _position.x() + radius + ( _w - radius*2.0 ) * percent; }
+	double y( double percent, double radius = 0.0 ) const { return _position.y() + radius + ( _h - radius*2.0 ) * percent; }
+
 	double x1( void ) const { return _position.x(); }
 	double y1( void ) const { return _position.y(); }
 	double x2( void ) const { return _position.x() + _w - 1.0; }
