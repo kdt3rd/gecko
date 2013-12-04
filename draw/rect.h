@@ -59,6 +59,8 @@ public:
 
 	void set_size( double w, double h ) { _w = w; _h = h; }
 
+	void trim( double l, double r, double t, double b ) { _w -= l + r; _h -= t + b; _position.add( l, t ); }
+
 	bool contains( double x, double y ) const;
 
 private:
