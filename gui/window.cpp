@@ -64,7 +64,6 @@ void window::paint( void )
 	auto canvas = _window->canvas();
 	if ( _widget )
 	{
-		canvas->fill( { 0, 0, 1, 1 } );
 		_widget->layout();
 		_widget->paint( canvas );
 	}
