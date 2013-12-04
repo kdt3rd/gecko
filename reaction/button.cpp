@@ -23,6 +23,7 @@ bool button::mouse_press( const layout::simple_area &area, const draw::point &p,
 {
 	if ( area.contains( p ) )
 	{
+		_tracking = true;
 		pressed( true );
 		return true;
 	}
@@ -33,18 +34,26 @@ bool button::mouse_press( const layout::simple_area &area, const draw::point &p,
 
 bool button::mouse_release( const layout::simple_area &area, const draw::point &p, int button )
 {
-	pressed( false );
-	if ( area.contains( p ) )
-		activated();
-	return true;
+	if ( _tracking )
+	{
+		pressed( false );
+		if ( area.contains( p ) )
+			activated();
+		return true;
+	}
+	return false;
 }
 
 ////////////////////////////////////////
 
 bool button::mouse_move( const layout::simple_area &area, const draw::point &p )
 {
-	pressed( area.contains( p ) );
-	return true;
+	if ( _tracking )
+	{
+		pressed( area.contains( p ) );
+		return true;
+	}
+	return false;
 }
 
 ////////////////////////////////////////

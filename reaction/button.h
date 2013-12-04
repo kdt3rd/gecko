@@ -22,6 +22,9 @@ public:
 	virtual bool mouse_press( const layout::simple_area &area, const draw::point &p, int button );
 	virtual bool mouse_release( const layout::simple_area &area, const draw::point &p, int button );
 	virtual bool mouse_move( const layout::simple_area &area, const draw::point &p );
+
+private:
+	bool _tracking;
 };
 
 ////////////////////////////////////////
