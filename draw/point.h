@@ -30,6 +30,12 @@ public:
 		_y = yy;
 	}
 
+	void add( double xx, double yy )
+	{
+		_x += xx;
+		_y += yy;
+	}
+
 	void set_x( double xx ) { _x = xx; }
 	void set_y( double yy ) { _y = yy; }
 
