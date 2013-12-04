@@ -16,6 +16,7 @@ window::window( const std::shared_ptr<platform::window> &w )
 	_window->resized.callback( [=]( double w, double h ) { this->resize( w, h ); } );
 	_window->mouse_pressed.callback( [=]( const std::shared_ptr<platform::mouse> &, const draw::point &p, int b ) { this->mouse_press( p, b ); } );
 	_window->mouse_released.callback( [=]( const std::shared_ptr<platform::mouse> &, const draw::point &p, int b ) { this->mouse_release( p, b ); } );
+	_window->mouse_moved.callback( [=]( const std::shared_ptr<platform::mouse> &, const draw::point &p ) { this->mouse_moved( p ); } );
 }
 
 ////////////////////////////////////////
@@ -94,6 +95,14 @@ void window::mouse_release( const draw::point &p, int b )
 {
 	if ( _widget )
 		_widget->mouse_release( p, b );
+}
+
+////////////////////////////////////////
+
+void window::mouse_moved( const draw::point &p )
+{
+	if ( _widget )
+		_widget->mouse_move( p );
 }
 
 ////////////////////////////////////////
