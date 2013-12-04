@@ -7,6 +7,7 @@
 
 namespace
 {
+draw::color bg { 0.9294, 0.9294, 0.9294 };
 
 draw::color border1 { 0.6039, 0.6039, 0.6039 };
 draw::gradient grad1
@@ -66,6 +67,17 @@ std::shared_ptr<draw::font> cocoa_style::default_font( bool bold )
 
 ////////////////////////////////////////
 
+void cocoa_style::background( const std::shared_ptr<draw::canvas> &c, const draw::rect &r )
+{
+	draw::paint p;
+	p.set_fill_color( bg );
+
+	c->fill( r, p );
+
+}
+
+////////////////////////////////////////
+
 void cocoa_style::button_frame( const std::shared_ptr<draw::canvas> &c, const draw::rect &r, bool pressed )
 {
 	draw::paint p;
@@ -91,14 +103,23 @@ void cocoa_style::button_frame( const std::shared_ptr<draw::canvas> &c, const dr
 
 ////////////////////////////////////////
 
+double cocoa_style::slider_size( const draw::rect &r )
+{
+	return r.radius();
+}
+
+////////////////////////////////////////
+
 void cocoa_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const draw::rect &rect )
 {
+	double size = slider_size( rect );
 	draw::rect r = rect;
-	double extra = r.height() - 5.0;
+	r.trim( size, size, 0.0, 0.0 );
+	double extra = r.height() - 7.0;
 	if ( extra > 0.0 )
 	{
-		r.set_x( r.x() + extra/2.0 );
-		r.set_height( 5.0 );
+		r.set_y( r.y() + extra/2.0 );
+		r.set_height( 7.0 );
 	}
 
 	draw::paint p;
@@ -114,7 +135,7 @@ void cocoa_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const d
 
 ////////////////////////////////////////
 
-void cocoa_style::slider_button( const std::shared_ptr<draw::canvas> &c, const draw::rect &r, bool pressed )
+void cocoa_style::slider_button( const std::shared_ptr<draw::canvas> &c, const draw::rect &r, bool pressed, double val )
 {
 	draw::paint p;
 
@@ -131,8 +152,10 @@ void cocoa_style::slider_button( const std::shared_ptr<draw::canvas> &c, const d
 		p.set_fill_linear( r.top_left(), r.bottom_left(), grad1 );
 	}
 
+	draw::point center = { r.x( val, slider_size( r ) ), r.y( 0.5 ) };
+
 	draw::path rpath;
-	rpath.circle( r.center(), r.radius() );
+	rpath.circle( center, r.radius() );
 
 	c->draw_path( rpath, p );
 }
