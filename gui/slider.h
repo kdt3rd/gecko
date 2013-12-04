@@ -3,6 +3,7 @@
 
 #include "widget.h"
 #include <core/alignment.h>
+#include <reaction/slider.h>
 
 namespace gui
 {
@@ -15,7 +16,8 @@ public:
 	slider( void );
 	~slider( void );
 
-	void set_pressed( bool p );
+	void set_value( double v );
+	void set_range( double min, double max );
 
 	virtual void paint( const std::shared_ptr<draw::canvas> &c );
 
@@ -23,6 +25,8 @@ public:
 
 private:
 	bool _pressed = false;
+	double _value = 0.5;
+	double _min = 0.0, _max = 1.0;
 };
 
 ////////////////////////////////////////

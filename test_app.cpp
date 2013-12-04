@@ -20,12 +20,11 @@ namespace {
 
 void build_button( const std::shared_ptr<gui::window> &win )
 {
-	auto container = std::make_shared<gui::container<gui::box_layout>>( direction::DOWN );
+	auto container = std::make_shared<gui::container<gui::form_layout>>( direction::DOWN );
 	container->set_spacing( 6, 6 );
 	container->set_pad( 12.5, 12.5, 12.5, 12.5 );
-	container->add( std::make_shared<gui::label>( "Hello World" ) );
-	container->add( std::make_shared<gui::button>( "Click Me" ) );
-	container->add( std::make_shared<gui::slider>() );
+	container->add( std::make_shared<gui::label>( "Hello World" ), std::make_shared<gui::button>( "Click Me" ) );
+	container->add( std::make_shared<gui::label>( "What" ), std::make_shared<gui::slider>() );
 
 	win->set_widget( container );
 //	gui::builder builder( win );
