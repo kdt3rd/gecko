@@ -42,7 +42,7 @@ void button::set_pressed( bool p )
 	if ( p != _pressed )
 	{
 		_pressed = p;
-		invalidate( rectangle() );
+		invalidate();
 	}
 }
 
