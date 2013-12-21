@@ -171,6 +171,21 @@ void canvas::draw_text( const std::shared_ptr<draw::font> &font, const draw::poi
 
 ////////////////////////////////////////
 
+void canvas::clip( const draw::rect &r )
+{
+	cairo_rectangle( _context, r.x(), r.y(), r.width(), r.height() );
+	cairo_clip( _context );
+}
+
+////////////////////////////////////////
+
+void canvas::translate( double x, double y )
+{
+	cairo_translate( _context, x, y );
+}
+
+////////////////////////////////////////
+
 void canvas::present( void )
 {
 	if ( !_surface )

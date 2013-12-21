@@ -35,6 +35,10 @@ public:
 
 	virtual void draw_text( const std::shared_ptr<draw::font> &font, const draw::point &p, const std::string &utf8, const draw::paint &c );
 
+	virtual void clip( const draw::rect &r );
+
+	virtual void translate( double x, double y );
+
 	virtual void present( void );
 
 	virtual void save( void );

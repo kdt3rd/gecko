@@ -52,6 +52,10 @@ public:
 
 	virtual draw::point align_text( const std::shared_ptr<font> &font, const std::string &text, const draw::rect &rect, alignment a );
 
+	virtual void translate( double x, double y ) = 0;
+
+	virtual void clip( const rect &r ) = 0;
+
 	/// @brief Present the canvas
 	/// Finalize the drawing of the canvas and display it.
 	virtual void present( void );
