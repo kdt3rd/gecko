@@ -59,7 +59,7 @@ void slider::paint( const std::shared_ptr<draw::canvas> &canvas )
 
 ////////////////////////////////////////
 
-void slider::layout( void )
+void slider::compute_minimum( void )
 {
 	set_minimum( 17.0 * 2.0, 17.0 );
 }

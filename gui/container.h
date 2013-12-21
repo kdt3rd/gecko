@@ -26,13 +26,18 @@ public:
 			w->set_delegate( d );
 	}
 
-	virtual void layout( void )
+	virtual void compute_minimum( void )
 	{
 		for ( auto w: _widgets )
-			w->layout();
-
+			w->compute_minimum();
 		this->recompute_minimum( *this );
+	}
+
+	virtual void compute_layout( void )
+	{
 		this->recompute_layout( *this );
+		for ( auto w: _widgets )
+			w->compute_layout();
 	}
 
 	virtual bool mouse_press( const draw::point &p, int button )

@@ -62,7 +62,7 @@ void button::paint( const std::shared_ptr<draw::canvas> &canvas )
 
 ////////////////////////////////////////
 
-void button::layout( void )
+void button::compute_minimum( void )
 {
 	draw::font_extents fex = _font->extents();
 	draw::text_extents tex = _font->extents( _text );

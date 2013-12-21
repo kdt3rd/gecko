@@ -64,7 +64,6 @@ void window::paint( void )
 	auto canvas = _window->canvas();
 	if ( _widget )
 	{
-		_widget->layout();
 		_widget->paint( canvas );
 	}
 	else
@@ -75,9 +74,12 @@ void window::paint( void )
 
 void window::resize( double w, double h )
 {
-	_widget->set_horizontal( 0.0, w - 1.0 );
-	_widget->set_vertical( 0.0, h - 1.0 );
-	_widget->set_minimum( w, h );
+	if ( _widget )
+	{
+		_widget->set_horizontal( 0.0, w - 1.0 );
+		_widget->set_vertical( 0.0, h - 1.0 );
+		_widget->compute_layout();
+	}
 }
 
 ////////////////////////////////////////

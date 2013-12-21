@@ -43,7 +43,7 @@ void label::paint( const std::shared_ptr<draw::canvas> &c )
 
 ////////////////////////////////////////
 
-void label::layout( void )
+void label::compute_minimum( void )
 {
 	auto style = application::current()->get_style();
 	auto font = style->default_font( false );

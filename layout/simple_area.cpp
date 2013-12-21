@@ -12,7 +12,13 @@ simple_area::~simple_area( void )
 
 ////////////////////////////////////////
 
-void simple_area::layout( void )
+void simple_area::compute_minimum( void )
+{
+}
+
+////////////////////////////////////////
+
+void simple_area::compute_layout( void )
 {
 }
 

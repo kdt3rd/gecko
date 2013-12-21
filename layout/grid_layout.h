@@ -83,12 +83,6 @@ public:
 
 	virtual void recompute_minimum( container &master )
 	{
-		for ( auto &r: _areas )
-		{
-			for ( auto &a: r )
-				a->layout();
-		}
-
 		switch ( _dir )
 		{
 			case direction::LEFT:

@@ -24,7 +24,7 @@ public:
 
 	virtual void paint( const std::shared_ptr<draw::canvas> &c );
 
-	virtual void layout( void );
+	virtual void compute_minimum( void );
 
 private:
 	std::string _text;
