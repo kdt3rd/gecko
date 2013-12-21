@@ -43,6 +43,11 @@ public:
 	{
 		return { _x - p._x, _y - p._y };
 	}
+	
+	point operator+( const point &p ) const
+	{
+		return { _x + p._x, _y + p._y };
+	}
 
 	static inline double distance( const point &p1, const point &p2 )
 	{
