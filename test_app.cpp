@@ -11,6 +11,7 @@
 #include <gui/label.h>
 #include <gui/button.h>
 #include <gui/slider.h>
+#include <gui/scroll_area.h>
 
 namespace {
 
@@ -18,15 +19,15 @@ namespace {
 
 ////////////////////////////////////////
 
-void build_button( const std::shared_ptr<gui::window> &win )
+std::shared_ptr<gui::widget> build_button( void )
 {
 	auto container = std::make_shared<gui::container<gui::form_layout>>( direction::DOWN );
-	container->set_spacing( 6, 6 );
+	container->set_spacing( 12, 6 );
 	container->set_pad( 12.5, 12.5, 12.5, 12.5 );
 	container->add( std::make_shared<gui::label>( "Hello World" ), std::make_shared<gui::button>( "Click Me" ) );
 	container->add( std::make_shared<gui::label>( "What" ), std::make_shared<gui::slider>() );
+	return container;
 
-	win->set_widget( container );
 //	gui::builder builder( win );
 //	auto layout = builder.new_layout<layout::box_layout>( direction::DOWN );
 //	layout->set_pad( 12.0, 12.0, 12.0, 12.0 );
@@ -62,7 +63,9 @@ int safemain( int argc, char **argv )
 //	win4->show();
 
 	auto win5 = app->new_window();
-	build_button( win5 );
+	auto scroll = std::make_shared<gui::scroll_area>( 50, 50 );
+	scroll->set_widget( build_button() );
+	win5->set_widget( scroll );
 	win5->show();
 
 	int code = app->run();

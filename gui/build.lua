@@ -8,6 +8,7 @@ srcs = {
 	"label.cpp";
 	"button.cpp";
 	"slider.cpp";
+	"scroll_area.cpp";
 }
 
 Library( "gui", Compile( srcs ), LinkLibs( "layout", "reaction" ) );
