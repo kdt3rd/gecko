@@ -182,6 +182,20 @@ void canvas::present( void )
 
 ////////////////////////////////////////
 
+void canvas::save( void )
+{
+	cairo_save( _context );
+}
+
+////////////////////////////////////////
+
+void canvas::restore( void )
+{
+	cairo_restore( _context );
+}
+
+////////////////////////////////////////
+
 void canvas::screenshot_png( const char *filename )
 {
 	if ( !_surface )

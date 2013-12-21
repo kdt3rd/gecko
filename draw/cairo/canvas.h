@@ -37,6 +37,9 @@ public:
 
 	virtual void present( void );
 
+	virtual void save( void );
+	virtual void restore( void );
+
 	virtual void screenshot_png( const char *filename );
 
 private:
