@@ -85,8 +85,6 @@ public:
 
 	virtual void paint( const std::shared_ptr<draw::canvas> &c )
 	{
-		auto style = application::current()->get_style();
-		style->background( c, rectangle() );
 		for ( auto w: _widgets )
 			w->paint( c );
 	}

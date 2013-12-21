@@ -67,12 +67,12 @@ std::shared_ptr<draw::font> cocoa_style::default_font( bool bold )
 
 ////////////////////////////////////////
 
-void cocoa_style::background( const std::shared_ptr<draw::canvas> &c, const draw::rect &r )
+void cocoa_style::background( const std::shared_ptr<draw::canvas> &c )
 {
 	draw::paint p;
 	p.set_fill_color( bg );
 
-	c->fill( r, p );
+	c->fill( p );
 
 }
 

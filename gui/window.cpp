@@ -1,6 +1,8 @@
 
 #include <iostream>
 #include "window.h"
+#include "application.h"
+#include "style.h"
 #include <platform/window.h>
 
 namespace gui
@@ -62,12 +64,11 @@ void window::invalidate( const draw::rect &r )
 void window::paint( void )
 {
 	auto canvas = _window->canvas();
+	auto style = application::current()->get_style();
+	if ( style )
+		style->background( canvas );
 	if ( _widget )
-	{
 		_widget->paint( canvas );
-	}
-	else
-		canvas->fill( { 1, 0, 0, 1 } );
 }
 
 ////////////////////////////////////////

@@ -20,7 +20,7 @@ public:
 
 	virtual std::shared_ptr<draw::font> default_font( bool bold = false ) = 0;
 
-	virtual void background( const std::shared_ptr<draw::canvas> &c, const draw::rect &r ) = 0;
+	virtual void background( const std::shared_ptr<draw::canvas> &c ) = 0;
 
 	virtual void button_frame( const std::shared_ptr<draw::canvas> &c, const draw::rect &r, bool pressed ) = 0;
 
