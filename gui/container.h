@@ -106,6 +106,7 @@ private:
 
 typedef container<form_layout> form;
 typedef container<grid_layout> grid;
+typedef container<box_layout> simple_container;
 
 extern template class container<form_layout>;
 extern template class container<grid_layout>;
