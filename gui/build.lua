@@ -9,6 +9,7 @@ srcs = {
 	"button.cpp";
 	"slider.cpp";
 	"scroll_area.cpp";
+	"container.cpp";
 }
 
 Library( "gui", Compile( srcs ), LinkLibs( "layout", "reaction" ) );

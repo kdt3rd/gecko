@@ -2,6 +2,7 @@
 #pragma once
 
 #include "widget.h"
+#include "layouts.h"
 #include <reaction/passive.h>
 #include <map>
 
@@ -100,6 +101,15 @@ private:
 	std::vector<std::shared_ptr<widget>> _widgets;
 	std::shared_ptr<widget> _mouse_grab;
 };
+
+////////////////////////////////////////
+
+typedef container<form_layout> form;
+typedef container<grid_layout> grid;
+
+extern template class container<form_layout>;
+extern template class container<grid_layout>;
+extern template class container<box_layout>;
 
 ////////////////////////////////////////
 
