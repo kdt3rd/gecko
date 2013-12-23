@@ -17,7 +17,8 @@ template<typename container, typename area>
 class grid_layout : public layout<container, area>
 {
 public:
-	grid_layout( void )
+	grid_layout( direction dir = direction::DOWN )
+		: _dir( dir )
 	{
 	}
 
