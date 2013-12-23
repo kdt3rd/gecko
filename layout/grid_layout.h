@@ -81,6 +81,16 @@ public:
 		}
 	}
 
+	void set_row_weight( size_t r, double w )
+	{
+		_rweights.at( r ) = w;
+	}
+
+	void set_column_weight( size_t c, double w )
+	{
+		_cweights.at( c ) = w;
+	}
+
 	virtual void recompute_minimum( container &master )
 	{
 		switch ( _dir )
