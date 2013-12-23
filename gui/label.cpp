@@ -34,7 +34,7 @@ label::~label( void )
 
 void label::paint( const std::shared_ptr<draw::canvas> &c )
 {
-	draw::point p = c->align_text( _font, _text, rectangle(), _align );
+	draw::point p = c->align_text( _font, _text, *this, _align );
 
 	draw::paint paint;
 	paint.set_fill_color( _color );

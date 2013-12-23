@@ -47,7 +47,7 @@ void slider::set_value( double v )
 
 void slider::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
-	draw::rect r = rectangle();
+	draw::rect r = *this;
 	reaction::slider *slide = dynamic_cast<reaction::slider*>( _action.get() );
 	if ( slide )
 		slide->set_handle_size( r.radius() );

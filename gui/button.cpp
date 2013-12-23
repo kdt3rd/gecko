@@ -51,9 +51,9 @@ void button::set_pressed( bool p )
 void button::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
 	auto style = application::current()->get_style();
-	style->button_frame( canvas, rectangle(), _pressed );
+	style->button_frame( canvas, *this, _pressed );
 
-	draw::point p = canvas->align_text( _font, _text, rectangle(), _align );
+	draw::point p = canvas->align_text( _font, _text, *this, _align );
 
 	draw::paint paint;
 	paint.set_fill_color( _color );

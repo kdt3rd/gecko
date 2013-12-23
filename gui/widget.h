@@ -61,7 +61,7 @@ public:
 	void invalidate( void )
 	{
 		if ( _delegate )
-			_delegate->invalidate( rectangle() );
+			_delegate->invalidate( *this );
 	}
 
 protected:

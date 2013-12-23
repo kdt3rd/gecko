@@ -36,7 +36,7 @@ void scroll_area::set_delegate( delegate *d )
 void scroll_area::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
 	canvas->save();
-	canvas->clip( rectangle() );
+	canvas->clip( *this );
 	canvas->translate( -_position.x(), -_position.y() );
 	_widget->paint( canvas );
 	canvas->restore();
