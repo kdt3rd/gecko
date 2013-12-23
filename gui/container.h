@@ -97,7 +97,6 @@ protected:
 		w->set_delegate( _delegate );
 	}
 
-private:
 	std::vector<std::shared_ptr<widget>> _widgets;
 	std::shared_ptr<widget> _mouse_grab;
 };
@@ -110,6 +109,7 @@ typedef container<box_layout> simple_container;
 
 extern template class container<form_layout>;
 extern template class container<grid_layout>;
+extern template class container<tree_layout>;
 extern template class container<box_layout>;
 
 ////////////////////////////////////////
