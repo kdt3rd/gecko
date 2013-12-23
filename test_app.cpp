@@ -19,7 +19,7 @@ namespace {
 
 std::shared_ptr<gui::widget> build_form( void )
 {
-	auto container = std::make_shared<gui::container<gui::form_layout>>( direction::DOWN );
+	auto container = std::make_shared<gui::form>( direction::DOWN );
 	container->set_spacing( 12, 6 );
 	container->set_pad( 12.5, 12.5, 12.5, 12.5 );
 	container->add( std::make_shared<gui::label>( "Hello World" ), std::make_shared<gui::button>( "Click Me" ) );
@@ -31,7 +31,34 @@ std::shared_ptr<gui::widget> build_form( void )
 
 std::shared_ptr<gui::widget> build_grid( void )
 {
-	auto container = std::make_shared<gui::container<gui::grid_layout>>();
+	auto container = std::make_shared<gui::grid>();
+	container->set_spacing( 12, 6 );
+	container->set_pad( 12.5, 12.5, 12.5, 12.5 );
+
+	std::string name( "A" );
+	std::vector<std::shared_ptr<gui::widget>> row;
+	const double weights[5] = { 0.25, 0.5, 1.0, 0.5, 0.25 };
+	for ( size_t y = 0; y < 5; ++y )
+	{
+		row.clear();
+		for ( size_t x = 0; x < 5; ++x )
+		{
+			row.push_back( std::make_shared<gui::label>( name, alignment::CENTER ) );
+			++name[0];
+		}
+		container->add_row( row, weights[y] );
+	}
+	for ( size_t y = 0; y < 5; ++y )
+		container->set_column_weight( y, weights[y] );
+
+	return container;
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<gui::widget> build_box( void )
+{
+	auto container = std::make_shared<gui::simple_container>( direction::DOWN );
 	container->set_spacing( 12, 6 );
 	container->set_pad( 12.5, 12.5, 12.5, 12.5 );
 
@@ -39,24 +66,9 @@ std::shared_ptr<gui::widget> build_grid( void )
 	std::vector<std::shared_ptr<gui::widget>> row;
 	for ( size_t y = 0; y < 5; ++y )
 	{
-		row.clear();
-		for ( size_t x = 0; x < 5; ++x )
-		{
-			row.emplace_back( new gui::label( name, alignment::CENTER ) );
-			++name[0];
-		}
-		container->add_row( row );
+		container->add( std::make_shared<gui::label>( name, alignment::CENTER ) );
+		++name[0];
 	}
-	container->set_row_weight( 0, 0.25 );
-	container->set_row_weight( 1, 0.5 );
-	container->set_row_weight( 2, 1.0 );
-	container->set_row_weight( 3, 0.5 );
-	container->set_row_weight( 4, 0.25 );
-	container->set_column_weight( 0, 0.25 );
-	container->set_column_weight( 1, 0.5 );
-	container->set_column_weight( 2, 1.0 );
-	container->set_column_weight( 3, 0.5 );
-	container->set_column_weight( 4, 0.25 );
 
 	return container;
 }
@@ -79,6 +91,8 @@ int safemain( int argc, char **argv )
 		win->set_widget( build_form() );
 	else if ( test == "grid" )
 		win->set_widget( build_grid() );
+	else if ( test == "box" )
+		win->set_widget( build_box() );
 
 	win->show();
 
