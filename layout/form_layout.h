@@ -156,7 +156,7 @@ private:
 	typedef std::array<std::shared_ptr<area>,2> row;
 
 	direction _dir = direction::DOWN;
-	double _pad[4] = { 0.0, 0.0, 0.0, 0.0 };
+	double _pad[4] = { 0.5, 0.5, 0.5, 0.5 };
 	double _hspacing = 0.0, _vspacing = 0.0;
 	std::vector<row> _areas;
 	std::vector<double> _weights;

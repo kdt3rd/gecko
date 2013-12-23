@@ -103,7 +103,7 @@ public:
 
 protected:
 	direction _dir = direction::DOWN;
-	double _pad[4] = { 0.0, 0.0, 0.0, 0.0 };
+	double _pad[4] = { 0.5, 0.5, 0.5, 0.5 };
 	double _hspacing = 0.0, _vspacing = 0.0;
 	std::vector<std::shared_ptr<area>> _areas;
 	std::vector<double> _weights;
