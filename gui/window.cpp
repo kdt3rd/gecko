@@ -48,7 +48,7 @@ void window::set_widget( const std::shared_ptr<widget> &w )
 	_widget = w;
 	_widget->set_horizontal( 0.0, _window->width() - 1.0 );
 	_widget->set_vertical( 0.0, _window->height() - 1.0 );
-	_widget->set_minimum( _window->width(), _window->height() );
+	_widget->compute_minimum();
 	_widget->set_delegate( this );
 }
 
