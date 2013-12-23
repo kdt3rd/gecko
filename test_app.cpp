@@ -17,9 +17,7 @@ namespace {
 
 ////////////////////////////////////////
 
-////////////////////////////////////////
-
-std::shared_ptr<gui::widget> build_button( void )
+std::shared_ptr<gui::widget> build_form( void )
 {
 	auto container = std::make_shared<gui::container<gui::form_layout>>( direction::DOWN );
 	container->set_spacing( 12, 6 );
@@ -27,15 +25,40 @@ std::shared_ptr<gui::widget> build_button( void )
 	container->add( std::make_shared<gui::label>( "Hello World" ), std::make_shared<gui::button>( "Click Me" ) );
 	container->add( std::make_shared<gui::label>( "What" ), std::make_shared<gui::slider>() );
 	return container;
+}
 
-//	gui::builder builder( win );
-//	auto layout = builder.new_layout<layout::box_layout>( direction::DOWN );
-//	layout->set_pad( 12.0, 12.0, 12.0, 12.0 );
-//	layout->set_spacing( 12.0, 12.0 );
+////////////////////////////////////////
 
-//	auto area = layout->new_area();
-//	builder.make_button( area, "Button" );
+std::shared_ptr<gui::widget> build_grid( void )
+{
+	auto container = std::make_shared<gui::container<gui::grid_layout>>();
+	container->set_spacing( 12, 6 );
+	container->set_pad( 12.5, 12.5, 12.5, 12.5 );
 
+	std::string name( "A" );
+	std::vector<std::shared_ptr<gui::widget>> row;
+	for ( size_t y = 0; y < 5; ++y )
+	{
+		row.clear();
+		for ( size_t x = 0; x < 5; ++x )
+		{
+			row.emplace_back( new gui::label( name, alignment::CENTER ) );
+			++name[0];
+		}
+		container->add_row( row );
+	}
+	container->set_row_weight( 0, 0.25 );
+	container->set_row_weight( 1, 0.5 );
+	container->set_row_weight( 2, 1.0 );
+	container->set_row_weight( 3, 0.5 );
+	container->set_row_weight( 4, 0.25 );
+	container->set_column_weight( 0, 0.25 );
+	container->set_column_weight( 1, 0.5 );
+	container->set_column_weight( 2, 1.0 );
+	container->set_column_weight( 3, 0.5 );
+	container->set_column_weight( 4, 0.25 );
+
+	return container;
 }
 
 ////////////////////////////////////////
@@ -46,29 +69,21 @@ int safemain( int argc, char **argv )
 	app->push();
 	app->set_style( std::make_shared<gui::cocoa_style>() );
 
-//	auto win1 = app->new_window();
-//	build_form_layout( win1 );
-//	win1->show();
+	auto win = app->new_window();
 
-//	auto win2 = app->new_window();
-//	build_box_layout( win2 );
-//	win2->show();
+	std::string test = "form";
+	if ( argc > 1 )
+		test = argv[1];
 
-//	auto win3 = app->new_window();
-//	build_grid_layout( win3 );
-//	win3->show();
+	if ( test == "form" )
+		win->set_widget( build_form() );
+	else if ( test == "grid" )
+		win->set_widget( build_grid() );
 
-//	auto win4 = app->new_window();
-//	build_tree_layout( win4 );
-//	win4->show();
-
-	auto win5 = app->new_window();
-	auto scroll = std::make_shared<gui::scroll_area>( 50, 50 );
-	scroll->set_widget( build_button() );
-	win5->set_widget( scroll );
-	win5->show();
+	win->show();
 
 	int code = app->run();
+
 	app->pop();
 	return code;
 }
