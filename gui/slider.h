@@ -2,7 +2,6 @@
 #pragma once
 
 #include "widget.h"
-#include <core/alignment.h>
 #include <reaction/slider.h>
 
 namespace gui
