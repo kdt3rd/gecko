@@ -36,5 +36,15 @@ bool rect::contains( double x, double y ) const
 
 ////////////////////////////////////////
 
+void rect::shrink( double left, double right, double top, double bottom )
+{
+	_position.add( left, top );
+	_w -= left + right;
+	_h -= top + bottom;
+	fix_size();
+}
+
+////////////////////////////////////////
+
 }
 

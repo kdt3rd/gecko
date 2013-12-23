@@ -24,11 +24,13 @@ public:
 	rect( const point &p, double w, double h )
 		: _position( p ), _w( w ), _h( h )
 	{
+		fix_size();
 	}
 
 	rect( double w, double h )
 		: _w( w ), _h( h )
 	{
+		fix_size();
 	}
 
 	double x( void ) const { return _position.x(); }
@@ -44,6 +46,7 @@ public:
 	double x2( void ) const { return _position.x() + _w - 1.0; }
 	double y2( void ) const { return _position.y() + _h - 1.0; }
 
+	point position( void ) const { return _position; }
 	point top_left( void ) const { return _position; }
 	point top_right( void ) const { return point( x2(), y1() ); }
 	point bottom_left( void ) const { return point( x1(), y2() ); }
@@ -54,19 +57,39 @@ public:
 
 	void set_x( double x ) { _position.set_x( x ); }
 	void set_y( double y ) { _position.set_y( y ); }
-	void set_width( double w ) { _w = w; }
-	void set_height( double h ) { _h = h; }
+	void set_width( double w ) { _w = w; fix_size(); }
+	void set_height( double h ) { _h = h; fix_size(); }
 
 	void set_horizontal( double x1, double x2 );
 	void set_vertical( double y1, double y2 );
 
-	void set_size( double w, double h ) { _w = w; _h = h; }
+	void set_position( const draw::point &p ) { _position = p; }
+
+	void set_size( double w, double h ) { _w = w; _h = h; fix_size(); }
 
 	void trim( double l, double r, double t, double b ) { _w -= l + r; _h -= t + b; _position.add( l, t ); }
 
 	bool contains( double x, double y ) const;
+	bool contains( const draw::point &p ) const { return contains( p.x(), p.y() ); }
+
+	void shrink( double left, double right, double top, double bottom );
 
 private:
+	void fix_size( void )
+	{
+		if ( _w < 0.0 )
+		{
+			_position.add( _w, 0.0 );
+			_w = -_w;
+		}
+
+		if ( _h < 0.0 )
+		{
+			_position.add( 0.0, _h );
+			_h = -_h;
+		}
+	}
+
 	point _position;
 	double _w = 0.0, _h = 0.0;
 };
