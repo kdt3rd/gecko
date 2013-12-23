@@ -68,7 +68,11 @@ void window::paint( void )
 	if ( style )
 		style->background( canvas );
 	if ( _widget )
+	{
+		_widget->compute_minimum();
+		_widget->compute_layout();
 		_widget->paint( canvas );
+	}
 }
 
 ////////////////////////////////////////
