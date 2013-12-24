@@ -66,7 +66,7 @@ void button::compute_minimum( void )
 {
 	draw::font_extents fex = _font->extents();
 	draw::text_extents tex = _font->extents( _text );
-	set_minimum( tex.width - tex.x_bearing, std::max( 21.0, fex.height ) );
+	set_minimum( tex.x_advance + 12, std::max( 21.0, fex.height ) );
 }
 
 ////////////////////////////////////////

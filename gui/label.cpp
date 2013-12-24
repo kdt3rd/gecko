@@ -50,7 +50,7 @@ void label::compute_minimum( void )
 
 	draw::font_extents fex = font->extents();
 	draw::text_extents tex = font->extents( _text );
-	set_minimum( tex.width - tex.x_bearing, fex.height );
+	set_minimum( tex.x_advance + 12, fex.height );
 }
 
 ////////////////////////////////////////
