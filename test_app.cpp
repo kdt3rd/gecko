@@ -78,25 +78,26 @@ std::shared_ptr<gui::widget> build_box( direction dir )
 
 std::shared_ptr<gui::widget> build_tree( direction dir )
 {
-	auto container = std::make_shared<gui::tree_node>( 12.0, dir );
-//	container->set_root( std::make_shared<gui::label>( "Root" ) );
-	container->set_root( std::make_shared<gui::color>( draw::color( { 0, 0, 1 } ), 12, 12 ) );
-	container->set_tab( std::make_shared<gui::color>( draw::color( { 1, 0, 0 } ) ) );
+	auto container = std::make_shared<gui::tree_node>( 24.0, dir );
+	container->set_root( std::make_shared<gui::label>( "Root" ) );
 	container->set_spacing( 12, 6 );
 	container->set_pad( 12.5, 12.5, 12.5, 12.5 );
 
 	std::string name( "A" );
 	for ( size_t y = 0; y < 3; ++y )
 	{
-		auto node = std::make_shared<gui::tree_node>( 12.0, direction::DOWN );
+		auto node = std::make_shared<gui::tree_node>( 24.0, dir );
 		if( y == 1 )
 		{
-			auto button = std::make_shared<gui::button>( "Collapse" );
+			auto button = std::make_shared<gui::button>( "+" );
+			button->when_activated += [=]( void )
+			{
+				node->set_collapsed( !node->collapsed() );
+			};
 			node->set_root( button );
 		}
 		else
 			node->set_root( std::make_shared<gui::label>( name ) );
-		node->set_tab( std::make_shared<gui::color>() );
 		std::string sub( "1" );
 		for ( size_t x = 0; x < 3; ++x )
 		{
