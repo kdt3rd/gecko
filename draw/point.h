@@ -30,7 +30,7 @@ public:
 		_y = yy;
 	}
 
-	void add( double xx, double yy )
+	void move_by( double xx, double yy )
 	{
 		_x += xx;
 		_y += yy;

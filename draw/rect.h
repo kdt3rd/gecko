@@ -64,10 +64,11 @@ public:
 	void set_vertical( double y1, double y2 );
 
 	void set_position( const draw::point &p ) { _position = p; }
+	void move_by( double x, double y ) { _position.move_by( x, y ); }
 
 	void set_size( double w, double h ) { _w = w; _h = h; fix_size(); }
 
-	void trim( double l, double r, double t, double b ) { _w -= l + r; _h -= t + b; _position.add( l, t ); }
+	void trim( double l, double r, double t, double b ) { _w -= l + r; _h -= t + b; _position.move_by( l, t ); }
 
 	bool contains( double x, double y ) const;
 	bool contains( const draw::point &p ) const { return contains( p.x(), p.y() ); }
@@ -79,13 +80,13 @@ private:
 	{
 		if ( _w < 0.0 )
 		{
-			_position.add( _w, 0.0 );
+			_position.move_by( _w, 0.0 );
 			_w = -_w;
 		}
 
 		if ( _h < 0.0 )
 		{
-			_position.add( 0.0, _h );
+			_position.move_by( 0.0, _h );
 			_h = -_h;
 		}
 	}
