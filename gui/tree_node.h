@@ -14,7 +14,7 @@ public:
 	using container<tree_layout>::container;
 
 	bool collapsed( void ) const { return _collapsed; }
-	void set_collapse( bool c = true ) { _collapsed = c; }
+	void set_collapsed( bool c = true );
 
 	virtual void compute_minimum( void );
 	virtual void compute_layout( void );

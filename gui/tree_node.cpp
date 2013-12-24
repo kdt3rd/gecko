@@ -6,6 +6,17 @@ namespace gui
 
 ////////////////////////////////////////
 
+void tree_node::set_collapsed( bool c )
+{
+	if ( c != _collapsed )
+	{
+		_collapsed = c;
+		invalidate();
+	}
+}
+
+////////////////////////////////////////
+
 void tree_node::compute_minimum( void )
 {
 	if ( _collapsed )
