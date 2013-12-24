@@ -11,7 +11,7 @@ void tree_node::compute_minimum( void )
 	if ( _collapsed )
 	{
 		_root->compute_minimum();
-		set_minimum( _root->minimum_height(), _root->minimum_width() );
+		set_minimum( _root->minimum_width(), _root->minimum_height() );
 	}
 	else
 		container<tree_layout>::compute_minimum();
