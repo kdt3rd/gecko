@@ -18,6 +18,7 @@ button::button( const std::string &t )
 
 	std::unique_ptr<reaction::button> act( new reaction::button );
 	act->pressed.callback( [=]( bool p ) { this->set_pressed( p ); } );
+	act->activated.callback( [&]( void ) { this->when_activated(); } );
 
 	_action = std::move( act );
 }

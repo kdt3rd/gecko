@@ -3,6 +3,7 @@
 
 #include "widget.h"
 #include <core/alignment.h>
+#include <core/signal.h>
 
 namespace gui
 {
@@ -26,6 +27,8 @@ public:
 	virtual void paint( const std::shared_ptr<draw::canvas> &c );
 
 	virtual void compute_minimum( void );
+
+	core::signal<void(void)> when_activated;
 
 private:
 	bool _pressed = false;
