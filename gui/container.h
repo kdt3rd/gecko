@@ -23,6 +23,7 @@ public:
 
 	virtual void set_delegate( delegate *d )
 	{
+		widget::set_delegate( d );
 		for ( auto w: _widgets )
 			w->set_delegate( d );
 	}
