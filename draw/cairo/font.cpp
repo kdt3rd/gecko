@@ -1,7 +1,6 @@
 
 #include "font.h"
 #include <stdexcept>
-#include <cairo-ft.h>
 
 namespace cairo
 {
