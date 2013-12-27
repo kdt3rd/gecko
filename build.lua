@@ -18,7 +18,6 @@ SubDir( "core" )
 SubDir( "draw" )
 SubDir( "platform" )
 SubDir( "layout" )
-SubDir( "reaction" )
 SubDir( "gui" )
 
 --Executable( "test_layout", Compile( "test_layout.cpp" ), LinkLibs( "layout", platform ) )
