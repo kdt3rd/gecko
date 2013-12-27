@@ -6,6 +6,7 @@
 #include <typeinfo>
 #include <string>
 #include <cassert>
+#include <memory>
 
 ////////////////////////////////////////
 
@@ -70,7 +71,7 @@ public:
 	    if ( !d )
 		{
 			std::cout << "Ooops: " << typeid( _ptr.get() ).name() << std::endl;
-	        throw bad_cast();
+	        throw std::bad_cast();
 		}
 	    return d->_value;
 	}
@@ -81,7 +82,7 @@ public:
 	    typedef decay<U> T;
 	    auto d = dynamic_cast<derived<T>*>( _ptr.get() );
 	    if ( !d )
-	        throw bad_cast();
+	        throw std::bad_cast();
 	    return d->_value;
 	}
 
