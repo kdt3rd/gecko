@@ -3,7 +3,6 @@
 
 #include "widget.h"
 #include "layouts.h"
-#include <reaction/passive.h>
 #include <map>
 
 namespace gui

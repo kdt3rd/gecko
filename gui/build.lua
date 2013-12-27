@@ -14,5 +14,5 @@ srcs = {
 	"tree_node.cpp";
 }
 
-Library( "gui", Compile( srcs ), LinkLibs( "layout", "reaction" ) );
+Library( "gui", Compile( srcs ), LinkLibs( "layout" ) );
 

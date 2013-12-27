@@ -3,7 +3,6 @@
 #include "label.h"
 #include "application.h"
 #include "style.h"
-#include <reaction/passive.h>
 
 namespace gui
 {
@@ -15,7 +14,6 @@ label::label( const std::string &t, alignment a )
 {
 	_text = t;
 	_font = application::current()->get_style()->default_font();
-	_action.reset( new reaction::passive );
 }
 
 ////////////////////////////////////////

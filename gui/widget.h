@@ -2,8 +2,8 @@
 #pragma once
 
 #include <type_traits>
-#include <reaction/reaction.h>
 #include <draw/canvas.h>
+#include <layout/simple_area.h>
 #include "delegate.h"
 
 namespace gui
@@ -33,22 +33,16 @@ public:
 
 	virtual bool mouse_press( const draw::point &p, int button )
 	{
-		if ( _action )
-			return _action->mouse_press( *this, p, button );
 		return false;
 	}
 
 	virtual bool mouse_release( const draw::point &p, int button )
 	{
-		if ( _action )
-			return _action->mouse_release( *this, p, button );
 		return false;
 	}
 
 	virtual bool mouse_move( const draw::point &p )
 	{
-		if ( _action )
-			return _action->mouse_move( *this, p );
 		return false;
 	}
 
@@ -65,7 +59,6 @@ public:
 	}
 
 protected:
-	std::unique_ptr<reaction::reaction> _action;
 	delegate *_delegate = nullptr;
 };
 

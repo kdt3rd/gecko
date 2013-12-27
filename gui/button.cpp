@@ -3,7 +3,6 @@
 #include "button.h"
 #include "application.h"
 #include "style.h"
-#include <reaction/button.h>
 
 
 namespace gui
@@ -15,12 +14,6 @@ button::button( const std::string &t )
 {
 	_text = t;
 	_font = application::current()->get_style()->default_font();
-
-	std::unique_ptr<reaction::button> act( new reaction::button );
-	act->pressed.callback( [=]( bool p ) { this->set_pressed( p ); } );
-	act->activated.callback( [&]( void ) { this->when_activated(); } );
-
-	_action = std::move( act );
 }
 
 ////////////////////////////////////////
@@ -68,6 +61,45 @@ void button::compute_minimum( void )
 	draw::font_extents fex = _font->extents();
 	draw::text_extents tex = _font->extents( _text );
 	set_minimum( tex.x_advance + 12, std::max( 21.0, fex.height ) );
+}
+
+////////////////////////////////////////
+
+bool button::mouse_press( const draw::point &p, int button )
+{
+	if ( contains( p ) )
+	{
+		_tracking = true;
+		set_pressed( true );
+	}
+	return _tracking;
+}
+
+////////////////////////////////////////
+
+bool button::mouse_release( const draw::point &p, int button )
+{
+	if ( _tracking )
+	{
+		_tracking = false;
+		set_pressed( false );
+		if ( contains( p ) )
+			when_activated();
+		return true;
+	}
+	return false;
+}
+
+////////////////////////////////////////
+
+bool button::mouse_move( const draw::point &p )
+{
+	if ( _tracking )
+	{
+		set_pressed( contains( p ) );
+		return true;
+	}
+	return false;
 }
 
 ////////////////////////////////////////

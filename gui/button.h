@@ -28,10 +28,15 @@ public:
 
 	virtual void compute_minimum( void );
 
+	virtual bool mouse_press( const draw::point &p, int button );
+	virtual bool mouse_release( const draw::point &p, int button );
+	virtual bool mouse_move( const draw::point &p );
+
 	core::signal<void(void)> when_activated;
 
 private:
 	bool _pressed = false;
+	bool _tracking = false;
 	std::string _text;
 	alignment _align = alignment::CENTER;
 	draw::color _color = { 0, 0, 0, 1 };
