@@ -49,6 +49,11 @@ public:
 		this->added( a );
 	}
 
+	void set_weight( size_t i, double weight )
+	{
+		_weights.at( i ) = weight;
+	}
+
 	virtual void recompute_minimum( container &master )
 	{
 		switch ( _dir )
