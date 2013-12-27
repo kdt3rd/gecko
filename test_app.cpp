@@ -19,7 +19,7 @@ namespace {
 
 ////////////////////////////////////////
 
-std::shared_ptr<gui::widget> build_form( direction dir )
+std::shared_ptr<gui::form> build_form( direction dir )
 {
 	auto container = std::make_shared<gui::form>( dir );
 	container->set_spacing( 12, 6 );
@@ -31,7 +31,7 @@ std::shared_ptr<gui::widget> build_form( direction dir )
 
 ////////////////////////////////////////
 
-std::shared_ptr<gui::widget> build_grid( direction dir )
+std::shared_ptr<gui::grid> build_grid( direction dir )
 {
 	auto container = std::make_shared<gui::grid>( dir );
 	container->set_spacing( 12, 6 );
@@ -58,7 +58,7 @@ std::shared_ptr<gui::widget> build_grid( direction dir )
 
 ////////////////////////////////////////
 
-std::shared_ptr<gui::widget> build_box( direction dir )
+std::shared_ptr<gui::simple_container> build_box( direction dir )
 {
 	auto container = std::make_shared<gui::simple_container>( dir );
 	container->set_spacing( 12, 6 );
@@ -74,9 +74,10 @@ std::shared_ptr<gui::widget> build_box( direction dir )
 
 	return container;
 }
+
 ////////////////////////////////////////
 
-std::shared_ptr<gui::widget> build_tree( direction dir )
+std::shared_ptr<gui::tree_node> build_tree( direction dir )
 {
 	auto container = std::make_shared<gui::tree_node>( 24.0, dir );
 	container->set_root( std::make_shared<gui::label>( "Root" ) );
@@ -112,6 +113,21 @@ std::shared_ptr<gui::widget> build_tree( direction dir )
 	return container;
 }
 
+////////////////////////////////////////
+
+std::shared_ptr<gui::simple_container> build_all( direction dir )
+{
+	auto container = std::make_shared<gui::simple_container>( dir );
+	container->set_spacing( 12, 6 );
+
+	std::vector<std::shared_ptr<gui::widget>> list = { build_form( dir ), build_grid( dir ), build_box( dir ), build_tree( dir ) };
+
+	for ( auto c: list )
+		container->add( c );
+	container->set_weight( 1, 1.0 );
+
+	return container;
+}
 
 ////////////////////////////////////////
 
@@ -148,11 +164,13 @@ int safemain( int argc, char **argv )
 		win->set_widget( build_box( dir ) );
 	else if ( test == "tree" )
 		win->set_widget( build_tree( dir ) );
+	else if ( test == "all" )
+		win->set_widget( build_all( dir ) );
+	else
+		throw std::runtime_error( "unknown test" );
 
 	win->show();
-
 	int code = app->run();
-
 	app->pop();
 	return code;
 }
