@@ -89,6 +89,15 @@
 
 ////////////////////////////////////////
 
+- (void)mouseDragged:(NSEvent*)event
+{
+	NSPoint p = [event locationInWindow];
+	p = [self convertPoint:p fromView:nil];
+	win->mouse_moved( mouse, { p.x, p.y } );
+}
+
+////////////////////////////////////////
+
 @end
 
 
