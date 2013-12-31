@@ -53,6 +53,11 @@ public:
 		return &_value;
 	}
 
+	bool belongs_to( const std::shared_ptr<record> &r )
+	{
+		return _rec == r.get();
+	}
+
 private:
 	record *_rec = nullptr;
 	T _value;
