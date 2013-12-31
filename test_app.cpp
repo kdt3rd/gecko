@@ -17,6 +17,14 @@
 
 namespace {
 
+struct test_record : public model::record
+{
+	field<std::string> title = field<std::string>( this );
+	field<double> rating = field<double>( this, 0.5 );
+};
+
+std::shared_ptr<test_record> testrec = std::make_shared<test_record>();
+
 ////////////////////////////////////////
 
 std::shared_ptr<gui::form> build_form( direction dir )
@@ -24,8 +32,16 @@ std::shared_ptr<gui::form> build_form( direction dir )
 	auto container = std::make_shared<gui::form>( dir );
 	container->set_spacing( 12, 6 );
 	container->set_pad( 12.5, 12.5, 12.5, 12.5 );
-	container->add( std::make_shared<gui::label>( "Hello World" ), std::make_shared<gui::button>( "Click Me" ) );
-	container->add( std::make_shared<gui::label>( "What" ), std::make_shared<gui::slider>() );
+
+	auto button = std::make_shared<gui::button>( "Click Me" );
+	button->when_activated += []()
+	{
+		testrec->title = "Goodbye World";
+	};
+
+	container->add( std::make_shared<gui::label>( model::make_datum( testrec, testrec->title ) ), button );
+	container->add( std::make_shared<gui::label>( "What" ), std::make_shared<gui::slider>( model::make_datum( testrec, testrec->rating ) ) );
+	container->add( std::make_shared<gui::label>( "Who" ), std::make_shared<gui::slider>( model::make_datum( testrec, testrec->rating ) ) );
 	return container;
 }
 
@@ -133,6 +149,8 @@ std::shared_ptr<gui::simple_container> build_all( direction dir )
 
 int safemain( int argc, char **argv )
 {
+	testrec->title = "Hello World";
+
 	auto app = std::make_shared<gui::application>();
 	app->push();
 	app->set_style( std::make_shared<gui::cocoa_style>() );
