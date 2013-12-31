@@ -104,6 +104,7 @@ datum<T> make_datum( const T &v )
 template<typename T>
 datum<T> make_datum( const std::shared_ptr<record> &r, field<T> &f )
 {
+	precondition( f.belongs_to( r ), "field should belong to record" );
 	return datum<T>( r, f );
 }
 
