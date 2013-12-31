@@ -1,8 +1,13 @@
 
+#pragma once
+
 #include <functional>
 #include <vector>
+#include <assert.h>
 
 namespace core {
+
+typedef std::uintptr_t connection;
 
 namespace detail {
 
@@ -41,7 +46,7 @@ private:
 
 /// collector_default implements the default signal handler collection behaviour.
 template<typename result>
-class collector_default : collector_last<result>
+class collector_default : public collector_last<result>
 {
 };
 
@@ -83,8 +88,6 @@ public:
 		return c();
 	}
 };
-
-typedef std::uintptr_t connection;
 
 /// proto_signal template specialised for the callback signature and collector.
 template<class collector, typename ret_type, typename ...args>
@@ -211,7 +214,7 @@ public:
 	}
 
 	/// proto_signal destructor releases all resources associated with this signal.
-	~proto_signal( void )
+	virtual ~proto_signal( void )
 	{
 		if ( _callback_ring )
 		{
