@@ -86,8 +86,15 @@ std::shared_ptr<application> application::current( void )
 {
 	precondition( !stack.empty(), "getting empty stack" );
 	auto ptr = stack.back().lock();
-	precondition( bool(ptr), "null application" );
+	precondition( bool(ptr), "deleted application" );
 	return ptr;
+}
+
+////////////////////////////////////////
+
+const std::shared_ptr<style> &application::current_style( void )
+{
+	return current()->get_style();
 }
 
 ////////////////////////////////////////

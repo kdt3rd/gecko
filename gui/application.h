@@ -30,6 +30,7 @@ public:
 	std::shared_ptr<draw::font> get_font( const std::string &family, const std::string &style, double pixsize );
 
 	static std::shared_ptr<application> current( void );
+	static const std::shared_ptr<style> &current_style( void );
 
 private:
 	struct impl;
