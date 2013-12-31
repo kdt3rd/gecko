@@ -33,8 +33,12 @@ void slider::set_range( double min, double max )
 
 void slider::set_value( double v )
 {
-	_value = v;
-	invalidate();
+	v = std::max( _min, std::min( _max, v ) );
+	if ( v != _value )
+	{
+		_value = v;
+		invalidate();
+	}
 }
 
 ////////////////////////////////////////
@@ -60,14 +64,13 @@ bool slider::mouse_press( const draw::point &p, int button )
 {
 	if ( contains( p ) )
 	{
-		const double handle = radius();
-		double z1 = x1() + handle;
-		double z2 = x2() - handle;
+		double z1 = x1() + _handle;
+		double z2 = x2() - _handle;
 		if ( z1 < z2 )
 		{
 			double current = z1 + _value * ( z2 - z1 );
 			double dist = std::abs( p.x() - current );
-			if ( dist < handle )
+			if ( dist < _handle )
 			{
 				_tracking = true;
 				_pressed = true;
@@ -86,17 +89,12 @@ bool slider::mouse_move( const draw::point &p )
 {
 	if ( _tracking )
 	{
-		const double handle = radius();
-		double z1 = x1() + handle;
-		double z2 = x2() - handle;
+		double z1 = x1() + _handle;
+		double z2 = x2() - _handle;
 		if ( z1 < z2 )
-		{
-			double current = ( p.x() - z1 ) / ( z2 - z1 );
-			_value = std::max( 0.0, std::min( 1.0, current ) );
-		}
+			set_value( ( p.x() - z1 ) / ( z2 - z1 ) );
 		else
-			_value = 0.5;
-		invalidate();
+			set_value( ( _min + _max ) / 2.0 );
 		return true;
 	}
 	return false;
@@ -108,17 +106,12 @@ bool slider::mouse_release( const draw::point &p, int button )
 {
 	if ( _tracking )
 	{
-		const double handle = radius();
-		double z1 = x1() + handle;
-		double z2 = x2() - handle;
+		double z1 = x1() + _handle;
+		double z2 = x2() - _handle;
 		if ( z1 < z2 )
-		{
-			_value = ( p.x() - z1 ) / ( z2 - z1 );
-			_value = std::max( 0.0, std::min( 1.0, _value ) );
-		}
+			set_value( ( p.x() - z1 ) / ( z2 - z1 ) );
 		else
-			_value = 0.5;
-
+			set_value( ( _min + _max ) / 2.0 );
 		_pressed = false;
 		_tracking = false;
 		invalidate();
