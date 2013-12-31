@@ -10,17 +10,17 @@ namespace gui
 
 ////////////////////////////////////////
 
-button::button( const std::string &t )
+button::button( void )
 {
-	_text = t;
-	_font = application::current()->get_style()->default_font();
+	callback_invalidate( _text, _align, _color, _font );
 }
 
 ////////////////////////////////////////
 
-button::button( void )
+button::button( datum<std::string> &&l, datum<alignment> &&a, datum<draw::color> &&c, shared_datum<draw::font> &&f )
+	: _text( std::move( l ) ), _align( std::move( a ) ), _color( std::move( c ) ), _font( std::move( f ) )
 {
-	_font = application::current()->get_style()->default_font();
+	callback_invalidate( _text, _align, _color, _font );
 }
 
 ////////////////////////////////////////
@@ -44,22 +44,22 @@ void button::set_pressed( bool p )
 
 void button::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
-	auto style = application::current()->get_style();
+	auto style = application::current_style();
 	style->button_frame( canvas, *this, _pressed );
 
-	draw::point p = canvas->align_text( _font, _text, *this, _align );
+	draw::point p = canvas->align_text( _font.value(), _text.value(), *this, _align.value() );
 
 	draw::paint paint;
-	paint.set_fill_color( _color );
-	canvas->draw_text( _font, p, _text, paint );
+	paint.set_fill_color( _color.value() );
+	canvas->draw_text( _font.value(), p, _text.value(), paint );
 }
 
 ////////////////////////////////////////
 
 void button::compute_minimum( void )
 {
-	draw::font_extents fex = _font->extents();
-	draw::text_extents tex = _font->extents( _text );
+	draw::font_extents fex = _font.value()->extents();
+	draw::text_extents tex = _font.value()->extents( _text.value() );
 	set_minimum( tex.x_advance + 12, std::max( 21.0, fex.height ) );
 }
 
