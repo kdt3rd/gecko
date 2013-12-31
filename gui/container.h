@@ -16,32 +16,32 @@ class container : public widget, public the_layout
 public:
 	using the_layout::the_layout;
 
-	virtual ~container( void )
+	~container( void )
 	{
 	}
 
-	virtual void set_delegate( delegate *d )
+	void set_delegate( delegate *d ) override
 	{
 		widget::set_delegate( d );
 		for ( auto w: _widgets )
 			w->set_delegate( d );
 	}
 
-	virtual void compute_minimum( void )
+	void compute_minimum( void ) override
 	{
 		for ( auto w: _widgets )
 			w->compute_minimum();
 		this->recompute_minimum( *this );
 	}
 
-	virtual void compute_layout( void )
+	void compute_layout( void ) override
 	{
 		this->recompute_layout( *this );
 		for ( auto w: _widgets )
 			w->compute_layout();
 	}
 
-	virtual bool mouse_press( const draw::point &p, int button )
+	bool mouse_press( const draw::point &p, int button ) override
 	{
 		for ( auto w: _widgets )
 		{
@@ -54,7 +54,7 @@ public:
 		return widget::mouse_press( p, button );
 	}
 
-	virtual bool mouse_release( const draw::point &p, int button )
+	bool mouse_release( const draw::point &p, int button ) override
 	{
 		if ( _mouse_grab )
 		{
@@ -71,7 +71,7 @@ public:
 		return widget::mouse_release( p, button );
 	}
 
-	virtual bool mouse_move( const draw::point &p )
+	bool mouse_move( const draw::point &p ) override
 	{
 		if ( _mouse_grab )
 			return _mouse_grab->mouse_move( p );
@@ -84,14 +84,14 @@ public:
 		return widget::mouse_move( p );
 	}
 
-	virtual void paint( const std::shared_ptr<draw::canvas> &c )
+	void paint( const std::shared_ptr<draw::canvas> &c ) override
 	{
 		for ( auto w: _widgets )
 			w->paint( c );
 	}
 
 protected:
-	void added( const std::shared_ptr<widget> &w )
+	void added( const std::shared_ptr<widget> &w ) override
 	{
 		_widgets.push_back( w );
 		w->set_delegate( _delegate );

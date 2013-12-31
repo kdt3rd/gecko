@@ -42,13 +42,13 @@ public:
 	void set_value( double v );
 	void set_range( double min, double max );
 
-	virtual void paint( const std::shared_ptr<draw::canvas> &c );
+	void paint( const std::shared_ptr<draw::canvas> &c ) override;
 
-	virtual void compute_minimum( void );
+	void compute_minimum( void ) override;
 
-	virtual bool mouse_press( const draw::point &p, int button );
-	virtual bool mouse_move( const draw::point &p );
-	virtual bool mouse_release( const draw::point &p, int button );
+	bool mouse_press( const draw::point &p, int button ) override;
+	bool mouse_move( const draw::point &p ) override;
+	bool mouse_release( const draw::point &p, int button ) override;
 
 private:
 	bool _tracking = false;

@@ -25,9 +25,9 @@ public:
 	void set_font( std::shared_ptr<draw::font> &f ) { _font = f; }
 	void set_align( alignment a ) { _align = a; }
 
-	virtual void paint( const std::shared_ptr<draw::canvas> &c );
+	void paint( const std::shared_ptr<draw::canvas> &c ) override;
 
-	virtual void compute_minimum( void );
+	void compute_minimum( void ) override;
 
 private:
 	datum<std::string> _text;

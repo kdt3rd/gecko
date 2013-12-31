@@ -16,14 +16,14 @@ public:
 	bool collapsed( void ) const { return _collapsed; }
 	void set_collapsed( bool c = true );
 
-	virtual void compute_minimum( void );
-	virtual void compute_layout( void );
+	void compute_minimum( void ) override;
+	void compute_layout( void ) override;
 
-	virtual bool mouse_press( const draw::point &p, int button );
-	virtual bool mouse_release( const draw::point &p, int button );
-	virtual bool mouse_move( const draw::point &p );
+	bool mouse_press( const draw::point &p, int button ) override;
+	bool mouse_release( const draw::point &p, int button ) override;
+	bool mouse_move( const draw::point &p ) override;
 
-	virtual void paint( const std::shared_ptr<draw::canvas> &c );
+	void paint( const std::shared_ptr<draw::canvas> &c ) override;
 
 private:
 	bool _collapsed = false;

@@ -26,7 +26,7 @@ public:
 	{
 	}
 
-	virtual ~widget( void )
+	~widget( void )
 	{
 	}
 

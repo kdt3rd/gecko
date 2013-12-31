@@ -27,13 +27,13 @@ public:
 
 	void set_pressed( bool p );
 
-	virtual void paint( const std::shared_ptr<draw::canvas> &c );
+	void paint( const std::shared_ptr<draw::canvas> &c ) override;
 
-	virtual void compute_minimum( void );
+	void compute_minimum( void ) override;
 
-	virtual bool mouse_press( const draw::point &p, int button );
-	virtual bool mouse_release( const draw::point &p, int button );
-	virtual bool mouse_move( const draw::point &p );
+	bool mouse_press( const draw::point &p, int button ) override;
+	bool mouse_release( const draw::point &p, int button ) override;
+	bool mouse_move( const draw::point &p ) override;
 
 	core::signal<void(void)> when_activated;
 
