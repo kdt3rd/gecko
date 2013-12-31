@@ -43,11 +43,8 @@ void label::paint( const std::shared_ptr<draw::canvas> &c )
 
 void label::compute_minimum( void )
 {
-	auto style = application::current()->get_style();
-	auto font = style->default_font( false );
-
-	draw::font_extents fex = font->extents();
-	draw::text_extents tex = font->extents( _text.value() );
+	draw::font_extents fex = _font.value()->extents();
+	draw::text_extents tex = _font.value()->extents( _text.value() );
 	set_minimum( tex.x_advance + 12, fex.height );
 }
 
