@@ -67,6 +67,26 @@ public:
 	}
 
 protected:
+	template<typename D>
+	void callback_helper( const std::function<void(void)> &cb, D &d )
+	{
+		d += cb;
+	}
+
+	template<typename D, typename ...Args>
+	void callback_helper( const std::function<void(void)> &cb, D &d, Args &...args )
+	{
+		d += cb;
+		callback_helper( cb, args... );
+	}
+
+	template<typename ...Args>
+	void callback_invalidate( Args &...args )
+	{
+		auto cb = [this]() { invalidate(); };
+		callback_helper( cb, args... );
+	}
+
 	delegate *_delegate = nullptr;
 };
 
