@@ -9,17 +9,17 @@ namespace gui
 
 ////////////////////////////////////////
 
-label::label( const std::string &t, alignment a )
-	: _align( a )
+label::label( void )
 {
-	_text = t;
-	_font = application::current()->get_style()->default_font();
+	callback_invalidate( _text, _align, _color, _font );
 }
 
 ////////////////////////////////////////
 
-label::label( void )
+label::label( datum<std::string> &&l, datum<alignment> &&a, datum<draw::color> &&c, shared_datum<draw::font> &&f )
+	: _text( std::move( l ) ), _align( std::move( a ) ), _color( std::move( c ) ), _font( std::move( f ) )
 {
+	callback_invalidate( _text, _align, _color, _font );
 }
 
 ////////////////////////////////////////
@@ -32,11 +32,11 @@ label::~label( void )
 
 void label::paint( const std::shared_ptr<draw::canvas> &c )
 {
-	draw::point p = c->align_text( _font, _text, *this, _align );
+	draw::point p = c->align_text( _font.value(), _text.value(), *this, _align.value() );
 
 	draw::paint paint;
-	paint.set_fill_color( _color );
-	c->draw_text( _font, p, _text, paint );
+	paint.set_fill_color( _color.value() );
+	c->draw_text( _font.value(), p, _text.value(), paint );
 }
 
 ////////////////////////////////////////
@@ -47,7 +47,7 @@ void label::compute_minimum( void )
 	auto font = style->default_font( false );
 
 	draw::font_extents fex = font->extents();
-	draw::text_extents tex = font->extents( _text );
+	draw::text_extents tex = font->extents( _text.value() );
 	set_minimum( tex.x_advance + 12, fex.height );
 }
 
