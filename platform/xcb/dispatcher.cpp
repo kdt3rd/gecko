@@ -185,7 +185,12 @@ int dispatcher::execute( void )
 			{
 				auto *ev = reinterpret_cast<xcb_client_message_event_t*>( event.get() );
 				if ( ev->data.data32[0] == _atom_delete_window )
-					done = true;
+				{
+					auto w = _windows[ev->window];
+					w->hide();
+					_windows.erase( w->id() );
+					done = _windows.empty();
+				}
 				break;
 			}
 
