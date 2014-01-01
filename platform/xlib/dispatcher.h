@@ -34,6 +34,7 @@ public:
 private:
 	int _exit_code = 0;
 	Display *_display = nullptr;
+	Atom _atom_delete_window;
 	std::shared_ptr<keyboard> _keyboard;
 	std::shared_ptr<mouse> _mouse;
 	std::map<Window, std::shared_ptr<window>> _windows;

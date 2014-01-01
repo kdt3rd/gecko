@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <core/contract.h>
 #include <core/pointer.h>
+#include <core/meta.h>
 #include "dispatcher.h"
 
 namespace xlib
@@ -14,6 +15,7 @@ dispatcher::dispatcher( Display *dpy, const std::shared_ptr<keyboard> &k, const 
 	: _display( dpy ), _keyboard( k ), _mouse( m )
 {
 	precondition( _display, "null display" );
+	_atom_delete_window = XInternAtom( _display, "WM_DELETE_WINDOW", True );
 }
 
 ////////////////////////////////////////
@@ -50,10 +52,7 @@ int dispatcher::execute( void )
 				if ( w->check_last_position( event.xconfigure.x, event.xconfigure.y ) )
 					w->moved( event.xconfigure.x, event.xconfigure.y );
 				if ( w->check_last_size( event.xconfigure.width, event.xconfigure.height ) )
-				{
-					std::cout << "Configure notify! " << event.xconfigure.width << 'x' << event.xconfigure.height << std::endl;
 					w->resize_canvas( event.xconfigure.width, event.xconfigure.height );
-				}
 				break;
 			}
 
@@ -96,73 +95,67 @@ int dispatcher::execute( void )
 
 			case KeyPress:
 			{
-//				auto *ev = reinterpret_cast<xcb_key_press_event_t*>( event.get() );
-//				auto w = _windows[ev->event];
-//				platform::scancode sc = _keyboard->get_scancode( ev->detail );
-//				w->key_pressed( _keyboard, sc );
+				auto w = _windows[event.xkey.window];
+				platform::scancode sc = _keyboard->get_scancode( event.xkey );
+				w->key_pressed( _keyboard, sc );
 				break;
 			}
 
 			case KeyRelease:
 			{
-//				auto *ev = reinterpret_cast<xcb_key_press_event_t*>( event.get() );
-//				auto w = _windows[ev->event];
-//				platform::scancode sc = _keyboard->get_scancode( ev->detail );
-//				w->key_released( _keyboard, sc );
+				auto w = _windows[event.xkey.window];
+				platform::scancode sc = _keyboard->get_scancode( event.xkey );
+				w->key_released( _keyboard, sc );
 				break;
 			}
 
 			case MappingNotify:
 			{
-//				auto *ev = reinterpret_cast<xcb_mapping_notify_event_t*>( event.get() );
-//				if ( ev->request == XCB_MAPPING_MODIFIER || ev->request == XCB_MAPPING_KEYBOARD )
-//					_keyboard->update_mapping();
+				if ( event.xmapping.request == MappingKeyboard )
+					XRefreshKeyboardMapping( &event.xmapping );
 				break;
 			}
 
 			case ButtonPress:
 			{
-//				auto *ev = reinterpret_cast<xcb_button_press_event_t*>( event.get() );
-//				auto w = _windows[ev->event];
-//				switch ( ev->detail )
-//				{
-//					case 1:
-//					case 2:
-//					case 3:
-//						w->mouse_pressed( _mouse, { double(ev->event_x), double(ev->event_y) }, ev->detail );
-//						break;
-//
-//					case 4: // Mouse wheel up
-//					case 5: // Mouse wheel down
-//						break;
-//				}
+				auto w = _windows[event.xbutton.window];
+				switch ( event.xbutton.button )
+				{
+					case 1:
+					case 2:
+					case 3:
+						w->mouse_pressed( _mouse, { double(event.xbutton.x), double(event.xbutton.y) }, event.xbutton.button );
+						break;
+
+					case 4: // Mouse wheel up
+					case 5: // Mouse wheel down
+						break;
+				}
 				break;
 			}
 
 			case ButtonRelease:
 			{
-//				auto *ev = reinterpret_cast<xcb_button_press_event_t*>( event.get() );
-//				auto w = _windows[ev->event];
-//				switch ( ev->detail )
-//				{
-//					case 1:
-//					case 2:
-//					case 3:
-//						w->mouse_released( _mouse, { double(ev->event_x), double(ev->event_y) }, ev->detail );
-//						break;
-//
-//					case 4: // Mouse wheel up
-//					case 5: // Mouse wheel down
-//						break;
-//				}
+				auto w = _windows[event.xbutton.window];
+				switch ( event.xbutton.button )
+				{
+					case 1:
+					case 2:
+					case 3:
+						w->mouse_released( _mouse, { double(event.xbutton.x), double(event.xbutton.y) }, event.xbutton.button );
+						break;
+
+					case 4: // Mouse wheel up
+					case 5: // Mouse wheel down
+						break;
+				}
 				break;
 			}
 
 			case MotionNotify:
 			{
-//				auto *ev = reinterpret_cast<xcb_motion_notify_event_t*>( event.get() );
-//				auto w = _windows[ev->event];
-//				w->mouse_moved( _mouse, { double(ev->event_x), double(ev->event_y) } );
+				auto w = _windows[event.xmotion.window];
+				w->mouse_moved( _mouse, { double(event.xmotion.x), double(event.xmotion.y) } );
 				break;
 			}
 
@@ -172,9 +165,13 @@ int dispatcher::execute( void )
 
 			case ClientMessage:
 			{
-//				auto *ev = reinterpret_cast<xcb_client_message_event_t*>( event.get() );
-//				if ( ev->data.data32[0] == _atom_delete_window )
-//					done = true;
+				auto w = _windows[event.xclient.window];
+				if ( Atom(event.xclient.data.l[0]) == _atom_delete_window )
+				{
+					w->hide();
+					_windows.erase( w->id() );
+					done = _windows.empty();
+				}
 				break;
 			}
 
@@ -198,7 +195,7 @@ void dispatcher::exit( int code )
 void dispatcher::add_window( const std::shared_ptr<window> &w )
 {
 	_windows[w->id()] = w;
-//	xcb_change_property( _connection, XCB_PROP_MODE_REPLACE, w->id(), _atom_wm_protocols, XCB_ATOM_ATOM, 32, 1, &_atom_delete_window );
+	XSetWMProtocols( _display, w->id(), &_atom_delete_window, 1 );
 }
 
 ////////////////////////////////////////

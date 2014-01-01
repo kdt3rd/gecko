@@ -21,22 +21,6 @@ system::system( void )
 	if ( !_display )
 		throw std::runtime_error( "no X display" );
 
-	int prefScreen = 0;
-
-	/*
-	const xcb_setup_t *setup = xcb_get_setup( _connection );
-	precondition( setup, "not xcb setup" );
-
-	xcb_screen_iterator_t iter = xcb_setup_roots_iterator( setup );
-	_screen = iter.data;
-
-	while ( iter.rem )
-	{
-		_screens.push_back( std::make_shared<screen>( iter.data ) );
-		xcb_screen_next( &iter );
-	}
-	*/
-
 	_keyboard = std::make_shared<keyboard>( _display );
 	_mouse = std::make_shared<mouse>();
 	_font_manager = std::make_shared<font_manager>();

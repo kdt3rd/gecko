@@ -29,7 +29,6 @@ public:
 
 private:
 	Display *_display = nullptr;
-//	xcb_screen_t *_screen;
 	std::shared_ptr<dispatcher> _dispatcher;
 	std::shared_ptr<keyboard> _keyboard;
 	std::shared_ptr<mouse> _mouse;
