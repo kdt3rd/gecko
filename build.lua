@@ -1,9 +1,9 @@
 
-Include( source_dir, FREETYPE_INCLUDE, CAIRO_INCLUDE )
+Include( source_dir, CAIRO_INCLUDE )
 
 if System() == "Linux" then
-	platform = "platform-xcb"
-	CXXFlags( "-DPLATFORM=xcb" )
+	platform = "platform-xlib"
+	CXXFlags( "-DPLATFORM=xlib" )
 elseif System() == "Darwin" then
 	platform = "platform-cocoa"
 	CXXFlags( "-DPLATFORM=cocoa" )

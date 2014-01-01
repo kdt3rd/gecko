@@ -13,7 +13,7 @@ srcs = {
 Library( "platform", Compile( srcs ), LinkLibs( "draw" ) )
 
 if System() == "Linux" then
-	SubDir( "xcb" )
+	SubDir( "xlib" )
 elseif System() == "Darwin" then
 	SubDir( "xcb" )
 	SubDir( "cocoa" )
