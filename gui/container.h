@@ -84,6 +84,45 @@ public:
 		return widget::mouse_move( p );
 	}
 
+	bool key_press( platform::scancode c ) override
+	{
+		if ( _key_focus )
+			return _key_focus->key_press( c );
+
+		for ( auto w: _widgets )
+		{
+			if ( w->key_press( c ) )
+				return true;
+		}
+		return widget::key_press( c );
+	}
+
+	bool key_release( platform::scancode c ) override
+	{
+		if ( _key_focus )
+			return _key_focus->key_release( c );
+
+		for ( auto w: _widgets )
+		{
+			if ( w->key_release( c ) )
+				return true;
+		}
+		return widget::key_release( c );
+	}
+
+	bool text_input( char32_t c ) override
+	{
+		if ( _key_focus )
+			return _key_focus->text_input( c );
+
+		for ( auto w: _widgets )
+		{
+			if ( w->text_input( c ) )
+				return true;
+		}
+		return widget::text_input( c );
+	}
+
 	void paint( const std::shared_ptr<draw::canvas> &c ) override
 	{
 		for ( auto w: _widgets )
@@ -99,6 +138,7 @@ protected:
 
 	std::vector<std::shared_ptr<widget>> _widgets;
 	std::shared_ptr<widget> _mouse_grab;
+	std::shared_ptr<widget> _key_focus;
 };
 
 ////////////////////////////////////////
