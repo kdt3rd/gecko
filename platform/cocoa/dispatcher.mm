@@ -113,6 +113,15 @@
 	platform::scancode sc = keyboard->get_scancode( kc );
 
 	win->key_pressed( keyboard, sc );
+
+	NSString *chars = [event characters];
+	char32_t c;
+	if ( [chars getBytes:&c maxLength:4 usedLength:NULL encoding:NSUTF32LittleEndianStringEncoding options:0 range:NSMakeRange(0,1) remainingRange:NULL] )
+	{
+		c = NSSwapLittleIntToHost( c );
+		if ( c < 0xE000 || c > 0xF8FF ) // Private area
+			win->text_entered( keyboard, c );
+	}
 }
 
 ////////////////////////////////////////
