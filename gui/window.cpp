@@ -21,6 +21,7 @@ window::window( const std::shared_ptr<platform::window> &w )
 	_window->mouse_moved.callback( [this]( const std::shared_ptr<platform::mouse> &, const draw::point &p ) { mouse_moved( p ); } );
 	_window->key_pressed.callback( [this]( const std::shared_ptr<platform::keyboard> &, const platform::scancode &c ) { key_pressed( c ); } );
 	_window->key_released.callback( [this]( const std::shared_ptr<platform::keyboard> &, const platform::scancode &c ) { key_released( c ); } );
+	_window->text_entered.callback( [this]( const std::shared_ptr<platform::keyboard> &, const char32_t &c ) { text_entered( c ); } );
 }
 
 ////////////////////////////////////////
@@ -127,6 +128,14 @@ void window::key_released( platform::scancode c )
 {
 	if ( _widget )
 		_widget->key_release( c );
+}
+
+////////////////////////////////////////
+
+void window::text_entered( char32_t c )
+{
+	if ( _widget )
+		_widget->text_input( c );
 }
 
 ////////////////////////////////////////

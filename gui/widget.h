@@ -65,6 +65,11 @@ public:
 		return false;
 	}
 
+	virtual bool text_input( char32_t c )
+	{
+		return false;
+	}
+
 	void invalidate( const draw::rect &r )
 	{
 		if ( _delegate )

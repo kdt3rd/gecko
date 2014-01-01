@@ -40,6 +40,7 @@ private:
 
 	void key_pressed( platform::scancode c );
 	void key_released( platform::scancode c );
+	void text_entered( char32_t c );
 
 	std::shared_ptr<layout::simple_area> _area;
 	std::shared_ptr<platform::window> _window;

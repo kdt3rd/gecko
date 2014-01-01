@@ -101,6 +101,11 @@ public:
 	/// Callback action for key release events.
 	action<void( const std::shared_ptr<keyboard> &, scancode )> key_released;
 
+	/// @brief Action for text entered events.
+	///
+	/// Callback action for text entered events.
+	action<void( const std::shared_ptr<keyboard> &, char32_t )> text_entered;
+
 	action<void( void )> closed;
 	action<void( void )> shown;
 	action<void( void )> hidden;
