@@ -4,6 +4,7 @@
 #include <type_traits>
 #include <draw/canvas.h>
 #include <layout/simple_area.h>
+#include <platform/keyboard.h>
 #include "delegate.h"
 
 namespace model
@@ -50,6 +51,16 @@ public:
 	}
 
 	virtual bool mouse_move( const draw::point &p )
+	{
+		return false;
+	}
+
+	virtual bool key_press( platform::scancode c )
+	{
+		return false;
+	}
+
+	virtual bool key_release( platform::scancode c )
 	{
 		return false;
 	}
