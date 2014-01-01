@@ -59,7 +59,7 @@ enum class scancode : uint32_t
 	KEY_TAB          = 43,
 	KEY_SPACE        = 44,
 	KEY_MINUS        = 45,
-	KEY_EQUALS       = 46,
+	KEY_EQUAL        = 46,
 	KEY_LEFTBRACKET  = 47,
 	KEY_RIGHTBRACKET = 48,
 	KEY_BACKSLASH    = 49,

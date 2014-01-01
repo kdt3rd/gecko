@@ -38,7 +38,7 @@ const std::map<xcb_keysym_t,platform::scancode> sym2code =
 	{ XK_Tab, platform::scancode::KEY_TAB },
 	{ XK_space, platform::scancode::KEY_SPACE },
 	{ XK_minus, platform::scancode::KEY_MINUS },
-	{ XK_equal, platform::scancode::KEY_EQUALS },
+	{ XK_equal, platform::scancode::KEY_EQUAL },
 	{ XK_bracketleft, platform::scancode::KEY_LEFTBRACKET },
 	{ XK_bracketright, platform::scancode::KEY_RIGHTBRACKET },
 	{ XK_slash, platform::scancode::KEY_BACKSLASH },
