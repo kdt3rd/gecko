@@ -14,11 +14,13 @@ window::window( const std::shared_ptr<platform::window> &w )
 	: _window( w )
 {
 	precondition( bool(_window), "null window" );
-	_window->exposed.callback( [=] { this->paint(); } );
-	_window->resized.callback( [=]( double w, double h ) { this->resize( w, h ); } );
-	_window->mouse_pressed.callback( [=]( const std::shared_ptr<platform::mouse> &, const draw::point &p, int b ) { this->mouse_press( p, b ); } );
-	_window->mouse_released.callback( [=]( const std::shared_ptr<platform::mouse> &, const draw::point &p, int b ) { this->mouse_release( p, b ); } );
-	_window->mouse_moved.callback( [=]( const std::shared_ptr<platform::mouse> &, const draw::point &p ) { this->mouse_moved( p ); } );
+	_window->exposed.callback( [this] ( void ) { paint(); } );
+	_window->resized.callback( [this] ( double w, double h ) { resize( w, h ); } );
+	_window->mouse_pressed.callback( [this]( const std::shared_ptr<platform::mouse> &, const draw::point &p, int b ) { mouse_press( p, b ); } );
+	_window->mouse_released.callback( [this]( const std::shared_ptr<platform::mouse> &, const draw::point &p, int b ) { mouse_release( p, b ); } );
+	_window->mouse_moved.callback( [this]( const std::shared_ptr<platform::mouse> &, const draw::point &p ) { mouse_moved( p ); } );
+	_window->key_pressed.callback( [this]( const std::shared_ptr<platform::keyboard> &, const platform::scancode &c ) { key_pressed( c ); } );
+	_window->key_released.callback( [this]( const std::shared_ptr<platform::keyboard> &, const platform::scancode &c ) { key_released( c ); } );
 }
 
 ////////////////////////////////////////
@@ -109,6 +111,22 @@ void window::mouse_moved( const draw::point &p )
 {
 	if ( _widget )
 		_widget->mouse_move( p );
+}
+
+////////////////////////////////////////
+
+void window::key_pressed( platform::scancode c )
+{
+	if ( _widget )
+		_widget->key_press( c );
+}
+
+////////////////////////////////////////
+
+void window::key_released( platform::scancode c )
+{
+	if ( _widget )
+		_widget->key_release( c );
 }
 
 ////////////////////////////////////////

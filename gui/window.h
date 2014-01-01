@@ -3,6 +3,7 @@
 
 #include "widget.h"
 #include "delegate.h"
+#include <platform/keyboard.h>
 
 namespace platform
 {
@@ -36,6 +37,9 @@ private:
 	void mouse_press( const draw::point &p, int button );
 	void mouse_release( const draw::point &p, int button );
 	void mouse_moved( const draw::point &p );
+
+	void key_pressed( platform::scancode c );
+	void key_released( platform::scancode c );
 
 	std::shared_ptr<layout::simple_area> _area;
 	std::shared_ptr<platform::window> _window;
