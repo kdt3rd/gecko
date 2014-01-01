@@ -103,6 +103,22 @@ void cocoa_style::button_frame( const std::shared_ptr<draw::canvas> &c, const dr
 
 ////////////////////////////////////////
 
+void cocoa_style::line_edit_frame( const std::shared_ptr<draw::canvas> &c, const draw::rect &r, bool focused )
+{
+	draw::paint paint;
+
+	paint.set_stroke_color( border1 );
+	paint.set_stroke_width( 1.0 );
+	paint.set_fill_color( { 1, 1, 1 } );
+
+	draw::path path;
+	path.rectangle( r.top_left(), r.bottom_right() );
+
+	c->draw_path( path, paint );
+}
+
+////////////////////////////////////////
+
 double cocoa_style::slider_size( const draw::rect &r )
 {
 	return r.radius();

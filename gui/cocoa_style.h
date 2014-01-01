@@ -12,17 +12,18 @@ class cocoa_style : public style
 {
 public:
 	cocoa_style( void );
-	virtual ~cocoa_style( void );
+	~cocoa_style( void );
 
-	virtual std::shared_ptr<draw::font> default_font( bool bold = false );
+	std::shared_ptr<draw::font> default_font( bool bold = false ) override;
 
-	virtual void background( const std::shared_ptr<draw::canvas> &c );
+	void background( const std::shared_ptr<draw::canvas> &c ) override;
 
-	virtual void button_frame( const std::shared_ptr<draw::canvas> &c, const draw::rect &r, bool pressed );
+	void button_frame( const std::shared_ptr<draw::canvas> &c, const draw::rect &r, bool pressed ) override;
+	void line_edit_frame( const std::shared_ptr<draw::canvas> &c, const draw::rect &r, bool focused ) override;
 
-	virtual double slider_size( const draw::rect &rect );
-	virtual void slider_groove( const std::shared_ptr<draw::canvas> &c, const draw::rect &rect );
-	virtual void slider_button( const std::shared_ptr<draw::canvas> &c, const draw::rect &r, bool pressed, double val );
+	double slider_size( const draw::rect &rect ) override;
+	void slider_groove( const std::shared_ptr<draw::canvas> &c, const draw::rect &rect ) override;
+	void slider_button( const std::shared_ptr<draw::canvas> &c, const draw::rect &r, bool pressed, double val ) override;
 
 private:
 	std::shared_ptr<draw::font> _default_font;
