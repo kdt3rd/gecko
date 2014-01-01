@@ -83,35 +83,45 @@ namespace utf
 	void write( std::ostream &out, char32_t cp );
 
 	template<typename insert_it>
-	void convert_utf8( char32_t cp, insert_it &it ) {
+	size_t convert_utf8( char32_t cp, insert_it &it )
+	{
 		if ( cp <= 0x7F )
+		{
 			*it++ = (char)cp;
-		else if ( cp <= 0x7FF )
+			return 1;
+		}
+
+		if ( cp <= 0x7FF )
 		{
 			*it++ = (char)(0xC0|(cp>>6));
 			*it++ = (char)(0x80|(cp&0x3F));
+			return 2;
 		}
-		else if ( cp <= 0xFFFF )
+
+		if ( cp <= 0xFFFF )
 		{
 			*it++ = (char)(0xE0|(cp>>12));
 		   	*it++ = (char)(0x80|((cp>>6)&0x3F));
 			*it++ = (char)(0x80|(cp&0x3F));
+			return 3;
 		}
-		else if ( cp <= 0x10FFFF )
+
+		if ( cp <= 0x10FFFF )
 		{
 			*it++ = (char)(0xF0|(cp>>18));
 			*it++ = (char)(0x80|((cp>>12)&0x3F));
 			*it++ = (char)(0x80|((cp>>6)&0x3F));
 			*it++ = (char)(0x80|(cp&0x3F));
+			return 3;
 		}
-		else
-			throw error( "invalid unicode code point" );
+
+		throw error( "invalid unicode code point" );
 	}
 
-	inline void convert_utf8( char32_t cp, std::string &s )
+	inline size_t convert_utf8( char32_t cp, std::string &s )
 	{
 		std::insert_iterator<std::string> it( s, s.end() );
-		convert_utf8( cp, it );
+		return convert_utf8( cp, it );
 	}
 
 	// Sort characters in canonical order.
