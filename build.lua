@@ -15,6 +15,7 @@ else
 end
 
 SubDir( "core" )
+SubDir( "utf" )
 SubDir( "draw" )
 SubDir( "platform" )
 SubDir( "layout" )

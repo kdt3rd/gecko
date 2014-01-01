@@ -501,6 +501,10 @@ end
 -- Construct the filename in the build directory
 ----------------------------------------
 function BuildFile( file )
+	if not file then
+		return build_dir
+	end
+
 	if file:match( "^/" ) then
 		return file
 	end
@@ -531,6 +535,10 @@ end
 -- Construct the filename in the source directory
 ----------------------------------------
 function SourceFile( file )
+	if not file then
+		return source_dir
+	end
+
 	if file:match( "^/" ) then
 		return file
 	end
