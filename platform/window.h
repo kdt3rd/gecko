@@ -29,7 +29,10 @@ public:
 	/// Raise the window above all other windows.
 	virtual void raise( void ) = 0;
 
-//	virtual void lower( void ) = 0;
+	/// @brief Lower the window.
+	///
+	/// Lower the window below all other windows.
+	virtual void lower( void ) = 0;
 
 	/// @brief Show the window.
 	///
