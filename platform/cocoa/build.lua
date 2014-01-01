@@ -6,7 +6,7 @@ srcs = {
 	"screen.cpp";
 	"window.mm";
 	"timer.cpp";
-	"keyboard.cpp";
+	"keyboard.mm";
 	"mouse.cpp";
 	"font_manager.mm";
 	"dispatcher.mm";
