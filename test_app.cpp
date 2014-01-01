@@ -14,6 +14,7 @@
 #include <gui/color.h>
 #include <gui/scroll_area.h>
 #include <gui/tree_node.h>
+#include <gui/line_edit.h>
 
 namespace {
 
@@ -131,6 +132,18 @@ std::shared_ptr<gui::tree_node> build_tree( direction dir )
 
 ////////////////////////////////////////
 
+std::shared_ptr<gui::form> build_edit( direction dir )
+{
+	auto container = std::make_shared<gui::form>( dir );
+	container->set_spacing( 12, 6 );
+	container->set_pad( 12.5, 12.5, 12.5, 12.5 );
+
+	container->add( std::make_shared<gui::label>( "Edit" ), std::make_shared<gui::line_edit>( model::make_datum( testrec, testrec->title ) ) );
+	return container;
+}
+
+////////////////////////////////////////
+
 std::shared_ptr<gui::simple_container> build_all( direction dir )
 {
 	auto container = std::make_shared<gui::simple_container>( dir );
@@ -182,6 +195,8 @@ int safemain( int argc, char **argv )
 		win->set_widget( build_box( dir ) );
 	else if ( test == "tree" )
 		win->set_widget( build_tree( dir ) );
+	else if ( test == "edit" )
+		win->set_widget( build_edit( dir ) );
 	else if ( test == "all" )
 		win->set_widget( build_all( dir ) );
 	else
