@@ -130,5 +130,14 @@ void path::rounded_rect( const point &p1, double w, double h, double r )
 
 ////////////////////////////////////////
 
+point path::next_point( const point &d )
+{
+	if ( _points.empty() )
+		return d;
+	return _points.back() + d;
+}
+
+////////////////////////////////////////
+
 }
 
