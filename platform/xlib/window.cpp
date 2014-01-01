@@ -21,7 +21,6 @@ window::window( Display *dpy )
 	: _display( dpy )
 {
 	precondition( _display, "null display" );
-//	precondition( _screen, "null screen" );
 
 	int black = BlackPixel( _display, DefaultScreen( _display ) );
 	_win = XCreateSimpleWindow( _display, DefaultRootWindow( _display ), 0, 0, 320, 240, 0, black, black ); 
@@ -33,29 +32,6 @@ window::window( Display *dpy )
 		ButtonPressMask | ButtonReleaseMask |
 		PointerMotionMask | ButtonMotionMask;
 	XSelectInput( _display, _win, events );
-
-	/*
-	const uint32_t values[] = { screen->black_pixel };
-	xcb_change_window_attributes( _connection, _win, XCB_CW_BACK_PIXEL, values );
-
-	auto depth_iter = xcb_screen_allowed_depths_iterator( screen );
-	while ( depth_iter.rem )
-	{
-		auto visual_iter = xcb_depth_visuals_iterator( depth_iter.data );
-		while ( visual_iter.rem )
-		{
-			if ( screen->root_visual == visual_iter.data->visual_id )
-			{
-				_visual = visual_iter.data;
-				break;
-			}
-			xcb_visualtype_next( &visual_iter );
-		}
-		xcb_depth_next( &depth_iter );
-	}
-
-	postcondition( _visual, "visual not found" );
-	*/
 }
 
 ////////////////////////////////////////
@@ -68,19 +44,15 @@ window::~window( void )
 
 void window::raise( void )
 {
-//	const static uint32_t values[] = { XCB_STACK_MODE_ABOVE };
-//	xcb_configure_window( _connection, _win, XCB_CONFIG_WINDOW_STACK_MODE, values);
+	XRaiseWindow( _display, _win );
 }
 
 ////////////////////////////////////////
 
-/*
 void window::lower( void )
 {
-	const static uint32_t values[] = { XCB_STACK_MODE_BELOW };
-	xcb_configure_window( _connection, _win, XCB_CONFIG_WINDOW_STACK_MODE, values);
+	XLowerWindow( _display, _win );
 }
-*/
 
 ////////////////////////////////////////
 
@@ -116,9 +88,7 @@ rect window::geometry( void )
 
 void window::resize( double w, double h )
 {
-//	const static uint32_t values[] = { uint32_t(w+0.5), uint32_t(h+0.5) };
-//	xcb_configure_window( _connection, _win, XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, values );
-//	resize_canvas( w, h );
+	XResizeWindow( _display, _win, (unsigned int)( std::max( 0.0, w ) + 0.5 ), (unsigned int)( std::max( 0.0, h ) + 0.5 ) );
 }
 
 ////////////////////////////////////////
@@ -139,16 +109,14 @@ void window::set_minimum_size( double w, double h )
 
 void window::set_title( const std::string &t )
 {
-//	xcb_change_property( _connection, XCB_PROP_MODE_REPLACE, _win, XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8, t.size(), t.c_str() );
+	XStoreName( _display, _win, t.c_str() );
 }
 
 ////////////////////////////////////////
 
 void window::invalidate( const draw::rect &r )
 {
-//	exposed();
-//	xcb_flush( _connection );
-//	xcb_clear_area( _connection, 1, _win, std::floor( r.x() ), std::floor( r.y() ), std::ceil( r.width() ), std::ceil( r.height() ) );
+	XClearArea( _display, _win, std::floor( r.x() ), std::floor( r.y() ), std::ceil( r.width() ), std::ceil( r.height() ), true );
 }
 
 ////////////////////////////////////////
