@@ -124,8 +124,7 @@ namespace xlib
 
 ////////////////////////////////////////
 
-keyboard::keyboard( Display *dpy )
-//	: _display( dpy )
+keyboard::keyboard( Display * )
 {
 }
 
