@@ -1,16 +1,30 @@
 
-Include( COCOA_INCLUDE, CAIRO_INCLUDE )
+Platform {
+	name = "cocoa";
 
-srcs = {
-	"system.mm";
-	"screen.cpp";
-	"window.mm";
-	"timer.cpp";
-	"keyboard.mm";
-	"mouse.cpp";
-	"font_manager.mm";
-	"dispatcher.mm";
+	incs = {
+		COCOA_INCLUDE;
+		CAIRO_INCLUDE;
+	};
+
+	srcs = {
+		"system.mm";
+		"screen.cpp";
+		"window.mm";
+		"timer.cpp";
+		"keyboard.mm";
+		"mouse.cpp";
+		"font_manager.mm";
+		"dispatcher.mm";
+	};
+
+	libs = {
+		"draw-cairo";
+	};
+
+	syslibs = {
+		COCOA_LIBS;
+		CAIRO_LIBS;
+	};
 }
-
-Library( "platform-cocoa", Compile( srcs ), LinkLibs( "platform", "draw-cairo" ), LinkSys( COCOA_LIBS, CAIRO_LIBS ) )
 
