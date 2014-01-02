@@ -170,7 +170,7 @@ int safemain( int argc, char **argv )
 	app->set_style( std::make_shared<gui::cocoa_style>() );
 
 	auto win = app->new_window();
-	win->set_title( "Test Application" );
+	win->set_title( app->active_platform() );
 
 	std::string test = "form";
 	if ( argc > 1 )
