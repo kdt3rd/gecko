@@ -25,14 +25,6 @@ scroll_area::~scroll_area( void )
 
 ////////////////////////////////////////
 
-void scroll_area::set_delegate( delegate *d )
-{
-	widget::set_delegate( d );
-	_widget->set_delegate( d );
-}
-
-////////////////////////////////////////
-
 void scroll_area::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
 	canvas->save();

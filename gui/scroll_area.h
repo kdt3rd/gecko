@@ -15,8 +15,6 @@ public:
 	scroll_area( double minw, double minh );
 	virtual ~scroll_area( void );
 
-	virtual void set_delegate( delegate *d );
-
 	void set_widget( const std::shared_ptr<widget> &v )
 	{
 		_widget = v;

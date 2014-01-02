@@ -2,6 +2,7 @@
 srcs = {
 	"application.cpp";
 	"layouts.cpp";
+	"context.cpp";
 	"window.cpp";
 	"style.cpp";
 	"cocoa_style.cpp";

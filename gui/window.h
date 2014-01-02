@@ -2,7 +2,7 @@
 #pragma once
 
 #include "widget.h"
-#include "delegate.h"
+#include "context.h"
 #include <platform/keyboard.h>
 
 namespace platform
@@ -15,7 +15,7 @@ namespace gui
 
 ////////////////////////////////////////
 
-class window : public delegate
+class window : public context
 {
 public:
 	window( const std::shared_ptr<platform::window> &w );

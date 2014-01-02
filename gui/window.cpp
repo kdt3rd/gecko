@@ -48,11 +48,13 @@ void window::show( void )
 
 void window::set_widget( const std::shared_ptr<widget> &w )
 {
-	_widget = w;
-	_widget->set_horizontal( 0.0, _window->width() - 1.0 );
-	_widget->set_vertical( 0.0, _window->height() - 1.0 );
-	_widget->compute_minimum();
-	_widget->set_delegate( this );
+	in_context( [&,this]
+	{
+		_widget = w;
+		_widget->set_horizontal( 0.0, _window->width() - 1.0 );
+		_widget->set_vertical( 0.0, _window->height() - 1.0 );
+		_widget->compute_minimum();
+	} );
 }
 
 ////////////////////////////////////////
@@ -71,11 +73,12 @@ void window::paint( void )
 	if ( style )
 		style->background( canvas );
 	if ( _widget )
-	{
-		_widget->compute_minimum();
-		_widget->compute_layout();
-		_widget->paint( canvas );
-	}
+		in_context( [&,this]
+		{
+			_widget->compute_minimum();
+			_widget->compute_layout();
+			_widget->paint( canvas );
+		} );
 }
 
 ////////////////////////////////////////
@@ -83,11 +86,12 @@ void window::paint( void )
 void window::resize( double w, double h )
 {
 	if ( _widget )
-	{
-		_widget->set_horizontal( 0.0, w - 1.0 );
-		_widget->set_vertical( 0.0, h - 1.0 );
-		_widget->compute_layout();
-	}
+		in_context( [&,this]
+		{
+			_widget->set_horizontal( 0.0, w - 1.0 );
+			_widget->set_vertical( 0.0, h - 1.0 );
+			_widget->compute_layout();
+		} );
 }
 
 ////////////////////////////////////////
@@ -95,7 +99,7 @@ void window::resize( double w, double h )
 void window::mouse_press( const draw::point &p, int b )
 {
 	if ( _widget )
-		_widget->mouse_press( p, b );
+		in_context( [&,this] { _widget->mouse_press( p, b ); } );
 }
 
 ////////////////////////////////////////
@@ -103,7 +107,7 @@ void window::mouse_press( const draw::point &p, int b )
 void window::mouse_release( const draw::point &p, int b )
 {
 	if ( _widget )
-		_widget->mouse_release( p, b );
+		in_context( [&,this] { _widget->mouse_release( p, b ); } );
 }
 
 ////////////////////////////////////////
@@ -111,7 +115,7 @@ void window::mouse_release( const draw::point &p, int b )
 void window::mouse_moved( const draw::point &p )
 {
 	if ( _widget )
-		_widget->mouse_move( p );
+		in_context( [&,this] { _widget->mouse_move( p ); } );
 }
 
 ////////////////////////////////////////
@@ -119,7 +123,7 @@ void window::mouse_moved( const draw::point &p )
 void window::key_pressed( platform::scancode c )
 {
 	if ( _widget )
-		_widget->key_press( c );
+		in_context( [&,this] { _widget->key_press( c ); } );
 }
 
 ////////////////////////////////////////
@@ -127,7 +131,7 @@ void window::key_pressed( platform::scancode c )
 void window::key_released( platform::scancode c )
 {
 	if ( _widget )
-		_widget->key_release( c );
+		in_context( [&,this] { _widget->key_release( c ); } );
 }
 
 ////////////////////////////////////////
@@ -135,7 +139,7 @@ void window::key_released( platform::scancode c )
 void window::text_entered( char32_t c )
 {
 	if ( _widget )
-		_widget->text_input( c );
+		in_context( [&,this] { _widget->text_input( c ); } );
 }
 
 ////////////////////////////////////////

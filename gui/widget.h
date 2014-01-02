@@ -5,7 +5,7 @@
 #include <draw/canvas.h>
 #include <layout/simple_area.h>
 #include <platform/keyboard.h>
-#include "delegate.h"
+#include "context.h"
 
 namespace model
 {
@@ -29,11 +29,6 @@ public:
 
 	~widget( void )
 	{
-	}
-
-	virtual void set_delegate( delegate *d )
-	{
-		_delegate = d;
 	}
 
 	virtual void paint( const std::shared_ptr<draw::canvas> &canvas )
@@ -72,14 +67,12 @@ public:
 
 	void invalidate( const draw::rect &r )
 	{
-		if ( _delegate )
-			_delegate->invalidate( r );
+		context::current().invalidate( r );
 	}
 
 	void invalidate( void )
 	{
-		if ( _delegate )
-			_delegate->invalidate( *this );
+		context::current().invalidate( *this );
 	}
 
 protected:
@@ -102,8 +95,6 @@ protected:
 		auto cb = [this]() { invalidate(); };
 		callback_helper( cb, args... );
 	}
-
-	delegate *_delegate = nullptr;
 };
 
 ////////////////////////////////////////

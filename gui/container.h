@@ -20,13 +20,6 @@ public:
 	{
 	}
 
-	void set_delegate( delegate *d ) override
-	{
-		widget::set_delegate( d );
-		for ( auto w: _widgets )
-			w->set_delegate( d );
-	}
-
 	void compute_minimum( void ) override
 	{
 		for ( auto w: _widgets )
@@ -133,7 +126,6 @@ protected:
 	void added( const std::shared_ptr<widget> &w ) override
 	{
 		_widgets.push_back( w );
-		w->set_delegate( _delegate );
 	}
 
 	std::vector<std::shared_ptr<widget>> _widgets;
