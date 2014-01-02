@@ -46,13 +46,9 @@ void window::raise( void )
 
 ////////////////////////////////////////
 
-/*
 void window::lower( void )
 {
-	const static uint32_t values[] = { XCB_STACK_MODE_BELOW };
-	xcb_configure_window( _connection, _win, XCB_CONFIG_WINDOW_STACK_MODE, values);
 }
-*/
 
 ////////////////////////////////////////
 

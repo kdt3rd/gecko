@@ -17,7 +17,7 @@ public:
 	virtual ~window( void );
 
 	virtual void raise( void );
-//	virtual void lower( void );
+	virtual void lower( void );
 
 	virtual void show( void );
 	virtual void hide( void );
