@@ -17,6 +17,8 @@ public:
 	application( const std::string &platform );
 	~application( void );
 
+	const std::string &active_platform( void ) { return _platform; }
+
 	std::shared_ptr<window> new_window( void );
 
 	void set_style( const std::shared_ptr<style> &sty ) { _style = sty; }
@@ -38,6 +40,7 @@ private:
 	std::unique_ptr<impl> _impl;
 
 	std::shared_ptr<style> _style;
+	std::string _platform;
 };
 
 ////////////////////////////////////////

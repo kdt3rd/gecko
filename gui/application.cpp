@@ -25,7 +25,10 @@ application::application( void )
 	auto const &platforms = platform::platform::list();
 	if ( platforms.empty() )
 		throw std::runtime_error( "no platforms available" );
-	_impl->sys = platforms.front().create();
+
+	const platform::platform &p = platforms.front();
+	_platform = p.name() + "+" + p.render();
+	_impl->sys = p.create();
 	_impl->dispatch = _impl->sys->get_dispatcher();
 }
 
@@ -39,7 +42,9 @@ application::application( const std::string &p )
 		throw std::runtime_error( "no platforms available" );
 	if ( p.empty() )
 	{
-		_impl->sys = platforms.front().create();
+		const platform::platform &p = platforms.front();
+		_platform = p.name() + "+" + p.render();
+		_impl->sys = p.create();
 		_impl->dispatch = _impl->sys->get_dispatcher();
 	}
 	else
@@ -48,7 +53,9 @@ application::application( const std::string &p )
 		{
 			if ( platforms[i].name() == p )
 			{
-				_impl->sys = platforms.front().create();
+				const platform::platform &p = platforms.front();
+				_platform = p.name() + "+" + p.render();
+				_impl->sys = p.create();
 				_impl->dispatch = _impl->sys->get_dispatcher();
 				return;
 			}
