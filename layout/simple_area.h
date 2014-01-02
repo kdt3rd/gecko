@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <draw/size.h>
 #include <draw/rect.h>
 
 namespace layout
@@ -21,32 +22,34 @@ public:
 	/// @brief Set minimum width.
 	///
 	/// @param w The minimum width.
-	void set_minimum_width( double w ) { _minw = w; }
+	void set_minimum_width( double w ) { _min.set_width( w ); }
 
 	/// @brief Set minimum height.
 	///
 	/// @param h The minimum height.
-	void set_minimum_height( double h ) { _minh = h; }
+	void set_minimum_height( double h ) { _min.set_height( h ); }
 
 	/// @brief Set minimum size.
 	///
 	/// @param w The minimum width.
 	/// @param h The minimum height.
-	void set_minimum( double w, double h ) { _minw = w; _minh = h; }
+	void set_minimum( double w, double h ) { _min.set( w, h ); }
+
+	void set_minimum( const draw::size &s ) { _min = s; }
 
 	/// @brief Minimum width.
 	///
 	/// The minimum width of the area.
 	/// @return The minimum width.
-	double minimum_width( void ) const { return _minw; }
+	double minimum_width( void ) const { return _min.w(); }
 
 	/// @brief Minimum height.
 	///
 	/// The minimum height of the area.
 	/// @return The minimum height.
-	double minimum_height( void ) const { return _minh; }
+	double minimum_height( void ) const { return _min.h(); }
 
-	bool fits( double w, double h ) const { return w >= _minw && h >= _minh; }
+	bool fits( double w, double h ) const { return w >= _min.w() && h >= _min.h(); }
 
 	// @brief Compute this area's minimum size
 	virtual void compute_minimum( void );
@@ -55,7 +58,7 @@ public:
 	virtual void compute_layout( void );
 
 private:
-	double _minw = 0.0, _minh = 0.0;
+	draw::size _min;
 };
 
 ////////////////////////////////////////
