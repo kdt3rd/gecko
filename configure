@@ -189,7 +189,7 @@ end
 ----------------------------------------
 -- Recurse into a subdirectory
 ----------------------------------------
-function SubDir( dir )
+function SubDir( dir, vars )
 	-- Run the local config file
 	if dir == nil then
 		dofile( "config.lua" )
@@ -199,6 +199,11 @@ function SubDir( dir )
 	local env_copy = {}
 	for k, v in pairs( _G ) do
 		env_copy[k] = v
+	end
+	if vars then
+		for k, v in pairs( vars ) do
+			env_copy[k] = v
+		end
 	end
 	local old_file = ninja
 	local old_src_dir = source_dir
