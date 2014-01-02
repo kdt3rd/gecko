@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <cmath>
 
 namespace draw
@@ -59,6 +60,14 @@ public:
 private:
 	double _x = 0.0, _y = 0.0;
 };
+
+////////////////////////////////////////
+
+inline std::ostream &operator<<( std::ostream &out, const point &p )
+{
+	out << p.x() << ',' << p.y();
+	return out;
+}
 
 ////////////////////////////////////////
 
