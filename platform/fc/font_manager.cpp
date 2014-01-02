@@ -8,7 +8,7 @@
 #include <draw/cairo/font.h>
 #include <cairo/cairo-ft.h>
 
-namespace xcb
+namespace fc
 {
 
 ////////////////////////////////////////
