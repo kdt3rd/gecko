@@ -21,7 +21,7 @@ public:
 	platform::scancode get_scancode( XKeyEvent &ev );
 
 private:
-	Display *_display;
+//	Display *_display;
 };
 
 ////////////////////////////////////////

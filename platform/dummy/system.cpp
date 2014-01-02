@@ -5,9 +5,11 @@
 #include "timer.h"
 #include "font_manager.h"
 #include "dispatcher.h"
+#include <platform/platform.h>
 
 #include <core/contract.h>
 #include <stdexcept>
+
 
 namespace dummy
 {

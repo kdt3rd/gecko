@@ -8,12 +8,24 @@
 #include <draw/cairo/font.h>
 #include <cairo/cairo-ft.h>
 
+#include <fontconfig/fontconfig.h>
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 namespace fc
 {
+
+struct font_manager::pimpl
+{
+	FcConfig *config = nullptr;
+	FT_Library ftlib;
+};
 
 ////////////////////////////////////////
 
 font_manager::font_manager( void )
+	: _impl( new pimpl )
 {
 	if ( FcInit() != FcTrue )
 		throw std::runtime_error( "error intializing fontconfig" );
@@ -24,10 +36,10 @@ font_manager::font_manager( void )
 	version << v/10000 << '.' << (v/100)%100 << '.' << v%100;
 	set_manager_version( version.str() );
 
-	_config = FcConfigGetCurrent();
-	FcConfigSetRescanInterval( _config, 0 );
+	_impl->config = FcConfigGetCurrent();
+	FcConfigSetRescanInterval( _impl->config, 0 );
 
-	if ( FT_Init_FreeType( &_ft_lib ) != 0 )
+	if ( FT_Init_FreeType( &(_impl->ftlib) ) != 0 )
 		throw std::runtime_error( "freetype initialization failed" );
 }
 
@@ -35,6 +47,7 @@ font_manager::font_manager( void )
 
 font_manager::~font_manager( void )
 {
+	delete _impl;
 	FcFini();
 }
 
@@ -46,7 +59,7 @@ std::set<std::string> font_manager::get_families( void )
 
 	FcPattern *pat = FcPatternCreate();
 	FcObjectSet *os = FcObjectSetBuild( FC_FAMILY, nullptr );
-	FcFontSet *fs = FcFontList( _config, pat, os );
+	FcFontSet *fs = FcFontList( _impl->config, pat, os );
 	if ( fs )
 	{
 		FcChar8 *name = nullptr;
@@ -72,7 +85,7 @@ std::set<std::string> font_manager::get_styles( void )
 
 	FcPattern *pat = FcPatternCreate();
 	FcObjectSet *os = FcObjectSetBuild( FC_STYLE, nullptr );
-	FcFontSet *fs = FcFontList( _config, pat, os );
+	FcFontSet *fs = FcFontList( _impl->config, pat, os );
 	if ( fs )
 	{
 		FcChar8 *name = nullptr;
@@ -101,7 +114,7 @@ std::shared_ptr<draw::font> font_manager::get_font( const std::string &family, c
 		nullptr );
 
 	FcResult result;
-	FcPattern *matched = FcFontMatch( _config, pat, &result );
+	FcPattern *matched = FcFontMatch( _impl->config, pat, &result );
 
 	std::shared_ptr<cairo::font> ret;
 	if ( matched && result == FcResultMatch )
@@ -112,7 +125,7 @@ std::shared_ptr<draw::font> font_manager::get_font( const std::string &family, c
 			 FcPatternGetInteger( matched, FC_INDEX, 0, &fontid ) == FcResultMatch )
 		{
 			FT_Face ftface;
-			auto error = FT_New_Face( _ft_lib, reinterpret_cast<const char*>( filename ), fontid, &ftface );
+			auto error = FT_New_Face( _impl->ftlib, reinterpret_cast<const char*>( filename ), fontid, &ftface );
 			if ( error )
 				throw std::runtime_error( "freetype error" );
 			ret = std::make_shared<cairo::font>( cairo_ft_font_face_create_for_ft_face( ftface, 0 ), family, style, pixsize );

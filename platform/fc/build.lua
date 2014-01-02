@@ -1,9 +1,18 @@
 
-Include( CAIRO_INCLUDE, FREETYPE_INCLUDE, FONTCONFIG_INCLUDE )
+Platform {
+	name = "fc";
 
-srcs = {
-	"font_manager.cpp";
+	srcs = {
+		"font_manager.cpp";
+	};
+
+	libs = {
+		"draw-cairo";
+	};
+
+	syslibs = {
+		FREETYPE_LIBS;
+		FONTCONFIG_LIBS;
+	};
 }
-
-Library( "platform-fc", Compile( srcs ), LinkLibs( "platform", "draw-cairo" ), LinkSys( CAIRO_LIBS, FREETYPE_LIBS, FONTCONFIG_LIBS ) )
 

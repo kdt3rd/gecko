@@ -1,5 +1,6 @@
 
 #include "font_manager.h"
+#include <draw/dummy/font.h>
 
 #include <iostream>
 #include <stdexcept>
@@ -42,7 +43,7 @@ std::set<std::string> font_manager::get_styles( void )
 
 std::shared_ptr<draw::font> font_manager::get_font( const std::string &family, const std::string &style, double pixsize )
 {
-	std::shared_ptr<draw::font> ret;
+	auto ret = std::make_shared<dummy::font>( family, style, pixsize );
 	return ret;
 }
 

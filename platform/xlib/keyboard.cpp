@@ -125,7 +125,7 @@ namespace xlib
 ////////////////////////////////////////
 
 keyboard::keyboard( Display *dpy )
-	: _display( dpy )
+//	: _display( dpy )
 {
 }
 

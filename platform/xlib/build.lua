@@ -1,15 +1,27 @@
 
-Include( XLIB_INCLUDE, CAIRO_INCLUDE, FONTCONFIG_INCLUDE )
+Platform {
+	name = "xlib";
 
-srcs = {
-	"system.cpp";
-	"screen.cpp";
-	"window.cpp";
-	"timer.cpp";
-	"keyboard.cpp";
-	"mouse.cpp";
-	"dispatcher.cpp";
+	incs = {
+		CAIRO_INCLUDE;
+	};
+
+	srcs = {
+		"system.cpp";
+		"screen.cpp";
+		"window.cpp";
+		"timer.cpp";
+		"keyboard.cpp";
+		"mouse.cpp";
+		"dispatcher.cpp";
+	};
+
+	libs = {
+		"draw-cairo";
+	};
+
+	syslibs = {
+		XLIB_LIBS;
+	};
 }
-
-Library( "platform-xlib", Compile( srcs ), LinkLibs( "platform", "draw-cairo", "platform-fc" ), LinkSys( XLIB_LIBS, CAIRO_LIBS, FREETYPE_LIBS, FONTCONFIG_LIBS ) )
 

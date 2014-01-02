@@ -1,8 +1,7 @@
 
-#define PLATFORM_H <platform/PLATFORM/system.h>
-#include PLATFORM_H
-
 #include "application.h"
+#include <platform/platform.h>
+#include <platform/system.h>
 
 namespace
 {
@@ -23,7 +22,10 @@ struct application::impl
 application::application( void )
 	: _impl( new application::impl )
 {
-	_impl->sys = std::make_shared<platform::native_system>();
+	auto const &platforms = platform::platform::list();
+	if ( platforms.empty() )
+		throw std::runtime_error( "no platforms available" );
+	_impl->sys = platforms.front().create();
 	_impl->dispatch = _impl->sys->get_dispatcher();
 }
 

@@ -2,8 +2,12 @@
 #pragma once
 
 #include <platform/window.h>
-#include <draw/cairo/canvas.h>
 #include <xcb/xcb.h>
+
+namespace cairo
+{
+	class canvas;
+}
 
 namespace xcb
 {

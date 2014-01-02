@@ -2,10 +2,6 @@
 #pragma once
 
 #include <platform/font_manager.h>
-#include <fontconfig/fontconfig.h>
-
-#include <ft2build.h>
-#include FT_FREETYPE_H
 
 namespace fc
 {
@@ -25,8 +21,8 @@ public:
 	virtual std::shared_ptr<draw::font> get_font( const std::string &family, const std::string &style, double pixsize );
 
 private:
-	FcConfig *_config = nullptr;
-	FT_Library _ft_lib;
+	struct pimpl;
+	pimpl *_impl = nullptr;
 };
 
 ////////////////////////////////////////
