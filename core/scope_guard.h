@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <utility>
+
 ////////////////////////////////////////
 
 namespace core
@@ -60,5 +62,5 @@ namespace detail
 #define ANONYMOUS_VARIABLE(str) CONCATENATE(str, __COUNTER__)
 
 #define SCOPE_EXIT \
-	auto ANONYMOUS_VARIABLE(SCOPE_EXIT_STATE) = ::detail::scope_guardOnExit() + [&]()
+	auto ANONYMOUS_VARIABLE(SCOPE_EXIT_STATE) = core::detail::scope_guardOnExit() + [&]()
 
