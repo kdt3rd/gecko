@@ -78,6 +78,25 @@ void cocoa_style::background( const std::shared_ptr<draw::canvas> &c )
 
 ////////////////////////////////////////
 
+draw::size cocoa_style::button_size( const draw::size &content )
+{
+	draw::size full( content );
+	full.grow( 12, 6 );
+	full.ceil();
+	return full;
+}
+
+////////////////////////////////////////
+
+draw::rect cocoa_style::button_content( const draw::rect &full )
+{
+	draw::rect content( full );
+	content.shrink( 6, 6, 3, 3 );
+	return content;
+}
+
+////////////////////////////////////////
+
 void cocoa_style::button_frame( const std::shared_ptr<draw::canvas> &c, const draw::rect &r, bool pressed )
 {
 	draw::paint p;

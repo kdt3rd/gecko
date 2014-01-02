@@ -18,7 +18,10 @@ public:
 
 	void background( const std::shared_ptr<draw::canvas> &c ) override;
 
+	draw::size button_size( const draw::size &content ) override;
+	draw::rect button_content( const draw::rect &size ) override;
 	void button_frame( const std::shared_ptr<draw::canvas> &c, const draw::rect &r, bool pressed ) override;
+
 	void line_edit_frame( const std::shared_ptr<draw::canvas> &c, const draw::rect &r, bool focused ) override;
 
 	double slider_size( const draw::rect &rect ) override;

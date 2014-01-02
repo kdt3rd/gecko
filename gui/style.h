@@ -22,7 +22,10 @@ public:
 
 	virtual void background( const std::shared_ptr<draw::canvas> &c ) = 0;
 
+	virtual draw::size button_size( const draw::size &content ) = 0;
+	virtual draw::rect button_content( const draw::rect &size ) = 0;
 	virtual void button_frame( const std::shared_ptr<draw::canvas> &c, const draw::rect &r, bool pressed ) = 0;
+
 	virtual void line_edit_frame( const std::shared_ptr<draw::canvas> &c, const draw::rect &r, bool focused ) = 0;
 
 	virtual double slider_size( const draw::rect &r ) = 0;
