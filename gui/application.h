@@ -14,6 +14,7 @@ class application : public std::enable_shared_from_this<application>
 {
 public:
 	application( void );
+	application( const std::string &platform );
 	~application( void );
 
 	std::shared_ptr<window> new_window( void );

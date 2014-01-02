@@ -31,6 +31,34 @@ application::application( void )
 
 ////////////////////////////////////////
 
+application::application( const std::string &p )
+	: _impl( new application::impl )
+{
+	auto const &platforms = platform::platform::list();
+	if ( platforms.empty() )
+		throw std::runtime_error( "no platforms available" );
+	if ( p.empty() )
+	{
+		_impl->sys = platforms.front().create();
+		_impl->dispatch = _impl->sys->get_dispatcher();
+	}
+	else
+	{
+		for ( size_t i = 0; i < platforms.size(); ++i )
+		{
+			if ( platforms[i].name() == p )
+			{
+				_impl->sys = platforms.front().create();
+				_impl->dispatch = _impl->sys->get_dispatcher();
+				return;
+			}
+		}
+		throw std::runtime_error( "platform does not exist" );
+	}
+}
+
+////////////////////////////////////////
+
 application::~application( void )
 {
 }
