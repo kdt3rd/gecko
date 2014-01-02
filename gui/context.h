@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <vector>
 #include <core/scope_guard.h>
 #include <draw/rect.h>
 
