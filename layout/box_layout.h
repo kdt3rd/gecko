@@ -28,7 +28,7 @@ public:
 		_dir = d;
 	}
 
-	virtual void set_pad( double left, double right, double top, double bottom )
+	void set_pad( double left, double right, double top, double bottom ) override
 	{
 		_pad[0] = left;
 		_pad[1] = right;
@@ -36,7 +36,7 @@ public:
 		_pad[3] = bottom;
 	}
 
-	virtual void set_spacing( double horiz, double vert )
+	void set_spacing( double horiz, double vert ) override
 	{
 		_hspacing = horiz;
 		_vspacing = vert;
@@ -54,7 +54,7 @@ public:
 		_weights.at( i ) = weight;
 	}
 
-	virtual void recompute_minimum( container &master )
+	void recompute_minimum( container &master ) override
 	{
 		switch ( _dir )
 		{
@@ -80,7 +80,7 @@ public:
 		}
 	}
 
-	virtual void recompute_layout( container &master )
+	void recompute_layout( container &master ) override
 	{
 		switch ( _dir )
 		{

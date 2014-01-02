@@ -12,7 +12,7 @@ class keyboard : public platform::keyboard
 {
 public:
 	keyboard( void );
-	virtual ~keyboard( void );
+	~keyboard( void );
 };
 
 ////////////////////////////////////////

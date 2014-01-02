@@ -13,7 +13,7 @@ class mouse : public platform::mouse
 {
 public:
 	mouse( void );
-	virtual ~mouse( void );
+	~mouse( void );
 };
 
 ////////////////////////////////////////

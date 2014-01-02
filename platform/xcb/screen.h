@@ -16,9 +16,9 @@ class screen : public platform::screen
 public:
 	/// @brief Constructor.
 	screen( xcb_screen_t *scr );
-	virtual ~screen( void );
+	~screen( void );
 
-	virtual size bounds( void );
+	size bounds( void ) override;
 
 	/// @brief XCB identifier for the screen.
 	xcb_screen_t *id( void ) { return _screen; }

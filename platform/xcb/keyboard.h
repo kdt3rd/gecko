@@ -16,7 +16,7 @@ class keyboard : public platform::keyboard
 public:
 	/// @brief Constructor.
 	keyboard( xcb_connection_t *c );
-	virtual ~keyboard( void );
+	~keyboard( void );
 
 	/// @brief Update key mapping.
 	///

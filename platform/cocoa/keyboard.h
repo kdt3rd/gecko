@@ -13,7 +13,7 @@ class keyboard : public platform::keyboard
 {
 public:
 	keyboard( void );
-	virtual ~keyboard( void );
+	~keyboard( void );
 
 	void update_mapping( void );
 

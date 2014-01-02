@@ -14,9 +14,9 @@ class screen : public platform::screen
 {
 public:
 	screen( void );
-	virtual ~screen( void );
+	~screen( void );
 
-	virtual size bounds( void );
+	size bounds( void ) override;
 
 private:
 };

@@ -14,34 +14,40 @@ class window : public platform::window
 {
 public:
 	window( void );
-	virtual ~window( void );
+	~window( void );
 
-	virtual void raise( void );
-	virtual void lower( void );
+	void raise( void ) override;
+	void lower( void ) override;
 
-	virtual void show( void );
-	virtual void hide( void );
-	virtual bool is_visible( void );
+	void show( void ) override;
+	void hide( void ) override;
+	bool is_visible( void ) override;
 
-//	virtual rect geometry( void );
-//	virtual void set_position( double x, double y );
-	virtual void resize( double w, double h );
-	virtual void set_minimum_size( double w, double h );
+//	rect geometry( void ) override;
+//	void set_position( double x, double y ) override;
+	void resize( double w, double h ) override;
+	void set_minimum_size( double w, double h ) override;
 
-	virtual void set_title( const std::string &t );
-//	virtual void set_icon( const icon &i );
+	void set_title( const std::string &t ) override;
+//	void set_icon( const icon &i ) override;
 
-	virtual std::shared_ptr<draw::canvas> canvas( void );
+	std::shared_ptr<draw::canvas> canvas( void ) override;
 
-	virtual void resized( double w, double h );
-	virtual void exposed( void );
+	void resized( double w, double h );
 
-	virtual void invalidate( const draw::rect &r );
+	void invalidate( const draw::rect &r ) override;
 
 	void set_ns( void *nswin, void *nsview );
 
-	virtual double width( void ) { return _last_w; }
-	virtual double height( void ) { return _last_h; }
+	double width( void ) override
+	{
+		return _last_w;
+	}
+
+	double height( void ) override
+	{
+		return _last_h;
+	}
 
 private:
 	struct objcwrapper;

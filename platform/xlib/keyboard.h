@@ -15,7 +15,7 @@ class keyboard : public platform::keyboard
 public:
 	/// @brief Constructor.
 	keyboard( Display *dpy );
-	virtual ~keyboard( void );
+	~keyboard( void );
 
 	/// @brief Get the platform::scancode of the given keycode.
 	platform::scancode get_scancode( XKeyEvent &ev );

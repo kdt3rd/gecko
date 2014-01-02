@@ -20,10 +20,20 @@ public:
 	button( datum<std::string> &&l, datum<alignment> &&a = alignment::LEFT, datum<draw::color> &&c = { 0, 0, 0, 1 }, shared_datum<draw::font> &&f = application::current_style()->default_font() );
 	~button( void );
 
-	const std::string &text( void ) { return _text.value(); }
-	void set_text( const std::string &t ) { _text = t; }
+	const std::string &text( void )
+	{
+		return _text.value();
+	}
 
-	void set_font( std::shared_ptr<draw::font> &f ) { _font = f; }
+	void set_text( const std::string &t )
+	{
+		_text = t;
+	}
+
+	void set_font( std::shared_ptr<draw::font> &f )
+	{
+		_font = f;
+	}
 
 	void set_pressed( bool p );
 

@@ -21,10 +21,10 @@ class dispatcher : public platform::dispatcher
 public:
 	/// @brief Constructor.
 	dispatcher( Display *dpy, const std::shared_ptr<keyboard> &k, const std::shared_ptr<mouse> &m );
-	virtual ~dispatcher( void );
+	~dispatcher( void );
 
-	int execute( void );
-	void exit( int code );
+	int execute( void ) override;
+	void exit( int code ) override;
 
 	/// @brief Add a window.
 	///

@@ -40,7 +40,7 @@ public:
 		_dir = d;
 	}
 
-	virtual void set_pad( double left, double right, double top, double bottom )
+	void set_pad( double left, double right, double top, double bottom ) override
 	{
 		_pad[0] = left;
 		_pad[1] = right;
@@ -48,7 +48,7 @@ public:
 		_pad[3] = bottom;
 	}
 
-	virtual void set_spacing( double horiz, double vert )
+	void set_spacing( double horiz, double vert ) override
 	{
 		_hspacing = horiz;
 		_vspacing = vert;
@@ -61,7 +61,7 @@ public:
 		this->added( a );
 	}
 
-	virtual void recompute_minimum( container &master )
+	void recompute_minimum( container &master ) override
 	{
 		simple_area children;
 		double minw, minh;
@@ -108,7 +108,7 @@ public:
 		master.set_minimum( minw + _pad[0] + _pad[1], minh + _pad[2] + _pad[3] );
 	}
 
-	virtual void recompute_layout( container &master )
+	void recompute_layout( container &master ) override
 	{
 		simple_area children = master;
 		children.shrink( _pad[0], _pad[1], _pad[2], _pad[3] );

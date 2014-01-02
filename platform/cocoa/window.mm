@@ -102,13 +102,6 @@ void window::resized( double w, double h )
 
 ////////////////////////////////////////
 
-void window::exposed( void )
-{
-	platform::window::exposed();
-}
-
-////////////////////////////////////////
-
 void window::invalidate( const draw::rect &r )
 {
 	[_impl->view setNeedsDisplay:YES];

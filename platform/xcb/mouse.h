@@ -16,7 +16,7 @@ public:
 	mouse( void );
 
 	/// @brief Destructor.
-	virtual ~mouse( void );
+	~mouse( void );
 };
 
 ////////////////////////////////////////

@@ -29,13 +29,13 @@ public:
 	void hide( void ) override;
 	bool is_visible( void ) override;
 
-//	virtual rect geometry( void );
-//	virtual void set_position( double x, double y );
+//	rect geometry( void ) override;
+//	void set_position( double x, double y ) override;
 	void resize( double w, double h ) override;
 	void set_minimum_size( double w, double h ) override;
 
 	void set_title( const std::string &t ) override;
-//	virtual void set_icon( const icon &i );
+//	void set_icon( const icon &i ) override;
 
 	void invalidate( const draw::rect &r ) override;
 

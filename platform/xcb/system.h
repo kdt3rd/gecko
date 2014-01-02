@@ -16,16 +16,20 @@ class system : public platform::system
 {
 public:
 	system( void );
-	virtual ~system( void );
+	~system( void );
 
-	virtual std::vector<std::shared_ptr<platform::screen>> screens( void ) { return _screens; }
-	virtual std::shared_ptr<platform::window> new_window( void );
-	virtual std::shared_ptr<platform::timer> new_timer( void );
+	std::vector<std::shared_ptr<platform::screen>> screens( void ) override
+	{
+		return _screens;
+	}
 
-	virtual std::shared_ptr<platform::dispatcher> get_dispatcher( void );
-	virtual std::shared_ptr<platform::keyboard> get_keyboard( void );
-	virtual std::shared_ptr<platform::mouse> get_mouse( void );
-	virtual std::shared_ptr<platform::font_manager> get_font_manager( void );
+	std::shared_ptr<platform::window> new_window( void ) override;
+	std::shared_ptr<platform::timer> new_timer( void ) override;
+
+	std::shared_ptr<platform::dispatcher> get_dispatcher( void ) override;
+	std::shared_ptr<platform::keyboard> get_keyboard( void ) override;
+	std::shared_ptr<platform::mouse> get_mouse( void ) override;
+	std::shared_ptr<platform::font_manager> get_font_manager( void ) override;
 
 private:
 	xcb_connection_t *_connection;
