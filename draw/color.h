@@ -69,5 +69,13 @@ private:
 
 ////////////////////////////////////////
 
+inline std::ostream &operator<<( std::ostream &out, const color &c )
+{
+	out << c.red() << ',' << c.green() << ',' << c.blue() << ',' << c.alpha();
+	return out;
+}
+
+////////////////////////////////////////
+
 }
 
