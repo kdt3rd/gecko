@@ -19,6 +19,7 @@ struct application::impl
 
 ////////////////////////////////////////
 
+/*
 application::application( void )
 	: _impl( new application::impl )
 {
@@ -31,37 +32,35 @@ application::application( void )
 	_impl->sys = p.create();
 	_impl->dispatch = _impl->sys->get_dispatcher();
 }
+*/
 
 ////////////////////////////////////////
 
-application::application( const std::string &p )
+application::application( const std::string &p, const std::string &r )
 	: _impl( new application::impl )
 {
 	auto const &platforms = platform::platform::list();
 	if ( platforms.empty() )
 		throw std::runtime_error( "no platforms available" );
-	if ( p.empty() )
+
+	for ( size_t i = 0; i < platforms.size(); ++i )
 	{
-		const platform::platform &p = platforms.front();
-		_platform = p.name() + "+" + p.render();
-		_impl->sys = p.create();
-		_impl->dispatch = _impl->sys->get_dispatcher();
-	}
-	else
-	{
-		for ( size_t i = 0; i < platforms.size(); ++i )
+		if ( p.empty() || ( platforms[i].name() == p ) )
 		{
-			if ( platforms[i].name() == p )
+			if ( r.empty() || ( platforms[i].render() == r ) )
 			{
-				const platform::platform &p = platforms.front();
+				std::cout << p << ' ' << platforms[i].name() << std::endl;
+				const platform::platform &p = platforms[i];
 				_platform = p.name() + "+" + p.render();
 				_impl->sys = p.create();
 				_impl->dispatch = _impl->sys->get_dispatcher();
-				return;
+				break;
 			}
 		}
-		throw std::runtime_error( "platform does not exist" );
 	}
+
+	if ( !_impl->sys )
+		throw std::runtime_error( "platform does not exist" );
 }
 
 ////////////////////////////////////////
