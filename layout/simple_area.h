@@ -49,12 +49,14 @@ public:
 	/// @return The minimum height.
 	double minimum_height( void ) const { return _min.h(); }
 
+	draw::size minimum( void ) const { return _min; }
+
 	bool fits( double w, double h ) const { return w >= _min.w() && h >= _min.h(); }
 
 	// @brief Compute this area's minimum size
 	virtual void compute_minimum( void );
 
-	/// @brief Compute your sub-areas
+	/// @brief Compute the layout of your children
 	virtual void compute_layout( void );
 
 private:
