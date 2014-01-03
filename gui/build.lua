@@ -15,6 +15,7 @@ srcs = {
 	"scroll_area.cpp";
 	"container.cpp";
 	"tree_node.cpp";
+	"color_picker.cpp";
 }
 
 Library( "gui", Compile( srcs ), LinkLibs( "platform", "layout", "utf" ) );
