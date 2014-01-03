@@ -2,6 +2,7 @@
 #pragma once
 
 #include <memory>
+#include <set>
 #include "window.h"
 
 namespace gui
@@ -29,6 +30,8 @@ public:
 	void push( void );
 	void pop( void );
 
+	std::set<std::string> get_font_families( void );
+	std::set<std::string> get_font_styles( const std::string &family );
 	std::shared_ptr<draw::font> get_font( const std::string &family, const std::string &style, double pixsize );
 
 	static std::shared_ptr<application> current( void );

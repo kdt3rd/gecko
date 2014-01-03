@@ -110,6 +110,22 @@ void application::pop( void )
 
 ////////////////////////////////////////
 
+std::set<std::string> application::get_font_families( void )
+{
+	auto fmgr = _impl->sys->get_font_manager();
+	return fmgr->get_families();
+}
+
+////////////////////////////////////////
+
+std::set<std::string> application::get_font_styles( const std::string &family )
+{
+	auto fmgr = _impl->sys->get_font_manager();
+	return fmgr->get_styles( family );
+}
+
+////////////////////////////////////////
+
 std::shared_ptr<draw::font> application::get_font( const std::string &family, const std::string &style, double pixsize )
 {
 	auto fmgr = _impl->sys->get_font_manager();
