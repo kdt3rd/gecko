@@ -62,6 +62,11 @@ public:
 		return std::sqrt( dx * dx + dy * dy );
 	}
 
+	static point polar( double r, double a )
+	{
+		return { r * std::cos( a ), r * std::sin( a ) };
+	}
+
 private:
 	double _x = 0.0, _y = 0.0;
 };
