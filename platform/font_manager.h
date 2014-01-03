@@ -46,7 +46,7 @@ public:
 	///
 	/// Get a list of styles available.
 	/// @return The list of styles.
-	virtual std::set<std::string> get_styles( void ) = 0;
+	virtual std::set<std::string> get_styles( const std::string &family ) = 0;
 
 	/// @brief Get a particular font.
 	///

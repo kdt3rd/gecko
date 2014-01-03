@@ -9,9 +9,26 @@
 #include <iostream>
 #include <stdexcept>
 #include <sstream>
+#include <map>
 
 #include <draw/cairo/font.h>
 #include <cairo/cairo-quartz.h>
+
+namespace
+{
+	const std::map<NSFontTraitMask,std::string> fonttraits =
+	{
+		{ NSItalicFontMask, "Italic" },
+		{ NSBoldFontMask, "Bold" },
+		{ NSNarrowFontMask, "Narrow" },
+		{ NSExpandedFontMask, "Expanded" },
+		{ NSSmallCapsFontMask, "SmallCaps" },
+		{ NSCompressedFontMask, "Compressed" },
+		{ NSFixedPitchFontMask, "Fixed" },
+	};
+}
+
+////////////////////////////////////////
 
 namespace cocoa
 {
@@ -42,17 +59,34 @@ std::set<std::string> font_manager::get_families( void )
 
 ////////////////////////////////////////
 
-std::set<std::string> font_manager::get_styles( void )
+std::set<std::string> font_manager::get_styles( const std::string &family )
 {
 	std::set<std::string> ret;
-	ret.insert( "Italic" );
-	ret.insert( "Bold" );
-	ret.insert( "Narrow" );
-	ret.insert( "Expanded" );
-	ret.insert( "Condensed" );
-	ret.insert( "Small Caps" );
-	ret.insert( "Compressed" );
-	ret.insert( "Fixed Pitch" );
+
+	NSFontManager *fmgr = [NSFontManager sharedFontManager];
+
+	NSString *fam = [NSString stringWithUTF8String:family.c_str()];
+
+	for ( id fd in [fmgr availableMembersOfFontFamily:fam] )
+	{
+		NSArray *fontdesc = (NSArray *)fd;
+		NSFontTraitMask traits = [[fontdesc objectAtIndex:3] intValue];
+
+		std::string style;
+		for ( auto t: fonttraits )
+		{
+			if ( ( traits & t.first ) != 0 )
+			{
+				if ( !style.empty() )
+					style += "/";
+				style += t.second;
+			}
+		}
+
+		if ( style.empty() )
+			style = "Regular";
+		ret.insert( style );
+	}
 	return ret;
 }
 
@@ -65,6 +99,25 @@ std::shared_ptr<draw::font> font_manager::get_font( const std::string &family, c
 	NSFontManager *fmgr = [NSFontManager sharedFontManager];
 	NSString *fam = [[NSString alloc] initWithUTF8String:family.c_str()];
 	NSFontTraitMask mask = 0;
+	if ( style.find( "Italic" ) != std::string::npos )
+		mask |= NSItalicFontMask;
+	else
+		mask |= NSUnitalicFontMask;
+	if ( style.find( "Bold" ) != std::string::npos )
+		mask |= NSBoldFontMask;
+	else
+		mask |= NSUnboldFontMask;
+	if ( style.find( "Narrow" ) != std::string::npos )
+		mask |= NSNarrowFontMask;
+	if ( style.find( "Expanded" ) != std::string::npos )
+		mask |= NSExpandedFontMask;
+	if ( style.find( "Small Caps" ) != std::string::npos )
+		mask |= NSSmallCapsFontMask;
+	if ( style.find( "Compressed" ) != std::string::npos )
+		mask |= NSCompressedFontMask;
+	if ( style.find( "Fixed Pitch" ) != std::string::npos )
+		mask |= NSFixedPitchFontMask;
+		
 	NSFont *nsfont = [fmgr fontWithFamily:fam traits:mask weight:5 size:pixsize];
 	if ( nsfont )
 	{

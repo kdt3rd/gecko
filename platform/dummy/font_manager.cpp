@@ -33,7 +33,7 @@ std::set<std::string> font_manager::get_families( void )
 
 ////////////////////////////////////////
 
-std::set<std::string> font_manager::get_styles( void )
+std::set<std::string> font_manager::get_styles( const std::string &family )
 {
 	std::set<std::string> ret;
 	return ret;

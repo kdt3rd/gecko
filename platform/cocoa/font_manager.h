@@ -19,7 +19,7 @@ public:
 	~font_manager( void );
 
 	std::set<std::string> get_families( void ) override;
-	std::set<std::string> get_styles( void );
+	std::set<std::string> get_styles( const std::string &family );
 
 	std::shared_ptr<draw::font> get_font( const std::string &family, const std::string &style, double pixsize ) override;
 
