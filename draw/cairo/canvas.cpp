@@ -125,7 +125,10 @@ void canvas::draw_path( const draw::path &path, const draw::paint &c )
 				auto &c = path.get_point( p++ );
 				auto &r = path.get_point( p++ );
 				auto &a = path.get_point( p++ );
-				cairo_arc( _context, c.x(), c.y(), draw::point::distance( c, r ), a.x(), a.y() );
+				if ( a.x() < a.y() )
+					cairo_arc( _context, c.x(), c.y(), draw::point::distance( c, r ), a.x(), a.y() );
+				else
+					cairo_arc_negative( _context, c.x(), c.y(), draw::point::distance( c, r ), a.x(), a.y() );
 				break;
 			}
 
