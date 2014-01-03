@@ -3,6 +3,11 @@
 #include <cmath>
 #include <algorithm>
 
+namespace 
+{
+	constexpr double PI = 3.14159265358979323846;
+}
+
 ////////////////////////////////////////
 
 namespace
@@ -64,26 +69,90 @@ void color::get_lab( double &l, double &astar, double &bstar )
 	double y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
 	double z = 0.0193 * r + 0.1192 * g + 0.9505 * b;
 
-	l = 116.0 * labF( y / Yn ) - 16.0;
-	astar = 500.0 * ( labF( x / Xn ) - labF( y / Yn ) );
-	bstar = 200.0 * ( labF( y / Yn ) - labF( z / Zn ) );
+	l = 1.16 * labF( y / Yn ) - 0.16;
+	astar = 5.0 * ( labF( x / Xn ) - labF( y / Yn ) );
+	bstar = 2.0 * ( labF( y / Yn ) - labF( z / Zn ) );
 }
 
 ////////////////////////////////////////
 
 void color::set_lab( double l, double astar, double bstar )
 {
-	double y = Yn * labR( 1.0/116.0 * ( l + 16.0 ) );
-	double x = Xn * labR( 1.0/116.0 * ( l + 16.0 ) + 1.0/500.0 * astar );
-	double z = Zn * labR( 1.0/116.0 * ( l + 16.0 ) - 1.0/200.0 * bstar );
+	double y = Yn * labR( 1.0/1.16 * ( l + 0.16 ) );
+	double x = Xn * labR( 1.0/1.16 * ( l + 0.16 ) + 1.0/5.0 * astar );
+	double z = Zn * labR( 1.0/1.16 * ( l + 0.16 ) - 1.0/2.0 * bstar );
 
-	double r = 3.2406 * x - 1.5372 * y - 0.4986 * z;
-	double g =-0.9689 * x + 1.8758 * y + 0.0415 * z;
-	double b = 0.0557 * x - 0.2040 * y + 1.0570 * z;
+	_r = 3.2406 * x - 1.5372 * y - 0.4986 * z;
+	_g =-0.9689 * x + 1.8758 * y + 0.0415 * z;
+	_b = 0.0557 * x - 0.2040 * y + 1.0570 * z;
 
-	_r = fromLin( r );
-	_g = fromLin( g );
-	_b = fromLin( b );
+	_r = fromLin( _r );
+	_g = fromLin( _g );
+	_b = fromLin( _b );
+}
+
+////////////////////////////////////////
+
+void color::get_hsl( double &h, double &s, double &l )
+{
+	double min = std::min( std::min( _r, _g ), _b );
+	double max = std::max( std::max( _r, _g ), _b );
+
+	l = ( max + min ) / 2;
+
+	if ( max == min )
+		h = s = 0;
+	else
+	{
+		double d = max - min;
+		s = l > 0.5 ? ( d / ( 2 - max - min ) ) : ( d / ( max + min ) );
+		if ( max == _r )
+			h = ( _g - _b ) / d  + ( _g < _b ? 6 : 0 );
+		else if ( max == _g )
+			h = ( _b - _r ) / d + 2;
+		else
+			h = ( _r - _g ) / d + 4;
+	}
+	h = ( h / 6.0 ) * 2 * PI;
+}
+
+////////////////////////////////////////
+
+namespace {
+	double hue2rgb( double p, double q, double t )
+	{
+		if ( t < 0 )
+			t += 1;
+		if ( t > 1 )
+			t -= 1;
+		if ( t < 1.0/6.0 )
+			return p + ( q - p ) * 6 * t;
+		if ( t < 1.0/2.0 )
+			return q;
+		if ( t < 2.0/3.0 )
+			return p + ( q - p ) * (2.0/3.0 - t) * 6;
+		return p;
+	}
+}
+
+void color::set_hsl( double h, double s, double l )
+{
+	if ( s == 0 )
+		_r = _g = _b = l;
+	else
+	{
+		double q = l < 0.5 ? ( l * ( 1 + s ) ) : ( l + s - l * s );
+		double p = 2 * l - q;
+		h = h / ( 2 * PI );
+		while ( h < 0 )
+			h += 1;
+		while ( h > 1 )
+			h -= 1;
+		_r = hue2rgb( p, q, h + 1.0/3.0 );
+		_g = hue2rgb( p, q, h );
+		_b = hue2rgb( p, q, h - 1.0/3.0 );
+	}
+
 }
 
 ////////////////////////////////////////

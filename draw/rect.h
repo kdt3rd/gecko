@@ -69,10 +69,22 @@ public:
 	point center( void ) const { return point( ( x1() + x2() ) / 2.0, ( y1() + y2() ) / 2.0 ); }
 	double radius( void ) const { return std::min( width(), height() ) / 2.0; }
 
+	void set( const draw::point &p, const draw::size &s )
+	{
+		_position = p;
+		_size = s;
+		fix_size();
+	}
+
 	void set_x( double x ) { _position.set_x( x ); }
 	void set_y( double y ) { _position.set_y( y ); }
 	void set_width( double w ) { _size.set_width( w ); fix_size(); }
 	void set_height( double h ) { _size.set_height( h ); fix_size(); }
+
+	void set_x1( double x ) { _position.set_x( x ); }
+	void set_y1( double y ) { _position.set_y( y ); }
+	void set_x2( double x ) { _size.set_width( x - x1() ); }
+	void set_y2( double y ) { _size.set_height( y - y1() ); }
 
 	void set_horizontal( double x1, double x2 );
 	void set_vertical( double y1, double y2 );

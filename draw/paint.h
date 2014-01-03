@@ -2,10 +2,12 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "color.h"
 #include "point.h"
 #include "gradient.h"
+#include "path.h"
 #include <core/contract.h>
 
 namespace draw
@@ -61,6 +63,29 @@ public:
 	double get_fill_radial_r2( void ) const { precondition( has_fill_radial(), "no fill radial" ); return _fill_radial.r2; }
 	const std::vector<std::pair<double,color>> &get_fill_radial_stops( void ) const { precondition( has_fill_radial(), "no fill radial" ); return _fill_radial.grad.stops(); }
 
+	void set_fill_mesh( path p, std::vector<color> c )
+	{
+		_fill_type = MESH;
+		new (&_fill_mesh) mesh( std::move( p ), std::move( c ) );
+	}
+
+	bool has_fill_mesh( void ) const
+	{
+		return _fill_type == MESH;
+	}
+
+	const path &get_fill_mesh_path( void ) const
+	{
+		precondition( has_fill_mesh(), "no fill mesh" );
+		return _fill_mesh.path;
+	}
+
+	const std::vector<color> &get_fill_mesh_colors( void ) const
+	{
+		precondition( has_fill_mesh(), "no fill mesh" );
+		return _fill_mesh.colors;
+	}
+
 private:
 	bool _antialias = true;
 
@@ -72,7 +97,8 @@ private:
 		NONE,
 		COLOR,
 		LINEAR,
-		RADIAL
+		RADIAL,
+		MESH,
 	} _fill_type = NONE;
 
 	struct linear
@@ -98,11 +124,23 @@ private:
 		gradient grad;
 	};
 
+	struct mesh
+	{
+		mesh( path &&p, std::vector<color> &&c )
+			: path( std::move( p ) ), colors( std::move( c ) )
+		{
+		}
+
+		path path;
+		std::vector<color> colors;
+	};
+
 	union
 	{
 		color _fill_color;
 		linear _fill_linear;
 		radial _fill_radial;
+		mesh _fill_mesh;
 	};
 };
 

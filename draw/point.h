@@ -50,11 +50,21 @@ public:
 		return { _x + p._x, _y + p._y };
 	}
 
+	point operator-( const point &p ) const
+	{
+		return { _x - p._x, _y - p._y };
+	}
+
 	static inline double distance( const point &p1, const point &p2 )
 	{
 		double dx = p1.x() - p2.x();
 		double dy = p1.y() - p2.y();
 		return std::sqrt( dx * dx + dy * dy );
+	}
+
+	static point polar( double r, double a )
+	{
+		return { r * std::cos( a ), r * std::sin( a ) };
 	}
 
 private:

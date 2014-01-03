@@ -8,20 +8,11 @@ namespace gui
 
 ////////////////////////////////////////
 
-enum class scroll_behavior
-{
-	FREE,
-	BOUND,
-	NONE
-};
-
-////////////////////////////////////////
-
-class scroll_area : public widget
+class background : public widget
 {
 public:
-	scroll_area( scroll_behavior hscroll = scroll_behavior::BOUND, scroll_behavior vscroll = scroll_behavior::BOUND );
-	~scroll_area( void );
+	background( const std::shared_ptr<widget> &w = std::shared_ptr<widget>() );
+	~background( void );
 
 	void set_widget( const std::shared_ptr<widget> &v )
 	{
@@ -38,10 +29,6 @@ public:
 	void compute_layout( void ) override;
 
 private:
-	bool _tracking = false;
-	draw::point _track;
-
-	scroll_behavior _hscroll = scroll_behavior::BOUND, _vscroll = scroll_behavior::BOUND;
 	std::shared_ptr<widget> _widget;
 };
 

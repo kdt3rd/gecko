@@ -26,6 +26,9 @@ public:
 
 	/// @brief Constructor
 	path( void );
+
+	path( const point &p );
+
 	/// @brief Destructor
 	~path( void );
 

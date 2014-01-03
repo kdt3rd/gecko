@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <iostream>
+
 namespace draw
 {
 
@@ -16,8 +18,9 @@ class color
 public:
 	enum class space
 	{
-		SRGB,
-		LAB
+		SRGB, // R G B [0..1]
+		LAB, // L [0..1], a* b* [-1,1]
+		HSL, // H radians, S L [0..1]
 	};
 
 	constexpr color( void )
@@ -36,6 +39,7 @@ public:
 		{
 			case space::SRGB: set( i, j, k ); break;
 			case space::LAB: set_lab( i, j, k ); break;
+			case space::HSL: set_hsl( i, j, k ); break;
 		}
 	}
 
@@ -55,12 +59,23 @@ public:
 	void get_lab( double &l, double &a, double &b );
 	void set_lab( double l, double a, double b );
 
+	void get_hsl( double &h, double &s, double &l );
+	void set_hsl( double h, double s, double l );
+
 	color desaturate( double amt );
 	color change( double amt );
 
 private:
 	double _r = 0.0, _g = 0.0, _b = 0.0, _a = 0.0;
 };
+
+////////////////////////////////////////
+
+inline std::ostream &operator<<( std::ostream &out, const color &c )
+{
+	out << c.red() << ',' << c.green() << ',' << c.blue() << ',' << c.alpha();
+	return out;
+}
 
 ////////////////////////////////////////
 
