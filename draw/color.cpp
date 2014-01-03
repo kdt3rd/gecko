@@ -3,6 +3,11 @@
 #include <cmath>
 #include <algorithm>
 
+namespace 
+{
+	constexpr double PI = 3.14159265358979323846;
+}
+
 ////////////////////////////////////////
 
 namespace
@@ -84,6 +89,69 @@ void color::set_lab( double l, double astar, double bstar )
 	_r = fromLin( r );
 	_g = fromLin( g );
 	_b = fromLin( b );
+}
+
+////////////////////////////////////////
+
+void color::get_hsl( double &h, double &s, double &l )
+{
+	double min = std::min( std::min( _r, _g ), _b );
+	double max = std::max( std::max( _r, _g ), _b );
+
+	l = ( max + min ) / 2;
+
+	if ( max == min )
+		h = s = 0;
+	else
+	{
+		double d = max - min;
+		s = l > 0.5 ? ( d / ( 2 - max - min ) ) : ( d / ( max + min ) );
+		if ( max == _r )
+			h = ( _g - _b ) / d  + ( _g < _b ? 6 : 0 );
+		else if ( max == _g )
+			h = ( _b - _r ) / d + 2;
+		else
+			h = ( _r - _g ) / d + 4;
+	}
+}
+
+////////////////////////////////////////
+
+namespace {
+	double hue2rgb( double p, double q, double t )
+	{
+		if ( t < 0 )
+			t += 1;
+		if ( t > 1 )
+			t -= 1;
+		if ( t < 1.0/6.0 )
+			return p + ( q - p ) * 6 * t;
+		if ( t < 1.0/2.0 )
+			return q;
+		if ( t < 2.0/3.0 )
+			return p + ( q - p ) * (2.0/3.0 - t) * 6;
+		return p;
+	}
+}
+
+void color::set_hsl( double h, double s, double l )
+{
+	if ( s == 0 )
+		_r = _g = _b = l;
+	else
+	{
+		double q = l < 0.5 ? ( l * ( 1 + s ) ) : ( l + s - l * s );
+		double p = 2 * l - q;
+		h = h / ( 2 * PI );
+		while ( h < 0 )
+			h += 1;
+		while ( h > 1 )
+			h -= 1;
+		_r = hue2rgb( p, q, h + 1.0/3.0 );
+		_g = hue2rgb( p, q, h );
+		_b = hue2rgb( p, q, h - 1.0/3.0 );
+	}
+
 }
 
 ////////////////////////////////////////

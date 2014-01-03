@@ -17,7 +17,8 @@ public:
 	enum class space
 	{
 		SRGB,
-		LAB
+		LAB,
+		HSL,
 	};
 
 	constexpr color( void )
@@ -36,6 +37,7 @@ public:
 		{
 			case space::SRGB: set( i, j, k ); break;
 			case space::LAB: set_lab( i, j, k ); break;
+			case space::HSL: set_hsl( i, j, k ); break;
 		}
 	}
 
@@ -54,6 +56,9 @@ public:
 
 	void get_lab( double &l, double &a, double &b );
 	void set_lab( double l, double a, double b );
+
+	void get_hsl( double &h, double &s, double &l );
+	void set_hsl( double h, double s, double l );
 
 	color desaturate( double amt );
 	color change( double amt );
