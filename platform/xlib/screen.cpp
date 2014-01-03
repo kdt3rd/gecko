@@ -23,10 +23,10 @@ screen::~screen( void )
 
 ////////////////////////////////////////
 
-size screen::bounds( void )
+draw::size screen::bounds( void )
 {
 //	precondition( _screen, "null screen" );
-	return size( 0, 0 );
+	return { 0, 0 };
 }
 
 ////////////////////////////////////////

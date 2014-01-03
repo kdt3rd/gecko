@@ -9,7 +9,7 @@ namespace draw
 
 ////////////////////////////////////////
 
-/// @brief Point.
+/// @brief Size.
 class size
 {
 public:

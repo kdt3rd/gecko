@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <core/size.h>
+#include <draw/size.h>
 
 namespace platform
 {
@@ -24,7 +24,7 @@ public:
 	///
 	/// The bounds (size) of the screen.
 	/// @return The size of the screen
-	virtual size bounds( void ) = 0;
+	virtual draw::size bounds( void ) = 0;
 };
 
 ////////////////////////////////////////

@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include <core/size.h>
 #include <platform/screen.h>
 
 namespace x11
@@ -17,7 +16,7 @@ public:
 	screen( void );
 	~screen( void );
 
-	size bounds( void ) override;
+	draw::size bounds( void ) override;
 
 private:
 };

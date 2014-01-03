@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include <core/size.h>
 #include <platform/screen.h>
 #include <xcb/xcb.h>
 
@@ -18,7 +17,7 @@ public:
 	screen( xcb_screen_t *scr );
 	~screen( void );
 
-	size bounds( void ) override;
+	draw::size bounds( void ) override;
 
 	/// @brief XCB identifier for the screen.
 	xcb_screen_t *id( void ) { return _screen; }
