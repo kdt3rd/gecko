@@ -7,6 +7,7 @@ srcs = {
 	"style.cpp";
 	"cocoa_style.cpp";
 	"color.cpp";
+	"background.cpp";
 	"label.cpp";
 	"button.cpp";
 	"slider.cpp";
