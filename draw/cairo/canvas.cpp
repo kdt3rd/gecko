@@ -281,6 +281,95 @@ bool canvas::set_cairo_fill( const draw::paint &p )
 		cairo_pattern_destroy( pat );
 		return true;
 	}
+	else if ( p.has_fill_mesh() )
+	{
+		cairo_pattern_t *pat = cairo_pattern_create_mesh();
+
+		const draw::path &path = p.get_fill_mesh_path();
+		const std::vector<draw::color> &colors = p.get_fill_mesh_colors();
+		size_t p = 0;
+		bool patch = false;
+		auto col = colors.begin();
+		size_t corner = 0;
+
+		for ( auto v: path.get_actions() )
+		{
+			bool added = false;
+			if ( !patch )
+			{
+				cairo_mesh_pattern_begin_patch( pat );
+				patch = true;
+			}
+
+			switch ( v )
+			{
+				case draw::path::action::MOVE:
+				{
+					precondition( corner <= 3, "too many corners for patch" );
+					auto &p1 = path.get_point( p++ );
+					cairo_mesh_pattern_move_to( pat, p1.x(), p1.y() );
+					added = true;
+					break;
+				}
+
+				case draw::path::action::LINE:
+				{
+					precondition( corner <= 3, "too many corners for patch" );
+					auto &p1 = path.get_point( p++ );
+					cairo_mesh_pattern_line_to( pat, p1.x(), p1.y() );
+					added = true;
+					break;
+				}
+
+				case draw::path::action::QUADRATIC:
+				{
+					precondition( corner <= 3, "too many corners for patch" );
+					throw std::runtime_error( "not yet implemented" );
+				}
+
+				case draw::path::action::CUBIC:
+				{
+					precondition( corner <= 3, "too many corners for patch" );
+					auto &p1 = path.get_point( p++ );
+					auto &p2 = path.get_point( p++ );
+					auto &p3 = path.get_point( p++ );
+					cairo_mesh_pattern_curve_to( pat, p1.x(), p1.y(), p2.x(), p2.y(), p3.x(), p3.y() );
+					added = true;
+					break;
+				}
+
+				case draw::path::action::ARC:
+				{
+					precondition( corner <= 3, "too many corners for patch" );
+					throw std::runtime_error( "arc not support for meshes" );
+				}
+
+				case draw::path::action::CLOSE:
+				{
+					cairo_mesh_pattern_end_patch( pat );
+					patch = false;
+					corner = 0;
+					break;
+				}
+			}
+
+			if ( added )
+			{
+				if ( col != colors.end() )
+				{
+					cairo_mesh_pattern_set_corner_color_rgba( pat, corner, col->red(), col->green(), col->blue(), col->alpha() );
+					++col;
+				}
+				++corner;
+			}
+		}
+		if ( patch )
+			cairo_mesh_pattern_end_patch( pat );
+		cairo_set_source( _context, pat );
+		cairo_pattern_destroy( pat );
+		check_error();
+		return true;
+	}
 
 	return false;
 }
