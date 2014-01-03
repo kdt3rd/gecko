@@ -6,8 +6,8 @@ srcs = {
 	"window.cpp";
 	"style.cpp";
 	"cocoa_style.cpp";
-	"color.cpp";
 	"background.cpp";
+	"background_color.cpp";
 	"label.cpp";
 	"button.cpp";
 	"slider.cpp";
