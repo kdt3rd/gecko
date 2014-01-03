@@ -3,6 +3,7 @@
 #include <sstream>
 #include <random>
 #include <functional>
+#include <memory>
 
 #include <gui/application.h>
 #include <gui/cocoa_style.h>
@@ -11,7 +12,7 @@
 #include <gui/label.h>
 #include <gui/button.h>
 #include <gui/slider.h>
-#include <gui/color.h>
+#include <gui/background_color.h>
 #include <gui/scroll_area.h>
 #include <gui/tree_node.h>
 #include <gui/line_edit.h>
@@ -48,7 +49,7 @@ std::shared_ptr<gui::form> build_form( direction dir )
 
 ////////////////////////////////////////
 
-std::shared_ptr<gui::grid> build_grid( direction dir )
+std::shared_ptr<gui::background> build_grid( direction dir )
 {
 	auto container = std::make_shared<gui::grid>( dir );
 	container->set_spacing( 12, 6 );
@@ -70,7 +71,11 @@ std::shared_ptr<gui::grid> build_grid( direction dir )
 	for ( size_t y = 0; y < 5; ++y )
 		container->set_column_weight( y, weights[y] );
 
-	return container;
+	auto bg = std::make_shared<gui::background_color>();// { 1, 0, 1, 1 }, container );
+	bg->set_color( { 1, 0, 1, 1 } );
+	bg->set_widget( container );
+
+	return bg;
 }
 
 ////////////////////////////////////////
@@ -145,7 +150,7 @@ std::shared_ptr<gui::simple_container> build_edit( direction dir )
 
 ////////////////////////////////////////
 
-std::shared_ptr<gui::simple_container> build_all( direction dir )
+std::shared_ptr<gui::widget> build_all( direction dir )
 {
 	auto container = std::make_shared<gui::simple_container>( dir );
 	container->set_spacing( 12, 6 );
@@ -156,7 +161,10 @@ std::shared_ptr<gui::simple_container> build_all( direction dir )
 		container->add( c );
 	container->set_weight( 1, 1.0 );
 
-	return container;
+	auto scroll = std::make_shared<gui::scroll_area>( gui::scroll_behavior::NONE, gui::scroll_behavior::BOUND );
+	scroll->set_widget( container );
+
+	return scroll;
 }
 
 ////////////////////////////////////////
