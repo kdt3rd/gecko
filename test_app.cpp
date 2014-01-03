@@ -16,6 +16,7 @@
 #include <gui/scroll_area.h>
 #include <gui/tree_node.h>
 #include <gui/line_edit.h>
+#include <gui/color_picker.h>
 
 namespace {
 
@@ -169,6 +170,20 @@ std::shared_ptr<gui::widget> build_all( direction dir )
 
 ////////////////////////////////////////
 
+std::shared_ptr<gui::simple_container> build_color( direction dir )
+{
+	auto container = std::make_shared<gui::simple_container>( dir );
+	container->set_spacing( 12, 6 );
+	container->set_pad( 12.5, 12.5, 12.5, 12.5 );
+
+	container->add( std::make_shared<gui::color_picker>( draw::color::space::HSL ), 1.0 );
+	container->add( std::make_shared<gui::color_picker>( draw::color::space::LAB ), 1.0 );
+
+	return container;
+}
+
+////////////////////////////////////////
+
 int safemain( int argc, char **argv )
 {
 	testrec->title = "Hello World";
@@ -207,6 +222,8 @@ int safemain( int argc, char **argv )
 		win->set_widget( build_tree( dir ) );
 	else if ( test == "edit" )
 		win->set_widget( build_edit( dir ) );
+	else if ( test == "color" )
+		win->set_widget( build_color( dir ) );
 	else if ( test == "all" )
 		win->set_widget( build_all( dir ) );
 	else
