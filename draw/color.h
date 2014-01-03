@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <iostream>
+
 namespace draw
 {
 
@@ -16,9 +18,9 @@ class color
 public:
 	enum class space
 	{
-		SRGB,
-		LAB,
-		HSL,
+		SRGB, // R G B [0..1]
+		LAB, // L [0..1], a* b* [-1,1]
+		HSL, // H radians, S L [0..1]
 	};
 
 	constexpr color( void )

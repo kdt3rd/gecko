@@ -69,26 +69,26 @@ void color::get_lab( double &l, double &astar, double &bstar )
 	double y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
 	double z = 0.0193 * r + 0.1192 * g + 0.9505 * b;
 
-	l = 116.0 * labF( y / Yn ) - 16.0;
-	astar = 500.0 * ( labF( x / Xn ) - labF( y / Yn ) );
-	bstar = 200.0 * ( labF( y / Yn ) - labF( z / Zn ) );
+	l = 1.16 * labF( y / Yn ) - 0.16;
+	astar = 5.0 * ( labF( x / Xn ) - labF( y / Yn ) );
+	bstar = 2.0 * ( labF( y / Yn ) - labF( z / Zn ) );
 }
 
 ////////////////////////////////////////
 
 void color::set_lab( double l, double astar, double bstar )
 {
-	double y = Yn * labR( 1.0/116.0 * ( l + 16.0 ) );
-	double x = Xn * labR( 1.0/116.0 * ( l + 16.0 ) + 1.0/500.0 * astar );
-	double z = Zn * labR( 1.0/116.0 * ( l + 16.0 ) - 1.0/200.0 * bstar );
+	double y = Yn * labR( 1.0/1.16 * ( l + 0.16 ) );
+	double x = Xn * labR( 1.0/1.16 * ( l + 0.16 ) + 1.0/5.0 * astar );
+	double z = Zn * labR( 1.0/1.16 * ( l + 0.16 ) - 1.0/2.0 * bstar );
 
-	double r = 3.2406 * x - 1.5372 * y - 0.4986 * z;
-	double g =-0.9689 * x + 1.8758 * y + 0.0415 * z;
-	double b = 0.0557 * x - 0.2040 * y + 1.0570 * z;
+	_r = 3.2406 * x - 1.5372 * y - 0.4986 * z;
+	_g =-0.9689 * x + 1.8758 * y + 0.0415 * z;
+	_b = 0.0557 * x - 0.2040 * y + 1.0570 * z;
 
-	_r = fromLin( r );
-	_g = fromLin( g );
-	_b = fromLin( b );
+	_r = fromLin( _r );
+	_g = fromLin( _g );
+	_b = fromLin( _b );
 }
 
 ////////////////////////////////////////
@@ -113,6 +113,7 @@ void color::get_hsl( double &h, double &s, double &l )
 		else
 			h = ( _r - _g ) / d + 4;
 	}
+	h = ( h / 6.0 ) * 2 * PI;
 }
 
 ////////////////////////////////////////
