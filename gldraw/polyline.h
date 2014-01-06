@@ -16,7 +16,6 @@ public:
 	void close( void )
 	{
 		_closed = true;
-		_points.emplace_back( _points.front() );
 	}
 
 	bool closed( void ) const
@@ -62,6 +61,11 @@ public:
 	std::vector<point>::const_iterator end( void ) const
 	{
 		return _points.end();
+	}
+
+	const point &operator[]( size_t i ) const
+	{
+		return _points[i];
 	}
 
 private:
