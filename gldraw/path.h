@@ -69,6 +69,8 @@ public:
 //	std::shared_ptr<drawable> stroked( ... );
 //	std::shared_ptr<drawable> filled( ... );
 
+	path stroked( double width );
+
 	const std::vector<polyline> lines( void ) const
 	{
 		return _lines;

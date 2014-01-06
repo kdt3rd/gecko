@@ -2,6 +2,7 @@
 #include <iostream>
 #include "path.h"
 #include "geometry.h"
+#include "clipper.h"
 #include <core/contract.h>
 
 namespace 
@@ -89,6 +90,40 @@ void path::close( void )
 	precondition( !_lines.empty(), "no path to close" );
 	_lines.back().close();
 	_lines.emplace_back();
+}
+
+////////////////////////////////////////
+
+path path::stroked( double width )
+{
+	using namespace ClipperLib;
+	Path subj;
+	Paths solution;
+	path result;
+
+	for ( size_t i = 0; i < _lines.size(); ++i )
+	{
+		const polyline &line = _lines[i];
+		subj.resize( line.size() );
+		for ( size_t p = 0; p < line.size(); ++p )
+			subj << IntPoint( line[p].x() * 100 + 0.5, line[p].y() * 100 + 0.5 );
+		ClipperOffset co;
+		co.AddPath( subj, jtRound, line.closed() ? etClosedPolygon : etOpenRound );
+		solution.clear();
+		co.Execute( solution, width * 100 );
+
+		for ( auto path: solution )
+		{
+			result.move_to( { path[0].X / 100.0, path[0].Y / 100.0 } );
+			for ( size_t p = 1; p < path.size(); ++p )
+				result.line_to( { path[p].X / 100.0, path[p].Y / 100.0 } );
+			result.close();
+		}
+	}
+
+	return result;
+
+	return result;
 }
 
 ////////////////////////////////////////
