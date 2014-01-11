@@ -3,6 +3,7 @@
 
 #include <memory>
 #include "shader.h"
+#include "matrix4.h"
 
 namespace gl
 {
@@ -44,6 +45,7 @@ public:
 
 	void set_uniform( uniform uniform, int value );
 	void set_uniform( uniform uniform, float value );
+	void set_uniform( uniform uniform, const matrix4 &value );
 	/*
 	void set_uniform( const Uniform& uniform, const Vec2& value );
 	void set_uniform( const Uniform& uniform, const Vec3& value );
