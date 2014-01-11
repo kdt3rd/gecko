@@ -6,6 +6,7 @@ srcs = {
 	"shader.cpp";
 	"program.cpp";
 	"context.cpp";
+	"matrix4.cpp";
 }
 
 Library( "gl", Compile( srcs ), LinkSys( GL_LIBS ) );
