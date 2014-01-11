@@ -1,0 +1,24 @@
+
+#include "texture.h"
+
+namespace gl
+{
+
+////////////////////////////////////////
+
+texture::texture( void )
+{
+	glGenTextures( 1, &_texture );
+}
+
+////////////////////////////////////////
+
+texture::~texture( void )
+{
+	glDeleteTextures( 1, &_texture );
+}
+
+////////////////////////////////////////
+
+}
+
