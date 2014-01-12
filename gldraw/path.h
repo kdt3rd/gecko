@@ -4,6 +4,7 @@
 #include <vector>
 #include "polyline.h"
 #include "point.h"
+#include "mesh.h"
 
 namespace gldraw
 {
@@ -70,6 +71,7 @@ public:
 //	std::shared_ptr<drawable> filled( ... );
 
 	path stroked( double width );
+	mesh<draw::point> filled( double width );
 
 	const std::vector<polyline> lines( void ) const
 	{

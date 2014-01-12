@@ -2,7 +2,9 @@
 #include <iostream>
 #include "path.h"
 #include "geometry.h"
+#include "mesh.h"
 #include "clipper.h"
+#include "libtess2/tesselator.h"
 #include <core/contract.h>
 
 namespace 
@@ -122,8 +124,116 @@ path path::stroked( double width )
 	}
 
 	return result;
+}
 
-	return result;
+////////////////////////////////////////
+
+namespace {
+	void *stdAlloc( void *data, unsigned int size )
+	{
+		return malloc( size );
+	}
+
+	void stdFree( void *data, void *ptr )
+	{
+		free( ptr );
+	}
+
+}
+
+
+mesh<draw::point> path::filled( double width )
+{
+	if ( _lines.empty() )
+		throw std::runtime_error( "no path" );
+	while ( _lines.back().empty() )
+		_lines.pop_back();
+	if ( _lines.empty() )
+		throw std::runtime_error( "no path" );
+
+	using namespace ClipperLib;
+	Path subj;
+
+	Clipper clip;
+	for ( size_t i = 0; i < _lines.size(); ++i )
+	{
+		const polyline &line = _lines[i];
+		subj.resize( line.size() );
+		for ( size_t p = 0; p < line.size(); ++p )
+			subj << IntPoint( line[p].x() * 100 + 0.5, line[p].y() * 100 + 0.5 );
+		clip.AddPath( subj, ptSubject, line.closed() );
+	}
+
+	Paths solution;
+	clip.Execute( ctUnion, solution );
+//	path result;
+
+	/*
+	mesh<draw::point> m;
+	for ( auto path: solution )
+	{
+		m.begin( gl::primitive::LINE_LOOP );
+		for ( size_t p = 0; p < path.size(); ++p )
+			m.push_back( { path[p].X / 100.0, path[p].Y / 100.0 } );
+		m.end();
+	}
+	*/
+
+	TESSalloc ma;
+	memset( &ma, 0, sizeof(ma) );
+	ma.memalloc = &stdAlloc;
+	ma.memfree = &stdFree;
+
+	TESStesselator *tess = tessNewTess( &ma );
+	if ( !tess )
+		throw std::runtime_error( "tesselator creation failed" );
+
+	std::vector<float> tmp;
+	int nvp = 0;
+	for ( auto path: solution )
+	{
+		tmp.clear();
+		for ( size_t p = 0; p < path.size(); ++p )
+		{
+			tmp.push_back( path[p].X / 100.0 );
+			tmp.push_back( path[p].Y / 100.0 );
+		}
+		nvp += int(tmp.size()) / 2;
+		tessAddContour( tess, 2, tmp.data(), sizeof(float)*2, tmp.size()/2 );
+
+//		result.move_to( { path[0].X / 100.0, path[0].Y / 100.0 } );
+//		for ( size_t p = 1; p < path.size(); ++p )
+//			result.line_to(
+//		result.close();
+	}
+
+	if ( !tessTesselate( tess, TESS_WINDING_ODD, TESS_POLYGONS, nvp, 2, nullptr ) )
+		throw std::runtime_error( "tesselation failed" );
+
+	const float *verts = tessGetVertices( tess );
+//	const int *vinds = tessGetVertexIndices( tess );
+	const int *elems = tessGetElements( tess );
+	const int nverts = tessGetVertexCount( tess );
+	const int nelems = tessGetElementCount( tess );
+
+	for ( int i = 0; i < nverts; ++i )
+		std::cout << i << ' ' << verts[i*2] << ',' << verts[i*2+1] << std::endl;
+
+	mesh<draw::point> m;
+	for ( int i = 0; i < nelems; ++i )
+	{
+		std::cout << "Element " << i << std::endl;
+		const int *p = &elems[i*nvp];
+		m.begin( gl::primitive::TRIANGLE_FAN );
+		for ( int j = 0; j < nvp && p[j] != TESS_UNDEF; ++j )
+		{
+			std::cout << "  " << verts[p[j]*2] << ' ' << verts[p[j]*2+1] << '\n';
+			m.push_back( { verts[p[j]*2], verts[p[j]*2+1] } );
+		}
+		m.end();
+	}
+
+	return m;
 }
 
 ////////////////////////////////////////
