@@ -42,7 +42,7 @@ public:
 	void set_value( double v );
 	void set_range( double min, double max );
 
-	void paint( const std::shared_ptr<gldraw::canvas> &c ) override;
+	void paint( const std::shared_ptr<draw::canvas> &c ) override;
 
 	void compute_minimum( void ) override;
 

@@ -1,7 +1,7 @@
 
 #include "font.h"
 
-namespace gldraw
+namespace draw
 {
 
 ////////////////////////////////////////

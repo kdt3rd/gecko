@@ -19,7 +19,7 @@ scroll_area::~scroll_area( void )
 
 ////////////////////////////////////////
 
-void scroll_area::paint( const std::shared_ptr<gldraw::canvas> &canvas )
+void scroll_area::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
 	if ( _widget )
 	{

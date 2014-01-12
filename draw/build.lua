@@ -19,5 +19,5 @@ tess = {
 	"libtess2/tess.c";
 }
 
-Library( "gldraw", Compile( srcs ), Compile( tess ), LinkLibs( "gl" ) );
+Library( "draw", Compile( srcs ), Compile( tess ), LinkLibs( "gl" ) );
 

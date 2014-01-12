@@ -8,7 +8,7 @@
 #include "font.h"
 #include <core/rect.h>
 
-namespace gldraw
+namespace draw
 {
 
 ////////////////////////////////////////

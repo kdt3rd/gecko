@@ -6,7 +6,7 @@
 #include "mesh.h"
 #include <core/point.h>
 
-namespace gldraw
+namespace draw
 {
 
 ////////////////////////////////////////

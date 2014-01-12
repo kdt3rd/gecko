@@ -9,7 +9,7 @@ namespace gl
 	class context;
 }
 
-namespace gldraw
+namespace draw
 {
 
 ////////////////////////////////////////

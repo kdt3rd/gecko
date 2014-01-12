@@ -1,7 +1,7 @@
 
 #include "paint.h"
 
-namespace gldraw
+namespace draw
 {
 
 ////////////////////////////////////////

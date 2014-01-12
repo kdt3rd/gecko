@@ -12,7 +12,7 @@ namespace
 }
 
 
-namespace gldraw
+namespace draw
 {
 
 ////////////////////////////////////////

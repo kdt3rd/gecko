@@ -32,9 +32,9 @@ namespace
 	*/
 }
 
-void color_picker::paint( const std::shared_ptr<gldraw::canvas> &canvas )
+void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
-	using gldraw::path;
+	using draw::path;
 	using core::point;
 	using core::color;
 
@@ -47,7 +47,7 @@ void color_picker::paint( const std::shared_ptr<gldraw::canvas> &canvas )
 	static_assert( n%4 == 0, "invalid number of segments" );
 //	double slice = PI / n;
 
-	gldraw::paint paint;
+	draw::paint paint;
 	for ( size_t i = 0; i < n; ++i )
 	{
 		double a = i * 2 * PI / n;
@@ -112,7 +112,7 @@ void color_picker::paint( const std::shared_ptr<gldraw::canvas> &canvas )
 				double h, s, l;
 				_current.get_hsl( h, s, l );
 
-				gldraw::path m;
+				draw::path m;
 				m.move_to( c + point::polar( r2, h ) );
 				m.line_to( c + point::polar( r2, h + 2 * PI / 3 ) );
 				m.line_to( c + point::polar( r2, h + 4 * PI / 3 ) );

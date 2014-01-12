@@ -4,7 +4,7 @@
 #include <string>
 #include <set>
 #include <memory>
-#include <gldraw/font.h>
+#include <draw/font.h>
 
 namespace platform
 {
@@ -56,7 +56,7 @@ public:
 	/// @param pixsize Size of the font to create
 	///
 	/// @return The best matching font found
-	virtual std::shared_ptr<gldraw::font> get_font( const std::string &family, const std::string &style, double pixsize ) = 0;
+	virtual std::shared_ptr<draw::font> get_font( const std::string &family, const std::string &style, double pixsize ) = 0;
 
 protected:
 	void set_manager_name( std::string s ) { _name = std::move( s ); }

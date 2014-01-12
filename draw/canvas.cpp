@@ -1,7 +1,7 @@
 
 #include "canvas.h"
 
-namespace gldraw
+namespace draw
 {
 
 ////////////////////////////////////////

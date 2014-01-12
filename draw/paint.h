@@ -10,7 +10,7 @@
 #include <core/point.h>
 #include <core/contract.h>
 
-namespace gldraw
+namespace draw
 {
 
 ////////////////////////////////////////

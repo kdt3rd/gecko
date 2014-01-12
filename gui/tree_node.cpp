@@ -90,7 +90,7 @@ bool tree_node::mouse_move( const core::point &p )
 
 ////////////////////////////////////////
 
-void tree_node::paint( const std::shared_ptr<gldraw::canvas> &c )
+void tree_node::paint( const std::shared_ptr<draw::canvas> &c )
 {
 	if ( _collapsed )
 		_root->paint( c );

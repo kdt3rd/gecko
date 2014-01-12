@@ -4,7 +4,7 @@
 #include <vector>
 #include <core/color.h>
 
-namespace gldraw
+namespace draw
 {
 
 ////////////////////////////////////////

@@ -17,7 +17,7 @@ class button : public widget
 {
 public:
 	button( void );
-	button( datum<std::string> &&l, datum<alignment> &&a = alignment::LEFT, datum<core::color> &&c = { 0, 0, 0, 1 }, shared_datum<gldraw::font> &&f = application::current_style()->default_font() );
+	button( datum<std::string> &&l, datum<alignment> &&a = alignment::LEFT, datum<core::color> &&c = { 0, 0, 0, 1 }, shared_datum<draw::font> &&f = application::current_style()->default_font() );
 	~button( void );
 
 	const std::string &text( void )
@@ -30,14 +30,14 @@ public:
 		_text = t;
 	}
 
-	void set_font( std::shared_ptr<gldraw::font> &f )
+	void set_font( std::shared_ptr<draw::font> &f )
 	{
 		_font = f;
 	}
 
 	void set_pressed( bool p );
 
-	void paint( const std::shared_ptr<gldraw::canvas> &c ) override;
+	void paint( const std::shared_ptr<draw::canvas> &c ) override;
 
 	void compute_minimum( void ) override;
 
@@ -51,7 +51,7 @@ private:
 	datum<std::string> _text;
 	datum<alignment> _align = alignment::CENTER;
 	datum<core::color> _color = { 0, 0, 0, 1 };
-	shared_datum<gldraw::font> _font = application::current_style()->default_font();
+	shared_datum<draw::font> _font = application::current_style()->default_font();
 
 	bool _pressed = false;
 	bool _tracking = false;

@@ -28,7 +28,7 @@ public:
 		_widget = v;
 	}
 
-	void paint( const std::shared_ptr<gldraw::canvas> &canvas ) override;
+	void paint( const std::shared_ptr<draw::canvas> &canvas ) override;
 
 	bool mouse_press( const core::point &p, int button ) override;
 	bool mouse_release( const core::point &p, int button ) override;

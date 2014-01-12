@@ -18,7 +18,7 @@ public:
 	std::set<std::string> get_families( void ) override;
 	std::set<std::string> get_styles( const std::string &family ) override;
 
-	std::shared_ptr<gldraw::font> get_font( const std::string &family, const std::string &style, double pixsize ) override;
+	std::shared_ptr<draw::font> get_font( const std::string &family, const std::string &style, double pixsize ) override;
 
 private:
 	struct pimpl;

@@ -17,7 +17,7 @@ line_edit::line_edit( void )
 
 ////////////////////////////////////////
 
-line_edit::line_edit( datum<std::string> &&l, datum<alignment> &&a, datum<core::color> &&c, shared_datum<gldraw::font> &&f )
+line_edit::line_edit( datum<std::string> &&l, datum<alignment> &&a, datum<core::color> &&c, shared_datum<draw::font> &&f )
 	: _text( std::move( l ) ), _align( std::move( a ) ), _color( std::move( c ) ), _font( std::move( f ) )
 {
 	callback_invalidate( _text, _align, _color, _font );
@@ -31,7 +31,7 @@ line_edit::~line_edit( void )
 
 ////////////////////////////////////////
 
-void line_edit::paint( const std::shared_ptr<gldraw::canvas> &c )
+void line_edit::paint( const std::shared_ptr<draw::canvas> &c )
 {
 	auto style = application::current_style();
 	style->line_edit_frame( c, *this, false );
@@ -41,19 +41,19 @@ void line_edit::paint( const std::shared_ptr<gldraw::canvas> &c )
 	core::point p = c->align_text( _font.value(), str, *this, _align.value() );
 
 
-	gldraw::paint paint;
+	draw::paint paint;
 	paint.set_fill_color( _color.value() );
 	c->draw_text( _font.value(), p, str, paint );
 
-	gldraw::font_extents fex = _font.value()->extents();
-	gldraw::text_extents tex = _font.value()->extents( str.substr( 0, _cursor ) );
+	draw::font_extents fex = _font.value()->extents();
+	draw::text_extents tex = _font.value()->extents( str.substr( 0, _cursor ) );
 
-	gldraw::path path;
+	draw::path path;
 	path.move_to( p );
 	path.move_by( { tex.x_advance, fex.descent } );
 	path.line_by( { 0, -fex.height } );
 
-	gldraw::paint pen;
+	draw::paint pen;
 	pen.set_stroke_color( _color.value() );
 	c->draw_path( path, pen );
 }
@@ -62,8 +62,8 @@ void line_edit::paint( const std::shared_ptr<gldraw::canvas> &c )
 
 void line_edit::compute_minimum( void )
 {
-	gldraw::font_extents fex = _font.value()->extents();
-	gldraw::text_extents tex = _font.value()->extents( _text.value() );
+	draw::font_extents fex = _font.value()->extents();
+	draw::text_extents tex = _font.value()->extents( _text.value() );
 	set_minimum( tex.x_advance + 12, std::max( 21.0, fex.height ) );
 }
 

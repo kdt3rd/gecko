@@ -116,7 +116,7 @@ public:
 		return widget::text_input( c );
 	}
 
-	void paint( const std::shared_ptr<gldraw::canvas> &c ) override
+	void paint( const std::shared_ptr<draw::canvas> &c ) override
 	{
 		for ( auto w: _widgets )
 			w->paint( c );

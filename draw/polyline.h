@@ -5,7 +5,7 @@
 #include <core/point.h>
 #include "polyline.h"
 
-namespace gldraw
+namespace draw
 {
 
 ////////////////////////////////////////

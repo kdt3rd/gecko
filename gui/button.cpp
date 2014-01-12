@@ -17,7 +17,7 @@ button::button( void )
 
 ////////////////////////////////////////
 
-button::button( datum<std::string> &&l, datum<alignment> &&a, datum<core::color> &&c, shared_datum<gldraw::font> &&f )
+button::button( datum<std::string> &&l, datum<alignment> &&a, datum<core::color> &&c, shared_datum<draw::font> &&f )
 	: _text( std::move( l ) ), _align( std::move( a ) ), _color( std::move( c ) ), _font( std::move( f ) )
 {
 	callback_invalidate( _text, _align, _color, _font );
@@ -42,7 +42,7 @@ void button::set_pressed( bool p )
 
 ////////////////////////////////////////
 
-void button::paint( const std::shared_ptr<gldraw::canvas> &canvas )
+void button::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
 	auto style = application::current_style();
 	style->button_frame( canvas, *this, _pressed );
@@ -50,7 +50,7 @@ void button::paint( const std::shared_ptr<gldraw::canvas> &canvas )
 
 	core::point p = canvas->align_text( _font.value(), _text.value(), content, _align.value() );
 
-	gldraw::paint paint;
+	draw::paint paint;
 	paint.set_fill_color( _color.value() );
 	canvas->draw_text( _font.value(), p, _text.value(), paint );
 }
@@ -59,8 +59,8 @@ void button::paint( const std::shared_ptr<gldraw::canvas> &canvas )
 
 void button::compute_minimum( void )
 {
-	gldraw::font_extents fex = _font.value()->extents();
-	gldraw::text_extents tex = _font.value()->extents( _text.value() );
+	draw::font_extents fex = _font.value()->extents();
+	draw::text_extents tex = _font.value()->extents( _text.value() );
 
 	core::size s( tex.x_advance, fex.height );
 

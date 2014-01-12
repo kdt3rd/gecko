@@ -52,7 +52,7 @@ void slider::set_value( double v )
 
 ////////////////////////////////////////
 
-void slider::paint( const std::shared_ptr<gldraw::canvas> &canvas )
+void slider::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
 	core::rect r = *this;
 	auto style = application::current()->get_style();

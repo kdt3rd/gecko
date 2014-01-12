@@ -2,7 +2,7 @@
 #pragma once
 
 #include <type_traits>
-#include <gldraw/canvas.h>
+#include <draw/canvas.h>
 #include <layout/simple_area.h>
 #include <platform/keyboard.h>
 #include "context.h"
@@ -31,7 +31,7 @@ public:
 	{
 	}
 
-	virtual void paint( const std::shared_ptr<gldraw::canvas> &canvas )
+	virtual void paint( const std::shared_ptr<draw::canvas> &canvas )
 	{
 	}
 

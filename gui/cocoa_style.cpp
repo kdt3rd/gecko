@@ -10,7 +10,7 @@ namespace
 core::color bg { 0.9294, 0.9294, 0.9294 };
 
 core::color border1 { 0.6039, 0.6039, 0.6039 };
-gldraw::gradient grad1
+draw::gradient grad1
 {
 	{ 0.00, { 1.0000, 1.0000, 1.0000 } },
 	{ 0.22, { 1.0000, 1.0000, 1.0000 } },
@@ -22,7 +22,7 @@ gldraw::gradient grad1
 };
 
 core::color border2 { 0.3059, 0.2863, 0.4314 };
-gldraw::gradient grad2
+draw::gradient grad2
 {
 	{ 0.00, { 0.7804, 0.8039, 0.8275 } },
 	{ 0.06, { 0.6784, 0.7059, 0.7608 } },
@@ -57,7 +57,7 @@ cocoa_style::~cocoa_style( void )
 
 ////////////////////////////////////////
 
-std::shared_ptr<gldraw::font> cocoa_style::default_font( bool bold )
+std::shared_ptr<draw::font> cocoa_style::default_font( bool bold )
 {
 	if ( bold )
 		return _default_bold_font;
@@ -67,9 +67,9 @@ std::shared_ptr<gldraw::font> cocoa_style::default_font( bool bold )
 
 ////////////////////////////////////////
 
-void cocoa_style::background( const std::shared_ptr<gldraw::canvas> &c )
+void cocoa_style::background( const std::shared_ptr<draw::canvas> &c )
 {
-	gldraw::paint p;
+	draw::paint p;
 	p.set_fill_color( bg );
 
 	c->fill( p );
@@ -97,9 +97,9 @@ core::rect cocoa_style::button_content( const core::rect &full )
 
 ////////////////////////////////////////
 
-void cocoa_style::button_frame( const std::shared_ptr<gldraw::canvas> &c, const core::rect &r, bool pressed )
+void cocoa_style::button_frame( const std::shared_ptr<draw::canvas> &c, const core::rect &r, bool pressed )
 {
-	gldraw::paint p;
+	draw::paint p;
 
 	if ( pressed )
 	{
@@ -114,7 +114,7 @@ void cocoa_style::button_frame( const std::shared_ptr<gldraw::canvas> &c, const 
 		p.set_fill_linear( r.top_left(), r.bottom_left(), grad1 );
 	}
 
-	gldraw::path rpath;
+	draw::path rpath;
 //	rpath.rounded_rect( r.top_left(), r.bottom_right(), 3 );
 
 	c->draw_path( rpath, p );
@@ -122,15 +122,15 @@ void cocoa_style::button_frame( const std::shared_ptr<gldraw::canvas> &c, const 
 
 ////////////////////////////////////////
 
-void cocoa_style::line_edit_frame( const std::shared_ptr<gldraw::canvas> &c, const core::rect &r, bool focused )
+void cocoa_style::line_edit_frame( const std::shared_ptr<draw::canvas> &c, const core::rect &r, bool focused )
 {
-	gldraw::paint paint;
+	draw::paint paint;
 
 	paint.set_stroke_color( border1 );
 	paint.set_stroke_width( 1.0 );
 	paint.set_fill_color( { 1, 1, 1 } );
 
-	gldraw::path path;
+	draw::path path;
 //	path.rectangle( r.top_left(), r.bottom_right() );
 
 	c->draw_path( path, paint );
@@ -145,7 +145,7 @@ double cocoa_style::slider_size( const core::rect &r )
 
 ////////////////////////////////////////
 
-void cocoa_style::slider_groove( const std::shared_ptr<gldraw::canvas> &c, const core::rect &rect )
+void cocoa_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const core::rect &rect )
 {
 	double size = slider_size( rect );
 	core::rect r = rect;
@@ -157,12 +157,12 @@ void cocoa_style::slider_groove( const std::shared_ptr<gldraw::canvas> &c, const
 		r.set_height( 7.0 );
 	}
 
-	gldraw::paint p;
+	draw::paint p;
 	p.set_stroke_color( border2 );
 	p.set_stroke_width( 1.0 );
 	p.set_fill_linear( r.top_left(), r.bottom_left(), grad2 );
 
-	gldraw::path rpath;
+	draw::path rpath;
 //	rpath.rounded_rect( r.top_left(), r.bottom_right(), 2 );
 
 	c->draw_path( rpath, p );
@@ -170,9 +170,9 @@ void cocoa_style::slider_groove( const std::shared_ptr<gldraw::canvas> &c, const
 
 ////////////////////////////////////////
 
-void cocoa_style::slider_button( const std::shared_ptr<gldraw::canvas> &c, const core::rect &r, bool pressed, double val )
+void cocoa_style::slider_button( const std::shared_ptr<draw::canvas> &c, const core::rect &r, bool pressed, double val )
 {
-	gldraw::paint p;
+	draw::paint p;
 
 	if ( pressed )
 	{
@@ -189,7 +189,7 @@ void cocoa_style::slider_button( const std::shared_ptr<gldraw::canvas> &c, const
 
 	core::point center = { r.x( val, slider_size( r ) ), r.y( 0.5 ) };
 
-	gldraw::path rpath;
+	draw::path rpath;
 //	rpath.circle( center, r.radius() );
 
 	c->draw_path( rpath, p );

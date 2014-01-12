@@ -4,7 +4,7 @@
 #include "drawable.h"
 #include "mesh.h"
 
-namespace gldraw
+namespace draw
 {
 
 ////////////////////////////////////////

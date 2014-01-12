@@ -23,7 +23,7 @@ public:
 	bool mouse_release( const core::point &p, int button ) override;
 	bool mouse_move( const core::point &p ) override;
 
-	void paint( const std::shared_ptr<gldraw::canvas> &c ) override;
+	void paint( const std::shared_ptr<draw::canvas> &c ) override;
 
 private:
 	bool _collapsed = false;

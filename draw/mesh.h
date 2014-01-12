@@ -8,7 +8,7 @@
 #include <gl/context.h>
 #include <gl/vertex_array.h>
 
-namespace gldraw
+namespace draw
 {
 
 ////////////////////////////////////////

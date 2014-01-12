@@ -102,7 +102,7 @@ std::set<std::string> font_manager::get_styles( const std::string &family )
 
 ////////////////////////////////////////
 
-std::shared_ptr<gldraw::font> font_manager::get_font( const std::string &family, const std::string &style, double pixsize )
+std::shared_ptr<draw::font> font_manager::get_font( const std::string &family, const std::string &style, double pixsize )
 {
 	std::cout << "Getting font: " << family << ' ' << style << ' ' << pixsize << std::endl;
 	FcPattern *pat = FcPatternBuild( nullptr,
@@ -118,7 +118,7 @@ std::shared_ptr<gldraw::font> font_manager::get_font( const std::string &family,
 
 	std::cout << "Matched: " << matched << std::endl;
 
-	std::shared_ptr<gldraw::font> ret;
+	std::shared_ptr<draw::font> ret;
 	if ( matched && result == FcResultMatch )
 	{
 		FcChar8 *filename = nullptr;

@@ -16,6 +16,7 @@ local platform = {
 	};
 
 	libs = {
+		"draw";
 	};
 
 	syslibs = {

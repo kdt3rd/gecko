@@ -18,7 +18,7 @@ public:
 
 	void set_color( const core::color &c ) { _color = c; }
 
-	void paint( const std::shared_ptr<gldraw::canvas> &c ) override;
+	void paint( const std::shared_ptr<draw::canvas> &c ) override;
 
 private:
 	datum<core::color> _color = { 1, 0, 1, 1 };

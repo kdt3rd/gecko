@@ -1,7 +1,7 @@
 
 #include "object.h"
 
-namespace gldraw
+namespace draw
 {
 
 ////////////////////////////////////////

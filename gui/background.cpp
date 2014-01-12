@@ -19,7 +19,7 @@ background::~background( void )
 
 ////////////////////////////////////////
 
-void background::paint( const std::shared_ptr<gldraw::canvas> &canvas )
+void background::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
 	if ( _widget )
 		_widget->paint( canvas );

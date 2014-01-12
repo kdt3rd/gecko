@@ -247,7 +247,7 @@ gl::context window::context( void )
 
 ////////////////////////////////////////
 
-std::shared_ptr<gldraw::canvas> window::canvas( void )
+std::shared_ptr<draw::canvas> window::canvas( void )
 {
 	return _canvas;
 }

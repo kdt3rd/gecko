@@ -4,7 +4,7 @@
 #include <string>
 #include "extents.h"
 
-namespace gldraw
+namespace draw
 {
 
 ////////////////////////////////////////

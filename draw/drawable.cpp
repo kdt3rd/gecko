@@ -1,7 +1,7 @@
 
 #include "drawable.h"
 
-namespace gldraw
+namespace draw
 {
 
 ////////////////////////////////////////
