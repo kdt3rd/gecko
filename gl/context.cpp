@@ -8,6 +8,7 @@ namespace gl
 
 context::context( void )
 {
+	_matrix.emplace_back();
 }
 
 ////////////////////////////////////////
@@ -77,6 +78,49 @@ void context::stencil_mask( uint32_t mask )
 void context::color_mask( bool r, bool g, bool b, bool a )
 {
 	glColorMask( r, g, b, a );
+}
+
+////////////////////////////////////////
+
+void context::save_matrix( void )
+{
+	_matrix.emplace_back( _matrix.back() );
+}
+
+////////////////////////////////////////
+
+void context::ortho( float left, float right, float top, float bottom )
+{
+	multiply( gl::matrix4::ortho( left, right, top, bottom ) );
+}
+
+////////////////////////////////////////
+
+void context::scale( float x, float y, float z )
+{
+	multiply( gl::matrix4::scale( x, y, z ) );
+}
+
+////////////////////////////////////////
+
+void context::translate( float dx, float dy, float dz )
+{
+	multiply( gl::matrix4::translation( dx, dy, dz ) );
+}
+
+////////////////////////////////////////
+
+void context::multiply( const matrix4 &m )
+{
+	_matrix.back() *= m;
+}
+
+////////////////////////////////////////
+
+void context::restore_matrix( void )
+{
+	precondition( _matrix.size() > 1, "too many restore_matrix" );
+	_matrix.pop_back();
 }
 
 ////////////////////////////////////////

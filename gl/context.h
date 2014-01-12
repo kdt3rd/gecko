@@ -4,12 +4,14 @@
 #include <exception>
 #include <memory>
 #include <vector>
+#include <core/contract.h>
 #include "opengl.h"
 #include "enums.h"
 #include "texture.h"
 #include "shader.h"
 #include "program.h"
 #include "buffer.h"
+#include "matrix4.h"
 #include "vertex_array.h"
 #include <draw/color.h>
 
@@ -36,6 +38,21 @@ public:
 	void stencil_mask( bool write );
 	void stencil_mask( uint32_t mask );
 	void color_mask( bool r, bool g, bool b, bool a );
+
+	void save_matrix( void );
+	void ortho( float left, float right, float top, float bottom );
+	void scale( float x, float y, float z = 1.F );
+	void translate( float dx, float dy, float dz = 0.F );
+	void multiply( const matrix4 &m );
+
+	matrix4 current_matrix( void )
+	{
+		precondition( !_matrix.empty(), "no matrix available");
+		return _matrix.back();
+	}
+
+	void restore_matrix( void );
+
 
 	template<typename ...Args>
 	std::shared_ptr<shader> new_shader( Args &&...args )
@@ -91,6 +108,9 @@ public:
 	{
 		glDisableVertexAttribArray( attr );
 	}
+
+private:
+	std::vector<matrix4> _matrix;
 };
 
 ////////////////////////////////////////
