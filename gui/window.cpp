@@ -4,6 +4,7 @@
 #include "application.h"
 #include "style.h"
 #include <platform/window.h>
+#include <gl/opengl.h>
 
 namespace gui
 {
@@ -69,6 +70,7 @@ void window::invalidate( const draw::rect &r )
 void window::paint( void )
 {
 	auto canvas = _window->canvas();
+	glViewport( 0, 0, _window->width(), _window->height() );
 	auto style = application::current()->get_style();
 	if ( style )
 		style->background( canvas );
