@@ -54,7 +54,7 @@ vars = { Platform = Platform }
 if System() == "Linux" then
 	table.insert( platform.srcs, "linux.cpp" )
 	SubDir( "fc", vars )
-	SubDir( "xcb", vars )
+--	SubDir( "xcb", vars )
 	SubDir( "xlib", vars )
 elseif System() == "Darwin" then
 	table.insert( platform.srcs, "darwin.cpp" )
