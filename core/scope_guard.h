@@ -49,7 +49,7 @@ namespace detail
 {
 	enum class scope_guardOnExit {};
 	template <typename function>
-	scope_guard<function> operator+( scope_guardOnExit, function &&fn )
+	scope_guard<function> operator+=( scope_guardOnExit, function &&fn )
 	{
 		return scope_guard<function>( std::forward<function>( fn ) );
 	}
@@ -61,6 +61,6 @@ namespace detail
 #define CONCATENATE(s1, s2) CONCATENATE_IMPL(s1, s2)
 #define ANONYMOUS_VARIABLE(str) CONCATENATE(str, __COUNTER__)
 
-#define SCOPE_EXIT \
-	auto ANONYMOUS_VARIABLE(SCOPE_EXIT_STATE) = core::detail::scope_guardOnExit() + [&]()
+#define on_scope_exit \
+	auto ANONYMOUS_VARIABLE(SCOPE_EXIT_STATE) = core::detail::scope_guardOnExit()
 
