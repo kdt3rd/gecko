@@ -30,12 +30,12 @@ public:
 	}
 
 	template<typename D>
-	void attrib_pointer( program::attribute attr, std::shared_ptr<buffer<D>> &buf, size_t components )
+	void attrib_pointer( program::attribute attr, std::shared_ptr<buffer<D>> &buf, size_t components, size_t stride = 0, size_t offset = 0 )
 	{
 		{
 			auto bb = buf->bind( gl::target::ARRAY_BUFFER );
 			glEnableVertexAttribArray( attr );
-			glVertexAttribPointer( attr, components, gl_data_type<D>::value, GL_FALSE, 0, nullptr );
+			glVertexAttribPointer( attr, components, gl_data_type<D>::value, GL_FALSE, stride * sizeof(D), reinterpret_cast<const GLvoid *>( offset * sizeof(D) ) );
 		}
 	}
 
