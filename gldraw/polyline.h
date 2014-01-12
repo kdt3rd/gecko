@@ -33,6 +33,11 @@ public:
 		return _points.back();
 	}
 
+	const point &front( void ) const
+	{
+		return _points.front();
+	}
+
 	size_t size( void ) const
 	{
 		return _points.size();
