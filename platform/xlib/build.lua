@@ -19,6 +19,7 @@ Platform {
 
 	libs = {
 		"draw-cairo";
+		"gl";
 	};
 
 	syslibs = {
