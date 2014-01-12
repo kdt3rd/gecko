@@ -7,72 +7,74 @@ namespace gl
 
 ////////////////////////////////////////
 
-matrix4::matrix4( void )
+matrix4 &matrix4::operator*=( const matrix4 &m )
 {
-	for ( size_t i = 0; i < 16; ++i )
-		_data[i] = 0.F;
+	*this = *this * m;
+	return *this;
 }
 
 ////////////////////////////////////////
 
-void matrix4::identity( void )
+matrix4 matrix4::ortho( float left, float right, float top, float bottom )
 {
-	_data[0] = 1.F;
-	_data[1] = 0.F;
-	_data[2] = 0.F;
-	_data[3] = 0.F;
-	_data[4] = 0.F;
-	_data[5] = 1.F;
-	_data[6] = 0.F;
-	_data[7] = 0.F;
-	_data[8] = 0.F;
-	_data[9] = 0.F;
-	_data[10] = 1.F;
-	_data[11] = 0.F;
-	_data[12] = 0.F;
-	_data[13] = 0.F;
-	_data[14] = 0.F;
-	_data[15] = 1.F;
+	return matrix4
+	{
+		2.F / ( right - left ), 0.F, 0.F, 0.F,
+		0.F, 2.F / ( top - bottom ), 0.F, 0.F,
+		0.F, 0.F, -1.F, 0.F,
+		- ( right + left ) / ( right - left ), - ( top + bottom ) / ( top - bottom ), 0.F, 1.F
+	};
 }
 
 ////////////////////////////////////////
 
-void matrix4::ortho( float left, float right, float bottom, float top )
+matrix4 matrix4::scale( float x, float y, float z )
 {
-	_data[0] = 2.F / ( right - left );
-	_data[1] = 0.F;
-	_data[2] = 0.F;
-	_data[3] = 0.F;
-	_data[4] = 0.F;
-	_data[5] = 2.F / ( top - bottom );
-	_data[6] = 0.F;
-	_data[7] = 0.F;
-	_data[8] = 0.F;
-	_data[9] = 0.F;
-	_data[10] = -1.F;
-	_data[11] = 0.F;
-	_data[12] = - ( right + left ) / ( right - left );
-	_data[13] = - ( top + bottom ) / ( top - bottom );
-	_data[14] = 0.F;
-	_data[15] = 1.F;
+	return matrix4
+	{
+		x, 0, 0, 0,
+		0, y, 0, 0,
+		0, 0, z, 0,
+		0, 0, 0, 1
+	};
 }
 
 ////////////////////////////////////////
 
-void matrix4::scale( float x, float y, float z )
+matrix4 matrix4::translation( float x, float y, float z )
 {
-	_data[0] *= x;
-	_data[5] *= y;
-	_data[10] *= z;
+	return matrix4
+	{
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		x, y, z, 1
+	};
 }
 
 ////////////////////////////////////////
 
-void matrix4::translate( float x, float y, float z )
+matrix4 operator*( const matrix4 &a, const matrix4 &b )
 {
-	_data[12] += x;
-	_data[13] += y;
-	_data[14] += z;
+	return matrix4
+	{
+		a.row0() * b.col0(),
+		a.row0() * b.col1(),
+		a.row0() * b.col2(),
+		a.row0() * b.col3(),
+		a.row1() * b.col0(),
+		a.row1() * b.col1(),
+		a.row1() * b.col2(),
+		a.row1() * b.col3(),
+		a.row2() * b.col0(),
+		a.row2() * b.col1(),
+		a.row2() * b.col2(),
+		a.row2() * b.col3(),
+		a.row3() * b.col0(),
+		a.row3() * b.col1(),
+		a.row3() * b.col2(),
+		a.row3() * b.col3()
+	};
 }
 
 ////////////////////////////////////////
