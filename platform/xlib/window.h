@@ -64,7 +64,6 @@ private:
 	uint16_t _last_w = 0, _last_h = 0;
 
 	GLXContext _glc;
-	cairo_device_t *_device = nullptr;
 };
 
 ////////////////////////////////////////
