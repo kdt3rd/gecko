@@ -27,7 +27,7 @@ protected:
 	void in_context( const func &f )
 	{
 		push_context();
-		SCOPE_EXIT { pop_context(); };
+		on_scope_exit += [&]() { pop_context(); };
 		f();
 	}
 
