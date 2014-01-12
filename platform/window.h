@@ -4,7 +4,7 @@
 #include <string>
 #include <memory>
 #include <functional>
-#include <draw/canvas.h>
+#include <gldraw/canvas.h>
 #include <core/action.h>
 #include <gl/context.h>
 #include "mouse.h"
@@ -74,27 +74,27 @@ public:
 	/// @param t The window title
 	virtual void set_title( const std::string &t ) = 0;
 
-	virtual void invalidate( const draw::rect &r ) = 0;
+	virtual void invalidate( const core::rect &r ) = 0;
 
 //	virtual void set_icon( const icon &i );
 
 	virtual gl::context context( void ) = 0;
-	virtual std::shared_ptr<draw::canvas> canvas( void ) = 0;
+	virtual std::shared_ptr<gldraw::canvas> canvas( void ) = 0;
 
 	/// @brief Action for mouse press events.
 	///
 	/// Callback action for mouse button press events.
-	action<void( const std::shared_ptr<mouse> &, const draw::point &, int )> mouse_pressed;
+	action<void( const std::shared_ptr<mouse> &, const core::point &, int )> mouse_pressed;
 
 	/// @brief Action for mouse release events.
 	///
 	/// Callback action for mouse button release events.
-	action<void( const std::shared_ptr<mouse> &, const draw::point &, int )> mouse_released;
+	action<void( const std::shared_ptr<mouse> &, const core::point &, int )> mouse_released;
 
 	/// @brief Actionfor mouse motion events.
 	///
 	/// Callback action for mouse motion events.
-	action<void( const std::shared_ptr<mouse> &, const draw::point & )> mouse_moved;
+	action<void( const std::shared_ptr<mouse> &, const core::point & )> mouse_moved;
 
 	/// @brief Action for key press events.
 	///

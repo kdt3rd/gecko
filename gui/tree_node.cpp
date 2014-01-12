@@ -43,7 +43,7 @@ void tree_node::compute_layout( void )
 
 ////////////////////////////////////////
 
-bool tree_node::mouse_press( const draw::point &p, int button )
+bool tree_node::mouse_press( const core::point &p, int button )
 {
 	if ( _collapsed )
 	{
@@ -60,7 +60,7 @@ bool tree_node::mouse_press( const draw::point &p, int button )
 
 ////////////////////////////////////////
 
-bool tree_node::mouse_release( const draw::point &p, int button )
+bool tree_node::mouse_release( const core::point &p, int button )
 {
 	if ( _mouse_grab )
 	{
@@ -77,7 +77,7 @@ bool tree_node::mouse_release( const draw::point &p, int button )
 
 ////////////////////////////////////////
 
-bool tree_node::mouse_move( const draw::point &p )
+bool tree_node::mouse_move( const core::point &p )
 {
 	if ( _mouse_grab )
 		return _mouse_grab->mouse_move( p );
@@ -90,7 +90,7 @@ bool tree_node::mouse_move( const draw::point &p )
 
 ////////////////////////////////////////
 
-void tree_node::paint( const std::shared_ptr<draw::canvas> &c )
+void tree_node::paint( const std::shared_ptr<gldraw::canvas> &c )
 {
 	if ( _collapsed )
 		_root->paint( c );

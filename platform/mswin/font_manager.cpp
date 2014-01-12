@@ -88,7 +88,6 @@ std::set<std::string> font_manager::get_styles( void )
 
 std::shared_ptr<draw::font> font_manager::get_font( const std::string &family, const std::string &style, double pixsize )
 {
-	/*
 	precondition( family.size() < LF_FACESIZE, "family name too long" );
 
 	LOGFONTW lf;
@@ -111,6 +110,7 @@ std::shared_ptr<draw::font> font_manager::get_font( const std::string &family, c
 	lf.lfQuality = DEFAULT_QUALITY;
 	lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
 
+	std::cout << "cairo_win32_font_face_create_for_logfontw" << std::endl;
 	auto cfont = cairo_win32_font_face_create_for_logfontw( &lf );
 	std::cout << "CFont created" << std::endl;
 
@@ -119,15 +119,16 @@ std::shared_ptr<draw::font> font_manager::get_font( const std::string &family, c
 	std::cout << "Font created" << std::endl;
 
 	return ret;
-	*/
 
-//	std::cout << "Creating toy font face" << std::endl;
-//	auto cfont = cairo_toy_font_face_create( family.c_str(), CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL );
-//	std::cout << "Done" << std::endl;
+	/*
+	std::cout << "Creating toy font face " << family << std::endl;
+	auto cfont = cairo_toy_font_face_create( "", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL );
+	std::cout << "Done" << std::endl;
 	std::shared_ptr<draw::font> ret;
-//	ret = std::make_shared<cairo::font>( cfont, family, style, pixsize );
-//	std::cout << "Returning" << std::endl;
+	ret = std::make_shared<cairo::font>( cfont, family, style, pixsize );
+	std::cout << "Returning" << std::endl;
 	return ret;
+	*/
 }
 
 ////////////////////////////////////////

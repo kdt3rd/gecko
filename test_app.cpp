@@ -176,8 +176,8 @@ std::shared_ptr<gui::simple_container> build_color( direction dir )
 	container->set_spacing( 12, 6 );
 	container->set_pad( 12.5, 12.5, 12.5, 12.5 );
 
-	container->add( std::make_shared<gui::color_picker>( draw::color::space::HSL ), 1.0 );
-	container->add( std::make_shared<gui::color_picker>( draw::color::space::LAB ), 1.0 );
+	container->add( std::make_shared<gui::color_picker>( core::color::space::HSL ), 1.0 );
+	container->add( std::make_shared<gui::color_picker>( core::color::space::LAB ), 1.0 );
 
 	return container;
 }

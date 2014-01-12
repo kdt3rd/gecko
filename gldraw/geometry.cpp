@@ -5,7 +5,7 @@
 namespace
 {
 	template<int n, typename T>
-	inline const gldraw::point &pt( const T &t )
+	inline const core::point &pt( const T &t )
 	{
 		return std::get<n>( t );
 	}
@@ -17,8 +17,9 @@ namespace gldraw
 
 ////////////////////////////////////////
 
-void add_quadratic( const point &p1, const point &p2, const point &p3, polyline &line )
+void add_quadratic( const core::point &p1, const core::point &p2, const core::point &p3, polyline &line )
 {
+	using core::point;
 	typedef std::tuple<point,point,point> curve;
 	std::vector<curve> stack;
 	stack.reserve( 16 );
@@ -50,8 +51,9 @@ void add_quadratic( const point &p1, const point &p2, const point &p3, polyline 
 
 ////////////////////////////////////////
 
-void add_cubic( const point &p1, const point &p2, const point &p3, const point &p4, polyline &line )
+void add_cubic( const core::point &p1, const core::point &p2, const core::point &p3, const core::point &p4, polyline &line )
 {
+	using core::point;
 	typedef std::tuple<point,point,point,point> curve;
 	std::vector<curve> stack;
 	stack.reserve( 16 );

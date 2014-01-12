@@ -2,7 +2,7 @@
 #pragma once
 
 #include <vector>
-#include "point.h"
+#include <core/point.h>
 #include "polyline.h"
 
 namespace gldraw
@@ -13,6 +13,8 @@ namespace gldraw
 class polyline
 {
 public:
+	using point = core::point;
+
 	void close( void )
 	{
 		_closed = true;

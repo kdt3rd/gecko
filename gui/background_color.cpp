@@ -7,7 +7,7 @@ namespace gui
 
 ////////////////////////////////////////
 
-background_color::background_color( datum<draw::color> &&c, const std::shared_ptr<widget> &w )
+background_color::background_color( datum<core::color> &&c, const std::shared_ptr<widget> &w )
 	: background( w ), _color( std::move( c ) )
 {
 }
@@ -20,7 +20,7 @@ background_color::~background_color( void )
 
 ////////////////////////////////////////
 
-void background_color::paint( const std::shared_ptr<draw::canvas> &canvas )
+void background_color::paint( const std::shared_ptr<gldraw::canvas> &canvas )
 {
 	canvas->fill( *this, _color.value() );
 	background::paint( canvas );

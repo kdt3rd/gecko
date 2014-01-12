@@ -32,6 +32,7 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam )
 			break;
 
 		case WM_PAINT:
+			std::cout << "PAINTING WINDOW" << std::endl;
 			win->exposed();
 			return 0;
 
@@ -67,7 +68,8 @@ dispatcher::dispatcher( const std::shared_ptr<keyboard> &k, const std::shared_pt
     wc.lpszClassName = L"WindowClass";
     wc.hIconSm       = LoadIcon( NULL, IDI_APPLICATION );
 
-	if ( !RegisterClassEx( &wc ) )
+	ATOM ret = RegisterClassEx( &wc );
+	if ( !ret )
 		throw std::runtime_error( "window registration failed" );
 }
 
@@ -105,7 +107,6 @@ void dispatcher::exit( int code )
 
 void dispatcher::add_window( const std::shared_ptr<window> &win )
 {
-	std::cout << "NEW WINDOW: " << win->id() << std::endl;
 	windows[win->id()] = win;
 }
 

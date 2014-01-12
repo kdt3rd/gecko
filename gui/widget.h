@@ -2,7 +2,7 @@
 #pragma once
 
 #include <type_traits>
-#include <draw/canvas.h>
+#include <gldraw/canvas.h>
 #include <layout/simple_area.h>
 #include <platform/keyboard.h>
 #include "context.h"
@@ -31,21 +31,21 @@ public:
 	{
 	}
 
-	virtual void paint( const std::shared_ptr<draw::canvas> &canvas )
+	virtual void paint( const std::shared_ptr<gldraw::canvas> &canvas )
 	{
 	}
 
-	virtual bool mouse_press( const draw::point &p, int button )
-	{
-		return false;
-	}
-
-	virtual bool mouse_release( const draw::point &p, int button )
+	virtual bool mouse_press( const core::point &p, int button )
 	{
 		return false;
 	}
 
-	virtual bool mouse_move( const draw::point &p )
+	virtual bool mouse_release( const core::point &p, int button )
+	{
+		return false;
+	}
+
+	virtual bool mouse_move( const core::point &p )
 	{
 		return false;
 	}
@@ -65,7 +65,7 @@ public:
 		return false;
 	}
 
-	void invalidate( const draw::rect &r )
+	void invalidate( const core::rect &r )
 	{
 		context::current().invalidate( r );
 	}

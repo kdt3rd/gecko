@@ -175,12 +175,6 @@ int dispatcher::execute( void )
 				break;
 			}
 
-			case 65:
-				// TODO bug in cairo??
-				// I think this is a XShm event?
-				// Ignore for now...
-				break;
-
 			default:
 				std::cout << "Unknown event: " << uint32_t( event.type ) << std::endl;
 		}

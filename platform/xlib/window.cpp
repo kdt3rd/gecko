@@ -1,6 +1,5 @@
 
 #include "window.h"
-#include <draw/cairo/canvas.h>
 #include <core/pointer.h>
 
 #include <string.h>
@@ -12,9 +11,6 @@
 
 #include <gl/opengl.h>
 #include <GL/glx.h>
-//#include <cairo.h>
-//#include <cairo-gl.h>
-//#include <cairo-xlib.h>
 
 namespace {
 
@@ -236,7 +232,7 @@ void window::set_title( const std::string &t )
 
 ////////////////////////////////////////
 
-void window::invalidate( const draw::rect &r )
+void window::invalidate( const core::rect &r )
 {
 	XClearArea( _display, _win, std::floor( r.x() ), std::floor( r.y() ), std::ceil( r.width() ), std::ceil( r.height() ), true );
 }
@@ -251,21 +247,8 @@ gl::context window::context( void )
 
 ////////////////////////////////////////
 
-std::shared_ptr<draw::canvas> window::canvas( void )
+std::shared_ptr<gldraw::canvas> window::canvas( void )
 {
-	/*
-	if ( !_canvas )
-	{
-		_canvas = std::make_shared<cairo::canvas>();
-
-		Window root;
-		int x, y;
-		unsigned int w, h;
-		unsigned int border, depth;
-		XGetGeometry( _display, _win, &root, &x, &y, &w, &h, &border, &depth );
-		update_canvas( w, h );
-	}
-	*/
 	return _canvas;
 }
 

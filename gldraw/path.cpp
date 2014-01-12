@@ -23,7 +23,7 @@ path::path( void )
 
 ////////////////////////////////////////
 
-path::path( const point &p )
+path::path( const core::point &p )
 {
 	move_to( p );
 }
@@ -36,7 +36,7 @@ path::~path( void )
 
 ////////////////////////////////////////
 
-void path::move_to( const point &p )
+void path::move_to( const core::point &p )
 {
 	if ( _lines.empty() )
 		_lines.emplace_back();
@@ -48,7 +48,7 @@ void path::move_to( const point &p )
 
 ////////////////////////////////////////
 
-void path::line_to( const point &p )
+void path::line_to( const core::point &p )
 {
 	precondition( !_lines.empty(), "no point to start from" );
 	precondition( !_lines.back().empty(), "no point to start from" );
@@ -57,7 +57,7 @@ void path::line_to( const point &p )
 
 ////////////////////////////////////////
 
-void path::quadratic_to( const point &p1, const point &p2 )
+void path::quadratic_to( const core::point &p1, const core::point &p2 )
 {
 	precondition( !_lines.empty(), "no point to start from" );
 	precondition( !_lines.back().empty(), "no point to start from" );
@@ -66,7 +66,7 @@ void path::quadratic_to( const point &p1, const point &p2 )
 
 ////////////////////////////////////////
 
-void path::cubic_to( const point &p1, const point &p2, const point &p3 )
+void path::cubic_to( const core::point &p1, const core::point &p2, const core::point &p3 )
 {
 	precondition( !_lines.empty(), "no point to start from" );
 	precondition( !_lines.back().empty(), "no point to start from" );
@@ -142,7 +142,7 @@ namespace {
 }
 
 
-mesh<draw::point> path::filled( double width )
+mesh<core::point> path::filled( double width )
 {
 	if ( _lines.empty() )
 		throw std::runtime_error( "no path" );
@@ -169,7 +169,7 @@ mesh<draw::point> path::filled( double width )
 //	path result;
 
 	/*
-	mesh<draw::point> m;
+	mesh<core::point> m;
 	for ( auto path: solution )
 	{
 		m.begin( gl::primitive::LINE_LOOP );
@@ -216,7 +216,7 @@ mesh<draw::point> path::filled( double width )
 //	const int nverts = tessGetVertexCount( tess );
 	const int nelems = tessGetElementCount( tess );
 
-	mesh<draw::point> m;
+	mesh<core::point> m;
 	for ( int i = 0; i < nelems; ++i )
 	{
 		const int *p = &elems[i*nvp];
@@ -231,7 +231,7 @@ mesh<draw::point> path::filled( double width )
 
 ////////////////////////////////////////
 
-point path::abs_point( const point &d ) const
+core::point path::abs_point( const core::point &d ) const
 {
 	precondition( !_lines.empty(), "no point to start from" );
 	precondition( !_lines.back().empty(), "no point to start from" );

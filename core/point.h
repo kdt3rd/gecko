@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cmath>
 
-namespace gldraw
+namespace core
 {
 
 ////////////////////////////////////////

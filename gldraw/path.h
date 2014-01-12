@@ -3,8 +3,8 @@
 
 #include <vector>
 #include "polyline.h"
-#include "point.h"
 #include "mesh.h"
+#include <core/point.h>
 
 namespace gldraw
 {
@@ -18,7 +18,7 @@ public:
 	/// @brief Constructor
 	path( void );
 
-	path( const point &p );
+	path( const core::point &p );
 
 	/// @brief Destructor
 	~path( void );
@@ -26,24 +26,24 @@ public:
 	/// @brief Move the cursor
 	/// Move the cursor to the given position
 	/// @param p
-	void move_to( const point &p );
+	void move_to( const core::point &p );
 
-	void line_to( const point &p );
+	void line_to( const core::point &p );
 
-	void quadratic_to( const point &p1, const point &p2 );
+	void quadratic_to( const core::point &p1, const core::point &p2 );
 
-	void cubic_to( const point &p1, const point &p2, const point &p3 );
+	void cubic_to( const core::point &p1, const core::point &p2, const core::point &p3 );
 
 	/*
 	void arc_to( const point &center, double radius, double angle1, double angle2 );
 	*/
 
-	void move_by( const point &p )
+	void move_by( const core::point &p )
 	{
 		move_to( abs_point( p ) );
 	}
 
-	void line_by( const point &p )
+	void line_by( const core::point &p )
 	{
 		line_to( abs_point( p ) );
 	}
@@ -71,7 +71,7 @@ public:
 //	std::shared_ptr<drawable> filled( ... );
 
 	path stroked( double width );
-	mesh<draw::point> filled( double width );
+	mesh<core::point> filled( double width );
 
 	const std::vector<polyline> lines( void ) const
 	{
@@ -79,7 +79,7 @@ public:
 	}
 
 private:
-	point abs_point( const point &d ) const;
+	core::point abs_point( const core::point &d ) const;
 
 	std::vector<polyline> _lines;
 };

@@ -19,7 +19,7 @@ scroll_area::~scroll_area( void )
 
 ////////////////////////////////////////
 
-void scroll_area::paint( const std::shared_ptr<draw::canvas> &canvas )
+void scroll_area::paint( const std::shared_ptr<gldraw::canvas> &canvas )
 {
 	if ( _widget )
 	{
@@ -32,7 +32,7 @@ void scroll_area::paint( const std::shared_ptr<draw::canvas> &canvas )
 
 ////////////////////////////////////////
 
-bool scroll_area::mouse_press( const draw::point &p, int button )
+bool scroll_area::mouse_press( const core::point &p, int button )
 {
 	if ( button == 2 && _widget )
 	{
@@ -50,7 +50,7 @@ bool scroll_area::mouse_press( const draw::point &p, int button )
 
 ////////////////////////////////////////
 
-bool scroll_area::mouse_release( const draw::point &p, int button )
+bool scroll_area::mouse_release( const core::point &p, int button )
 {
 	if ( _tracking )
 	{
@@ -67,7 +67,7 @@ bool scroll_area::mouse_release( const draw::point &p, int button )
 
 ////////////////////////////////////////
 
-bool scroll_area::mouse_move( const draw::point &p )
+bool scroll_area::mouse_move( const core::point &p )
 {
 	if ( _tracking )
 	{

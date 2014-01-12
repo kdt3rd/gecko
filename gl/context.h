@@ -13,7 +13,7 @@
 #include "buffer.h"
 #include "matrix4.h"
 #include "vertex_array.h"
-#include <draw/color.h>
+#include <core/color.h>
 
 namespace gl
 {
@@ -29,7 +29,7 @@ public:
 	void enable( capability cap );
 	void disable( capability cap );
 
-	void clear_color( const draw::color &c );
+	void clear_color( const core::color &c );
 
 	void clear( buffer_bit bit );
 	void clear( buffer_bits bits = ( buffer_bit::COLOR_BUFFER_BIT | buffer_bit::DEPTH_BUFFER_BIT ) );

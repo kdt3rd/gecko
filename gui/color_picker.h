@@ -11,19 +11,19 @@ namespace gui
 class color_picker : public widget
 {
 public:
-	color_picker( draw::color::space space = draw::color::space::HSL );
+	color_picker( core::color::space space = core::color::space::HSL );
 
-	void paint( const std::shared_ptr<draw::canvas> &c ) override;
+	void paint( const std::shared_ptr<gldraw::canvas> &c ) override;
 
-	bool mouse_press( const draw::point &p, int b ) override;
-	bool mouse_release( const draw::point &p, int b ) override;
-	bool mouse_move( const draw::point &p ) override;
+	bool mouse_press( const core::point &p, int b ) override;
+	bool mouse_release( const core::point &p, int b ) override;
+	bool mouse_move( const core::point &p ) override;
 
 private:
 	bool _tracking = false;
-	draw::color::space _space = draw::color::space::HSL;
+	core::color::space _space = core::color::space::HSL;
 
-	draw::color _current;
+	core::color _current;
 };
 
 ////////////////////////////////////////

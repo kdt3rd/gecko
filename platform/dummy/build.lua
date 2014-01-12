@@ -14,7 +14,6 @@ Platform {
 	};
 
 	libs = {
-		"draw-dummy";
 	};
 }
 

@@ -5,6 +5,8 @@ srcs = {
 	"path.cpp";
 	"geometry.cpp";
 	"clipper.cpp";
+	"canvas.cpp";
+	"paint.cpp";
 }
 
 tess = {

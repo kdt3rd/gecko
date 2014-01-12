@@ -28,15 +28,15 @@ public:
 	void set_widget( const std::shared_ptr<widget> &w );
 	std::shared_ptr<widget> get_widget( void ) { return _widget; }
 
-	void invalidate( const draw::rect &r ) override;
+	void invalidate( const core::rect &r ) override;
 
 private:
 	void paint( void );
 	void resize( double w, double h );
 
-	void mouse_press( const draw::point &p, int button );
-	void mouse_release( const draw::point &p, int button );
-	void mouse_moved( const draw::point &p );
+	void mouse_press( const core::point &p, int button );
+	void mouse_release( const core::point &p, int button );
+	void mouse_moved( const core::point &p );
 
 	void key_pressed( platform::scancode c );
 	void key_released( platform::scancode c );

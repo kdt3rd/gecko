@@ -13,7 +13,7 @@ namespace gui
 
 ////////////////////////////////////////
 
-color_picker::color_picker( draw::color::space space )
+color_picker::color_picker( core::color::space space )
 	: _space( space ), _current( { 1, 0, 0, 1 } )
 {
 	set_minimum( 120, 120 );
@@ -23,18 +23,20 @@ color_picker::color_picker( draw::color::space space )
 
 namespace
 {
+	/*
 	inline double radial_square( double a )
 	{
 		a = std::fmod( a + PI/4, PI/2 ) - PI/4;
 		return 1 / std::cos( a );
 	}
+	*/
 }
 
-void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
+void color_picker::paint( const std::shared_ptr<gldraw::canvas> &canvas )
 {
-	using draw::path;
-	using draw::point;
-	using draw::color;
+	using gldraw::path;
+	using core::point;
+	using core::color;
 
 	double r1 = radius();
 	double r2 = std::max( r1 - 24, 0.0 );
@@ -43,11 +45,13 @@ void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 	const size_t n = 24;
 	const size_t seg = n / 4;
 	static_assert( n%4 == 0, "invalid number of segments" );
-	double slice = PI / n;
-	draw::paint paint;
+//	double slice = PI / n;
+
+	gldraw::paint paint;
 	for ( size_t i = 0; i < n; ++i )
 	{
 		double a = i * 2 * PI / n;
+		/* TODO
 		double a1 = a - slice;
 		double a2 = a + slice;
 		path p( point::polar( r1, a1 ) + c );
@@ -55,11 +59,12 @@ void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 		p.line_to( point::polar( r2, a2 ) + c );
 		p.arc_to( c, r2, a2, a1 );
 		p.close();
+		*/
 		switch ( _space )
 		{
 			case color::space::SRGB:
 			case color::space::HSL:
-				paint.set_fill_color( { draw::color::space::HSL, a, 0.8, 0.5 } );
+				paint.set_fill_color( { color::space::HSL, a, 0.8, 0.5 } );
 				break;
 
 			case color::space::LAB:
@@ -94,10 +99,10 @@ void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 
 				x -= 0.5;
 				y -= 0.5;
-				paint.set_fill_color( { draw::color::space::LAB, 0.5, x, y } );
+				paint.set_fill_color( { color::space::LAB, 0.5, x, y } );
 			}
 		}
-		canvas->draw_path( p, paint );
+//		canvas->draw_path( p, paint );
 
 		switch ( _space )
 		{
@@ -107,11 +112,11 @@ void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 				double h, s, l;
 				_current.get_hsl( h, s, l );
 
-				draw::path m;
+				gldraw::path m;
 				m.move_to( c + point::polar( r2, h ) );
 				m.line_to( c + point::polar( r2, h + 2 * PI / 3 ) );
 				m.line_to( c + point::polar( r2, h + 4 * PI / 3 ) );
-				std::vector<draw::color> c =
+				std::vector<color> c =
 				{
 					_current,
 					color( color::space::HSL, h, 1.0, 1.0 ),
@@ -130,13 +135,13 @@ void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 
 ////////////////////////////////////////
 
-bool color_picker::mouse_press( const draw::point &p, int b )
+bool color_picker::mouse_press( const core::point &p, int b )
 {
 	if ( b == 1 )
 	{
 		double r1 = radius();
 		double r2 = std::max( r1 - 24, 0.0 );
-		if ( draw::point::distance( p, center() ) > r2 )
+		if ( core::point::distance( p, center() ) > r2 )
 		{
 			_tracking = true;
 			return mouse_move( p );
@@ -148,7 +153,7 @@ bool color_picker::mouse_press( const draw::point &p, int b )
 
 ////////////////////////////////////////
 
-bool color_picker::mouse_release( const draw::point &p, int b )
+bool color_picker::mouse_release( const core::point &p, int b )
 {
 	if ( _tracking && b == 1 )
 	{
@@ -160,11 +165,11 @@ bool color_picker::mouse_release( const draw::point &p, int b )
 
 ////////////////////////////////////////
 
-bool color_picker::mouse_move( const draw::point &p )
+bool color_picker::mouse_move( const core::point &p )
 {
 	if ( _tracking )
 	{
-		draw::point d = p.delta( center() );
+		core::point d = p.delta( center() );
 		double h, s, l;
 		_current.get_hsl( h, s, l );
 		h = std::atan2( d.y(), d.x() );

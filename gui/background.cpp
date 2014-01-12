@@ -19,7 +19,7 @@ background::~background( void )
 
 ////////////////////////////////////////
 
-void background::paint( const std::shared_ptr<draw::canvas> &canvas )
+void background::paint( const std::shared_ptr<gldraw::canvas> &canvas )
 {
 	if ( _widget )
 		_widget->paint( canvas );
@@ -27,7 +27,7 @@ void background::paint( const std::shared_ptr<draw::canvas> &canvas )
 
 ////////////////////////////////////////
 
-bool background::mouse_press( const draw::point &p, int button )
+bool background::mouse_press( const core::point &p, int button )
 {
 	if ( _widget )
 		return _widget->mouse_press( p, button );
@@ -36,7 +36,7 @@ bool background::mouse_press( const draw::point &p, int button )
 
 ////////////////////////////////////////
 
-bool background::mouse_release( const draw::point &p, int button )
+bool background::mouse_release( const core::point &p, int button )
 {
 	if ( _widget )
 		return _widget->mouse_release( p, button );
@@ -45,7 +45,7 @@ bool background::mouse_release( const draw::point &p, int button )
 
 ////////////////////////////////////////
 
-bool background::mouse_move( const draw::point &p )
+bool background::mouse_move( const core::point &p )
 {
 	if ( _widget )
 		return _widget->mouse_move( p );

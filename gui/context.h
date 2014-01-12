@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <core/scope_guard.h>
-#include <draw/rect.h>
+#include <core/rect.h>
 
 namespace gui
 {
@@ -15,7 +15,7 @@ class context
 public:
 	virtual ~context( void ) {}
 
-	virtual void invalidate( const draw::rect &r ) = 0;
+	virtual void invalidate( const core::rect &r ) = 0;
 
 	static context &current( void );
 

@@ -3,7 +3,6 @@ Platform {
 	name = "xlib";
 
 	incs = {
-		CAIRO_INCLUDE;
 		GL_INCLUDE;
 	};
 
@@ -18,7 +17,6 @@ Platform {
 	};
 
 	libs = {
-		"draw-cairo";
 		"gl";
 	};
 

@@ -5,9 +5,6 @@
 #include <stdexcept>
 #include <sstream>
 
-#include <draw/cairo/font.h>
-#include <cairo/cairo-ft.h>
-
 #include <fontconfig/fontconfig.h>
 
 #include <ft2build.h>
@@ -105,7 +102,7 @@ std::set<std::string> font_manager::get_styles( const std::string &family )
 
 ////////////////////////////////////////
 
-std::shared_ptr<draw::font> font_manager::get_font( const std::string &family, const std::string &style, double pixsize )
+std::shared_ptr<gldraw::font> font_manager::get_font( const std::string &family, const std::string &style, double pixsize )
 {
 	std::cout << "Getting font: " << family << ' ' << style << ' ' << pixsize << std::endl;
 	FcPattern *pat = FcPatternBuild( nullptr,
@@ -121,7 +118,7 @@ std::shared_ptr<draw::font> font_manager::get_font( const std::string &family, c
 
 	std::cout << "Matched: " << matched << std::endl;
 
-	std::shared_ptr<cairo::font> ret;
+	std::shared_ptr<gldraw::font> ret;
 	if ( matched && result == FcResultMatch )
 	{
 		FcChar8 *filename = nullptr;
@@ -135,9 +132,7 @@ std::shared_ptr<draw::font> font_manager::get_font( const std::string &family, c
 			std::cout << "Loaded: " << ftface << std::endl;
 			if ( error )
 				throw std::runtime_error( "freetype error" );
-			std::cout << "Creating cairo font" << std::endl;
-			ret = std::make_shared<cairo::font>( cairo_ft_font_face_create_for_ft_face( ftface, 0 ), family, style, pixsize );
-			std::cout << "Created cairo font" << std::endl;
+//			ret = std::make_shared<cairo::font>( cairo_ft_font_face_create_for_ft_face( ftface, 0 ), family, style, pixsize );
 		}
 	}
 	FcPatternDestroy( pat );

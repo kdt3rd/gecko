@@ -52,9 +52,9 @@ void slider::set_value( double v )
 
 ////////////////////////////////////////
 
-void slider::paint( const std::shared_ptr<draw::canvas> &canvas )
+void slider::paint( const std::shared_ptr<gldraw::canvas> &canvas )
 {
-	draw::rect r = *this;
+	core::rect r = *this;
 	auto style = application::current()->get_style();
 	style->slider_groove( canvas, r );
 	style->slider_button( canvas, r, _pressed, _value.value() );
@@ -69,7 +69,7 @@ void slider::compute_minimum( void )
 
 ////////////////////////////////////////
 
-bool slider::mouse_press( const draw::point &p, int button )
+bool slider::mouse_press( const core::point &p, int button )
 {
 	if ( contains( p ) )
 	{
@@ -94,7 +94,7 @@ bool slider::mouse_press( const draw::point &p, int button )
 
 ////////////////////////////////////////
 
-bool slider::mouse_move( const draw::point &p )
+bool slider::mouse_move( const core::point &p )
 {
 	if ( _tracking )
 	{
@@ -111,7 +111,7 @@ bool slider::mouse_move( const draw::point &p )
 
 ////////////////////////////////////////
 
-bool slider::mouse_release( const draw::point &p, int button )
+bool slider::mouse_release( const core::point &p, int button )
 {
 	if ( _tracking )
 	{

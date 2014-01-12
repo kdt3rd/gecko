@@ -22,7 +22,7 @@ screen::~screen( void )
 
 ////////////////////////////////////////
 
-draw::size screen::bounds( void )
+core::size screen::bounds( void )
 {
 	return { 0, 0 };
 }

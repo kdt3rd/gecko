@@ -2,14 +2,8 @@
 #pragma once
 
 #include <platform/window.h>
-#include <cairo/cairo-gl.h>
 #include <X11/Xlib.h>
 #include <GL/glx.h>
-
-namespace cairo
-{
-	class canvas;
-}
 
 namespace xlib
 {
@@ -39,11 +33,11 @@ public:
 	void set_title( const std::string &t ) override;
 //	void set_icon( const icon &i ) override;
 
-	void invalidate( const draw::rect &r ) override;
+	void invalidate( const core::rect &r ) override;
 
 	/// @brief Canvas to draw on the window.
 	gl::context context( void ) override;
-	std::shared_ptr<draw::canvas> canvas( void ) override;
+	std::shared_ptr<gldraw::canvas> canvas( void ) override;
 
 	/// @brief Xlib window identifier.
 	Window id( void ) const;
@@ -59,7 +53,7 @@ private:
 	Display *_display = nullptr;
 	Window _win = 0;
 
-	std::shared_ptr<cairo::canvas> _canvas;
+	std::shared_ptr<gldraw::canvas> _canvas;
 	int16_t _last_x = 0, _last_y = 0;
 	uint16_t _last_w = 0, _last_h = 0;
 

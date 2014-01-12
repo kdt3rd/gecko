@@ -2,12 +2,15 @@
 Platform {
 	name = "fc";
 
+	incs = {
+		FREETYPE_INCLUDE;
+	};
+
 	srcs = {
 		"font_manager.cpp";
 	};
 
 	libs = {
-		"draw-cairo";
 	};
 
 	syslibs = {

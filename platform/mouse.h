@@ -1,10 +1,6 @@
 
 #pragma once
 
-#include <memory>
-#include <functional>
-#include <draw/point.h>
-
 namespace platform
 {
 

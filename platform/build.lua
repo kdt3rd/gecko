@@ -16,7 +16,6 @@ local platform = {
 	};
 
 	libs = {
-		"draw";
 	};
 
 	syslibs = {
@@ -59,14 +58,14 @@ if System() == "Linux" then
 elseif System() == "Darwin" then
 	table.insert( platform.srcs, "darwin.cpp" )
 	SubDir( "fc", vars )
-	SubDir( "xcb", vars )
+--	SubDir( "xcb", vars )
 	SubDir( "xlib", vars )
 	SubDir( "cocoa", vars )
 elseif System() == "Windows" then
 	table.insert( platform.srcs, "windows.cpp" )
 	SubDir( "mswin", vars )
 end
-SubDir( "dummy", vars )
+--SubDir( "dummy", vars )
 
 Include( platform.incs )
 

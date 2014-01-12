@@ -19,11 +19,11 @@ public:
 		_widget = v;
 	}
 
-	void paint( const std::shared_ptr<draw::canvas> &canvas ) override;
+	void paint( const std::shared_ptr<gldraw::canvas> &canvas ) override;
 
-	bool mouse_press( const draw::point &p, int button ) override;
-	bool mouse_release( const draw::point &p, int button ) override;
-	bool mouse_move( const draw::point &p ) override;
+	bool mouse_press( const core::point &p, int button ) override;
+	bool mouse_release( const core::point &p, int button ) override;
+	bool mouse_move( const core::point &p ) override;
 
 	void compute_minimum( void ) override;
 	void compute_layout( void ) override;
