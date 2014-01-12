@@ -41,18 +41,18 @@ int dispatcher::execute( void )
 			case Expose:
 			{
 				if ( event.xexpose.count == 0 )
-					_windows[event.xexpose.window]->exposed();
-				XFlush( _display );
+				{
+					auto win = _windows[event.xexpose.window];
+					win->expose_event();
+				}
 				break;
 			}
 
 			case ConfigureNotify:
 			{
 				auto w = _windows[event.xconfigure.window];
-				if ( w->check_last_position( event.xconfigure.x, event.xconfigure.y ) )
-					w->moved( event.xconfigure.x, event.xconfigure.y );
-				if ( w->check_last_size( event.xconfigure.width, event.xconfigure.height ) )
-					w->resize_canvas( event.xconfigure.width, event.xconfigure.height );
+				w->move_event( event.xconfigure.x, event.xconfigure.y );
+				w->resize_event( event.xconfigure.width, event.xconfigure.height );
 				break;
 			}
 
@@ -174,6 +174,12 @@ int dispatcher::execute( void )
 				}
 				break;
 			}
+
+			case 65:
+				// TODO bug in cairo??
+				// I think this is a XShm event?
+				// Ignore for now...
+				break;
 
 			default:
 				std::cout << "Unknown event: " << uint32_t( event.type ) << std::endl;

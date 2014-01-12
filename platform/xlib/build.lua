@@ -4,6 +4,7 @@ Platform {
 
 	incs = {
 		CAIRO_INCLUDE;
+		GL_INCLUDE;
 	};
 
 	srcs = {
@@ -22,6 +23,7 @@ Platform {
 
 	syslibs = {
 		XLIB_LIBS;
+		GL_LIBS;
 	};
 }
 
