@@ -1,5 +1,0 @@
-
-/// @brief Cairo implementation of drawing classes.
-namespace cairo
-{
-}
