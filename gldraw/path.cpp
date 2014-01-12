@@ -213,23 +213,16 @@ mesh<draw::point> path::filled( double width )
 	const float *verts = tessGetVertices( tess );
 //	const int *vinds = tessGetVertexIndices( tess );
 	const int *elems = tessGetElements( tess );
-	const int nverts = tessGetVertexCount( tess );
+//	const int nverts = tessGetVertexCount( tess );
 	const int nelems = tessGetElementCount( tess );
-
-	for ( int i = 0; i < nverts; ++i )
-		std::cout << i << ' ' << verts[i*2] << ',' << verts[i*2+1] << std::endl;
 
 	mesh<draw::point> m;
 	for ( int i = 0; i < nelems; ++i )
 	{
-		std::cout << "Element " << i << std::endl;
 		const int *p = &elems[i*nvp];
 		m.begin( gl::primitive::TRIANGLE_FAN );
 		for ( int j = 0; j < nvp && p[j] != TESS_UNDEF; ++j )
-		{
-			std::cout << "  " << verts[p[j]*2] << ' ' << verts[p[j]*2+1] << '\n';
 			m.push_back( { verts[p[j]*2], verts[p[j]*2+1] } );
-		}
 		m.end();
 	}
 
