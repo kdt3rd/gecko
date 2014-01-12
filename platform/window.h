@@ -6,6 +6,7 @@
 #include <functional>
 #include <draw/canvas.h>
 #include <core/action.h>
+#include <gl/context.h>
 #include "mouse.h"
 #include "keyboard.h"
 
@@ -77,6 +78,7 @@ public:
 
 //	virtual void set_icon( const icon &i );
 
+	virtual gl::context context( void ) = 0;
 	virtual std::shared_ptr<draw::canvas> canvas( void ) = 0;
 
 	/// @brief Action for mouse press events.
