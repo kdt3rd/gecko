@@ -631,7 +631,7 @@ function Compile( ... )
 		elseif file:match( "[.]mm$" ) then
 			table.insert( mms, file )
 		elseif file:match( "[.]c$" ) then
-			jtable.insert( cs, file )
+			table.insert( cs, file )
 		elseif file:match( "[.]cu$" ) then
 			table.insert( cus, file )
 		elseif file:match( "[.]h$" ) then
