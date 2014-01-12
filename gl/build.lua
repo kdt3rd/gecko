@@ -9,4 +9,4 @@ srcs = {
 	"matrix4.cpp";
 }
 
-Library( "gl", Compile( srcs ), LinkSys( GL_LIBS ) );
+Library( "gl", Compile( srcs ), LinkLibs( "core" ), LinkSys( GL_LIBS ) );
