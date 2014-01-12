@@ -617,6 +617,7 @@ function Compile( ... )
 	local hdrs = {}
 	local incs = {}
 	local cpps = {}
+	local ccs = {}
 	local cs = {}
 	local cus = {}
 	local mms = {}
@@ -625,6 +626,8 @@ function Compile( ... )
 	for k, file in pairs( srcs ) do
 		if file:match( "[.]cpp$" ) then
 			table.insert( cpps, file )
+		elseif file:match( "[.]cc$" ) then
+			table.insert( ccs, file )
 		elseif file:match( "[.]mm$" ) then
 			table.insert( mms, file )
 		elseif file:match( "[.]c$" ) then
@@ -651,6 +654,15 @@ function Compile( ... )
 
 	for k, file in pairs( cpps ) do
 		local obj = BuildFile( file:gsub( "[.]cpp$", ".o" ) )
+		ninja:write( "build " .. obj .. ": cxx " .. SourceFile( file ) .. hdrs .. "\n" )
+		if incs then
+			ninja:write( incs )
+		end
+		table.insert( ret, obj )
+	end
+
+	for k, file in pairs( ccs ) do
+		local obj = BuildFile( file:gsub( "[.]cc$", ".o" ) )
 		ninja:write( "build " .. obj .. ": cxx " .. SourceFile( file ) .. hdrs .. "\n" )
 		if incs then
 			ninja:write( incs )
