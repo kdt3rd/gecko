@@ -9,12 +9,6 @@ namespace gl
 
 ////////////////////////////////////////
 
-enum class target
-{
-	ARRAY_BUFFER = GL_ARRAY_BUFFER,
-	ELEMENT_ARRAY_BUFFER = GL_ELEMENT_ARRAY_BUFFER,
-};
-
 ////////////////////////////////////////
 
 enum class usage
@@ -85,6 +79,12 @@ template<typename D>
 class buffer
 {
 public:
+	enum class target
+	{
+		ARRAY_BUFFER = GL_ARRAY_BUFFER,
+		ELEMENT_ARRAY_BUFFER = GL_ELEMENT_ARRAY_BUFFER,
+	};
+
 	buffer( const buffer &b ) = delete;
 
 	buffer( void )
@@ -92,14 +92,14 @@ public:
 		glGenBuffers( 1, &_buffer );
 	}
 
-	buffer( gl::target targ, const D *data, size_t n, usage u )
+	buffer( target targ, const D *data, size_t n, usage u )
 		: buffer()
 	{
 		auto bb = bind( targ );
 		bb.data( data, n, u );
 	}
 
-	buffer( gl::target targ, const std::vector<D> &data, usage u )
+	buffer( target targ, const std::vector<D> &data, usage u )
 		: buffer()
 	{
 		auto bb = bind( targ );
@@ -111,7 +111,7 @@ public:
 		glDeleteBuffers( 1, &_buffer );
 	}
 
-	bound_buffer<D> bind( gl::target targ )
+	bound_buffer<D> bind( target targ )
 	{
 		return bound_buffer<D>( static_cast<GLenum>( targ ), _buffer );
 	}
