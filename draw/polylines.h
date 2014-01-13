@@ -18,6 +18,8 @@ public:
 	/// @brief Constructor
 	polylines( void );
 
+	void new_polyline( void );
+
 	/// @brief Move the cursor
 	/// Move the cursor to the given position
 	/// @param p
@@ -31,14 +33,14 @@ public:
 
 	void arc_to( const core::point &center, double radius, double angle1, double angle2 );
 
-	void close( void );
+	void add_point( const core::point &p );
 
-//	std::shared_ptr<drawable> stroked( ... );
-//	std::shared_ptr<drawable> filled( ... );
+	void close( void );
 
 	polylines stroked( double width );
 	polylines offset( double width );
-	mesh<core::point> stroked( void );
+
+	mesh<core::point> debug( void );
 	mesh<core::point> filled( void );
 
 	std::vector<polyline>::iterator begin( void )

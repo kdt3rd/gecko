@@ -9,11 +9,29 @@ namespace
 	{
 		return std::get<n>( t );
 	}
+
+	constexpr double PI = 3.14159265358979323846;
 }
 
 
 namespace draw
 {
+
+////////////////////////////////////////
+
+size_t circle_precision( double r )
+{
+	size_t n = 3;
+	double error = 0.0;
+	do
+	{
+		error = r * ( 1 - std::cos( PI / n ) );
+		n = n * 2;
+	} while ( error > 1.0 );
+
+	return n;
+}
+
 
 ////////////////////////////////////////
 
@@ -90,6 +108,29 @@ void add_cubic( const core::point &p1, const core::point &p2, const core::point 
 			stack.emplace_back( p0, p01, p012, p0123 );
 		}
 		first = false;
+	}
+}
+
+////////////////////////////////////////
+
+void add_arc( const core::point &center, double radius, double a1, double a2, polyline &line )
+{
+	using core::point;
+
+	size_t n = circle_precision( radius );
+
+	double span = std::abs( std::fmod( ( a1 - a2 + PI ), 2.0 * PI ) - PI );
+	n = size_t( std::ceil( n * span / ( 2.0 * PI ) ) );
+
+	point p = point::polar( radius, a1 ) + center;
+	if ( line.empty() || point::distance_squared( p, line.back() ) > 0.1 )
+		line.push_back( p );
+
+	for ( size_t i = 1; i <= n; ++i )
+	{
+		double m = double(i) / double(n);
+		double a = a1 * ( 1.0 - m ) + a2 * m;
+		line.push_back( point::polar( radius, a ) + center );
 	}
 }
 
