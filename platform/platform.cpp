@@ -3,8 +3,11 @@
 #include <mutex>
 #include "platform.h"
 
-std::vector<platform::platform> *_list = nullptr;
-std::mutex lock;
+namespace
+{
+	std::vector<platform::platform> *platforms = nullptr;
+	std::mutex lock;
+}
 
 namespace platform
 {
@@ -25,10 +28,10 @@ void platform::enroll( std::string name, std::string render, const std::function
 {
 	std::lock_guard<std::mutex> guard( lock );
 
-	if ( _list == nullptr )
-		_list = new std::vector<platform::platform>;
+	if ( platforms == nullptr )
+		platforms = new std::vector<::platform::platform>;
 
-	_list->emplace_back( name, render, creator );
+	platforms->emplace_back( name, render, creator );
 }
 
 ////////////////////////////////////////
@@ -38,10 +41,10 @@ const std::vector<platform> &platform::list( void )
 	init();
 
 	std::lock_guard<std::mutex> guard( lock );
-	if ( _list == nullptr )
-		_list = new std::vector<platform::platform>;
+	if ( platforms == nullptr )
+		platforms = new std::vector<::platform::platform>;
 
-	return *_list;
+	return *platforms;
 }
 
 ////////////////////////////////////////
