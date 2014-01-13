@@ -66,7 +66,7 @@ public:
 	void set_attrib_pointers( gl::context &GL, std::shared_ptr<gl::vertex_array> &vao, Names ...namelist ) const
 	{
 		static_assert( sizeof...(Names) == sizeof...(Args), "invalid number of program attributes" );
-		auto buf = GL.new_buffer<float>( gl::target::ARRAY_BUFFER, _data, gl::usage::STATIC_DRAW );
+		auto buf = GL.new_buffer<float>( gl::buffer<float>::target::ARRAY_BUFFER, _data, gl::usage::STATIC_DRAW );
 		auto va = vao->bind();
 
 		std::array<size_t,sizeof...(Args)> components = {{ detail::count_components<Args>::value... }};
