@@ -77,7 +77,7 @@ public:
 	template<typename ...Args>
 	std::shared_ptr<texture> new_texture( Args &&...args )
 	{
-		std::make_shared<texture>( std::forward<Args>( args )... );
+		return std::make_shared<texture>( std::forward<Args>( args )... );
 	}
 
 	template<texture::target T>
