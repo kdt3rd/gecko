@@ -29,9 +29,15 @@ public:
 		_program = p;
 	}
 
+	void add_texture( const std::shared_ptr<gl::texture> &t )
+	{
+		_textures.push_back( t );
+	}
+
 	void draw( gl::context &ctxt ) override;
 
 private:
+	std::vector<std::shared_ptr<gl::texture>> _textures;
 	std::shared_ptr<gl::program> _program;
 	std::shared_ptr<gl::vertex_array> _vao;
 	std::vector<std::tuple<gl::primitive,size_t,size_t>> _parts;
