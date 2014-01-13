@@ -1,5 +1,6 @@
 
 #include <vector>
+#include <iostream>
 #include <stdexcept>
 #include "shader.h"
 
@@ -47,7 +48,14 @@ void shader::compile( void )
 	glGetShaderiv( _shader, GL_COMPILE_STATUS, &res );
 
 	if ( res == GL_FALSE )
+	{
+		GLint len = 0;
+		glGetShaderiv( _shader, GL_SHADER_SOURCE_LENGTH, &len );
+		std::string source( len + 1, '\0' );
+		glGetShaderSource( _shader, len + 1, nullptr, &source[0] );
+		std::cerr << "Compile error:\n" << source << std::endl;
 		throw std::runtime_error( log() );
+	}
 }
 
 ////////////////////////////////////////
