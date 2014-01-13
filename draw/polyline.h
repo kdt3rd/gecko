@@ -2,8 +2,9 @@
 #pragma once
 
 #include <vector>
+#include <iostream>
+#include <iterator>
 #include <core/point.h>
-#include "polyline.h"
 
 namespace draw
 {
@@ -79,6 +80,14 @@ private:
 	bool _closed = false;
 	std::vector<point> _points;
 };
+
+////////////////////////////////////////
+
+inline std::ostream &operator<<( std::ostream &out, const polyline &p )
+{
+	std::copy( p.begin(), p.end(), std::ostream_iterator<core::point>( out, "; " ) );
+	return out;
+}
 
 ////////////////////////////////////////
 
