@@ -80,11 +80,10 @@ enum class image_type
 
 enum class format
 {
+	RED = GL_RED,
+	RG = GL_RG,
 	RGB = GL_RGB,
 	RGBA = GL_RGBA,
-	LUMINANCE = GL_LUMINANCE,
-	LUMINANCE_ALPHA = GL_LUMINANCE_ALPHA,
-	ALPHA = GL_ALPHA,
 };
 
 ////////////////////////////////////////
