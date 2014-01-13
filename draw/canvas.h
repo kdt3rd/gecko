@@ -4,8 +4,8 @@
 #include <memory>
 #include <core/alignment.h>
 #include "paint.h"
-#include "path.h"
 #include "font.h"
+#include <core/path.h>
 #include <core/rect.h>
 
 namespace draw
@@ -40,7 +40,7 @@ public:
 	/// Draw a path on the canvas
 	/// @param p Path to draw
 	/// @param c Paint to apply to the path
-	virtual void draw_path( const path &p, const paint &c ) = 0;
+	virtual void draw_path( const core::path &p, const paint &c ) = 0;
 
 	/// @brief Draw text
 	/// Draw text on the canvas
