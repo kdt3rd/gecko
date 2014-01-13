@@ -48,7 +48,7 @@ void line_edit::paint( const std::shared_ptr<draw::canvas> &c )
 	draw::font_extents fex = _font.value()->extents();
 	draw::text_extents tex = _font.value()->extents( str.substr( 0, _cursor ) );
 
-	draw::path path;
+	core::path path;
 	path.move_to( p );
 	path.move_by( { tex.x_advance, fex.descent } );
 	path.line_by( { 0, -fex.height } );

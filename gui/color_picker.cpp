@@ -34,7 +34,7 @@ namespace
 
 void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
-	using draw::path;
+	using core::path;
 	using core::point;
 	using core::color;
 
@@ -112,7 +112,7 @@ void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 				double h, s, l;
 				_current.get_hsl( h, s, l );
 
-				draw::path m;
+				core::path m;
 				m.move_to( c + point::polar( r2, h ) );
 				m.line_to( c + point::polar( r2, h + 2 * PI / 3 ) );
 				m.line_to( c + point::polar( r2, h + 4 * PI / 3 ) );
@@ -122,7 +122,7 @@ void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 					color( color::space::HSL, h, 1.0, 1.0 ),
 					color( color::space::HSL, h, 1.0, 0.0 ),
 				};
-				paint.set_fill_mesh( m, c );
+//				paint.set_fill_mesh( m, c );
 				canvas->draw_path( m, paint );
 				break;
 			}

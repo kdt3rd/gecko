@@ -114,8 +114,8 @@ void cocoa_style::button_frame( const std::shared_ptr<draw::canvas> &c, const co
 		p.set_fill_linear( r.top_left(), r.bottom_left(), grad1 );
 	}
 
-	draw::path rpath;
-//	rpath.rounded_rect( r.top_left(), r.bottom_right(), 3 );
+	core::path rpath;
+	rpath.rounded_rect( r.top_left(), r.bottom_right(), 3 );
 
 	c->draw_path( rpath, p );
 }
@@ -130,8 +130,8 @@ void cocoa_style::line_edit_frame( const std::shared_ptr<draw::canvas> &c, const
 	paint.set_stroke_width( 1.0 );
 	paint.set_fill_color( { 1, 1, 1 } );
 
-	draw::path path;
-//	path.rectangle( r.top_left(), r.bottom_right() );
+	core::path path;
+	path.rectangle( r.top_left(), r.bottom_right() );
 
 	c->draw_path( path, paint );
 }
@@ -162,8 +162,8 @@ void cocoa_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const c
 	p.set_stroke_width( 1.0 );
 	p.set_fill_linear( r.top_left(), r.bottom_left(), grad2 );
 
-	draw::path rpath;
-//	rpath.rounded_rect( r.top_left(), r.bottom_right(), 2 );
+	core::path rpath;
+	rpath.rounded_rect( r.top_left(), r.bottom_right(), 2 );
 
 	c->draw_path( rpath, p );
 }
@@ -189,8 +189,8 @@ void cocoa_style::slider_button( const std::shared_ptr<draw::canvas> &c, const c
 
 	core::point center = { r.x( val, slider_size( r ) ), r.y( 0.5 ) };
 
-	draw::path rpath;
-//	rpath.circle( center, r.radius() );
+	core::path rpath;
+	rpath.circle( center, r.radius() );
 
 	c->draw_path( rpath, p );
 }
