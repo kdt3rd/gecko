@@ -80,12 +80,6 @@ public:
 		return std::make_shared<texture>( std::forward<Args>( args )... );
 	}
 
-	template<texture::target T>
-	bound_texture<T> bind_texture( const std::shared_ptr<texture> &tx )
-	{
-		return bound_texture<T>( tx->_texture );
-	}
-
 	template<typename D, typename ...Args>
 	std::shared_ptr<buffer<D>> new_buffer( Args &&...args )
 	{
