@@ -1,6 +1,6 @@
 #! /usr/bin/env lua
 
-local posix = require( "posix" )
+local posix = require "posix"
 local exports = {}
 local libs_needed = {}
 
@@ -48,7 +48,7 @@ local function mkdir( name, file )
 	end
 end
 
-local function array_concat( ... ) 
+function table.flatten( ... ) 
     local t = {}
     for n = 1, select( "#", ... ) do
         local arg = select( n, ... )
@@ -174,9 +174,12 @@ function Machine()
 end
 
 local system
-function System()
+function System( sys )
+	if sys then
+		system = sys
+	end
 	if system == nil then
-		system = os.getenv( "CROSS_SYSTEM" ) or posix.uname( "%s" )
+		system = posix.uname( "%s" )
 	end
 	return system
 end
@@ -320,7 +323,7 @@ end
 ----------------------------------------
 function Variable( name, ... )
 	assert( ninja, "Invalid build dir" )
-	local value = array_concat( ... )
+	local value = table.flatten( ... )
 	ninja:write( name .. " =" )
 	for k, v in pairs( value ) do
 		ninja:write( " " .. v )
@@ -392,7 +395,7 @@ end
 ----------------------------------------
 function Append( name, ... )
 	assert( ninja, "Invalid build dir" )
-	local list = array_concat( ... )
+	local list = table.flatten( ... )
 	ninja:write( name .. " = $" .. name )
 	for k, v in pairs( list ) do
 		ninja:write( " " .. v )
@@ -404,7 +407,7 @@ end
 -- CXX flags
 ----------------------------------------
 function CXXFlags( ... )
-	local flags = array_concat( ... )
+	local flags = table.flatten( ... )
 	flags = table.concat( flags, " " )
 	Append( "cxxflags", flags )
 end
@@ -413,7 +416,7 @@ end
 -- C flags
 ----------------------------------------
 function CFlags( ... )
-	local flags = array_concat( ... )
+	local flags = table.flatten( ... )
 	flags = table.concat( flags, " " )
 	Append( "cflags", flags )
 end
@@ -422,7 +425,7 @@ end
 -- Warning flags
 ----------------------------------------
 function Warning( ... )
-	local flags = array_concat( ... )
+	local flags = table.flatten( ... )
 	local str = ""
 	for k, warn in pairs( flags ) do
 		if warn:match( "^-" ) then
@@ -436,7 +439,7 @@ function Warning( ... )
 end
 
 function CXXWarning( ... )
-	local flags = array_concat( ... )
+	local flags = table.flatten( ... )
 	local str = ""
 	for k, warn in pairs( flags ) do
 		if warn:match( "^-" ) then
@@ -449,7 +452,7 @@ function CXXWarning( ... )
 end
 
 function CWarning( ... )
-	local flags = array_concat( ... )
+	local flags = table.flatten( ... )
 	local str = ""
 	for k, warn in pairs( flags ) do
 		if warn:match( "^-" ) then
@@ -465,7 +468,7 @@ end
 -- LD flags
 ----------------------------------------
 function LDFlags( ... )
-	local flags = array_concat( ... )
+	local flags = table.flatten( ... )
 	flags = table.concat( flags, " " )
 	Append( "ldflags", flags )
 end
@@ -474,7 +477,7 @@ end
 -- Include directory
 ----------------------------------------
 function Include( ... )
-	local dirs = array_concat( ... )
+	local dirs = table.flatten( ... )
 	local str = ""
 	for k, dir in pairs( dirs ) do
 		if dir:match( "^-I" ) then
@@ -490,7 +493,7 @@ end
 -- Definition
 ----------------------------------------
 function Definition( ... )
-	local defs = array_concat( ... )
+	local defs = table.flatten( ... )
 	local str = ""
 	for k, def in pairs( defs ) do
 		if def:match( "^-D" ) then
@@ -533,7 +536,11 @@ function BinFile( file )
 	if file:match( "^/" ) then
 		return file
 	end
-	return top_build_dir .. "/bin/" .. file
+	if System() == "Windows" then
+		return top_build_dir .. "/bin/" .. file .. ".exe"
+	else
+		return top_build_dir .. "/bin/" .. file
+	end
 end
 
 ----------------------------------------
@@ -612,7 +619,7 @@ end
 ----------------------------------------
 function Compile( ... )
 	assert( ninja, "Invalid build dir" )
-	local srcs = array_concat( ... )
+	local srcs = table.flatten( ... )
 	local ret = {}
 	local hdrs = {}
 	local incs = {}
@@ -795,12 +802,12 @@ function OptExecutable( name, ... )
 	assert( ninja, "Invalid build dir" )
 	local file = BinFile( name )
 	if System() == "Windows" then
-		file = file .. ".exe"
+		ninja:write( "build " .. name .. ".exe: phony " .. file .. "\n" )
 	end
-	local objs = array_concat( ... )
+	ninja:write( "build " .. name .. ": phony " .. file .. "\n" )
+	local objs = table.flatten( ... )
 	local shared = {}
 	local libs = {}
-	ninja:write( "build " .. name .. ": phony " .. file .. "\n" )
 	ninja:write( "build " .. file .. ": link_exe" )
 	for k, obj in pairs( objs ) do
 		if obj:match( "[.]o$" ) then
@@ -837,7 +844,7 @@ end
 -- Link a library to an executable
 ----------------------------------------
 function LinkSharedLibs( ... )
-	local libs = array_concat( ... )
+	local libs = table.flatten( ... )
 	local list = {}
 	for k, lib in pairs( libs ) do
 		table.insert( list, top_build_dir .. "/lib/lib" .. lib .. ".so" )
@@ -850,7 +857,7 @@ function LinkSharedLibs( ... )
 end
 
 function LinkStaticLibs( ... )
-	local libs = array_concat( ... )
+	local libs = table.flatten( ... )
 	local list = {}
 	for k, lib in pairs( libs ) do
 		table.insert( list, top_build_dir .. "/lib/lib" .. lib .. ".a" )
@@ -866,7 +873,7 @@ end
 -- Link an external library to an executable
 ----------------------------------------
 function LinkSys( ... )
-	local libs = array_concat( ... )
+	local libs = table.flatten( ... )
 	local list = {}
 	for k, lib in pairs( libs ) do
 		if lib:match( "^-" ) then
@@ -883,7 +890,7 @@ end
 ----------------------------------------
 function BaseLibrary( name, link_cmd, file, ... )
 	assert( ninja, "Invalid build dir" )
-	local objs = array_concat( ... )
+	local objs = table.flatten( ... )
 	ninja:write( "build " .. name .. ": phony " .. file .. "\n" )
 	ninja:write( "build " .. file .. ": " .. link_cmd )
 	libs_needed[name] = {}
@@ -918,7 +925,7 @@ end
 ----------------------------------------
 function CUDACompile( group, ... )
 	assert( ninja, "Invalid build dir" )
-	local srcs = array_concat( ... )
+	local srcs = table.flatten( ... )
 	local ret = {}
 	local list = {}
 	for k, file in pairs( srcs ) do
@@ -955,7 +962,7 @@ end
 ----------------------------------------
 function DataCompile( name, ... )
 	assert( ninja, "Invalid build dir" )
-	local data = array_concat( ... )
+	local data = table.flatten( ... )
 	local text = {}
 	local ret = {}
 	for k, file in pairs( data ) do
@@ -996,7 +1003,7 @@ end
 ----------------------------------------
 function LuaCompile( name, ... )
 	assert( ninja, "Invalid build dir" )
-	local scripts = array_concat( ... )
+	local scripts = table.flatten( ... )
 	local ret = {}
 	for k, script in pairs( scripts ) do
 		local obj = BuildFile( script .. "o" )
@@ -1012,8 +1019,8 @@ end
 ----------------------------------------
 function Run( input, output, dir, cmd, ... )
 	assert( ninja, "Invalid build dir" )
-	input = array_concat( input )
-	output = array_concat( output )
+	input = table.flatten( input )
+	output = table.flatten( output )
 	ninja:write( "build" )
 	for k, o in pairs( output ) do
 		ninja:write( " " .. o )
@@ -1023,10 +1030,15 @@ function Run( input, output, dir, cmd, ... )
 		ninja:write( " " .. i )
 	end
 	ninja:write( " | " .. cmd ..  "\n" )
+
+	local args = table.flatten( ... )
+	if ( System() == "Windows" ) then
+		table.insert( args, 1, cmd )
+		cmd = "wine"
+	end
 	ninja:write( "  dir = " .. dir .. "\n" )
 	ninja:write( "  cmd = " .. cmd .. "\n" )
 	ninja:write( "  args =" )
-	local args = array_concat( ... )
 	for k, arg in pairs( args ) do
 		ninja:write( " " .. arg )
 	end
@@ -1038,7 +1050,7 @@ end
 -- Find package
 ----------------------------------------
 function Package( ... )
-	local libs = array_concat( ... )
+	local libs = table.flatten( ... )
 	if System() == "Linux" or System() == "Windows" then
 		libs = table.concat( libs, " " )
 
@@ -1057,7 +1069,7 @@ function Package( ... )
 		local iflags = {}
 		local lflags = {}
 		local found = {}
-		local dirlist = array_concat( posix.glob( "/Library/Frameworks/*.framework" ), posix.glob( "/System/Library/Frameworks/*.framework" ) )
+		local dirlist = table.flatten( posix.glob( "/Library/Frameworks/*.framework" ), posix.glob( "/System/Library/Frameworks/*.framework" ) )
 		for j, lib in pairs( libs ) do
 			local found = false
 			for i, dir in pairs( dirlist ) do
@@ -1092,7 +1104,7 @@ end
 -- Qt header file processing
 ----------------------------------------
 function QtHeader( ... )
-	local hdrs = array_concat( ... )
+	local hdrs = table.flatten( ... )
 	assert( hdrs and #hdrs > 0, "No headers" )
 	local ret = {}
 	for k, hdr in pairs( hdrs ) do
@@ -1107,7 +1119,7 @@ end
 -- Qt resource file processing
 ----------------------------------------
 function QtResource( name, ...  )
-	local qrcs = array_concat( ... )
+	local qrcs = table.flatten( ... )
 	local ret = {}
 	for k, qrc in pairs( qrcs ) do
 		local deps = ""
@@ -1132,7 +1144,7 @@ end
 -- Flatten everything into a single list
 ----------------------------------------
 function Flatten( ... )
-	return array_concat( ... )
+	return table.flatten( ... )
 end
 
 ----------------------------------------
