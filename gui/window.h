@@ -3,7 +3,6 @@
 
 #include "widget.h"
 #include "context.h"
-#include <platform/keyboard.h>
 
 namespace platform
 {
@@ -27,6 +26,9 @@ public:
 
 	void set_widget( const std::shared_ptr<widget> &w );
 	std::shared_ptr<widget> get_widget( void ) { return _widget; }
+
+	double width( void ) const;
+	double height( void ) const;
 
 	void invalidate( const core::rect &r ) override;
 
