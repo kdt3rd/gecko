@@ -2,6 +2,7 @@
 #pragma once
 
 #include <vector>
+#include <array>
 #include <core/meta.h>
 #include <core/point.h>
 #include <core/color.h>
