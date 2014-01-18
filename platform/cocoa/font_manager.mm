@@ -11,9 +11,6 @@
 #include <sstream>
 #include <map>
 
-#include <draw/cairo/font.h>
-#include <cairo/cairo-quartz.h>
-
 namespace
 {
 	const std::map<NSFontTraitMask,std::string> fonttraits =
@@ -94,7 +91,7 @@ std::set<std::string> font_manager::get_styles( const std::string &family )
 
 std::shared_ptr<draw::font> font_manager::get_font( const std::string &family, const std::string &style, double pixsize )
 {
-	std::shared_ptr<cairo::font> ret;
+	std::shared_ptr<draw::font> ret;
 
 	NSFontManager *fmgr = [NSFontManager sharedFontManager];
 	NSString *fam = [[NSString alloc] initWithUTF8String:family.c_str()];
@@ -122,7 +119,7 @@ std::shared_ptr<draw::font> font_manager::get_font( const std::string &family, c
 	if ( nsfont )
 	{
 		CGFontRef font = CTFontCopyGraphicsFont( (CTFontRef)nsfont, NULL );
-		ret = std::make_shared<cairo::font>( cairo_quartz_font_face_create_for_cgfont( font ), family, style, pixsize );
+//		ret = std::make_shared<cairo::font>( cairo_quartz_font_face_create_for_cgfont( font ), family, style, pixsize );
 	}
 	
 	return ret;

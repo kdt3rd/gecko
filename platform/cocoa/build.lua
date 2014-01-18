@@ -4,7 +4,6 @@ Platform {
 
 	incs = {
 		COCOA_INCLUDE;
-		CAIRO_INCLUDE;
 	};
 
 	srcs = {
@@ -19,12 +18,10 @@ Platform {
 	};
 
 	libs = {
-		"draw-cairo";
 	};
 
 	syslibs = {
 		COCOA_LIBS;
-		CAIRO_LIBS;
 	};
 }
 

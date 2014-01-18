@@ -15,7 +15,7 @@ public:
 	screen( void );
 	~screen( void );
 
-	draw::size bounds( void ) override;
+	core::size bounds( void ) override;
 
 private:
 };
