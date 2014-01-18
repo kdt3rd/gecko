@@ -60,6 +60,20 @@ void window::set_widget( const std::shared_ptr<widget> &w )
 
 ////////////////////////////////////////
 
+double window::width( void ) const
+{
+	return _window->width();
+}
+
+////////////////////////////////////////
+
+double window::height( void ) const
+{
+	return _window->height();
+}
+
+////////////////////////////////////////
+
 void window::invalidate( const core::rect &r )
 {
 	_window->invalidate( r );

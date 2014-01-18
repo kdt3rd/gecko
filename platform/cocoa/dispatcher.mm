@@ -8,7 +8,7 @@
 
 ////////////////////////////////////////
 
-@interface MyView : NSView
+@interface MyView : NSOpenGLView
 {
 	std::shared_ptr<cocoa::window> win;
 	std::shared_ptr<cocoa::mouse> mouse;
@@ -29,8 +29,16 @@
 
 ////////////////////////////////////////
 
+- (void)reshape
+{
+	[super setNeedsDisplay: YES];
+}
+
+////////////////////////////////////////
+
 - (id)initWithWindow:(std::shared_ptr<cocoa::window>)w andMouse:(std::shared_ptr<cocoa::mouse>)m andKeyboard: (std::shared_ptr<cocoa::keyboard>)k
 {
+	[[self superview] setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
 	self = [super init];
 	if ( self )
 	{
@@ -38,6 +46,21 @@
 		mouse = m;
 		keyboard = k;
 	}
+
+	NSOpenGLPixelFormatAttribute pixelFormatAttributes[] =
+	{
+		NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
+		NSOpenGLPFADoubleBuffer,
+		NSOpenGLPFAMultisample,
+		NSOpenGLPFASampleBuffers, (NSOpenGLPixelFormatAttribute)1,
+		NSOpenGLPFASamples, (NSOpenGLPixelFormatAttribute)4,
+		0
+	};
+
+	NSOpenGLPixelFormat *pixelFormat = [[[NSOpenGLPixelFormat alloc] initWithAttributes:pixelFormatAttributes] autorelease];
+	NSOpenGLContext *openGLContext = [[[NSOpenGLContext alloc] initWithFormat:pixelFormat shareContext:nil] autorelease];
+	[self setOpenGLContext:openGLContext];
+	[openGLContext makeCurrentContext]; 
 
 	return self;
 }
@@ -49,6 +72,7 @@
 	try
 	{
 		win->exposed();
+		[[self openGLContext] flushBuffer];
 	}
 	catch ( std::exception &e )
 	{
@@ -63,7 +87,7 @@
 	[super setFrameSize:newSize];
 	try
 	{
-		win->resized( newSize.width, newSize.height );
+		win->resize_event( newSize.width, newSize.height );
 	}
 	catch ( std::exception &e )
 	{
@@ -159,7 +183,36 @@ dispatcher::~dispatcher( void )
 int dispatcher::execute( void )
 {
 	_exit_code = 0;
+
+/*
+	[NSApp finishLaunching];
+
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
+	_continue_running = true;
+
+	do
+	{
+		[pool release];
+		pool = [[NSAutoreleasePool alloc] init];
+
+		NSEvent *event = [NSApp
+			nextEventMatchingMask:NSAnyEventMask
+			untilDate:[NSDate distantFuture]
+			inMode:NSDefaultRunLoopMode
+			dequeue:YES];
+
+std::cout << "Sending event" << std::endl;
+		[NSApp sendEvent:event];
+std::cout << "Done event" << std::endl;
+		[NSApp updateWindows];
+	} while ( _continue_running );
+
+	[pool release];
+*/
+	
     [NSApp run];
+	std::cout << "DONE EXECUTE" << std::endl;
 
 	return _exit_code;
 }
@@ -169,6 +222,7 @@ int dispatcher::execute( void )
 void dispatcher::exit( int code )
 {
 	_exit_code = code;
+//	_continue_running = false;
 	[NSApp stop:nil];
 }
 
@@ -179,8 +233,7 @@ void dispatcher::add_window( const std::shared_ptr<window> &w )
 	int style = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
 
 	NSWindow *nswin = [[[NSWindow alloc] initWithContentRect:NSMakeRect( 0, 0, 200, 200 )
-		styleMask:style backing:NSBackingStoreBuffered defer:YES]
-			autorelease];
+		styleMask:style backing:NSBackingStoreBuffered defer:YES] autorelease];
 
 	[nswin orderOut:nil];
 	[nswin cascadeTopLeftFromPoint:NSMakePoint(20,20)];

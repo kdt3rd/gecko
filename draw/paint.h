@@ -39,21 +39,21 @@ public:
 	void set_stroke_width( double w ) { _stroke_width = w; }
 	double get_stroke_width( void ) const { return _stroke_width; }
 
-	void clear_fill( void ) { _fill_type = NONE; }
-	bool no_fill( void ) const { return _fill_type == NONE; }
+	void clear_fill( void );
+	bool has_no_fill( void ) const { return _fill_type == NONE; }
 
-	void set_fill_color( const core::color &c ) { _fill_type = COLOR; _fill_color = c; }
+	void set_fill_color( const core::color &c ) { clear_fill(); _fill_type = COLOR; _fill_color = c; }
 	bool has_fill_color( void ) const { return _fill_type == COLOR; }
 	const core::color &get_fill_color( void ) const { precondition( has_fill_color(), "no fill color" ); return _fill_color; }
 
-	void set_fill_linear( const core::point &p1, const core::point &p2, const gradient &g ) { _fill_type = LINEAR; new (&_fill_linear) linear( p1, p2, g ); }
+	void set_fill_linear( const core::point &p1, const core::point &p2, const gradient &g ) { clear_fill(); _fill_type = LINEAR; new (&_fill_linear) linear( p1, p2, g ); }
 	void set_fill_linear( const core::point &p1, double w, double h, const gradient &g ) { set_fill_linear( p1, { p1.x() + w, p1.y() + h }, g ); }
 	bool has_fill_linear( void ) const { return _fill_type == LINEAR; }
 	const core::point &get_fill_linear_p1( void ) const { precondition( has_fill_linear(), "no fill linear" ); return _fill_linear.p1; }
 	const core::point &get_fill_linear_p2( void ) const { precondition( has_fill_linear(), "no fill linear" ); return _fill_linear.p2; }
 	const std::vector<std::pair<double,core::color>> &get_fill_linear_stops( void ) const { precondition( has_fill_linear(), "no fill linear" ); return _fill_linear.grad.stops(); }
 
-	void set_fill_radial( const core::point &p1, double r1, const core::point &p2, double r2, const gradient &g ) { _fill_type = RADIAL; new (&_fill_radial) radial( p1, r1, p2, r2, g ); }
+	void set_fill_radial( const core::point &p1, double r1, const core::point &p2, double r2, const gradient &g ) { clear_fill(); _fill_type = RADIAL; new (&_fill_radial) radial( p1, r1, p2, r2, g ); }
 	void set_fill_radial( const core::point &p, double r, const gradient &g ) { set_fill_radial( p, 0.0, p, r, g ); }
 	bool has_fill_radial( void ) const { return _fill_type == RADIAL; }
 	const core::point &get_fill_radial_p1( void ) const { precondition( has_fill_radial(), "no fill radial" ); return _fill_radial.p1; }

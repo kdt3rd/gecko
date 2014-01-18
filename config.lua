@@ -108,12 +108,10 @@ if System() == "Linux" then
 	FONTCONFIG_FLAGS, FONTCONFIG_INCLUDE, FONTCONFIG_LIBS = Package( "fontconfig" )
 	GL_FLAGS, GL_INCLUDE, GL_LIBS = Package( "gl" )
 elseif System() == "Darwin" then
-	CAIRO_FLAGS, CAIRO_INCLUDE, CAIRO_LIBS = Package( "cairo", "cairo-quartz" )
 	COCOA_FLAGS, COCOA_INCLUDE, COCOA_LIBS = Package( "Cocoa" )
-	XLIB_FLAGS, XLIB_INCLUDE, XLIB_LIBS = Package( "x11" )
-	XCB_FLAGS, XCB_INCLUDE, XCB_LIBS = Package( "xcb", "xcb-keysyms" )
 	FREETYPE_FLAGS, FREETYPE_INCLUDE, FREETYPE_LIBS = Package( "freetype2" )
 	FONTCONFIG_FLAGS, FONTCONFIG_INCLUDE, FONTCONFIG_LIBS = Package( "fontconfig" )
+	GL_FLAGS, GL_INCLUDE, GL_LIBS = Package( "OpenGL" )
 elseif System() == "Windows" then
 	CAIRO_FLAGS, CAIRO_INCLUDE, CAIRO_LIBS = Package( "cairo", "cairo-win32", "cairo-png", "pixman-1", "zlib" )
 	FREETYPE_FLAGS, FREETYPE_INCLUDE, FREETYPE_LIBS = Package( "freetype2" )

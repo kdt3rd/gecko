@@ -4,6 +4,7 @@ Platform {
 
 	incs = {
 		FREETYPE_INCLUDE;
+		FONTCONFIG_INCLUDE;
 	};
 
 	srcs = {
