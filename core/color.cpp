@@ -180,5 +180,19 @@ color color::change( double amt )
 
 ////////////////////////////////////////
 
+core::color color::mix( const core::color &a, const core::color &b, double m )
+{
+	double n = 1.0 - m;
+	return {
+		a.red() * n + b.red() * m,
+		a.green() * n + b.green() * m,
+		a.blue() * n + b.blue() * m,
+		a.alpha() * n + b.alpha() * m
+	};
+}
+
+
+////////////////////////////////////////
+
 }
 

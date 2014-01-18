@@ -65,6 +65,8 @@ public:
 	color desaturate( double amt );
 	color change( double amt );
 
+	static core::color mix( const core::color &a, const core::color &b, double m );
+
 private:
 	double _r = 0.0, _g = 0.0, _b = 0.0, _a = 0.0;
 };
