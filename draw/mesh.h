@@ -88,6 +88,11 @@ public:
 		return _parts;
 	}
 
+	size_t size( void ) const
+	{
+		return _data.size() / number_components();
+	}
+
 private:
 
 	inline size_t number_components( void ) const
