@@ -1,5 +1,6 @@
 
 Include( source_dir )
+Include( BuildFile() )
 
 SubDir( "core" )
 SubDir( "gl" )
