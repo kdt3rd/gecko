@@ -2,8 +2,12 @@
 #pragma once
 
 #include <memory>
+#include <core/color.h>
+#include <core/point.h>
+#include <core/size.h>
 #include "shader.h"
 #include "matrix4.h"
+#include "enums.h"
 
 namespace gl
 {
@@ -19,6 +23,11 @@ public:
 	typedef GLuint attribute;
 
 	program( const program &program ) = delete;
+
+	program( void );
+	program( const std::shared_ptr<shader> &vertex );
+	program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<shader> &fragment );
+	program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<shader> &fragment, const std::shared_ptr<shader> &geometry );
 
 	~program( void );
 
@@ -38,7 +47,7 @@ public:
 	}
 
 	template <typename T>
-	void set_uniform( const std::string &name, const T *values, uint count )
+	void set_uniform( const std::string &name, const T *values, size_t count )
 	{
 		set_uniform( get_uniform_location( name ), values, count );
 	}
@@ -46,22 +55,13 @@ public:
 	void set_uniform( uniform uniform, int value );
 	void set_uniform( uniform uniform, float value );
 	void set_uniform( uniform uniform, const matrix4 &value );
-	/*
-	void set_uniform( const Uniform& uniform, const Vec2& value );
-	void set_uniform( const Uniform& uniform, const Vec3& value );
-	void set_uniform( const Uniform& uniform, const Vec4& value );
-	void set_uniform( const Uniform& uniform, const float* values, uint count );
-	void set_uniform( const Uniform& uniform, const Vec2* values, uint count );
-	void set_uniform( const Uniform& uniform, const Vec3* values, uint count );
-	void set_uniform( const Uniform& uniform, const Vec4* values, uint count );
-	void set_uniform( const Uniform& uniform, const Mat3& value );
-	void set_uniform( const Uniform& uniform, const Mat4& value );
-	*/
+	void set_uniform( uniform uniform, const core::color &value );
+	void set_uniform( uniform uniform, const core::point &value );
+	void set_uniform( uniform uniform, const core::size &value );
 
-	program( void );
-	program( const std::shared_ptr<shader> &vertex );
-	program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<shader> &fragment );
-	program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<shader> &fragment, const std::shared_ptr<shader> &geometry );
+	size_t number_active_uniforms( void );
+	std::pair<uniform_type,std::string> active_uniform( size_t i );
+
 private:
 	friend class context;
 

@@ -47,7 +47,7 @@ program::program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<s
 
 ////////////////////////////////////////
 
-program::~program()
+program::~program( void )
 {
 	glDeleteProgram( _program );
 }
@@ -125,52 +125,64 @@ void program::set_uniform( uniform uni, const matrix4 &value )
 
 ////////////////////////////////////////
 
-/*
-void program::SetUniform( const Uniform& uniform, const Vec2& value )
+void program::set_uniform( uniform uni, const core::color &value )
 {
-	glUniform2f( uniform, value.X, value.Y );
+	float tmp[] = { float(value.red()), float(value.green()), float(value.blue()), float(value.alpha()) };
+	glUniform4fv( uni, 1, tmp );
 }
 
-void program::SetUniform( const Uniform& uniform, const Vec3& value )
+////////////////////////////////////////
+
+void program::set_uniform( uniform uni, const core::point &value )
 {
-	glUniform3f( uniform, value.X, value.Y, value.Z );
+	float tmp[] = { float(value.x()), float(value.y()) };
+	glUniform2fv( uni, 1, tmp );
 }
 
-void program::SetUniform( const Uniform& uniform, const Vec4& value )
+////////////////////////////////////////
+
+void program::set_uniform( uniform uni, const core::size &value )
 {
-	glUniform4f( uniform, value.X, value.Y, value.Z, value.W );
+	float tmp[] = { float(value.w()), float(value.h()) };
+	glUniform2fv( uni, 1, tmp );
 }
 
-void program::SetUniform( const Uniform& uniform, const float* values, uint count )
+////////////////////////////////////////
+
+size_t program::number_active_uniforms( void )
 {
-	glUniform1fv( uniform, count, values );
+	GLint n;
+	glGetProgramiv( _program, GL_ACTIVE_UNIFORMS, &n );
+	return size_t( n );
 }
 
-void program::SetUniform( const Uniform& uniform, const Vec2* values, uint count )
+////////////////////////////////////////
+
+std::pair<uniform_type,std::string> program::active_uniform( size_t i )
 {
-	glUniform2fv( uniform, count, (float*)values );
+	GLint max;
+	glGetProgramiv( _program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max );
+
+	std::string name( max, '\0' );
+	GLsizei len = 0;
+	GLint sz = 0;
+	GLenum type;
+	glGetActiveUniform( _program, i, max, &len, &sz, &type, &name[0] );
+	name.resize( len );
+
+	uniform_type t;
+	switch ( type )
+	{
+		case GL_FLOAT: t = uniform_type::FLOAT; break;
+		case GL_FLOAT_VEC2: t = uniform_type::FLOAT_VEC2; break;
+		case GL_FLOAT_VEC4: t = uniform_type::FLOAT_VEC4; break;
+		case GL_FLOAT_MAT4: t = uniform_type::FLOAT_MAT4; break;
+		default: t = uniform_type::OTHER; break;
+	}
+
+	return { t, name };
 }
 
-void program::SetUniform( const Uniform& uniform, const Vec3* values, uint count )
-{
-	glUniform3fv( uniform, count, (float*)values );
-}
-
-void program::SetUniform( const Uniform& uniform, const Vec4* values, uint count )
-{
-	glUniform4fv( uniform, count, (float*)values );
-}
-
-void program::SetUniform( const Uniform& uniform, const Mat3& value )
-{
-	glUniformMatrix3fv( uniform, 1, GL_FALSE, value.m );
-}
-
-void program::SetUniform( const Uniform& uniform, const Mat4& value )
-{
-	glUniformMatrix4fv( uniform, 1, GL_FALSE, value.m );
-}
-
-*/
+////////////////////////////////////////
 
 }
