@@ -1,4 +1,6 @@
 
+Include( BuildFile() )
+
 srcs = {
 	"application.cpp";
 	"layouts.cpp";
@@ -18,5 +20,15 @@ srcs = {
 	"color_picker.cpp";
 }
 
-Library( "gui", Compile( srcs ), LinkLibs( "platform", "layout", "utf" ) );
+shaders = {
+	"color_mesh.vert";
+	"position_uv.vert";
+	"quadrant.vert";
+	"simple.vert";
+	"color_mesh.frag";
+	"linear_gradient.frag";
+	"single_color.frag";
+}
+
+Library( "gui", Compile( srcs ), DataCompile( "shaders", table.unpack( shaders ) ), LinkLibs( "platform", "layout", "utf" ) );
 
