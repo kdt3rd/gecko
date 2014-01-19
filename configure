@@ -965,50 +965,10 @@ function CUDACompile( group, ... )
 end
 
 ----------------------------------------
--- Data compiled directly into an object
-----------------------------------------
-function DataCompile( name, ... )
-	assert( ninja, "Invalid build dir" )
-	local data = table.flatten( ... )
-	local text = {}
-	local ret = {}
-	for k, file in pairs( data ) do
-		local symname = name .. "_" .. posix.basename( file ):gsub( "[./]", "_" )
-		table.insert( text, "extern char _binary_" .. symname .. "_start;" )
-		table.insert( text, "extern char _binary_" .. symname .. "_end;" )
-		table.insert( text, "extern int _binary_" .. symname .. "_size;" )
-	end
-	table.insert( text, "static struct { const char *name; const char *start; const char *end; intptr_t size; } " .. name .. "[] = {" )
-	for k, file in pairs( data ) do
-		local symname = name .. "_" .. posix.basename( file ):gsub( "[./]", "_" )
-		local silly = SourceFile( file ):gsub( "[./]", "_" )
-		local obj = BuildFile( file .. ".o" )
-		table.insert( text, "{ \"" .. file .. "\", &_binary_" .. symname .. "_start, &_binary_" .. symname .. "_end, (intptr_t)&_binary_" .. symname .. "_size }," )
-		ninja:write( "build " .. obj .. ": data_compile " .. SourceFile( file ) .. "\n" )
-		local ren = "--redefine-sym _binary_" .. silly .. "_start=_binary_" .. symname .. "_start "
-		ren = ren .. "--redefine-sym _binary_" .. silly .. "_end=_binary_" .. symname .. "_end "
-		ren = ren .. "--redefine-sym _binary_" .. silly .. "_size=_binary_" .. symname .. "_size "
-		ninja:write( "  renames = " .. ren .. "\n" )
-		table.insert( ret, obj )
-	end
-	table.insert( text, "{ 0, 0, 0, 0 } };" )
-
-	local hfile = BuildFile( name .. ".h" )
-	if file_diff( hfile, text ) then
-		local header = io.open( hfile, "w+" )
-		for i = 1, #text do
-			header:write( text[i] )
-			header:write( "\n" )
-		end
-		header:close()
-	end
-	return ret
-end
-
-----------------------------------------
 -- Lua compiled directly into an object
 ----------------------------------------
 function LuaCompile( name, ... )
+	error( "Need to convert to use CreateFile (no DataCompile anymore)" )
 	assert( ninja, "Invalid build dir" )
 	local scripts = table.flatten( ... )
 	local ret = {}
