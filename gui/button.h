@@ -53,6 +53,8 @@ private:
 	datum<core::color> _color = { 0, 0, 0, 1 };
 	shared_datum<draw::font> _font = application::current_style()->default_font();
 
+	std::shared_ptr<draw::drawable> _draw;
+
 	bool _pressed = false;
 	bool _tracking = false;
 };
