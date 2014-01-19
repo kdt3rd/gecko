@@ -2,6 +2,7 @@
 #pragma once
 
 #include <map>
+#include <draw/drawable.h>
 #include "style.h"
 
 namespace gui

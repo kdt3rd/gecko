@@ -4,6 +4,7 @@
 #include "widget.h"
 #include "application.h"
 #include "style.h"
+#include <draw/drawable.h>
 #include <core/alignment.h>
 #include <core/signal.h>
 #include <model/datum.h>
