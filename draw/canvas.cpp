@@ -18,6 +18,7 @@ canvas::~canvas( void )
 
 ////////////////////////////////////////
 
+/*
 void canvas::fill( const core::color &c )
 {
 	paint p( c );
@@ -82,6 +83,21 @@ core::point canvas::align_text( const std::shared_ptr<font> &font, const std::st
 
 void canvas::present( void )
 {
+}
+*/
+
+////////////////////////////////////////
+
+void canvas::save( void )
+{
+	save_matrix();
+}
+
+////////////////////////////////////////
+
+void canvas::restore( void )
+{
+	restore_matrix();
 }
 
 ////////////////////////////////////////

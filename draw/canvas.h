@@ -7,6 +7,7 @@
 #include "font.h"
 #include <core/path.h>
 #include <core/rect.h>
+#include <gl/context.h>
 
 namespace draw
 {
@@ -14,7 +15,7 @@ namespace draw
 ////////////////////////////////////////
 
 /// @brief Canvas to draw on
-class canvas
+class canvas : public gl::context
 {
 public:
 
@@ -24,6 +25,7 @@ public:
 	/// @brief Destructor
 	virtual ~canvas( void );
 
+/*
 	/// @brief Fill the entire canvas
 	/// @param c Color to fill with
 	void fill( const core::color &c );
@@ -59,10 +61,11 @@ public:
 	/// @brief Present the canvas
 	/// Finalize the drawing of the canvas and display it.
 	virtual void present( void );
-	virtual void save( void ) = 0;
-	virtual void restore( void ) = 0;
+*/
+	void save( void );
+	void restore( void );
 
-	virtual void screenshot_png( const char *filename ) = 0;
+//	virtual void screenshot_png( const char *filename ) = 0;
 };
 
 ////////////////////////////////////////
