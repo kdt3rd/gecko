@@ -85,17 +85,21 @@ void window::paint( void )
 {
 	auto canvas = _window->canvas();
 	glViewport( 0, 0, _window->width(), _window->height() );
-	canvas->ortho( 0, _window->width(), 0, _window->height() );
 	auto style = application::current()->get_style();
 	if ( style )
 		style->background( canvas );
+	canvas->save();
+	canvas->ortho( 0, _window->width(), 0, _window->height() );
 	if ( _widget )
+	{
 		in_context( [&,this]
 		{
 			_widget->compute_minimum();
 			_widget->compute_layout();
 			_widget->paint( canvas );
 		} );
+	}
+	canvas->restore();
 }
 
 ////////////////////////////////////////
