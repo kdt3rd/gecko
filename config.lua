@@ -1,9 +1,15 @@
 
-DefaultBuildType( "build" )
+local posix = require "posix"
 
 BuildDir( "build", "build" )
 BuildDir( "debug", "debug" )
 BuildDir( "release", "release" )
+BuildDir( "mingw", "mingw" )
+
+if Building( "mingw" ) then
+	System( "Windows" )
+	posix.setenv( "PKG_CONFIG_PATH", "/usr/i686-w64-mingw32/lib/pkgconfig" )
+end
 
 if System() == "Linux" then
 --	Variable( "cxx", "g++" )
@@ -40,6 +46,8 @@ elseif System() == "Windows" then
 --	Variable( "cxx", "i486-mingw32-g++" )
 --	Variable( "cc", "i486-mingw32-gcc" )
 --	Variable( "ld", "i486-mingw32-g++" )
+else
+	error( "Unknown system: " .. System() );
 end
 
 Variable( "moc", "moc-qt4" )
@@ -91,6 +99,13 @@ if Building( "release" ) then
 	LinkLibs = LinkStaticLibs
 end
 
+if Building( "mingw" ) then
+	CFlags( "-O3" )
+	Definition( "NDEBUG" )
+	Library = StaticLibrary
+	LinkLibs = LinkStaticLibs
+end
+
 Definition( "__STDC_LIMIT_MACROS", "_FILE_OFFSET_BITS=64" )
 
 LDFlags( "-L" .. build_dir .. "/lib" )
@@ -106,7 +121,7 @@ if System() == "Linux" then
 	XCB_FLAGS, XCB_INCLUDE, XCB_LIBS = Package( "xcb", "xcb-keysyms" )
 	FREETYPE_FLAGS, FREETYPE_INCLUDE, FREETYPE_LIBS = Package( "freetype2" )
 	FONTCONFIG_FLAGS, FONTCONFIG_INCLUDE, FONTCONFIG_LIBS = Package( "fontconfig" )
-	GL_FLAGS, GL_INCLUDE, GL_LIBS = Package( "gl" )
+	GL_FLAGS, GL_INCLUDE, GL_LIBS = Package( "glew" )
 elseif System() == "Darwin" then
 	COCOA_FLAGS, COCOA_INCLUDE, COCOA_LIBS = Package( "Cocoa" )
 	FREETYPE_FLAGS, FREETYPE_INCLUDE, FREETYPE_LIBS = Package( "freetype2" )
@@ -116,5 +131,6 @@ elseif System() == "Windows" then
 	CAIRO_FLAGS, CAIRO_INCLUDE, CAIRO_LIBS = Package( "cairo", "cairo-win32", "cairo-png", "pixman-1", "zlib" )
 	FREETYPE_FLAGS, FREETYPE_INCLUDE, FREETYPE_LIBS = Package( "freetype2" )
 	FONTCONFIG_FLAGS, FONTCONFIG_INCLUDE, FONTCONFIG_LIBS = Package( "fontconfig", "expat" )
+	GL_FLAGS, GL_INCLUDE, GL_LIBS = "", "", "-lglew32 -lopengl32"
 end
 
