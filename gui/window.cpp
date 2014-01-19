@@ -85,6 +85,7 @@ void window::paint( void )
 {
 	auto canvas = _window->canvas();
 	glViewport( 0, 0, _window->width(), _window->height() );
+	canvas->ortho( 0, _window->width(), 0, _window->height() );
 	auto style = application::current()->get_style();
 	if ( style )
 		style->background( canvas );
