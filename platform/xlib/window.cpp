@@ -10,6 +10,7 @@
 #include <stdexcept>
 
 #include <gl/opengl.h>
+#include <gl/check.h>
 #include <GL/glx.h>
 
 namespace {
@@ -34,19 +35,19 @@ static int visual_attribs[] =
 	None
 };
 
+/*
 static bool isExtensionSupported(const char *extList, const char *extension)
 {
   const char *start;
   const char *where, *terminator;
 
-  /* Extension names should not have spaces. */
+  // Extension names should not have spaces.
   where = strchr(extension, ' ');
   if (where || *extension == '\0')
     return false;
 
-  /* It takes a bit of care to be fool-proof about parsing the
-     OpenGL extensions string. Don't be fooled by sub-strings,
-     etc. */
+  // It takes a bit of care to be fool-proof about parsing the
+  // OpenGL extensions string. Don't be fooled by sub-strings, etc.
   for (start=extList;;) {
     where = strstr(start, extension);
 
@@ -64,6 +65,7 @@ static bool isExtensionSupported(const char *extList, const char *extension)
 
   return false;
 }
+*/
 
 }
 
@@ -76,6 +78,11 @@ window::window( Display *dpy )
 	: _display( dpy )
 {
 	precondition( _display, "null display" );
+
+	glXCreateContextAttribsARB = (GLXContext(*)(Display* dpy, GLXFBConfig config, GLXContext share_context, Bool direct, const int *attrib_list))glXGetProcAddressARB((GLubyte*)"glXCreateContextAttribsARB");
+	glXChooseFBConfig = (GLXFBConfig*(*)(Display *dpy, int screen, const int *attrib_list, int *nelements))glXGetProcAddressARB((GLubyte*)"glXChooseFBConfig");
+	glXGetVisualFromFBConfig = (XVisualInfo*(*)(Display *dpy, GLXFBConfig config))glXGetProcAddressARB((GLubyte*)"glXGetVisualFromFBConfig");
+	glXGetFBConfigAttrib = (int(*)(Display *dpy, GLXFBConfig config, int attribute, int *value))glXGetProcAddressARB((GLubyte*)"glXGetFBConfigAttrib");
 
 	// Check GLX version.  Version 1.3 is needed for FBConfig
 	int glx_major, glx_minor;
@@ -131,30 +138,41 @@ window::window( Display *dpy )
 	_win = XCreateWindow( _display, root, 0, 0, 320, 240, 0, vi->depth, InputOutput, vi->visual, CWBorderPixel | CWColormap | CWEventMask, &swa );
 
 	// Get the default screen's GLX extension list
-	const char *glxExts = glXQueryExtensionsString( _display, DefaultScreen( _display ) );
+//	const char *glxExts = glXQueryExtensionsString( _display, DefaultScreen( _display ) );
 
 	// NOTE: It is not necessary to create or make current to a context before
 	// calling glXGetProcAddressARB
 	auto glXCreateContextAttribsARB = (glXCreateContextAttribsARBProc)glXGetProcAddressARB( (const GLubyte *) "glXCreateContextAttribsARB" );
 
+//	GLXContext tmp = glXCreateNewContext( _display, bestFbc, GLX_RGBA_TYPE, 0, True );
+//	glXMakeCurrent( _display, _win, tmp );
 	// Check for the GLX_ARB_create_context extension string and the function.
-	if ( !isExtensionSupported( glxExts, "GLX_ARB_create_context" ) || !glXCreateContextAttribsARB )
-	{
-		// If either is not present, use GLX 1.3 context creation method.
-		_glc = glXCreateNewContext( _display, bestFbc, GLX_RGBA_TYPE, 0, True );
-	}
-	else
+//	if ( glxewIsSupported( "GLX_ARB_create_context" ) == 1 )
 	{
 		// If it does, try to get a GL 4.0 context!
-		int context_attribs[] =
+		int atrributes[] =
 		{
-			GLX_CONTEXT_MAJOR_VERSION_ARB, 4,
+			GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
 			GLX_CONTEXT_MINOR_VERSION_ARB, 0,
 			None
 		};
 
-		_glc = glXCreateContextAttribsARB( _display, bestFbc, 0, True, context_attribs );
+		_glc = glXCreateContextAttribsARB( _display, bestFbc, 0, True, atrributes );
+
+		glXMakeCurrent( _display, _win, _glc );
+//		glXDestroyContext( _display, tmp );
 	}
+//	else
+//		throw std::runtime_error( "opengl 4 not supported" );
+
+	checkgl();
+	glewExperimental = true;
+	GLenum err = glewInit();
+	checkgl();
+	if ( err != GLEW_OK )
+		throw std::runtime_error( reinterpret_cast<const char *>( glewGetErrorString( err ) ) );
+
+	_canvas = std::make_shared<draw::canvas>();
 
 	// Sync to ensure any errors generated are processed.
 	XSync( _display, False );
@@ -249,6 +267,7 @@ gl::context window::context( void )
 
 std::shared_ptr<draw::canvas> window::canvas( void )
 {
+	glXMakeCurrent( _display, _win, _glc );
 	return _canvas;
 }
 
