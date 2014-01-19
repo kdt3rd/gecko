@@ -61,8 +61,9 @@ elseif System() == "Darwin" then
 	SubDir( "fc", vars )
 	SubDir( "cocoa", vars )
 elseif System() == "Windows" then
-	table.insert( platform.srcs, "windows.cpp" )
+	table.insert( platform.srcs, "mswin.cpp" )
 	SubDir( "mswin", vars )
+	SubDir( "fc", vars )
 end
 --SubDir( "dummy", vars )
 
