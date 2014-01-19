@@ -89,7 +89,7 @@ const std::map<KeySym,platform::scancode> sym2code =
 	{ XK_F22, platform::scancode::KEY_F22 },
 	{ XK_F23, platform::scancode::KEY_F23 },
 	{ XK_F24, platform::scancode::KEY_F24 },
-	{ XK_Execute, platform::scancode::KEY_EXECUTE},
+//	{ XK_Execute, platform::scancode::KEY_EXECUTE},
 	{ XK_Help, platform::scancode::KEY_HELP },
 	{ XK_Menu, platform::scancode::KEY_MENU },
 	{ XK_Select, platform::scancode::KEY_SELECT },
