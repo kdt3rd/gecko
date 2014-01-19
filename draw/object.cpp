@@ -19,7 +19,7 @@ void object::draw( gl::context &ctxt )
 	if ( _program )
 	{
 		ctxt.use_program( _program );
-		_program->set_uniform( "mvpMatrix", ctxt.current_matrix() );
+		_program->set_uniform( "mvp_matrix", ctxt.current_matrix() );
 	}
 
 	std::vector<gl::bound_texture> bindings;
