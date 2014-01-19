@@ -48,7 +48,7 @@ public:
 
 	void mipmap( void )
 	{
-		glGenerateMipmap( _target );
+//		glGenerateMipmap( _target );
 	}
 
 private:
