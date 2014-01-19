@@ -68,6 +68,17 @@ struct gl_data_type<float>
 
 ////////////////////////////////////////
 
+enum class uniform_type
+{
+	FLOAT = GL_FLOAT,
+	FLOAT_VEC2 = GL_FLOAT_VEC2,
+	FLOAT_VEC4 = GL_FLOAT_VEC4,
+	FLOAT_MAT4 = GL_FLOAT_MAT4,
+	OTHER = 0,
+};
+
+////////////////////////////////////////
+
 enum class image_type
 {
 	UNSIGNED_BYTE = GL_UNSIGNED_BYTE,
