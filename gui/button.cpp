@@ -44,7 +44,6 @@ void button::set_pressed( bool p )
 
 void button::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
-	std::cout << "Drawing button!" << std::endl;
 	auto style = application::current_style();
 	style->button_frame( canvas, *this, _pressed );
 
