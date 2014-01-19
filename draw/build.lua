@@ -7,6 +7,7 @@ srcs = {
 	"canvas.cpp";
 	"paint.cpp";
 	"geometry.cpp";
+	"composite.cpp";
 }
 
 tess = {
