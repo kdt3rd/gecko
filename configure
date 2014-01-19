@@ -237,6 +237,13 @@ function SubDir( dir, vars )
 	assert( newfile, err )
 	newfile()
 
+    -- Load extra file (if present)
+    if posix.access( SourceFile( "build_extra.lua" ), "r" ) then
+        local extrafile, err = loadfile( SourceFile( "build_extra.lua" ), "bt", env_copy )
+        assert( extrafile, err )
+        extrafile()
+    end
+
 	-- Close the ninja file
 	ninja:close()
 

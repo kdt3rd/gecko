@@ -2,3 +2,5 @@ build
 debug
 release
 mingw
+test
+build_extra.lua
