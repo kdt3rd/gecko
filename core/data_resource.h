@@ -1,48 +1,41 @@
 
 #pragma once
 
-#include <type_traits>
+#include <tuple>
+#include <string>
+#include <vector>
+#include <initializer_list>
 
 namespace core
 {
 
 ////////////////////////////////////////
 
-template<typename T>
+typedef std::tuple<const char *,const char *,size_t> resource;
+
+////////////////////////////////////////
+
 class data_resource
 {
 public:
-	typedef typename std::decay<T>::type D;
-
-	data_resource( D data )
+	data_resource( std::initializer_list<resource> data )
 		: _data( data )
 	{
 	}
 
 	std::string operator()( const std::string &filename )
 	{
-		D d = _data;
-		while ( d->name != nullptr )
+		for ( auto t: _data )
 		{
-			if ( filename == d->name )
-				return std::string( d->start, d->end );
-			++d;
+			if ( filename == std::get<0>( t ) )
+				return std::string( std::get<1>( t ), std::get<2>( t ) );
 		}
 		throw std::runtime_error( "resource file not found" );
 	}
 
-
 private:
-	const D _data;
+	std::vector<resource> _data;
 };
-
-////////////////////////////////////////
-
-template<typename T>
-data_resource<T> resource( T &data )
-{
-	return data_resource<T>( data );
-}
 
 ////////////////////////////////////////
 

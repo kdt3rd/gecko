@@ -30,5 +30,35 @@ shaders = {
 	"single_color.frag";
 }
 
-Library( "gui", Compile( srcs ), DataCompile( "shaders", table.unpack( shaders ) ), LinkLibs( "platform", "layout", "utf" ) );
+local cpp_shaders = {
+	"#include \"shaders.h\"";
+	"using core::resource;";
+	"namespace gui";
+	"{";
+	"	core::data_resource shaders( {";
+}
+for i, file in pairs( shaders ) do
+	local data = io.open( SourceFile( file ), "r" )
+	data = data:read( "*a" )
+	table.insert( cpp_shaders, string.format( "\tresource { \"%s\",", file ) )
+	table.insert( cpp_shaders, "\t\t{" )
+	BinaryToCString( data, cpp_shaders, "\t\t\t" )
+	table.insert( cpp_shaders, string.format( "\t\t}, %d", #data ) )
+	table.insert( cpp_shaders, "\t}," )
+end
+table.insert( cpp_shaders, "\t} );" )
+table.insert( cpp_shaders, "}" )
+table.insert( srcs, CreateFile( "shaders.cpp", cpp_shaders ) )
+
+local h_shaders = {
+	"#pragma once";
+	"#include <core/data_resource.h>";
+	"namespace gui";
+	"{";
+	"extern core::data_resource shaders;";
+	"}";
+}
+CreateFile( "shaders.h", h_shaders )
+
+Library( "gui", Compile( srcs ), LinkLibs( "platform", "layout", "utf" ) );
 

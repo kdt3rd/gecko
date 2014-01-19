@@ -5,25 +5,18 @@
 #include <draw/polylines.h>
 #include <core/contract.h>
 #include "application.h"
-#include <core/data_resource.h>
 #include <shaders.h>
 
 namespace
 {
-	auto resource = core::resource( shaders );
 
-	std::shared_ptr<gl::program> make_program( gl::context &ctxt, const std::string &vname, const std::string &fname )
-	{
-		auto vshader = ctxt.new_shader( gl::shader::type::VERTEX, resource( vname ) );
-		auto fshader = ctxt.new_shader( gl::shader::type::FRAGMENT, resource( fname ) );
-		return ctxt.new_program( vshader, fshader );
-	}
+std::shared_ptr<gl::program> make_program( gl::context &ctxt, const std::string &vname, const std::string &fname )
+{
+	auto vshader = ctxt.new_shader( gl::shader::type::VERTEX, gui::shaders( vname ) );
+	auto fshader = ctxt.new_shader( gl::shader::type::FRAGMENT, gui::shaders( fname ) );
+	return ctxt.new_program( vshader, fshader );
 }
 
-////////////////////////////////////////
-
-namespace
-{
 core::color bg { 0.9294, 0.9294, 0.9294 };
 
 core::color border1 { 0.6039, 0.6039, 0.6039 };

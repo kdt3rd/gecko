@@ -1147,6 +1147,32 @@ function QtResource( name, ...  )
 	return ret
 end
 
+function BinaryToCString( data, out, pre )
+	local str = ( pre or "" ) .. "\""
+    for i = 1, #data do
+       	str = str .. string.format( '\\x%02X', data:byte(i) )
+        if i % 16 == 0 then
+			table.insert( out, str .. "\"" )
+			str = ( pre or "" ) .. "\""
+		end
+    end
+	if #str > 0 then
+		table.insert( out, str .. "\"" )
+	end
+end
+
+function CreateFile( filename, text )
+	local file = BuildFile( filename )
+	if file_diff( file, text ) then
+		local fh = io.open( file, "w+" )
+		for i = 1, #text do
+			fh:write( text[i], '\n' )
+		end
+		fh:close()
+	end
+	return file
+end
+
 ----------------------------------------
 -- Flatten everything into a single list
 ----------------------------------------
