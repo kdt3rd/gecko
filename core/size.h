@@ -42,6 +42,11 @@ public:
 		return { _w + s._w, _h + s._h };
 	}
 
+	bool operator<( const size &o ) const
+	{
+		return _w < o._w || ( _w == o._w && _h < o._h );
+	}
+
 	void ceil( void )
 	{
 		_w = std::ceil( _w );
