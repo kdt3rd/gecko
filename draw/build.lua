@@ -8,6 +8,7 @@ srcs = {
 	"paint.cpp";
 	"geometry.cpp";
 	"composite.cpp";
+	"gradient.cpp";
 }
 
 tess = {
