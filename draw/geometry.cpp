@@ -25,8 +25,8 @@ size_t circle_precision( double r )
 	double error = 0.0;
 	do
 	{
-		error = r * ( 1 - std::cos( PI / n ) );
 		n = n * 2;
+		error = r * ( 1 - std::cos( PI / n ) );
 	} while ( error > 1.0 );
 
 	return n;
