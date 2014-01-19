@@ -123,7 +123,7 @@ void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 					color( color::space::HSL, h, 1.0, 0.0 ),
 				};
 //				paint.set_fill_mesh( m, c );
-				canvas->draw_path( m, paint );
+//				canvas->draw_path( m, paint );
 				break;
 			}
 

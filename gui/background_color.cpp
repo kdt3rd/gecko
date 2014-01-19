@@ -22,7 +22,7 @@ background_color::~background_color( void )
 
 void background_color::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
-	canvas->fill( *this, _color.value() );
+//	canvas->fill( *this, _color.value() );
 	background::paint( canvas );
 }
 

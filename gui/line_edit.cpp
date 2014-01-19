@@ -38,24 +38,24 @@ void line_edit::paint( const std::shared_ptr<draw::canvas> &c )
 
 	const std::string &str = _text.value();
 
-	core::point p = c->align_text( _font.value(), str, *this, _align.value() );
+//	core::point p = c->align_text( _font.value(), str, *this, _align.value() );
 
 
 	draw::paint paint;
 	paint.set_fill_color( _color.value() );
-	c->draw_text( _font.value(), p, str, paint );
+//	c->draw_text( _font.value(), p, str, paint );
 
 	draw::font_extents fex = _font.value()->extents();
 	draw::text_extents tex = _font.value()->extents( str.substr( 0, _cursor ) );
 
 	core::path path;
-	path.move_to( p );
+//	path.move_to( p );
 	path.move_by( { tex.x_advance, fex.descent } );
 	path.line_by( { 0, -fex.height } );
 
 	draw::paint pen;
 	pen.set_stroke_color( _color.value() );
-	c->draw_path( path, pen );
+//	c->draw_path( path, pen );
 }
 
 ////////////////////////////////////////

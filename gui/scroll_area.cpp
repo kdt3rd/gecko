@@ -24,7 +24,7 @@ void scroll_area::paint( const std::shared_ptr<draw::canvas> &canvas )
 	if ( _widget )
 	{
 		canvas->save();
-		canvas->clip( *this );
+// TODO		canvas->clip( *this );
 		_widget->paint( canvas );
 		canvas->restore();
 	}
