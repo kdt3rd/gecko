@@ -112,23 +112,20 @@ LDFlags( "-L" .. build_dir .. "/lib" )
 
 Include( source_dir .. "/lib" )
 
---BOTAN_FLAGS, BOTAN_INCLUDE, BOTAN_LIBS = Package( "botan-1.10" )
---SDL_FLAGS, SDL_INCLUDE, SDL_LIBS = Package( "sdl2" )
 
 if System() == "Linux" then
-	CAIRO_FLAGS, CAIRO_INCLUDE, CAIRO_LIBS = Package( "cairo", "cairo-xlib" )
 	XLIB_FLAGS, XLIB_INCLUDE, XLIB_LIBS = Package( "x11" )
 	XCB_FLAGS, XCB_INCLUDE, XCB_LIBS = Package( "xcb", "xcb-keysyms" )
 	FREETYPE_FLAGS, FREETYPE_INCLUDE, FREETYPE_LIBS = Package( "freetype2" )
 	FONTCONFIG_FLAGS, FONTCONFIG_INCLUDE, FONTCONFIG_LIBS = Package( "fontconfig" )
 	GL_FLAGS, GL_INCLUDE, GL_LIBS = Package( "glew" )
+--BOTAN_FLAGS, BOTAN_INCLUDE, BOTAN_LIBS = Package( "botan-1.10" )
 elseif System() == "Darwin" then
 	COCOA_FLAGS, COCOA_INCLUDE, COCOA_LIBS = Package( "Cocoa" )
 	FREETYPE_FLAGS, FREETYPE_INCLUDE, FREETYPE_LIBS = Package( "freetype2" )
 	FONTCONFIG_FLAGS, FONTCONFIG_INCLUDE, FONTCONFIG_LIBS = Package( "fontconfig" )
 	GL_FLAGS, GL_INCLUDE, GL_LIBS = Package( "OpenGL" )
 elseif System() == "Windows" then
-	CAIRO_FLAGS, CAIRO_INCLUDE, CAIRO_LIBS = Package( "cairo", "cairo-win32", "cairo-png", "pixman-1", "zlib" )
 	FREETYPE_FLAGS, FREETYPE_INCLUDE, FREETYPE_LIBS = Package( "freetype2" )
 	FONTCONFIG_FLAGS, FONTCONFIG_INCLUDE, FONTCONFIG_LIBS = Package( "fontconfig", "expat" )
 	GL_FLAGS, GL_INCLUDE, GL_LIBS = "", "", "-lglew32 -lopengl32"
