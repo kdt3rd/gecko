@@ -5,15 +5,15 @@
 #include <draw/polylines.h>
 #include <core/contract.h>
 #include "application.h"
-#include <shaders.h>
+#include <draw/shaders.h>
 
 namespace
 {
 
 std::shared_ptr<gl::program> make_program( gl::context &ctxt, const std::string &vname, const std::string &fname )
 {
-	auto vshader = ctxt.new_shader( gl::shader::type::VERTEX, gui::shaders( vname ) );
-	auto fshader = ctxt.new_shader( gl::shader::type::FRAGMENT, gui::shaders( fname ) );
+	auto vshader = ctxt.new_shader( gl::shader::type::VERTEX, draw::shaders( vname ) );
+	auto fshader = ctxt.new_shader( gl::shader::type::FRAGMENT, draw::shaders( fname ) );
 	return ctxt.new_program( vshader, fshader );
 }
 
