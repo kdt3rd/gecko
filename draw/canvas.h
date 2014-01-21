@@ -3,9 +3,9 @@
 
 #include <memory>
 #include <core/alignment.h>
-#include "paint.h"
 #include "font.h"
-#include "gradient.h"
+#include <core/gradient.h>
+#include <core/paint.h>
 #include <core/path.h>
 #include <core/rect.h>
 #include <gl/context.h>
@@ -26,7 +26,7 @@ public:
 	/// @brief Destructor
 	virtual ~canvas( void );
 
-	std::shared_ptr<gl::texture> gradient( draw::gradient &g, size_t n = 128 );
+	std::shared_ptr<gl::texture> gradient( core::gradient &g, size_t n = 128 );
 /*
 	/// @brief Fill the entire canvas
 	/// @param c Color to fill with

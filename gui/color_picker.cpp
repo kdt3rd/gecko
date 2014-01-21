@@ -47,7 +47,7 @@ void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 	static_assert( n%4 == 0, "invalid number of segments" );
 //	double slice = PI / n;
 
-	draw::paint paint;
+	core::paint paint;
 	for ( size_t i = 0; i < n; ++i )
 	{
 		double a = i * 2 * PI / n;

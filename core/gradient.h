@@ -3,9 +3,9 @@
 
 #include <vector>
 #include <memory>
-#include <core/color.h>
+#include "color.h"
 
-namespace draw
+namespace core
 {
 
 ////////////////////////////////////////
@@ -23,25 +23,25 @@ public:
 	{
 	}
 
-	gradient( std::initializer_list<std::pair<double,core::color>> l )
+	gradient( std::initializer_list<std::pair<double,color>> l )
 		: _stops( l )
 	{
 	}
 
 	~gradient( void ) {}
 
-	void add_stop( double v, const core::color &c ) { _stops.emplace_back( v, c ); }
+	void add_stop( double v, const color &c ) { _stops.emplace_back( v, c ); }
 
-	core::color sample( double v ) const;
+	color sample( double v ) const;
 
-	const std::vector<std::pair<double,core::color>> &stops( void ) const { return _stops; }
+	const std::vector<std::pair<double,color>> &stops( void ) const { return _stops; }
 
 	gradient &operator=( const gradient &g ) { _stops = g._stops; return *this; }
 
 private:
 	gradient( gradient && ) = delete;
 
-	std::vector<std::pair<double,core::color>> _stops;
+	std::vector<std::pair<double,color>> _stops;
 };
 
 ////////////////////////////////////////

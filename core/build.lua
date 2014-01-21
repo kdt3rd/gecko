@@ -7,6 +7,8 @@ srcs = {
 	"color.cpp";
 	"path.cpp";
 	"string.cpp";
+	"gradient.cpp";
+	"paint.cpp";
 }
 
 Library( "core", Compile( srcs ) );

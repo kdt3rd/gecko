@@ -1,7 +1,7 @@
 
 #include "paint.h"
 
-namespace draw
+namespace core
 {
 
 ////////////////////////////////////////
@@ -12,7 +12,7 @@ paint::paint( void )
 
 ////////////////////////////////////////
 
-paint::paint( const core::color &c )
+paint::paint( const color &c )
 	: _stroke_color( c )
 {
 }

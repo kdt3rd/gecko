@@ -4,12 +4,12 @@
 
 ////////////////////////////////////////
 
-namespace draw
+namespace core
 {
 
 ////////////////////////////////////////
 
-core::color gradient::sample( double v ) const
+color gradient::sample( double v ) const
 {
 	size_t i = 0;
 	while ( i < _stops.size() )
@@ -27,7 +27,7 @@ core::color gradient::sample( double v ) const
 		double range = _stops[i].first - _stops[i-1].first;
 		double mix = ( _stops[i].first - v ) / range;
 
-		return core::color::mix( _stops[i].second, _stops[i-1].second, mix );
+		return color::mix( _stops[i].second, _stops[i-1].second, mix );
 	}
 
 	return _stops.back().second;

@@ -31,7 +31,7 @@ canvas::~canvas( void )
 
 ////////////////////////////////////////
 
-std::shared_ptr<gl::texture> canvas::gradient( draw::gradient &g, size_t n )
+std::shared_ptr<gl::texture> canvas::gradient( core::gradient &g, size_t n )
 {
 	std::vector<uint8_t> bytes( n * 4 );
 	for ( size_t i = 0; i < n; ++i )

@@ -20,7 +20,7 @@ std::shared_ptr<gl::program> make_program( gl::context &ctxt, const std::string 
 core::color bg { 0.9294, 0.9294, 0.9294 };
 
 core::color border1 { 0.6039, 0.6039, 0.6039 };
-draw::gradient grad1
+core::gradient grad1
 {
 	{ 0.00, { 1.0000, 1.0000, 1.0000 } },
 	{ 0.22, { 1.0000, 1.0000, 1.0000 } },
@@ -32,7 +32,7 @@ draw::gradient grad1
 };
 
 core::color border2 { 0.3059, 0.2863, 0.4314 };
-draw::gradient grad2
+core::gradient grad2
 {
 	{ 0.00, { 0.7804, 0.8039, 0.8275 } },
 	{ 0.06, { 0.6784, 0.7059, 0.7608 } },
@@ -117,7 +117,7 @@ void cocoa_style::button_frame( const std::shared_ptr<draw::canvas> &c, const co
 
 void cocoa_style::line_edit_frame( const std::shared_ptr<draw::canvas> &c, const core::rect &r, bool focused )
 {
-	draw::paint paint;
+	core::paint paint;
 
 	paint.set_stroke_color( border1 );
 	paint.set_stroke_width( 1.0 );
@@ -149,7 +149,7 @@ void cocoa_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const c
 		r.set_height( 7.0 );
 	}
 
-	draw::paint p;
+	core::paint p;
 	p.set_stroke_color( border2 );
 	p.set_stroke_width( 1.0 );
 	p.set_fill_linear( r.top_left(), r.bottom_left(), grad2 );
@@ -164,7 +164,7 @@ void cocoa_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const c
 
 void cocoa_style::slider_button( const std::shared_ptr<draw::canvas> &c, const core::rect &r, bool pressed, double val )
 {
-	draw::paint p;
+	core::paint p;
 
 	if ( pressed )
 	{
@@ -193,8 +193,8 @@ void cocoa_style::construct( const std::shared_ptr<draw::canvas> &c )
 {
 	if ( !_constructed )
 	{
-		_grad1 = grad1.generate( *c );
-		_grad2 = grad2.generate( *c );
+		_grad1 = c->gradient( grad1 );
+		_grad2 = c->gradient( grad2 );
 
 		// Button drawing
 		{

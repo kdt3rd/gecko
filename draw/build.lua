@@ -5,10 +5,8 @@ srcs = {
 	"polylines.cpp";
 	"clipper.cpp";
 	"canvas.cpp";
-	"paint.cpp";
 	"geometry.cpp";
 	"composite.cpp";
-	"gradient.cpp";
 }
 
 tess = {
