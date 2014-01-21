@@ -2,6 +2,7 @@
 #include "cocoa_style.h"
 #include <draw/composite.h>
 #include <draw/object.h>
+#include <draw/stretchable.h>
 #include <draw/polylines.h>
 #include <core/contract.h>
 #include "application.h"
@@ -9,13 +10,6 @@
 
 namespace
 {
-
-std::shared_ptr<gl::program> make_program( gl::context &ctxt, const std::string &vname, const std::string &fname )
-{
-	auto vshader = ctxt.new_shader( gl::shader::type::VERTEX, draw::shaders( vname ) );
-	auto fshader = ctxt.new_shader( gl::shader::type::FRAGMENT, draw::shaders( fname ) );
-	return ctxt.new_program( vshader, fshader );
-}
 
 core::color bg { 0.9294, 0.9294, 0.9294 };
 
@@ -152,7 +146,7 @@ void cocoa_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const c
 	core::paint p;
 	p.set_stroke_color( border2 );
 	p.set_stroke_width( 1.0 );
-	p.set_fill_linear( r.top_left(), r.bottom_left(), grad2 );
+	p.set_fill_linear( r.top_left(), r.size(), grad2 );
 
 	core::path rpath;
 	rpath.rounded_rect( r.top_left(), r.bottom_right(), 2 );
@@ -170,13 +164,13 @@ void cocoa_style::slider_button( const std::shared_ptr<draw::canvas> &c, const c
 	{
 		p.set_stroke_color( border2 );
 		p.set_stroke_width( 1.0 );
-		p.set_fill_linear( r.top_left(), r.bottom_left(), grad2 );
+		p.set_fill_linear( r.top_left(), r.size(), grad2 );
 	}
 	else
 	{
 		p.set_stroke_color( border1 );
 		p.set_stroke_width( 1.0 );
-		p.set_fill_linear( r.top_left(), r.bottom_left(), grad1 );
+		p.set_fill_linear( r.top_left(), r.size(), grad1 );
 	}
 
 	core::point center = { r.x( val, slider_size( r ) ), r.y( 0.5 ) };
@@ -196,69 +190,20 @@ void cocoa_style::construct( const std::shared_ptr<draw::canvas> &c )
 		_grad1 = c->gradient( grad1 );
 		_grad2 = c->gradient( grad2 );
 
-		// Button drawing
 		{
-			draw::polylines p;
-			{
-				core::path tmp;
-				tmp.rounded_rect( { 0.5, 0.5 }, 19, 19, 3 );
-				tmp.replay( p );
-			}
+			// Button drawing
+			core::path path;
+			path.rounded_rect( { 0, 0 }, 20, 20, 3 );
 
-			auto fill = std::make_shared<draw::object>();
-			auto fillprog = make_program( *c, "quadrant.vert", "linear_gradient.frag" );
-			checkgl();
-			{
-				fillprog->set_uniform( "txt", 0 );
-				fillprog->set_uniform( "origin", core::point( 0.5, 0.5 ) );
-				fillprog->set_uniform( "dir", core::point( 0, 19 ) );
-				fillprog->set_uniform( "center", core::point( 10, 10 ) );
-				fillprog->set_uniform( "top_left", core::point( { 100, 100 } ) );
-				fillprog->set_uniform( "quad_size", core::size( { 250, 21 } ) );
-				checkgl();
+			core::paint paint( border1 );
+			paint.set_fill_linear( { 0, 0 }, { 0, 20 }, grad1 );
 
-				auto m = p.filled();
-				fill->set_mesh( *c, m, fillprog->get_attribute_location( "position" ) );
-				checkgl();
-
-				fill->set_program( fillprog );
-				checkgl();
-
-				fill->add_texture( _grad1 );
-				checkgl();
-			}
-
-			auto outline = std::make_shared<draw::object>();
-			auto outprog = make_program( *c, "quadrant.vert", "single_color.frag" );
-			{
-				outprog->set_uniform( "color", border1 );
-				outprog->set_uniform( "center", core::point( { 10, 10 } ) );
-				checkgl();
-
-				auto m = p.stroked( 1.0 ).filled();
-				outline->set_mesh( *c, m, outprog->get_attribute_location( "position" ) );
-				checkgl();
-
-				outline->set_program( outprog );
-				checkgl();
-			}
-
-			auto result = std::make_shared<draw::composite>();
-			result->add( fill );
-			result->add( outline );
+			auto result = std::make_shared<draw::stretchable>();
+			result->create( c, path, paint, { 10, 10 } );
 
 			draw_button_frame = [=]( const std::shared_ptr<draw::canvas> &c, const core::rect &r )
 			{
-				core::point tl = r.top_left() - core::point( { 0.5, 0.5 } );
-
-				c->use_program( fillprog );
-				fillprog->set_uniform( "top_left", tl );
-				fillprog->set_uniform( "quad_size", r.size() );
-
-				c->use_program( outprog );
-				outprog->set_uniform( "top_left", tl );
-				outprog->set_uniform( "quad_size", r.size() );
-
+				result->set( c, r );
 				return result;
 			};
 		}
