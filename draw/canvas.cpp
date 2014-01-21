@@ -1,5 +1,6 @@
 
 #include "canvas.h"
+#include <draw/shaders.h>
 
 ////////////////////////////////////////
 
@@ -31,7 +32,7 @@ canvas::~canvas( void )
 
 ////////////////////////////////////////
 
-std::shared_ptr<gl::texture> canvas::gradient( core::gradient &g, size_t n )
+std::shared_ptr<gl::texture> canvas::gradient( const core::gradient &g, size_t n )
 {
 	std::vector<uint8_t> bytes( n * 4 );
 	for ( size_t i = 0; i < n; ++i )
@@ -50,6 +51,15 @@ std::shared_ptr<gl::texture> canvas::gradient( core::gradient &g, size_t n )
 		txt.image_2d( gl::format::RGBA, bytes.size(), 1, gl::image_type::UNSIGNED_BYTE, bytes.data() );
 	}
 	return ret;
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<gl::program> canvas::program( const std::string &vert, const std::string &frag )
+{
+	auto vshader = new_shader( gl::shader::type::VERTEX, draw::shaders( vert ) );
+	auto fshader = new_shader( gl::shader::type::FRAGMENT, draw::shaders( frag ) );
+	return new_program( vshader, fshader );
 }
 
 ////////////////////////////////////////

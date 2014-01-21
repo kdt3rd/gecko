@@ -1,12 +1,13 @@
 
 srcs = {
 	"drawable.cpp";
-	"object.cpp";
 	"polylines.cpp";
 	"clipper.cpp";
 	"canvas.cpp";
 	"geometry.cpp";
 	"composite.cpp";
+	"object.cpp";
+	"stretchable.cpp";
 }
 
 tess = {

@@ -9,6 +9,7 @@
 #include <core/path.h>
 #include <core/rect.h>
 #include <gl/context.h>
+#include <gl/program.h>
 
 namespace draw
 {
@@ -26,7 +27,10 @@ public:
 	/// @brief Destructor
 	virtual ~canvas( void );
 
-	std::shared_ptr<gl::texture> gradient( core::gradient &g, size_t n = 128 );
+	std::shared_ptr<gl::texture> gradient( const core::gradient &g, size_t n = 128 );
+
+	std::shared_ptr<gl::program> program( const std::string &vert, const std::string &frag );
+
 /*
 	/// @brief Fill the entire canvas
 	/// @param c Color to fill with

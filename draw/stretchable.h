@@ -9,12 +9,14 @@ namespace draw
 
 ////////////////////////////////////////
 
-class object : public drawable
+class stretchable : public drawable
 {
 public:
-	object( void );
+	stretchable( void );
 
-	void create( const std::shared_ptr<canvas> &c, const core::path &path, const core::paint &paint );
+	void create( const std::shared_ptr<canvas> &c, const core::path &path, const core::paint &paint, const core::point &center );
+
+	void set( const std::shared_ptr<canvas> &c, const core::rect &r );
 
 	void draw( gl::context &ctxt ) override;
 

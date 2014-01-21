@@ -1,5 +1,5 @@
 
-#include "object.h"
+#include "stretchable.h"
 #include "mesh.h"
 #include "polylines.h"
 
@@ -8,21 +8,22 @@ namespace draw
 
 ////////////////////////////////////////
 
-object::object( void )
+stretchable::stretchable( void )
 {
 }
 
 ////////////////////////////////////////
 
-void object::create( const std::shared_ptr<canvas> &c, const core::path &path, const core::paint &paint )
+void stretchable::create( const std::shared_ptr<canvas> &c, const core::path &path, const core::paint &paint, const core::point &center )
 {
 	polylines lines;
 	path.replay( lines );
 
 	if ( paint.get_stroke_width() > 0.0 )
 	{
-		_stroke_prog = c->program( "color_mesh.vert", "single_color.frag" );
+		_stroke_prog = c->program( "quadrant.vert", "single_color.frag" );
 		_stroke_prog->set_uniform( "color", paint.get_stroke_color() );
+		_stroke_prog->set_uniform( "center", center );
 		_stroke = c->new_vertex_array();
 		auto mesh = lines.stroked( paint.get_stroke_width() ).filled();
 		mesh.set_attrib_pointers( *c, _stroke, _stroke_prog->get_attribute_location( "position" ) );
@@ -31,8 +32,9 @@ void object::create( const std::shared_ptr<canvas> &c, const core::path &path, c
 
 	if ( paint.has_fill_color() )
 	{
-		_fill_prog = c->program( "color_mesh.vert", "single_color.frag" );
+		_fill_prog = c->program( "quadrant.vert", "single_color.frag" );
 		_fill_prog->set_uniform( "color", paint.get_fill_color() );
+		_fill_prog->set_uniform( "center", center );
 		_fill = c->new_vertex_array();
 		auto mesh = lines.filled();
 		mesh.set_attrib_pointers( *c, _fill, _fill_prog->get_attribute_location( "position" ) );
@@ -40,8 +42,9 @@ void object::create( const std::shared_ptr<canvas> &c, const core::path &path, c
 	}
 	else if ( paint.has_fill_linear() )
 	{
-		_fill_prog = c->program( "position_uv.vert", "linear_gradient.frag" );
+		_fill_prog = c->program( "quadrant.vert", "linear_gradient.frag" );
 		_fill_prog->set_uniform( "txt", 0 );
+		_fill_prog->set_uniform( "center", center );
 		_fill_prog->set_uniform( "origin", paint.get_fill_linear_origin() );
 		_fill_prog->set_uniform( "dir", paint.get_fill_linear_size() );
 		_fill_texture = c->gradient( paint.get_fill_linear_gradient() );
@@ -59,7 +62,19 @@ void object::create( const std::shared_ptr<canvas> &c, const core::path &path, c
 
 ////////////////////////////////////////
 
-void object::draw( gl::context &ctxt )
+void stretchable::set( const std::shared_ptr<canvas> &c, const core::rect &r )
+{
+	c->use_program( _stroke_prog );
+	_stroke_prog->set_uniform( "top_left", r.top_left() );
+	_stroke_prog->set_uniform( "quad_size", r.size() );
+	c->use_program( _fill_prog );
+	_fill_prog->set_uniform( "top_left", r.top_left() );
+	_fill_prog->set_uniform( "quad_size", r.size() );
+}
+
+////////////////////////////////////////
+
+void stretchable::draw( gl::context &ctxt )
 {
 	using target = gl::texture::target;
 
