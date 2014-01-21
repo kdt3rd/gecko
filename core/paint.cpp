@@ -12,8 +12,8 @@ paint::paint( void )
 
 ////////////////////////////////////////
 
-paint::paint( const color &c )
-	: _stroke_color( c )
+paint::paint( const color &c, double w )
+	: _stroke_color( c ), _stroke_width( w )
 {
 }
 
