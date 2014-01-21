@@ -38,6 +38,7 @@ private:
 	std::shared_ptr<draw::font> _default_font;
 	std::shared_ptr<draw::font> _default_bold_font;
 	std::shared_ptr<draw::stretchable> _button_frame;
+	std::shared_ptr<draw::stretchable> _button_frame_down;
 	std::shared_ptr<draw::stretchable> _slider_groove;
 	std::shared_ptr<draw::stretchable> _slider_button;
 
