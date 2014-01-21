@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <memory>
-#include <gl/texture.h>
 #include <core/color.h>
 
 namespace draw
@@ -38,8 +37,6 @@ public:
 	const std::vector<std::pair<double,core::color>> &stops( void ) const { return _stops; }
 
 	gradient &operator=( const gradient &g ) { _stops = g._stops; return *this; }
-
-	std::shared_ptr<gl::texture> generate( gl::context &ctxt );
 
 private:
 	gradient( gradient && ) = delete;
