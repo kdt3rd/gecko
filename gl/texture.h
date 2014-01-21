@@ -15,8 +15,12 @@ class context;
 class bound_texture
 {
 public:
-	bound_texture( void ) = delete;
+	bound_texture( void )
+	{
+	}
+
 	bound_texture( const bound_texture &other ) = delete;
+
 	bound_texture( bound_texture &&other )
 		: _target( other._target )
 	{
@@ -51,6 +55,12 @@ public:
 //		glGenerateMipmap( _target );
 	}
 
+	void operator=( bound_texture &&t )
+	{
+		_target = t._target;
+		t._target = 0;
+	}
+
 private:
 	friend class texture;
 
@@ -60,7 +70,7 @@ private:
 		glBindTexture( _target, txt );
 	}
 
-	GLenum _target;
+	GLenum _target = 0;
 };
 
 
