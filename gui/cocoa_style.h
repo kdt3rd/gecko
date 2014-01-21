@@ -2,7 +2,7 @@
 #pragma once
 
 #include <map>
-#include <draw/drawable.h>
+#include <draw/stretchable.h>
 #include "style.h"
 
 namespace gui
@@ -37,7 +37,9 @@ private:
 
 	std::shared_ptr<draw::font> _default_font;
 	std::shared_ptr<draw::font> _default_bold_font;
-	std::function<std::shared_ptr<draw::drawable>( const std::shared_ptr<draw::canvas> &c, const core::rect &r )> draw_button_frame;
+	std::shared_ptr<draw::stretchable> _button_frame;
+	std::shared_ptr<draw::stretchable> _slider_groove;
+	std::shared_ptr<draw::stretchable> _slider_button;
 
 //	typedef std::tuple<core::size,bool> button_key;
 //	std::map<button_key,std::shared_ptr<draw::drawable>> _button_cache;
