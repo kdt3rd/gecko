@@ -57,6 +57,8 @@ private:
 	int16_t _last_x = 0, _last_y = 0;
 	uint16_t _last_w = 0, _last_h = 0;
 
+	bool _invalid = false;
+
 	GLXContext _glc;
 };
 

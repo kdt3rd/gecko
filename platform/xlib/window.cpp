@@ -252,7 +252,11 @@ void window::set_title( const std::string &t )
 
 void window::invalidate( const core::rect &r )
 {
-	XClearArea( _display, _win, std::floor( r.x() ), std::floor( r.y() ), std::ceil( r.width() ), std::ceil( r.height() ), true );
+	if ( !_invalid )
+	{
+		XClearArea( _display, _win, 0, 0, 0, 0, True );
+		_invalid = true;
+	}
 }
 
 ////////////////////////////////////////
@@ -308,9 +312,11 @@ void window::resize_event( double w, double h )
 
 void window::expose_event( void )
 {
+	_invalid = false;
 	glXMakeCurrent( _display, _win, _glc );
 	exposed();
 	glXSwapBuffers( _display, _win );
+	glFlush();
 	XFlush( _display );
 }
 
