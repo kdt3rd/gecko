@@ -30,7 +30,7 @@ public:
 			if ( filename == std::get<0>( t ) )
 				return std::string( std::get<1>( t ), std::get<2>( t ) );
 		}
-		throw std::runtime_error( "resource file not found" );
+		throw std::runtime_error( "resource file not found: " + filename );
 	}
 
 private:
