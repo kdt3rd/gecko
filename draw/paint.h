@@ -28,9 +28,6 @@ public:
 	paint( const core::color &c );
 	~paint( void );
 	
-	bool has_antialias( void ) const { return _antialias; }
-	void set_antialias( bool on = true ) { _antialias = on; }
-
 	void set_stroke( const core::color &c, double w ) { _stroke_color = c; _stroke_width = w; }
 
 	void set_stroke_color( const core::color &c ) { _stroke_color = c; }
@@ -63,8 +60,6 @@ public:
 	const std::vector<std::pair<double,core::color>> &get_fill_radial_stops( void ) const { precondition( has_fill_radial(), "no fill radial" ); return _fill_radial.grad.stops(); }
 
 private:
-	bool _antialias = true;
-
 	core::color _stroke_color;
 	double _stroke_width = 1.0;
 
