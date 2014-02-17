@@ -11,11 +11,11 @@ namespace xlib
 
 ////////////////////////////////////////
 
-dispatcher::dispatcher( Display *dpy, const std::shared_ptr<keyboard> &k, const std::shared_ptr<mouse> &m )
+dispatcher::dispatcher( const std::shared_ptr<Display> &dpy, const std::shared_ptr<keyboard> &k, const std::shared_ptr<mouse> &m )
 	: _display( dpy ), _keyboard( k ), _mouse( m )
 {
 	precondition( _display, "null display" );
-	_atom_delete_window = XInternAtom( _display, "WM_DELETE_WINDOW", True );
+	_atom_delete_window = XInternAtom( _display.get(), "WM_DELETE_WINDOW", True );
 }
 
 ////////////////////////////////////////
@@ -28,14 +28,14 @@ dispatcher::~dispatcher( void )
 
 int dispatcher::execute( void )
 {
-	XFlush( _display );
+	XFlush( _display.get() );
 	_exit_code = 0;
 
 	bool done = false;
 	XEvent event;
 	while ( !done )
 	{
-		XNextEvent( _display, &event );
+		XNextEvent( _display.get(), &event );
 		switch ( event.type )
 		{
 			case Expose:
@@ -195,7 +195,7 @@ void dispatcher::exit( int code )
 void dispatcher::add_window( const std::shared_ptr<window> &w )
 {
 	_windows[w->id()] = w;
-	XSetWMProtocols( _display, w->id(), &_atom_delete_window, 1 );
+	XSetWMProtocols( _display.get(), w->id(), &_atom_delete_window, 1 );
 }
 
 ////////////////////////////////////////

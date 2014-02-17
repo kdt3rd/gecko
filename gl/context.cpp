@@ -82,6 +82,13 @@ void context::color_mask( bool r, bool g, bool b, bool a )
 
 ////////////////////////////////////////
 
+void context::blend_func( blend_style src, blend_style dst )
+{
+	glBlendFunc( static_cast<GLenum>( src ), static_cast<GLenum>( dst ) );
+}
+
+////////////////////////////////////////
+
 void context::save_matrix( void )
 {
 	_matrix.emplace_back( _matrix.back() );

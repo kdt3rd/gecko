@@ -2,6 +2,7 @@
 #pragma once
 
 #include "opengl.h"
+#include "enums.h"
 #include <vector>
 
 namespace gl
@@ -58,6 +59,11 @@ public:
 	void sub_data( const std::vector<D> &data, size_t offset )
 	{
 		glBufferSubData( _target, offset * sizeof(D), data.size() * sizeof(D), data.data() );
+	}
+
+	void draw( primitive prim, size_t n )
+	{
+		glDrawElements( static_cast<GLenum>( prim ), n, gl_data_type<D>::value, nullptr );
 	}
 
 private:

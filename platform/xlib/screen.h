@@ -2,8 +2,10 @@
 #pragma once
 
 #include <platform/screen.h>
+#include <X11/Xlib.h>
+#include <memory>
 
-namespace x11
+namespace xlib
 {
 
 ////////////////////////////////////////
@@ -13,12 +15,18 @@ class screen : public platform::screen
 {
 public:
 	/// @brief Constructor.
-	screen( void );
+	screen( const std::shared_ptr<Display> &disp, int scr );
 	~screen( void );
 
-	core::size bounds( void ) override;
+	bool is_default( void ) const override;
+
+	core::size bounds( void ) const override;
+
+	core::point dpi( void ) const override;
 
 private:
+	std::shared_ptr<Display> _display;
+	int _screen = 0;
 };
 
 ////////////////////////////////////////

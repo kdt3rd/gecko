@@ -47,7 +47,7 @@ namespace gui
 cocoa_style::cocoa_style( void )
 //   	const std::shared_ptr<draw::canvas> &c  )
 {
-//	_default_font = application::current()->get_font( "Lucida Grande", "Regular", 14.0 );
+	_default_font = application::current()->get_font( "Lucida Grande", "Regular", 14.0 );
 //	postcondition( bool(_default_font), "font for cocoa style not found" );
 
 //	_default_bold_font = application::current()->get_font( "Lucida Grande", "Bold", 14.0 );

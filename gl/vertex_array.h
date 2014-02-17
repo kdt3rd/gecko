@@ -39,9 +39,28 @@ public:
 		}
 	}
 
+	template<typename D, typename E>
+	void attrib_pointer( program::attribute attr, std::shared_ptr<buffer<D>> &buf, const std::vector<E> &components, size_t nPer, size_t stride = 0, size_t offset = 0 )
+	{
+		{
+			auto bb = buf->bind( gl::buffer<D>::target::ARRAY_BUFFER );
+			bb.data( components, gl::usage::STATIC_DRAW );
+			glEnableVertexAttribArray( attr );
+			glVertexAttribPointer( attr, nPer, gl_data_type<D>::value, GL_FALSE, stride * sizeof(D), reinterpret_cast<const GLvoid *>( offset * sizeof(D) ) );
+		}
+	}
+
 	void draw( primitive prim, size_t start, size_t count )
 	{
 		glDrawArrays( static_cast<GLenum>( prim ), start, count );
+	}
+
+	template <typename T>
+	void draw_indices( primitive prim, const std::vector<T> &buf )
+	{
+		glDrawElements( static_cast<GLenum>( prim ), buf.size(),
+						gl_data_type<T>::value,
+						buf.data() );
 	}
 
 private:

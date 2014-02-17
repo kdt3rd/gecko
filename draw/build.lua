@@ -4,7 +4,9 @@ srcs = {
 	"polylines.cpp";
 	"clipper.cpp";
 	"canvas.cpp";
+	"font.cpp";
 	"geometry.cpp";
+	"glyph.cpp";
 	"composite.cpp";
 	"object.cpp";
 	"stretchable.cpp";
@@ -25,9 +27,11 @@ shaders = {
 	"position_uv.vert";
 	"quadrant.vert";
 	"simple.vert";
+	"text.vert";
 	"color_mesh.frag";
 	"linear_gradient.frag";
 	"single_color.frag";
+	"text_bitmap.frag";
 }
 
 local cpp_shaders = {

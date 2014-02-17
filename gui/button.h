@@ -18,7 +18,7 @@ class button : public widget
 {
 public:
 	button( void );
-	button( datum<std::string> &&l, datum<alignment> &&a = alignment::LEFT, datum<core::color> &&c = { 0, 0, 0, 1 }, shared_datum<draw::font> &&f = application::current_style()->default_font() );
+	button( datum<std::string> &&l, datum<alignment> &&a = alignment::CENTER, datum<core::color> &&c = { 0, 0, 0, 1 }, shared_datum<draw::font> &&f = application::current_style()->default_font() );
 	~button( void );
 
 	const std::string &text( void )

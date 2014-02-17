@@ -31,6 +31,11 @@ public:
 
 	std::shared_ptr<gl::program> program( const std::string &vert, const std::string &frag );
 
+
+	virtual core::point align_text( const std::shared_ptr<font> &font, const std::string &utf8, const core::rect &rect, alignment a );
+
+	virtual void draw_text( const std::shared_ptr<font> &font, const core::point &p, const std::string &utf8, const core::paint &c );
+
 /*
 	/// @brief Fill the entire canvas
 	/// @param c Color to fill with
@@ -56,10 +61,6 @@ public:
 	/// @param p The start of the baseline
 	/// @param utf8 The text to draw
 	/// @param c The paint to color with
-	virtual void draw_text( const std::shared_ptr<font> &font, const core::point &p, const std::string &utf8, const paint &c ) = 0;
-
-	virtual core::point align_text( const std::shared_ptr<font> &font, const std::string &text, const core::rect &rect, alignment a );
-
 	virtual void translate( double x, double y ) = 0;
 
 	virtual void clip( const core::rect &r ) = 0;
@@ -72,6 +73,21 @@ public:
 	void restore( void );
 
 //	virtual void screenshot_png( const char *filename ) = 0;
+private:
+	std::shared_ptr<gl::program> _text_program;
+	std::shared_ptr<gl::buffer<float>> _text_texture_vertices;
+	std::shared_ptr<gl::buffer<float>> _text_output_vertices;
+//	std::shared_ptr<gl::buffer<uint16_t>> _text_indices;
+	std::shared_ptr<gl::vertex_array> _text_array;
+	std::vector<float> _text_coord_buf;
+	std::vector<float> _text_texcoord_buf;
+	std::vector<uint16_t> _text_idx_buf;
+	struct GlyphPack
+	{
+		uint32_t version;
+		std::shared_ptr<gl::texture> texture;
+	};
+	std::map<std::shared_ptr<font>, GlyphPack> _font_glyph_cache;
 };
 
 ////////////////////////////////////////
