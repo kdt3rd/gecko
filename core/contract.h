@@ -20,7 +20,8 @@ class postcondition_error : public std::runtime_error
 
 ////////////////////////////////////////
 
-inline void precondition( bool check, const std::string &msg )
+template <typename T>
+inline void precondition( const T &check, const std::string &msg )
 {
 	if ( !check )
 		throw precondition_error( msg );
@@ -28,7 +29,8 @@ inline void precondition( bool check, const std::string &msg )
 
 ////////////////////////////////////////
 
-inline void postcondition( bool check, const std::string &msg )
+template <typename T>
+inline void postcondition( const T &check, const std::string &msg )
 {
 	if ( !check )
 		throw postcondition_error( msg );
