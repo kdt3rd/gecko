@@ -8,11 +8,6 @@
 #include <core/contract.h>
 #include <core/scope_guard.h>
 
-namespace 
-{
-	constexpr double PI = 3.14159265358979323846;
-}
-
 namespace draw
 {
 
