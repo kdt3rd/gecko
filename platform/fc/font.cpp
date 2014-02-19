@@ -200,10 +200,10 @@ font::get_glyph( wchar_t char_code )
 					}
 				}
 
-				float leftX = ( static_cast<double>(gA.x) - 0.5 ) / texNormW;
-				float topY = ( static_cast<double>(gA.y) - 0.5 ) / texNormH;
-				float rightX = ( static_cast<double>(gA.x + h) + 0.5 ) / texNormW;
-				float bottomY = ( static_cast<double>(gA.y + w) + 0.5 ) / texNormH;
+				float leftX = static_cast<double>(gA.x) / texNormW;
+				float topY = static_cast<double>(gA.y) / texNormH;
+				float rightX = static_cast<double>(gA.x + h) / texNormW;
+				float bottomY = static_cast<double>(gA.y + w) / texNormH;
 
 				_glyph_coords.push_back( leftX );
 				_glyph_coords.push_back( bottomY );
@@ -235,10 +235,10 @@ font::get_glyph( wchar_t char_code )
 				}
 
 				// things go in naturally, upper left of bitmap is at x, y
-				float leftX = ( static_cast<double>(gA.x) - 0.5 ) / texNormW;
-				float topY = ( static_cast<double>(gA.y) - 0.5 ) / texNormH;
-				float rightX = ( static_cast<double>(gA.x + w) + 0.5 ) / texNormW;
-				float bottomY = ( static_cast<double>(gA.y + h) + 0.5 ) / texNormH;
+				float leftX = static_cast<double>(gA.x) / texNormW;
+				float topY = static_cast<double>(gA.y) / texNormH;
+				float rightX = static_cast<double>(gA.x + w) / texNormW;
+				float bottomY = static_cast<double>(gA.y + h) / texNormH;
 
 				_glyph_coords.push_back( leftX );
 				_glyph_coords.push_back( topY );
