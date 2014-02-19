@@ -169,11 +169,6 @@ font::get_glyph( wchar_t char_code )
 			double texNormW = static_cast<double>( bmW );
 			double texNormH = static_cast<double>( bmH );
 
-			float leftX = static_cast<double>(gA.x) / texNormW;
-			float topY = static_cast<double>(gA.y) / texNormH;
-			float rightX = static_cast<double>(gA.x + w) / texNormW;
-			float bottomY = static_cast<double>(gA.y + h) / texNormH;
-
 			_glyph_index_offset[char_code] = _glyph_coords.size();
 			int glPitch = slot->bitmap.pitch;
 			if ( gA.flipped( w + 1, h + 1 ) )
@@ -184,19 +179,31 @@ font::get_glyph( wchar_t char_code )
 				// lower left is at x + h, y + w
 				// lower right is at x + h, y
 				uint8_t *bmData = _glyph_bitmap.data();
-				for ( int y = 0; y <= h; ++y )
+				const uint8_t *glData = slot->bitmap.buffer;
+				for ( int y = 0; y <= w; ++y )
 				{
-					const uint8_t *glData = slot->bitmap.buffer + y * glPitch;
-					for ( int x = 0; x <= w; ++x )
+					int destY = gA.y + y;
+					if ( y == w )
 					{
-						int destY = gA.y + w - x;
-						int destX = gA.x + y; 
-						if ( y == h || x == 0 )
+						for ( int x = 0, destX = gA.x; x <= h; ++x, ++destX )
 							bmData[destY*bmW + destX] = 0;
-						else
-							bmData[destY*bmW + destX] = glData[x - 1];
+					}
+					else
+					{
+						int srcX = w - y - 1;
+						int destX = gA.x;
+						for ( int x = 0; x < h; ++x, ++destX )
+						{
+							bmData[destY*bmW + destX] = glData[x*glPitch + srcX];
+						}
+						bmData[destY*bmW + destX] = 0;
 					}
 				}
+
+				float leftX = ( static_cast<double>(gA.x) - 0.5 ) / texNormW;
+				float topY = ( static_cast<double>(gA.y) - 0.5 ) / texNormH;
+				float rightX = ( static_cast<double>(gA.x + h) + 0.5 ) / texNormW;
+				float bottomY = ( static_cast<double>(gA.y + w) + 0.5 ) / texNormH;
 
 				_glyph_coords.push_back( leftX );
 				_glyph_coords.push_back( bottomY );
@@ -228,6 +235,11 @@ font::get_glyph( wchar_t char_code )
 				}
 
 				// things go in naturally, upper left of bitmap is at x, y
+				float leftX = ( static_cast<double>(gA.x) - 0.5 ) / texNormW;
+				float topY = ( static_cast<double>(gA.y) - 0.5 ) / texNormH;
+				float rightX = ( static_cast<double>(gA.x + w) + 0.5 ) / texNormW;
+				float bottomY = ( static_cast<double>(gA.y + h) + 0.5 ) / texNormH;
+
 				_glyph_coords.push_back( leftX );
 				_glyph_coords.push_back( topY );
 				_glyph_coords.push_back( rightX );
@@ -240,6 +252,8 @@ font::get_glyph( wchar_t char_code )
 		}
 
 		draw::text_extents &gle = nglyph->extents();
+
+//		err = FT_Load_Glyph( _face, nglyph->index(), FT_LOAD_TARGET_NORMAL | FT_LOAD_NO_HINTING );
 
 		gle.x_bearing = static_cast<double>( slot->metrics.horiBearingX ) / 64.0;
 		gle.y_bearing = static_cast<double>( slot->metrics.horiBearingY ) / 64.0;
