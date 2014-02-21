@@ -1,5 +1,5 @@
 
-#include "string.h"
+#include "string_util.h"
 
 namespace core
 {

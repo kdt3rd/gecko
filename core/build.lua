@@ -6,7 +6,7 @@ srcs = {
 	"rect.cpp";
 	"color.cpp";
 	"path.cpp";
-	"string.cpp";
+	"string_util.cpp";
 	"gradient.cpp";
 	"paint.cpp";
 	"pack.cpp";

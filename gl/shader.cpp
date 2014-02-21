@@ -2,7 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <stdexcept>
-#include <core/string.h>
+#include <core/string_util.h>
 #include "shader.h"
 
 namespace gl
