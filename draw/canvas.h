@@ -77,7 +77,7 @@ private:
 	std::shared_ptr<gl::program> _text_program;
 	std::shared_ptr<gl::buffer<float>> _text_texture_vertices;
 	std::shared_ptr<gl::buffer<float>> _text_output_vertices;
-//	std::shared_ptr<gl::buffer<uint16_t>> _text_indices;
+	std::shared_ptr<gl::buffer<uint16_t>> _text_indices;
 	std::shared_ptr<gl::vertex_array> _text_array;
 	std::vector<float> _text_coord_buf;
 	std::vector<float> _text_texcoord_buf;

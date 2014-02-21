@@ -1,6 +1,7 @@
 
 #include "canvas.h"
 #include <draw/shaders.h>
+#include <gl/check.h>
 
 ////////////////////////////////////////
 
@@ -148,36 +149,47 @@ canvas::draw_text( const std::shared_ptr<font> &font, const core::point &p, cons
 	else
 		texture = new_texture();
 
+	checkgl();
 	auto txt = texture->bind( gl::texture::target::TEXTURE_2D );
+	checkgl();
 
 	if ( storeTex )
 	{
 		txt.set_wrapping( gl::wrapping::CLAMP_TO_EDGE );
+	checkgl();
 		txt.set_filters( gl::filter::LINEAR, gl::filter::LINEAR );
+	checkgl();
 
 		txt.image_2d( gl::format::RED,
 					  font->glyph_texture_size_x(),
 					  font->glyph_texture_size_y(),
 					  gl::image_type::UNSIGNED_BYTE,
 					  font->glyph_texture().data() );
+	checkgl();
 
 		_font_glyph_cache[font] = { font->glyph_version(), texture };
 	}
 
 	if ( ! _text_texture_vertices )
 		_text_texture_vertices = new_buffer<float>();
+	checkgl();
 	if ( ! _text_output_vertices )
 		_text_output_vertices = new_buffer<float>();
-//	if ( ! _text_indices )
-//		_text_indices = new_buffer<uint16_t>();
+	checkgl();
+	if ( ! _text_indices )
+		_text_indices = new_buffer<uint16_t>();
 	if ( ! _text_array )
 		_text_array = new_vertex_array();
+	checkgl();
 	if ( ! _text_program )
 		_text_program = program( "text.vert", "text_bitmap.frag" );
+	checkgl();
 
 	use_program( _text_program );
+	checkgl();
 
 	auto ta = _text_array->bind();
+	checkgl();
 
 	enable( gl::capability::BLEND );
 	blend_func( gl::blend_style::SRC_ALPHA, gl::blend_style::ONE_MINUS_SRC_ALPHA );
@@ -190,13 +202,14 @@ canvas::draw_text( const std::shared_ptr<font> &font, const core::point &p, cons
 	_text_program->set_uniform( "color", c.get_fill_color() );
 	_text_program->set_uniform( "mvp_matrix", current_matrix() );
 
-//	auto idc = _text_indices->bind( gl::buffer<uint16_t>::target::ELEMENT_ARRAY_BUFFER );
+	auto idc = _text_indices->bind( gl::buffer<uint16_t>::target::ELEMENT_ARRAY_BUFFER );
 
-//	idc.data( _text_idx_buf, gl::usage::STATIC_DRAW );
-//	idc.draw( gl::primitive::TRIANGLES, _text_idx_buf.size() );
+	idc.data( _text_idx_buf, gl::usage::STATIC_DRAW );
+	idc.draw( gl::primitive::TRIANGLES, _text_idx_buf.size() );
 //	ta.draw_indices( gl::primitive::TRIANGLES, _text_idx_buf );
 	// is this safe in GL ES? It's fine for normal OpenGL, and is fewer indices...
-	ta.draw_indices( gl::primitive::QUADS, _text_idx_buf );
+//	ta.draw_indices( gl::primitive::QUADS, _text_idx_buf );
+	checkgl();
 
 	disable( gl::capability::BLEND );
 }

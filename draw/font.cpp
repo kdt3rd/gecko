@@ -131,9 +131,9 @@ font::render( std::vector<float> &outCoords,
 				renderIndices.push_back( idxVal );
 				renderIndices.push_back( idxVal + 1 );
 				renderIndices.push_back( idxVal + 2 );
-//				renderIndices.push_back( idxVal + 2 );
+				renderIndices.push_back( idxVal + 2 );
 				renderIndices.push_back( idxVal + 3 );
-//				renderIndices.push_back( idxVal );
+				renderIndices.push_back( idxVal );
 
 				double upperY = start.y() - gext.y_bearing;
 				double lowerY = upperY + gext.height;
