@@ -158,9 +158,9 @@ void cocoa_style::slider_button( const std::shared_ptr<draw::canvas> &c, const c
 {
 	construct( c );
 
-	double rad = r.radius();
+	double rad = 9.0; //r.radius();
 	core::rect tmp( rad * 2, rad * 2 );
-	tmp.set_center( { r.x( val, rad ), r.y( val, rad ) } );
+	tmp.set_center( { r.x( val, rad ), r.y( 0.5, rad ) } );
 
 	_slider_button->set( c, tmp );
 	_slider_button->draw( *c );
