@@ -74,10 +74,12 @@ namespace xlib
 
 ////////////////////////////////////////
 
-window::window( Display *dpy )
+window::window( const std::shared_ptr<Display> &dpy )
 	: _display( dpy )
 {
 	precondition( _display, "null display" );
+
+	Display *disp = _display.get();
 
 	glXCreateContextAttribsARB = (GLXContext(*)(Display* dpy, GLXFBConfig config, GLXContext share_context, Bool direct, const int *attrib_list))glXGetProcAddressARB((GLubyte*)"glXCreateContextAttribsARB");
 	glXChooseFBConfig = (GLXFBConfig*(*)(Display *dpy, int screen, const int *attrib_list, int *nelements))glXGetProcAddressARB((GLubyte*)"glXChooseFBConfig");
@@ -86,14 +88,14 @@ window::window( Display *dpy )
 
 	// Check GLX version.  Version 1.3 is needed for FBConfig
 	int glx_major, glx_minor;
-	if ( !glXQueryVersion( _display, &glx_major, &glx_minor ) )
+	if ( !glXQueryVersion( disp, &glx_major, &glx_minor ) )
 		throw std::runtime_error( "glx query version failed" );
 	if ( ( ( glx_major == 1 ) && ( glx_minor < 3 ) ) || ( glx_major < 1 ) )
 		throw std::runtime_error( "glx too old" );
 
 	// Get the framebuffer configs
 	int fbcount;
-	GLXFBConfig* fbc = glXChooseFBConfig( _display, DefaultScreen( _display ), visual_attribs, &fbcount );
+	GLXFBConfig* fbc = glXChooseFBConfig( disp, DefaultScreen( disp ), visual_attribs, &fbcount );
 	if ( fbc == nullptr )
 		throw std::runtime_error( "failed to get GL framebuffer configs" );
 	on_scope_exit += [&]() { XFree( fbc ); };
@@ -102,14 +104,14 @@ window::window( Display *dpy )
 	int best_fbc = -1, best_num_samp = -1;
 	for ( int i = 0; i < fbcount; ++i )
 	{
-		XVisualInfo *vi = glXGetVisualFromFBConfig( _display, fbc[i] );
+		XVisualInfo *vi = glXGetVisualFromFBConfig( disp, fbc[i] );
 		on_scope_exit += [&]() { XFree( vi ); };
 
 		if ( vi != nullptr )
 		{
 			int samp_buf, samples;
-			glXGetFBConfigAttrib( _display, fbc[i], GLX_SAMPLE_BUFFERS, &samp_buf );
-			glXGetFBConfigAttrib( _display, fbc[i], GLX_SAMPLES, &samples );
+			glXGetFBConfigAttrib( disp, fbc[i], GLX_SAMPLE_BUFFERS, &samp_buf );
+			glXGetFBConfigAttrib( disp, fbc[i], GLX_SAMPLES, &samples );
 			if ( best_fbc < 0 || ( samp_buf && samples > best_num_samp ) )
 				best_fbc = i, best_num_samp = samples;
 		}
@@ -117,7 +119,7 @@ window::window( Display *dpy )
 
 	GLXFBConfig bestFbc = fbc[ best_fbc ];
 
-	XVisualInfo *vi = glXGetVisualFromFBConfig( _display, bestFbc );
+	XVisualInfo *vi = glXGetVisualFromFBConfig( disp, bestFbc );
 	if ( vi == nullptr )
 		throw std::runtime_error( "no glx visual found" );
 	on_scope_exit += [&]() { XFree( vi ); };
@@ -132,20 +134,20 @@ window::window( Display *dpy )
 		ButtonPressMask | ButtonReleaseMask |
 		PointerMotionMask | ButtonMotionMask;
 
-	Window root = DefaultRootWindow( _display );
-	swa.colormap = XCreateColormap( _display, root, vi->visual, AllocNone );
+	Window root = DefaultRootWindow( disp );
+	swa.colormap = XCreateColormap( disp, root, vi->visual, AllocNone );
 
-	_win = XCreateWindow( _display, root, 0, 0, 320, 240, 0, vi->depth, InputOutput, vi->visual, CWBorderPixel | CWColormap | CWEventMask, &swa );
+	_win = XCreateWindow( disp, root, 0, 0, 320, 240, 0, vi->depth, InputOutput, vi->visual, CWBorderPixel | CWColormap | CWEventMask, &swa );
 
 	// Get the default screen's GLX extension list
-//	const char *glxExts = glXQueryExtensionsString( _display, DefaultScreen( _display ) );
+//	const char *glxExts = glXQueryExtensionsString( disp, DefaultScreen( disp ) );
 
 	// NOTE: It is not necessary to create or make current to a context before
 	// calling glXGetProcAddressARB
 	auto glXCreateContextAttribsARB = (glXCreateContextAttribsARBProc)glXGetProcAddressARB( (const GLubyte *) "glXCreateContextAttribsARB" );
 
-//	GLXContext tmp = glXCreateNewContext( _display, bestFbc, GLX_RGBA_TYPE, 0, True );
-//	glXMakeCurrent( _display, _win, tmp );
+//	GLXContext tmp = glXCreateNewContext( disp, bestFbc, GLX_RGBA_TYPE, 0, True );
+//	glXMakeCurrent( disp, _win, tmp );
 	// Check for the GLX_ARB_create_context extension string and the function.
 //	if ( glxewIsSupported( "GLX_ARB_create_context" ) == 1 )
 	{
@@ -157,10 +159,10 @@ window::window( Display *dpy )
 			None
 		};
 
-		_glc = glXCreateContextAttribsARB( _display, bestFbc, 0, True, atrributes );
+		_glc = glXCreateContextAttribsARB( disp, bestFbc, 0, True, atrributes );
 
-		glXMakeCurrent( _display, _win, _glc );
-//		glXDestroyContext( _display, tmp );
+		glXMakeCurrent( disp, _win, _glc );
+//		glXDestroyContext( disp, tmp );
 	}
 //	else
 //		throw std::runtime_error( "opengl 4 not supported" );
@@ -175,7 +177,7 @@ window::window( Display *dpy )
 	_canvas = std::make_shared<draw::canvas>();
 
 	// Sync to ensure any errors generated are processed.
-	XSync( _display, False );
+	XSync( disp, False );
 }
 
 ////////////////////////////////////////
@@ -188,28 +190,28 @@ window::~window( void )
 
 void window::raise( void )
 {
-	XRaiseWindow( _display, _win );
+	XRaiseWindow( _display.get(), _win );
 }
 
 ////////////////////////////////////////
 
 void window::lower( void )
 {
-	XLowerWindow( _display, _win );
+	XLowerWindow( _display.get(), _win );
 }
 
 ////////////////////////////////////////
 
 void window::show( void )
 {
-	XMapWindow( _display, _win );
+	XMapWindow( _display.get(), _win );
 }
 
 ////////////////////////////////////////
 
 void window::hide( void )
 {
-	XUnmapWindow( _display, _win );
+	XUnmapWindow( _display.get(), _win );
 }
 
 ////////////////////////////////////////
@@ -232,7 +234,7 @@ rect window::geometry( void )
 
 void window::resize( double w, double h )
 {
-	XResizeWindow( _display, _win, (unsigned int)( std::max( 0.0, w ) + 0.5 ), (unsigned int)( std::max( 0.0, h ) + 0.5 ) );
+	XResizeWindow( _display.get(), _win, (unsigned int)( std::max( 0.0, w ) + 0.5 ), (unsigned int)( std::max( 0.0, h ) + 0.5 ) );
 }
 
 ////////////////////////////////////////
@@ -245,21 +247,25 @@ void window::set_minimum_size( double w, double h )
 
 void window::set_title( const std::string &t )
 {
-	XStoreName( _display, _win, t.c_str() );
+	XStoreName( _display.get(), _win, t.c_str() );
 }
 
 ////////////////////////////////////////
 
 void window::invalidate( const core::rect &r )
 {
-	XClearArea( _display, _win, std::floor( r.x() ), std::floor( r.y() ), std::ceil( r.width() ), std::ceil( r.height() ), true );
+	if ( !_invalid )
+	{
+		XClearArea( _display.get(), _win, 0, 0, 0, 0, True );
+		_invalid = true;
+	}
 }
 
 ////////////////////////////////////////
 
 gl::context window::context( void )
 {
-	glXMakeCurrent( _display, _win, _glc );
+	glXMakeCurrent( _display.get(), _win, _glc );
 	return gl::context();
 }
 
@@ -267,7 +273,7 @@ gl::context window::context( void )
 
 std::shared_ptr<draw::canvas> window::canvas( void )
 {
-	glXMakeCurrent( _display, _win, _glc );
+	glXMakeCurrent( _display.get(), _win, _glc );
 	return _canvas;
 }
 
@@ -298,7 +304,7 @@ void window::resize_event( double w, double h )
 	{
 		_last_w = w;
 		_last_h = h;
-		glXMakeCurrent( _display, _win, _glc );
+		glXMakeCurrent( _display.get(), _win, _glc );
 		glViewport( 0, 0, w, h );
 		resized( w, h );
 	}
@@ -308,10 +314,12 @@ void window::resize_event( double w, double h )
 
 void window::expose_event( void )
 {
-	glXMakeCurrent( _display, _win, _glc );
+	_invalid = false;
+	glXMakeCurrent( _display.get(), _win, _glc );
 	exposed();
-	glXSwapBuffers( _display, _win );
-	XFlush( _display );
+	glXSwapBuffers( _display.get(), _win );
+	glFlush();
+	XFlush( _display.get() );
 }
 
 ////////////////////////////////////////

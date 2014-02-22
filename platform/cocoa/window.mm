@@ -26,6 +26,7 @@ window::window( void )
 {
 	_impl->win = nullptr;
 	_impl->ctxt = nullptr;
+	_canvas = std::make_shared<draw::canvas>();
 }
 
 ////////////////////////////////////////
@@ -131,18 +132,7 @@ gl::context window::context( void )
 
 std::shared_ptr<draw::canvas> window::canvas( void )
 {
-//	if ( !_canvas )
-//		_canvas = std::make_shared<draw::canvas>();
-
-//	if ( _canvas->get_surface() == nullptr )
-//	{
-//		NSGraphicsContext *nsgctxt = [_impl->win graphicsContext];
-//		_impl->ctxt = (CGContextRef)[nsgctxt graphicsPort];
-//		CGContextTranslateCTM( _impl->ctxt, 0.0, _last_h );
-//		CGContextScaleCTM( _impl->ctxt, 1.0, -1.0 );
-//		_canvas->set_surface( cairo_quartz_surface_create_for_cg_context( _impl->ctxt, _last_w, _last_h ) );
-//	}
-
+	[[_impl->view openGLContext] makeCurrentContext];
 	return _canvas;
 }
 

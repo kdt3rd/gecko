@@ -47,7 +47,7 @@ namespace gui
 cocoa_style::cocoa_style( void )
 //   	const std::shared_ptr<draw::canvas> &c  )
 {
-//	_default_font = application::current()->get_font( "Lucida Grande", "Regular", 14.0 );
+	_default_font = application::current()->get_font( "Lucida Grande", "Regular", 14.0 );
 //	postcondition( bool(_default_font), "font for cocoa style not found" );
 
 //	_default_bold_font = application::current()->get_font( "Lucida Grande", "Bold", 14.0 );
@@ -103,8 +103,16 @@ core::rect cocoa_style::button_content( const core::rect &full )
 void cocoa_style::button_frame( const std::shared_ptr<draw::canvas> &c, const core::rect &r, bool pressed )
 {
 	construct( c );
-	auto obj = draw_button_frame( c, r );
-	obj->draw( *c );
+	if ( pressed )
+	{
+		_button_frame_down->set( c, r );
+		_button_frame_down->draw( *c );
+	}
+	else
+	{
+		_button_frame->set( c, r );
+		_button_frame->draw( *c );
+	}
 }
 
 ////////////////////////////////////////
@@ -124,61 +132,38 @@ void cocoa_style::line_edit_frame( const std::shared_ptr<draw::canvas> &c, const
 
 ////////////////////////////////////////
 
-double cocoa_style::slider_size( const core::rect &r )
+double cocoa_style::slider_size( const core::rect &rect )
 {
-	return r.radius();
+	return rect.radius();
 }
 
 ////////////////////////////////////////
 
 void cocoa_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const core::rect &rect )
 {
-	double size = slider_size( rect );
-	core::rect r = rect;
-	r.trim( size, size, 0.0, 0.0 );
-	double extra = r.height() - 7.0;
-	if ( extra > 0.0 )
-	{
-		r.set_y( r.y() + extra/2.0 );
-		r.set_height( 7.0 );
-	}
+	construct( c );
 
-	core::paint p;
-	p.set_stroke_color( border2 );
-	p.set_stroke_width( 1.0 );
-	p.set_fill_linear( r.top_left(), r.size(), grad2 );
+	double rad = slider_size( rect );
+	double h = rect.height() - 7;
+	core::rect tmp( rect );
+	tmp.trim( rad, rad, h/2, h/2 );
 
-	core::path rpath;
-	rpath.rounded_rect( r.top_left(), r.bottom_right(), 2 );
-
-//	c->draw_path( rpath, p );
+	_slider_groove->set( c, tmp );
+	_slider_groove->draw( *c );
 }
 
 ////////////////////////////////////////
 
 void cocoa_style::slider_button( const std::shared_ptr<draw::canvas> &c, const core::rect &r, bool pressed, double val )
 {
-	core::paint p;
+	construct( c );
 
-	if ( pressed )
-	{
-		p.set_stroke_color( border2 );
-		p.set_stroke_width( 1.0 );
-		p.set_fill_linear( r.top_left(), r.size(), grad2 );
-	}
-	else
-	{
-		p.set_stroke_color( border1 );
-		p.set_stroke_width( 1.0 );
-		p.set_fill_linear( r.top_left(), r.size(), grad1 );
-	}
+	double rad = r.radius();
+	core::rect tmp( rad * 2, rad * 2 );
+	tmp.set_center( { r.x( val, rad ), r.y( val, rad ) } );
 
-	core::point center = { r.x( val, slider_size( r ) ), r.y( 0.5 ) };
-
-	core::path rpath;
-	rpath.circle( center, r.radius() );
-
-//	c->draw_path( rpath, p );
+	_slider_button->set( c, tmp );
+	_slider_button->draw( *c );
 }
 
 ////////////////////////////////////////
@@ -190,22 +175,45 @@ void cocoa_style::construct( const std::shared_ptr<draw::canvas> &c )
 		_grad1 = c->gradient( grad1 );
 		_grad2 = c->gradient( grad2 );
 
+		// Button drawing
+		_button_frame = std::make_shared<draw::stretchable>();
+		_button_frame_down = std::make_shared<draw::stretchable>();
 		{
-			// Button drawing
 			core::path path;
 			path.rounded_rect( { 0, 0 }, 20, 20, 3 );
 
 			core::paint paint( border1 );
 			paint.set_fill_linear( { 0, 0 }, { 0, 20 }, grad1 );
 
-			auto result = std::make_shared<draw::stretchable>();
-			result->create( c, path, paint, { 10, 10 } );
+			_button_frame->create( c, path, paint, { 10, 10 } );
 
-			draw_button_frame = [=]( const std::shared_ptr<draw::canvas> &c, const core::rect &r )
-			{
-				result->set( c, r );
-				return result;
-			};
+			paint.set_stroke_color( border2 );
+			paint.set_fill_linear( { 0, 0 }, { 0, 20 }, grad2 );
+			_button_frame_down->create( c, path, paint, { 10, 10 } );
+		}
+
+		// Slider groove
+		_slider_groove = std::make_shared<draw::stretchable>();
+		{
+			core::path path;
+			path.rounded_rect( { 0, 0 }, { 20, 7 }, 2 );
+
+			core::paint paint( border2 );
+			paint.set_fill_linear( { 0, 0 }, { 0, 7 }, grad2 );
+
+			_slider_groove->create( c, path, paint, { 10, 3.5 } );
+		}
+
+		// Slider button drawing
+		_slider_button = std::make_shared<draw::stretchable>();
+		{
+			core::path path;
+			path.circle( { 10, 10 }, 9 );
+
+			core::paint paint( border1 );
+			paint.set_fill_linear( { 0, 0 }, { 0, 20 }, grad1 );
+
+			_slider_button->create( c, path, paint, { 10, 10 } );
 		}
 
 		_constructed = true;

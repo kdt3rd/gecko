@@ -3,7 +3,7 @@
 #include "screen.h"
 #include "window.h"
 #include "timer.h"
-#include "font_manager.h"
+#include <platform/fc/font_manager.h>
 #include "dispatcher.h"
 
 #include <core/contract.h>
@@ -39,7 +39,7 @@ system::system( void )
 
 	_keyboard = std::make_shared<keyboard>();
 	_mouse = std::make_shared<mouse>();
-	_font_manager = std::make_shared<font_manager>();
+	_font_manager = std::make_shared<fc::font_manager>();
 	_dispatcher = std::make_shared<dispatcher>( _keyboard, _mouse );
 }
 

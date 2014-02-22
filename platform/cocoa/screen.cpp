@@ -22,7 +22,7 @@ screen::~screen( void )
 
 ////////////////////////////////////////
 
-core::size screen::bounds( void )
+core::size screen::bounds( void ) const
 {
 	return { 0, 0 };
 }

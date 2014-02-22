@@ -20,7 +20,7 @@ class dispatcher : public platform::dispatcher
 {
 public:
 	/// @brief Constructor.
-	dispatcher( Display *dpy, const std::shared_ptr<keyboard> &k, const std::shared_ptr<mouse> &m );
+	dispatcher( const std::shared_ptr<Display> &dpy, const std::shared_ptr<keyboard> &k, const std::shared_ptr<mouse> &m );
 	~dispatcher( void );
 
 	int execute( void ) override;
@@ -33,8 +33,9 @@ public:
 
 private:
 	int _exit_code = 0;
-	Display *_display = nullptr;
+	std::shared_ptr<Display> _display;
 	Atom _atom_delete_window;
+	XIM _xim;
 	std::shared_ptr<keyboard> _keyboard;
 	std::shared_ptr<mouse> _mouse;
 	std::map<Window, std::shared_ptr<window>> _windows;

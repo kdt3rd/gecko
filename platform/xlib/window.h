@@ -15,7 +15,7 @@ class window : public platform::window
 {
 public:
 	/// @brief Constrcutor
-	window( Display *dpy );
+	window( const std::shared_ptr<Display> &dpy );
 	~window( void );
 
 	void raise( void ) override;
@@ -41,6 +41,8 @@ public:
 
 	/// @brief Xlib window identifier.
 	Window id( void ) const;
+	void set_input_context( XIC xic ) { _xic = xic; }
+	XIC input_context( void ) const { return _xic; }
 
 	double width( void ) override { return _last_w; }
 	double height( void )  override { return _last_h; }
@@ -50,12 +52,15 @@ public:
 	void resize_event( double w, double h );
 
 private:
-	Display *_display = nullptr;
+	std::shared_ptr<Display> _display;
 	Window _win = 0;
+	XIC _xic = 0;
 
 	std::shared_ptr<draw::canvas> _canvas;
 	int16_t _last_x = 0, _last_y = 0;
 	uint16_t _last_w = 0, _last_h = 0;
+
+	bool _invalid = false;
 
 	GLXContext _glc;
 };

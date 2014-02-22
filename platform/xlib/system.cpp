@@ -10,6 +10,33 @@
 #include <core/contract.h>
 #include <stdexcept>
 
+////////////////////////////////////////
+
+namespace {
+
+int
+xErrorCB( Display *d, XErrorEvent *e )
+{
+	char errorBuf[4096];
+
+	XGetErrorText( d, e->error_code, errorBuf, 4096 );
+	std::cerr << "ERROR: Xlib Error"
+			  << "\n  Major/Minor: " << e->request_code << " / " << e->minor_code
+			  << "\n   Error code: " << e->error_code
+			  << "\n      Message: " << errorBuf << std::endl;
+
+	return 0;
+}
+
+int
+xIOErrorCB( Display *d )
+{
+	std::cerr << "ERROR: I/O error w/ X server (connection lost?)" << std::endl;
+	exit( -1 );
+}
+
+}
+
 
 namespace xlib
 {
@@ -17,13 +44,20 @@ namespace xlib
 ////////////////////////////////////////
 
 system::system( void )
-	: platform::system( "x11", "X11/XLib" )
+		: platform::system( "x11", "X11/XLib" )
 {
-	_display = XOpenDisplay( nullptr );
-	if ( !_display )
+	XSetErrorHandler( &xErrorCB );
+	XSetIOErrorHandler( &xIOErrorCB );
+
+	_display.reset( XOpenDisplay( nullptr ), &XCloseDisplay );
+	if ( ! _display )
 		throw std::runtime_error( "no X display" );
 
-	_keyboard = std::make_shared<keyboard>( _display );
+	_screens.resize( ScreenCount( _display.get() ) );
+	for ( int i = 0; i < ScreenCount( _display.get() ); ++i )
+		_screens[0] = std::make_shared<screen>( _display, i );
+
+	_keyboard = std::make_shared<keyboard>();
 	_mouse = std::make_shared<mouse>();
 	_font_manager = std::make_shared<font_manager>();
 	_dispatcher = std::make_shared<dispatcher>( _display, _keyboard, _mouse );
@@ -33,7 +67,6 @@ system::system( void )
 
 system::~system( void )
 {
-	XCloseDisplay( _display );
 }
 
 ////////////////////////////////////////

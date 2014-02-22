@@ -4,11 +4,15 @@
 #include <iostream>
 #include <stdexcept>
 #include <sstream>
+#include <tuple>
+#include <map>
+#include <vector>
+#include <core/scope_guard.h>
 
 #include <fontconfig/fontconfig.h>
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
+#include "glyph.h"
+#include "font.h"
 
 namespace fc
 {
@@ -44,6 +48,8 @@ font_manager::font_manager( void )
 
 font_manager::~font_manager( void )
 {
+	FT_Done_FreeType( _impl->ftlib );
+
 	delete _impl;
 	FcFini();
 }
@@ -102,21 +108,23 @@ std::set<std::string> font_manager::get_styles( const std::string &family )
 
 ////////////////////////////////////////
 
-std::shared_ptr<draw::font> font_manager::get_font( const std::string &family, const std::string &style, double pixsize )
+std::shared_ptr<draw::font>
+font_manager::get_font( const std::string &family, const std::string &style,
+						double pixsize )
 {
-	std::cout << "Getting font: " << family << ' ' << style << ' ' << pixsize << std::endl;
 	FcPattern *pat = FcPatternBuild( nullptr,
 		FC_FAMILY, FcTypeString, family.c_str(),
 		FC_STYLE, FcTypeString, style.c_str(),
 		FC_PIXEL_SIZE, FcTypeDouble, pixsize,
 		nullptr );
 
-	std::cout << "Pattern: " << pat << std::endl;
+	if ( ! pat )
+		throw std::runtime_error( "Unable to build font pattern" );
 
 	FcResult result;
 	FcPattern *matched = FcFontMatch( _impl->config, pat, &result );
-
-	std::cout << "Matched: " << matched << std::endl;
+	FcPatternDestroy( pat );
+	on_scope_exit += [&]() { if ( matched ) FcPatternDestroy( matched ); };
 
 	std::shared_ptr<draw::font> ret;
 	if ( matched && result == FcResultMatch )
@@ -126,17 +134,25 @@ std::shared_ptr<draw::font> font_manager::get_font( const std::string &family, c
 		if ( FcPatternGetString( matched, FC_FILE, 0, &filename ) == FcResultMatch &&
 			 FcPatternGetInteger( matched, FC_INDEX, 0, &fontid ) == FcResultMatch )
 		{
-			std::cout << "Loading: " << filename << ' ' << fontid << std::endl;
 			FT_Face ftface;
 			auto error = FT_New_Face( _impl->ftlib, reinterpret_cast<const char*>( filename ), fontid, &ftface );
-			std::cout << "Loaded: " << ftface << std::endl;
 			if ( error )
-				throw std::runtime_error( "freetype error" );
-//			ret = std::make_shared<cairo::font>( cairo_ft_font_face_create_for_ft_face( ftface, 0 ), family, style, pixsize );
+				throw std::runtime_error( fc::font::errorstr( error ) );
+
+			try
+			{
+				ret = std::make_shared<fc::font>( ftface, family, style, pixsize );
+			}
+			catch ( ... )
+			{
+				FT_Done_Face( ftface );
+			}
 		}
+		else
+			throw std::runtime_error( "Unable to extract font information" );
 	}
-	FcPatternDestroy( pat );
-	FcPatternDestroy( matched );
+	else
+		throw std::runtime_error( "No matching font found" );
 
 	return ret;
 }

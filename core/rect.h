@@ -66,6 +66,11 @@ public:
 	point bottom_left( void ) const { return point( x1(), y2() ); }
 	point bottom_right( void ) const { return point( x2(), y2() ); }
 
+	void set_center( const point &p )
+	{
+		_position = _position + ( p - center() );
+	}
+
 	point center( void ) const { return point( ( x1() + x2() ) / 2.0, ( y1() + y2() ) / 2.0 ); }
 	double radius( void ) const { return std::min( width(), height() ) / 2.0; }
 

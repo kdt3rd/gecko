@@ -9,6 +9,8 @@ Platform {
 
 	srcs = {
 		"font_manager.cpp";
+		"font.cpp";
+		"glyph.cpp";
 	};
 
 	libs = {

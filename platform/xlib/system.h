@@ -32,7 +32,7 @@ public:
 	std::shared_ptr<platform::font_manager> get_font_manager( void ) override;
 
 private:
-	Display *_display = nullptr;
+	std::shared_ptr<Display> _display;
 	std::shared_ptr<dispatcher> _dispatcher;
 	std::shared_ptr<keyboard> _keyboard;
 	std::shared_ptr<mouse> _mouse;

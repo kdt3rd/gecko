@@ -22,6 +22,16 @@ enum class capability
 
 ////////////////////////////////////////
 
+enum class blend_style
+{
+	ZERO = GL_ZERO,
+	ONE = GL_ONE,
+	SRC_ALPHA = GL_SRC_ALPHA,
+	ONE_MINUS_SRC_ALPHA = GL_ONE_MINUS_SRC_ALPHA,
+};
+
+////////////////////////////////////////
+
 enum class buffer_bit
 {
 	COLOR_BUFFER_BIT = GL_COLOR_BUFFER_BIT,
@@ -59,6 +69,18 @@ enum class data_type
 
 template<typename D>
 struct gl_data_type {};
+
+template<>
+struct gl_data_type<uint16_t>
+{
+	enum { value = GL_UNSIGNED_SHORT };
+};
+
+template<>
+struct gl_data_type<uint8_t>
+{
+	enum { value = GL_UNSIGNED_BYTE };
+};
 
 template<>
 struct gl_data_type<float>
@@ -129,6 +151,7 @@ enum class primitive
 	TRIANGLE_STRIP = GL_TRIANGLE_STRIP,
 	TRIANGLE_FAN = GL_TRIANGLE_FAN,
 	TRIANGLES = GL_TRIANGLES,
+	QUADS = GL_QUADS,
 };
 
 ////////////////////////////////////////

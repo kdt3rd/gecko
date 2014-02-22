@@ -38,6 +38,7 @@ public:
 	void stencil_mask( bool write );
 	void stencil_mask( uint32_t mask );
 	void color_mask( bool r, bool g, bool b, bool a );
+	void blend_func( blend_style src, blend_style dst );
 
 	void save_matrix( void );
 	void ortho( float left, float right, float top, float bottom );

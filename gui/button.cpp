@@ -47,20 +47,20 @@ void button::paint( const std::shared_ptr<draw::canvas> &canvas )
 	auto style = application::current_style();
 	style->button_frame( canvas, *this, _pressed );
 
-//	core::rect content = style->button_content( *this );
-//	core::point p = canvas->align_text( _font.value(), _text.value(), content, _align.value() );
+	core::rect content = style->button_content( *this );
+	core::point p = canvas->align_text( _font.value(), _text.value(), content, _align.value() );
 
-//	draw::paint paint;
-//	paint.set_fill_color( _color.value() );
-//	canvas->draw_text( _font.value(), p, _text.value(), paint );
+	core::paint paint;
+	paint.set_fill_color( _color.value() );
+	canvas->draw_text( _font.value(), p, _text.value(), paint );
 }
 
 ////////////////////////////////////////
 
 void button::compute_minimum( void )
 {
-	draw::font_extents fex;// = _font.value()->extents();
-	draw::text_extents tex;// = _font.value()->extents( _text.value() );
+	draw::font_extents fex = _font.value()->extents();
+	draw::text_extents tex = _font.value()->extents( _text.value() );
 
 	core::size s( tex.x_advance, fex.height );
 

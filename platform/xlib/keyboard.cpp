@@ -124,7 +124,7 @@ namespace xlib
 
 ////////////////////////////////////////
 
-keyboard::keyboard( Display * )
+keyboard::keyboard( void )
 {
 }
 
