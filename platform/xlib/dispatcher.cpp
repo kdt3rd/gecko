@@ -1,9 +1,13 @@
 
 #include <iostream>
 #include <stdlib.h>
+#include <sstream>
+#include <X11/Xlib.h>
 #include <core/contract.h>
 #include <core/pointer.h>
 #include <core/meta.h>
+#include <utf/utf.h>
+#include <utf/utfcat.h>
 #include "dispatcher.h"
 
 namespace xlib
@@ -16,6 +20,10 @@ dispatcher::dispatcher( const std::shared_ptr<Display> &dpy, const std::shared_p
 {
 	precondition( _display, "null display" );
 	_atom_delete_window = XInternAtom( _display.get(), "WM_DELETE_WINDOW", True );
+
+	_xim = XOpenIM( _display.get(), nullptr, nullptr, nullptr ); // TODO resource/class name?
+	if ( !_xim )
+		throw std::runtime_error( "failed to open input method" );
 }
 
 ////////////////////////////////////////
@@ -98,6 +106,19 @@ int dispatcher::execute( void )
 				auto w = _windows[event.xkey.window];
 				platform::scancode sc = _keyboard->get_scancode( event.xkey );
 				w->key_pressed( _keyboard, sc );
+				char keybuf[16];
+				Status status;
+				int length = Xutf8LookupString( w->input_context(), &event.xkey, keybuf, sizeof(keybuf), nullptr, &status );
+				if ( length > 0 )
+				{
+					std::stringstream tmp( std::string( keybuf, length ) );
+					utf::iterator it( tmp, utf::UTF8 );
+					while ( ++it )
+					{
+						if ( utf::is_graphic( *it ) )
+							w->text_entered( _keyboard, *it );
+					}
+				}
 				break;
 			}
 
@@ -196,6 +217,16 @@ void dispatcher::add_window( const std::shared_ptr<window> &w )
 {
 	_windows[w->id()] = w;
 	XSetWMProtocols( _display.get(), w->id(), &_atom_delete_window, 1 );
+
+	// Create an input context.
+	auto xic = XCreateIC( _xim,
+		XNClientWindow, w->id(),
+		XNFocusWindow, w->id(), 
+		XNInputStyle, XIMPreeditNothing | XIMStatusNothing,
+		nullptr );
+	if ( !xic )
+		throw std::runtime_error( "failed to create input context" );
+	w->set_input_context( xic );
 }
 
 ////////////////////////////////////////
