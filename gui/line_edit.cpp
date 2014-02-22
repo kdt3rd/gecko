@@ -38,18 +38,17 @@ void line_edit::paint( const std::shared_ptr<draw::canvas> &c )
 
 	const std::string &str = _text.value();
 
-//	core::point p = c->align_text( _font.value(), str, *this, _align.value() );
-
+	core::point p = c->align_text( _font.value(), str, *this, _align.value() );
 
 	core::paint paint;
 	paint.set_fill_color( _color.value() );
-//	c->draw_text( _font.value(), p, str, paint );
+	c->draw_text( _font.value(), p, str, paint );
 
 	draw::font_extents fex = _font.value()->extents();
 	draw::text_extents tex = _font.value()->extents( str.substr( 0, _cursor ) );
 
 	core::path path;
-//	path.move_to( p );
+	path.move_to( p );
 	path.move_by( { tex.x_advance, fex.descent } );
 	path.line_by( { 0, -fex.height } );
 
@@ -71,6 +70,7 @@ void line_edit::compute_minimum( void )
 
 bool line_edit::key_press( platform::scancode c )
 {
+	std::cout << "Key press!" << std::endl;
 	switch ( c )
 	{
 		case platform::scancode::KEY_LEFT:
@@ -139,6 +139,7 @@ bool line_edit::key_press( platform::scancode c )
 
 bool line_edit::text_input( char32_t c )
 {
+	std::cout << "Text input!" << c << std::endl;
 	if ( utf::is_graphic( c ) )
 	{
 		std::string tmp( _text.value() );
