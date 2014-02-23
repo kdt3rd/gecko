@@ -54,6 +54,7 @@ public:
 	void circle( const point &center, double radius );
 
 	void rectangle( const point &p1, const point &p2 );
+	void rectangle( const point &p1, double w, double h ) { rectangle( p1, p1 + core::point( w, h ) ); }
 
 	void rounded_rect( const point &p1, const point &p2, double r );
 	void rounded_rect( const point &p1, double w, double h, double r );
