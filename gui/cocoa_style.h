@@ -41,6 +41,7 @@ private:
 	std::shared_ptr<draw::stretchable> _button_frame_down;
 	std::shared_ptr<draw::stretchable> _slider_groove;
 	std::shared_ptr<draw::stretchable> _slider_button;
+	std::shared_ptr<draw::stretchable> _line_edit_frame;
 
 //	typedef std::tuple<core::size,bool> button_key;
 //	std::map<button_key,std::shared_ptr<draw::drawable>> _button_cache;

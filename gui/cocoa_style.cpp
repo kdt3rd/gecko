@@ -119,15 +119,9 @@ void cocoa_style::button_frame( const std::shared_ptr<draw::canvas> &c, const co
 
 void cocoa_style::line_edit_frame( const std::shared_ptr<draw::canvas> &c, const core::rect &r, bool focused )
 {
-	core::paint paint;
-
-	paint.set_stroke_color( border1 );
-	paint.set_stroke_width( 1.0 );
-	paint.set_fill_color( { 1, 1, 1 } );
-
-	core::path path;
-	path.rectangle( r.top_left(), r.bottom_right() );
-//	c->draw_path( path, paint );
+	construct( c );
+	_line_edit_frame->set( c, r );
+	_line_edit_frame->draw( *c );
 }
 
 ////////////////////////////////////////
@@ -215,6 +209,19 @@ void cocoa_style::construct( const std::shared_ptr<draw::canvas> &c )
 
 			_slider_button->create( c, path, paint, { 10, 10 } );
 		}
+
+		// Line edit frame 
+		_line_edit_frame = std::make_shared<draw::stretchable>();
+		{
+			core::paint paint( border1, 1.0 );
+			paint.set_fill_color( { 1, 1, 1 } );
+
+			core::path path;
+			path.rectangle( { 0, 0 }, 20, 20 );
+
+			_line_edit_frame->create( c, path, paint, { 10, 10 } );
+		}
+
 
 		_constructed = true;
 	}
