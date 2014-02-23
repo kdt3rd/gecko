@@ -77,13 +77,14 @@ canvas::align_text( const std::shared_ptr<font> &font, const std::string &utf8, 
 	text_extents tex = font->extents( utf8 );
 
 	double y = 0.0, x = 0.0;
+	double textHeight = fex.ascent - fex.descent;
 
 	switch ( a )
 	{
 		case alignment::CENTER:
 		case alignment::LEFT:
 		case alignment::RIGHT:
-			y = rect.y() + rect.height() / 2.0 - fex.descent;
+			y = rect.y() + rect.height() / 2.0 + textHeight / 2.0 + fex.descent;
 			break;
 
 		case alignment::BOTTOM:
