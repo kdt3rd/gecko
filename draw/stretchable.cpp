@@ -67,9 +67,12 @@ void stretchable::set( const std::shared_ptr<canvas> &c, const core::rect &r )
 	c->use_program( _stroke_prog );
 	_stroke_prog->set_uniform( "top_left", r.top_left() );
 	_stroke_prog->set_uniform( "quad_size", r.size() );
-	c->use_program( _fill_prog );
-	_fill_prog->set_uniform( "top_left", r.top_left() );
-	_fill_prog->set_uniform( "quad_size", r.size() );
+	if ( _fill_prog )
+	{
+		c->use_program( _fill_prog );
+		_fill_prog->set_uniform( "top_left", r.top_left() );
+		_fill_prog->set_uniform( "quad_size", r.size() );
+	}
 }
 
 ////////////////////////////////////////
