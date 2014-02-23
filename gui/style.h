@@ -31,6 +31,8 @@ public:
 	virtual double slider_size( const core::rect &r ) = 0;
 	virtual void slider_groove( const std::shared_ptr<draw::canvas> &c, const core::rect &rect ) = 0;
 	virtual void slider_button( const std::shared_ptr<draw::canvas> &c, const core::rect &r, bool pressed, double val ) = 0;
+
+	virtual void text_cursor( const std::shared_ptr<draw::canvas> &c, const core::point &p, double h ) = 0;
 };
 
 ////////////////////////////////////////

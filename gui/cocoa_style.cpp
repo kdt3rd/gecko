@@ -45,13 +45,12 @@ namespace gui
 ////////////////////////////////////////
 
 cocoa_style::cocoa_style( void )
-//   	const std::shared_ptr<draw::canvas> &c  )
 {
 	_default_font = application::current()->get_font( "Lucida Grande", "Regular", 14.0 );
-//	postcondition( bool(_default_font), "font for cocoa style not found" );
+	postcondition( bool(_default_font), "font for cocoa style not found" );
 
-//	_default_bold_font = application::current()->get_font( "Lucida Grande", "Bold", 14.0 );
-//	postcondition( bool(_default_bold_font), "font for cocoa bold style not found" );
+	_default_bold_font = application::current()->get_font( "Lucida Grande", "Bold", 14.0 );
+	postcondition( bool(_default_bold_font), "font for cocoa bold style not found" );
 }
 
 ////////////////////////////////////////
@@ -162,6 +161,18 @@ void cocoa_style::slider_button( const std::shared_ptr<draw::canvas> &c, const c
 
 ////////////////////////////////////////
 
+void cocoa_style::text_cursor( const std::shared_ptr<draw::canvas> &c, const core::point &p, double h )
+{
+	construct( c );
+
+	core::rect tmp( p - core::point( 0, h ), 2, h );
+
+	_text_cursor->set( c, tmp );
+	_text_cursor->draw( *c );
+}
+
+////////////////////////////////////////
+
 void cocoa_style::construct( const std::shared_ptr<draw::canvas> &c )
 {
 	if ( !_constructed )
@@ -222,6 +233,17 @@ void cocoa_style::construct( const std::shared_ptr<draw::canvas> &c )
 			_line_edit_frame->create( c, path, paint, { 10, 10 } );
 		}
 
+		// Text cursor
+		_text_cursor = std::make_shared<draw::stretchable>();
+		{
+			core::path path;
+			path.move_to( { 0.5, 0 } );
+			path.line_by( { 0, 10 } );
+
+			core::paint pen( { 0, 0, 0, 1 }, 1.0 );
+
+			_text_cursor->create( c, path, pen, { 0.5, 5 } );
+		}
 
 		_constructed = true;
 	}

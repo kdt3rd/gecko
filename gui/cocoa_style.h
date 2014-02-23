@@ -31,6 +31,8 @@ public:
 	void slider_groove( const std::shared_ptr<draw::canvas> &c, const core::rect &rect ) override;
 	void slider_button( const std::shared_ptr<draw::canvas> &c, const core::rect &r, bool pressed, double val ) override;
 
+	virtual void text_cursor( const std::shared_ptr<draw::canvas> &c, const core::point &p, double h );
+
 private:
 	void construct( const std::shared_ptr<draw::canvas> &c );
 	bool _constructed = false;
@@ -42,6 +44,7 @@ private:
 	std::shared_ptr<draw::stretchable> _slider_groove;
 	std::shared_ptr<draw::stretchable> _slider_button;
 	std::shared_ptr<draw::stretchable> _line_edit_frame;
+	std::shared_ptr<draw::stretchable> _text_cursor;
 
 //	typedef std::tuple<core::size,bool> button_key;
 //	std::map<button_key,std::shared_ptr<draw::drawable>> _button_cache;

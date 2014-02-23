@@ -47,14 +47,7 @@ void line_edit::paint( const std::shared_ptr<draw::canvas> &c )
 	draw::font_extents fex = _font.value()->extents();
 	draw::text_extents tex = _font.value()->extents( str.substr( 0, _cursor ) );
 
-	core::path path;
-	path.move_to( p );
-	path.move_by( { tex.x_advance, fex.descent } );
-	path.line_by( { 0, -fex.height } );
-
-	core::paint pen;
-	pen.set_stroke_color( _color.value() );
-//	c->draw_path( path, pen );
+	style->text_cursor( c, p + core::point( tex.x_advance, 0 ) , fex.height );
 }
 
 ////////////////////////////////////////
@@ -139,7 +132,6 @@ bool line_edit::key_press( platform::scancode c )
 
 bool line_edit::text_input( char32_t c )
 {
-	std::cout << "Text input!" << c << std::endl;
 	if ( utf::is_graphic( c ) )
 	{
 		std::string tmp( _text.value() );
