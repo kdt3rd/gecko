@@ -95,8 +95,9 @@ font::font( FT_Face face, std::string fam, std::string style, double pixsize )
 						  static_cast<double>( _face->units_per_EM ) );
 		double scaleY = ( static_cast<double>( _face->size->metrics.y_ppem ) /
 						  static_cast<double>( _face->units_per_EM ) );
-		_extents.width = ( static_cast<double>( _face->bbox.xMax - _face->bbox.xMin ) * scaleX );
-		_extents.height = ( static_cast<double>( _face->bbox.yMax - _face->bbox.yMin ) * scaleY );
+		_extents.width = std::ceil( static_cast<double>( _face->bbox.xMax - _face->bbox.xMin ) * scaleX );
+		_extents.height = static_cast<double>( _face->size->metrics.height ) / 64.0;
+			// was: std::ceil( static_cast<double>( _face->bbox.yMax - _face->bbox.yMin ) * scaleY );
 
 		_extents.max_x_advance = static_cast<double>( _face->max_advance_width ) * scaleX;
 		_extents.max_y_advance = static_cast<double>( _face->max_advance_height ) * scaleY;
