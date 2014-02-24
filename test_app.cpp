@@ -18,6 +18,8 @@
 #include <gui/line_edit.h>
 #include <gui/color_picker.h>
 
+constexpr double padding = 12.5;
+
 namespace {
 
 struct test_record : public model::record
@@ -34,7 +36,7 @@ std::shared_ptr<gui::form> build_form( direction dir )
 {
 	auto container = std::make_shared<gui::form>( dir );
 	container->set_spacing( 12, 6 );
-	container->set_pad( 12.5, 12.5, 12.5, 12.5 );
+	container->set_pad( padding, padding, padding, padding );
 
 	auto button = std::make_shared<gui::button>( "Click Me" );
 	button->when_activated += []()
@@ -54,7 +56,7 @@ std::shared_ptr<gui::background> build_grid( direction dir )
 {
 	auto container = std::make_shared<gui::grid>( dir );
 	container->set_spacing( 12, 6 );
-	container->set_pad( 12.5, 12.5, 12.5, 12.5 );
+	container->set_pad( padding, padding, padding, padding );
 
 	std::string name( "A" );
 	std::vector<std::shared_ptr<gui::widget>> row;
@@ -85,7 +87,7 @@ std::shared_ptr<gui::simple_container> build_box( direction dir )
 {
 	auto container = std::make_shared<gui::simple_container>( dir );
 	container->set_spacing( 12, 6 );
-	container->set_pad( 12.5, 12.5, 12.5, 12.5 );
+	container->set_pad( padding, padding, padding, padding );
 
 	std::string name( "A" );
 	std::vector<std::shared_ptr<gui::widget>> row;
@@ -105,7 +107,7 @@ std::shared_ptr<gui::tree_node> build_tree( direction dir )
 	auto container = std::make_shared<gui::tree_node>( 24.0, dir );
 	container->set_root( std::make_shared<gui::label>( "Root" ) );
 	container->set_spacing( 12, 6 );
-	container->set_pad( 12.5, 12.5, 12.5, 12.5 );
+	container->set_pad( padding, padding, padding, padding );
 
 	std::string name( "A" );
 	for ( size_t y = 0; y < 3; ++y )
@@ -142,7 +144,7 @@ std::shared_ptr<gui::simple_container> build_edit( direction dir )
 {
 	auto container = std::make_shared<gui::simple_container>( dir );
 	container->set_spacing( 12, 6 );
-	container->set_pad( 12.5, 12.5, 12.5, 12.5 );
+	container->set_pad( padding, padding, padding, padding );
 
 	container->add( std::make_shared<gui::label>( model::make_datum( testrec, testrec->title ) ) );
 	container->add( std::make_shared<gui::line_edit>( model::make_datum( testrec, testrec->title ) ) );
@@ -174,7 +176,7 @@ std::shared_ptr<gui::simple_container> build_color( direction dir )
 {
 	auto container = std::make_shared<gui::simple_container>( dir );
 	container->set_spacing( 12, 6 );
-	container->set_pad( 12.5, 12.5, 12.5, 12.5 );
+	container->set_pad( padding, padding, padding, padding );
 
 	container->add( std::make_shared<gui::color_picker>( core::color::space::HSL ), 1.0 );
 	container->add( std::make_shared<gui::color_picker>( core::color::space::LAB ), 1.0 );
