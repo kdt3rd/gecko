@@ -66,8 +66,14 @@ std::shared_ptr<gl::program> canvas::program( const std::string &vert, const std
 ////////////////////////////////////////
 
 core::point
-canvas::align_text( const std::shared_ptr<font> &font, const std::string &utf8, const core::rect &rect, alignment a )
+canvas::align_text( const std::shared_ptr<font> &font, const std::string &utf8, const core::rect &r, alignment a )
 {
+	core::rect rect;
+	rect.set_x1( std::ceil( r.x1() ) );
+	rect.set_y1( std::ceil( r.y1() ) );
+	rect.set_x2( std::floor( r.x2() ) );
+	rect.set_y2( std::floor( r.y2() ) );
+
 	if ( ! font || utf8.empty() )
 		return { 0.0, 0.0 };
 
