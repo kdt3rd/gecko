@@ -47,7 +47,7 @@ void line_edit::paint( const std::shared_ptr<draw::canvas> &c )
 	draw::font_extents fex = _font.value()->extents();
 	draw::text_extents tex = _font.value()->extents( str.substr( 0, _cursor ) );
 
-	style->text_cursor( c, p + core::point( tex.x_advance, -fex.descent ) , fex.height );
+	style->text_cursor( c, p + core::point( tex.x_advance, -fex.descent ) , fex.ascent - fex.descent );
 }
 
 ////////////////////////////////////////
