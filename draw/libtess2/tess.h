@@ -75,8 +75,6 @@ struct TESStesselator {
 	int elementCount;
 
 	TESSalloc alloc;
-	
-	jmp_buf env;			/* place to jump to when memAllocs fail */
 };
 
 #endif

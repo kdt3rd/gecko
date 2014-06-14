@@ -32,6 +32,8 @@
 #include <stddef.h>
 #include <assert.h>
 #include <setjmp.h>
+#include <stdexcept>
+
 #include "bucketalloc.h"
 #include "tess.h"
 #include "mesh.h"
@@ -888,11 +890,6 @@ int tessTesselate( TESStesselator *tess, int windingRule, int elementType,
 	if (vertexSize > 3)
 		vertexSize = 3;
 
-	if (setjmp(tess->env) != 0) { 
-		/* come back here if out of memory */
-		return 0;
-	}
-
 	if (!tess->mesh)
 	{
 		return 0;
@@ -910,7 +907,7 @@ int tessTesselate( TESStesselator *tess, int windingRule, int elementType,
 	* Each interior region is guaranteed be monotone.
 	*/
 	if ( !tessComputeInterior( tess ) ) {
-		longjmp(tess->env,1);  /* could've used a label */
+		throw std::runtime_error( "interior computation failed" );
 	}
 
 	mesh = tess->mesh;
@@ -919,19 +916,20 @@ int tessTesselate( TESStesselator *tess, int windingRule, int elementType,
 	* except those which separate the interior from the exterior.
 	* Otherwise we tessellate all the regions marked "inside".
 	*/
-	if (elementType == TESS_BOUNDARY_CONTOURS) {
-		rc = tessMeshSetWindingNumber( mesh, 1, TRUE );
-	} else {
+//	if (elementType == TESS_BOUNDARY_CONTOURS) {
+//		rc = tessMeshSetWindingNumber( mesh, 1, TRUE );
+//	} else {
 		rc = tessMeshTessellateInterior( mesh ); 
-	}
-	if (rc == 0) longjmp(tess->env,1);  /* could've used a label */
+//	}
+	if (rc == 0)
+		throw std::runtime_error( "interior tessellation failed" );
 
 	tessMeshCheckMesh( mesh );
 
-	if (elementType == TESS_BOUNDARY_CONTOURS) {
-		OutputContours( tess, mesh, vertexSize );     /* output contours */
-	}
-	else
+//	if (elementType == TESS_BOUNDARY_CONTOURS) {
+//		OutputContours( tess, mesh, vertexSize );     /* output contours */
+//	}
+//	else
 	{
 		OutputPolymesh( tess, mesh, elementType, polySize, vertexSize );     /* output polygons */
 	}
