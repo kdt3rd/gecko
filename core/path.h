@@ -66,24 +66,65 @@ public:
 	void replay( P &player ) const
 	{
 		auto data = _data.begin();
-		auto pt = [&]() { double x = *data++; double y = *data++; return core::point( x, y ); };
-		auto dbl = [&]() { return *data++; };
+
+		core::point p1, p2, p3;
+		double x, y, z;
 
 		for ( auto act: _actions )
 		{
 			switch ( act )
 			{
-				case action::MOVE: player.move_to( pt() ); break;
-				case action::LINE: player.line_to( pt() ); break;
-				case action::QUADRATIC: player.quadratic_to( pt(), pt() ); break;
-				case action::CUBIC: player.cubic_to( pt(), pt(), pt() ); break;
-				case action::ARC: player.arc_to( pt(), dbl(), dbl(), dbl() ); break;
-				case action::CLOSE: player.close();
+				case action::MOVE:
+					player.move_to( pt( data ) );
+					break;
+
+				case action::LINE:
+					player.line_to( pt( data ) );
+					break;
+
+				case action::QUADRATIC:
+					p1 = pt( data );
+					p2 = pt( data );
+					player.quadratic_to( p1, p2 );
+					break;
+
+				case action::CUBIC:
+					p1 = pt( data );
+					p2 = pt( data );
+					p3 = pt( data );
+					player.cubic_to( p1, p2, p3 );
+					break;
+
+				case action::ARC:
+					p1 = pt( data );
+					x = dbl( data );
+					y = dbl( data );
+					z = dbl( data );
+					player.arc_to( p1, x, y, z );
+					break;
+
+				case action::CLOSE:
+					player.close();
+					break;
 			}
 		}
 	}
 
 private:
+	template<typename Iterator>
+	core::point pt( Iterator &i ) const
+	{
+		double x = *i++;
+		double y = *i++;
+		return core::point( x, y );
+	}
+
+	template<typename Iterator>
+	double dbl( Iterator &i ) const
+	{
+		return *i++;
+	}
+
 	inline point next_point( const point &d )
 	{
 		return d + _last;
@@ -102,8 +143,8 @@ private:
 
 	void addit( const point &p )
 	{
-		add( p.x() );
-		add( p.y() );
+		addit( p.x() );
+		addit( p.y() );
 	}
 
 	void addit( double v )
