@@ -424,7 +424,7 @@ static void VertexWeights( TESSvertex *isect, TESSvertex *org, TESSvertex *dst,
 	weights[1] = (TESSreal)0.5 * t1 / (t1 + t2);
 	isect->coords[0] += weights[0]*org->coords[0] + weights[1]*dst->coords[0];
 	isect->coords[1] += weights[0]*org->coords[1] + weights[1]*dst->coords[1];
-	isect->coords[2] += weights[0]*org->coords[2] + weights[1]*dst->coords[2];
+//	isect->coords[2] += weights[0]*org->coords[2] + weights[1]*dst->coords[2];
 }
 
 
@@ -439,7 +439,7 @@ static void GetIntersectData( TESStesselator *tess, TESSvertex *isect,
 {
 	TESSreal weights[4];
 
-	isect->coords[0] = isect->coords[1] = isect->coords[2] = 0;
+	isect->coords[0] = isect->coords[1] = /*isect->coords[2] =*/ 0;
 	isect->idx = TESS_UNDEF;
 	VertexWeights( isect, orgUp, dstUp, &weights[0] );
 	VertexWeights( isect, orgLo, dstLo, &weights[2] );
@@ -1133,7 +1133,6 @@ static void InitEdgeDict( TESStesselator *tess )
 static void DoneEdgeDict( TESStesselator *tess )
 {
 	ActiveRegion *reg;
-	int fixedEdges = 0;
 
 	while( (reg = (ActiveRegion *)dictKey( dictMin( tess->dict ))) != NULL ) {
 		/*

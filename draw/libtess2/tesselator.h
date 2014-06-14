@@ -32,10 +32,6 @@
 #ifndef TESSELATOR_H
 #define TESSELATOR_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // See OpenGL Red Book for description of the winding rules
 // http://www.glprogramming.com/red/chapter11.html
 enum TessWindingRule
@@ -201,9 +197,5 @@ int tessGetElementCount( TESStesselator *tess );
 
 // tessGetElements() - Returns pointer to the first element.
 const TESSindex* tessGetElements( TESStesselator *tess );
-
-#ifdef __cplusplus
-};
-#endif
 
 #endif // TESSELATOR_H

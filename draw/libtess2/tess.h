@@ -39,10 +39,6 @@
 #include "priorityq.h"
 #include "tesselator.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 //typedef struct TESStesselator TESStesselator;
 
 struct TESStesselator {
@@ -82,9 +78,5 @@ struct TESStesselator {
 	
 	jmp_buf env;			/* place to jump to when memAllocs fail */
 };
-
-#ifdef __cplusplus
-};
-#endif
 
 #endif

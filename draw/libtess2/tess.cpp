@@ -46,6 +46,7 @@
 
 #define Dot(u,v)	(u[0]*v[0] + u[1]*v[1] + u[2]*v[2])
 
+#if defined(FOR_TRITE_TEST_PROGRAM) || defined(TRUE_PROJECT)
 static void Normalize( TESSreal v[3] )
 {
 	TESSreal len = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
@@ -56,6 +57,7 @@ static void Normalize( TESSreal v[3] )
 	v[1] /= len;
 	v[2] /= len;
 }
+#endif
 
 #define ABS(x)	((x) < 0 ? -(x) : (x))
 
@@ -806,7 +808,7 @@ void tessAddContour( TESStesselator *tess, int size, const void* vertices,
 
 	for( i = 0; i < numVertices; ++i )
 	{
-		const TESSreal* coords = (const TESSreal*)src;
+		const TESSreal* coords = (const TESSreal*)(src);
 		src += stride;
 
 		if( e == NULL ) {

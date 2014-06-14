@@ -13,13 +13,13 @@ srcs = {
 }
 
 tess = {
-	"libtess2/bucketalloc.c";
-	"libtess2/dict.c";
-	"libtess2/geom.c";
-	"libtess2/mesh.c";
-	"libtess2/priorityq.c";
-	"libtess2/sweep.c";
-	"libtess2/tess.c";
+	"libtess2/bucketalloc.cpp";
+	"libtess2/dict.cpp";
+	"libtess2/geom.cpp";
+	"libtess2/mesh.cpp";
+	"libtess2/priorityq.cpp";
+	"libtess2/sweep.cpp";
+	"libtess2/tess.cpp";
 }
 
 shaders = {

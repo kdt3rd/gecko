@@ -32,10 +32,6 @@
 #ifndef MEMALLOC_H
 #define MEMALLOC_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "tesselator.h"
 	
 struct BucketAlloc *createBucketAlloc( TESSalloc* alloc, const char *name,
@@ -43,9 +39,5 @@ struct BucketAlloc *createBucketAlloc( TESSalloc* alloc, const char *name,
 void *bucketAlloc( struct BucketAlloc *ba);
 void bucketFree( struct BucketAlloc *ba, void *ptr );
 void deleteBucketAlloc( struct BucketAlloc *ba );
-
-#ifdef __cplusplus
-};
-#endif
 
 #endif
