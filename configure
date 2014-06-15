@@ -487,7 +487,7 @@ function Include( ... )
 	local dirs = table.flatten( ... )
 	local str = ""
 	for k, dir in pairs( dirs ) do
-		if dir:match( "^-I" ) then
+		if dir:match( "^-" ) then
 			str = str .. " " .. dir
 		else
 			str = str .. " -I" .. dir
@@ -1046,7 +1046,7 @@ function Package( ... )
 			for i, dir in pairs( dirlist ) do
 				local fmwk = dir:match( ".*/([^/]*).framework" )
 				if near_match( lib, fmwk ) then
-					table.insert( iflags, "-I" .. dir .. "/Headers" )
+					table.insert( iflags, "-F" .. dir )
 					table.insert( lflags, "-framework " .. fmwk )
 					found = true
 					break
