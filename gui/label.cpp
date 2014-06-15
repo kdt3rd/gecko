@@ -11,6 +11,8 @@ namespace gui
 
 label::label( void )
 {
+	auto style = application::current_style();
+	_color = style->label_color();
 	callback_invalidate( _text, _align, _color, _font );
 }
 
@@ -19,6 +21,11 @@ label::label( void )
 label::label( datum<std::string> &&l, datum<alignment> &&a, datum<core::color> &&c, shared_datum<draw::font> &&f )
 	: _text( std::move( l ) ), _align( std::move( a ) ), _color( std::move( c ) ), _font( std::move( f ) )
 {
+	if ( _color.value().alpha() < 0.0 )
+	{
+		auto style = application::current_style();
+		_color = style->label_color();
+	}
 	callback_invalidate( _text, _align, _color, _font );
 }
 

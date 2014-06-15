@@ -21,6 +21,7 @@ public:
 	virtual std::shared_ptr<draw::font> default_font( bool bold = false ) = 0;
 
 	virtual void background( const std::shared_ptr<draw::canvas> &c ) = 0;
+	virtual const core::color &label_color( void ) = 0;
 
 	virtual core::size button_size( const core::size &content ) = 0;
 	virtual core::rect button_content( const core::rect &size ) = 0;

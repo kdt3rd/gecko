@@ -16,7 +16,7 @@ class label : public widget
 {
 public:
 	label( void );
-	label( datum<std::string> &&l, datum<alignment> &&a = alignment::LEFT, datum<core::color> &&c = { 0, 0, 0, 1 }, shared_datum<draw::font> &&f = application::current_style()->default_font() );
+	label( datum<std::string> &&l, datum<alignment> &&a = alignment::LEFT, datum<core::color> &&c = { 0, 0, 0, -1 }, shared_datum<draw::font> &&f = application::current_style()->default_font() );
 	~label( void );
 
 	const std::string &text( void ) { return _text.value(); }
