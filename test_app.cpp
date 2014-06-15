@@ -6,7 +6,7 @@
 #include <memory>
 
 #include <gui/application.h>
-#include <gui/cocoa_style.h>
+#include <gui/dark_style.h>
 #include <gui/container.h>
 #include <gui/layouts.h>
 #include <gui/label.h>
@@ -192,7 +192,7 @@ int safemain( int argc, char **argv )
 
 	auto app = std::make_shared<gui::application>();
 	app->push();
-	app->set_style( std::make_shared<gui::cocoa_style>() );
+	app->set_style( std::make_shared<gui::dark_style>() );
 
 	auto win = app->new_window();
 	win->set_title( app->active_platform() );
