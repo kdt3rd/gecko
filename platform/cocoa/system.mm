@@ -9,7 +9,7 @@
 #include <core/contract.h>
 #include <stdexcept>
 
-#include <Cocoa.h>
+#include <Cocoa/Cocoa.h>
 
 namespace cocoa
 {
@@ -35,12 +35,12 @@ system::system( void )
     [appMenu addItem:quitMenuItem];
     [appMenuItem setSubmenu:appMenu];
 
-    [NSApp activateIgnoringOtherApps:YES];
-
 	_keyboard = std::make_shared<keyboard>();
 	_mouse = std::make_shared<mouse>();
 	_font_manager = std::make_shared<fc::font_manager>();
 	_dispatcher = std::make_shared<dispatcher>( _keyboard, _mouse );
+
+    [NSApp activateIgnoringOtherApps:YES];
 }
 
 ////////////////////////////////////////

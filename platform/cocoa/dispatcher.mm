@@ -4,7 +4,7 @@
 #include <core/contract.h>
 #include <core/pointer.h>
 #include "dispatcher.h"
-#include <Cocoa.h>
+#include <Cocoa/Cocoa.h>
 
 ////////////////////////////////////////
 

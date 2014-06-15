@@ -7,7 +7,7 @@
 #include <core/contract.h>
 #include <stdexcept>
 
-#include <Cocoa.h>
+#include <Cocoa/Cocoa.h>
 
 namespace cocoa
 {
@@ -87,15 +87,10 @@ void window::resize( double w, double h )
 
 void window::resize_event( double w, double h )
 {
-	std::cout << "Resized! " << w << 'x' << h << std::endl;
 	_last_w = w;
 	_last_h = h;
-//	[[_impl->view openGLContext] makeCurrentContext];
-//	glViewport( 0, 0, w, h );
 	if ( _canvas )
-	{
 		_impl->ctxt = nullptr;
-	}
 	resized( w, h );
 }
 
@@ -142,6 +137,8 @@ void window::set_ns( void *w, void *v )
 {
 	_impl->win = (NSWindow *)w;
 	_impl->view = (NSOpenGLView *)v;
+	if ( [ _impl->view respondsToSelector:@selector(setWantsBestResolutionOpenGLSurface:) ] ) 
+		[ _impl->view setWantsBestResolutionOpenGLSurface:YES ]; 
 }
 
 ////////////////////////////////////////
