@@ -90,7 +90,7 @@ canvas::align_text( const std::shared_ptr<font> &font, const std::string &utf8, 
 		case alignment::CENTER:
 		case alignment::LEFT:
 		case alignment::RIGHT:
-			y = rect.y() + rect.height() / 2.0 + textHeight / 2.0 + fex.descent;
+			y = rect.y() + std::round( ( rect.height() + textHeight ) / 2.0 ) + fex.descent;
 			break;
 
 		case alignment::BOTTOM:
@@ -123,7 +123,7 @@ canvas::align_text( const std::shared_ptr<font> &font, const std::string &utf8, 
 		case alignment::CENTER:
 		case alignment::TOP:
 		case alignment::BOTTOM:
-			x = rect.x1() + ( rect.width() - tex.width - tex.x_bearing ) /2.0;
+			x = rect.x1() + std::round( ( rect.width() - tex.width - tex.x_bearing ) / 2.0 );
 			break;
 	}
 
