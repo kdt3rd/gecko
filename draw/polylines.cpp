@@ -117,13 +117,20 @@ polylines polylines::stroked( double width )
 		subj.clear();
 		for ( const auto &p: line )
 			subj << IntPoint( p.x() * 100 + 0.5, p.y() * 100 + 0.5 );
-		if ( line.closed() )
-			subj << IntPoint( line.front().x() * 100 + 0.5, line.front().y() * 100 + 0.5 );
 
 		ClipperOffset co;
-		co.AddPath( subj, jtRound, etOpenRound );
 		solution.clear();
-		co.Execute( solution, width * 50 );
+		if ( line.closed() )
+		{
+			result._lines.push_back( line );
+			co.AddPath( subj, jtRound, etClosedPolygon );
+			co.Execute( solution, -width * 100 );
+		}
+		else
+		{
+			co.AddPath( subj, jtRound, etOpenRound );
+			co.Execute( solution, width * 50 );
+		}
 
 		for ( auto path: solution )
 		{

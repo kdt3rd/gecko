@@ -3,102 +3,69 @@
 #include <unistd.h>
 
 #include <core/contract.h>
-#include <view/cocoa/button.h>
-
-#define PLATFORM_H <platform/PLATFORM/system.h>
-#include PLATFORM_H
+#include <platform/platform.h>
+#include <platform/system.h>
+#include <draw/object.h>
+#include <draw/polylines.h>
 
 namespace {
 
 int safemain( int argc, char **argv )
 {
-	auto sys = std::make_shared<platform::native_system>();
-	std::cout << sys->name() << " - " << sys->description() << std::endl;
+	auto const &platforms = platform::platform::list();
+	if ( platforms.empty() )
+		throw std::runtime_error( "no platforms available" );
 
-	auto fontmgr = sys->get_font_manager();
-	std::cout << fontmgr->name() << " - " << fontmgr->version() << std::endl;
-
-	std::cout << "Font families:\n";
-	for ( auto &f: fontmgr->get_families() )
-		std::cout << "  " << f << '\n';
-
-	auto font = fontmgr->get_font( "Lucida Grande", "bold", 14.0 );
-	if ( !font )
-		throw std::runtime_error( "font not found" );
-
-	auto screens = sys->screens();
-	for ( auto s: screens )
-		std::cout << ' ' << s->bounds().width() << 'x' << s->bounds().height() << std::endl;
+	const platform::platform &p = platforms.front();
+	std::cout << "Using platform: " << p.name() << ' ' << p.render() << std::endl;
+	auto sys = p.create();
+	auto dispatcher = sys->get_dispatcher();
 
 	auto win = sys->new_window();
 
-	draw::color bg( 0.9294, 0.9294, 0.9294 );
-	draw::color fg( 0, 0, 0 );
-//	draw::color textbg = bg.change( 0.30 );
-//	draw::color textfg = bg.change( -0.64 ).desaturate( -0.10 );
+	core::color bg( 0.9294, 0.9294, 0.9294 );
+	core::color fg( 0, 0, 0 );
 
-	draw::path round_rect;
-	round_rect.rounded_rect( { 10, 10 }, 150, 24, 6 );
+	core::path path;
+	path.rectangle( { 10, 10 }, 150, 24 );
 
-	draw::gradient grad;
-	{
-		draw::color c = bg.change( 0.10 );
-		grad.add_stop( 0.0, c );
-		grad.add_stop( 0.7, c.change( -0.13 ) );
-		grad.add_stop( 1.0, c.change( -0.13 ) );
-	}
+	core::path path2;
+	path2.circle( { 180, 22 }, 12 );
 
-//	std::shared_ptr<platform::points> ps;
-	auto area = std::make_shared<layout::area>( draw::point( 10.5, 10.5 ), 150, 21 );
+	core::paint paint( { 1, 0, 0 }, 3.0 );
+	paint.set_fill_color( { 0, 0, 1 } );
 
-	cocoa::button b( area );
+	std::shared_ptr<draw::object> obj;
+	std::shared_ptr<draw::object> obj2;
 
 	auto draw_stuff = [&]
 	{
-		std::cout << "Drawing" << std::endl;
 		auto canvas = win->canvas();
-		canvas->fill( bg );
+		glViewport( 0, 0, win->width(), win->height() );
+		canvas->clear_color( bg );
+		canvas->clear();
+		canvas->ortho( 0, win->width(), 0, win->height() );
 
-		b.paint( canvas );
+		if ( !obj )
+		{
+			obj = std::make_shared<draw::object>();
+			obj->create( canvas, path, paint );
+		}
 
-		draw::paint paint2( { 0.1961, 0.1961, 0.1961, 0 } );
-		paint2.set_fill_color( { 0.1961, 0.1961, 0.1961 } );
-		canvas->draw_text( font, { 18, 10+16 }, "Hello", paint2 );
+		if ( !obj2 )
+		{
+			obj2 = std::make_shared<draw::object>();
+			obj2->create( canvas, path2, paint );
+		}
 
-		canvas->present();
-
+		obj->draw( *canvas );
+		obj2->draw( *canvas );
 	};
 
 	win->exposed.callback( draw_stuff );
 	win->resize( 400, 400 );
 	win->set_title( "Hello World" );
 	win->show();
-
-
-	auto dispatcher = sys->get_dispatcher();
-
-	auto keypress = [&]( const std::shared_ptr<platform::keyboard> &k, platform::scancode sc )
-	{
-		auto canvas = win->canvas();
-		canvas->screenshot_png( "test.png" );
-		std::cout << "Screenshot " << static_cast<uint32_t>(sc) << std::endl;
-		dispatcher->exit( 0 );
-	};
-
-	auto mousepress = [&]( const std::shared_ptr<platform::mouse> &m, const draw::point &p, int b )
-	{
-		std::cout << "Press: " << b << std::endl;
-	};
-
-	auto mousemove = [&]( const std::shared_ptr<platform::mouse> &m, const draw::point &p )
-	{
-		std::cout << "Moved: " << p.x() << ',' << p.y() << std::endl;
-	};
-
-	win->key_pressed.callback( keypress );
-
-	win->mouse_pressed.callback( mousepress );
-	win->mouse_moved.callback( mousemove );
 
 	return dispatcher->execute();
 }

@@ -116,8 +116,8 @@ void path::rounded_rect( const point &p1, const point &p2, double r )
 {
 	const double x1 = std::min( p1.x(), p2.x() );
 	const double y1 = std::min( p1.y(), p2.y() );
-	const double x2 = std::max( p1.x(), p2.x() ) - 1.0;
-	const double y2 = std::max( p1.y(), p2.y() ) - 1.0;
+	const double x2 = std::max( p1.x(), p2.x() );
+	const double y2 = std::max( p1.y(), p2.y() );
 
 	constexpr double degrees = PI / 180.0;
 
@@ -133,7 +133,7 @@ void path::rounded_rect( const point &p1, const point &p2, double r )
 
 void path::rounded_rect( const point &p1, double w, double h, double r )
 {
-	rounded_rect( p1, { p1.x() + w - 1.0, p1.y() + h - 1.0 }, r );
+	rounded_rect( p1, { p1.x() + w, p1.y() + h }, r );
 }
 
 ////////////////////////////////////////

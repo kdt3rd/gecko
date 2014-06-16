@@ -19,7 +19,7 @@ void stretchable::create( const std::shared_ptr<canvas> &c, const core::path &pa
 	polylines lines;
 	path.replay( lines );
 
-	if ( paint.get_stroke_width() > 0.0 )
+	if ( paint.get_stroke_width() != 0.0 )
 	{
 		_stroke_prog = c->program( "quadrant.vert", "single_color.frag" );
 		_stroke_prog->set_uniform( "color", paint.get_stroke_color() );
