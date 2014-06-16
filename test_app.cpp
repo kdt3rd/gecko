@@ -18,14 +18,14 @@
 #include <gui/line_edit.h>
 #include <gui/color_picker.h>
 
-constexpr double padding = 12.5;
+constexpr double padding = 12;
 
 namespace {
 
 struct test_record : public model::record
 {
 	field<std::string> title = field<std::string>( this );
-	field<double> rating = field<double>( this, 0.5 );
+	field<double> rating = field<double>( this, 1.0 );
 };
 
 std::shared_ptr<test_record> testrec = std::make_shared<test_record>();
