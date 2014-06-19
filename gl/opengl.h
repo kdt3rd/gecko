@@ -6,7 +6,9 @@
 #endif
 
 #ifdef _WIN32
-#	include <GL/wglew.h>
+#define GLEW_STATIC
+#	include <glew.h>
+#	include <wglew.h>
 #endif
 
 #ifdef __unix__
