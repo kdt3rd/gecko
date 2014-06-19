@@ -15,7 +15,11 @@ public:
 	screen( void );
 	virtual ~screen( void );
 
-	virtual size bounds( void );
+	bool is_default( void ) const override;
+
+	virtual core::size bounds( void ) const override;
+
+	core::point dpi( void ) const override;
 };
 
 ////////////////////////////////////////

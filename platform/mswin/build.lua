@@ -1,16 +1,27 @@
 
-Include( CAIRO_INCLUDE, FREETYPE_INCLUDE, FONTCONFIG_INCLUDE )
+Platform {
+	name = "mswin";
 
-srcs = {
-	"system.cpp";
-	"screen.cpp";
-	"window.cpp";
-	"timer.cpp";
-	"keyboard.cpp";
-	"mouse.cpp";
-	"font_manager.cpp";
-	"dispatcher.cpp";
+	incs = {
+		GL_INCLUDE;
+	};
+
+	srcs = {
+		"system.cpp";
+		"screen.cpp";
+		"window.cpp";
+		"timer.cpp";
+		"keyboard.cpp";
+		"mouse.cpp";
+		"dispatcher.cpp";
+	};
+
+	libs = {
+		"gl";
+	};
+
+	syslibs = {
+		GL_LIBS;
+	};
 }
-
-Library( "platform-mswin", Compile( srcs ), LinkLibs( "platform", "draw-cairo" ), LinkSys( CAIRO_LIBS, FONTCONFIG_LIBS, FREETYPE_LIBS ) )
 

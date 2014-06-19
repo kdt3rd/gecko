@@ -3,11 +3,13 @@
 
 #include <iostream>
 #include <stdexcept>
-#include <cairo-win32.h>
 
 #include <core/pointer.h>
 #include <core/contract.h>
 #include <windows.h>
+
+#include <GL/glew.h>
+#include <GL/wglew.h>
 
 namespace mswin
 {
@@ -44,13 +46,9 @@ void window::raise( void )
 
 ////////////////////////////////////////
 
-/*
 void window::lower( void )
 {
-	const static uint32_t values[] = { XCB_STACK_MODE_BELOW };
-	xcb_configure_window( _connection, _win, XCB_CONFIG_WINDOW_STACK_MODE, values);
 }
-*/
 
 ////////////////////////////////////////
 
@@ -111,22 +109,22 @@ void window::invalidate( const draw::rect &r )
 
 ////////////////////////////////////////
 
+gl::context window::context( void )
+{
+//	glXMakeCurrent( _display.get(), _win, _glc );
+	return gl::context();
+}
+
+////////////////////////////////////////
+
 std::shared_ptr<draw::canvas> window::canvas( void )
 {
-	if ( !_canvas )
-	{
-		_canvas = std::make_shared<cairo::canvas>();
-
-		HDC hdc = GetDC( _hwnd );
-		cairo_surface_t *surf = cairo_win32_surface_create( hdc );
-		_canvas->set_surface( surf );
-	}
-
 	return _canvas;
 }
 
 ////////////////////////////////////////
 
+/*
 void window::exposed( void )
 {
 	PAINTSTRUCT ps;
@@ -134,6 +132,7 @@ void window::exposed( void )
 	platform::window::exposed();
 	EndPaint( _hwnd, &ps );
 }
+*/
 
 ////////////////////////////////////////
 

@@ -8,7 +8,7 @@ BuildDir( "mingw", "mingw" )
 
 if Building( "mingw" ) then
 	System( "Windows" )
-	posix.setenv( "PKG_CONFIG_PATH", "/usr/i686-w64-mingw32/lib/pkgconfig" )
+	posix.setenv( "PKG_CONFIG_LIBDIR", "/usr/i686-w64-mingw32/lib/pkgconfig" )
 end
 
 if System() == "Linux" then
@@ -128,6 +128,6 @@ elseif System() == "Darwin" then
 elseif System() == "Windows" then
 	FREETYPE_FLAGS, FREETYPE_INCLUDE, FREETYPE_LIBS = Package( "freetype2" )
 	FONTCONFIG_FLAGS, FONTCONFIG_INCLUDE, FONTCONFIG_LIBS = Package( "fontconfig", "expat" )
-	GL_FLAGS, GL_INCLUDE, GL_LIBS = "", "", "-lglew32 -lopengl32"
+	GL_FLAGS, GL_INCLUDE, GL_LIBS = Package( "glew" )
 end
 

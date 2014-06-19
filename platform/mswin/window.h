@@ -2,7 +2,6 @@
 #pragma once
 
 #include <platform/window.h>
-#include <draw/cairo/canvas.h>
 #include <windows.h>
 
 namespace mswin
@@ -14,41 +13,41 @@ class window : public platform::window
 {
 public:
 	window( void );
-	virtual ~window( void );
+	~window( void );
 
-	virtual void raise( void );
-//	virtual void lower( void );
+	void raise( void ) override;
+	void lower( void ) override;
 
-	virtual void show( void );
-	virtual void hide( void );
-	virtual bool is_visible( void );
+	void show( void ) override;
+	void hide( void ) override;
+	bool is_visible( void ) override;
 
-//	virtual rect geometry( void );
-//	virtual void set_position( double x, double y );
-	virtual void resize( double w, double h );
-	virtual void set_minimum_size( double w, double h );
+//	rect geometry( void ) override;
+//	void set_position( double x, double y ) override;
+	void resize( double w, double h ) override;
+	void set_minimum_size( double w, double h ) override;
 
-	virtual void set_title( const std::string &t );
-//	virtual void set_icon( const icon &i );
+	void set_title( const std::string &t ) override;
+//	void set_icon( const icon &i ) override;
 
-	virtual void invalidate( const draw::rect &r );
-	virtual std::shared_ptr<draw::canvas> canvas( void );
+	void invalidate( const core::rect &r );
+
+	gl::context context( void ) override;
+	std::shared_ptr<draw::canvas> canvas( void ) override;
 
 	bool check_last_position( int16_t x, int16_t y ) { if ( _last_x != x || _last_y != y ) { _last_x = x; _last_y = y; return true; } return false; }
 	bool check_last_size( uint16_t w, uint16_t h ) { if ( _last_w != w || _last_h != h ) { _last_w = w; _last_h = h; return true; } return false; }
 
-	virtual void exposed( void );
-
-	virtual double width( void ) { return _last_w; }
-	virtual double height( void ) { return _last_h; }
-
 	HWND id( void ) const { return _hwnd; }
+
+	double width( void ) override { return _last_w; }
+	double height( void )  override { return _last_h; }
 
 private:
 	void update_canvas( double w, double h );
 	HWND _hwnd;
 
-	std::shared_ptr<cairo::canvas> _canvas;
+	std::shared_ptr<draw::canvas> _canvas;
 
 	int16_t _last_x = 0, _last_y = 0;
 	uint16_t _last_w = 0, _last_h = 0;
