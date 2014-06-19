@@ -1,6 +1,7 @@
 
 Include( source_dir )
 Include( BuildFile() )
+Include( GL_INCLUDE )
 
 SubDir( "core" )
 SubDir( "gl" )
@@ -11,7 +12,7 @@ SubDir( "platform" )
 SubDir( "gui" )
 
 --Executable( "test_layout", Compile( "test_layout.cpp" ), LinkLibs( "layout", platform ) )
-Executable( "test", Compile( "test.cpp" ), LinkLibs( "platform", "draw", "utf" ) )
+Executable( "test", Compile( "test.cpp" ), LinkLibs( "platform", "draw", "gl", "utf", "gui" ), LinkSys( GL_LIBS ) )
 Executable( "test_app", Compile( "test_app.cpp" ), LinkLibs( "gui" ) )
 
 Application( "Test Application", "test_app" )
