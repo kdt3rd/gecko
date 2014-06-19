@@ -1,6 +1,4 @@
 ///
-/// @file glyph.h
-///
 /// @author Kimball Thurston
 ///
 
@@ -80,6 +78,6 @@ protected:
 	mutable std::map<wchar_t, double> _kerning;
 };
 
-} // namespace draw
+}
 
 
