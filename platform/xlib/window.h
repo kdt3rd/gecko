@@ -20,6 +20,7 @@ public:
 
 	void raise( void ) override;
 	void lower( void ) override;
+	void set_popup( void ) override;
 
 	void show( void ) override;
 	void hide( void ) override;

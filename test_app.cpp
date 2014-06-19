@@ -19,6 +19,8 @@
 #include <gui/color_picker.h>
 
 constexpr double padding = 12;
+std::shared_ptr<gui::application> app;
+std::shared_ptr<gui::window> extra;
 
 namespace {
 
@@ -44,7 +46,15 @@ std::shared_ptr<gui::form> build_form( direction dir )
 		testrec->title = "Goodbye World";
 	};
 
+	auto popup = std::make_shared<gui::button>( "Pop up" );
+	popup->when_activated += []()
+	{
+		extra = app->new_popup();
+		extra->show();
+	};
+
 	container->add( std::make_shared<gui::label>( model::make_datum( testrec, testrec->title ) ), button );
+	container->add( std::make_shared<gui::label>( "Button" ), popup );
 	container->add( std::make_shared<gui::label>( "What" ), std::make_shared<gui::slider>( model::make_datum( testrec, testrec->rating ) ) );
 	container->add( std::make_shared<gui::label>( "Who" ), std::make_shared<gui::slider>( model::make_datum( testrec, testrec->rating ) ) );
 	return container;
@@ -190,7 +200,7 @@ int safemain( int argc, char **argv )
 {
 	testrec->title = "Hello World";
 
-	auto app = std::make_shared<gui::application>();
+	app = std::make_shared<gui::application>();
 	app->push();
 	app->set_style( std::make_shared<gui::dark_style>() );
 

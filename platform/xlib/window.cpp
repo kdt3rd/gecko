@@ -202,6 +202,15 @@ void window::lower( void )
 
 ////////////////////////////////////////
 
+void window::set_popup( void )
+{
+	XSetWindowAttributes swa;
+	swa.override_redirect = true;
+	XChangeWindowAttributes( _display.get(), _win, CWOverrideRedirect, &swa );
+}
+
+////////////////////////////////////////
+
 void window::show( void )
 {
 	XMapWindow( _display.get(), _win );

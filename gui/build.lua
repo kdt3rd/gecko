@@ -6,6 +6,7 @@ srcs = {
 	"layouts.cpp";
 	"context.cpp";
 	"window.cpp";
+	"popup.cpp";
 	"style.cpp";
 	"cocoa_style.cpp";
 	"dark_style.cpp";

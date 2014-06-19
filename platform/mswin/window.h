@@ -29,6 +29,7 @@ public:
 
 	void set_title( const std::string &t ) override;
 //	void set_icon( const icon &i ) override;
+	void set_popup( void ) override;
 
 	void invalidate( const core::rect &r );
 

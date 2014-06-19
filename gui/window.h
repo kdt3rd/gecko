@@ -32,7 +32,7 @@ public:
 
 	void invalidate( const core::rect &r ) override;
 
-private:
+protected:
 	void paint( void );
 	void resize( double w, double h );
 

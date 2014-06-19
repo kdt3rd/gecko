@@ -101,7 +101,13 @@ void window::set_title( const std::string &t )
 
 ////////////////////////////////////////
 
-void window::invalidate( const draw::rect &r )
+void window::set_popup( void )
+{
+}
+
+////////////////////////////////////////
+
+void window::invalidate( const core::rect &r )
 {
 	RECT rect = { LONG( std::floor( r.x1() ) ), LONG( std::floor( r.y1() ) ), LONG( std::ceil( r.x2() ) ), LONG( std::ceil( r.y2() ) ) };
 	InvalidateRect( _hwnd, &rect, FALSE );

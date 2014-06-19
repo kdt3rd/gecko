@@ -4,6 +4,7 @@
 #include <memory>
 #include <set>
 #include "window.h"
+#include "popup.h"
 
 namespace gui
 {
@@ -20,6 +21,7 @@ public:
 	const std::string &active_platform( void ) { return _platform; }
 
 	std::shared_ptr<window> new_window( void );
+	std::shared_ptr<popup> new_popup( void );
 
 	void set_style( const std::shared_ptr<style> &sty ) { _style = sty; }
 	const std::shared_ptr<style> &get_style( void ) const { return _style; }

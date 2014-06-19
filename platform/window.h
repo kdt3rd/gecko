@@ -35,6 +35,11 @@ public:
 	/// Lower the window below all other windows.
 	virtual void lower( void ) = 0;
 
+	/// @brief Set window as popup.
+	///
+	/// Make the window without decorations.
+	virtual void set_popup( void ) = 0;
+
 	/// @brief Show the window.
 	///
 	/// Make the window visible.
