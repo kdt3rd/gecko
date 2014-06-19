@@ -59,8 +59,11 @@ int dispatcher::execute( void )
 			case ConfigureNotify:
 			{
 				auto w = _windows[event.xconfigure.window];
-				w->move_event( event.xconfigure.x, event.xconfigure.y );
-				w->resize_event( event.xconfigure.width, event.xconfigure.height );
+				if ( w )
+				{
+					w->move_event( event.xconfigure.x, event.xconfigure.y );
+					w->resize_event( event.xconfigure.width, event.xconfigure.height );
+				}
 				break;
 			}
 
@@ -82,8 +85,11 @@ int dispatcher::execute( void )
 			case UnmapNotify:
 			{
 				auto w = _windows[event.xunmap.window];
-				w->hidden();
-				w->minimized();
+				if ( w )
+				{
+					w->hidden();
+					w->minimized();
+				}
 				break;
 			}
 
