@@ -1,10 +1,10 @@
 
 #include "window.h"
-#include <core/pointer.h>
+#include <base/pointer.h>
 
 #include <iostream>
 
-#include <core/contract.h>
+#include <base/contract.h>
 #include <stdexcept>
 
 #include <Cocoa/Cocoa.h>
@@ -44,6 +44,12 @@ void window::raise( void )
 ////////////////////////////////////////
 
 void window::lower( void )
+{
+}
+
+////////////////////////////////////////
+
+void window::set_popup( void )
 {
 }
 
@@ -96,7 +102,7 @@ void window::resize_event( double w, double h )
 
 ////////////////////////////////////////
 
-void window::invalidate( const core::rect &r )
+void window::invalidate( const base::rect &r )
 {
 	[_impl->view setNeedsDisplay:YES];
 }

@@ -1,7 +1,7 @@
 
 #include "mouse.h"
 
-namespace cocoa
+namespace platform { namespace cocoa
 {
 
 ////////////////////////////////////////
@@ -18,5 +18,5 @@ mouse::~mouse( void )
 
 ////////////////////////////////////////
 
-}
+} }
 

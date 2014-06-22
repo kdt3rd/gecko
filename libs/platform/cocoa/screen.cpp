@@ -1,11 +1,11 @@
 
 #include "screen.h"
 
-#include <core/contract.h>
+#include <base/contract.h>
 #include <string>
 #include <stdexcept>
 
-namespace cocoa
+namespace platform { namespace cocoa
 {
 
 ////////////////////////////////////////
@@ -22,12 +22,13 @@ screen::~screen( void )
 
 ////////////////////////////////////////
 
-core::size screen::bounds( void ) const
+base::size screen::bounds( void ) const
 {
 	return { 0, 0 };
 }
 
 ////////////////////////////////////////
 
-}
+} }
+
 

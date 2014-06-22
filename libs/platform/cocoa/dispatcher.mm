@@ -1,8 +1,8 @@
 
 #include <iostream>
 #include <stdlib.h>
-#include <core/contract.h>
-#include <core/pointer.h>
+#include <base/contract.h>
+#include <base/pointer.h>
 #include "dispatcher.h"
 #include <Cocoa/Cocoa.h>
 
@@ -10,9 +10,9 @@
 
 @interface MyView : NSOpenGLView
 {
-	std::shared_ptr<cocoa::window> win;
-	std::shared_ptr<cocoa::mouse> mouse;
-	std::shared_ptr<cocoa::keyboard> keyboard;
+	std::shared_ptr<::platform::cocoa::window> win;
+	std::shared_ptr<::platform::cocoa::mouse> mouse;
+	std::shared_ptr<::platform::cocoa::keyboard> keyboard;
 }
 @end
 
@@ -36,7 +36,7 @@
 
 ////////////////////////////////////////
 
-- (id)initWithWindow:(std::shared_ptr<cocoa::window>)w andMouse:(std::shared_ptr<cocoa::mouse>)m andKeyboard: (std::shared_ptr<cocoa::keyboard>)k
+- (id)initWithWindow:(std::shared_ptr<::platform::cocoa::window>)w andMouse:(std::shared_ptr<::platform::cocoa::mouse>)m andKeyboard: (std::shared_ptr<::platform::cocoa::keyboard>)k
 {
 	[[self superview] setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
 	self = [super init];

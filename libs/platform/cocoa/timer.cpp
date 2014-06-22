@@ -1,9 +1,9 @@
 
 #include <string>
-#include <core/contract.h>
+#include <base/contract.h>
 #include "timer.h"
 
-namespace cocoa
+namespace platform { namespace cocoa
 {
 
 ////////////////////////////////////////
@@ -44,5 +44,5 @@ void timer::cancel( void )
 
 ////////////////////////////////////////
 
-}
+} }
 

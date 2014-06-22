@@ -32,7 +32,7 @@ public:
 	/// @brief Callback for the timer.
 	///
 	/// The callback will be called once the timer is elapsed.
-	action<void( void )> elapsed;
+	base::action<void( void )> elapsed;
 };
 
 ////////////////////////////////////////

@@ -9,7 +9,7 @@ namespace platform { namespace cocoa
 ////////////////////////////////////////
 
 /// @brief Cocoa implementation of window.
-class window : public platform::window
+class window : public ::platform::window
 {
 public:
 	window( void );
@@ -20,6 +20,7 @@ public:
 
 	void show( void ) override;
 	void hide( void ) override;
+	void set_popup( void ) override;
 	bool is_visible( void ) override;
 
 //	rect geometry( void ) override;
@@ -35,7 +36,7 @@ public:
 
 	void resize_event( double w, double h );
 
-	void invalidate( const core::rect &r ) override;
+	void invalidate( const base::rect &r ) override;
 
 	void set_ns( void *nswin, void *nsview );
 

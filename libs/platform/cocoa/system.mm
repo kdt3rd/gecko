@@ -6,7 +6,7 @@
 #include <platform/fc/font_manager.h>
 #include "dispatcher.h"
 
-#include <core/contract.h>
+#include <base/contract.h>
 #include <stdexcept>
 
 #include <Cocoa/Cocoa.h>
@@ -53,7 +53,7 @@ system::~system( void )
 
 std::shared_ptr<platform::window> system::new_window( void )
 {
-	auto ret = std::make_shared<window>();
+	auto ret = std::make_shared<::platform::cocoa::window>();
 	_dispatcher->add_window( ret );
 	return ret;
 }

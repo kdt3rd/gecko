@@ -2,7 +2,7 @@
 #include <iostream>
 #include "keyboard.h"
 #include <map>
-#include <core/pointer.h>
+#include <base/pointer.h>
 #include <AppKit/AppKit.h>
 
 ////////////////////////////////////////
