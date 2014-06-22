@@ -1,10 +1,10 @@
 
 #pragma once
 
-#include <core/size.h>
+#include <base/size.h>
 #include <platform/screen.h>
 
-namespace mswin
+namespace platform { namespace mswin
 {
 
 ////////////////////////////////////////
@@ -17,12 +17,12 @@ public:
 
 	bool is_default( void ) const override;
 
-	virtual core::size bounds( void ) const override;
+	virtual base::size bounds( void ) const override;
 
-	core::point dpi( void ) const override;
+	base::point dpi( void ) const override;
 };
 
 ////////////////////////////////////////
 
-}
+} }
 

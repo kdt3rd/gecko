@@ -12,7 +12,7 @@
 #include <cairo-xcb.h>
 #include <xcb/xcb.h>
 
-namespace xcb
+namespace platform { namespace xcb
 {
 
 ////////////////////////////////////////
@@ -204,5 +204,5 @@ void window::update_canvas( double ww, double hh )
 
 ////////////////////////////////////////
 
-}
+} }
 

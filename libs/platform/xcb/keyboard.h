@@ -5,7 +5,7 @@
 #include <xcb/xcb.h>
 #include <xcb/xcb_keysyms.h>
 
-namespace xcb
+namespace platform { namespace xcb
 {
 
 ////////////////////////////////////////
@@ -40,5 +40,5 @@ private:
 
 ////////////////////////////////////////
 
-}
+} }
 

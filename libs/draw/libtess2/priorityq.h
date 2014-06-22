@@ -1,3 +1,4 @@
+/// @cond LIBTESS
 /*
 ** SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008) 
 ** Copyright (C) [dates of first publication] Silicon Graphics, Inc.
@@ -102,3 +103,4 @@ PQkey pqMinimum( PriorityQ *pq );
 int pqIsEmpty( PriorityQ *pq );
 
 #endif
+/// @endcond

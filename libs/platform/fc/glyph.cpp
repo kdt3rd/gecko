@@ -2,10 +2,13 @@
 #include "glyph.h"
 #include <stdexcept>
 
-namespace fc {
+namespace platform { namespace fc
+{
+
+////////////////////////////////////////
 
 glyph::glyph( FT_Face face, wchar_t code )
-		: draw::glyph( code ),
+		: ::draw::glyph( code ),
 		  _face( face ),
 		  _index( FT_Get_Char_Index( face, code ) )
 {
@@ -43,4 +46,6 @@ glyph::load_kerning( wchar_t prev_char ) const
 	return rval;
 }
 
-}
+////////////////////////////////////////
+
+} }

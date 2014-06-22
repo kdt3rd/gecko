@@ -3,7 +3,7 @@
 
 #include <platform/screen.h>
 
-namespace cocoa
+namespace platform { namespace cocoa
 {
 
 ////////////////////////////////////////
@@ -22,5 +22,5 @@ private:
 
 ////////////////////////////////////////
 
-}
+} }
 

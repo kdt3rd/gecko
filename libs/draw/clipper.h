@@ -1,3 +1,4 @@
+/// @cond CLIPPER
 /*******************************************************************************
 *                                                                              *
 * Author    :  Angus Johnson                                                   *
@@ -396,4 +397,4 @@ class clipperException : public std::exception
 
 #endif //clipper_hpp
 
-
+/// @endcond

@@ -24,7 +24,8 @@ const struct {
 
 }
 
-namespace fc {
+namespace platform { namespace fc
+{
 
 ////////////////////////////////////////
 
@@ -275,6 +276,5 @@ font::get_glyph( wchar_t char_code )
 
 ////////////////////////////////////////
 
-
-} // namespace
+} }
 

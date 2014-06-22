@@ -6,10 +6,10 @@
 #include "font_manager.h"
 #include "dispatcher.h"
 
-#include <core/contract.h>
+#include <base/contract.h>
 #include <stdexcept>
 
-namespace mswin
+namespace platform { namespace mswin
 {
 
 ////////////////////////////////////////
@@ -75,4 +75,5 @@ std::shared_ptr<platform::font_manager> system::get_font_manager( void )
 
 ////////////////////////////////////////
 
-}
+} }
+

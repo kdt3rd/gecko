@@ -3,13 +3,13 @@
 
 #include <platform/font_manager.h>
 
-namespace fc
+namespace platform { namespace fc
 {
 
 ////////////////////////////////////////
 
 /// @brief FontConfig implementation of platform::font_manager
-class font_manager : public platform::font_manager
+class font_manager : public ::platform::font_manager
 {
 public:
 	font_manager( void );
@@ -27,5 +27,5 @@ private:
 
 ////////////////////////////////////////
 
-}
+} }
 

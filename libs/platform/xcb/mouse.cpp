@@ -1,7 +1,7 @@
 
 #include "mouse.h"
 
-namespace xcb
+namespace platform { namespace xcb
 {
 
 ////////////////////////////////////////
@@ -18,5 +18,5 @@ mouse::~mouse( void )
 
 ////////////////////////////////////////
 
-}
+} }
 

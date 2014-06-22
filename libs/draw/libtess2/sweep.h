@@ -1,3 +1,4 @@
+/// @cond LIBTESS
 /*
 ** SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008) 
 ** Copyright (C) [dates of first publication] Silicon Graphics, Inc.
@@ -72,3 +73,4 @@ struct ActiveRegion {
 #define RegionAbove(r) ((ActiveRegion *) dictKey(dictSucc((r)->nodeUp)))
 
 #endif
+/// @endcond

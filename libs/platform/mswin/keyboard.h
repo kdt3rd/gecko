@@ -4,12 +4,12 @@
 #undef KEY_EXECUTE
 #include <platform/keyboard.h>
 
-namespace mswin
+namespace platform { namespace mswin
 {
 
 ////////////////////////////////////////
 
-class keyboard : public platform::keyboard
+class keyboard : public ::platform::keyboard
 {
 public:
 	keyboard( void );
@@ -18,5 +18,5 @@ public:
 
 ////////////////////////////////////////
 
-}
+} }
 

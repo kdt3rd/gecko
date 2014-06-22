@@ -3,13 +3,13 @@
 
 #include <platform/mouse.h>
 
-namespace xlib
+namespace platform { namespace xlib
 {
 
 ////////////////////////////////////////
 
 /// @brief Xlib implementation of platform::mouse.
-class mouse : public platform::mouse
+class mouse : public ::platform::mouse
 {
 public:
 	/// @brief Constructor.
@@ -21,5 +21,5 @@ public:
 
 ////////////////////////////////////////
 
-}
+} }
 

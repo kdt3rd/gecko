@@ -1,7 +1,7 @@
 
 #include "mouse.h"
 
-namespace xlib
+namespace platform { namespace xlib
 {
 
 ////////////////////////////////////////
@@ -18,5 +18,5 @@ mouse::~mouse( void )
 
 ////////////////////////////////////////
 
-}
+} }
 

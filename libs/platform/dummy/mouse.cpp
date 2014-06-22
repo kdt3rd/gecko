@@ -1,7 +1,7 @@
 
 #include "mouse.h"
 
-namespace dummy
+namespace platform { namespace dummy
 {
 
 ////////////////////////////////////////
@@ -18,5 +18,5 @@ mouse::~mouse( void )
 
 ////////////////////////////////////////
 
-}
+} }
 

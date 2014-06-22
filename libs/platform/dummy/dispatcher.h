@@ -8,7 +8,7 @@
 #include "keyboard.h"
 #include "mouse.h"
 
-namespace dummy
+namespace platform { namespace dummy
 {
 
 ////////////////////////////////////////
@@ -30,4 +30,4 @@ private:
 
 ////////////////////////////////////////
 
-}
+} }

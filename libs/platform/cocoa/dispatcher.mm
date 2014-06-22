@@ -162,7 +162,7 @@
 @end
 
 
-namespace cocoa
+namespace platform { namespace cocoa
 {
 
 ////////////////////////////////////////
@@ -248,5 +248,5 @@ void dispatcher::add_window( const std::shared_ptr<window> &w )
 
 ////////////////////////////////////////
 
-}
+} }
 

@@ -10,7 +10,7 @@
 #include <utf/utfcat.h>
 #include "dispatcher.h"
 
-namespace xlib
+namespace platform { namespace xlib
 {
 
 ////////////////////////////////////////
@@ -237,5 +237,5 @@ void dispatcher::add_window( const std::shared_ptr<window> &w )
 
 ////////////////////////////////////////
 
-}
+} }
 

@@ -4,12 +4,7 @@
 #include <platform/window.h>
 #include <xcb/xcb.h>
 
-namespace cairo
-{
-	class canvas;
-}
-
-namespace xcb
+namespace platform { namespace xcb
 {
 
 ////////////////////////////////////////
@@ -97,5 +92,5 @@ private:
 
 ////////////////////////////////////////
 
-}
+} }
 

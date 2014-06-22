@@ -1,18 +1,17 @@
 
 #include <iostream>
 #include <stdlib.h>
-#include <core/contract.h>
-#include <core/pointer.h>
+#include <base/contract.h>
 #include "dispatcher.h"
 #include <windows.h>
 
 namespace {
 
-std::map<HWND,std::weak_ptr<mswin::window>> windows;
+std::map<HWND,std::weak_ptr<platform::mswin::window>> windows;
 
 LRESULT CALLBACK WndProc( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam )
 {
-	std::shared_ptr<mswin::window> win;
+	std::shared_ptr<platform::mswin::window> win;
 	auto i = windows.find( hwnd );
 	if ( i != windows.end() )
 		win = i->second.lock();
@@ -46,7 +45,7 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam )
 
 ////////////////////////////////////////
 
-namespace mswin
+namespace platform { namespace mswin
 {
 
 ////////////////////////////////////////
@@ -112,5 +111,5 @@ void dispatcher::add_window( const std::shared_ptr<window> &win )
 
 ////////////////////////////////////////
 
-}
+} }
 

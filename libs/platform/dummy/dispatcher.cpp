@@ -5,7 +5,7 @@
 #include <core/pointer.h>
 #include "dispatcher.h"
 
-namespace dummy
+namespace platform { namespace dummy
 {
 
 ////////////////////////////////////////
@@ -45,5 +45,5 @@ void dispatcher::exit( int code )
 
 ////////////////////////////////////////
 
-}
+} }
 

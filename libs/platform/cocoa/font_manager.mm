@@ -27,7 +27,7 @@ namespace
 
 ////////////////////////////////////////
 
-namespace cocoa
+namespace platform { namespace cocoa
 {
 
 ////////////////////////////////////////
@@ -127,5 +127,5 @@ std::shared_ptr<draw::font> font_manager::get_font( const std::string &family, c
 
 ////////////////////////////////////////
 
-}
+} }
 

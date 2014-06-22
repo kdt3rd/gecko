@@ -3,7 +3,7 @@
 
 #include <platform/timer.h>
 
-namespace dummy
+namespace platform { namespace dummy
 {
 
 ////////////////////////////////////////
@@ -23,5 +23,5 @@ private:
 
 ////////////////////////////////////////
 
-}
+} }
 

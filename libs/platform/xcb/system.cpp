@@ -10,7 +10,7 @@
 #include <core/contract.h>
 #include <stdexcept>
 
-namespace xcb
+namespace platform { namespace xcb
 {
 
 ////////////////////////////////////////
@@ -94,4 +94,4 @@ std::shared_ptr<platform::font_manager> system::get_font_manager( void )
 
 ////////////////////////////////////////
 
-}
+} }

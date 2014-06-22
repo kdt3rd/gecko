@@ -3,13 +3,13 @@
 
 #include <platform/font_manager.h>
 
-namespace cocoa
+namespace platform { namespace cocoa
 {
 
 ////////////////////////////////////////
 
 /// @brief Cocoa implementation of font_manager.
-class font_manager : public platform::font_manager
+class font_manager : public ::platform::font_manager
 {
 public:
 	/// @brief Constructor.
@@ -28,5 +28,5 @@ private:
 
 ////////////////////////////////////////
 
-}
+} }
 

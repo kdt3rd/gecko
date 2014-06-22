@@ -8,12 +8,12 @@
 #include "keyboard.h"
 #include "mouse.h"
 
-namespace mswin
+namespace platform { namespace mswin
 {
 
 ////////////////////////////////////////
 
-class dispatcher : public platform::dispatcher
+class dispatcher : public ::platform::dispatcher
 {
 public:
 	dispatcher( const std::shared_ptr<keyboard> &k, const std::shared_ptr<mouse> &m );
@@ -32,4 +32,5 @@ private:
 
 ////////////////////////////////////////
 
-}
+} }
+

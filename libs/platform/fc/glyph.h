@@ -6,10 +6,12 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-namespace fc
+namespace platform { namespace fc
 {
 
-class glyph : public draw::glyph
+////////////////////////////////////////
+
+class glyph : public ::draw::glyph
 {
 public:
 	glyph( FT_Face face, wchar_t code );
@@ -25,6 +27,7 @@ private:
 	FT_UInt _index = 0;
 };
 
-}
+////////////////////////////////////////
 
+} }
 

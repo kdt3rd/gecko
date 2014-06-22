@@ -5,7 +5,7 @@
 #include <string>
 #include <stdexcept>
 
-namespace xlib
+namespace platform { namespace xlib
 {
 
 ////////////////////////////////////////
@@ -51,5 +51,5 @@ base::point screen::dpi( void ) const
 
 ////////////////////////////////////////
 
-}
+} }
 

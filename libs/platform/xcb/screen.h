@@ -4,7 +4,7 @@
 #include <platform/screen.h>
 #include <xcb/xcb.h>
 
-namespace xcb
+namespace platform { namespace xcb
 {
 
 ////////////////////////////////////////
@@ -28,5 +28,5 @@ private:
 
 ////////////////////////////////////////
 
-}
+} }
 

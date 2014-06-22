@@ -3,7 +3,7 @@
 
 #include <platform/keyboard.h>
 
-namespace cocoa
+namespace platform { namespace cocoa
 {
 
 ////////////////////////////////////////
@@ -25,5 +25,5 @@ private:
 
 ////////////////////////////////////////
 
-}
+} }
 

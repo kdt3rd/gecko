@@ -11,7 +11,7 @@
 
 #include <Cocoa/Cocoa.h>
 
-namespace cocoa
+namespace platform { namespace cocoa
 {
 
 ////////////////////////////////////////
@@ -95,4 +95,5 @@ std::shared_ptr<platform::font_manager> system::get_font_manager( void )
 
 ////////////////////////////////////////
 
-}
+} }
+

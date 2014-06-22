@@ -3,7 +3,7 @@
 
 #include <platform/mouse.h>
 
-namespace xcb
+namespace platform { namespace xcb
 {
 
 ////////////////////////////////////////
@@ -21,5 +21,5 @@ public:
 
 ////////////////////////////////////////
 
-}
+} }
 

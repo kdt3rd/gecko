@@ -5,7 +5,7 @@
 #include <string>
 #include <stdexcept>
 
-namespace dummy
+namespace platform { namespace dummy
 {
 
 ////////////////////////////////////////
@@ -29,5 +29,5 @@ core::size screen::bounds( void )
 
 ////////////////////////////////////////
 
-}
+} }
 

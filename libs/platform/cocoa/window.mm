@@ -9,7 +9,7 @@
 
 #include <Cocoa/Cocoa.h>
 
-namespace cocoa
+namespace platform { namespace cocoa
 {
 
 struct window::objcwrapper
@@ -143,5 +143,5 @@ void window::set_ns( void *w, void *v )
 
 ////////////////////////////////////////
 
-}
+} }
 

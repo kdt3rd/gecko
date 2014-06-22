@@ -3,7 +3,7 @@
 
 #include <platform/keyboard.h>
 
-namespace dummy
+namespace platform { namespace dummy
 {
 
 ////////////////////////////////////////
@@ -17,5 +17,5 @@ public:
 
 ////////////////////////////////////////
 
-}
+} }
 

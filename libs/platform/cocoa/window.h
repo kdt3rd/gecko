@@ -3,7 +3,7 @@
 
 #include <platform/window.h>
 
-namespace cocoa
+namespace platform { namespace cocoa
 {
 
 ////////////////////////////////////////
@@ -59,5 +59,5 @@ private:
 
 ////////////////////////////////////////
 
-}
+} }
 

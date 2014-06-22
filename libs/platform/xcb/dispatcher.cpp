@@ -8,7 +8,7 @@
 #include <xcb/xcb.h>
 #include <xcb/xcb_icccm.h>
 
-namespace xcb
+namespace platform { namespace xcb
 {
 
 ////////////////////////////////////////
@@ -226,5 +226,5 @@ void dispatcher::add_window( const std::shared_ptr<window> &w )
 
 ////////////////////////////////////////
 
-}
+} }
 

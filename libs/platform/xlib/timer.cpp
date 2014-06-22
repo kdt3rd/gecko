@@ -3,7 +3,7 @@
 #include <base/contract.h>
 #include "timer.h"
 
-namespace xlib
+namespace platform { namespace xlib
 {
 
 ////////////////////////////////////////
@@ -44,5 +44,5 @@ void timer::cancel( void )
 
 ////////////////////////////////////////
 
-}
+} }
 

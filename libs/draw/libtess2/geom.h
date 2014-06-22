@@ -1,3 +1,4 @@
+/// @cond LIBTESS
 /*
 ** SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008) 
 ** Copyright (C) [dates of first publication] Silicon Graphics, Inc.
@@ -74,3 +75,4 @@ int tesvertCCW( TESSvertex *u, TESSvertex *v, TESSvertex *w );
 void tesedgeIntersect( TESSvertex *o1, TESSvertex *d1, TESSvertex *o2, TESSvertex *d2, TESSvertex *v );
 
 #endif
+/// @endcond

@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <sstream>
 
-namespace dummy
+namespace platform { namespace dummy
 {
 
 ////////////////////////////////////////
@@ -47,5 +47,5 @@ std::shared_ptr<gldraw::font> font_manager::get_font( const std::string &family,
 
 ////////////////////////////////////////
 
-}
+} }
 

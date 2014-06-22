@@ -4,7 +4,7 @@
 #include <core/pointer.h>
 #include "keyboard.h"
 
-namespace dummy
+namespace platform { namespace dummy
 {
 
 ////////////////////////////////////////
@@ -21,5 +21,5 @@ keyboard::~keyboard( void )
 
 ////////////////////////////////////////
 
-}
+} }
 

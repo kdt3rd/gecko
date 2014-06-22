@@ -1,7 +1,7 @@
 
 #include "mouse.h"
 
-namespace mswin
+namespace platform { namespace mswin
 {
 
 ////////////////////////////////////////
@@ -18,5 +18,5 @@ mouse::~mouse( void )
 
 ////////////////////////////////////////
 
-}
+} }
 

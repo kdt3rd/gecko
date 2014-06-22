@@ -1,11 +1,10 @@
 
 #include "screen.h"
 
-#include <core/contract.h>
 #include <string>
 #include <stdexcept>
 
-namespace mswin
+namespace platform { namespace mswin
 {
 
 ////////////////////////////////////////
@@ -22,12 +21,12 @@ screen::~screen( void )
 
 ////////////////////////////////////////
 
-core::size screen::bounds( void ) const
+base::size screen::bounds( void ) const
 {
 	return { 0, 0 };
 }
 
 ////////////////////////////////////////
 
-}
+} }
 

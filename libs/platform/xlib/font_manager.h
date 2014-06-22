@@ -1,8 +1,8 @@
 
 #include <platform/fc/font_manager.h>
 
-namespace xlib
+namespace platform { namespace xlib
 {
 	using fc::font_manager;
-};
+} }
 

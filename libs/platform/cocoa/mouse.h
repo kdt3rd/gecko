@@ -3,7 +3,7 @@
 
 #include <platform/mouse.h>
 
-namespace cocoa
+namespace platform { namespace cocoa
 {
 
 ////////////////////////////////////////
@@ -18,5 +18,5 @@ public:
 
 ////////////////////////////////////////
 
-}
+} }
 

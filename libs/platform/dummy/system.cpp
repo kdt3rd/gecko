@@ -11,7 +11,7 @@
 #include <stdexcept>
 
 
-namespace dummy
+namespace platform { namespace dummy
 {
 
 ////////////////////////////////////////
@@ -76,4 +76,4 @@ std::shared_ptr<platform::font_manager> system::get_font_manager( void )
 
 ////////////////////////////////////////
 
-}
+} }

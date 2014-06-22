@@ -4,14 +4,12 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <core/pointer.h>
-#include <core/contract.h>
 #include <windows.h>
 
 #include <GL/glew.h>
 #include <GL/wglew.h>
 
-namespace mswin
+namespace platform { namespace mswin
 {
 
 ////////////////////////////////////////
@@ -107,7 +105,7 @@ void window::set_popup( void )
 
 ////////////////////////////////////////
 
-void window::invalidate( const core::rect &r )
+void window::invalidate( const base::rect &r )
 {
 	RECT rect = { LONG( std::floor( r.x1() ) ), LONG( std::floor( r.y1() ) ), LONG( std::ceil( r.x2() ) ), LONG( std::ceil( r.y2() ) ) };
 	InvalidateRect( _hwnd, &rect, FALSE );
@@ -142,5 +140,5 @@ void window::exposed( void )
 
 ////////////////////////////////////////
 
-}
+} }
 

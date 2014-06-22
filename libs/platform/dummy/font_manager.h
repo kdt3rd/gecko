@@ -3,7 +3,7 @@
 
 #include <platform/font_manager.h>
 
-namespace dummy
+namespace platform { namespace dummy
 {
 
 ////////////////////////////////////////
@@ -22,5 +22,5 @@ public:
 
 ////////////////////////////////////////
 
-}
+} }
 

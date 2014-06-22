@@ -1,0 +1,6 @@
+
+/// @namespace platform::xlib
+/// @brief Xlib platform implementation.
+///
+/// Implementation of the platform classes using X Window System
+

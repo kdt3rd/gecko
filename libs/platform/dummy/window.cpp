@@ -7,7 +7,7 @@
 #include <core/pointer.h>
 #include <core/contract.h>
 
-namespace dummy
+namespace platform { namespace dummy
 {
 
 ////////////////////////////////////////
@@ -97,5 +97,5 @@ std::shared_ptr<draw::canvas> window::canvas( void )
 
 ////////////////////////////////////////
 
-}
+} }
 

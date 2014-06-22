@@ -14,7 +14,7 @@
 #include "glyph.h"
 #include "font.h"
 
-namespace fc
+namespace platform { namespace fc
 {
 
 struct font_manager::pimpl
@@ -159,5 +159,5 @@ font_manager::get_font( const std::string &family, const std::string &style,
 
 ////////////////////////////////////////
 
-}
+} }
 

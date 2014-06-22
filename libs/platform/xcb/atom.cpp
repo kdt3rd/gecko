@@ -4,7 +4,7 @@
 #include <core/contract.h>
 #include "xcbpp.h"
 
-namespace xcb
+namespace platform { namespace xcb
 {
 
 ////////////////////////////////////////
@@ -30,5 +30,5 @@ xcb_atom_t get_atom( xcb_connection_t *c, const std::string &name )
 
 ////////////////////////////////////////
 
-}
+} }
 

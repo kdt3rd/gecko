@@ -3,12 +3,12 @@
 
 #include <platform/mouse.h>
 
-namespace mswin
+namespace platform { namespace mswin
 {
 
 ////////////////////////////////////////
 
-class mouse : public platform::mouse
+class mouse : public ::platform::mouse
 {
 public:
 	mouse( void );
@@ -17,5 +17,5 @@ public:
 
 ////////////////////////////////////////
 
-}
+} }
 

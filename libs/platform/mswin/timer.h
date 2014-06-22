@@ -3,7 +3,7 @@
 
 #include <platform/timer.h>
 
-namespace mswin
+namespace platform { namespace mswin
 {
 
 ////////////////////////////////////////
@@ -23,5 +23,5 @@ private:
 
 ////////////////////////////////////////
 
-}
+} }
 

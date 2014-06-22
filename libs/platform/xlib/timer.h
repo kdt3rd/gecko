@@ -3,7 +3,7 @@
 
 #include <platform/timer.h>
 
-namespace xlib
+namespace platform { namespace xlib
 {
 
 ////////////////////////////////////////
@@ -25,5 +25,5 @@ private:
 
 ////////////////////////////////////////
 
-}
+} }
 

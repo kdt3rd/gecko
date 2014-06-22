@@ -1,7 +1,6 @@
 
+/// @namespace platform::mswin
 /// @brief Microsoft Windows platform and draw implementation
 ///
 /// Implementation of the platform and draw classes for Microsoft Windows.
-namespace mswin
-{
-}
+

@@ -4,7 +4,7 @@
 #include <platform/system.h>
 #include "dispatcher.h"
 
-namespace cocoa
+namespace platform { namespace cocoa
 {
 
 ////////////////////////////////////////
@@ -41,14 +41,5 @@ private:
 
 ////////////////////////////////////////
 
-}
-
-////////////////////////////////////////
-
-namespace platform
-{
-	typedef cocoa::system native_system;
-}
-
-////////////////////////////////////////
+} }
 

@@ -3,7 +3,14 @@
 
 #include <functional>
 
+namespace base
+{
+
+////////////////////////////////////////
+
 template<typename> class action; // undefined
+
+////////////////////////////////////////
 
 template<typename Result, typename ... Args>
 class action<Result(Args...)>
@@ -27,3 +34,6 @@ private:
 	Function _action;
 };
 
+////////////////////////////////////////
+
+}

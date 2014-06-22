@@ -3,7 +3,7 @@
 
 #include <platform/timer.h>
 
-namespace cocoa
+namespace platform { namespace cocoa
 {
 
 ////////////////////////////////////////
@@ -24,5 +24,5 @@ private:
 
 ////////////////////////////////////////
 
-}
+} }
 

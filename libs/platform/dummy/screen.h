@@ -3,7 +3,7 @@
 
 #include <platform/screen.h>
 
-namespace dummy
+namespace platform { namespace dummy
 {
 
 ////////////////////////////////////////
@@ -19,5 +19,5 @@ public:
 
 ////////////////////////////////////////
 
-}
+} }
 

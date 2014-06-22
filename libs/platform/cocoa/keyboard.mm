@@ -167,7 +167,7 @@ const std::map<unsigned short,platform::scancode> keycode2scancode =
 
 ////////////////////////////////////////
 
-namespace cocoa
+namespace platform { namespace cocoa
 {
 
 ////////////////////////////////////////
@@ -202,5 +202,5 @@ platform::scancode keyboard::get_scancode( unsigned short key )
 
 ////////////////////////////////////////
 
-}
+} }
 

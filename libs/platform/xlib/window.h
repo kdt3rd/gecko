@@ -5,13 +5,13 @@
 #include <X11/Xlib.h>
 #include <GL/glx.h>
 
-namespace xlib
+namespace platform { namespace xlib
 {
 
 ////////////////////////////////////////
 
 /// @brief Xlib implementation of platform::window.
-class window : public platform::window
+class window : public ::platform::window
 {
 public:
 	/// @brief Constrcutor
@@ -68,5 +68,5 @@ private:
 
 ////////////////////////////////////////
 
-}
+} }
 

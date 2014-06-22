@@ -1,10 +1,9 @@
 
 #include <iostream>
 #include <map>
-#include <core/pointer.h>
 #include "keyboard.h"
 
-namespace mswin
+namespace platform { namespace mswin
 {
 
 ////////////////////////////////////////
@@ -21,5 +20,5 @@ keyboard::~keyboard( void )
 
 ////////////////////////////////////////
 
-}
+} }
 

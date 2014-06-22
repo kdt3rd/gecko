@@ -136,7 +136,7 @@ const std::map<xcb_keysym_t,platform::scancode> sym2code =
 
 ////////////////////////////////////////
 
-namespace xcb
+namespace platform { namespace xcb
 {
 
 ////////////////////////////////////////
@@ -254,5 +254,5 @@ platform::scancode keyboard::get_scancode( xcb_keycode_t code )
 
 ////////////////////////////////////////
 
-}
+} }
 

@@ -4,12 +4,12 @@
 #include <platform/window.h>
 #include <windows.h>
 
-namespace mswin
+namespace platform { namespace mswin
 {
 
 ////////////////////////////////////////
 
-class window : public platform::window
+class window : public ::platform::window
 {
 public:
 	window( void );
@@ -31,7 +31,7 @@ public:
 //	void set_icon( const icon &i ) override;
 	void set_popup( void ) override;
 
-	void invalidate( const core::rect &r );
+	void invalidate( const base::rect &r );
 
 	gl::context context( void ) override;
 	std::shared_ptr<draw::canvas> canvas( void ) override;
@@ -56,5 +56,5 @@ private:
 
 ////////////////////////////////////////
 
-}
+} }
 

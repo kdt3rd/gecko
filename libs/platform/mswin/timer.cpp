@@ -1,9 +1,9 @@
 
 #include <string>
-#include <core/contract.h>
+#include <base/contract.h>
 #include "timer.h"
 
-namespace mswin
+namespace platform { namespace mswin
 {
 
 ////////////////////////////////////////
@@ -39,5 +39,5 @@ void timer::cancel( void )
 
 ////////////////////////////////////////
 
-}
+} }
 

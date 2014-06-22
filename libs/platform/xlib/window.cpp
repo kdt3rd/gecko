@@ -69,7 +69,7 @@ static bool isExtensionSupported(const char *extList, const char *extension)
 
 }
 
-namespace xlib
+namespace platform { namespace xlib
 {
 
 ////////////////////////////////////////
@@ -333,5 +333,5 @@ void window::expose_event( void )
 
 ////////////////////////////////////////
 
-}
+} }
 

@@ -8,7 +8,7 @@
 #include "keyboard.h"
 #include "mouse.h"
 
-namespace xcb
+namespace platform { namespace xcb
 {
 
 ////////////////////////////////////////
@@ -43,4 +43,5 @@ private:
 
 ////////////////////////////////////////
 
-}
+} }
+

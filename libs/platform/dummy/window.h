@@ -3,7 +3,7 @@
 
 #include <platform/window.h>
 
-namespace dummy
+namespace platform { namespace dummy
 {
 
 ////////////////////////////////////////
@@ -50,5 +50,5 @@ private:
 
 ////////////////////////////////////////
 
-}
+} }
 

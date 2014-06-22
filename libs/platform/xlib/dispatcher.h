@@ -8,7 +8,7 @@
 #include "keyboard.h"
 #include "mouse.h"
 
-namespace xlib
+namespace platform { namespace xlib
 {
 
 ////////////////////////////////////////
@@ -16,7 +16,7 @@ namespace xlib
 /// @brief Xlib implementation of platform::dispatcher.
 ///
 /// Dispatcher implemented using Xlib.
-class dispatcher : public platform::dispatcher
+class dispatcher : public ::platform::dispatcher
 {
 public:
 	/// @brief Constructor.
@@ -43,4 +43,5 @@ private:
 
 ////////////////////////////////////////
 
-}
+} }
+

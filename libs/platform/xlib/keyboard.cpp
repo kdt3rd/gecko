@@ -119,7 +119,7 @@ const std::map<KeySym,platform::scancode> sym2code =
 
 ////////////////////////////////////////
 
-namespace xlib
+namespace platform { namespace xlib
 {
 
 ////////////////////////////////////////
@@ -158,5 +158,5 @@ platform::scancode keyboard::get_scancode( XKeyEvent &ev )
 
 ////////////////////////////////////////
 
-}
+} }
 

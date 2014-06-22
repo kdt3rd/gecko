@@ -14,13 +14,13 @@
 /// @author Kimball Thurston
 ///
 
-namespace fc
+namespace platform { namespace fc
 {
 
 ///
 /// @brief Font subclass for fontconfig / freetype.
 ///
-class font : public draw::font
+class font : public ::draw::font
 {
 public:
 	font( FT_Face face, std::string fam, std::string style, double pixsize );
@@ -35,5 +35,5 @@ private:
 	FT_Face _face;
 };
 
-} // namespace fc
+} }
 

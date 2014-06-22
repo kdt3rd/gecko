@@ -1,8 +1,8 @@
 
 #include <platform/fc/font_manager.h>
 
-namespace mswin
+namespace platform { namespace mswin
 {
-	using fc::font_manager;
-};
+	using ::platform::fc::font_manager;
+} }
 

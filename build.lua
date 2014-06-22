@@ -8,3 +8,4 @@ Include( GL_INCLUDE )
 SubDir( "libs" )
 SubDir( "apps" )
 
+Doxygen( "docs", SourceFile( "docs/doxyfile" ), "", "docs" );

@@ -3,7 +3,7 @@
 #include <core/contract.h>
 #include "timer.h"
 
-namespace dummy
+namespace platform { namespace dummy
 {
 
 ////////////////////////////////////////
@@ -39,5 +39,5 @@ void timer::cancel( void )
 
 ////////////////////////////////////////
 
-}
+} }
 

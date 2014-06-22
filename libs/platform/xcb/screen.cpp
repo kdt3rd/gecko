@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <xcb/xcb.h>
 
-namespace xcb
+namespace platform { namespace xcb
 {
 
 ////////////////////////////////////////
@@ -33,5 +33,5 @@ draw::size screen::bounds( void )
 
 ////////////////////////////////////////
 
-}
+} }
 
