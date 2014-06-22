@@ -1,12 +1,3 @@
-
-#pragma once
-
-#include <vector>
-#include <cstdint>
-#include <cstdlib>
-
-///
-/// @file pack.h
 ///
 /// @author Kimball Thurston
 ///
@@ -20,7 +11,14 @@
 /// http://clb.demon.fi/files/RectangleBinPack/
 ///
 
-namespace core
+
+#pragma once
+
+#include <vector>
+#include <cstdint>
+#include <cstdlib>
+
+namespace base
 {
 
 ///
@@ -121,5 +119,5 @@ private:
 
 };
 
-} // namespace core
+}
 

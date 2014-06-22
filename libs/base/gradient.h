@@ -5,7 +5,7 @@
 #include <memory>
 #include "color.h"
 
-namespace core
+namespace base
 {
 
 ////////////////////////////////////////

@@ -2,9 +2,9 @@
 #pragma once
 
 #include <memory>
-#include <core/color.h>
-#include <core/point.h>
-#include <core/size.h>
+#include <base/color.h>
+#include <base/point.h>
+#include <base/size.h>
 #include "shader.h"
 #include "matrix4.h"
 #include "enums.h"
@@ -55,9 +55,9 @@ public:
 	void set_uniform( uniform uniform, int value );
 	void set_uniform( uniform uniform, float value );
 	void set_uniform( uniform uniform, const matrix4 &value );
-	void set_uniform( uniform uniform, const core::color &value );
-	void set_uniform( uniform uniform, const core::point &value );
-	void set_uniform( uniform uniform, const core::size &value );
+	void set_uniform( uniform uniform, const base::color &value );
+	void set_uniform( uniform uniform, const base::point &value );
+	void set_uniform( uniform uniform, const base::size &value );
 
 	size_t number_active_uniforms( void );
 	std::pair<uniform_type,std::string> active_uniform( size_t i );

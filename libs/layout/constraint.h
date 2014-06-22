@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include <core/contract.h>
-#include <core/direction.h>
-#include <core/orientation.h>
+#include <base/contract.h>
+#include <base/direction.h>
+#include <base/orientation.h>
 #include <memory>
 #include <iostream>
 

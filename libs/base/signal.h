@@ -5,7 +5,8 @@
 #include <vector>
 #include <assert.h>
 
-namespace core {
+namespace base
+{
 
 typedef std::uintptr_t connection;
 

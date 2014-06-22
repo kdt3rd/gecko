@@ -6,8 +6,8 @@
 #include <map>
 #include <memory>
 
-#include <core/point.h>
-#include <core/pack.h>
+#include <base/point.h>
+#include <base/pack.h>
 #include "extents.h"
 #include "glyph.h"
 
@@ -74,7 +74,7 @@ public:
 	void render( std::vector<float> &outCoords,
 				 std::vector<float> &texCoords,
 				 std::vector<uint16_t> &renderIndices,
-				 const core::point &start, const std::string &utf8 );
+				 const base::point &start, const std::string &utf8 );
 
 	/// Increments every time a glyph is loaded into the internal
 	/// store.  This is done such that the font only deals with CPU
@@ -104,7 +104,7 @@ protected:
 	font_extents _extents;
 
 	uint32_t _glyph_version = 0;
-	core::pack _glyph_pack;
+	base::pack _glyph_pack;
 	std::vector<uint8_t> _glyph_bitmap;
 	std::vector<float> _glyph_coords;
 	std::map<wchar_t, size_t> _glyph_index_offset;

@@ -1,7 +1,7 @@
 
 #include "paint.h"
 
-namespace core
+namespace base
 {
 
 ////////////////////////////////////////

@@ -2,14 +2,14 @@
 #pragma once
 
 #include <memory>
-#include <core/alignment.h>
-#include "font.h"
-#include <core/gradient.h>
-#include <core/paint.h>
-#include <core/path.h>
-#include <core/rect.h>
+#include <base/alignment.h>
+#include <base/gradient.h>
+#include <base/paint.h>
+#include <base/path.h>
+#include <base/rect.h>
 #include <gl/context.h>
 #include <gl/program.h>
+#include "font.h"
 
 namespace draw
 {
@@ -27,19 +27,19 @@ public:
 	/// @brief Destructor
 	virtual ~canvas( void );
 
-	std::shared_ptr<gl::texture> gradient( const core::gradient &g, size_t n = 128 );
+	std::shared_ptr<gl::texture> gradient( const base::gradient &g, size_t n = 128 );
 
 	std::shared_ptr<gl::program> program( const std::string &vert, const std::string &frag );
 
 
-	virtual core::point align_text( const std::shared_ptr<font> &font, const std::string &utf8, const core::rect &rect, alignment a );
+	virtual base::point align_text( const std::shared_ptr<font> &font, const std::string &utf8, const base::rect &rect, alignment a );
 
-	virtual void draw_text( const std::shared_ptr<font> &font, const core::point &p, const std::string &utf8, const core::paint &c );
+	virtual void draw_text( const std::shared_ptr<font> &font, const base::point &p, const std::string &utf8, const base::paint &c );
 
 /*
 	/// @brief Fill the entire canvas
 	/// @param c Color to fill with
-	void fill( const core::color &c );
+	void fill( const base::color &c );
 
 	/// @brief Fill the entire canvas
 	/// @param p Paint to fill with
@@ -47,13 +47,13 @@ public:
 
 	/// @brief Fill the entire canvas
 	/// @param p Paint to fill with
-	virtual void fill( const core::rect &r, const paint &p ) = 0;
+	virtual void fill( const base::rect &r, const paint &p ) = 0;
 
 	/// @brief Draw a path
 	/// Draw a path on the canvas
 	/// @param p Path to draw
 	/// @param c Paint to apply to the path
-	virtual void draw_path( const core::path &p, const paint &c ) = 0;
+	virtual void draw_path( const base::path &p, const paint &c ) = 0;
 
 	/// @brief Draw text
 	/// Draw text on the canvas
@@ -63,7 +63,7 @@ public:
 	/// @param c The paint to color with
 	virtual void translate( double x, double y ) = 0;
 
-	virtual void clip( const core::rect &r ) = 0;
+	virtual void clip( const base::rect &r ) = 0;
 
 	/// @brief Present the canvas
 	/// Finalize the drawing of the canvas and display it.

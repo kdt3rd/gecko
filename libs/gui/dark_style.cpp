@@ -4,16 +4,16 @@
 #include <draw/object.h>
 #include <draw/stretchable.h>
 #include <draw/polylines.h>
-#include <core/contract.h>
+#include <base/contract.h>
 #include "application.h"
 #include <draw/shaders.h>
 
 namespace
 {
 
-core::color bg { 0.13, 0.13, 0.13 };
-core::color fg { 1.0, 1.0, 1.0 };
-core::color button_bg { 0.27, 0.27, 0.27 };
+base::color bg { 0.13, 0.13, 0.13 };
+base::color fg { 1.0, 1.0, 1.0 };
+base::color button_bg { 0.27, 0.27, 0.27 };
 
 }
 
@@ -59,16 +59,16 @@ void dark_style::background( const std::shared_ptr<draw::canvas> &c )
 
 ////////////////////////////////////////
 
-const core::color &dark_style::label_color( void )
+const base::color &dark_style::label_color( void )
 {
 	return fg;
 }
 
 ////////////////////////////////////////
 
-core::size dark_style::button_size( const core::size &content )
+base::size dark_style::button_size( const base::size &content )
 {
-	core::size full( content );
+	base::size full( content );
 	full.grow( 12, 6 );
 	full.ceil();
 	full.set_height( std::max( full.h(), 21.0 ) );
@@ -77,16 +77,16 @@ core::size dark_style::button_size( const core::size &content )
 
 ////////////////////////////////////////
 
-core::rect dark_style::button_content( const core::rect &full )
+base::rect dark_style::button_content( const base::rect &full )
 {
-	core::rect content( full );
+	base::rect content( full );
 	content.shrink( 6, 6, 3, 3 );
 	return content;
 }
 
 ////////////////////////////////////////
 
-void dark_style::button_frame( const std::shared_ptr<draw::canvas> &c, const core::rect &r, bool pressed )
+void dark_style::button_frame( const std::shared_ptr<draw::canvas> &c, const base::rect &r, bool pressed )
 {
 	construct( c );
 	if ( pressed )
@@ -103,7 +103,7 @@ void dark_style::button_frame( const std::shared_ptr<draw::canvas> &c, const cor
 
 ////////////////////////////////////////
 
-void dark_style::line_edit_frame( const std::shared_ptr<draw::canvas> &c, const core::rect &r, bool focused )
+void dark_style::line_edit_frame( const std::shared_ptr<draw::canvas> &c, const base::rect &r, bool focused )
 {
 	construct( c );
 	_line_edit_frame->set( c, r );
@@ -112,20 +112,20 @@ void dark_style::line_edit_frame( const std::shared_ptr<draw::canvas> &c, const 
 
 ////////////////////////////////////////
 
-double dark_style::slider_size( const core::rect &rect )
+double dark_style::slider_size( const base::rect &rect )
 {
 	return rect.radius();
 }
 
 ////////////////////////////////////////
 
-void dark_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const core::rect &rect )
+void dark_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const base::rect &rect )
 {
 	construct( c );
 
 	double rad = slider_size( rect );
 	double h = rect.height() - 7;
-	core::rect tmp( rect );
+	base::rect tmp( rect );
 	tmp.trim( rad, rad, h/2, h/2 );
 
 	_slider_groove->set( c, tmp );
@@ -134,12 +134,12 @@ void dark_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const co
 
 ////////////////////////////////////////
 
-void dark_style::slider_button( const std::shared_ptr<draw::canvas> &c, const core::rect &r, bool pressed, double val )
+void dark_style::slider_button( const std::shared_ptr<draw::canvas> &c, const base::rect &r, bool pressed, double val )
 {
 	construct( c );
 
 	double rad = 9.0; //r.radius();
-	core::rect tmp( rad * 2, rad * 2 );
+	base::rect tmp( rad * 2, rad * 2 );
 	tmp.set_center( { r.x( val, rad ), r.y( 0.5, rad ) } );
 
 	_slider_button->set( c, tmp );
@@ -148,11 +148,11 @@ void dark_style::slider_button( const std::shared_ptr<draw::canvas> &c, const co
 
 ////////////////////////////////////////
 
-void dark_style::text_cursor( const std::shared_ptr<draw::canvas> &c, const core::point &p, double h )
+void dark_style::text_cursor( const std::shared_ptr<draw::canvas> &c, const base::point &p, double h )
 {
 	construct( c );
 
-	core::rect tmp( p - core::point( 0, h ), 2, h );
+	base::rect tmp( p - base::point( 0, h ), 2, h );
 
 	_text_cursor->set( c, tmp );
 	_text_cursor->draw( *c );
@@ -168,10 +168,10 @@ void dark_style::construct( const std::shared_ptr<draw::canvas> &c )
 		_button_frame = std::make_shared<draw::stretchable>();
 		_button_frame_down = std::make_shared<draw::stretchable>();
 		{
-			core::path path;
+			base::path path;
 			path.rounded_rect( { 0, 0 }, 20, 20, 3 );
 
-			core::paint paint;
+			base::paint paint;
 			paint.set_fill_color( button_bg );
 
 			_button_frame->create( c, path, paint, { 10, 10 } );
@@ -181,10 +181,10 @@ void dark_style::construct( const std::shared_ptr<draw::canvas> &c )
 		// Slider groove
 		_slider_groove = std::make_shared<draw::stretchable>();
 		{
-			core::path path;
+			base::path path;
 			path.rounded_rect( { 0, 0 }, { 20, 7 }, 2 );
 
-			core::paint paint;
+			base::paint paint;
 			paint.set_fill_color( button_bg );
 
 			_slider_groove->create( c, path, paint, { 10, 3.5 } );
@@ -193,10 +193,10 @@ void dark_style::construct( const std::shared_ptr<draw::canvas> &c )
 		// Slider button drawing
 		_slider_button = std::make_shared<draw::stretchable>();
 		{
-			core::path path;
+			base::path path;
 			path.circle( { 10, 10 }, 9 );
 
-			core::paint paint;
+			base::paint paint;
 			paint.set_fill_color( button_bg );
 //			paint.set_fill_linear( { 0, 0 }, { 0, 20 }, grad1 );
 
@@ -206,10 +206,10 @@ void dark_style::construct( const std::shared_ptr<draw::canvas> &c )
 		// Line edit frame 
 		_line_edit_frame = std::make_shared<draw::stretchable>();
 		{
-			core::paint paint( button_bg, 1.0 );
+			base::paint paint( button_bg, 1.0 );
 			paint.set_fill_color( { 1, 1, 1 } );
 
-			core::path path;
+			base::path path;
 			path.rectangle( { 0, 0 }, 20, 20 );
 
 			_line_edit_frame->create( c, path, paint, { 10, 10 } );
@@ -218,11 +218,11 @@ void dark_style::construct( const std::shared_ptr<draw::canvas> &c )
 		// Text cursor
 		_text_cursor = std::make_shared<draw::stretchable>();
 		{
-			core::path path;
+			base::path path;
 			path.move_to( { 0.5, 0 } );
 			path.line_by( { 0, 10 } );
 
-			core::paint pen( { 0, 0, 0, 1 }, 1.0 );
+			base::paint pen( { 0, 0, 0, 1 }, 1.0 );
 
 			_text_cursor->create( c, path, pen, { 0.5, 5 } );
 		}

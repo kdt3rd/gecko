@@ -1,6 +1,6 @@
 
 #include "context.h"
-#include <core/contract.h>
+#include <base/contract.h>
 
 namespace gui
 {

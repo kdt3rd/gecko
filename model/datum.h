@@ -4,7 +4,7 @@
 #include <memory>
 #include "record.h"
 #include "field.h"
-#include <core/meta.h>
+#include <base/meta.h>
 
 namespace model
 {
@@ -84,7 +84,7 @@ public:
 private:
 	std::shared_ptr<record> _record;
 	field<T> &_field;
-	core::connection _connection = 0;
+	base::connection _connection = 0;
 };
 
 ////////////////////////////////////////

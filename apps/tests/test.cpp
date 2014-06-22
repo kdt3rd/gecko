@@ -2,7 +2,7 @@
 #include <iostream>
 #include <unistd.h>
 
-#include <core/contract.h>
+#include <base/contract.h>
 #include <platform/platform.h>
 #include <platform/system.h>
 #include <platform/dispatcher.h>

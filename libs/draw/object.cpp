@@ -14,7 +14,7 @@ object::object( void )
 
 ////////////////////////////////////////
 
-void object::create( const std::shared_ptr<canvas> &c, const core::path &path, const core::paint &paint )
+void object::create( const std::shared_ptr<canvas> &c, const base::path &path, const base::paint &paint )
 {
 	polylines lines;
 	path.replay( lines );

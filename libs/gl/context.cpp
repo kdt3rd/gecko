@@ -33,7 +33,7 @@ void context::disable( capability cap )
 
 ////////////////////////////////////////
 
-void context::clear_color( const core::color &c )
+void context::clear_color( const base::color &c )
 {
 	glClearColor( c.red(), c.green(), c.blue(), c.alpha() );
 }

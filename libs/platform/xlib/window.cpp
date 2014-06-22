@@ -1,12 +1,12 @@
 
 #include "window.h"
-#include <core/pointer.h>
+#include <base/pointer.h>
 
 #include <string.h>
 #include <iostream>
 
-#include <core/contract.h>
-#include <core/scope_guard.h>
+#include <base/contract.h>
+#include <base/scope_guard.h>
 #include <stdexcept>
 
 #include <gl/opengl.h>
@@ -261,7 +261,7 @@ void window::set_title( const std::string &t )
 
 ////////////////////////////////////////
 
-void window::invalidate( const core::rect &r )
+void window::invalidate( const base::rect &r )
 {
 	if ( !_invalid )
 	{

@@ -46,9 +46,9 @@ public:
 
 	void compute_minimum( void ) override;
 
-	bool mouse_press( const core::point &p, int button ) override;
-	bool mouse_move( const core::point &p ) override;
-	bool mouse_release( const core::point &p, int button ) override;
+	bool mouse_press( const base::point &p, int button ) override;
+	bool mouse_move( const base::point &p ) override;
+	bool mouse_release( const base::point &p, int button ) override;
 
 private:
 	bool _tracking = false;

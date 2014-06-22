@@ -14,9 +14,9 @@ class stretchable : public drawable
 public:
 	stretchable( void );
 
-	void create( const std::shared_ptr<canvas> &c, const core::path &path, const core::paint &paint, const core::point &center );
+	void create( const std::shared_ptr<canvas> &c, const base::path &path, const base::paint &paint, const base::point &center );
 
-	void set( const std::shared_ptr<canvas> &c, const core::rect &r );
+	void set( const std::shared_ptr<canvas> &c, const base::rect &r );
 
 	void draw( gl::context &ctxt ) override;
 

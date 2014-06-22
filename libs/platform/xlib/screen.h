@@ -20,9 +20,9 @@ public:
 
 	bool is_default( void ) const override;
 
-	core::size bounds( void ) const override;
+	base::size bounds( void ) const override;
 
-	core::point dpi( void ) const override;
+	base::point dpi( void ) const override;
 
 private:
 	std::shared_ptr<Display> _display;

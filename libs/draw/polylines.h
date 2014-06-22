@@ -4,7 +4,7 @@
 #include <vector>
 #include "polyline.h"
 #include "mesh.h"
-#include <core/point.h>
+#include <base/point.h>
 
 namespace draw
 {
@@ -23,25 +23,25 @@ public:
 	/// @brief Move the cursor
 	/// Move the cursor to the given position
 	/// @param p
-	void move_to( const core::point &p );
+	void move_to( const base::point &p );
 
-	void line_to( const core::point &p );
+	void line_to( const base::point &p );
 
-	void quadratic_to( const core::point &p1, const core::point &p2 );
+	void quadratic_to( const base::point &p1, const base::point &p2 );
 
-	void cubic_to( const core::point &p1, const core::point &p2, const core::point &p3 );
+	void cubic_to( const base::point &p1, const base::point &p2, const base::point &p3 );
 
-	void arc_to( const core::point &center, double radius, double angle1, double angle2 );
+	void arc_to( const base::point &center, double radius, double angle1, double angle2 );
 
-	void add_point( const core::point &p );
+	void add_point( const base::point &p );
 
 	void close( void );
 
 	polylines stroked( double width );
 	polylines offset( double width );
 
-	mesh<core::point> debug( void );
-	mesh<core::point> filled( void );
+	mesh<base::point> debug( void );
+	mesh<base::point> filled( void );
 
 	std::vector<polyline>::iterator begin( void )
 	{

@@ -5,8 +5,8 @@
 #include "application.h"
 #include "style.h"
 #include <draw/drawable.h>
-#include <core/alignment.h>
-#include <core/signal.h>
+#include <base/alignment.h>
+#include <base/signal.h>
 #include <model/datum.h>
 
 namespace gui
@@ -18,7 +18,7 @@ class button : public widget
 {
 public:
 	button( void );
-	button( datum<std::string> &&l, datum<alignment> &&a = alignment::CENTER, datum<core::color> &&c = { 0, 0, 0, -1 }, shared_datum<draw::font> &&f = application::current_style()->default_font() );
+	button( datum<std::string> &&l, datum<alignment> &&a = alignment::CENTER, datum<base::color> &&c = { 0, 0, 0, -1 }, shared_datum<draw::font> &&f = application::current_style()->default_font() );
 	~button( void );
 
 	const std::string &text( void )
@@ -42,16 +42,16 @@ public:
 
 	void compute_minimum( void ) override;
 
-	bool mouse_press( const core::point &p, int button ) override;
-	bool mouse_release( const core::point &p, int button ) override;
-	bool mouse_move( const core::point &p ) override;
+	bool mouse_press( const base::point &p, int button ) override;
+	bool mouse_release( const base::point &p, int button ) override;
+	bool mouse_move( const base::point &p ) override;
 
-	core::signal<void(void)> when_activated;
+	base::signal<void(void)> when_activated;
 
 private:
 	datum<std::string> _text;
 	datum<alignment> _align = alignment::CENTER;
-	datum<core::color> _color = { 0, 0, 0, 1 };
+	datum<base::color> _color = { 0, 0, 0, 1 };
 	shared_datum<draw::font> _font = application::current_style()->default_font();
 
 	std::shared_ptr<draw::drawable> _draw;

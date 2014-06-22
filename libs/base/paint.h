@@ -10,7 +10,7 @@
 #include "size.h"
 #include "contract.h"
 
-namespace core
+namespace base
 {
 
 ////////////////////////////////////////
@@ -49,7 +49,7 @@ public:
 	void set_fill_linear( const point &p1, double w, double h, const gradient &g ) { set_fill_linear( p1, { w, h }, g ); }
 	const point &get_fill_linear_origin( void ) const { precondition( has_fill_linear(), "no fill linear" ); return _fill_linear.p; }
 	const size &get_fill_linear_size( void ) const { precondition( has_fill_linear(), "no fill linear" ); return _fill_linear.s; }
-	const core::gradient &get_fill_linear_gradient( void ) const { precondition( has_fill_linear(), "no fill linear" ); return _fill_linear.grad; }
+	const gradient &get_fill_linear_gradient( void ) const { precondition( has_fill_linear(), "no fill linear" ); return _fill_linear.grad; }
 
 	bool has_fill_radial( void ) const { return _fill_type == RADIAL; }
 	void set_fill_radial( const point &p1, double r1, const point &p2, double r2, const gradient &g ) { clear_fill(); _fill_type = RADIAL; new (&_fill_radial) radial( p1, r1, p2, r2, g ); }
@@ -58,7 +58,7 @@ public:
 	const point &get_fill_radial_p2( void ) const { precondition( has_fill_radial(), "no fill radial" ); return _fill_radial.p2; }
 	double get_fill_radial_r1( void ) const { precondition( has_fill_radial(), "no fill radial" ); return _fill_radial.r1; }
 	double get_fill_radial_r2( void ) const { precondition( has_fill_radial(), "no fill radial" ); return _fill_radial.r2; }
-	const core::gradient &get_fill_radial_gradient( void ) const { precondition( has_fill_radial(), "no fill radial" ); return _fill_radial.grad; }
+	const gradient &get_fill_radial_gradient( void ) const { precondition( has_fill_radial(), "no fill radial" ); return _fill_radial.grad; }
 
 private:
 	color _stroke_color;

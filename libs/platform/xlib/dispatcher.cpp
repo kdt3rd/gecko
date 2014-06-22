@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <sstream>
 #include <X11/Xlib.h>
-#include <core/contract.h>
-#include <core/pointer.h>
-#include <core/meta.h>
+#include <base/contract.h>
+#include <base/pointer.h>
+#include <base/meta.h>
 #include <utf/utf.h>
 #include <utf/utfcat.h>
 #include "dispatcher.h"

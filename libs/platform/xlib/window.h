@@ -34,7 +34,7 @@ public:
 	void set_title( const std::string &t ) override;
 //	void set_icon( const icon &i ) override;
 
-	void invalidate( const core::rect &r ) override;
+	void invalidate( const base::rect &r ) override;
 
 	/// @brief Canvas to draw on the window.
 	gl::context context( void ) override;

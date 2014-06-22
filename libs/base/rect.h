@@ -7,7 +7,7 @@
 #include <iostream>
 #include <cmath>
 
-namespace core
+namespace base
 {
 
 ////////////////////////////////////////
@@ -23,44 +23,44 @@ public:
 	}
 
 	rect( const point &p, double w, double h )
-		: _position( p ), _size( w, h )
+		: _position( p ), _extent( w, h )
 	{
-		fix_size();
+		fix_extent();
 	}
 
-	rect( const point &p, const core::size &s )
-		: _position( p ), _size( s )
+	rect( const point &p, const size &s )
+		: _position( p ), _extent( s )
 	{
-		fix_size();
+		fix_extent();
 	}
 
 	rect( double w, double h )
-		: _size( w, h )
+		: _extent( w, h )
 	{
-		fix_size();
+		fix_extent();
 	}
 
-	rect( const core::size &s )
-		: _size( s )
+	rect( const size &s )
+		: _extent( s )
 	{
-		fix_size();
+		fix_extent();
 	}
 
 	double x( void ) const { return _position.x(); }
 	double y( void ) const { return _position.y(); }
-	double width( void ) const { return _size.w(); }
-	double height( void ) const { return _size.h(); }
+	double width( void ) const { return _extent.w(); }
+	double height( void ) const { return _extent.h(); }
 
-	double x( double percent, double radius = 0.0 ) const { return _position.x() + radius + ( _size.w() - radius*2.0 ) * percent; }
-	double y( double percent, double radius = 0.0 ) const { return _position.y() + radius + ( _size.h() - radius*2.0 ) * percent; }
+	double x( double percent, double radius = 0.0 ) const { return _position.x() + radius + ( _extent.w() - radius*2.0 ) * percent; }
+	double y( double percent, double radius = 0.0 ) const { return _position.y() + radius + ( _extent.h() - radius*2.0 ) * percent; }
 
 	double x1( void ) const { return _position.x(); }
 	double y1( void ) const { return _position.y(); }
-	double x2( void ) const { return _position.x() + _size.w() - 1.0; }
-	double y2( void ) const { return _position.y() + _size.h() - 1.0; }
+	double x2( void ) const { return _position.x() + _extent.w() - 1.0; }
+	double y2( void ) const { return _position.y() + _extent.h() - 1.0; }
 
 	point position( void ) const { return _position; }
-	core::size size( void ) const { return _size; }
+	size extent( void ) const { return _extent; }
 	point top_left( void ) const { return _position; }
 	point top_right( void ) const { return point( x2(), y1() ); }
 	point bottom_left( void ) const { return point( x1(), y2() ); }
@@ -74,33 +74,33 @@ public:
 	point center( void ) const { return point( ( x1() + x2() ) / 2.0, ( y1() + y2() ) / 2.0 ); }
 	double radius( void ) const { return std::min( width(), height() ) / 2.0; }
 
-	void set( const point &p, const core::size &s )
+	void set( const point &p, const size &s )
 	{
 		_position = p;
-		_size = s;
-		fix_size();
+		_extent = s;
+		fix_extent();
 	}
 
 	void set_x( double x ) { _position.set_x( x ); }
 	void set_y( double y ) { _position.set_y( y ); }
-	void set_width( double w ) { _size.set_width( w ); fix_size(); }
-	void set_height( double h ) { _size.set_height( h ); fix_size(); }
+	void set_width( double w ) { _extent.set_width( w ); fix_extent(); }
+	void set_height( double h ) { _extent.set_height( h ); fix_extent(); }
 
 	void set_x1( double x ) { _position.set_x( x ); }
 	void set_y1( double y ) { _position.set_y( y ); }
-	void set_x2( double x ) { _size.set_width( x - x1() ); }
-	void set_y2( double y ) { _size.set_height( y - y1() ); }
+	void set_x2( double x ) { _extent.set_width( x - x1() ); }
+	void set_y2( double y ) { _extent.set_height( y - y1() ); }
 
 	void set_horizontal( double x1, double x2 );
 	void set_vertical( double y1, double y2 );
 
 	void set_position( const point &p ) { _position = p; }
-	void set_size( const core::size &s ) { _size = s; fix_size(); }
+	void set_extent( const size &s ) { _extent = s; fix_extent(); }
 	void move_by( double x, double y ) { _position.move_by( x, y ); }
 
-	void set_size( double w, double h ) { _size.set( w, h ); }
+	void set_extent( double w, double h ) { _extent.set( w, h ); }
 
-	void trim( double l, double r, double t, double b ) { _size.shrink( l + r, t + b ); _position.move_by( l, t ); }
+	void trim( double l, double r, double t, double b ) { _extent.shrink( l + r, t + b ); _position.move_by( l, t ); }
 
 	bool contains( double x, double y ) const;
 	bool contains( const point &p ) const { return contains( p.x(), p.y() ); }
@@ -109,21 +109,21 @@ public:
 	void grow( double left, double right, double top, double bottom );
 
 private:
-	void fix_size( void )
+	void fix_extent( void )
 	{
-		_position.move_by( std::min( _size.w(), 0.0 ), std::min( _size.h(), 0.0 ) );
-		_size.set( std::abs( _size.w() ), std::abs( _size.h() ) );
+		_position.move_by( std::min( _extent.w(), 0.0 ), std::min( _extent.h(), 0.0 ) );
+		_extent.set( std::abs( _extent.w() ), std::abs( _extent.h() ) );
 	}
 
 	point _position;
-	core::size _size;
+	size _extent;
 };
 
 ////////////////////////////////////////
 
 inline std::ostream &operator<<( std::ostream &out, const rect &r )
 {
-	out << r.position() << ' ' << r.size();
+	out << r.position() << ' ' << r.extent();
 	return out;
 }
 

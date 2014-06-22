@@ -14,7 +14,7 @@ class object : public drawable
 public:
 	object( void );
 
-	void create( const std::shared_ptr<canvas> &c, const core::path &path, const core::paint &paint );
+	void create( const std::shared_ptr<canvas> &c, const base::path &path, const base::paint &paint );
 
 	void draw( gl::context &ctxt ) override;
 

@@ -75,7 +75,7 @@ void
 font::render( std::vector<float> &outCoords,
 			  std::vector<float> &texCoords,
 			  std::vector<uint16_t> &renderIndices,
-			  const core::point &start, const std::string &utf8 )
+			  const base::point &start, const std::string &utf8 )
 {
 	if ( utf8.empty() )
 		return;

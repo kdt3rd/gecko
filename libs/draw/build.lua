@@ -1,4 +1,6 @@
 
+Include( BuildFile() )
+
 srcs = {
 	"drawable.cpp";
 	"polylines.cpp";
@@ -36,10 +38,10 @@ shaders = {
 
 local cpp_shaders = {
 	"#include \"shaders.h\"";
-	"using core::resource;";
+	"using base::resource;";
 	"namespace draw";
 	"{";
-	"	core::data_resource shaders( {";
+	"	base::data_resource shaders( {";
 }
 for i, file in pairs( shaders ) do
 	local data = io.open( SourceFile( file ), "r" )
@@ -56,10 +58,10 @@ table.insert( srcs, CreateFile( "shaders.cpp", cpp_shaders, shaders ) )
 
 CreateFile( "shaders.h", {
 	"#pragma once";
-	"#include <core/data_resource.h>";
+	"#include <base/data_resource.h>";
 	"namespace draw";
 	"{";
-	"extern core::data_resource shaders;";
+	"extern base::data_resource shaders;";
 	"}";
 } )
 

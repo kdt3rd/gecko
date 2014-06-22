@@ -30,15 +30,15 @@ public:
 	double width( void ) const;
 	double height( void ) const;
 
-	void invalidate( const core::rect &r ) override;
+	void invalidate( const base::rect &r ) override;
 
 protected:
 	void paint( void );
 	void resize( double w, double h );
 
-	void mouse_press( const core::point &p, int button );
-	void mouse_release( const core::point &p, int button );
-	void mouse_moved( const core::point &p );
+	void mouse_press( const base::point &p, int button );
+	void mouse_release( const base::point &p, int button );
+	void mouse_moved( const base::point &p );
 
 	void key_pressed( platform::scancode c );
 	void key_released( platform::scancode c );

@@ -158,7 +158,7 @@ font::get_glyph( wchar_t char_code )
 		{
 			// We want each glyph to be separated by at least one black pixel
 			// (for example for shader used in demo-subpixel.c)
-			core::pack::area gA = _glyph_pack.insert( w + 1, h + 1 );
+			base::pack::area gA = _glyph_pack.insert( w + 1, h + 1 );
 			while ( gA.empty() )
 			{
 				bump_glyph_store_size();

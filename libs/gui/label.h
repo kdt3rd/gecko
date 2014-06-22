@@ -5,7 +5,7 @@
 #include "application.h"
 #include "style.h"
 #include <model/datum.h>
-#include <core/alignment.h>
+#include <base/alignment.h>
 
 namespace gui
 {
@@ -16,7 +16,7 @@ class label : public widget
 {
 public:
 	label( void );
-	label( datum<std::string> &&l, datum<alignment> &&a = alignment::LEFT, datum<core::color> &&c = { 0, 0, 0, -1 }, shared_datum<draw::font> &&f = application::current_style()->default_font() );
+	label( datum<std::string> &&l, datum<alignment> &&a = alignment::LEFT, datum<base::color> &&c = { 0, 0, 0, -1 }, shared_datum<draw::font> &&f = application::current_style()->default_font() );
 	~label( void );
 
 	const std::string &text( void ) { return _text.value(); }
@@ -32,7 +32,7 @@ public:
 private:
 	datum<std::string> _text;
 	datum<alignment> _align = alignment::LEFT;
-	datum<core::color> _color = { 0, 0, 0, 1 };
+	datum<base::color> _color = { 0, 0, 0, 1 };
 	shared_datum<draw::font> _font = application::current_style()->default_font();;
 };
 

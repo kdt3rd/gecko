@@ -30,16 +30,16 @@ public:
 
 	void paint( const std::shared_ptr<draw::canvas> &canvas ) override;
 
-	bool mouse_press( const core::point &p, int button ) override;
-	bool mouse_release( const core::point &p, int button ) override;
-	bool mouse_move( const core::point &p ) override;
+	bool mouse_press( const base::point &p, int button ) override;
+	bool mouse_release( const base::point &p, int button ) override;
+	bool mouse_move( const base::point &p ) override;
 
 	void compute_minimum( void ) override;
 	void compute_layout( void ) override;
 
 private:
 	bool _tracking = false;
-	core::point _track;
+	base::point _track;
 
 	scroll_behavior _hscroll = scroll_behavior::BOUND, _vscroll = scroll_behavior::BOUND;
 	std::shared_ptr<widget> _widget;

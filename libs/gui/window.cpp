@@ -17,9 +17,9 @@ window::window( const std::shared_ptr<platform::window> &w )
 	precondition( bool(_window), "null window" );
 	_window->exposed.callback( [this] ( void ) { paint(); } );
 	_window->resized.callback( [this] ( double w, double h ) { resize( w, h ); } );
-	_window->mouse_pressed.callback( [this]( const std::shared_ptr<platform::mouse> &, const core::point &p, int b ) { mouse_press( p, b ); } );
-	_window->mouse_released.callback( [this]( const std::shared_ptr<platform::mouse> &, const core::point &p, int b ) { mouse_release( p, b ); } );
-	_window->mouse_moved.callback( [this]( const std::shared_ptr<platform::mouse> &, const core::point &p ) { mouse_moved( p ); } );
+	_window->mouse_pressed.callback( [this]( const std::shared_ptr<platform::mouse> &, const base::point &p, int b ) { mouse_press( p, b ); } );
+	_window->mouse_released.callback( [this]( const std::shared_ptr<platform::mouse> &, const base::point &p, int b ) { mouse_release( p, b ); } );
+	_window->mouse_moved.callback( [this]( const std::shared_ptr<platform::mouse> &, const base::point &p ) { mouse_moved( p ); } );
 	_window->key_pressed.callback( [this]( const std::shared_ptr<platform::keyboard> &, const platform::scancode &c ) { key_pressed( c ); } );
 	_window->key_released.callback( [this]( const std::shared_ptr<platform::keyboard> &, const platform::scancode &c ) { key_released( c ); } );
 	_window->text_entered.callback( [this]( const std::shared_ptr<platform::keyboard> &, const char32_t &c ) { text_entered( c ); } );
@@ -74,7 +74,7 @@ double window::height( void ) const
 
 ////////////////////////////////////////
 
-void window::invalidate( const core::rect &r )
+void window::invalidate( const base::rect &r )
 {
 	_window->invalidate( r );
 }
@@ -117,7 +117,7 @@ void window::resize( double w, double h )
 
 ////////////////////////////////////////
 
-void window::mouse_press( const core::point &p, int b )
+void window::mouse_press( const base::point &p, int b )
 {
 	if ( _widget )
 		in_context( [&,this] { _widget->mouse_press( p, b ); } );
@@ -125,7 +125,7 @@ void window::mouse_press( const core::point &p, int b )
 
 ////////////////////////////////////////
 
-void window::mouse_release( const core::point &p, int b )
+void window::mouse_release( const base::point &p, int b )
 {
 	if ( _widget )
 		in_context( [&,this] { _widget->mouse_release( p, b ); } );
@@ -133,7 +133,7 @@ void window::mouse_release( const core::point &p, int b )
 
 ////////////////////////////////////////
 
-void window::mouse_moved( const core::point &p )
+void window::mouse_moved( const base::point &p )
 {
 	if ( _widget )
 		in_context( [&,this] { _widget->mouse_move( p ); } );

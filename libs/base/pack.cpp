@@ -1,5 +1,3 @@
-// pack.cpp -*- C++ -*-
-
 //
 // Copyright (c) 2012 Kimball Thurston
 //
@@ -29,7 +27,7 @@
 ////////////////////////////////////////
 
 
-namespace core
+namespace base
 {
 
 
@@ -404,7 +402,7 @@ pack::add_waste( size_t idx, int w, int h, int y )
 ////////////////////////////////////////
 
 
-} // core
+}
 
 
 

@@ -1,22 +1,10 @@
 
-Include( source_dir )
+Include( SourceFile() )
+Include( SourceFile( "libs" ) )
 Include( BuildFile() )
+Include( BuildFile( "libs" ) )
 Include( GL_INCLUDE )
 
-SubDir( "core" )
-SubDir( "gl" )
-SubDir( "utf" )
-SubDir( "layout" )
-SubDir( "draw" )
-SubDir( "platform" )
-SubDir( "gui" )
-
---Executable( "test_layout", Compile( "test_layout.cpp" ), LinkLibs( "layout", platform ) )
-Executable( "test", Compile( "test.cpp" ), LinkLibs( "platform", "draw", "gl", "utf", "gui" ), LinkSys( GL_LIBS ) )
-Executable( "test_app", Compile( "test_app.cpp" ), LinkLibs( "gui" ) )
-
-Application( "Test Application", "test_app" )
---Application( "Test", "test" )
-
-Doxygen( "docs", "doxyfile", "", "docs" );
+SubDir( "libs" )
+SubDir( "apps" )
 

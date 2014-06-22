@@ -18,7 +18,7 @@ label::label( void )
 
 ////////////////////////////////////////
 
-label::label( datum<std::string> &&l, datum<alignment> &&a, datum<core::color> &&c, shared_datum<draw::font> &&f )
+label::label( datum<std::string> &&l, datum<alignment> &&a, datum<base::color> &&c, shared_datum<draw::font> &&f )
 	: _text( std::move( l ) ), _align( std::move( a ) ), _color( std::move( c ) ), _font( std::move( f ) )
 {
 	if ( _color.value().alpha() < 0.0 )
@@ -39,9 +39,9 @@ label::~label( void )
 
 void label::paint( const std::shared_ptr<draw::canvas> &c )
 {
-	core::point p = c->align_text( _font.value(), _text.value(), *this, _align.value() );
+	base::point p = c->align_text( _font.value(), _text.value(), *this, _align.value() );
 
-	core::paint paint;
+	base::paint paint;
 	paint.set_fill_color( _color.value() );
 	c->draw_text( _font.value(), p, _text.value(), paint );
 }

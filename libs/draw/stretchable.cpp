@@ -14,7 +14,7 @@ stretchable::stretchable( void )
 
 ////////////////////////////////////////
 
-void stretchable::create( const std::shared_ptr<canvas> &c, const core::path &path, const core::paint &paint, const core::point &center )
+void stretchable::create( const std::shared_ptr<canvas> &c, const base::path &path, const base::paint &paint, const base::point &center )
 {
 	polylines lines;
 	path.replay( lines );
@@ -62,20 +62,20 @@ void stretchable::create( const std::shared_ptr<canvas> &c, const core::path &pa
 
 ////////////////////////////////////////
 
-void stretchable::set( const std::shared_ptr<canvas> &c, const core::rect &r )
+void stretchable::set( const std::shared_ptr<canvas> &c, const base::rect &r )
 {
 	if ( _stroke_prog )
 	{
 		c->use_program( _stroke_prog );
 		_stroke_prog->set_uniform( "top_left", r.top_left() );
-		_stroke_prog->set_uniform( "quad_size", r.size() );
+		_stroke_prog->set_uniform( "quad_size", r.extent() );
 	}
 
 	if ( _fill_prog )
 	{
 		c->use_program( _fill_prog );
 		_fill_prog->set_uniform( "top_left", r.top_left() );
-		_fill_prog->set_uniform( "quad_size", r.size() );
+		_fill_prog->set_uniform( "quad_size", r.extent() );
 	}
 }
 

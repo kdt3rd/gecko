@@ -3,9 +3,9 @@
 
 #include <vector>
 #include <array>
-#include <core/meta.h>
-#include <core/point.h>
-#include <core/color.h>
+#include <base/meta.h>
+#include <base/point.h>
+#include <base/color.h>
 #include <gl/context.h>
 #include <gl/vertex_array.h>
 
@@ -18,12 +18,12 @@ namespace detail
 {
 	template<typename T> struct count_components {};
 
-	template<> struct count_components<core::point>
+	template<> struct count_components<base::point>
 	{
 		enum { value = 2 };
 	};
 
-	template<> struct count_components<core::color>
+	template<> struct count_components<base::color>
 	{
 		enum { value = 4 };
 	};
@@ -101,7 +101,7 @@ private:
 	}
 
 	template<typename ...More>
-	void append( const core::point &p, More ...args )
+	void append( const base::point &p, More ...args )
 	{
 		_data.push_back( p.x() );
 		_data.push_back( p.y() );
@@ -109,7 +109,7 @@ private:
 	}
 
 	template<typename ...More>
-	void append( const core::color &c, More ...args )
+	void append( const base::color &c, More ...args )
 	{
 		_data.push_back( c.red() );
 		_data.push_back( c.green() );

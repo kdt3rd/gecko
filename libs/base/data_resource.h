@@ -6,7 +6,7 @@
 #include <vector>
 #include <initializer_list>
 
-namespace core
+namespace base
 {
 
 ////////////////////////////////////////

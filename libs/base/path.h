@@ -4,7 +4,7 @@
 #include <vector>
 #include "point.h"
 
-namespace core
+namespace base
 {
 
 ////////////////////////////////////////
@@ -54,7 +54,7 @@ public:
 	void circle( const point &center, double radius );
 
 	void rectangle( const point &p1, const point &p2 );
-	void rectangle( const point &p1, double w, double h ) { rectangle( p1, p1 + core::point( w, h ) ); }
+	void rectangle( const point &p1, double w, double h ) { rectangle( p1, p1 + point( w, h ) ); }
 
 	void rounded_rect( const point &p1, const point &p2, double r );
 	void rounded_rect( const point &p1, double w, double h, double r );
@@ -67,7 +67,7 @@ public:
 	{
 		auto data = _data.begin();
 
-		core::point p1, p2, p3;
+		point p1, p2, p3;
 		double x, y, z;
 
 		for ( auto act: _actions )
@@ -112,11 +112,11 @@ public:
 
 private:
 	template<typename Iterator>
-	core::point pt( Iterator &i ) const
+	point pt( Iterator &i ) const
 	{
 		double x = *i++;
 		double y = *i++;
-		return core::point( x, y );
+		return point( x, y );
 	}
 
 	template<typename Iterator>
@@ -153,7 +153,7 @@ private:
 	}
 
 	std::size_t _start = 0;
-	core::point _last = { 0, 0 };
+	point _last = { 0, 0 };
 	std::vector<double> _data;
 	std::vector<action> _actions;
 };

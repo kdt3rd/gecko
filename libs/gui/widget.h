@@ -35,17 +35,17 @@ public:
 	{
 	}
 
-	virtual bool mouse_press( const core::point &p, int button )
+	virtual bool mouse_press( const base::point &p, int button )
 	{
 		return false;
 	}
 
-	virtual bool mouse_release( const core::point &p, int button )
+	virtual bool mouse_release( const base::point &p, int button )
 	{
 		return false;
 	}
 
-	virtual bool mouse_move( const core::point &p )
+	virtual bool mouse_move( const base::point &p )
 	{
 		return false;
 	}
@@ -65,7 +65,7 @@ public:
 		return false;
 	}
 
-	void invalidate( const core::rect &r )
+	void invalidate( const base::rect &r )
 	{
 		context::current().invalidate( r );
 	}

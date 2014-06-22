@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include <core/size.h>
-#include <core/rect.h>
+#include <base/size.h>
+#include <base/rect.h>
 
 namespace layout
 {
@@ -12,10 +12,10 @@ namespace layout
 /// @brief Rectangular area
 ///
 /// Represents an area, with a minimum size.  Used by layouts, views, and reactions.
-class simple_area : public core::rect
+class simple_area : public base::rect
 {
 public:
-	using core::rect::rect;
+	using base::rect::rect;
 
 	virtual ~simple_area( void );
 
@@ -35,7 +35,7 @@ public:
 	/// @param h The minimum height.
 	void set_minimum( double w, double h ) { _min.set( w, h ); }
 
-	void set_minimum( const core::size &s ) { _min = s; }
+	void set_minimum( const base::size &s ) { _min = s; }
 
 	/// @brief Minimum width.
 	///
@@ -49,7 +49,7 @@ public:
 	/// @return The minimum height.
 	double minimum_height( void ) const { return _min.h(); }
 
-	core::size minimum( void ) const { return _min; }
+	base::size minimum( void ) const { return _min; }
 
 	bool fits( double w, double h ) const { return w >= _min.w() && h >= _min.h(); }
 
@@ -60,7 +60,7 @@ public:
 	virtual void compute_layout( void );
 
 private:
-	core::size _min;
+	base::size _min;
 };
 
 ////////////////////////////////////////

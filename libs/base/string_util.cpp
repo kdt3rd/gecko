@@ -1,7 +1,7 @@
 
 #include "string_util.h"
 
-namespace core
+namespace base
 {
 
 ////////////////////////////////////////

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <memory>
 
-namespace core
+namespace base
 {
 
 ////////////////////////////////////////

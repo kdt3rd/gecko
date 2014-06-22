@@ -116,7 +116,7 @@ public:
 		switch ( _dir )
 		{
 			case direction::LEFT:
-				_root->set_size( _root->minimum_width(), children.height() );
+				_root->set_extent( _root->minimum_width(), children.height() );
 				children.shrink( 0, _root->width(), _tab_size, 0 );
 				flow_constraint( _areas, _weights, children, _dir, _hspacing );
 				overlap_constraint( _areas, children, orientation::VERTICAL );
@@ -128,7 +128,7 @@ public:
 				if ( _tab )
 				{
 					_tab->set_position( children.top_left() );
-					_tab->set_size( 0.0, -_tab_size );
+					_tab->set_extent( 0.0, -_tab_size );
 					if ( !_areas.empty() )
 						_tab->set_horizontal( _areas.back()->x1(), _root->x1() );
 				}
@@ -136,21 +136,21 @@ public:
 
 			case direction::RIGHT:
 				_root->set_position( children.top_left() );
-				_root->set_size( _root->minimum_width(), children.height() );
+				_root->set_extent( _root->minimum_width(), children.height() );
 				children.shrink( _root->width(), 0, _tab_size, 0 );
 				flow_constraint( _areas, _weights, children, _dir, _hspacing );
 				overlap_constraint( _areas, children, orientation::VERTICAL );
 				if ( _tab )
 				{
 					_tab->set_position( children.top_left() );
-					_tab->set_size( 0.0, -_tab_size );
+					_tab->set_extent( 0.0, -_tab_size );
 					if ( !_areas.empty() )
 						_tab->set_horizontal( _root->x2(), _areas.back()->x2() );
 				}
 				break;
 
 			case direction::UP:
-				_root->set_size( children.width(), _root->minimum_height() );
+				_root->set_extent( children.width(), _root->minimum_height() );
 				children.shrink( _tab_size, 0, 0, _root->height() + _vspacing );
 				flow_constraint( _areas, _weights, children, _dir, _vspacing );
 				overlap_constraint( _areas, children, orientation::HORIZONTAL );
@@ -162,7 +162,7 @@ public:
 				if ( _tab )
 				{
 					_tab->set_position( children.top_left() );
-					_tab->set_size( -_tab_size, 0.0 );
+					_tab->set_extent( -_tab_size, 0.0 );
 					if ( !_areas.empty() )
 						_tab->set_vertical( _areas.back()->y1(), _root->y1() );
 				}
@@ -170,14 +170,14 @@ public:
 
 			case direction::DOWN:
 				_root->set_position( children.top_left() );
-				_root->set_size( children.width(), _root->minimum_height() );
+				_root->set_extent( children.width(), _root->minimum_height() );
 				children.shrink( _tab_size, 0, _root->height() + _vspacing, 0 );
 				flow_constraint( _areas, _weights, children, _dir, _vspacing );
 				overlap_constraint( _areas, children, orientation::HORIZONTAL );
 				if ( _tab )
 				{
 					_tab->set_position( children.top_left() );
-					_tab->set_size( -_tab_size, 0.0 );
+					_tab->set_extent( -_tab_size, 0.0 );
 					if ( !_areas.empty() )
 						_tab->set_vertical( _root->y2(), _areas.back()->y2() );
 				}

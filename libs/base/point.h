@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cmath>
 
-namespace core
+namespace base
 {
 
 ////////////////////////////////////////

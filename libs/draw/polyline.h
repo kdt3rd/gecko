@@ -4,7 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <iterator>
-#include <core/point.h>
+#include <base/point.h>
 
 namespace draw
 {
@@ -14,7 +14,7 @@ namespace draw
 class polyline
 {
 public:
-	using point = core::point;
+	using point = base::point;
 
 	void close( void )
 	{
@@ -85,7 +85,7 @@ private:
 
 inline std::ostream &operator<<( std::ostream &out, const polyline &p )
 {
-	std::copy( p.begin(), p.end(), std::ostream_iterator<core::point>( out, "; " ) );
+	std::copy( p.begin(), p.end(), std::ostream_iterator<base::point>( out, "; " ) );
 	return out;
 }
 

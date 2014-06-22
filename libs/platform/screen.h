@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include <core/size.h>
-#include <core/point.h>
+#include <base/size.h>
+#include <base/point.h>
 
 namespace platform
 {
@@ -27,13 +27,13 @@ public:
 	///
 	/// The bounds (size) of the screen.
 	/// @return The size of the screen
-	virtual core::size bounds( void ) const = 0;
+	virtual base::size bounds( void ) const = 0;
 
 	/// @brief Screen DPI
 	///
 	/// Returns the horizontal and vertical DPI for the screen
 	/// @return The size of the screen
-	virtual core::point dpi( void ) const = 0;
+	virtual base::point dpi( void ) const = 0;
 };
 
 ////////////////////////////////////////

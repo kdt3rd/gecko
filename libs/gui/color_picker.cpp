@@ -13,7 +13,7 @@ namespace gui
 
 ////////////////////////////////////////
 
-color_picker::color_picker( core::color::space space )
+color_picker::color_picker( base::color::space space )
 	: _space( space ), _current( { 1, 0, 0, 1 } )
 {
 	set_minimum( 120, 120 );
@@ -34,9 +34,9 @@ namespace
 
 void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
-	using core::path;
-	using core::point;
-	using core::color;
+	using base::path;
+	using base::point;
+	using base::color;
 
 	double r1 = radius();
 	double r2 = std::max( r1 - 24, 0.0 );
@@ -47,7 +47,7 @@ void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 	static_assert( n%4 == 0, "invalid number of segments" );
 //	double slice = PI / n;
 
-	core::paint paint;
+	base::paint paint;
 	for ( size_t i = 0; i < n; ++i )
 	{
 		double a = i * 2 * PI / n;
@@ -112,7 +112,7 @@ void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 				double h, s, l;
 				_current.get_hsl( h, s, l );
 
-				core::path m;
+				base::path m;
 				m.move_to( c + point::polar( r2, h ) );
 				m.line_to( c + point::polar( r2, h + 2 * PI / 3 ) );
 				m.line_to( c + point::polar( r2, h + 4 * PI / 3 ) );
@@ -135,13 +135,13 @@ void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 
 ////////////////////////////////////////
 
-bool color_picker::mouse_press( const core::point &p, int b )
+bool color_picker::mouse_press( const base::point &p, int b )
 {
 	if ( b == 1 )
 	{
 		double r1 = radius();
 		double r2 = std::max( r1 - 24, 0.0 );
-		if ( core::point::distance( p, center() ) > r2 )
+		if ( base::point::distance( p, center() ) > r2 )
 		{
 			_tracking = true;
 			return mouse_move( p );
@@ -153,7 +153,7 @@ bool color_picker::mouse_press( const core::point &p, int b )
 
 ////////////////////////////////////////
 
-bool color_picker::mouse_release( const core::point &p, int b )
+bool color_picker::mouse_release( const base::point &p, int b )
 {
 	if ( _tracking && b == 1 )
 	{
@@ -165,11 +165,11 @@ bool color_picker::mouse_release( const core::point &p, int b )
 
 ////////////////////////////////////////
 
-bool color_picker::mouse_move( const core::point &p )
+bool color_picker::mouse_move( const base::point &p )
 {
 	if ( _tracking )
 	{
-		core::point d = p.delta( center() );
+		base::point d = p.delta( center() );
 		double h, s, l;
 		_current.get_hsl( h, s, l );
 		h = std::atan2( d.y(), d.x() );

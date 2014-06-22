@@ -35,7 +35,7 @@ void tree_node::compute_layout( void )
 	if ( _collapsed )
 	{
 		_root->set_position( position() );
-		_root->set_size( width(), height() );
+		_root->set_extent( width(), height() );
 	}
 	else
 		container<tree_layout>::compute_layout();
@@ -43,7 +43,7 @@ void tree_node::compute_layout( void )
 
 ////////////////////////////////////////
 
-bool tree_node::mouse_press( const core::point &p, int button )
+bool tree_node::mouse_press( const base::point &p, int button )
 {
 	if ( _collapsed )
 	{
@@ -60,7 +60,7 @@ bool tree_node::mouse_press( const core::point &p, int button )
 
 ////////////////////////////////////////
 
-bool tree_node::mouse_release( const core::point &p, int button )
+bool tree_node::mouse_release( const base::point &p, int button )
 {
 	if ( _mouse_grab )
 	{
@@ -77,7 +77,7 @@ bool tree_node::mouse_release( const core::point &p, int button )
 
 ////////////////////////////////////////
 
-bool tree_node::mouse_move( const core::point &p )
+bool tree_node::mouse_move( const base::point &p )
 {
 	if ( _mouse_grab )
 		return _mouse_grab->mouse_move( p );

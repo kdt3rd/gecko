@@ -1,7 +1,7 @@
 
 #include "screen.h"
 
-#include <core/contract.h>
+#include <base/contract.h>
 #include <string>
 #include <stdexcept>
 
@@ -30,7 +30,7 @@ bool screen::is_default( void ) const
 
 ////////////////////////////////////////
 
-core::size screen::bounds( void ) const
+base::size screen::bounds( void ) const
 {
 	return { static_cast<double>( DisplayWidth( _display.get(), _screen ) ),
 			static_cast<double>( DisplayHeight( _display.get(), _screen ) ) };
@@ -38,7 +38,7 @@ core::size screen::bounds( void ) const
 
 ////////////////////////////////////////
 
-core::point screen::dpi( void ) const
+base::point screen::dpi( void ) const
 {
 	double tmpW = ( ( static_cast<double>( DisplayWidth( _display.get(), _screen ) ) *
 					  25.4 ) /

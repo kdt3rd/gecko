@@ -125,7 +125,7 @@ void program::set_uniform( uniform uni, const matrix4 &value )
 
 ////////////////////////////////////////
 
-void program::set_uniform( uniform uni, const core::color &value )
+void program::set_uniform( uniform uni, const base::color &value )
 {
 	float tmp[] = { float(value.red()), float(value.green()), float(value.blue()), float(value.alpha()) };
 	glUniform4fv( uni, 1, tmp );
@@ -133,7 +133,7 @@ void program::set_uniform( uniform uni, const core::color &value )
 
 ////////////////////////////////////////
 
-void program::set_uniform( uniform uni, const core::point &value )
+void program::set_uniform( uniform uni, const base::point &value )
 {
 	float tmp[] = { float(value.x()), float(value.y()) };
 	glUniform2fv( uni, 1, tmp );
@@ -141,7 +141,7 @@ void program::set_uniform( uniform uni, const core::point &value )
 
 ////////////////////////////////////////
 
-void program::set_uniform( uniform uni, const core::size &value )
+void program::set_uniform( uniform uni, const base::size &value )
 {
 	float tmp[] = { float(value.w()), float(value.h()) };
 	glUniform2fv( uni, 1, tmp );

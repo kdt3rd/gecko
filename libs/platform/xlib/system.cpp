@@ -7,7 +7,7 @@
 #include "dispatcher.h"
 
 #include <platform/platform.h>
-#include <core/contract.h>
+#include <base/contract.h>
 #include <stdexcept>
 
 ////////////////////////////////////////

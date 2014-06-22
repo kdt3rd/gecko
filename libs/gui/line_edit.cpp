@@ -17,7 +17,7 @@ line_edit::line_edit( void )
 
 ////////////////////////////////////////
 
-line_edit::line_edit( datum<std::string> &&l, datum<alignment> &&a, datum<core::color> &&c, shared_datum<draw::font> &&f )
+line_edit::line_edit( datum<std::string> &&l, datum<alignment> &&a, datum<base::color> &&c, shared_datum<draw::font> &&f )
 	: _text( std::move( l ) ), _align( std::move( a ) ), _color( std::move( c ) ), _font( std::move( f ) )
 {
 	callback_invalidate( _text, _align, _color, _font );
@@ -38,16 +38,16 @@ void line_edit::paint( const std::shared_ptr<draw::canvas> &c )
 
 	const std::string &str = _text.value();
 
-	core::point p = c->align_text( _font.value(), str, *this, _align.value() );
+	base::point p = c->align_text( _font.value(), str, *this, _align.value() );
 
-	core::paint paint;
+	base::paint paint;
 	paint.set_fill_color( _color.value() );
 	c->draw_text( _font.value(), p, str, paint );
 
 	draw::font_extents fex = _font.value()->extents();
 	draw::text_extents tex = _font.value()->extents( str.substr( 0, _cursor ) );
 
-	style->text_cursor( c, p + core::point( tex.x_advance, -fex.descent ) , fex.ascent - fex.descent );
+	style->text_cursor( c, p + base::point( tex.x_advance, -fex.descent ) , fex.ascent - fex.descent );
 }
 
 ////////////////////////////////////////

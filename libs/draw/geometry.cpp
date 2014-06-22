@@ -5,7 +5,7 @@
 namespace
 {
 	template<int n, typename T>
-	inline const core::point &pt( const T &t )
+	inline const base::point &pt( const T &t )
 	{
 		return std::get<n>( t );
 	}
@@ -35,9 +35,9 @@ size_t circle_precision( double r )
 
 ////////////////////////////////////////
 
-void add_quadratic( const core::point &p1, const core::point &p2, const core::point &p3, polyline &line )
+void add_quadratic( const base::point &p1, const base::point &p2, const base::point &p3, polyline &line )
 {
-	using core::point;
+	using base::point;
 	typedef std::tuple<point,point,point> curve;
 	std::vector<curve> stack;
 	stack.reserve( 16 );
@@ -69,9 +69,9 @@ void add_quadratic( const core::point &p1, const core::point &p2, const core::po
 
 ////////////////////////////////////////
 
-void add_cubic( const core::point &p1, const core::point &p2, const core::point &p3, const core::point &p4, polyline &line )
+void add_cubic( const base::point &p1, const base::point &p2, const base::point &p3, const base::point &p4, polyline &line )
 {
-	using core::point;
+	using base::point;
 	typedef std::tuple<point,point,point,point> curve;
 	std::vector<curve> stack;
 	stack.reserve( 16 );
@@ -113,9 +113,9 @@ void add_cubic( const core::point &p1, const core::point &p2, const core::point 
 
 ////////////////////////////////////////
 
-void add_arc( const core::point &center, double radius, double a1, double a2, polyline &line )
+void add_arc( const base::point &center, double radius, double a1, double a2, polyline &line )
 {
-	using core::point;
+	using base::point;
 
 	size_t n = circle_precision( radius );
 

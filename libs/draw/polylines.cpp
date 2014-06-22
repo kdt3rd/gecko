@@ -5,8 +5,8 @@
 #include "mesh.h"
 #include "clipper.h"
 #include "libtess2/tesselator.h"
-#include <core/contract.h>
-#include <core/scope_guard.h>
+#include <base/contract.h>
+#include <base/scope_guard.h>
 
 namespace draw
 {
@@ -29,7 +29,7 @@ void polylines::new_polyline( void )
 
 ////////////////////////////////////////
 
-void polylines::move_to( const core::point &p )
+void polylines::move_to( const base::point &p )
 {
 	if ( _lines.empty() )
 		_lines.emplace_back();
@@ -41,7 +41,7 @@ void polylines::move_to( const core::point &p )
 
 ////////////////////////////////////////
 
-void polylines::line_to( const core::point &p )
+void polylines::line_to( const base::point &p )
 {
 	precondition( !_lines.empty(), "no point to start from" );
 	precondition( !_lines.back().empty(), "no point to start from" );
@@ -50,7 +50,7 @@ void polylines::line_to( const core::point &p )
 
 ////////////////////////////////////////
 
-void polylines::quadratic_to( const core::point &p1, const core::point &p2 )
+void polylines::quadratic_to( const base::point &p1, const base::point &p2 )
 {
 	precondition( !_lines.empty(), "no point to start from" );
 	precondition( !_lines.back().empty(), "no point to start from" );
@@ -59,7 +59,7 @@ void polylines::quadratic_to( const core::point &p1, const core::point &p2 )
 
 ////////////////////////////////////////
 
-void polylines::cubic_to( const core::point &p1, const core::point &p2, const core::point &p3 )
+void polylines::cubic_to( const base::point &p1, const base::point &p2, const base::point &p3 )
 {
 	precondition( !_lines.empty(), "no point to start from" );
 	precondition( !_lines.back().empty(), "no point to start from" );
@@ -68,7 +68,7 @@ void polylines::cubic_to( const core::point &p1, const core::point &p2, const co
 
 ////////////////////////////////////////
 
-void polylines::arc_to( const core::point &center, double radius, double angle1, double angle2 )
+void polylines::arc_to( const base::point &center, double radius, double angle1, double angle2 )
 {
 	precondition( !_lines.empty(), "no point to start from" );
 	add_arc( center, radius, angle1, angle2, _lines.back() );
@@ -88,7 +88,7 @@ void polylines::arc_to( const point &center, const point &radius, double angle1,
 
 ////////////////////////////////////////
 
-void polylines::add_point( const core::point &p )
+void polylines::add_point( const base::point &p )
 {
 	precondition( !_lines.empty(), "no point to start from" );
 	_lines.back().push_back( p );
@@ -178,9 +178,9 @@ polylines polylines::offset( double width )
 
 ////////////////////////////////////////
 
-mesh<core::point> polylines::debug( void )
+mesh<base::point> polylines::debug( void )
 {
-	mesh<core::point> result;
+	mesh<base::point> result;
 	for ( const auto &line: _lines )
 	{
 		if ( line.closed() )
@@ -210,7 +210,7 @@ namespace {
 
 }
 
-mesh<core::point> polylines::filled( void )
+mesh<base::point> polylines::filled( void )
 {
 	precondition( !_lines.empty(), "no polylines" );
 
@@ -261,7 +261,7 @@ mesh<core::point> polylines::filled( void )
 	const int nelems = tessGetElementCount( tess );
 
 	// TODO use element array when it's added to the GL library
-	mesh<core::point> m;
+	mesh<base::point> m;
 	m.begin( gl::primitive::TRIANGLES );
 	for ( int i = 0; i < nelems; ++i )
 	{

@@ -6,7 +6,7 @@
 
 #include <map>
 
-#include <core/point.h>
+#include <base/point.h>
 #include "extents.h"
 
 

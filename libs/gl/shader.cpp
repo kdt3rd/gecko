@@ -2,7 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <stdexcept>
-#include <core/string_util.h>
+#include <base/string_util.h>
 #include "shader.h"
 
 namespace gl
@@ -59,7 +59,7 @@ void shader::compile( void )
 	}
 	else
 	{
-		std::string l = core::trim( log() );
+		std::string l = base::trim( log() );
 		if ( !l.empty() )
 		{
 			GLint len = 0;

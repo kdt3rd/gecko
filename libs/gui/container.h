@@ -34,7 +34,7 @@ public:
 			w->compute_layout();
 	}
 
-	bool mouse_press( const core::point &p, int button ) override
+	bool mouse_press( const base::point &p, int button ) override
 	{
 		for ( auto w: _widgets )
 		{
@@ -47,7 +47,7 @@ public:
 		return widget::mouse_press( p, button );
 	}
 
-	bool mouse_release( const core::point &p, int button ) override
+	bool mouse_release( const base::point &p, int button ) override
 	{
 		if ( _mouse_grab )
 		{
@@ -64,7 +64,7 @@ public:
 		return widget::mouse_release( p, button );
 	}
 
-	bool mouse_move( const core::point &p ) override
+	bool mouse_move( const base::point &p ) override
 	{
 		if ( _mouse_grab )
 			return _mouse_grab->mouse_move( p );

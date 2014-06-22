@@ -3,7 +3,7 @@
 
 ////////////////////////////////////////
 
-namespace core
+namespace base
 {
 
 template <class T>

@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace core
+namespace base
 {
 
 ////////////////////////////////////////

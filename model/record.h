@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <core/signal.h>
+#include <base/signal.h>
 
 namespace model
 {
@@ -16,7 +16,7 @@ public:
 	template<typename T> using field = model::field<T>;
 	template<typename T> using shared_field = field<std::shared_ptr<T>>;
 
-	core::signal<void(void)> changes;
+	base::signal<void(void)> changes;
 
 	inline void changed( void )
 	{

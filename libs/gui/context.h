@@ -2,8 +2,8 @@
 #pragma once
 
 #include <vector>
-#include <core/scope_guard.h>
-#include <core/rect.h>
+#include <base/scope_guard.h>
+#include <base/rect.h>
 
 namespace gui
 {
@@ -15,7 +15,7 @@ class context
 public:
 	virtual ~context( void ) {}
 
-	virtual void invalidate( const core::rect &r ) = 0;
+	virtual void invalidate( const base::rect &r ) = 0;
 
 	static context &current( void );
 

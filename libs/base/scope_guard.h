@@ -5,7 +5,7 @@
 
 ////////////////////////////////////////
 
-namespace core
+namespace base
 {
 
 template <class function>
@@ -62,5 +62,5 @@ namespace detail
 #define ANONYMOUS_VARIABLE(str) CONCATENATE(str, __COUNTER__)
 
 #define on_scope_exit \
-	auto ANONYMOUS_VARIABLE(SCOPE_EXIT_STATE) = core::detail::scope_guardOnExit()
+	auto ANONYMOUS_VARIABLE(SCOPE_EXIT_STATE) = base::detail::scope_guardOnExit()
 

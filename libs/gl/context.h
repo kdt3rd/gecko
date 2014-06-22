@@ -1,10 +1,6 @@
 
 #pragma once
 
-#include <exception>
-#include <memory>
-#include <vector>
-#include <core/contract.h>
 #include "opengl.h"
 #include "enums.h"
 #include "texture.h"
@@ -13,7 +9,13 @@
 #include "buffer.h"
 #include "matrix4.h"
 #include "vertex_array.h"
-#include <core/color.h>
+
+#include <base/contract.h>
+#include <base/color.h>
+
+#include <exception>
+#include <memory>
+#include <vector>
 
 namespace gl
 {
@@ -29,7 +31,7 @@ public:
 	void enable( capability cap );
 	void disable( capability cap );
 
-	void clear_color( const core::color &c );
+	void clear_color( const base::color &c );
 
 	void clear( buffer_bit bit );
 	void clear( buffer_bits bits = ( buffer_bit::COLOR_BUFFER_BIT | buffer_bit::DEPTH_BUFFER_BIT ) );

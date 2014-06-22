@@ -7,7 +7,7 @@
 #include <tuple>
 #include <map>
 #include <vector>
-#include <core/scope_guard.h>
+#include <base/scope_guard.h>
 
 #include <fontconfig/fontconfig.h>
 

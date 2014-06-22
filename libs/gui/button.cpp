@@ -19,7 +19,7 @@ button::button( void )
 
 ////////////////////////////////////////
 
-button::button( datum<std::string> &&l, datum<alignment> &&a, datum<core::color> &&c, shared_datum<draw::font> &&f )
+button::button( datum<std::string> &&l, datum<alignment> &&a, datum<base::color> &&c, shared_datum<draw::font> &&f )
 	: _text( std::move( l ) ), _align( std::move( a ) ), _color( std::move( c ) ), _font( std::move( f ) )
 {
 	if ( _color.value().alpha() < 0.0 )
@@ -54,10 +54,10 @@ void button::paint( const std::shared_ptr<draw::canvas> &canvas )
 	auto style = application::current_style();
 	style->button_frame( canvas, *this, _pressed );
 
-	core::rect content = style->button_content( *this );
-	core::point p = canvas->align_text( _font.value(), _text.value(), content, _align.value() );
+	base::rect content = style->button_content( *this );
+	base::point p = canvas->align_text( _font.value(), _text.value(), content, _align.value() );
 
-	core::paint paint;
+	base::paint paint;
 	paint.set_fill_color( _color.value() );
 	canvas->draw_text( _font.value(), p, _text.value(), paint );
 }
@@ -69,7 +69,7 @@ void button::compute_minimum( void )
 	draw::font_extents fex = _font.value()->extents();
 	draw::text_extents tex = _font.value()->extents( _text.value() );
 
-	core::size s( tex.x_advance, fex.height );
+	base::size s( tex.x_advance, fex.height );
 
 	auto style = application::current_style();
 	s = style->button_size( s );
@@ -79,7 +79,7 @@ void button::compute_minimum( void )
 
 ////////////////////////////////////////
 
-bool button::mouse_press( const core::point &p, int button )
+bool button::mouse_press( const base::point &p, int button )
 {
 	if ( contains( p ) )
 	{
@@ -91,7 +91,7 @@ bool button::mouse_press( const core::point &p, int button )
 
 ////////////////////////////////////////
 
-bool button::mouse_release( const core::point &p, int button )
+bool button::mouse_release( const base::point &p, int button )
 {
 	if ( _tracking )
 	{
@@ -106,7 +106,7 @@ bool button::mouse_release( const core::point &p, int button )
 
 ////////////////////////////////////////
 
-bool button::mouse_move( const core::point &p )
+bool button::mouse_move( const base::point &p )
 {
 	if ( _tracking )
 	{

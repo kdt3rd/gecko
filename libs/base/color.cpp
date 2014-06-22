@@ -49,7 +49,7 @@ namespace
 
 ////////////////////////////////////////
 
-namespace core
+namespace base
 {
 
 ////////////////////////////////////////
@@ -180,7 +180,7 @@ color color::change( double amt )
 
 ////////////////////////////////////////
 
-core::color color::mix( const core::color &a, const core::color &b, double m )
+base::color color::mix( const base::color &a, const base::color &b, double m )
 {
 	double n = 1.0 - m;
 	return {

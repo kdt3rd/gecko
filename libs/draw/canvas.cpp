@@ -1,6 +1,6 @@
 
 #include "canvas.h"
-#include <draw/shaders.h>
+#include "shaders.h"
 #include <gl/check.h>
 
 ////////////////////////////////////////
@@ -33,13 +33,13 @@ canvas::~canvas( void )
 
 ////////////////////////////////////////
 
-std::shared_ptr<gl::texture> canvas::gradient( const core::gradient &g, size_t n )
+std::shared_ptr<gl::texture> canvas::gradient( const base::gradient &g, size_t n )
 {
 	std::vector<uint8_t> bytes( n * 4 );
 	for ( size_t i = 0; i < n; ++i )
 	{
 		double stop = double(i)/double(n);
-		core::color c = g.sample( stop );
+		base::color c = g.sample( stop );
 		bytes[i*4+0] = clampColorByte( c.red() );
 		bytes[i*4+1] = clampColorByte( c.green() );
 		bytes[i*4+2] = clampColorByte( c.blue() );
@@ -65,10 +65,10 @@ std::shared_ptr<gl::program> canvas::program( const std::string &vert, const std
 
 ////////////////////////////////////////
 
-core::point
-canvas::align_text( const std::shared_ptr<font> &font, const std::string &utf8, const core::rect &r, alignment a )
+base::point
+canvas::align_text( const std::shared_ptr<font> &font, const std::string &utf8, const base::rect &r, alignment a )
 {
-	core::rect rect;
+	base::rect rect;
 	rect.set_x1( std::ceil( r.x1() ) );
 	rect.set_y1( std::ceil( r.y1() ) );
 	rect.set_x2( std::floor( r.x2() ) );
@@ -133,7 +133,7 @@ canvas::align_text( const std::shared_ptr<font> &font, const std::string &utf8, 
 ////////////////////////////////////////
 
 void
-canvas::draw_text( const std::shared_ptr<font> &font, const core::point &p, const std::string &utf8, const core::paint &c )
+canvas::draw_text( const std::shared_ptr<font> &font, const base::point &p, const std::string &utf8, const base::paint &c )
 {
 	if ( ! font || utf8.empty() )
 		return;
@@ -224,7 +224,7 @@ canvas::draw_text( const std::shared_ptr<font> &font, const core::point &p, cons
 ////////////////////////////////////////
 
 /*
-void canvas::fill( const core::color &c )
+void canvas::fill( const base::color &c )
 {
 	paint p( c );
 	fill( p );
