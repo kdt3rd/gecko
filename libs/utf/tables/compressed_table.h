@@ -1,3 +1,4 @@
+/// @cond UTF
 
 #include <vector>
 #include <cassert>
@@ -142,3 +143,4 @@ private:
 
 ////////////////////////////////////////
 
+/// @endcond

@@ -8,17 +8,22 @@
 namespace base
 {
 
+/// @brief An ID for a connection
+///
+/// An opaque type that represents a connection.
+/// It is created when connecting a callback to a signal.
+/// It can only be used to disconnect a callback.
 typedef std::uintptr_t connection;
 
 namespace detail {
 
-/// proto_signal is the template implementation for callback list.
+// Proto_signal is the template implementation for callback list.
 template<typename, typename> class proto_signal;   // undefined
 
-/// collector_invocation invokes signal handlers differently depending on return type.
+// Collector_invocation invokes signal handlers differently depending on return type.
 template<typename collector, typename callback> class collector_invocation;
 
-/// collector_last returns the result of the last signal handler from a signal emission.
+// Collector_last returns the result of the last signal handler from a signal emission.
 template<typename ret_type>
 class collector_last
 {
@@ -90,7 +95,8 @@ public:
 	}
 };
 
-/// proto_signal template specialised for the callback signature and collector.
+/// @internal
+// proto_signal template specialised for the callback signature and collector.
 template<class collector, typename ret_type, typename ...args>
 class proto_signal<ret_type( args... ), collector> : private collector_invocation<collector, ret_type( args... )>
 {
@@ -227,7 +233,9 @@ public:
 		}
 	}
 
-	/// Operator to add a new function or lambda as signal handler, returns a handler connection ID.
+	/// @brief Add a callback
+	///
+	/// Adds a new function or lambda as signal handler, returns a handler connection ID.
 	connection operator+=( const callback &cb )
 	{
 		ensure_ring();
@@ -269,50 +277,81 @@ public:
 
 }
 
-/**
- * Signal is a template type providing an interface for arbitrary callback lists.
- * A signal type needs to be declared with the function signature of its callbacks,
- * and optionally a return result collector class type.
- * Signal callbacks can be added with operator+= to a signal and removed with operator-=, using
- * a callback connection ID return by operator+= as argument.
- * The callbacks of a signal are invoked with the emit() method and arguments according to the signature.
- * The result returned by emit() depends on the signal collector class. By default, the result of
- * the last callback is returned from emit(). Collectors can be implemented to accumulate callback
- * results or to halt a running emissions in correspondance to callback results.
- * The signal implementation is safe against recursion, so callbacks may be removed and
- * added during a signal emission and recursive emit() calls are also safe.
- * The overhead of an unused signal is intentionally kept very low, around the size of a single pointer.
- * Note that the Signal template types is non-copyable.
- */
+/// @brief List of callback functions
+///
+/// The list of callback functions are called when the signal is called.
+/// A collector class can be provided to "collect" the results of each callback.
+/// The default collector will return the value of the last callback.
 template <typename signature, class collector = detail::collector_default<typename std::function<signature>::result_type> >
 class signal: public detail::proto_signal<signature, collector>
 {
 public:
+	/// @private
 	typedef detail::proto_signal<signature, collector> proto_signal;
+
+	/// @brief Signature of the callback function
 	typedef typename proto_signal::callback callback;
 
-	/// Signal constructor, supports a default callback as argument.
+	/// @brief Default constructor
+	///
+	/// Signal constructor, accepting a callback for this signal.
 	signal( const callback &method = callback() )
 		: proto_signal( method )
 	{
 	}
+
+	/// @fn connection operator+=( const callback &cb )
+	/// @memberof base::signal
+	/// @brief Add a callback to the list
+	/// @param cb a callback function
+	/// @return a connection
+	///
+	/// Add a callback to the list, returning the connection.
+	/// The connection can be used with operator-= to remove the callback.
+
+	/// @fn bool operator-=( connection conn )
+	/// @memberof base::signal
+	/// @brief Remove a callback from the list
+	/// @param conn a connection to remove
+	/// @return true if a callback is removed
+	
+	/// @fn collector_result operator()( ... )
+	/// @memberof base::signal
+	/// @brief Call the signal
+	/// @param ... arguments of the callback
+	/// @return the collector result
+
+	/// @example test_signal.cpp
+	/// Example of using the signal class with a custom collector.
 };
 
-/// This function creates a std::function by binding @a object to the member function pointer @a method.
+/// @brief Create a slot from an object and a member pointer.
+/// @param o an object
+/// @param m a method pointer
+/// @return a functional object that can call the method on the object
+///
+/// This function creates a std::function by binding the object to the member function pointer.
+/// The object is assumed to be alive while a signal has this callback.
 template<class instance, class object_type, typename ret_type, typename ...args>
 std::function<ret_type( args... )> slot( instance &o, ret_type(object_type::*m)( args... ) )
 {
 	return [&o, m]( args... a ) { return (o.*m)( a... ); };
 }
 
-/// This function creates a std::function by binding @a object to the member function pointer @a method.
+/// @brief Create a slot from an object pointer and a member pointer.
+/// @param o an object pointer
+/// @param m a method pointer
+/// @return a functional object that can call the method on the object
+///
+/// This function creates a std::function by binding the object pointer to the member function pointer.
+/// The object is assumed to be alive while a signal has this callback.
 template<class object_type, typename ret_type, typename ...args>
 std::function<ret_type( args... )> slot( object_type *o, ret_type(object_type::*m) ( args... ) )
 {
 	return [o, m]( args... a ) { return (o->*m)( a... ); };
 }
 
-/// Keep signal emissions going while all handlers return !0 (true).
+/// @brief Collect while callbacks return true (!0).
 template<typename ret_type>
 class collector_while
 {
@@ -338,7 +377,7 @@ private:
 	collector_result _result;
 };
 
-/// Keep signal emissions going while all handlers return 0 (false).
+/// @brief Collect until a callback returns true (!0)
 template<typename ret_type>
 class collector_until
 {
@@ -364,7 +403,7 @@ private:
 	collector_result _result;
 };
 
-/// collector_vector returns the result of the all signal handlers from a signal emission in a std::vector.
+/// @brief Collect all values in an std::vector
 template<typename ret_type>
 class collector_vector
 {

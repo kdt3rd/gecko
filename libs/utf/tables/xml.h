@@ -1,3 +1,4 @@
+/// @cond UTF
 
 #pragma once
 
@@ -34,3 +35,5 @@ inline std::istream &operator>>( std::istream &stream, reader &reader )
 ////////////////////////////////////////
 
 }
+
+/// @endcond

@@ -97,7 +97,7 @@ private:
 
 	inline size_t number_components( void ) const
 	{
-		return sum( static_cast<size_t>( detail::count_components<Args>::value )... );
+		return base::sum( static_cast<size_t>( detail::count_components<Args>::value )... );
 	}
 
 	template<typename ...More>

@@ -1,6 +1,3 @@
-///
-/// @author Kimball Thurston
-///
 
 #pragma once
 
@@ -18,6 +15,7 @@ namespace draw
 
 ///
 /// @brief Storage to represent a glyph for font rendering
+/// @author Kimball Thurston
 ///
 /// vertical layout isn't really designed into the API currently
 /// as the layout is 

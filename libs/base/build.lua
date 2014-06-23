@@ -12,5 +12,5 @@ srcs = {
 	"pack.cpp";
 }
 
-Library( "core", Compile( srcs ) );
+Library( "base", Compile( srcs ) );
 

@@ -124,7 +124,7 @@ font_manager::get_font( const std::string &family, const std::string &style,
 	FcResult result;
 	FcPattern *matched = FcFontMatch( _impl->config, pat, &result );
 	FcPatternDestroy( pat );
-	on_scope_exit += [&]() { if ( matched ) FcPatternDestroy( matched ); };
+	on_scope_exit { if ( matched ) FcPatternDestroy( matched ); };
 
 	std::shared_ptr<draw::font> ret;
 	if ( matched && result == FcResultMatch )

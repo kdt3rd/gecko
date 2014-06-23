@@ -1,0 +1,5 @@
+
+/// @namespace gui
+/// @brief Graphical user interface
+///
+/// Contains top level window class along with various widgets.

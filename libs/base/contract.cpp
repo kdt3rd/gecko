@@ -2,6 +2,9 @@
 #include "contract.h"
 #include <iostream>
 
+namespace base
+{
+
 ////////////////////////////////////////
 
 void print_exception( std::ostream &out, const std::exception &e, int level )
@@ -21,4 +24,6 @@ void print_exception( std::ostream &out, const std::exception &e, int level )
 }
 
 ////////////////////////////////////////
+
+}
 

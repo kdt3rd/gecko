@@ -1,0 +1,6 @@
+
+/// @namespace gl
+/// @brief C++ wrapper for OpenGL
+///
+/// Wrapper for OpenGL version 3/4
+

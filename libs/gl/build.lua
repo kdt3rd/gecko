@@ -10,4 +10,4 @@ srcs = {
 	"check.cpp";
 }
 
-Library( "gl", Compile( srcs ), LinkLibs( "core" ), LinkSys( GL_LIBS ) );
+Library( "gl", Compile( srcs ), LinkLibs( "base" ), LinkSys( GL_LIBS ) );

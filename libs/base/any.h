@@ -8,53 +8,57 @@
 #include <cassert>
 #include <memory>
 
+namespace base
+{
+
 ////////////////////////////////////////
 
+/// @brief Holds a value of any type.
+///
+/// This is similar to a void pointer (void *), but is type-safe.
 class any
 {
 public:
+	/// @brief Decay type alias
 	template<class T> using decay = typename std::decay<T>::type;
 
+	/// @brief Default constructor
+	any( void )
+	{
+	}
+
+	/// @brief Constuct from the given r-value
 	template<typename U>
 	any( U &&value )
 		: _ptr( new derived<decay<U>>( std::forward<U>( value ) ) )
 	{
 	}
 
-	any( void )
-	{
-	}
-
-	any( any &that)
-		: _ptr( that.clone() )
-	{
-	}
-
-	any( any &&that)
-		: _ptr( std::move( that._ptr ) )
-	{
-	}
-
+	/// @brief Copy constructor
 	any( const any &that)
 		: _ptr( that.clone() )
 	{
 	}
 
-	any( const any &&that )
-		: _ptr( that.clone() )
+	/// @brief Move constructor
+	any( any &&that)
+		: _ptr( std::move( that._ptr ) )
 	{
 	}
 
+	/// @brief Is the any value not set?
 	bool is_null() const
 	{
 		return !bool( _ptr );
 	}
 
+	/// @brief Is the any value set?
 	bool not_null() const
 	{
 		return bool( _ptr );
 	}
 
+	/// @brief Is the any value of type U
 	template<class U>
 	bool is( void ) const
 	{
@@ -63,6 +67,7 @@ public:
 	    return bool( d );
 	}
 
+	/// @brief Access the any value as type U
 	template<class U>
 	decay<U> &as( void )
 	{
@@ -76,6 +81,7 @@ public:
 	    return d->_value;
 	}
 
+	/// @brief Access the any value as type const U
 	template<class U>
 	const decay<U> &as( void ) const
 	{
@@ -86,12 +92,14 @@ public:
 	    return d->_value;
 	}
 
+	/// @brief Cast operator to type U
 	template<class U>
 	operator U() const
 	{
 	    return as<decay<U>>();
 	}
 
+	/// @brief Assignment operator
 	any &operator=( const any &a )
 	{
 	    if ( _ptr == a._ptr )
@@ -100,6 +108,7 @@ public:
 	    return *this;
 	}
 
+	/// @brief Assignment move operator
 	any &operator=( any &&a )
 	{
 		using std::swap;
@@ -146,4 +155,6 @@ private:
 };
 
 ////////////////////////////////////////
+
+}
 

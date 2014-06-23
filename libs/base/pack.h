@@ -1,15 +1,13 @@
-///
-/// @author Kimball Thurston
-///
-/// Based on the following by Jukka Jylänki
-///
-/// http://clb.demon.fi/files/RectangleBinPack.pdf
-///
-/// and simplified version of the SkylineBinPack class in the
-/// provided source code:
-///
-/// http://clb.demon.fi/files/RectangleBinPack/
-///
+//
+// Based on the following by Jukka Jylänki
+//
+// http://clb.demon.fi/files/RectangleBinPack.pdf
+//
+// and simplified version of the SkylineBinPack class in the
+// provided source code:
+//
+// http://clb.demon.fi/files/RectangleBinPack/
+//
 
 
 #pragma once
@@ -21,12 +19,12 @@
 namespace base
 {
 
-///
-/// @brief Class pack provides...
-///
+/// @brief Pack areas into a single rectangular region
+/// @author Kimball Thurston
 class pack
 {
 public:
+	/// @brief An area to pack
 	struct area
 	{
 		constexpr area( void ) {}
@@ -71,17 +69,28 @@ public:
 		inline bool empty( void ) const { return width == 0 && height == 0; }
 	};
 	
+	/// @brief Default constructor
 	pack( void );
+
+	/// @brief Pack into the given size
 	pack( int w, int h, bool allowFlipped );
+
+	/// @brief Destructor
 	~pack( void );
 
+	/// @brief Width of the packing area
 	int width( void ) const { return _width; }
+
+	/// @brief Height of the packing area
 	int height( void ) const { return _width; }
 
+	/// @brief Reset to pack into the given area
 	void reset( int w, int h, bool allowFlipped );
 
+	/// @brief Insert an area into the packing
 	area insert( int aw, int ah );
 
+	/// @brief Calculate occupancy
 	double occupancy( void ) const;
 
 private:

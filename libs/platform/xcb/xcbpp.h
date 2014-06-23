@@ -5,6 +5,9 @@
 #include <stdexcept>
 #include <core/contract.h>
 
+namespace platform { namespace xcb
+{
+
 ////////////////////////////////////////
 
 template<typename Cookie, typename Reply, bool Checked, Reply *ReplyFunc( xcb_connection_t *, Cookie, xcb_generic_error_t ** )>
@@ -125,3 +128,4 @@ xcbpp_intern_atom( xcb_connection_t *c, uint8_t only_if_exist, uint16_t len, con
 
 ////////////////////////////////////////
 
+} }

@@ -62,7 +62,7 @@ public:
 
 	datum &operator=( const datum &d ) = delete;
 
-	template<typename U, typename X = disable_if_same_or_derived<datum,U>>
+	template<typename U, typename X = base::disable_if_same_or_derived<datum,U>>
 	datum &operator=( U &&v )
 	{
 		_field = std::forward<U>( v );

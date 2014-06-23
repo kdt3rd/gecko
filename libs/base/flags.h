@@ -7,6 +7,12 @@
 
 #include <initializer_list>
 
+namespace base
+{
+
+////////////////////////////////////////
+
+/// @brief Create flags from an enumeration
 template <typename Enum>
 class flags
 {
@@ -131,6 +137,7 @@ private:
 
 ////////////////////////////////////////
 
+/// @brief Bitwise and of two sets of flags 
 template<typename Enum>
 flags<Enum> operator& (const flags<Enum> &lhs, const flags<Enum> &rhs)
 {
@@ -139,6 +146,7 @@ flags<Enum> operator& (const flags<Enum> &lhs, const flags<Enum> &rhs)
 
 ////////////////////////////////////////
 
+/// @brief Bitwise or of two sets of flags 
 template<typename Enum>
 flags<Enum> operator| (const flags<Enum> &lhs, const flags<Enum> &rhs)
 {
@@ -147,6 +155,7 @@ flags<Enum> operator| (const flags<Enum> &lhs, const flags<Enum> &rhs)
 
 ////////////////////////////////////////
 
+/// @brief Bitwise xor of two sets of flags 
 template<typename Enum>
 flags<Enum> operator^ (const flags<Enum> &lhs, const flags<Enum> &rhs)
 {
@@ -155,6 +164,7 @@ flags<Enum> operator^ (const flags<Enum> &lhs, const flags<Enum> &rhs)
 
 ////////////////////////////////////////
 
+/// @brief Stream out a set of flags
 template <class charT, class traits, typename Enum>
 std::basic_ostream<charT, traits> &operator<< (std::basic_ostream<charT, traits> &os, const flags<Enum> &flagSet)
 {
@@ -162,4 +172,6 @@ std::basic_ostream<charT, traits> &operator<< (std::basic_ostream<charT, traits>
 }
 
 ////////////////////////////////////////
+
+}
 

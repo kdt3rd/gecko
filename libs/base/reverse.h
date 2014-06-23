@@ -4,8 +4,12 @@
 #include <utility>
 #include <iterator>
 
+namespace base
+{
+
 ////////////////////////////////////////
 
+/// @brief Wrap a container to reverse it's order
 template<class Cont>
 class const_reverse_wrapper
 {
@@ -31,6 +35,7 @@ public:
 
 ////////////////////////////////////////
 
+/// @brief Wrap a container to reverse it's order
 template<class Cont>
 class reverse_wrapper
 {
@@ -56,6 +61,7 @@ public:
 
 ////////////////////////////////////////
 
+/// @brief Wrap the container to reverse it's order
 template<class Cont>
 const_reverse_wrapper<Cont> reverse( const Cont &cont )
 {
@@ -64,6 +70,7 @@ const_reverse_wrapper<Cont> reverse( const Cont &cont )
 
 ////////////////////////////////////////
 
+/// @brief Wrap the container to reverse it's order
 template<class Cont>
 reverse_wrapper<Cont> reverse( Cont &cont )
 {
@@ -71,4 +78,6 @@ reverse_wrapper<Cont> reverse( Cont &cont )
 }
 
 ////////////////////////////////////////
+
+}
 

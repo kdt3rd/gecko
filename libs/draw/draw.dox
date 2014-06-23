@@ -1,0 +1,6 @@
+
+/// @namespace draw
+/// @brief Drawing library
+///
+/// Contains a canvas class and associated drawing utilities.
+/// Currently based on OpenGL.

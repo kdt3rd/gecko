@@ -9,13 +9,14 @@ namespace base
 ////////////////////////////////////////
 
 
-/// @brief A color.
+/// @brief A color
 ///
 /// Color represented by red, green, blue, and alpha.
-/// Valid colors should be between 0 and 1.
+/// Typical colors are between 0.0 and 1.0.
 class color
 {
 public:
+	/// @brief Color space
 	enum class space
 	{
 		SRGB, // R G B [0..1]
@@ -23,15 +24,18 @@ public:
 		HSL, // H radians, S L [0..1]
 	};
 
+	/// @brief Default constructor
 	constexpr color( void )
 	{
 	}
 
+	/// @brief Construct an RGBA color with the given values
 	constexpr color( double r, double g, double b, double a = 1.0 )
 		: _r( r ), _g( g ), _b( b ), _a( a )
 	{
 	}
 
+	/// @brief Construct a color with the given space and values
 	color( space s, double i, double j, double k, double a = 1.0 )
 		: _a( a )
 	{
@@ -43,11 +47,19 @@ public:
 		}
 	}
 
+	/// @brief Red value of this color
 	constexpr double red( void ) const { return _r; }
+
+	/// @brief Green value of this color
 	constexpr double green( void ) const { return _g; }
+
+	/// @brief Blue value of this color
 	constexpr double blue( void ) const { return _b; }
+
+	/// @brief Alpha value of this color
 	constexpr double alpha( void ) const { return _a; }
 
+	/// @brief Set the color with the given values
 	void set( double r, double g, double b, double a = 1.0 )
 	{
 		_r = r;
@@ -56,16 +68,33 @@ public:
 		_a = a;
 	}
 
+	/// @brief Get the LAB color values
 	void get_lab( double &l, double &a, double &b );
+
+	/// @brief Set the color values in the LAB color space
 	void set_lab( double l, double a, double b );
 
+	/// @brief Get the HSL color values
 	void get_hsl( double &h, double &s, double &l );
+
+	/// @brief Set the color values in the HSL color space
 	void set_hsl( double h, double s, double l );
 
+	/// @brief Desaturate the color
+	///
+	/// The amount should be between 0.0 and 1.0.
+	/// Amounts greater than 1.0 will add saturation.
 	color desaturate( double amt );
+
+	/// @brief Change the color
+	///
+	/// Change the color by the given amount.
+	/// This will make the color brighter or darker.
+	/// The amount should be between 0.0 and 1.0.
 	color change( double amt );
 
-	static color mix( const color &a, const color &b, double m );
+	/// @brief Mix two colors together
+	static color mix( const color &a, const color &b, double m = 0.5 );
 
 private:
 	double _r = 0.0, _g = 0.0, _b = 0.0, _a = 0.0;
@@ -73,6 +102,7 @@ private:
 
 ////////////////////////////////////////
 
+/// @brief Stream out a color
 inline std::ostream &operator<<( std::ostream &out, const color &c )
 {
 	out << c.red() << ',' << c.green() << ',' << c.blue() << ',' << c.alpha();

@@ -1,8 +1,12 @@
 
 #pragma once
 
+namespace base
+{
+
 ////////////////////////////////////////
 
+/// @brief Iterate over a range
 template<typename It>
 class iterator_range
 {
@@ -45,6 +49,7 @@ private:
 
 ////////////////////////////////////////
 
+/// @brief Construct an iterator_range
 template<typename It>
 iterator_range<It> range( It b, It e )
 {
@@ -53,6 +58,7 @@ iterator_range<It> range( It b, It e )
 
 ////////////////////////////////////////
 
+/// @brief Interate over column of two dimensional container
 template<typename I, typename T>
 class column_iterator : public std::iterator<std::random_access_iterator_tag,T>
 {
@@ -124,6 +130,7 @@ private:
 
 ////////////////////////////////////////
 
+/// @brief Construct a column iterator
 template<typename C>
 iterator_range<column_iterator<typename C::iterator, typename C::value_type::value_type>> column( C &c, int n )
 {
@@ -135,6 +142,7 @@ iterator_range<column_iterator<typename C::iterator, typename C::value_type::val
 
 ////////////////////////////////////////
 
+/// @brief Construct a row iterator
 template<typename C>
 iterator_range<typename C::iterator> rows( C &c )
 {
@@ -143,6 +151,7 @@ iterator_range<typename C::iterator> rows( C &c )
 
 ////////////////////////////////////////
 
+/// @brief Construct a list of column iterators
 template<typename C>
 std::vector<iterator_range<column_iterator<typename C::iterator, typename C::value_type::value_type>>> columns( C &c )
 {
@@ -162,3 +171,6 @@ std::vector<iterator_range<column_iterator<typename C::iterator, typename C::val
 }
 
 ////////////////////////////////////////
+
+}
+

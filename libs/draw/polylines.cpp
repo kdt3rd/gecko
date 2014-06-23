@@ -239,7 +239,7 @@ mesh<base::point> polylines::filled( void )
 	TESStesselator *tess = tessNewTess( &ma );
 	if ( !tess )
 		throw std::runtime_error( "tesselator creation failed" );
-	on_scope_exit += [=]() { tessDeleteTess( tess ); };
+	on_scope_exit { tessDeleteTess( tess ); };
 
 	std::vector<TESSreal> tmp;
 	for ( auto path: solution )

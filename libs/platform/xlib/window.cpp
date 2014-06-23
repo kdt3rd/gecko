@@ -98,14 +98,14 @@ window::window( const std::shared_ptr<Display> &dpy )
 	GLXFBConfig* fbc = glXChooseFBConfig( disp, DefaultScreen( disp ), visual_attribs, &fbcount );
 	if ( fbc == nullptr )
 		throw std::runtime_error( "failed to get GL framebuffer configs" );
-	on_scope_exit += [&]() { XFree( fbc ); };
+	on_scope_exit { XFree( fbc ); };
 
 	// Find the best framebuffer
 	int best_fbc = -1, best_num_samp = -1;
 	for ( int i = 0; i < fbcount; ++i )
 	{
 		XVisualInfo *vi = glXGetVisualFromFBConfig( disp, fbc[i] );
-		on_scope_exit += [&]() { XFree( vi ); };
+		on_scope_exit { XFree( vi ); };
 
 		if ( vi != nullptr )
 		{
@@ -122,7 +122,7 @@ window::window( const std::shared_ptr<Display> &dpy )
 	XVisualInfo *vi = glXGetVisualFromFBConfig( disp, bestFbc );
 	if ( vi == nullptr )
 		throw std::runtime_error( "no glx visual found" );
-	on_scope_exit += [&]() { XFree( vi ); };
+	on_scope_exit { XFree( vi ); };
 
 	XSetWindowAttributes swa;
 	swa.background_pixmap = None;

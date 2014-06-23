@@ -8,6 +8,9 @@
 namespace base
 {
 
+/// @brief Run a function, unless dismiss is called
+///
+/// Store a function and call it upon destruction, unless dismiss is called.
 template <class function>
 class scope_guard
 {
@@ -61,6 +64,7 @@ namespace detail
 #define CONCATENATE(s1, s2) CONCATENATE_IMPL(s1, s2)
 #define ANONYMOUS_VARIABLE(str) CONCATENATE(str, __COUNTER__)
 
+/// @brief Execute a code block on scope exit
 #define on_scope_exit \
-	auto ANONYMOUS_VARIABLE(SCOPE_EXIT_STATE) = base::detail::scope_guardOnExit()
+	auto ANONYMOUS_VARIABLE(SCOPE_EXIT_STATE) = base::detail::scope_guardOnExit() += [&](void)
 

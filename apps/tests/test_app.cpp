@@ -262,7 +262,7 @@ int main( int argc, char *argv[] )
 	}
 	catch ( std::exception &e )
 	{
-		print_exception( std::cerr, e );
+		base::print_exception( std::cerr, e );
 	}
 	return ret;
 }

@@ -8,18 +8,12 @@
 
 ////////////////////////////////////////
 
-///
-/// @file font.h
-///
-/// @author Kimball Thurston
-///
 
 namespace platform { namespace fc
 {
 
-///
 /// @brief Font subclass for fontconfig / freetype.
-///
+/// @author Kimball Thurston
 class font : public ::draw::font
 {
 public:
