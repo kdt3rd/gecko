@@ -12,6 +12,7 @@ class context;
 
 ////////////////////////////////////////
 
+/// @brief OpenGL bound texture
 class bound_texture
 {
 public:
@@ -83,6 +84,7 @@ private:
 
 ////////////////////////////////////////
 
+/// @brief OpenGL texture
 class texture
 {
 public:

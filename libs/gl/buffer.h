@@ -10,8 +10,7 @@ namespace gl
 
 ////////////////////////////////////////
 
-////////////////////////////////////////
-
+/// @brief Buffer usage
 enum class usage
 {
 	STREAM_DRAW = GL_STREAM_DRAW,
@@ -23,6 +22,7 @@ template<typename D> class buffer;
 
 ////////////////////////////////////////
 
+/// @brief OpenGL bound buffer
 template<typename D>
 class bound_buffer
 {
@@ -81,6 +81,7 @@ private:
 
 ////////////////////////////////////////
 
+/// @brief OpenGL buffer
 template<typename D>
 class buffer
 {

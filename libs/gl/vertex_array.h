@@ -14,6 +14,7 @@ class vertex_array;
 
 ////////////////////////////////////////
 
+/// @brief OpenGL bound vertex array
 class bound_array
 {
 public:
@@ -75,6 +76,7 @@ private:
 
 ////////////////////////////////////////
 
+/// @brief OpenGL vertex array
 class vertex_array
 {
 public:

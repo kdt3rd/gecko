@@ -12,9 +12,11 @@ class context;
 
 ////////////////////////////////////////
 
+/// @brief OpenGL shader
 class shader
 {
 public:
+	/// @brief Types of shader
 	enum class type 
 	{
 		VERTEX = GL_VERTEX_SHADER,
@@ -22,16 +24,25 @@ public:
 //		GEOMETRY = GL_GEOMETRY_SHADER
 	};
 
+	/// @brief Copying not allowed
 	shader( const shader &s ) = delete;
 
+	/// @brief Destructor
 	~shader( void );
 
+	/// @brief Set the source code
 	void source( const std::string &code );
+
+	/// @brief Compile the shader
 	void compile( void );
 
+	/// @brief Return the log messages
 	std::string log( void );
 
+	/// @brief Construct shader
 	shader( type t );
+
+	/// @brief Construct shader with code
 	shader( type t, const std::string &code );
 
 private:
