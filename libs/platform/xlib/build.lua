@@ -17,7 +17,8 @@ Platform {
 	};
 
 	libs = {
-		"gl";
+		"draw";
+		"utf";
 	};
 
 	syslibs = {
