@@ -17,7 +17,7 @@ namespace {
 
 typedef GLXContext (*glXCreateContextAttribsARBProc)(Display*, GLXFBConfig, GLXContext, Bool, const int*);
 
-static int visual_attribs[] =
+const int visual_attribs[] =
 {
 //	GLX_X_RENDERABLE    , True,
 	GLX_DRAWABLE_TYPE   , GLX_WINDOW_BIT,
