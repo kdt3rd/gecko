@@ -17,12 +17,12 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam )
 		win = i->second.lock();
 
 	if ( !win )
-		return DefWindowProc(hwnd, msg, wParam, lParam);
+		return DefWindowProc( hwnd, msg, wParam, lParam );
 
     switch(msg)
     {
         case WM_CLOSE:
-            DestroyWindow(hwnd);
+            DestroyWindow( hwnd );
 			win->closed();
 			break;
 
@@ -31,12 +31,11 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam )
 			break;
 
 		case WM_PAINT:
-			std::cout << "PAINTING WINDOW" << std::endl;
-			win->exposed();
+			win->expose_event();
 			return 0;
 
         default:
-            return DefWindowProc(hwnd, msg, wParam, lParam);
+            return DefWindowProc( hwnd, msg, wParam, lParam );
     }
     return 0;
 }

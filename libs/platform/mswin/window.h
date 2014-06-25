@@ -44,9 +44,13 @@ public:
 	double width( void ) override { return _last_w; }
 	double height( void )  override { return _last_h; }
 
+	void expose_event( void );
+
 private:
 	void update_canvas( double w, double h );
 	HWND _hwnd;
+	HGLRC _hrc;
+	HDC _hdc;
 
 	std::shared_ptr<draw::canvas> _canvas;
 
