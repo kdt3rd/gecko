@@ -87,7 +87,8 @@
 	[super setFrameSize:newSize];
 	try
 	{
-		win->resize_event( newSize.width, newSize.height );
+		float scale = win->scale_factor();
+		win->resize_event( newSize.width * scale, newSize.height * scale );
 	}
 	catch ( std::exception &e )
 	{
@@ -106,27 +107,30 @@
 
 - (void)mouseDown:(NSEvent*)event
 {
+	double scale = win->scale_factor();
 	NSPoint p = [event locationInWindow];
 	p = [self convertPoint:p fromView:nil];
-	win->mouse_pressed( mouse, { p.x, p.y }, 1 );
+	win->mouse_pressed( mouse, { p.x * scale, p.y * scale }, 1 );
 }
 
 ////////////////////////////////////////
 
 - (void)mouseUp:(NSEvent*)event
 {
+	double scale = win->scale_factor();
 	NSPoint p = [event locationInWindow];
 	p = [self convertPoint:p fromView:nil];
-	win->mouse_released( mouse, { p.x, p.y }, 1 );
+	win->mouse_released( mouse, { p.x * scale, p.y * scale }, 1 );
 }
 
 ////////////////////////////////////////
 
 - (void)mouseDragged:(NSEvent*)event
 {
+	double scale = win->scale_factor();
 	NSPoint p = [event locationInWindow];
 	p = [self convertPoint:p fromView:nil];
-	win->mouse_moved( mouse, { p.x, p.y } );
+	win->mouse_moved( mouse, { p.x * scale, p.y * scale } );
 }
 
 ////////////////////////////////////////

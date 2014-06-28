@@ -34,6 +34,8 @@ public:
 	void acquire( void ) override;
 	void release( void ) override;
 
+	double scale_factor( void );
+
 	void resize_event( double w, double h );
 
 	void invalidate( const base::rect &r ) override;
