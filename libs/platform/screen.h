@@ -33,7 +33,7 @@ public:
 	///
 	/// Returns the horizontal and vertical DPI for the screen
 	/// @return The size of the screen
-	virtual base::point dpi( void ) const = 0;
+	virtual base::size dpi( void ) const = 0;
 };
 
 ////////////////////////////////////////

@@ -51,6 +51,21 @@ system::~system( void )
 
 ////////////////////////////////////////
 
+std::vector<std::shared_ptr<::platform::screen>> system::screens( void )
+{
+	std::vector<std::shared_ptr<::platform::screen>> result;
+	NSArray *s = [NSScreen screens];
+	for ( size_t i = 0; i < [s count]; ++i )
+	{
+		auto scr = std::make_shared<screen>( [s objectAtIndex:i] );
+		result.push_back( scr );
+	}
+
+	return result;
+}
+
+////////////////////////////////////////
+
 std::shared_ptr<platform::window> system::new_window( void )
 {
 	auto ret = std::make_shared<::platform::cocoa::window>();

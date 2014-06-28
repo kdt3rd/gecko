@@ -8,7 +8,7 @@ Platform {
 
 	srcs = {
 		"system.mm";
-		"screen.cpp";
+		"screen.mm";
 		"window.mm";
 		"timer.cpp";
 		"keyboard.mm";
