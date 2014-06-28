@@ -49,11 +49,11 @@ int safemain( void )
 	base::signal<int(int),sum_results> sig;
 
 	// Add a function callback
-	sig += test1;
+	sig.connect( test1 );
 
 	// Add an object method callback
 	test2 t;
-	sig += base::slot( t, &test2::doit );
+	sig.connect( base::slot( t, &test2::doit ) );
 
 	// Call the signal
 	auto x = sig( 5 );

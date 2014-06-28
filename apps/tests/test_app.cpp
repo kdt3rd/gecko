@@ -41,17 +41,17 @@ std::shared_ptr<gui::form> build_form( direction dir )
 	container->set_pad( padding, padding, padding, padding );
 
 	auto button = std::make_shared<gui::button>( "Click Me" );
-	button->when_activated += []()
+	button->when_activated.connect( []()
 	{
 		testrec->title = "Goodbye World";
-	};
+	} );
 
 	auto popup = std::make_shared<gui::button>( "Pop up" );
-	popup->when_activated += []()
+	popup->when_activated.connect( []()
 	{
 		extra = app->new_popup();
 		extra->show();
-	};
+	} );
 
 	container->add( std::make_shared<gui::label>( model::make_datum( testrec, testrec->title ) ), button );
 	container->add( std::make_shared<gui::label>( "Button" ), popup );
@@ -126,10 +126,10 @@ std::shared_ptr<gui::tree_node> build_tree( direction dir )
 		if( y == 1 )
 		{
 			auto button = std::make_shared<gui::button>( "+" );
-			button->when_activated += [=]( void )
+			button->when_activated.connect( [=]( void )
 			{
 				node->set_collapsed( !node->collapsed() );
-			};
+			} );
 			node->set_root( button );
 		}
 		else

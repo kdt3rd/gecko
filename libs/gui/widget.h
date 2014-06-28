@@ -79,13 +79,13 @@ protected:
 	template<typename D>
 	void callback_helper( const std::function<void(void)> &cb, D &d )
 	{
-		d += cb;
+		d.callback( cb );
 	}
 
 	template<typename D, typename ...Args>
 	void callback_helper( const std::function<void(void)> &cb, D &d, Args &...args )
 	{
-		d += cb;
+		d.callback( cb );
 		callback_helper( cb, args... );
 	}
 

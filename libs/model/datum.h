@@ -57,7 +57,7 @@ public:
 	~datum( void )
 	{
 		if ( _connection != 0 )
-			_record->changes -= _connection;
+			_record->changes.disconnect( _connection );
 	}
 
 	datum &operator=( const datum &d ) = delete;
@@ -74,11 +74,11 @@ public:
 		return _field.value();
 	}
 
-	void operator+=( const std::function<void(void)> &cb )
+	void callback( const std::function<void(void)> &cb )
 	{
 		if ( _connection != 0 )
-			_record->changes -= _connection;
-		_connection = _record->changes += cb;
+			_record->changes.disconnect( _connection );
+		_connection = _record->changes.connect( cb );
 	}
 
 private:
