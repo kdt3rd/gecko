@@ -9,9 +9,7 @@
 #include <base/scope_guard.h>
 #include <stdexcept>
 
-#include <gl/opengl.h>
 #include <gl/check.h>
-#include <GL/glx.h>
 
 namespace {
 
@@ -174,7 +172,7 @@ window::window( const std::shared_ptr<Display> &dpy )
 	if ( err != GLEW_OK )
 		throw std::runtime_error( reinterpret_cast<const char *>( glewGetErrorString( err ) ) );
 
-	_canvas = std::make_shared<draw::canvas>();
+//	_canvas = std::make_shared<draw::canvas>();
 
 	// Sync to ensure any errors generated are processed.
 	XSync( disp, False );
@@ -272,18 +270,16 @@ void window::invalidate( const base::rect &r )
 
 ////////////////////////////////////////
 
-gl::context window::context( void )
+void window::acquire( void )
 {
 	glXMakeCurrent( _display.get(), _win, _glc );
-	return gl::context();
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<draw::canvas> window::canvas( void )
+void window::release( void )
 {
-	glXMakeCurrent( _display.get(), _win, _glc );
-	return _canvas;
+	glXMakeCurrent( _display.get(), None, nullptr );
 }
 
 ////////////////////////////////////////

@@ -23,6 +23,7 @@ window::window( const std::shared_ptr<platform::window> &w )
 	_window->key_pressed.callback( [this]( const std::shared_ptr<platform::keyboard> &, const platform::scancode &c ) { key_pressed( c ); } );
 	_window->key_released.callback( [this]( const std::shared_ptr<platform::keyboard> &, const platform::scancode &c ) { key_released( c ); } );
 	_window->text_entered.callback( [this]( const std::shared_ptr<platform::keyboard> &, const char32_t &c ) { text_entered( c ); } );
+	_canvas = std::make_shared<draw::canvas>();
 }
 
 ////////////////////////////////////////
@@ -83,23 +84,24 @@ void window::invalidate( const base::rect &r )
 
 void window::paint( void )
 {
-	auto canvas = _window->canvas();
+	_window->acquire();
 	glViewport( 0, 0, _window->width(), _window->height() );
 	auto style = application::current()->get_style();
 	if ( style )
-		style->background( canvas );
-	canvas->save();
-	canvas->ortho( 0, _window->width(), 0, _window->height() );
+		style->background( _canvas );
+	_canvas->save();
+	_canvas->ortho( 0, _window->width(), 0, _window->height() );
 	if ( _widget )
 	{
 		in_context( [&,this]
 		{
 			_widget->compute_minimum();
 			_widget->compute_layout();
-			_widget->paint( canvas );
+			_widget->paint( _canvas );
 		} );
 	}
-	canvas->restore();
+	_canvas->restore();
+	_window->release();
 }
 
 ////////////////////////////////////////

@@ -2,6 +2,8 @@
 #include <platform/platform.h>
 #include <platform/system.h>
 #include <platform/dispatcher.h>
+#include <gl/opengl.h>
+#include <base/contract.h>
 
 namespace
 {
@@ -14,10 +16,11 @@ int safemain( int argc, char **argv )
 	win->set_title( "Hello World" );
 	win->exposed.callback( [&]( void )
 	{
-		auto c = win->canvas();
+		win->acquire();
 		glViewport( 0, 0, win->width(), win->height() );
-		c->clear_color( { 0, 1, 0 } );
-		c->clear();
+		glClearColor( 0.0, 1.0, 0.0, 1.0 );
+		glClear( GL_COLOR_BUFFER_BIT );
+		win->release();
 	} );
 
 	win->show();
