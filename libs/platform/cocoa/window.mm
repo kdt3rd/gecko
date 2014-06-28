@@ -143,8 +143,8 @@ void window::set_ns( void *w, void *v )
 {
 	_impl->win = (NSWindow *)w;
 	_impl->view = (NSOpenGLView *)v;
-	if ( [ _impl->view respondsToSelector:@selector(setWantsBestResolutionOpenGLSurface:) ] ) 
-		[ _impl->view setWantsBestResolutionOpenGLSurface:YES ]; 
+//	if ( [ _impl->view respondsToSelector:@selector(setWantsBestResolutionOpenGLSurface:) ] ) 
+//		[ _impl->view setWantsBestResolutionOpenGLSurface:YES ]; 
 }
 
 ////////////////////////////////////////
