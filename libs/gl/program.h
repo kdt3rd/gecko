@@ -28,6 +28,9 @@ public:
 
 	/// @brief Default constructor
 	program( void );
+	program( const std::shared_ptr<shader> &vertex );
+	program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<shader> &fragment );
+	program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<shader> &fragment, const std::shared_ptr<shader> &geometry );
 
 	/// @brief Constructor with shader(s)
 	template<typename ...Shaders>
