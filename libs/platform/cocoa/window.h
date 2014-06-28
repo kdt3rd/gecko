@@ -31,8 +31,8 @@ public:
 	void set_title( const std::string &t ) override;
 //	void set_icon( const icon &i ) override;
 
-	gl::context context( void ) override;
-	std::shared_ptr<draw::canvas> canvas( void ) override;
+	void acquire( void ) override;
+	void release( void ) override;
 
 	void resize_event( double w, double h );
 
@@ -54,7 +54,6 @@ private:
 	struct objcwrapper;
 	objcwrapper *_impl;
 
-	std::shared_ptr<draw::canvas> _canvas;
 	double _last_w = 0.0, _last_h = 0.0;
 };
 
