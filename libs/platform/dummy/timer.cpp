@@ -1,6 +1,6 @@
 
 #include <string>
-#include <core/contract.h>
+#include <base/contract.h>
 #include "timer.h"
 
 namespace platform { namespace dummy

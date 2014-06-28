@@ -1,7 +1,7 @@
 
 #include <iostream>
 #include <map>
-#include <core/pointer.h>
+#include <base/pointer.h>
 #include "keyboard.h"
 
 namespace platform { namespace dummy
