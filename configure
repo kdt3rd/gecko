@@ -489,7 +489,7 @@ function Include( ... )
 	for k, dir in pairs( dirs ) do
 		if dir:match( "^-" ) then
 			str = str .. " " .. dir
-		else
+		elseif #dir > 0 then
 			str = str .. " -I" .. dir
 		end
 	end
