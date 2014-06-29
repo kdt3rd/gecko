@@ -80,8 +80,6 @@ window::window( void )
 	glGetIntegerv( GL_MAJOR_VERSION, &glVersion[0] );
 	glGetIntegerv( GL_MINOR_VERSION, &glVersion[1] );
 
-	_canvas = std::make_shared<draw::canvas>();
-
 	std::cout << "Using OpenGL: " << glVersion[0] << "." << glVersion[1] << std::endl;
 	std::cout << "CREATED WINDOW: " << _hwnd << std::endl;
 }
@@ -168,20 +166,16 @@ void window::invalidate( const base::rect &r )
 
 ////////////////////////////////////////
 
-gl::context window::context( void )
+void window::acquire( void )
 {
 	if ( !wglMakeCurrent( _hdc, _hrc ) )
 		throw std::runtime_error( "couldn't make context current" );
-	return gl::context();
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<draw::canvas> window::canvas( void )
+void window::release( void )
 {
-	if ( !wglMakeCurrent( _hdc, _hrc ) )
-		throw std::runtime_error( "couldn't make context current" );
-	return _canvas;
 }
 
 ////////////////////////////////////////

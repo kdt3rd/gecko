@@ -19,7 +19,7 @@ public:
 
 	virtual base::size bounds( void ) const override;
 
-	base::point dpi( void ) const override;
+	base::size dpi( void ) const override;
 };
 
 ////////////////////////////////////////
