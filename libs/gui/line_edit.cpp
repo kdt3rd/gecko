@@ -145,7 +145,7 @@ bool line_edit::text_input( char32_t c )
 		return true;
 	}
 	else
-		std::cout << "NON GRAPHIC: " << c << std::endl;
+		std::cout << "NON GRAPHIC: " << (uint32_t)c << std::endl;
 
 	return false;
 }
