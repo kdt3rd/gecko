@@ -119,6 +119,7 @@ if System() == "Linux" then
 	FREETYPE_FLAGS, FREETYPE_INCLUDE, FREETYPE_LIBS = Package( "freetype2" )
 	FONTCONFIG_FLAGS, FONTCONFIG_INCLUDE, FONTCONFIG_LIBS = Package( "fontconfig" )
 	GL_FLAGS, GL_INCLUDE, GL_LIBS = Package( "gl" )
+	GL_LIBS = GL_LIBS .. " -ldl"
 --BOTAN_FLAGS, BOTAN_INCLUDE, BOTAN_LIBS = Package( "botan-1.10" )
 elseif System() == "Darwin" then
 	COCOA_FLAGS, COCOA_INCLUDE, COCOA_LIBS = Package( "Cocoa" )

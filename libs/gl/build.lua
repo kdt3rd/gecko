@@ -11,4 +11,4 @@ srcs = {
 	"gl3w.c";
 }
 
-Library( "gl", Compile( srcs ), LinkLibs( "base" ), LinkSys( GL_LIBS, "dl" ) );
+Library( "gl", Compile( srcs ), LinkLibs( "base" ), LinkSys( GL_LIBS ) );

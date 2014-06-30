@@ -7,6 +7,7 @@
 
 #ifdef _WIN32
 #	include "gl3w.h"
+#	include <GL/wglext.h>
 #endif
 
 #ifdef __unix__
