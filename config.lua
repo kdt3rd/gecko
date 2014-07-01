@@ -130,6 +130,5 @@ elseif System() == "Windows" then
 	FREETYPE_FLAGS, FREETYPE_INCLUDE, FREETYPE_LIBS = Package( "freetype2" )
 	FONTCONFIG_FLAGS, FONTCONFIG_INCLUDE, FONTCONFIG_LIBS = Package( "fontconfig", "expat" )
 	GL_FLAGS, GL_INCLUDE, GL_LIBS = "", "", "-lopengl32"
-	print( GL_FLAGS, GL_INCLUDE, GL_LIBS )
 end
 

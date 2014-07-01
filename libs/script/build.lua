@@ -15,7 +15,6 @@ elseif System() == "Linux" then
 	table.insert( srcs, "fontconfig/font_manager.cpp" )
 	table.insert( srcs, "fontconfig/font.cpp" )
 	syslibs = LinkSys( FREETYPE_LIBS, FONTCONFIG_LIBS )
-	print( syslibs )
 end
 
 Library( "script", Compile( srcs ), LinkLibs( "base" ), syslibs )
