@@ -117,7 +117,7 @@ font::font( FT_Face face, std::string fam, std::string style, double pixsize )
 
 font::~font( void )
 {
-	FT_Done_Face( _face );
+//	FT_Done_Face( _face );
 }
 
 ////////////////////////////////////////
