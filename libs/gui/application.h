@@ -5,6 +5,7 @@
 #include <set>
 #include "window.h"
 #include "popup.h"
+#include <script/font_manager.h>
 
 namespace gui
 {
@@ -34,7 +35,7 @@ public:
 
 	std::set<std::string> get_font_families( void );
 	std::set<std::string> get_font_styles( const std::string &family );
-	std::shared_ptr<draw::font> get_font( const std::string &family, const std::string &style, double pixsize );
+	std::shared_ptr<script::font> get_font( const std::string &family, const std::string &style, double pixsize );
 
 	static std::shared_ptr<application> current( void );
 	static const std::shared_ptr<style> &current_style( void );
@@ -45,6 +46,7 @@ private:
 
 	std::shared_ptr<style> _style;
 	std::string _platform;
+	std::shared_ptr<script::font_manager> _fmgr;
 };
 
 ////////////////////////////////////////

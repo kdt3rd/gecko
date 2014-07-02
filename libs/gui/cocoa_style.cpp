@@ -61,7 +61,7 @@ cocoa_style::~cocoa_style( void )
 
 ////////////////////////////////////////
 
-std::shared_ptr<draw::font> cocoa_style::default_font( bool bold )
+std::shared_ptr<script::font> cocoa_style::default_font( bool bold )
 {
 	if ( bold )
 		return _default_bold_font;

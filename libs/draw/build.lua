@@ -6,7 +6,6 @@ srcs = {
 	"polylines.cpp";
 	"clipper.cpp";
 	"canvas.cpp";
-	"font.cpp";
 	"geometry.cpp";
 	"glyph.cpp";
 	"composite.cpp";
@@ -65,5 +64,5 @@ CreateFile( "shaders.h", {
 	"}";
 } )
 
-Library( "draw", Compile( srcs ), Compile( tess ), LinkLibs( "gl" ) );
+Library( "draw", Compile( srcs ), Compile( tess ), LinkLibs( "gl", "script" ) );
 

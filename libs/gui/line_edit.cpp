@@ -17,7 +17,7 @@ line_edit::line_edit( void )
 
 ////////////////////////////////////////
 
-line_edit::line_edit( datum<std::string> &&l, datum<alignment> &&a, datum<base::color> &&c, shared_datum<draw::font> &&f )
+line_edit::line_edit( datum<std::string> &&l, datum<alignment> &&a, datum<base::color> &&c, shared_datum<script::font> &&f )
 	: _text( std::move( l ) ), _align( std::move( a ) ), _color( std::move( c ) ), _font( std::move( f ) )
 {
 	callback_invalidate( _text, _align, _color, _font );
@@ -44,8 +44,8 @@ void line_edit::paint( const std::shared_ptr<draw::canvas> &c )
 	paint.set_fill_color( _color.value() );
 	c->draw_text( _font.value(), p, str, paint );
 
-	draw::font_extents fex = _font.value()->extents();
-	draw::text_extents tex = _font.value()->extents( str.substr( 0, _cursor ) );
+	script::font_extents fex = _font.value()->extents();
+	script::text_extents tex = _font.value()->extents( str.substr( 0, _cursor ) );
 
 	style->text_cursor( c, p + base::point( tex.x_advance, -fex.descent ) , fex.ascent - fex.descent );
 }
@@ -54,8 +54,8 @@ void line_edit::paint( const std::shared_ptr<draw::canvas> &c )
 
 void line_edit::compute_minimum( void )
 {
-	draw::font_extents fex = _font.value()->extents();
-	draw::text_extents tex = _font.value()->extents( _text.value() );
+	script::font_extents fex = _font.value()->extents();
+	script::text_extents tex = _font.value()->extents( _text.value() );
 	set_minimum( tex.x_advance + 12, std::max( 21.0, fex.height ) );
 }
 

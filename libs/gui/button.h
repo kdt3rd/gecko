@@ -18,7 +18,7 @@ class button : public widget
 {
 public:
 	button( void );
-	button( datum<std::string> &&l, datum<alignment> &&a = alignment::CENTER, datum<base::color> &&c = { 0, 0, 0, -1 }, shared_datum<draw::font> &&f = application::current_style()->default_font() );
+	button( datum<std::string> &&l, datum<alignment> &&a = alignment::CENTER, datum<base::color> &&c = { 0, 0, 0, -1 }, shared_datum<script::font> &&f = application::current_style()->default_font() );
 	~button( void );
 
 	const std::string &text( void )
@@ -31,7 +31,7 @@ public:
 		_text = t;
 	}
 
-	void set_font( std::shared_ptr<draw::font> &f )
+	void set_font( std::shared_ptr<script::font> &f )
 	{
 		_font = f;
 	}
@@ -52,7 +52,7 @@ private:
 	datum<std::string> _text;
 	datum<alignment> _align = alignment::CENTER;
 	datum<base::color> _color = { 0, 0, 0, 1 };
-	shared_datum<draw::font> _font = application::current_style()->default_font();
+	shared_datum<script::font> _font = application::current_style()->default_font();
 
 	std::shared_ptr<draw::drawable> _draw;
 

@@ -2,6 +2,7 @@
 #include "application.h"
 #include <platform/platform.h>
 #include <platform/system.h>
+#include <script/fontconfig/font_manager.h>
 
 namespace
 {
@@ -61,6 +62,8 @@ application::application( const std::string &p, const std::string &r )
 
 	if ( !_impl->sys )
 		throw std::runtime_error( "platform does not exist" );
+
+	_fmgr = std::make_shared<script::fontconfig::font_manager>();
 }
 
 ////////////////////////////////////////
@@ -120,24 +123,21 @@ void application::pop( void )
 
 std::set<std::string> application::get_font_families( void )
 {
-	auto fmgr = _impl->sys->get_font_manager();
-	return fmgr->get_families();
+	return _fmgr->get_families();
 }
 
 ////////////////////////////////////////
 
 std::set<std::string> application::get_font_styles( const std::string &family )
 {
-	auto fmgr = _impl->sys->get_font_manager();
-	return fmgr->get_styles( family );
+	return _fmgr->get_styles( family );
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<draw::font> application::get_font( const std::string &family, const std::string &style, double pixsize )
+std::shared_ptr<script::font> application::get_font( const std::string &family, const std::string &style, double pixsize )
 {
-	auto fmgr = _impl->sys->get_font_manager();
-	return fmgr->get_font( family, style, pixsize );
+	return _fmgr->get_font( family, style, pixsize );
 }
 
 ////////////////////////////////////////

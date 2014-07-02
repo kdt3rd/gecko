@@ -18,7 +18,7 @@ label::label( void )
 
 ////////////////////////////////////////
 
-label::label( datum<std::string> &&l, datum<alignment> &&a, datum<base::color> &&c, shared_datum<draw::font> &&f )
+label::label( datum<std::string> &&l, datum<alignment> &&a, datum<base::color> &&c, shared_datum<script::font> &&f )
 	: _text( std::move( l ) ), _align( std::move( a ) ), _color( std::move( c ) ), _font( std::move( f ) )
 {
 	if ( _color.value().alpha() < 0.0 )
@@ -50,8 +50,8 @@ void label::paint( const std::shared_ptr<draw::canvas> &c )
 
 void label::compute_minimum( void )
 {
-	draw::font_extents fex = _font.value()->extents();
-	draw::text_extents tex = _font.value()->extents( _text.value() );
+	script::font_extents fex = _font.value()->extents();
+	script::text_extents tex = _font.value()->extents( _text.value() );
 	set_minimum( tex.x_advance + 12, fex.height );
 }
 
