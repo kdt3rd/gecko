@@ -43,7 +43,8 @@ namespace
 
 const std::vector<platform> &platform::list( void )
 {
-	std::call_once( flag, [](){ init(); } );
+//	std::call_once( flag, [](){ init(); } );
+	init();
 
 	std::lock_guard<std::mutex> guard( lock );
 	if ( platforms == nullptr )
@@ -56,7 +57,8 @@ const std::vector<platform> &platform::list( void )
 
 platform &platform::common( void )
 {
-	std::call_once( flag, [](){ init(); } );
+//	std::call_once( flag, [](){ init(); } );
+	init();
 
 	std::lock_guard<std::mutex> guard( lock );
 	if ( platforms == nullptr )
