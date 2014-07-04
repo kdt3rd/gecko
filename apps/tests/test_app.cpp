@@ -244,6 +244,7 @@ int safemain( int argc, char **argv )
 	win->show();
 	int code = app->run();
 	app->pop();
+	app.reset();
 	return code;
 }
 
