@@ -10,6 +10,8 @@ syslibs = nil
 
 if System() == "Darwin" then
 	table.insert( srcs, "cocoa/font_manager.mm" )
+	table.insert( srcs, "cocoa/font.mm" )
+	syslibs = LinkSys( "-framework AppKit", "-framework Cocoa" )
 elseif System() == "Linux" then
 	Include( FREETYPE_INCLUDE, FONTCONFIG_INCLUDE )
 	table.insert( srcs, "fontconfig/font_manager.cpp" )
@@ -17,5 +19,5 @@ elseif System() == "Linux" then
 	syslibs = LinkSys( FREETYPE_LIBS, FONTCONFIG_LIBS )
 end
 
-Library( "script", Compile( srcs ), LinkLibs( "base" ), syslibs )
+Library( "script", Compile( srcs ), LinkLibs( "base", "utf" ), syslibs )
 

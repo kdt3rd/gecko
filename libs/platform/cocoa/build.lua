@@ -13,7 +13,6 @@ Platform {
 		"timer.cpp";
 		"keyboard.mm";
 		"mouse.cpp";
---		"font_manager.mm";
 		"dispatcher.mm";
 	};
 

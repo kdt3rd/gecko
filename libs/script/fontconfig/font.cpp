@@ -169,100 +169,7 @@ font::get_glyph( char32_t char_code )
 
 		if ( w > 0 && h > 0 )
 		{
-			// We want each glyph to be separated by at least one black pixel
-			// (for example for shader used in demo-subpixel.c)
-			base::pack::area gA = _glyph_pack.insert( w + 1, h + 1 );
-			while ( gA.empty() )
-			{
-				bump_glyph_store_size();
-				gA = _glyph_pack.insert( w + 1, h + 1 );
-			}
-
-			int bmW = _glyph_pack.width();
-			int bmH = _glyph_pack.height();
-			double texNormW = static_cast<double>( bmW );
-			double texNormH = static_cast<double>( bmH );
-
-			_glyph_index_offset[char_code] = _glyph_coords.size();
-			int glPitch = slot->bitmap.pitch;
-			if ( gA.flipped( w + 1, h + 1 ) )
-			{
-				// store things ... flipped so
-				// upper left is at x, y + w,
-				// upper right is at x, y
-				// lower left is at x + h, y + w
-				// lower right is at x + h, y
-				uint8_t *bmData = _glyph_bitmap.data();
-				const uint8_t *glData = slot->bitmap.buffer;
-				for ( int y = 0; y <= w; ++y )
-				{
-					int destY = gA.y + y;
-					if ( y == w )
-					{
-						for ( int x = 0, destX = gA.x; x <= h; ++x, ++destX )
-							bmData[destY*bmW + destX] = 0;
-					}
-					else
-					{
-						int srcX = w - y - 1;
-						int destX = gA.x;
-						for ( int x = 0; x < h; ++x, ++destX )
-						{
-							bmData[destY*bmW + destX] = glData[x*glPitch + srcX];
-						}
-						bmData[destY*bmW + destX] = 0;
-					}
-				}
-
-				float leftX = static_cast<double>(gA.x) / texNormW;
-				float topY = static_cast<double>(gA.y) / texNormH;
-				float rightX = static_cast<double>(gA.x + h) / texNormW;
-				float bottomY = static_cast<double>(gA.y + w) / texNormH;
-
-				_glyph_coords.push_back( leftX );
-				_glyph_coords.push_back( bottomY );
-				_glyph_coords.push_back( leftX );
-				_glyph_coords.push_back( topY );
-				_glyph_coords.push_back( rightX );
-				_glyph_coords.push_back( topY );
-				_glyph_coords.push_back( rightX );
-				_glyph_coords.push_back( bottomY );
-			}
-			else
-			{
-				for ( int y = 0; y <= h; ++y )
-				{
-					uint8_t *bmLine = _glyph_bitmap.data() + bmW * ( gA.y + y );
-					if ( y == h )
-					{
-						for ( int x = 0; x <= w; ++x )
-							bmLine[x] = 0;
-					}
-					else
-					{
-						bmLine += gA.x;
-						const uint8_t *glLine = slot->bitmap.buffer + y * glPitch;
-						for ( int x = 0; x < w; ++x )
-							bmLine[x] = glLine[x];
-						bmLine[w] = 0;
-					}
-				}
-
-				// things go in naturally, upper left of bitmap is at x, y
-				float leftX = static_cast<double>(gA.x) / texNormW;
-				float topY = static_cast<double>(gA.y) / texNormH;
-				float rightX = static_cast<double>(gA.x + w) / texNormW;
-				float bottomY = static_cast<double>(gA.y + h) / texNormH;
-
-				_glyph_coords.push_back( leftX );
-				_glyph_coords.push_back( topY );
-				_glyph_coords.push_back( rightX );
-				_glyph_coords.push_back( topY );
-				_glyph_coords.push_back( rightX );
-				_glyph_coords.push_back( bottomY );
-				_glyph_coords.push_back( leftX );
-				_glyph_coords.push_back( bottomY );
-			}
+			add_glyph( glData, glPitch, w, h );
 		}
 
 		text_extents &gle = _glyph_cache[char_code];
@@ -275,8 +182,6 @@ font::get_glyph( char32_t char_code )
 		gle.height = static_cast<double>( slot->metrics.height ) / 64.0;
 		gle.x_advance = static_cast<double>( slot->metrics.horiAdvance ) / 64.0;
 		gle.y_advance = static_cast<double>( slot->metrics.vertAdvance ) / 64.0;
-
-		++_glyph_version;
 
 		return gle;
 	}

@@ -90,6 +90,8 @@ public:
 	}
 	
 protected:
+	void add_glyph( char32_t char_code, const uint8_t *glData, size_t glPitch, size_t w, size_t h );
+
 	/// @brief Retrieves a glyph given a unicode char code
 	/// Function should load all attributes about the glyph and put
 	/// them into the glyph cache

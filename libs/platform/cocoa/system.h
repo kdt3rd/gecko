@@ -25,13 +25,11 @@ public:
 	std::shared_ptr<::platform::dispatcher> get_dispatcher( void ) override;
 	std::shared_ptr<::platform::keyboard> get_keyboard( void ) override;
 	std::shared_ptr<::platform::mouse> get_mouse( void ) override;
-	std::shared_ptr<::platform::font_manager> get_font_manager( void ) override;
 
 private:
 	std::shared_ptr<dispatcher> _dispatcher;
 	std::shared_ptr<keyboard> _keyboard;
 	std::shared_ptr<mouse> _mouse;
-	std::shared_ptr<::platform::font_manager> _font_manager;
 };
 
 ////////////////////////////////////////
