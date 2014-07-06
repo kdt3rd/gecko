@@ -20,23 +20,6 @@ struct application::impl
 
 ////////////////////////////////////////
 
-/*
-application::application( void )
-	: _impl( new application::impl )
-{
-	auto const &platforms = platform::platform::list();
-	if ( platforms.empty() )
-		throw std::runtime_error( "no platforms available" );
-
-	const platform::platform &p = platforms.front();
-	_platform = p.name() + "+" + p.render();
-	_impl->sys = p.create();
-	_impl->dispatch = _impl->sys->get_dispatcher();
-}
-*/
-
-////////////////////////////////////////
-
 application::application( const std::string &p, const std::string &r )
 	: _impl( new application::impl )
 {
@@ -144,19 +127,19 @@ std::shared_ptr<script::font> application::get_font( const std::string &family, 
 
 ////////////////////////////////////////
 
+std::shared_ptr<script::font> application::get_default_font( void )
+{
+	return _fmgr->get_font( "Lucida Grande", "Regular", 14.0 );
+}
+
+////////////////////////////////////////
+
 std::shared_ptr<application> application::current( void )
 {
 	precondition( !stack.empty(), "getting empty stack" );
 	auto ptr = stack.back().lock();
 	precondition( bool(ptr), "deleted application" );
 	return ptr;
-}
-
-////////////////////////////////////////
-
-const std::shared_ptr<style> &application::current_style( void )
-{
-	return current()->get_style();
 }
 
 ////////////////////////////////////////

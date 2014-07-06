@@ -2,8 +2,6 @@
 #pragma once
 
 #include "background.h"
-#include <model/datum.h>
-#include <base/alignment.h>
 
 namespace gui
 {
@@ -13,7 +11,7 @@ namespace gui
 class background_color : public background
 {
 public:
-	background_color( datum<base::color> &&c = { 1, 1, 1, 1 }, const std::shared_ptr<widget> &w = std::shared_ptr<widget>() );
+	background_color( const base::color &c = { 0.13, 0.13, 0.13, 1 }, const std::shared_ptr<widget> &w = std::shared_ptr<widget>() );
 	~background_color( void );
 
 	void set_color( const base::color &c ) { _color = c; }
@@ -21,7 +19,7 @@ public:
 	void paint( const std::shared_ptr<draw::canvas> &c ) override;
 
 private:
-	datum<base::color> _color = { 1, 0, 1, 1 };
+	base::color _color = { 0.13, 0.13, 0.13, 1 };
 };
 
 ////////////////////////////////////////

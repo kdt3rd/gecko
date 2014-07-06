@@ -86,11 +86,13 @@ void window::paint( void )
 {
 	_window->acquire();
 	glViewport( 0, 0, _window->width(), _window->height() );
-	auto style = application::current()->get_style();
-	if ( style )
-		style->background( _canvas );
+
+	_canvas->clear_color( { 0.13, 0.13, 0.13, 1 } );
+	_canvas->clear();
+
 	_canvas->save();
 	_canvas->ortho( 0, _window->width(), 0, _window->height() );
+
 	if ( _widget )
 	{
 		in_context( [&,this]
@@ -100,6 +102,7 @@ void window::paint( void )
 			_widget->paint( _canvas );
 		} );
 	}
+
 	_canvas->restore();
 	_window->release();
 }

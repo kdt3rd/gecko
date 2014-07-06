@@ -1,6 +1,9 @@
 
 #pragma once
 
+namespace base
+{
+
 ////////////////////////////////////////
 
 enum class alignment
@@ -17,4 +20,6 @@ enum class alignment
 };
 
 ////////////////////////////////////////
+
+}
 

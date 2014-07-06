@@ -12,22 +12,13 @@ namespace gui
 
 button::button( void )
 {
-	auto style = application::current_style();
-	_color = style->label_color();
-	callback_invalidate( _text, _align, _color, _font );
 }
 
 ////////////////////////////////////////
 
-button::button( datum<std::string> &&l, datum<alignment> &&a, datum<base::color> &&c, shared_datum<script::font> &&f )
-	: _text( std::move( l ) ), _align( std::move( a ) ), _color( std::move( c ) ), _font( std::move( f ) )
+button::button( std::string l, base::alignment a, const base::color &c, const std::shared_ptr<script::font> &f )
+	: _text( std::move( l ) ), _align( a ), _color( c ), _font( f )
 {
-	if ( _color.value().alpha() < 0.0 )
-	{
-		auto style = application::current_style();
-		_color = style->label_color();
-	}
-	callback_invalidate( _text, _align, _color, _font );
 }
 
 ////////////////////////////////////////
@@ -51,30 +42,44 @@ void button::set_pressed( bool p )
 
 void button::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
-	auto style = application::current_style();
-	style->button_frame( canvas, *this, _pressed );
+	if ( !_draw )
+	{
+		base::path path;
+		path.rounded_rect( { 0, 0 }, 20, 20, 3 );
 
-	base::rect content = style->button_content( *this );
-	base::point p = canvas->align_text( _font.value(), _text.value(), content, _align.value() );
+		base::paint paint;
+		paint.set_fill_color( { 0.27, 0.27, 0.27 } );
 
+		_draw= std::make_shared<draw::stretchable>();
+		_draw->create( canvas, path, paint, { 10, 10 } );
+	}
+
+	_draw->set( canvas, *this );
+	_draw->draw( *canvas );
+
+	base::rect content( *this );
+	content.shrink( 6, 6, 3, 3 );
+	base::point p = canvas->align_text( _font, _text, content, _align );
 	base::paint paint;
-	paint.set_fill_color( _color.value() );
-	canvas->draw_text( _font.value(), p, _text.value(), paint );
+	paint.set_fill_color( _color );
+	canvas->draw_text( _font, p, _text, paint );
 }
 
 ////////////////////////////////////////
 
 void button::compute_minimum( void )
 {
-	script::font_extents fex = _font.value()->extents();
-	script::text_extents tex = _font.value()->extents( _text.value() );
+	script::font_extents fex = _font->extents();
+	script::text_extents tex = _font->extents( _text );
 
-	base::size s( tex.x_advance, fex.height );
+	base::size textsize( tex.x_advance, fex.height );
 
-	auto style = application::current_style();
-	s = style->button_size( s );
+	base::size full( textsize );
+	full.grow( 12, 6 );
+	full.ceil();
+	full.set_height( std::max( full.h(), 21.0 ) );
 
-	set_minimum( s );
+	set_minimum( full );
 }
 
 ////////////////////////////////////////
