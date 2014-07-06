@@ -2,7 +2,7 @@
 #include "application.h"
 #include <platform/platform.h>
 #include <platform/system.h>
-#include <script/fontconfig/font_manager.h>
+#include <script/font_manager.h>
 
 namespace
 {
@@ -63,7 +63,9 @@ application::application( const std::string &p, const std::string &r )
 	if ( !_impl->sys )
 		throw std::runtime_error( "platform does not exist" );
 
-	_fmgr = std::make_shared<script::fontconfig::font_manager>();
+	_fmgr = script::font_manager::common();
+	if ( !_fmgr )
+		throw std::runtime_error( "no font manager available" );
 }
 
 ////////////////////////////////////////
