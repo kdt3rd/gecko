@@ -36,7 +36,22 @@ namespace
 void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
 	base::path path;
-	path.circle( center(), radius() );
+	base::paint paint;
+	draw::object obj;
+
+	/*
+	base::rect tmp( radius() * 2, radius() * 2 );
+	tmp.set_center( center() );
+	path.rounded_rect( tmp, 10.0 );
+	path.circle( center(), radius()/2.0 );
+	paint.set_fill_color( { 0.84, 0.84, 0.84 } );
+	obj.create( canvas, path, paint );
+	obj.draw( *canvas );
+	*/
+
+	path.clear();
+	path.circle( center(), radius()*0.95 );
+	path.circle( center(), radius()*0.7 );
 
 	base::gradient grad;
 	for ( size_t i = 0; i <= 36; ++i )
@@ -46,111 +61,10 @@ void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 		grad.add_stop( v, c );
 	}
 
-
-	base::paint paint;
 	paint.set_fill_conical( center(), grad );
 
-	draw::object obj;
 	obj.create( canvas, path, paint );
-
 	obj.draw( *canvas );
-
-	/*
-	double r1 = radius();
-	double r2 = std::max( r1 - 24, 0.0 );
-	point c = center();
-
-	const size_t n = 24;
-	const size_t seg = n / 4;
-	static_assert( n%4 == 0, "invalid number of segments" );
-	double slice = PI / n;
-
-	base::paint paint;
-	for ( size_t i = 0; i < n; ++i )
-	{
-		double a = i * 2 * PI / n;
-		double a1 = a - slice;
-		double a2 = a + slice;
-		path p( point::polar( r1, a1 ) + c );
-		p.arc_to( c, r1, a1, a2 );
-		p.line_to( point::polar( r2, a2 ) + c );
-		p.arc_to( c, r2, a2, a1 );
-		p.close();
-		switch ( _space )
-		{
-			case color::space::SRGB:
-			case color::space::HSL:
-				paint.set_fill_color( { color::space::HSL, a, 0.8, 0.5 } );
-				break;
-
-			case color::space::LAB:
-			{
-				double x, y;
-				switch ( i / seg )
-				{
-					case 0:
-						x = double( i%seg ) / double(seg);
-						y = 0.0;
-						break;
-
-					case 1:
-						x = 1.0;
-						y = double( i%seg ) / double(seg);
-						break;
-
-					case 2:
-						x = ( seg - double( i%seg ) ) / double(seg);
-						y = 1.0;
-						break;
-
-					case 3:
-						x = 0.0;
-						y = ( seg - double( i%seg ) ) / double(seg);
-						break;
-
-					default:
-						throw std::runtime_error( "oops" );
-				}
-
-
-				x -= 0.5;
-				y -= 0.5;
-				paint.set_fill_color( { color::space::LAB, 0.5, x, y } );
-			}
-		}
-		auto obj = std::make_shared<draw::object>();
-		obj->create( canvas, p, paint );
-		obj->draw( *canvas );
-//		canvas->draw_path( p, paint );
-
-		switch ( _space )
-		{
-			case color::space::SRGB:
-			case color::space::HSL:
-			{
-				double h, s, l;
-				_current.get_hsl( h, s, l );
-
-				base::path m;
-				m.move_to( c + point::polar( r2, h ) );
-				m.line_to( c + point::polar( r2, h + 2 * PI / 3 ) );
-				m.line_to( c + point::polar( r2, h + 4 * PI / 3 ) );
-				std::vector<color> c =
-				{
-					_current,
-					color( color::space::HSL, h, 1.0, 1.0 ),
-					color( color::space::HSL, h, 1.0, 0.0 ),
-				};
-				paint.set_fill_mesh( m, c );
-				canvas->draw_path( m, paint );
-				break;
-			}
-
-			case color::space::LAB:
-				break;
-		}
-	}
-	*/
 }
 
 ////////////////////////////////////////
