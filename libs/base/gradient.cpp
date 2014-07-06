@@ -9,6 +9,17 @@ namespace base
 
 ////////////////////////////////////////
 
+void gradient::sort( void )
+{
+	auto cmp = []( const std::pair<double,color> &a, const std::pair<double,color> &b )
+	{
+		return a.first < b.first;
+	};
+	std::sort( _stops.begin(), _stops.end(), cmp );
+}
+
+////////////////////////////////////////
+
 color gradient::sample( double v ) const
 {
 	size_t i = 0;

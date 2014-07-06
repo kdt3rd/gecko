@@ -1,5 +1,6 @@
 
 #include "color_picker.h"
+#include <draw/object.h>
 
 namespace
 {
@@ -34,10 +35,27 @@ namespace
 
 void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
-	using base::path;
-	using base::point;
-	using base::color;
+	base::path path;
+	path.circle( center(), radius() );
 
+	base::gradient grad;
+	for ( size_t i = 0; i <= 36; ++i )
+	{
+		double v = i / 36.0;
+		base::color c( base::color::space::HSL, v * 2.0 * PI, 0.75, 0.5 );
+		grad.add_stop( v, c );
+	}
+
+
+	base::paint paint;
+	paint.set_fill_conical( center(), grad );
+
+	draw::object obj;
+	obj.create( canvas, path, paint );
+
+	obj.draw( *canvas );
+
+	/*
 	double r1 = radius();
 	double r2 = std::max( r1 - 24, 0.0 );
 	point c = center();
@@ -45,13 +63,12 @@ void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 	const size_t n = 24;
 	const size_t seg = n / 4;
 	static_assert( n%4 == 0, "invalid number of segments" );
-//	double slice = PI / n;
+	double slice = PI / n;
 
 	base::paint paint;
 	for ( size_t i = 0; i < n; ++i )
 	{
 		double a = i * 2 * PI / n;
-		/* TODO
 		double a1 = a - slice;
 		double a2 = a + slice;
 		path p( point::polar( r1, a1 ) + c );
@@ -59,7 +76,6 @@ void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 		p.line_to( point::polar( r2, a2 ) + c );
 		p.arc_to( c, r2, a2, a1 );
 		p.close();
-		*/
 		switch ( _space )
 		{
 			case color::space::SRGB:
@@ -102,6 +118,9 @@ void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 				paint.set_fill_color( { color::space::LAB, 0.5, x, y } );
 			}
 		}
+		auto obj = std::make_shared<draw::object>();
+		obj->create( canvas, p, paint );
+		obj->draw( *canvas );
 //		canvas->draw_path( p, paint );
 
 		switch ( _space )
@@ -122,8 +141,8 @@ void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 					color( color::space::HSL, h, 1.0, 1.0 ),
 					color( color::space::HSL, h, 1.0, 0.0 ),
 				};
-//				paint.set_fill_mesh( m, c );
-//				canvas->draw_path( m, paint );
+				paint.set_fill_mesh( m, c );
+				canvas->draw_path( m, paint );
 				break;
 			}
 
@@ -131,6 +150,7 @@ void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 				break;
 		}
 	}
+	*/
 }
 
 ////////////////////////////////////////

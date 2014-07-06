@@ -40,6 +40,10 @@ void paint::clear_fill( void )
 		case RADIAL:
 			_fill_radial.~radial();
 			break;
+
+		case CONICAL:
+			_fill_conical.~conical();
+			break;
 	}
 	_fill_type = NONE;
 }
