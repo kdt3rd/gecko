@@ -87,6 +87,9 @@ public:
 	/// @brief Set uniform float
 	void set_uniform( uniform uniform, float value );
 
+	/// @brief Set uniform double
+	void set_uniform( uniform uniform, double value );
+
 	/// @brief Set uniform matrix
 	void set_uniform( uniform uniform, const matrix4 &value );
 
