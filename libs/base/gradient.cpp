@@ -1,6 +1,7 @@
 
 #include "gradient.h"
 #include <cmath>
+#include <algorithm>
 
 ////////////////////////////////////////
 

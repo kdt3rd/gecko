@@ -17,6 +17,7 @@ elseif System() == "Linux" then
 	Include( FREETYPE_INCLUDE, FONTCONFIG_INCLUDE )
 	table.insert( srcs, "fontconfig/font_manager.cpp" )
 	table.insert( srcs, "fontconfig/font.cpp" )
+	table.insert( srcs, "linux.cpp" )
 	syslibs = LinkSys( FREETYPE_LIBS, FONTCONFIG_LIBS )
 end
 

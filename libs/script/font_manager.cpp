@@ -1,5 +1,6 @@
 
 #include "font_manager.h"
+#include <mutex>
 
 namespace
 {
