@@ -169,7 +169,9 @@ font::get_glyph( char32_t char_code )
 
 		if ( w > 0 && h > 0 )
 		{
-			add_glyph( glData, glPitch, w, h );
+			const uint8_t *glData = slot->bitmap.buffer;
+			size_t glPitch = slot->bitmap.pitch;
+			add_glyph( char_code, glData, glPitch, w, h );
 		}
 
 		text_extents &gle = _glyph_cache[char_code];
