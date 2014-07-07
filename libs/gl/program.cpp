@@ -118,6 +118,13 @@ void program::set_uniform( uniform uni, float value )
 
 ////////////////////////////////////////
 
+void program::set_uniform( uniform uni, double value )
+{
+	glUniform1f( uni, value );
+}
+
+////////////////////////////////////////
+
 void program::set_uniform( uniform uni, const matrix4 &value )
 {
 	glUniformMatrix4fv( uni, 1, GL_FALSE, value.data() );

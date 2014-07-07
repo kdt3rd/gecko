@@ -50,6 +50,30 @@ void object::create( const std::shared_ptr<canvas> &c, const base::path &path, c
 		mesh.set_attrib_pointers( *c, _fill, _fill_prog->get_attribute_location( "position" ) );
 		_fill_parts = mesh.parts();
 	}
+	else if ( paint.has_fill_radial() )
+	{
+		_fill_prog = c->program( "position_uv.vert", "radial_gradient.frag" );
+		_fill_prog->set_uniform( "txt", 0 );
+		_fill_prog->set_uniform( "center", paint.get_fill_radial_p1() );
+		_fill_prog->set_uniform( "radius", paint.get_fill_radial_r2() );
+		_fill_texture = c->gradient( paint.get_fill_radial_gradient() );
+		_fill = c->new_vertex_array();
+		auto mesh = lines.filled();
+		mesh.set_attrib_pointers( *c, _fill, _fill_prog->get_attribute_location( "position" ) );
+		_fill_parts = mesh.parts();
+	}
+	else if ( paint.has_fill_conical() )
+	{
+		_fill_prog = c->program( "position_uv.vert", "conical_gradient.frag" );
+		_fill_prog->set_uniform( "txt", 0 );
+		_fill_prog->set_uniform( "center", paint.get_fill_conical_center() );
+		_fill_texture = c->gradient( paint.get_fill_conical_gradient() );
+		_fill_texture->bind( gl::texture::target::TEXTURE_RECTANGLE ).set_wrapping( gl::wrapping::REPEAT );
+		_fill = c->new_vertex_array();
+		auto mesh = lines.filled();
+		mesh.set_attrib_pointers( *c, _fill, _fill_prog->get_attribute_location( "position" ) );
+		_fill_parts = mesh.parts();
+	}
 	else if ( paint.has_no_fill() )
 	{
 	}

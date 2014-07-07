@@ -31,6 +31,8 @@ shaders = {
 	"text.vert";
 	"color_mesh.frag";
 	"linear_gradient.frag";
+	"radial_gradient.frag";
+	"conical_gradient.frag";
 	"single_color.frag";
 	"text_bitmap.frag";
 }

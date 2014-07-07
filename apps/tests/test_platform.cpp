@@ -12,6 +12,11 @@ int safemain( int argc, char **argv )
 {
 	auto sys = platform::platform::common().create();
 
+	auto screens = sys->screens();
+
+	for ( auto scr: screens )
+		std::cout << "Screen " << scr->bounds() << ' ' << scr->dpi() << std::endl;
+
 	auto win = sys->new_window();
 	win->set_title( "Hello World" );
 	win->exposed.callback( [&]( void )
@@ -21,6 +26,10 @@ int safemain( int argc, char **argv )
 		glClearColor( 0.0, 1.0, 0.0, 1.0 );
 		glClear( GL_COLOR_BUFFER_BIT );
 		win->release();
+	} );
+	win->resized.callback( [&]( double w, double h )
+	{
+		std::cout << "Resized to: " << w << 'x' << h << std::endl;
 	} );
 
 	win->show();

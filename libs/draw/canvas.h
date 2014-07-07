@@ -32,7 +32,7 @@ public:
 	std::shared_ptr<gl::program> program( const std::string &vert, const std::string &frag );
 
 
-	virtual base::point align_text( const std::shared_ptr<script::font> &font, const std::string &utf8, const base::rect &rect, alignment a );
+	virtual base::point align_text( const std::shared_ptr<script::font> &font, const std::string &utf8, const base::rect &rect, base::alignment a );
 
 	virtual void draw_text( const std::shared_ptr<script::font> &font, const base::point &p, const std::string &utf8, const base::paint &c );
 

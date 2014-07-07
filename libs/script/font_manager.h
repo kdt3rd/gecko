@@ -44,6 +44,14 @@ public:
 	///
 	/// @return The best matching font found
 	virtual std::shared_ptr<font> get_font( const std::string &family, const std::string &style, double pixsize ) = 0;
+
+	static const std::vector<std::shared_ptr<font_manager>> &list( void );
+
+	static std::shared_ptr<font_manager> common( void );
+
+private:
+	static void init( void );
+	static void enroll( const std::shared_ptr<font_manager> &mgr ); 
 };
 
 ////////////////////////////////////////

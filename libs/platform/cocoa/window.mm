@@ -92,8 +92,7 @@ void window::resize( double w, double h )
 
 double window::scale_factor( void )
 {
-	return 1.0;
-//	return [_impl->win backingScaleFactor];
+	return [_impl->win backingScaleFactor];
 }
 
 ////////////////////////////////////////
@@ -145,8 +144,8 @@ void window::set_ns( void *w, void *v )
 {
 	_impl->win = (NSWindow *)w;
 	_impl->view = (NSOpenGLView *)v;
-//	if ( [ _impl->view respondsToSelector:@selector(setWantsBestResolutionOpenGLSurface:) ] ) 
-//		[ _impl->view setWantsBestResolutionOpenGLSurface:YES ]; 
+	if ( [ _impl->view respondsToSelector:@selector(setWantsBestResolutionOpenGLSurface:) ] ) 
+		[ _impl->view setWantsBestResolutionOpenGLSurface:YES ]; 
 
 	float scale = scale_factor();
 	NSSize size = [_impl->view bounds].size;

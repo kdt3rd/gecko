@@ -2,7 +2,6 @@
 #include <iostream>
 #include "label.h"
 #include "application.h"
-#include "style.h"
 
 namespace gui
 {
@@ -11,22 +10,13 @@ namespace gui
 
 label::label( void )
 {
-	auto style = application::current_style();
-	_color = style->label_color();
-	callback_invalidate( _text, _align, _color, _font );
 }
 
 ////////////////////////////////////////
 
-label::label( datum<std::string> &&l, datum<alignment> &&a, datum<base::color> &&c, shared_datum<script::font> &&f )
-	: _text( std::move( l ) ), _align( std::move( a ) ), _color( std::move( c ) ), _font( std::move( f ) )
+label::label( std::string l, base::alignment a, const base::color &c, const std::shared_ptr<script::font> &f )
+	: _text( std::move( l ) ), _align( a ), _color( c ), _font( f )
 {
-	if ( _color.value().alpha() < 0.0 )
-	{
-		auto style = application::current_style();
-		_color = style->label_color();
-	}
-	callback_invalidate( _text, _align, _color, _font );
 }
 
 ////////////////////////////////////////
@@ -39,19 +29,19 @@ label::~label( void )
 
 void label::paint( const std::shared_ptr<draw::canvas> &c )
 {
-	base::point p = c->align_text( _font.value(), _text.value(), *this, _align.value() );
+	base::point p = c->align_text( _font, _text, *this, _align );
 
 	base::paint paint;
-	paint.set_fill_color( _color.value() );
-	c->draw_text( _font.value(), p, _text.value(), paint );
+	paint.set_fill_color( _color );
+	c->draw_text( _font, p, _text, paint );
 }
 
 ////////////////////////////////////////
 
 void label::compute_minimum( void )
 {
-	script::font_extents fex = _font.value()->extents();
-	script::text_extents tex = _font.value()->extents( _text.value() );
+	script::font_extents fex = _font->extents();
+	script::text_extents tex = _font->extents( _text );
 	set_minimum( tex.x_advance + 12, fex.height );
 }
 

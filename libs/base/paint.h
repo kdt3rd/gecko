@@ -60,6 +60,11 @@ public:
 	double get_fill_radial_r2( void ) const { precondition( has_fill_radial(), "no fill radial" ); return _fill_radial.r2; }
 	const gradient &get_fill_radial_gradient( void ) const { precondition( has_fill_radial(), "no fill radial" ); return _fill_radial.grad; }
 
+	bool has_fill_conical( void ) const { return _fill_type == CONICAL; }
+	void set_fill_conical( const point &p, const gradient &g ) { clear_fill(); _fill_type = CONICAL; new (&_fill_conical) conical( p, g ); }
+	const point &get_fill_conical_center( void ) const { precondition( has_fill_conical(), "no fill conical" ); return _fill_conical.p; }
+	const gradient &get_fill_conical_gradient( void ) const { precondition( has_fill_conical(), "no fill conical" ); return _fill_conical.grad; }
+
 private:
 	color _stroke_color;
 	double _stroke_width = 0.0;
@@ -70,6 +75,7 @@ private:
 		COLOR,
 		LINEAR,
 		RADIAL,
+		CONICAL
 	} _fill_type = NONE;
 
 	struct linear
@@ -96,11 +102,23 @@ private:
 		gradient grad;
 	};
 
+	struct conical
+	{
+		conical( const point &pp, const gradient &g )
+			: p( pp ), grad( g )
+		{
+		}
+
+		point p;
+		gradient grad;
+	};
+
 	union
 	{
 		color _fill_color;
 		linear _fill_linear;
 		radial _fill_radial;
+		conical _fill_conical;
 	};
 };
 
