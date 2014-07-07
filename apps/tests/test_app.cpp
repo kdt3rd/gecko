@@ -15,7 +15,7 @@
 #include <gui/background_color.h>
 //#include <gui/scroll_area.h>
 //#include <gui/tree_node.h>
-//#include <gui/line_edit.h>
+#include <gui/line_edit.h>
 #include <gui/color_picker.h>
 
 constexpr double padding = 12;
@@ -160,18 +160,16 @@ std::shared_ptr<gui::tree_node> build_tree( direction dir )
 
 ////////////////////////////////////////
 
-/*
 std::shared_ptr<gui::simple_container> build_edit( direction dir )
 {
 	auto container = std::make_shared<gui::simple_container>( dir );
 	container->set_spacing( 12, 6 );
 	container->set_pad( padding, padding, padding, padding );
 
-	container->add( std::make_shared<gui::label>( model::make_datum( testrec, testrec->title ) ) );
-	container->add( std::make_shared<gui::line_edit>( model::make_datum( testrec, testrec->title ) ) );
+	container->add( std::make_shared<gui::label>( "Edit" ) );
+	container->add( std::make_shared<gui::line_edit>( "Some text" ) );
 	return container;
 }
-*/
 
 ////////////////////////////////////////
 
@@ -245,9 +243,9 @@ int safemain( int argc, char **argv )
 	/*
 	else if ( test == "tree" )
 		win->set_widget( build_tree( dir ) );
+	*/
 	else if ( test == "edit" )
 		win->set_widget( build_edit( dir ) );
-	*/
 	else if ( test == "color" )
 		win->set_widget( build_color( dir ) );
 	/*
