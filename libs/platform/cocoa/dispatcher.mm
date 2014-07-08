@@ -59,6 +59,8 @@
 
 	NSOpenGLPixelFormat *pixelFormat = [[[NSOpenGLPixelFormat alloc] initWithAttributes:pixelFormatAttributes] autorelease];
 	NSOpenGLContext *openGLContext = [[[NSOpenGLContext alloc] initWithFormat:pixelFormat shareContext:nil] autorelease];
+	if ( openGLContext == nullptr )
+		throw std::runtime_error( "no opengl context" );
 	[self setOpenGLContext:openGLContext];
 	[openGLContext makeCurrentContext]; 
 
