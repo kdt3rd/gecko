@@ -3,7 +3,6 @@
 #include "screen.h"
 #include "window.h"
 #include "timer.h"
-#include <platform/fc/font_manager.h>
 #include "dispatcher.h"
 
 #include <base/contract.h>
@@ -37,7 +36,6 @@ system::system( void )
 
 	_keyboard = std::make_shared<keyboard>();
 	_mouse = std::make_shared<mouse>();
-	_font_manager = std::make_shared<fc::font_manager>();
 	_dispatcher = std::make_shared<dispatcher>( _keyboard, _mouse );
 
     [NSApp activateIgnoringOtherApps:YES];
@@ -47,6 +45,21 @@ system::system( void )
 
 system::~system( void )
 {
+}
+
+////////////////////////////////////////
+
+std::vector<std::shared_ptr<::platform::screen>> system::screens( void )
+{
+	std::vector<std::shared_ptr<::platform::screen>> result;
+	NSArray *s = [NSScreen screens];
+	for ( size_t i = 0; i < [s count]; ++i )
+	{
+		auto scr = std::make_shared<screen>( [s objectAtIndex:i] );
+		result.push_back( scr );
+	}
+
+	return result;
 }
 
 ////////////////////////////////////////
@@ -84,13 +97,6 @@ std::shared_ptr<platform::keyboard> system::get_keyboard( void )
 std::shared_ptr<platform::mouse> system::get_mouse( void )
 {
 	return _mouse;
-}
-
-////////////////////////////////////////
-
-std::shared_ptr<platform::font_manager> system::get_font_manager( void )
-{
-	return _font_manager;
 }
 
 ////////////////////////////////////////

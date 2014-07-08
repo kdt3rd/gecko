@@ -8,6 +8,7 @@ srcs = {
 	"context.cpp";
 	"matrix4.cpp";
 	"check.cpp";
+	"gl3w.c";
 }
 
 Library( "gl", Compile( srcs ), LinkLibs( "base" ), LinkSys( GL_LIBS ) );

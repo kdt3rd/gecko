@@ -4,8 +4,8 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <core/pointer.h>
-#include <core/contract.h>
+#include <base/pointer.h>
+#include <base/contract.h>
 
 namespace platform { namespace dummy
 {
@@ -84,15 +84,6 @@ void window::set_title( const std::string &t )
 
 void window::invalidate( const draw::rect & )
 {
-}
-
-////////////////////////////////////////
-
-std::shared_ptr<draw::canvas> window::canvas( void )
-{
-//	if ( !_canvas )
-//		_canvas = std::make_shared<dummy::canvas>();
-	return _canvas;
 }
 
 ////////////////////////////////////////

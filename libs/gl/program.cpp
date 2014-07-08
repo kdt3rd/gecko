@@ -14,6 +14,39 @@ program::program( void )
 
 ////////////////////////////////////////
 
+program::program( const std::shared_ptr<shader> &vertex )
+	: program()
+{
+	attach( vertex );
+	link();
+	glUseProgram( _program );
+}
+
+////////////////////////////////////////
+
+program::program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<shader> &fragment )
+	: program()
+{
+	attach( vertex );
+	attach( fragment );
+	link();
+	glUseProgram( _program );
+}
+
+////////////////////////////////////////
+
+program::program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<shader> &fragment, const std::shared_ptr<shader> &geometry )
+	: program()
+{
+	attach( vertex );
+	attach( fragment );
+	attach( geometry );
+	link();
+	glUseProgram( _program );
+}
+
+////////////////////////////////////////
+
 program::~program( void )
 {
 	glDeleteProgram( _program );
@@ -79,6 +112,13 @@ void program::set_uniform( uniform uni, int value )
 ////////////////////////////////////////
 
 void program::set_uniform( uniform uni, float value )
+{
+	glUniform1f( uni, value );
+}
+
+////////////////////////////////////////
+
+void program::set_uniform( uniform uni, double value )
 {
 	glUniform1f( uni, value );
 }

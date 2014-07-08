@@ -47,6 +47,7 @@ protected:
 	std::shared_ptr<layout::simple_area> _area;
 	std::shared_ptr<platform::window> _window;
 	std::shared_ptr<widget> _widget;
+	std::shared_ptr<draw::canvas> _canvas;
 };
 
 ////////////////////////////////////////

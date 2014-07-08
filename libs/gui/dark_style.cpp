@@ -41,7 +41,7 @@ dark_style::~dark_style( void )
 
 ////////////////////////////////////////
 
-std::shared_ptr<draw::font> dark_style::default_font( bool bold )
+std::shared_ptr<script::font> dark_style::default_font( bool bold )
 {
 	if ( bold )
 		return _default_bold_font;

@@ -26,7 +26,6 @@ window::window( void )
 {
 	_impl->win = nullptr;
 	_impl->ctxt = nullptr;
-	_canvas = std::make_shared<draw::canvas>();
 }
 
 ////////////////////////////////////////
@@ -91,13 +90,18 @@ void window::resize( double w, double h )
 
 ////////////////////////////////////////
 
+double window::scale_factor( void )
+{
+	return [_impl->win backingScaleFactor];
+}
+
+////////////////////////////////////////
+
 void window::resize_event( double w, double h )
 {
 	_last_w = w;
 	_last_h = h;
-	if ( _canvas )
-		_impl->ctxt = nullptr;
-	resized( w, h );
+	resized( _last_w, _last_h );
 }
 
 ////////////////////////////////////////
@@ -123,18 +127,15 @@ void window::set_title( const std::string &t )
 
 ////////////////////////////////////////
 
-gl::context window::context( void )
+void window::acquire( void )
 {
 	[[_impl->view openGLContext] makeCurrentContext];
-	return gl::context();
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<draw::canvas> window::canvas( void )
+void window::release( void )
 {
-	[[_impl->view openGLContext] makeCurrentContext];
-	return _canvas;
 }
 
 ////////////////////////////////////////
@@ -145,6 +146,11 @@ void window::set_ns( void *w, void *v )
 	_impl->view = (NSOpenGLView *)v;
 	if ( [ _impl->view respondsToSelector:@selector(setWantsBestResolutionOpenGLSurface:) ] ) 
 		[ _impl->view setWantsBestResolutionOpenGLSurface:YES ]; 
+
+	float scale = scale_factor();
+	NSSize size = [_impl->view bounds].size;
+	_last_w = size.width * scale;
+	_last_h = size.height * scale;
 }
 
 ////////////////////////////////////////

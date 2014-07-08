@@ -3,11 +3,9 @@
 
 #include "widget.h"
 #include "application.h"
-#include "style.h"
-#include <draw/drawable.h>
+#include <draw/stretchable.h>
 #include <base/alignment.h>
 #include <base/signal.h>
-#include <model/datum.h>
 
 namespace gui
 {
@@ -18,12 +16,12 @@ class button : public widget
 {
 public:
 	button( void );
-	button( datum<std::string> &&l, datum<alignment> &&a = alignment::CENTER, datum<base::color> &&c = { 0, 0, 0, -1 }, shared_datum<draw::font> &&f = application::current_style()->default_font() );
+	button( std::string l, base::alignment a = base::alignment::CENTER, const base::color &c = { 1.0, 1.0, 1.0 }, const std::shared_ptr<script::font> &f = application::current()->get_default_font() );
 	~button( void );
 
-	const std::string &text( void )
+	const std::string &text( void ) const
 	{
-		return _text.value();
+		return _text;
 	}
 
 	void set_text( const std::string &t )
@@ -31,7 +29,7 @@ public:
 		_text = t;
 	}
 
-	void set_font( std::shared_ptr<draw::font> &f )
+	void set_font( const std::shared_ptr<script::font> &f )
 	{
 		_font = f;
 	}
@@ -49,12 +47,12 @@ public:
 	base::signal<void(void)> when_activated;
 
 private:
-	datum<std::string> _text;
-	datum<alignment> _align = alignment::CENTER;
-	datum<base::color> _color = { 0, 0, 0, 1 };
-	shared_datum<draw::font> _font = application::current_style()->default_font();
+	std::string _text;
+	base::alignment _align = base::alignment::CENTER;
+	base::color _color = { 1.0, 1.0, 1.0 };
+	std::shared_ptr<script::font> _font = application::current()->get_default_font();
 
-	std::shared_ptr<draw::drawable> _draw;
+	std::shared_ptr<draw::stretchable> _draw;
 
 	bool _pressed = false;
 	bool _tracking = false;

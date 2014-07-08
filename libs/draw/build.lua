@@ -6,7 +6,6 @@ srcs = {
 	"polylines.cpp";
 	"clipper.cpp";
 	"canvas.cpp";
-	"font.cpp";
 	"geometry.cpp";
 	"glyph.cpp";
 	"composite.cpp";
@@ -32,6 +31,8 @@ shaders = {
 	"text.vert";
 	"color_mesh.frag";
 	"linear_gradient.frag";
+	"radial_gradient.frag";
+	"conical_gradient.frag";
 	"single_color.frag";
 	"text_bitmap.frag";
 }
@@ -65,5 +66,5 @@ CreateFile( "shaders.h", {
 	"}";
 } )
 
-Library( "draw", Compile( srcs ), Compile( tess ), LinkLibs( "gl" ) );
+Library( "draw", Compile( srcs ), Compile( tess ), LinkLibs( "gl", "script" ) );
 

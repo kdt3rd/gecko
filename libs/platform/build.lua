@@ -11,7 +11,6 @@ local platform = {
 		"timer.cpp";
 		"keyboard.cpp";
 		"mouse.cpp";
-		"font_manager.cpp";
 		"dispatcher.cpp";
 	};
 
@@ -53,17 +52,14 @@ vars = { Platform = Platform }
 
 if System() == "Linux" then
 	table.insert( platform.srcs, "linux.cpp" )
-	SubDir( "fc", vars )
 --	SubDir( "xcb", vars )
 	SubDir( "xlib", vars )
 elseif System() == "Darwin" then
 	table.insert( platform.srcs, "darwin.cpp" )
-	SubDir( "fc", vars )
 	SubDir( "cocoa", vars )
 elseif System() == "Windows" then
 	table.insert( platform.srcs, "mswin.cpp" )
 	SubDir( "mswin", vars )
-	SubDir( "fc", vars )
 end
 --SubDir( "dummy", vars )
 

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "point.h"
+#include "rect.h"
 
 namespace base
 {
@@ -58,6 +59,7 @@ public:
 
 	void rounded_rect( const point &p1, const point &p2, double r );
 	void rounded_rect( const point &p1, double w, double h, double r );
+	void rounded_rect( const rect &r, double rad );
 
 	const std::vector<double> &get_data( void ) const { return _data; }
 	const std::vector<action> &get_actions( void ) const { return _actions; }
@@ -108,6 +110,14 @@ public:
 					break;
 			}
 		}
+	}
+
+	void clear( void )
+	{
+		_start = 0;
+		_last = { 0, 0 };
+		_data.clear();
+		_actions.clear();
 	}
 
 private:

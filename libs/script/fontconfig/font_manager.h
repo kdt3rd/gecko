@@ -1,15 +1,15 @@
 
 #pragma once
 
-#include <platform/font_manager.h>
+#include <script/font_manager.h>
 
-namespace platform { namespace fc
+namespace script { namespace fontconfig
 {
 
 ////////////////////////////////////////
 
-/// @brief FontConfig implementation of platform::font_manager
-class font_manager : public ::platform::font_manager
+/// @brief FontConfig implementation of script::font_manager
+class font_manager : public ::script::font_manager
 {
 public:
 	font_manager( void );
@@ -18,7 +18,7 @@ public:
 	std::set<std::string> get_families( void ) override;
 	std::set<std::string> get_styles( const std::string &family ) override;
 
-	std::shared_ptr<draw::font> get_font( const std::string &family, const std::string &style, double pixsize ) override;
+	std::shared_ptr<script::font> get_font( const std::string &family, const std::string &style, double pixsize ) override;
 
 private:
 	struct pimpl;

@@ -28,6 +28,9 @@ public:
 
 	/// @brief Default constructor
 	program( void );
+	program( const std::shared_ptr<shader> &vertex );
+	program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<shader> &fragment );
+	program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<shader> &fragment, const std::shared_ptr<shader> &geometry );
 
 	/// @brief Constructor with shader(s)
 	template<typename ...Shaders>
@@ -83,6 +86,9 @@ public:
 
 	/// @brief Set uniform float
 	void set_uniform( uniform uniform, float value );
+
+	/// @brief Set uniform double
+	void set_uniform( uniform uniform, double value );
 
 	/// @brief Set uniform matrix
 	void set_uniform( uniform uniform, const matrix4 &value );

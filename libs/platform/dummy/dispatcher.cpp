@@ -1,8 +1,8 @@
 
 #include <iostream>
 #include <stdlib.h>
-#include <core/contract.h>
-#include <core/pointer.h>
+#include <base/contract.h>
+#include <base/pointer.h>
 #include "dispatcher.h"
 
 namespace platform { namespace dummy

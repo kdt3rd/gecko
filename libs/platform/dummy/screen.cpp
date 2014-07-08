@@ -1,7 +1,7 @@
 
 #include "screen.h"
 
-#include <core/contract.h>
+#include <base/contract.h>
 #include <string>
 #include <stdexcept>
 

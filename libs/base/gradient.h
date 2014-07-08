@@ -32,6 +32,8 @@ public:
 
 	void add_stop( double v, const color &c ) { _stops.emplace_back( v, c ); }
 
+	void sort( void );
+
 	color sample( double v ) const;
 
 	const std::vector<std::pair<double,color>> &stops( void ) const { return _stops; }

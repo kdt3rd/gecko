@@ -3,7 +3,7 @@
 
 #include <platform/window.h>
 #include <X11/Xlib.h>
-#include <GL/glx.h>
+#include <gl/opengl.h>
 
 namespace platform { namespace xlib
 {
@@ -36,9 +36,9 @@ public:
 
 	void invalidate( const base::rect &r ) override;
 
-	/// @brief Canvas to draw on the window.
-	gl::context context( void ) override;
-	std::shared_ptr<draw::canvas> canvas( void ) override;
+	/// @brief Acquire window to draw
+	void acquire( void ) override;
+	void release( void ) override;
 
 	/// @brief Xlib window identifier.
 	Window id( void ) const;
@@ -57,7 +57,6 @@ private:
 	Window _win = 0;
 	XIC _xic = 0;
 
-	std::shared_ptr<draw::canvas> _canvas;
 	int16_t _last_x = 0, _last_y = 0;
 	uint16_t _last_w = 0, _last_h = 0;
 

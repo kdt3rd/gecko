@@ -16,7 +16,7 @@ public:
 	dark_style( void );
 	~dark_style( void );
 
-	std::shared_ptr<draw::font> default_font( bool bold = false ) override;
+	std::shared_ptr<script::font> default_font( bool bold = false ) override;
 
 	void background( const std::shared_ptr<draw::canvas> &c ) override;
 	const base::color &label_color( void ) override;
@@ -38,8 +38,8 @@ private:
 	void construct( const std::shared_ptr<draw::canvas> &c );
 	bool _constructed = false;
 
-	std::shared_ptr<draw::font> _default_font;
-	std::shared_ptr<draw::font> _default_bold_font;
+	std::shared_ptr<script::font> _default_font;
+	std::shared_ptr<script::font> _default_bold_font;
 	std::shared_ptr<draw::stretchable> _button_frame;
 	std::shared_ptr<draw::stretchable> _button_frame_down;
 	std::shared_ptr<draw::stretchable> _slider_groove;

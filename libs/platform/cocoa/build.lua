@@ -8,12 +8,11 @@ Platform {
 
 	srcs = {
 		"system.mm";
-		"screen.cpp";
+		"screen.mm";
 		"window.mm";
 		"timer.cpp";
 		"keyboard.mm";
 		"mouse.cpp";
---		"font_manager.mm";
 		"dispatcher.mm";
 	};
 

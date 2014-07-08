@@ -7,18 +7,15 @@ srcs = {
 	"context.cpp";
 	"window.cpp";
 	"popup.cpp";
-	"style.cpp";
-	"cocoa_style.cpp";
-	"dark_style.cpp";
 	"background.cpp";
 	"background_color.cpp";
 	"label.cpp";
 	"button.cpp";
 	"slider.cpp";
 	"line_edit.cpp";
-	"scroll_area.cpp";
+--	"scroll_area.cpp";
 	"container.cpp";
-	"tree_node.cpp";
+--	"tree_node.cpp";
 	"color_picker.cpp";
 }
 

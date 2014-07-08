@@ -810,7 +810,7 @@ void tessAddContour( TESStesselator *tess, int size, const void* vertices,
 
 	for( i = 0; i < numVertices; ++i )
 	{
-		const TESSreal* coords = (const TESSreal*)(src);
+		const TESSreal* coords = reinterpret_cast<const TESSreal*>(src);
 		src += stride;
 
 		if( e == NULL ) {

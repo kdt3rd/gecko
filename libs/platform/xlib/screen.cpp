@@ -38,7 +38,7 @@ base::size screen::bounds( void ) const
 
 ////////////////////////////////////////
 
-base::point screen::dpi( void ) const
+base::size screen::dpi( void ) const
 {
 	double tmpW = ( ( static_cast<double>( DisplayWidth( _display.get(), _screen ) ) *
 					  25.4 ) /

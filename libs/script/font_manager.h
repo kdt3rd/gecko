@@ -4,9 +4,9 @@
 #include <string>
 #include <set>
 #include <memory>
-#include <draw/font.h>
+#include "font.h"
 
-namespace platform
+namespace script
 {
 
 ////////////////////////////////////////
@@ -22,19 +22,6 @@ public:
 
 	/// @brief Destructor.
 	virtual ~font_manager( void );
-
-	/// @brief Name of font manager.
-	///
-	/// The name of the font manager being used.
-	/// @return The name of the font manager
-	const std::string &name( void ) const { return _name; }
-
-	/// @brief Version of the font manager.
-	///
-	/// The version of the font manager being used.
-	/// @return The version of the font manager
-	const std::string &version( void ) const { return _version; }
-
 
 	/// @brief List of families.
 	///
@@ -56,14 +43,15 @@ public:
 	/// @param pixsize Size of the font to create
 	///
 	/// @return The best matching font found
-	virtual std::shared_ptr<draw::font> get_font( const std::string &family, const std::string &style, double pixsize ) = 0;
+	virtual std::shared_ptr<font> get_font( const std::string &family, const std::string &style, double pixsize ) = 0;
 
-protected:
-	void set_manager_name( std::string s ) { _name = std::move( s ); }
-	void set_manager_version( std::string v ) { _version = std::move( v ); }
+	static const std::vector<std::shared_ptr<font_manager>> &list( void );
 
-	std::string _name;
-	std::string _version;
+	static std::shared_ptr<font_manager> common( void );
+
+private:
+	static void init( void );
+	static void enroll( const std::shared_ptr<font_manager> &mgr ); 
 };
 
 ////////////////////////////////////////

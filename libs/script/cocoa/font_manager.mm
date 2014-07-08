@@ -1,10 +1,12 @@
 
 #import <AppKit/NSFontManager.h>
 #import <Foundation/NSString.h>
+#import <Foundation/NSArray.h>
 #import <ApplicationServices/ApplicationServices.h>
 #import <CoreText/CTFont.h>
 
 #include "font_manager.h"
+#include "font.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -27,7 +29,7 @@ namespace
 
 ////////////////////////////////////////
 
-namespace platform { namespace cocoa
+namespace script { namespace cocoa
 {
 
 ////////////////////////////////////////
@@ -89,9 +91,9 @@ std::set<std::string> font_manager::get_styles( const std::string &family )
 
 ////////////////////////////////////////
 
-std::shared_ptr<draw::font> font_manager::get_font( const std::string &family, const std::string &style, double pixsize )
+std::shared_ptr<script::font> font_manager::get_font( const std::string &family, const std::string &style, double pixsize )
 {
-	std::shared_ptr<draw::font> ret;
+	std::shared_ptr<script::font> ret;
 
 	NSFontManager *fmgr = [NSFontManager sharedFontManager];
 	NSString *fam = [[NSString alloc] initWithUTF8String:family.c_str()];
@@ -118,9 +120,10 @@ std::shared_ptr<draw::font> font_manager::get_font( const std::string &family, c
 	NSFont *nsfont = [fmgr fontWithFamily:fam traits:mask weight:5 size:pixsize];
 	if ( nsfont )
 	{
-		CGFontRef font = CTFontCopyGraphicsFont( (CTFontRef)nsfont, NULL );
-//		ret = std::make_shared<cairo::font>( cairo_quartz_font_face_create_for_cgfont( font ), family, style, pixsize );
+		ret = std::make_shared<script::cocoa::font>( (void *)nsfont, family, style, pixsize );
 	}
+	else
+		throw std::runtime_error( "font not found" );
 	
 	return ret;
 }

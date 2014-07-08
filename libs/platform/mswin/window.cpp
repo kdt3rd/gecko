@@ -6,8 +6,12 @@
 
 #include <windows.h>
 
-#include <GL/glew.h>
-#include <GL/wglew.h>
+#include <gl/opengl.h>
+
+namespace
+{
+	HGLRC WINAPI (*wglCreateContextAttribsARB)( HDC, HGLRC, const int * ) = nullptr;
+}
 
 namespace platform { namespace mswin
 {
@@ -54,36 +58,29 @@ window::window( void )
 	HGLRC tempOpenGLContext = wglCreateContext( _hdc );
 	wglMakeCurrent( _hdc, tempOpenGLContext );
 
-	glewExperimental = true;
-	GLenum error = glewInit();
-	if ( error != GLEW_OK )
+	if ( gl3wInit() != 0 )
 		throw std::runtime_error( "glew init failed" );
 
 	int attributes[] = {
-		WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
-		WGL_CONTEXT_MINOR_VERSION_ARB, 1,
+		WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+		WGL_CONTEXT_MINOR_VERSION_ARB, 3,
 		WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
 		0
 	};
 
-	if ( wglewIsSupported( "WGL_ARB_create_context" ) == 1 )
-	{
-		_hrc = wglCreateContextAttribsARB( _hdc, NULL, attributes );
-		wglMakeCurrent( NULL, NULL );
-		wglDeleteContext( tempOpenGLContext );
-		wglMakeCurrent( _hdc, _hrc );
-	}
-	else
-		throw std::runtime_error( "opengl 4 not supported" );
+	wglCreateContextAttribsARB = reinterpret_cast<decltype(wglCreateContextAttribsARB)>( wglGetProcAddress("wglCreateContextAttribsARB") );
+	if ( wglCreateContextAttribsARB == nullptr )
+		throw std::runtime_error( "wgl create context missing" );
 
-	int glVersion[2];
-	glGetIntegerv( GL_MAJOR_VERSION, &glVersion[0] );
-	glGetIntegerv( GL_MINOR_VERSION, &glVersion[1] );
+	_hrc = wglCreateContextAttribsARB( _hdc, NULL, attributes );
+	wglMakeCurrent( NULL, NULL );
+	wglDeleteContext( tempOpenGLContext );
+	wglMakeCurrent( _hdc, _hrc );
 
-	_canvas = std::make_shared<draw::canvas>();
-
-	std::cout << "Using OpenGL: " << glVersion[0] << "." << glVersion[1] << std::endl;
-	std::cout << "CREATED WINDOW: " << _hwnd << std::endl;
+//	int glVersion[2];
+//	glGetIntegerv( GL_MAJOR_VERSION, &glVersion[0] );
+//	glGetIntegerv( GL_MINOR_VERSION, &glVersion[1] );
+//	std::cout << "Using OpenGL: " << glVersion[0] << "." << glVersion[1] << std::endl;
 }
 
 ////////////////////////////////////////
@@ -168,20 +165,16 @@ void window::invalidate( const base::rect &r )
 
 ////////////////////////////////////////
 
-gl::context window::context( void )
+void window::acquire( void )
 {
 	if ( !wglMakeCurrent( _hdc, _hrc ) )
 		throw std::runtime_error( "couldn't make context current" );
-	return gl::context();
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<draw::canvas> window::canvas( void )
+void window::release( void )
 {
-	if ( !wglMakeCurrent( _hdc, _hrc ) )
-		throw std::runtime_error( "couldn't make context current" );
-	return _canvas;
 }
 
 ////////////////////////////////////////

@@ -1,5 +1,6 @@
 
 #include "font_manager.h"
+#include "font.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -10,11 +11,10 @@
 #include <base/scope_guard.h>
 
 #include <fontconfig/fontconfig.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
-#include "glyph.h"
-#include "font.h"
-
-namespace platform { namespace fc
+namespace script { namespace fontconfig
 {
 
 struct font_manager::pimpl
@@ -31,11 +31,13 @@ font_manager::font_manager( void )
 	if ( FcInit() != FcTrue )
 		throw std::runtime_error( "error intializing fontconfig" );
 
+	/*
 	set_manager_name( "fontconfig" );
 	std::stringstream version;
 	int v = FcGetVersion();
 	version << v/10000 << '.' << (v/100)%100 << '.' << v%100;
 	set_manager_version( version.str() );
+	*/
 
 	_impl->config = FcConfigGetCurrent();
 	FcConfigSetRescanInterval( _impl->config, 0 );
@@ -108,7 +110,7 @@ std::set<std::string> font_manager::get_styles( const std::string &family )
 
 ////////////////////////////////////////
 
-std::shared_ptr<draw::font>
+std::shared_ptr<script::font>
 font_manager::get_font( const std::string &family, const std::string &style,
 						double pixsize )
 {
@@ -126,7 +128,7 @@ font_manager::get_font( const std::string &family, const std::string &style,
 	FcPatternDestroy( pat );
 	on_scope_exit { if ( matched ) FcPatternDestroy( matched ); };
 
-	std::shared_ptr<draw::font> ret;
+	std::shared_ptr<script::font> ret;
 	if ( matched && result == FcResultMatch )
 	{
 		FcChar8 *filename = nullptr;
@@ -137,11 +139,11 @@ font_manager::get_font( const std::string &family, const std::string &style,
 			FT_Face ftface;
 			auto error = FT_New_Face( _impl->ftlib, reinterpret_cast<const char*>( filename ), fontid, &ftface );
 			if ( error )
-				throw std::runtime_error( fc::font::errorstr( error ) );
+				throw std::runtime_error( font::errorstr( error ) );
 
 			try
 			{
-				ret = std::make_shared<fc::font>( ftface, family, style, pixsize );
+				ret = std::make_shared<script::fontconfig::font>( ftface, family, style, pixsize );
 			}
 			catch ( ... )
 			{

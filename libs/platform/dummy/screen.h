@@ -14,7 +14,7 @@ public:
 	screen( void );
 	~screen( void );
 
-	core::size bounds( void ) override;
+	base::size bounds( void ) const override;
 };
 
 ////////////////////////////////////////

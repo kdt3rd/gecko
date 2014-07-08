@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <string>
-#include <draw/font.h>
+#include <script/font.h>
 #include <draw/canvas.h>
 #include <base/alignment.h>
 
@@ -18,7 +18,7 @@ public:
 	style( void );
 	virtual ~style( void );
 
-	virtual std::shared_ptr<draw::font> default_font( bool bold = false ) = 0;
+	virtual std::shared_ptr<script::font> default_font( bool bold = false ) = 0;
 
 	virtual void background( const std::shared_ptr<draw::canvas> &c ) = 0;
 	virtual const base::color &label_color( void ) = 0;

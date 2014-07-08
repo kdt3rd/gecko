@@ -12,15 +12,13 @@ namespace gui
 
 line_edit::line_edit( void )
 {
-	callback_invalidate( _text, _align, _color, _font );
 }
 
 ////////////////////////////////////////
 
-line_edit::line_edit( datum<std::string> &&l, datum<alignment> &&a, datum<base::color> &&c, shared_datum<draw::font> &&f )
-	: _text( std::move( l ) ), _align( std::move( a ) ), _color( std::move( c ) ), _font( std::move( f ) )
+line_edit::line_edit( std::string l, base::alignment a, const base::color &c, const std::shared_ptr<script::font> &f )
+	: _text( std::move( l ) ), _align( a ), _color( c ), _font( f )
 {
-	callback_invalidate( _text, _align, _color, _font );
 }
 
 ////////////////////////////////////////
@@ -33,29 +31,56 @@ line_edit::~line_edit( void )
 
 void line_edit::paint( const std::shared_ptr<draw::canvas> &c )
 {
-	auto style = application::current_style();
-	style->line_edit_frame( c, *this, false );
+	if ( !_frame )
+	{
+		_frame = std::make_shared<draw::stretchable>();
+		base::paint paint( { 0.27, 0.27, 0.27 } );
+		paint.set_fill_color( { 1, 1, 1 } );
 
-	const std::string &str = _text.value();
+		base::path path;
+		path.rectangle( { 0, 0 }, 20, 20 );
 
-	base::point p = c->align_text( _font.value(), str, *this, _align.value() );
+		_frame->create( c, path, paint, { 10, 10 } );
+	}
+
+	_frame->set( c, *this );
+	_frame->draw( *c );
+
+	const std::string &str = _text;
+	base::point p = c->align_text( _font, str, *this, _align );
 
 	base::paint paint;
-	paint.set_fill_color( _color.value() );
-	c->draw_text( _font.value(), p, str, paint );
+	paint.set_fill_color( _color );
+	c->draw_text( _font, p, str, paint );
 
-	draw::font_extents fex = _font.value()->extents();
-	draw::text_extents tex = _font.value()->extents( str.substr( 0, _cursor ) );
+	script::font_extents fex = _font->extents();
+	script::text_extents tex = _font->extents( str.substr( 0, _cursor ) );
 
-	style->text_cursor( c, p + base::point( tex.x_advance, -fex.descent ) , fex.ascent - fex.descent );
+	if ( !_marker )
+	{
+		_marker = std::make_shared<draw::stretchable>();
+		base::path path;
+		path.move_to( { 0.5, 0 } );
+		path.line_by( { 0, 10 } );
+
+		base::paint pen( { 0, 0, 0 }, 1.0 );
+
+		_marker->create( c, path, pen, { 0.5, 5 } );
+	}
+	float h = fex.ascent - fex.descent;
+	p = p + base::point( tex.x_advance, -fex.descent );
+	base::rect tmp( p - base::point( 0, h ), 2, h );
+
+	_marker->set( c, tmp );
+	_marker->draw( *c );
 }
 
 ////////////////////////////////////////
 
 void line_edit::compute_minimum( void )
 {
-	draw::font_extents fex = _font.value()->extents();
-	draw::text_extents tex = _font.value()->extents( _text.value() );
+	script::font_extents fex = _font->extents();
+	script::text_extents tex = _font->extents( _text );
 	set_minimum( tex.x_advance + 12, std::max( 21.0, fex.height ) );
 }
 
@@ -75,7 +100,7 @@ bool line_edit::key_press( platform::scancode c )
 			break;
 
 		case platform::scancode::KEY_RIGHT:
-			if ( _cursor < _text.value().size() )
+			if ( _cursor < _text.size() )
 			{
 				++_cursor;
 				invalidate();
@@ -91,18 +116,18 @@ bool line_edit::key_press( platform::scancode c )
 			break;
 
 		case platform::scancode::KEY_END:
-			if ( _cursor < _text.value().size() )
+			if ( _cursor < _text.size() )
 			{
-				_cursor = _text.value().size();
+				_cursor = _text.size();
 				invalidate();
 			}
 			break;
 
 		case platform::scancode::KEY_BACKSPACE:
-			_cursor = std::min( _cursor, _text.value().size() );
+			_cursor = std::min( _cursor, _text.size() );
 			if ( _cursor > 0 )
 			{
-				std::string tmp( _text.value() );
+				std::string tmp( _text );
 				tmp.erase( tmp.begin() + _cursor - 1 );
 				_text = std::move( tmp );
 				--_cursor;
@@ -111,10 +136,10 @@ bool line_edit::key_press( platform::scancode c )
 			break;
 
 		case platform::scancode::KEY_DELETE:
-			_cursor = std::min( _cursor, _text.value().size() );
-			if ( _cursor < _text.value().size() )
+			_cursor = std::min( _cursor, _text.size() );
+			if ( _cursor < _text.size() )
 			{
-				std::string tmp( _text.value() );
+				std::string tmp( _text );
 				tmp.erase( tmp.begin() + _cursor );
 				_text = std::move( tmp );
 				invalidate();
@@ -134,7 +159,7 @@ bool line_edit::text_input( char32_t c )
 {
 	if ( utf::is_graphic( c ) )
 	{
-		std::string tmp( _text.value() );
+		std::string tmp( _text );
 		_cursor = std::min( _cursor, tmp.size() );
 
 		std::insert_iterator<std::string> it( tmp, tmp.begin() + _cursor );
@@ -145,7 +170,7 @@ bool line_edit::text_input( char32_t c )
 		return true;
 	}
 	else
-		std::cout << "NON GRAPHIC: " << c << std::endl;
+		std::cout << "NON GRAPHIC: " << (uint32_t)c << std::endl;
 
 	return false;
 }

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <draw/font.h>
+#include <script/font.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -9,21 +9,23 @@
 ////////////////////////////////////////
 
 
-namespace platform { namespace fc
+namespace script { namespace fontconfig
 {
 
-/// @brief Font subclass for fontconfig / freetype.
+/// @brief Font subclass for freetype.
 /// @author Kimball Thurston
-class font : public ::draw::font
+class font : public ::script::font
 {
 public:
 	font( FT_Face face, std::string fam, std::string style, double pixsize );
-	virtual ~font( void );
+	~font( void );
+
+	double kerning( char32_t c1, char32_t c2 ) override;
 
 	static const char *errorstr( FT_Error err );
 
 protected:
-	const draw::glyph &get_glyph( wchar_t char_code ) override;
+	const text_extents &get_glyph( char32_t char_code ) override;
 
 private:
 	FT_Face _face;

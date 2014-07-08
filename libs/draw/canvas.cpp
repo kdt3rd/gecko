@@ -66,7 +66,7 @@ std::shared_ptr<gl::program> canvas::program( const std::string &vert, const std
 ////////////////////////////////////////
 
 base::point
-canvas::align_text( const std::shared_ptr<font> &font, const std::string &utf8, const base::rect &r, alignment a )
+canvas::align_text( const std::shared_ptr<script::font> &font, const std::string &utf8, const base::rect &r, base::alignment a )
 {
 	base::rect rect;
 	rect.set_x1( std::ceil( r.x1() ) );
@@ -79,50 +79,50 @@ canvas::align_text( const std::shared_ptr<font> &font, const std::string &utf8, 
 
 	// TODO: add multi-line support?
 
-	font_extents fex = font->extents();
-	text_extents tex = font->extents( utf8 );
+	script::font_extents fex = font->extents();
+	script::text_extents tex = font->extents( utf8 );
 
 	double y = 0.0, x = 0.0;
 	double textHeight = fex.ascent - fex.descent;
 
 	switch ( a )
 	{
-		case alignment::CENTER:
-		case alignment::LEFT:
-		case alignment::RIGHT:
+		case base::alignment::CENTER:
+		case base::alignment::LEFT:
+		case base::alignment::RIGHT:
 			y = rect.y() + std::round( ( rect.height() + textHeight ) / 2.0 ) + fex.descent;
 			break;
 
-		case alignment::BOTTOM:
-		case alignment::BOTTOM_RIGHT:
-		case alignment::BOTTOM_LEFT:
+		case base::alignment::BOTTOM:
+		case base::alignment::BOTTOM_RIGHT:
+		case base::alignment::BOTTOM_LEFT:
 			y = rect.y2() - fex.descent;
 			break;
 
-		case alignment::TOP:
-		case alignment::TOP_RIGHT:
-		case alignment::TOP_LEFT:
+		case base::alignment::TOP:
+		case base::alignment::TOP_RIGHT:
+		case base::alignment::TOP_LEFT:
 			y = rect.y1() + fex.ascent;
 			break;
 	}
 
 	switch ( a )
 	{
-		case alignment::LEFT:
-		case alignment::TOP_LEFT:
-		case alignment::BOTTOM_LEFT:
+		case base::alignment::LEFT:
+		case base::alignment::TOP_LEFT:
+		case base::alignment::BOTTOM_LEFT:
 			x = rect.x() - tex.x_bearing;
 			break;
 
-		case alignment::RIGHT:
-		case alignment::TOP_RIGHT:
-		case alignment::BOTTOM_RIGHT:
+		case base::alignment::RIGHT:
+		case base::alignment::TOP_RIGHT:
+		case base::alignment::BOTTOM_RIGHT:
 			x = rect.x2() - tex.width - tex.x_bearing;
 			break;
 
-		case alignment::CENTER:
-		case alignment::TOP:
-		case alignment::BOTTOM:
+		case base::alignment::CENTER:
+		case base::alignment::TOP:
+		case base::alignment::BOTTOM:
 			x = rect.x1() + std::round( ( rect.width() - tex.width - tex.x_bearing ) / 2.0 );
 			break;
 	}
@@ -133,7 +133,7 @@ canvas::align_text( const std::shared_ptr<font> &font, const std::string &utf8, 
 ////////////////////////////////////////
 
 void
-canvas::draw_text( const std::shared_ptr<font> &font, const base::point &p, const std::string &utf8, const base::paint &c )
+canvas::draw_text( const std::shared_ptr<script::font> &font, const base::point &p, const std::string &utf8, const base::paint &c )
 {
 	if ( ! font || utf8.empty() )
 		return;
@@ -168,10 +168,10 @@ canvas::draw_text( const std::shared_ptr<font> &font, const base::point &p, cons
 	checkgl();
 
 		txt.image_2d( gl::format::RED,
-					  font->glyph_texture_size_x(),
-					  font->glyph_texture_size_y(),
+					  font->bitmap_width(),
+					  font->bitmap_height(),
 					  gl::image_type::UNSIGNED_BYTE,
-					  font->glyph_texture().data() );
+					  font->bitmap().data() );
 	checkgl();
 
 		_font_glyph_cache[font] = { font->glyph_version(), texture };

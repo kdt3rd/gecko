@@ -7,11 +7,6 @@
 #include <platform/keyboard.h>
 #include "context.h"
 
-namespace model
-{
-	template<typename T> class datum;
-}
-
 namespace gui
 {
 
@@ -20,9 +15,6 @@ namespace gui
 class widget : public layout::simple_area
 {
 public:
-	template<typename T> using datum = model::datum<T>;
-	template<typename T> using shared_datum = model::datum<std::shared_ptr<T>>;
-
 	widget( void )
 	{
 	}
@@ -79,13 +71,13 @@ protected:
 	template<typename D>
 	void callback_helper( const std::function<void(void)> &cb, D &d )
 	{
-		d += cb;
+		d.callback( cb );
 	}
 
 	template<typename D, typename ...Args>
 	void callback_helper( const std::function<void(void)> &cb, D &d, Args &...args )
 	{
-		d += cb;
+		d.callback( cb );
 		callback_helper( cb, args... );
 	}
 

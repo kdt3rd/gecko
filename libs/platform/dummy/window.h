@@ -31,8 +31,8 @@ public:
 
 	void invalidate( const core::rect &r ) override;
 
-	gl::context context( void ) override { return gl::context(); }
-	std::shared_ptr<gldraw::canvas> canvas( void ) override;
+	void acquire( void ) override {}
+	void release( void ) override {}
 
 	double width( void ) override
 	{

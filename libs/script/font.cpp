@@ -4,7 +4,7 @@
 #include <limits>
 #include <stdexcept>
 
-namespace draw
+namespace script
 {
 
 ////////////////////////////////////////
@@ -47,10 +47,8 @@ font::extents( const std::string &utf8 )
 		if ( r == 0 || ccode == '\0' )
 			break;
 
-		const glyph &g = get_glyph( ccode );
-
-		const text_extents &gext = g.extents();
-		double k = g.kerning( prev );
+		const text_extents &gext = get_glyph( ccode );
+		double k = kerning( prev, ccode );
 
 		if ( prev == L'\0' )
 			retval.x_bearing = gext.x_bearing;
@@ -108,10 +106,8 @@ font::render( std::vector<float> &outCoords,
 			if ( r == 0 || ccode == '\0' )
 				break;
 
-			const glyph &g = get_glyph( ccode );
-
-			const text_extents &gext = g.extents();
-			double k = g.kerning( prev );
+			const text_extents &gext = get_glyph( ccode );
+			double k = kerning( prev, ccode );
 			curposX -= k;
 
 			auto idx_base_i = _glyph_index_offset.find( ccode );
@@ -155,10 +151,110 @@ font::render( std::vector<float> &outCoords,
 ////////////////////////////////////////
 
 void
+font::add_glyph( char32_t char_code, const uint8_t *glData, size_t glPitch, size_t w, size_t h )
+{
+	// We want each glyph to be separated by at least one black pixel
+	// (for example for shader used in demo-subpixel.c)
+	base::pack::area gA = _glyph_pack.insert( w + 1, h + 1 );
+	while ( gA.empty() )
+	{
+		bump_glyph_store_size();
+		gA = _glyph_pack.insert( w + 1, h + 1 );
+	}
+
+	_glyph_index_offset[char_code] = _glyph_coords.size();
+	int bmW = _glyph_pack.width();
+	int bmH = _glyph_pack.height();
+	double texNormW = static_cast<double>( bmW );
+	double texNormH = static_cast<double>( bmH );
+
+	if ( gA.flipped( w + 1, h + 1 ) )
+	{
+		// store things ... flipped so
+		// upper left is at x, y + w,
+		// upper right is at x, y
+		// lower left is at x + h, y + w
+		// lower right is at x + h, y
+		uint8_t *bmData = _glyph_bitmap.data();
+		for ( size_t y = 0; y <= w; ++y )
+		{
+			size_t destY = gA.y + y;
+			if ( y == w )
+			{
+				for ( size_t x = 0, destX = gA.x; x <= h; ++x, ++destX )
+					bmData[destY*bmW + destX] = 0;
+			}
+			else
+			{
+				int srcX = w - y - 1;
+				int destX = gA.x;
+				for ( size_t x = 0; x < h; ++x, ++destX )
+				{
+					bmData[destY*bmW + destX] = glData[x*glPitch + srcX];
+				}
+				bmData[destY*bmW + destX] = 0;
+			}
+		}
+
+		float leftX = static_cast<double>(gA.x) / texNormW;
+		float topY = static_cast<double>(gA.y) / texNormH;
+		float rightX = static_cast<double>(gA.x + h) / texNormW;
+		float bottomY = static_cast<double>(gA.y + w) / texNormH;
+
+		_glyph_coords.push_back( leftX );
+		_glyph_coords.push_back( bottomY );
+		_glyph_coords.push_back( leftX );
+		_glyph_coords.push_back( topY );
+		_glyph_coords.push_back( rightX );
+		_glyph_coords.push_back( topY );
+		_glyph_coords.push_back( rightX );
+		_glyph_coords.push_back( bottomY );
+	}
+	else
+	{
+		for ( size_t y = 0; y <= h; ++y )
+		{
+			uint8_t *bmLine = _glyph_bitmap.data() + bmW * ( gA.y + y );
+			if ( y == h )
+			{
+				for ( size_t x = 0; x <= w; ++x )
+					bmLine[x] = 0;
+			}
+			else
+			{
+				bmLine += gA.x;
+				const uint8_t *glLine = glData + y * glPitch;
+				for ( size_t x = 0; x < w; ++x )
+					bmLine[x] = glLine[x];
+				bmLine[w] = 0;
+			}
+		}
+
+		// things go in naturally, upper left of bitmap is at x, y
+		float leftX = static_cast<double>(gA.x) / texNormW;
+		float topY = static_cast<double>(gA.y) / texNormH;
+		float rightX = static_cast<double>(gA.x + w) / texNormW;
+		float bottomY = static_cast<double>(gA.y + h) / texNormH;
+
+		_glyph_coords.push_back( leftX );
+		_glyph_coords.push_back( topY );
+		_glyph_coords.push_back( rightX );
+		_glyph_coords.push_back( topY );
+		_glyph_coords.push_back( rightX );
+		_glyph_coords.push_back( bottomY );
+		_glyph_coords.push_back( leftX );
+		_glyph_coords.push_back( bottomY );
+	}
+	++_glyph_version;
+}
+
+////////////////////////////////////////
+
+void
 font::bump_glyph_store_size( void )
 {
-	int nPackW = _glyph_pack.width();
-	int nPackH = _glyph_pack.height();
+	size_t nPackW = _glyph_pack.width();
+	size_t nPackH = _glyph_pack.height();
 	if ( nPackW == 0 )
 		nPackW = 256;
 	else if ( nPackW <= nPackH )

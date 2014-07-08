@@ -11,7 +11,6 @@
 #include "dispatcher.h"
 #include "keyboard.h"
 #include "mouse.h"
-#include "font_manager.h"
 
 namespace platform
 {
@@ -82,12 +81,6 @@ public:
 	/// Get the main system mouse.
 	/// @return The mouse
 	virtual std::shared_ptr<mouse> get_mouse( void ) = 0;
-
-	/// @brief Get the font manager.
-	///
-	/// Get the system font manager.
-	/// @return The font manager
-	virtual std::shared_ptr<font_manager> get_font_manager( void ) = 0;
 
 private:
 	std::string _name;

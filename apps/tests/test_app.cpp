@@ -13,8 +13,8 @@
 #include <gui/button.h>
 #include <gui/slider.h>
 #include <gui/background_color.h>
-#include <gui/scroll_area.h>
-#include <gui/tree_node.h>
+//#include <gui/scroll_area.h>
+//#include <gui/tree_node.h>
 #include <gui/line_edit.h>
 #include <gui/color_picker.h>
 
@@ -24,14 +24,6 @@ std::shared_ptr<gui::window> extra;
 
 namespace {
 
-struct test_record : public model::record
-{
-	field<std::string> title = field<std::string>( this );
-	field<double> rating = field<double>( this, 1.0 );
-};
-
-std::shared_ptr<test_record> testrec = std::make_shared<test_record>();
-
 ////////////////////////////////////////
 
 std::shared_ptr<gui::form> build_form( direction dir )
@@ -40,23 +32,38 @@ std::shared_ptr<gui::form> build_form( direction dir )
 	container->set_spacing( 12, 6 );
 	container->set_pad( padding, padding, padding, padding );
 
+	auto label = std::make_shared<gui::label>( "Hello World" );
 	auto button = std::make_shared<gui::button>( "Click Me" );
-	button->when_activated += []()
+	button->when_activated.connect( [=]()
 	{
-		testrec->title = "Goodbye World";
-	};
+		label->set_text( "Goodbye World" );
+	} );
 
 	auto popup = std::make_shared<gui::button>( "Pop up" );
-	popup->when_activated += []()
+	popup->when_activated.connect( []()
 	{
 		extra = app->new_popup();
 		extra->show();
-	};
+	} );
 
-	container->add( std::make_shared<gui::label>( model::make_datum( testrec, testrec->title ) ), button );
-	container->add( std::make_shared<gui::label>( "Button" ), popup );
-	container->add( std::make_shared<gui::label>( "What" ), std::make_shared<gui::slider>( model::make_datum( testrec, testrec->rating ) ) );
-	container->add( std::make_shared<gui::label>( "Who" ), std::make_shared<gui::slider>( model::make_datum( testrec, testrec->rating ) ) );
+	auto slider1 = std::make_shared<gui::slider>( 0.5 );
+	auto slider2 = std::make_shared<gui::slider>( 0.5 );
+
+	slider1->when_changed.connect( [=]( double x )
+	{
+		slider2->set_value( x );
+	} );
+
+	slider2->when_changing.connect( [=]( double x )
+	{
+		slider1->set_value( x );
+	} );
+
+
+	container->add( label, button );
+//	container->add( std::make_shared<gui::label>( "Button" ), popup );
+	container->add( std::make_shared<gui::label>( "What" ), slider1 );
+	container->add( std::make_shared<gui::label>( "Who" ), slider2 );
 	return container;
 }
 
@@ -76,7 +83,7 @@ std::shared_ptr<gui::background> build_grid( direction dir )
 		row.clear();
 		for ( size_t x = 0; x < 5; ++x )
 		{
-			row.push_back( std::make_shared<gui::label>( name, alignment::CENTER ) );
+			row.push_back( std::make_shared<gui::label>( name, base::alignment::CENTER ) );
 			++name[0];
 		}
 		container->add_row( row, weights[y] );
@@ -103,7 +110,7 @@ std::shared_ptr<gui::simple_container> build_box( direction dir )
 	std::vector<std::shared_ptr<gui::widget>> row;
 	for ( size_t y = 0; y < 5; ++y )
 	{
-		container->add( std::make_shared<gui::label>( name, alignment::CENTER ) );
+		container->add( std::make_shared<gui::label>( name, base::alignment::CENTER ) );
 		++name[0];
 	}
 
@@ -112,6 +119,7 @@ std::shared_ptr<gui::simple_container> build_box( direction dir )
 
 ////////////////////////////////////////
 
+/*
 std::shared_ptr<gui::tree_node> build_tree( direction dir )
 {
 	auto container = std::make_shared<gui::tree_node>( 24.0, dir );
@@ -126,10 +134,10 @@ std::shared_ptr<gui::tree_node> build_tree( direction dir )
 		if( y == 1 )
 		{
 			auto button = std::make_shared<gui::button>( "+" );
-			button->when_activated += [=]( void )
+			button->when_activated.connect( [=]( void )
 			{
 				node->set_collapsed( !node->collapsed() );
-			};
+			} );
 			node->set_root( button );
 		}
 		else
@@ -147,6 +155,8 @@ std::shared_ptr<gui::tree_node> build_tree( direction dir )
 
 	return container;
 }
+	*/
+
 
 ////////////////////////////////////////
 
@@ -156,13 +166,14 @@ std::shared_ptr<gui::simple_container> build_edit( direction dir )
 	container->set_spacing( 12, 6 );
 	container->set_pad( padding, padding, padding, padding );
 
-	container->add( std::make_shared<gui::label>( model::make_datum( testrec, testrec->title ) ) );
-	container->add( std::make_shared<gui::line_edit>( model::make_datum( testrec, testrec->title ) ) );
+	container->add( std::make_shared<gui::label>( "Edit" ) );
+	container->add( std::make_shared<gui::line_edit>( "Some text" ) );
 	return container;
 }
 
 ////////////////////////////////////////
 
+/*
 std::shared_ptr<gui::widget> build_all( direction dir )
 {
 	auto container = std::make_shared<gui::simple_container>( dir );
@@ -179,6 +190,7 @@ std::shared_ptr<gui::widget> build_all( direction dir )
 
 	return scroll;
 }
+*/
 
 ////////////////////////////////////////
 
@@ -198,11 +210,9 @@ std::shared_ptr<gui::simple_container> build_color( direction dir )
 
 int safemain( int argc, char **argv )
 {
-	testrec->title = "Hello World";
-
 	app = std::make_shared<gui::application>();
 	app->push();
-	app->set_style( std::make_shared<gui::dark_style>() );
+//	app->set_style( std::make_shared<gui::dark_style>() );
 
 	auto win = app->new_window();
 	win->set_title( app->active_platform() );
@@ -230,20 +240,25 @@ int safemain( int argc, char **argv )
 		win->set_widget( build_grid( dir ) );
 	else if ( test == "box" )
 		win->set_widget( build_box( dir ) );
+	/*
 	else if ( test == "tree" )
 		win->set_widget( build_tree( dir ) );
+	*/
 	else if ( test == "edit" )
 		win->set_widget( build_edit( dir ) );
 	else if ( test == "color" )
 		win->set_widget( build_color( dir ) );
+	/*
 	else if ( test == "all" )
 		win->set_widget( build_all( dir ) );
+	*/
 	else
 		throw std::runtime_error( "unknown test" );
 
 	win->show();
 	int code = app->run();
 	app->pop();
+	app.reset();
 	return code;
 }
 

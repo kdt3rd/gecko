@@ -93,6 +93,9 @@ public:
 	/// @brief Top right corner
 	point top_right( void ) const { return point( x2(), y1() ); }
 
+	/// @brief Top center point
+	point top_center( void ) const { return point( ( x1() + x2() ) / 2.0, y1() ); }
+
 	/// @brief Bottom left corner
 	point bottom_left( void ) const { return point( x1(), y2() ); }
 

@@ -138,6 +138,13 @@ void path::rounded_rect( const point &p1, double w, double h, double r )
 
 ////////////////////////////////////////
 
+void path::rounded_rect( const rect &r, double rad )
+{
+	rounded_rect( r.top_left(), r.bottom_right(), rad );
+}
+
+////////////////////////////////////////
+
 std::ostream &operator<<( std::ostream &out, const path &p )
 {
 	class printer

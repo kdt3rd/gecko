@@ -36,9 +36,13 @@ void platform::enroll( std::string name, std::string render, const std::function
 
 ////////////////////////////////////////
 
+namespace
+{
+	std::once_flag flag;
+}
+
 const std::vector<platform> &platform::list( void )
 {
-	static std::once_flag flag;
 	std::call_once( flag, [](){ init(); } );
 
 	std::lock_guard<std::mutex> guard( lock );
@@ -52,17 +56,14 @@ const std::vector<platform> &platform::list( void )
 
 platform &platform::common( void )
 {
-	static std::once_flag flag;
 	std::call_once( flag, [](){ init(); } );
 
 	std::lock_guard<std::mutex> guard( lock );
 	if ( platforms == nullptr )
-		throw std::runtime_error( "no platforms found" );
+		throw std::runtime_error( "platform not found" );
 
-	return platforms->front();
+	return platforms->front();;
 }
-
-////////////////////////////////////////
 
 ////////////////////////////////////////
 

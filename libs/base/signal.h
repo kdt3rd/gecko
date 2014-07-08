@@ -236,14 +236,14 @@ public:
 	/// @brief Add a callback
 	///
 	/// Adds a new function or lambda as signal handler, returns a handler connection ID.
-	connection operator+=( const callback &cb )
+	connection connect( const callback &cb )
 	{
 		ensure_ring();
 		return _callback_ring->add_before( cb );
 	}
 
 	/// Operator to remove a signal handler through it connection ID, returns if a handler was removed.
-	bool operator-=( connection conn )
+	bool disconnect( connection conn )
 	{
 		return _callback_ring ? _callback_ring->remove_sibling( conn ) : false;
 	}
