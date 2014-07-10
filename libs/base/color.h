@@ -96,6 +96,9 @@ public:
 	/// @brief Mix two colors together
 	static color mix( const color &a, const color &b, double m = 0.5 );
 
+	static color white;
+	static color black;
+
 private:
 	double _r = 0.0, _g = 0.0, _b = 0.0, _a = 0.0;
 };
