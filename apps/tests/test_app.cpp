@@ -200,8 +200,8 @@ std::shared_ptr<gui::simple_container> build_color( direction dir )
 	container->set_spacing( 12, 6 );
 	container->set_pad( padding, padding, padding, padding );
 
-	container->add( std::make_shared<gui::color_picker>( base::color::space::HSL ), 1.0 );
-	container->add( std::make_shared<gui::color_picker>( base::color::space::LAB ), 1.0 );
+	container->add( std::make_shared<gui::color_picker>(), 1.0 );
+	container->add( std::make_shared<gui::color_picker>(), 1.0 );
 
 	return container;
 }

@@ -14,8 +14,8 @@ namespace gui
 
 ////////////////////////////////////////
 
-color_picker::color_picker( base::color::space space )
-	: _space( space ), _current( { 1, 0, 0, 1 } )
+color_picker::color_picker( void )
+	: _current( { 1, 0, 0, 1 } )
 {
 	set_minimum( 120, 120 );
 }
@@ -24,43 +24,39 @@ color_picker::color_picker( base::color::space space )
 
 namespace
 {
-	/*
-	inline double radial_square( double a )
-	{
-		a = std::fmod( a + PI/4, PI/2 ) - PI/4;
-		return 1 / std::cos( a );
-	}
-	*/
 }
 
 void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
 	base::path path;
 	base::paint paint;
+	base::gradient grad;
 	draw::object obj;
 
-	/*
-	base::rect tmp( radius() * 2, radius() * 2 );
-	tmp.set_center( center() );
-	path.rounded_rect( tmp, 10.0 );
-	path.circle( center(), radius()/2.0 );
-	paint.set_fill_color( { 0.84, 0.84, 0.84 } );
+	// Draw the background and sample
+	grad.add_stop( 0.0, _current );
+	grad.add_stop( 0.6666, _current );
+	grad.add_stop( 0.6666, base::color::white );
+	grad.add_stop( 1.0, base::color::white );
+
+	path.circle( center(), radius()*0.70 );
+	paint.set_fill_radial( center(), radius()*0.70, grad );
+
 	obj.create( canvas, path, paint );
 	obj.draw( *canvas );
-	*/
 
 	path.clear();
 	path.circle( center(), radius()*0.95 );
-	path.circle( center(), radius()*0.7 );
+	path.circle( center(), radius()*0.70 );
 
-	base::gradient grad;
+	grad.clear();
+	base::color c;
 	for ( size_t i = 0; i <= 36; ++i )
 	{
 		double v = i / 36.0;
-		base::color c( base::color::space::HSL, v * 2.0 * PI, 0.75, 0.5 );
-		grad.add_stop( v, c );
+		c.set_hsl( v * 2.0 * PI, 1.0, 0.5 );
+		grad.add_stop( v, base::color( base::color::space::HSL, v * 2.0 * PI, 1.0, 0.5 ) );
 	}
-
 	paint.set_fill_conical( center(), grad );
 
 	obj.create( canvas, path, paint );
@@ -73,11 +69,13 @@ bool color_picker::mouse_press( const base::point &p, int b )
 {
 	if ( b == 1 )
 	{
-		double r1 = radius();
-		double r2 = std::max( r1 - 24, 0.0 );
-		if ( base::point::distance( p, center() ) > r2 )
+		double r = base::point::distance( p, center() ) / radius();
+		if ( r > 0.70 && r < 0.95 )
 		{
 			_tracking = true;
+			base::point d = p.delta( center() );
+			double h = std::atan2( -d.x(), -d.y() );
+			_current.set_hsl( h, 1.0, 0.5 );
 			return mouse_move( p );
 		}
 	}
@@ -104,10 +102,8 @@ bool color_picker::mouse_move( const base::point &p )
 	if ( _tracking )
 	{
 		base::point d = p.delta( center() );
-		double h, s, l;
-		_current.get_hsl( h, s, l );
-		h = std::atan2( d.y(), d.x() );
-		_current.set_hsl( h, s, l );
+		double h = std::atan2( -d.x(), -d.y() );
+		_current.set_hsl( h, 1.0, 0.5 );
 		invalidate();
 		return true;
 	}
