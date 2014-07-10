@@ -54,6 +54,7 @@ public:
 
 	void circle( const point &center, double radius );
 
+	void rectangle( const rect &r );
 	void rectangle( const point &p1, const point &p2 );
 	void rectangle( const point &p1, double w, double h ) { rectangle( p1, p1 + point( w, h ) ); }
 

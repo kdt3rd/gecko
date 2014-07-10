@@ -96,6 +96,17 @@ void path::circle( const point &center, double radius )
 
 ////////////////////////////////////////
 
+void path::rectangle( const rect &r )
+{
+	move_to( r.top_left() );
+	line_to( r.top_right() );
+	line_to( r.bottom_right() );
+	line_to( r.bottom_left() );
+	close();
+}
+
+////////////////////////////////////////
+
 void path::rectangle( const point &p1, const point &p2 )
 {
 	const double x1 = std::min( p1.x(), p2.x() );
