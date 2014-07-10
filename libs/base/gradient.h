@@ -40,6 +40,8 @@ public:
 
 	gradient &operator=( const gradient &g ) { _stops = g._stops; return *this; }
 
+	void clear( void ) { _stops.clear(); }
+
 private:
 	gradient( gradient && ) = delete;
 
