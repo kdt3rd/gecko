@@ -86,6 +86,9 @@ void window::paint( void )
 {
 	_window->acquire();
 	glViewport( 0, 0, _window->width(), _window->height() );
+	glEnable( GL_MULTISAMPLE );
+	glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
+	glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
 
 	_canvas->clear_color( { 0.13, 0.13, 0.13, 1 } );
 	_canvas->clear();
