@@ -1,11 +1,14 @@
 
 #include "color_picker.h"
 #include <draw/object.h>
+#include <draw/color_wheel.h>
 
+/*
 namespace
 {
 	constexpr double PI = 3.14159265358979323846;
 }
+*/
 
 ////////////////////////////////////////
 
@@ -28,39 +31,28 @@ namespace
 
 void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 {
-	base::path path;
-	base::paint paint;
-	base::gradient grad;
-	draw::object obj;
+	draw::color_wheel wheel;
+	wheel.create( canvas, center(), radius() * 0.95 );
+	wheel.draw( *canvas );
+
 
 	// Draw the background and sample
+	base::gradient grad;
 	grad.add_stop( 0.0, _current );
 	grad.add_stop( 0.6666, _current );
 	grad.add_stop( 0.6666, base::color::white );
 	grad.add_stop( 1.0, base::color::white );
 
-	path.circle( center(), radius()*0.70 );
-	paint.set_fill_radial( center(), radius()*0.70, grad );
+	base::path path;
+	path.circle( center(), radius()*0.75 );
 
+	base::paint paint;
+	paint.set_fill_radial( center(), radius()*0.75, grad );
+
+	draw::object obj;
 	obj.create( canvas, path, paint );
 	obj.draw( *canvas );
 
-	path.clear();
-	path.circle( center(), radius()*0.95 );
-	path.circle( center(), radius()*0.70 );
-
-	grad.clear();
-	base::color c;
-	for ( size_t i = 0; i <= 36; ++i )
-	{
-		double v = i / 36.0;
-		c.set_hsl( v * 2.0 * PI, 1.0, 0.5 );
-		grad.add_stop( v, base::color( base::color::space::HSL, v * 2.0 * PI, 1.0, 0.5 ) );
-	}
-	paint.set_fill_conical( center(), grad );
-
-	obj.create( canvas, path, paint );
-	obj.draw( *canvas );
 }
 
 ////////////////////////////////////////
