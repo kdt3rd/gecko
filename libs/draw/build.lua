@@ -11,6 +11,7 @@ srcs = {
 	"composite.cpp";
 	"object.cpp";
 	"stretchable.cpp";
+	"color_wheel.cpp";
 }
 
 tess = {
