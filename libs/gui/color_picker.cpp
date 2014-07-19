@@ -66,7 +66,7 @@ bool color_picker::mouse_press( const base::point &p, int b )
 		{
 			_tracking = true;
 			base::point d = p.delta( center() );
-			double h = std::atan2( -d.x(), -d.y() );
+			double h = std::atan2( d.y(), d.x() );
 			_current.set_hsl( h, 1.0, 0.5 );
 			return mouse_move( p );
 		}
@@ -94,7 +94,7 @@ bool color_picker::mouse_move( const base::point &p )
 	if ( _tracking )
 	{
 		base::point d = p.delta( center() );
-		double h = std::atan2( -d.x(), -d.y() );
+		double h = std::atan2( d.y(), d.x() );
 		_current.set_hsl( h, 1.0, 0.5 );
 		invalidate();
 		return true;
