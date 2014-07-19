@@ -20,7 +20,7 @@
 
 constexpr double padding = 12;
 std::shared_ptr<gui::application> app;
-std::shared_ptr<gui::window> extra;
+std::shared_ptr<gui::menu> extra;
 
 namespace {
 
@@ -42,7 +42,11 @@ std::shared_ptr<gui::form> build_form( direction dir )
 	auto popup = std::make_shared<gui::button>( "Pop up" );
 	popup->when_activated.connect( []()
 	{
-		extra = app->new_popup();
+		extra = app->new_menu();
+		extra->move( 150, 150 );
+		extra->add_entry( "Menu 1" );
+		extra->add_entry( "Menu 2" );
+		extra->add_entry( "Menu 3" );
 		extra->show();
 	} );
 
@@ -61,7 +65,7 @@ std::shared_ptr<gui::form> build_form( direction dir )
 
 
 	container->add( label, button );
-//	container->add( std::make_shared<gui::label>( "Button" ), popup );
+	container->add( std::make_shared<gui::label>( "Button" ), popup );
 	container->add( std::make_shared<gui::label>( "What" ), slider1 );
 	container->add( std::make_shared<gui::label>( "Who" ), slider2 );
 	return container;
