@@ -16,7 +16,7 @@ window::window( const std::shared_ptr<platform::window> &w )
 {
 	precondition( bool(_window), "null window" );
 	_window->exposed.callback( [this] ( void ) { paint(); } );
-	_window->resized.callback( [this] ( double w, double h ) { resize( w, h ); } );
+	_window->resized.callback( [this] ( double w, double h ) { resized( w, h ); } );
 	_window->mouse_pressed.callback( [this]( const std::shared_ptr<platform::mouse> &, const base::point &p, int b ) { mouse_press( p, b ); } );
 	_window->mouse_released.callback( [this]( const std::shared_ptr<platform::mouse> &, const base::point &p, int b ) { mouse_release( p, b ); } );
 	_window->mouse_moved.callback( [this]( const std::shared_ptr<platform::mouse> &, const base::point &p ) { mouse_moved( p ); } );
@@ -44,6 +44,27 @@ void window::set_title( const std::string &t )
 void window::show( void )
 {
 	_window->show();
+}
+
+////////////////////////////////////////
+
+void window::hide( void )
+{
+	_window->hide();
+}
+
+////////////////////////////////////////
+
+void window::move( double x, double y )
+{
+	_window->move( x, y );
+}
+
+////////////////////////////////////////
+
+void window::resize( double w, double h )
+{
+	_window->resize( w, h );
 }
 
 ////////////////////////////////////////
@@ -112,7 +133,7 @@ void window::paint( void )
 
 ////////////////////////////////////////
 
-void window::resize( double w, double h )
+void window::resized( double w, double h )
 {
 	if ( _widget )
 		in_context( [&,this]

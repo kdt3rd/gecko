@@ -23,6 +23,10 @@ public:
 	void set_title( const std::string &t );
 
 	void show( void );
+	void hide( void );
+
+	void move( double x, double y );
+	void resize( double w, double h );
 
 	void set_widget( const std::shared_ptr<widget> &w );
 	std::shared_ptr<widget> get_widget( void ) { return _widget; }
@@ -34,7 +38,7 @@ public:
 
 protected:
 	void paint( void );
-	void resize( double w, double h );
+	void resized( double w, double h );
 
 	void mouse_press( const base::point &p, int button );
 	void mouse_release( const base::point &p, int button );

@@ -225,6 +225,13 @@ rect window::geometry( void )
 
 ////////////////////////////////////////
 
+void window::move( double x, double y )
+{
+	XMoveWindow( _display.get(), _win, int( x + 0.5 ), int( y + 0.5 ) );
+}
+
+////////////////////////////////////////
+
 void window::resize( double w, double h )
 {
 	XResizeWindow( _display.get(), _win, (unsigned int)( std::max( 0.0, w ) + 0.5 ), (unsigned int)( std::max( 0.0, h ) + 0.5 ) );

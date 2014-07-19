@@ -58,12 +58,21 @@ public:
 
 //	virtual void set_geometry( const rect &r ) = 0;
 
+	/// @brief Move the window.
+	///
+	/// Move the window to the given position.
+	/// @param w New width of the window
+	/// @param h New height of the window
+	virtual void move( double x, double y ) = 0;
+	void move( const base::point &p ) { resize( p.x(), p.y() ); }
+
 	/// @brief Resize the window.
 	///
 	/// Resize the window to the given size.
 	/// @param w New width of the window
 	/// @param h New height of the window
 	virtual void resize( double w, double h ) = 0;
+	void resize( const base::size &s ) { resize( s.w(), s.h() ); }
 
 	/// @brief Set minimum window size.
 	///
