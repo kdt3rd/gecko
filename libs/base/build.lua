@@ -10,6 +10,7 @@ srcs = {
 	"gradient.cpp";
 	"paint.cpp";
 	"pack.cpp";
+	"sha256.cpp";
 }
 
 Library( "base", Compile( srcs ) );
