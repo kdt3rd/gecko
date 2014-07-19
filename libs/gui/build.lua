@@ -7,6 +7,7 @@ srcs = {
 	"context.cpp";
 	"window.cpp";
 	"popup.cpp";
+	"menu.cpp";
 	"background.cpp";
 	"background_color.cpp";
 	"label.cpp";

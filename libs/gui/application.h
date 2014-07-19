@@ -5,6 +5,7 @@
 #include <set>
 #include "window.h"
 #include "popup.h"
+#include "menu.h"
 #include <script/font_manager.h>
 
 namespace gui
@@ -22,6 +23,7 @@ public:
 
 	std::shared_ptr<window> new_window( void );
 	std::shared_ptr<popup> new_popup( void );
+	std::shared_ptr<menu> new_menu( void );
 
 	int run( void );
 	void exit( int code );

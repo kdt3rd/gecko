@@ -75,6 +75,14 @@ std::shared_ptr<popup> application::new_popup( void )
 
 ////////////////////////////////////////
 
+std::shared_ptr<menu> application::new_menu( void )
+{
+	auto w = _impl->sys->new_window();
+	return std::make_shared<menu>( w );
+}
+
+////////////////////////////////////////
+
 int application::run( void )
 {
 	return _impl->dispatch->execute();
