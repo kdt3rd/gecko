@@ -74,10 +74,7 @@ public:
 	    typedef decay<U> T;
 	    auto d = dynamic_cast<derived<T>*>( _ptr.get() );
 	    if ( !d )
-		{
-			std::cout << "Ooops: " << typeid( _ptr.get() ).name() << std::endl;
 	        throw std::bad_cast();
-		}
 	    return d->_value;
 	}
 
