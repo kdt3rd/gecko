@@ -1,6 +1,4 @@
 
-// From Andrei Alexandrescu (2012)
-
 #pragma once
 
 ////////////////////////////////////////
@@ -9,6 +7,11 @@ namespace base
 {
 
 /// @brief Contains a value or an exception
+///
+/// Contains a value or exception.
+/// If it contains an exception, it will be thrown when get is called.
+/// Otherwise the value is returned from get.
+/// From Andrei Alexandrescu (2012)
 template <class T>
 class expected
 {

@@ -2,6 +2,7 @@
 Include( source_dir )
 
 srcs = {
+	"format.cpp";
 	"contract.cpp";
 	"rect.cpp";
 	"color.cpp";
