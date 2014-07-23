@@ -18,129 +18,127 @@ class expected
 public:
 	/// @brief Construct with a value
 	expected( const T &rhs )
-		: _ham( rhs ), _got_ham( true )
+		: _value( rhs ), _got_value( true )
 	{
 	}
 
 	/// @brief Construct with an rvalue
 	expected( T &&rhs )
-		: _ham( std::move( rhs ) ), _got_ham( true )
+		: _value( std::move( rhs ) ), _got_value( true )
 	{
 	}
 
 	/// @brief Copy constructor
 	expected( const expected &rhs )
-		: _got_ham( rhs._got_ham )
+		: _got_value( rhs._got_value )
 	{
-		if ( _got_ham )
-			new(&_ham) T( rhs._ham );
+		if ( _got_value )
+			new(&_value) T( rhs._value );
 		else
-			new(&_spam) std::exception_ptr( rhs._spam );
+			new(&_exc) std::exception_ptr( rhs._spam );
 	}
 
 	/// @brief Move constructor
 	expected( expected &&rhs )
-		: _got_ham( rhs._got_ham )
+		: _got_value( rhs._got_value )
 	{
-		if ( _got_ham )
-			new(&_ham) T( std::move( rhs._ham ) );
+		if ( _got_value )
+			new(&_value) T( std::move( rhs._value ) );
 		else
-			new(&_spam) std::exception_ptr( std::move( rhs._spam ) );
+			new(&_exc) std::exception_ptr( std::move( rhs._spam ) );
 	}
 
 	/// @brief Swap
 	void swap( expected& rhs )
 	{
-		if ( _got_ham )
+		if ( _got_value )
 		{
-			if ( rhs._got_ham )
+			if ( rhs._got_value )
 			{
 				using std::swap;
-				swap( _ham, rhs._ham );
+				swap( _value, rhs._value );
 			}
 			else
 			{
-				auto t = std::move( rhs._spam );
-				new(&rhs._ham) T( std::move( _ham ) );
-				new(&_spam) std::exception_ptr( t );
+				auto t = std::move( rhs._exc );
+				new(&rhs._value) T( std::move( _value ) );
+				new(&_exc) std::exception_ptr( t );
 			}
 		}
 		else
 	   	{
-			if ( rhs._got_ham )
+			if ( rhs._got_value )
 			{
 				rhs.swap( *this );
 			}
 			else
 		   	{
-				_spam.swap( rhs._spam );
-				std::swap( _got_ham, rhs._got_ham );
+				_exc.swap( rhs._spam );
+				std::swap( _got_value, rhs._got_value );
 			}
 		}
 	}
 
 	/// @brief Construct from an exception
 	template <class E>
-	static expected<T> fromException( const E &exception )
+	static expected<T> from_exception( const E &exception )
 	{
 		if ( typeid(exception) != typeid(E) )
-		{
 			throw std::invalid_argument( "slicing detected" );
-		}
-		return fromException( std::make_exception_ptr( exception ) );
+		return from_exception( std::make_exception_ptr( exception ) );
 	}
 
 	/// @brief Constructor from an exception pointer
-	static expected<T> fromException( std::exception_ptr p )
+	static expected<T> from_exception( std::exception_ptr p )
 	{
 		expected<T> result;
-		result._got_ham = false;
-		new(&result._spam) std::exception_ptr( std::move( p ) );
+		result._got_value = false;
+		new(&result._exc) std::exception_ptr( std::move( p ) );
 		return result;
 	}
 
 	/// @brief Constructor from the current exception
-	static expected<T> fromException( void )
+	static expected<T> from_exception( void )
 	{
-		return fromException( std::current_exception() );
+		return from_exception( std::current_exception() );
 	}
 
 	/// @brief Do we have a value?
 	bool valid( void ) const
 	{
-		return _got_ham;
+		return _got_value;
 	}
 
 	/// @brief Get the value (or throw the exception)
 	T &get( void )
 	{
-		if ( !_got_ham )
-			std::rethrow_exception( _spam );
-		return _ham;
+		if ( !_got_value )
+			std::rethrow_exception( _exc );
+		return _value;
 	}
 
 	/// @brief Get the const value (or throw the exception)
 	const T &get( void ) const
 	{
-		if ( !_got_ham )
-			std::rethrow_exception( _spam );
-		return _ham;
+		if ( !_got_value )
+			std::rethrow_exception( _exc );
+		return _value;
 	}
 
 	/// @brief Check if we have an exception of type E
 	template <class E>
-	bool hasException( void ) const
+	bool has_exception( void ) const
 	{
 		try
 		{
-			if ( !_got_ham )
-				std::rethrow_exception(_spam);
+			if ( !_got_value )
+				std::rethrow_exception(_exc);
 		}
-	   	catch ( const E& object )
+	   	catch ( const E &object )
 		{
 			return true;
 		}
-	   	catch (...)
+	   	catch ( ... )
 		{
 		}
 		return false;
@@ -148,7 +146,7 @@ public:
 
 	/// @brief Run a function and return an expected value
 	template <class F>
-	static expected fromCode( F fun )
+	static expected from_code( F fun )
 	{
 		try
 		{
@@ -156,18 +154,18 @@ public:
 		}
 		catch (...)
 		{
-			return fromException();
+			return from_exception();
 		}
 	}
 
 private:
 	union
 	{
-		T _ham;
-		std::exception_ptr _spam;
+		T _value;
+		std::exception_ptr _exc;
 	};
 
-	bool _got_ham;
+	bool _got_value;
 
 	expected(void )
 	{
