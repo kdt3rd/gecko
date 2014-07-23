@@ -42,11 +42,14 @@ std::shared_ptr<gui::form> build_form( direction dir )
 	auto popup = std::make_shared<gui::button>( "Pop up" );
 	popup->when_activated.connect( []()
 	{
-		extra = app->new_menu();
-		extra->move( 150, 150 );
-		extra->add_entry( "Menu 1" );
-		extra->add_entry( "Menu 2" );
-		extra->add_entry( "Menu 3" );
+		if ( !extra )
+		{
+			extra = app->new_menu();
+			extra->move( 150, 150 );
+			extra->add_entry( "Menu 1" );
+			extra->add_entry( "Menu 2" );
+			extra->add_entry( "Menu 3" );
+		}
 		extra->show();
 	} );
 

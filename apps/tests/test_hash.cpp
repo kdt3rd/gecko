@@ -1,5 +1,4 @@
 
-#include <store/hash256.h>
 #include <base/sha256.h>
 #include <base/contract.h>
 #include <sstream>
