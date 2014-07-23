@@ -80,7 +80,7 @@ format_specifier::format_specifier( const char * &fmt, const char *end )
 	}
 
 	if ( *fmt != '}' )
-		runtime_error( "format specifier expected '}' (got '{0}')", *fmt );
+		runtime_error( "format specifier expected ',' or '}' (got '{0}')", *fmt );
 }
 
 ////////////////////////////////////////

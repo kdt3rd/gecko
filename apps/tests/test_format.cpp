@@ -34,7 +34,7 @@ int safemain( void )
 	std::cout << base::format( "{0}", &x ) << std::endl;
 
 	// Finally let's try something the will error out
-	std::cout << base::format( "This will throw: {aaa}" ) << std::endl;
+	std::cout << base::format( "This will throw:\n  {0a}" ) << std::endl;
 	return 0;
 }
 

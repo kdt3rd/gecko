@@ -7,6 +7,7 @@
 #include <tuple>
 #include <stdexcept>
 #include "ansi.h"
+#include "string_util.h"
 
 namespace base
 {
@@ -157,6 +158,7 @@ std::basic_ostream<CharT> &operator<<( std::basic_ostream<CharT> &out, const for
 		size_t errpos = cur - start;
 		tmp.insert( errpos + 1, ansi::reset );
 		tmp.insert( errpos, ansi::invert );
+		tmp = replace( std::move( tmp ), '\n', "\\n" );
 		std::throw_with_nested( std::runtime_error( "parse error in format: \"" + tmp + '\"' ) );
 	}
 
