@@ -2,6 +2,7 @@
 #include <iostream>
 #include <iomanip>
 #include "format.h"
+#include "contract.h"
 
 namespace base
 {
@@ -12,10 +13,10 @@ format_specifier::format_specifier( const char * &fmt, const char *end )
 	: index( 0 ), width( -1 ), base( 10 ), precision( -1 ), alignment( -1 ), fill( ' ' ), upper_case( false ), show_plus( false )
 {
 	if ( fmt == end )
-		throw std::runtime_error( "empty format specifier" );
+		runtime_error( "empty format specifier" );
 
 	if( *fmt != '{' )
-		throw std::runtime_error( "format specifier does not begin with {" );
+		runtime_error( "format specifier expected '{' (got '{0}')", *fmt );
 	++fmt;
 	index = parse_number( fmt, end );
 	while ( *fmt == ',' )
@@ -62,13 +63,13 @@ format_specifier::format_specifier( const char * &fmt, const char *end )
 				{
 					case 'l': alignment = -1; break;
 					case 'r': alignment = 1; break;
-					default: throw std::runtime_error( "unknown alignment" );
+					default: runtime_error( "unknown alignment (got '{0}')", *fmt );
 				}
 				++fmt;
 				break;
 
 			default:
-				throw std::runtime_error( "unknown format specifier" );
+				runtime_error( "unknown format specifier (got '{0}')", *fmt );
 		}
 	}
 
@@ -79,7 +80,7 @@ format_specifier::format_specifier( const char * &fmt, const char *end )
 	}
 
 	if ( *fmt != '}' )
-		throw std::runtime_error( "format specifier did not end with }" );
+		runtime_error( "format specifier expected '}' (got '{0}')", *fmt );
 }
 
 ////////////////////////////////////////
@@ -96,7 +97,7 @@ format_specifier::apply( std::ostream &out )
 		case 8: out.setf( std::ios_base::oct ); break;
 		case 10: out.setf( std::ios_base::dec ); break;
 		case 16: out.setf( std::ios_base::hex ); break;
-		default: throw std::runtime_error( "unsupported base" );
+		default: runtime_error( "unsupported base: {0}", base );
 	}
 
 	out.unsetf( std::ios_base::floatfield );
@@ -157,7 +158,7 @@ format_specifier::parse_number( const char * &fmt, const char *end )
 	}
 
 	if ( digits == 0 )
-		throw std::runtime_error( "expected number" );
+		runtime_error( "expected number (got '{0}')", *fmt );
 
 	return n;
 }

@@ -5,6 +5,8 @@
 #include <iostream>
 #include <sstream>
 #include <tuple>
+#include <stdexcept>
+#include "ansi.h"
 
 namespace base
 {
@@ -22,7 +24,7 @@ public:
 
 	operator std::string()
 	{
-		std::stringstream str;
+		std::ostringstream str;
 		str << *this;
 		return str.str();
 	}
@@ -129,22 +131,34 @@ std::basic_ostream<CharT> &operator<<( std::basic_ostream<CharT> &out, const for
 {
 	const char *start = fmt.format_begin();
 	const char *end = fmt.format_end();
+	const char *cur = start;
 	const char *prev = start;
 
-	while ( format_specifier::begin( start, end ) )
+	try
 	{
-		out.write( prev, int( start - prev ) );
-		std::ios::fmtflags flags( out.flags() );
+		while ( format_specifier::begin( cur, end ) )
+		{
+			out.write( prev, int( cur - prev ) );
+			std::ios::fmtflags flags( out.flags() );
 
-		format_specifier spec( start, end );
-		spec.apply( out );
+			format_specifier spec( cur, end );
+			spec.apply( out );
 
-		fmt.output( out, size_t(spec.index) );
-		prev = start + 1;
+			fmt.output( out, size_t(spec.index) );
+			prev = cur + 1;
 
-		out.flags( flags );
+			out.flags( flags );
+		}
+		out.write( prev, int( cur - prev ) );
 	}
-	out.write( prev, int( start - prev ) );
+	catch ( ... )
+	{
+		std::string tmp( start, end );
+		size_t errpos = cur - start;
+		tmp.insert( errpos + 1, ansi::reset );
+		tmp.insert( errpos, ansi::invert );
+		std::throw_with_nested( std::runtime_error( "parse error in format: \"" + tmp + '\"' ) );
+	}
 
 	return out;
 }

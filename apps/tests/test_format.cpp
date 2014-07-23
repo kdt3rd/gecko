@@ -32,6 +32,9 @@ int safemain( void )
 	// Print pointers
 	int x = 1;
 	std::cout << base::format( "{0}", &x ) << std::endl;
+
+	// Finally let's try something the will error out
+	std::cout << base::format( "This will throw: {aaa}" ) << std::endl;
 	return 0;
 }
 
@@ -45,6 +48,7 @@ int main( void )
 	}
 	catch ( const std::exception &e )
 	{
+		std::cerr << '\n';
 		base::print_exception( std::cerr, e );
 	}
 }
