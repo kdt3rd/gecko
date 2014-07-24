@@ -14,7 +14,7 @@ void open_file( const std::string &name )
 	}
 	catch ( ... )
 	{
-		throw_add( "couldn't open file \"{0}\"", name );
+		throw_add_location( "couldn't open file \"{0}\"", name );
 	}
 }
 
