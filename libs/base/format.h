@@ -159,7 +159,7 @@ std::basic_ostream<CharT> &operator<<( std::basic_ostream<CharT> &out, const for
 		tmp.insert( errpos + 1, ansi::reset );
 		tmp.insert( errpos, ansi::invert );
 		tmp = replace( std::move( tmp ), '\n', "\\n" );
-		std::throw_with_nested( std::runtime_error( "parse error in format: \"" + tmp + '\"' ) );
+		std::throw_with_nested( std::runtime_error( "parse error in format \"" + tmp + '\"' ) );
 	}
 
 	return out;

@@ -80,7 +80,7 @@ public:
 	/// @brief Get the current matrix
 	matrix4 current_matrix( void )
 	{
-		precondition( !_matrix.empty(), "no matrix available");
+		precondition( !_matrix.empty(), "no matrix available" );;;
 		return _matrix.back();
 	}
 

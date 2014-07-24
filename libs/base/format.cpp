@@ -12,11 +12,9 @@ namespace base
 format_specifier::format_specifier( const char * &fmt, const char *end )
 	: index( 0 ), width( -1 ), base( 10 ), precision( -1 ), alignment( -1 ), fill( ' ' ), upper_case( false ), show_plus( false )
 {
-	if ( fmt == end )
-		runtime_error( "empty format specifier" );
+	precondition( fmt != end, "empty format specifier" );
+	precondition( *fmt == '{', "format specifier expected '{' (got '{0}')", *fmt );
 
-	if( *fmt != '{' )
-		runtime_error( "format specifier expected '{' (got '{0}')", *fmt );
 	++fmt;
 	index = parse_number( fmt, end );
 	while ( *fmt == ',' )
@@ -63,13 +61,13 @@ format_specifier::format_specifier( const char * &fmt, const char *end )
 				{
 					case 'l': alignment = -1; break;
 					case 'r': alignment = 1; break;
-					default: runtime_error( "unknown alignment (got '{0}')", *fmt );
+					default: throw_runtime( "unknown alignment (got '{0}')", *fmt );
 				}
 				++fmt;
 				break;
 
 			default:
-				runtime_error( "unknown format specifier (got '{0}')", *fmt );
+				throw_runtime( "unknown format specifier (got '{0}')", *fmt );
 		}
 	}
 
@@ -80,7 +78,7 @@ format_specifier::format_specifier( const char * &fmt, const char *end )
 	}
 
 	if ( *fmt != '}' )
-		runtime_error( "format specifier expected ',' or '}' (got '{0}')", *fmt );
+		throw_runtime( "format specifier expected ',' or '}' (got '{0}')", *fmt );
 }
 
 ////////////////////////////////////////
@@ -97,7 +95,7 @@ format_specifier::apply( std::ostream &out )
 		case 8: out.setf( std::ios_base::oct ); break;
 		case 10: out.setf( std::ios_base::dec ); break;
 		case 16: out.setf( std::ios_base::hex ); break;
-		default: runtime_error( "unsupported base: {0}", base );
+		default: throw_runtime( "unsupported base: {0}", base );
 	}
 
 	out.unsetf( std::ios_base::floatfield );
@@ -158,7 +156,7 @@ format_specifier::parse_number( const char * &fmt, const char *end )
 	}
 
 	if ( digits == 0 )
-		runtime_error( "expected number (got '{0}')", *fmt );
+		throw_runtime( "expected number (got '{0}')", *fmt );
 
 	return n;
 }
