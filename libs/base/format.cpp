@@ -15,7 +15,6 @@ format_specifier::format_specifier( const char * &fmt, const char *end )
 	precondition( fmt != end, "empty format specifier" );
 	precondition( *fmt == '{', "format specifier expected '{' (got '{0}')", *fmt );
 
-	++fmt;
 	index = parse_number( fmt, end );
 	while ( *fmt == ',' )
 	{
@@ -23,18 +22,15 @@ format_specifier::format_specifier( const char * &fmt, const char *end )
 		switch ( *fmt )
 		{
 			case 'w':
-				++fmt;
 				width = parse_number( fmt, end );
 				break;
 
 			case 'b':
-				++fmt;
 				base = parse_number( fmt, end );
 				upper_case = false;
 				break;
 
 			case 'B':
-				++fmt;
 				base = parse_number( fmt, end );
 				upper_case = true;
 				break;
@@ -51,7 +47,6 @@ format_specifier::format_specifier( const char * &fmt, const char *end )
 				break;
 
 			case 'p':
-				++fmt;
 				precision = parse_number( fmt, end );
 				break;
 
@@ -61,13 +56,13 @@ format_specifier::format_specifier( const char * &fmt, const char *end )
 				{
 					case 'l': alignment = -1; break;
 					case 'r': alignment = 1; break;
-					default: throw_runtime( "unknown alignment (got '{0}')", *fmt );
+					default: throw_runtime( "expected alignment 'l' or 'r' (got '{0}')", *fmt );
 				}
 				++fmt;
 				break;
 
 			default:
-				throw_runtime( "unknown format specifier (got '{0}')", *fmt );
+				throw_runtime( "expected 'w', 'b', 'B', 'f', '+', 'p', or 'a' (got '{0}')", *fmt );
 		}
 	}
 
@@ -78,7 +73,7 @@ format_specifier::format_specifier( const char * &fmt, const char *end )
 	}
 
 	if ( *fmt != '}' )
-		throw_runtime( "format specifier expected ',' or '}' (got '{0}')", *fmt );
+		throw_runtime( "expected ',' or '}' (got '{0}')", *fmt );
 }
 
 ////////////////////////////////////////
@@ -142,6 +137,7 @@ format_specifier::begin( const char * &fmt, const char *end )
 int
 format_specifier::parse_number( const char * &fmt, const char *end )
 {
+	char start = *fmt++;
 	int n = 0;
 	int digits = 0;
 
@@ -156,7 +152,7 @@ format_specifier::parse_number( const char * &fmt, const char *end )
 	}
 
 	if ( digits == 0 )
-		throw_runtime( "expected number (got '{0}')", *fmt );
+		throw_runtime( "expected number after '{0}' (got '{1}')", start, *fmt );
 
 	return n;
 }
