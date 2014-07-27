@@ -3,3 +3,5 @@
 /// @brief Various utility classes 
 ///
 /// Utility classes used almost everywhere.
+/// It contains only classes which do not depend on anything else, including third-party libraries.
+

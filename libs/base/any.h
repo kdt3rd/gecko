@@ -23,6 +23,7 @@ public:
 	template<class T> using decay = typename std::decay<T>::type;
 
 	/// @brief Default constructor
+	/// It contains no value until one is assigned.
 	any( void )
 	{
 	}
@@ -58,9 +59,9 @@ public:
 		return bool( _ptr );
 	}
 
-	/// @brief Is the any value of type U
+	/// @brief Is the any value of type U?
 	template<class U>
-	bool is( void ) const
+	bool is_type( void ) const
 	{
 	    typedef decay<U> T;
 	    auto d = dynamic_cast<derived<T>*>( _ptr.get() );

@@ -10,8 +10,9 @@ namespace base
 
 ////////////////////////////////////////
 
-/// @brief Exception describing the file/line
+/// @brief Exception describing the source file/line
 /// @sa throw_location
+/// @sa throw_add_location
 class location_exception : public std::exception
 {
 public:
@@ -72,11 +73,11 @@ public:
 
 ////////////////////////////////////////
 
-}
-
-////////////////////////////////////////
+/// @defgroup base base
+/// @{
 
 /// @brief Throw the exception, adding it's source location
+/// @param exc Exception to add source location to
 /// @sa base::location_exception
 #define throw_location( exc ) \
 	do { \
@@ -87,7 +88,7 @@ public:
 /// @brief Add a message as a nested exception
 ///
 /// Can only be called from inside a catch block.
-/// @sa base::format
+/// @param formats Format arguments.
 #define throw_add( ... ) \
 	std::throw_with_nested( std::runtime_error( base::format( __VA_ARGS__ ) ) );
 
@@ -114,5 +115,9 @@ public:
 #define postcondition( check, ... ) \
 	if ( !(check) ) throw_location( base::postcondition_error( base::format( __VA_ARGS__ ) ) )
 
+/// @}
+
 ////////////////////////////////////////
+
+}
 
