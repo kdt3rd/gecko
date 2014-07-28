@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <stdexcept>
+#include <system_error>
 #include "format.h"
 
 namespace base
@@ -106,6 +107,11 @@ public:
 /// @sa base::format
 #define throw_runtime( ... ) \
 	throw_location( std::runtime_error( base::format( __VA_ARGS__ ) ) )
+
+/// @brief Throw a errno error using format
+/// @sa base::format
+#define throw_errno( ... ) \
+	throw_location( std::system_error( errno, std::system_category(), base::format( __VA_ARGS__ ) ) )
 
 /// @brief If check is not true, throw a precondition_error
 #define precondition( check, ... ) \
