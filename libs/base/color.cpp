@@ -52,9 +52,6 @@ namespace
 namespace base
 {
 
-color color::white( 1, 1, 1 );
-color color::black( 0, 0, 0 );
-
 ////////////////////////////////////////
 
 void color::get_lab( double &l, double &astar, double &bstar )

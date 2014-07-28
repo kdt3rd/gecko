@@ -40,8 +40,8 @@ void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 	base::gradient grad;
 	grad.add_stop( 0.0, _current );
 	grad.add_stop( 0.6666, _current );
-	grad.add_stop( 0.6666, base::color::white );
-	grad.add_stop( 1.0, base::color::white );
+	grad.add_stop( 0.6666, base::white );
+	grad.add_stop( 1.0, base::white );
 
 	base::path path;
 	path.circle( center(), radius()*0.75 );

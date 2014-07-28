@@ -96,12 +96,18 @@ public:
 	/// @brief Mix two colors together
 	static color mix( const color &a, const color &b, double m = 0.5 );
 
-	static color white;
-	static color black;
-
 private:
 	double _r = 0.0, _g = 0.0, _b = 0.0, _a = 0.0;
 };
+
+////////////////////////////////////////
+
+constexpr color white( 1, 1, 1 );
+constexpr color black( 0, 0, 0 );
+constexpr color red( 1, 0, 0 );
+constexpr color green( 0, 1, 0 );
+constexpr color blue( 0, 0, 1 );
+
 
 ////////////////////////////////////////
 
