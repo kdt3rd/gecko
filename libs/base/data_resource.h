@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <initializer_list>
+#include "contract.h"
 
 namespace base
 {
@@ -35,7 +36,7 @@ public:
 			if ( filename == std::get<0>( t ) )
 				return std::string( std::get<1>( t ), std::get<2>( t ) );
 		}
-		throw std::runtime_error( "resource file not found: " + filename );
+		throw_runtime( "resource file not found {0}", filename );
 	}
 
 private:
