@@ -4,6 +4,7 @@
 #include "opengl.h"
 #include "enums.h"
 #include <limits>
+#include <base/color.h>
 
 namespace gl
 {
@@ -56,6 +57,13 @@ public:
 	{
 		glTexParameteri( _target, GL_TEXTURE_MIN_FILTER, static_cast<GLint>(min) );
 		glTexParameteri( _target, GL_TEXTURE_MAG_FILTER, static_cast<GLint>(mag) );
+	}
+
+	void set_border_color( const base::color &c )
+	{
+
+		float color[] = { float(c.red()), float(c.green()), float(c.blue()), float(c.alpha()) };
+		glTexParameterfv( _target, GL_TEXTURE_BORDER_COLOR, color );
 	}
 
 	void mipmap( void )
