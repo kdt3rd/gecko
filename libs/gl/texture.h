@@ -5,6 +5,7 @@
 #include "enums.h"
 #include <limits>
 #include <base/color.h>
+#include <base/contract.h>
 
 namespace gl
 {
@@ -105,12 +106,22 @@ public:
 
 	texture( void );
 
+	texture( GLuint t );
+
+	texture( texture &&other );
+
 	texture( const texture &other ) = delete;
 
 	~texture( void );
 
+	inline bool is_valid( void ) const
+	{
+		return _texture > 0;
+	}
+
 	inline bound_texture bind( target targ )
 	{
+		precondition( is_valid(), "invalid texture" );
 		return bound_texture( static_cast<GLenum>( targ ), _texture );
 	}
 
@@ -120,8 +131,14 @@ public:
 		return bind( targ );
 	}
 
+	GLuint id( void ) const
+	{
+		precondition( is_valid(), "invalid texture" );
+		return _texture;
+	}
+
 private:
-	GLuint _texture;
+	GLuint _texture = 0;
 };
 
 ////////////////////////////////////////

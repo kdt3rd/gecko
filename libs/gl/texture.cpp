@@ -13,9 +13,25 @@ texture::texture( void )
 
 ////////////////////////////////////////
 
+texture::texture( GLuint t )
+	: _texture( t )
+{
+}
+
+////////////////////////////////////////
+
+texture::texture( texture &&other )
+	: _texture( other._texture )
+{
+	other._texture = 0;
+}
+
+////////////////////////////////////////
+
 texture::~texture( void )
 {
-	glDeleteTextures( 1, &_texture );
+	if ( _texture > 0 )
+		glDeleteTextures( 1, &_texture );
 }
 
 ////////////////////////////////////////
