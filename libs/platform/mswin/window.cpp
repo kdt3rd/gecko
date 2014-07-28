@@ -133,6 +133,12 @@ rect window::geometry( void )
 
 ////////////////////////////////////////
 
+void window::move( double x, double y )
+{
+}
+
+////////////////////////////////////////
+
 void window::resize( double w, double h )
 {
 }
