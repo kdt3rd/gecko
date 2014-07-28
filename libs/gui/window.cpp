@@ -20,6 +20,7 @@ window::window( const std::shared_ptr<platform::window> &w )
 	_window->mouse_pressed.callback( [this]( const std::shared_ptr<platform::mouse> &, const base::point &p, int b ) { mouse_press( p, b ); } );
 	_window->mouse_released.callback( [this]( const std::shared_ptr<platform::mouse> &, const base::point &p, int b ) { mouse_release( p, b ); } );
 	_window->mouse_moved.callback( [this]( const std::shared_ptr<platform::mouse> &, const base::point &p ) { mouse_moved( p ); } );
+	_window->mouse_wheel.callback( [this]( const std::shared_ptr<platform::mouse> &, int i ) { mouse_wheel( i ); } );
 	_window->key_pressed.callback( [this]( const std::shared_ptr<platform::keyboard> &, const platform::scancode &c ) { key_pressed( c ); } );
 	_window->key_released.callback( [this]( const std::shared_ptr<platform::keyboard> &, const platform::scancode &c ) { key_released( c ); } );
 	_window->text_entered.callback( [this]( const std::shared_ptr<platform::keyboard> &, const char32_t &c ) { text_entered( c ); } );
@@ -141,6 +142,7 @@ void window::resized( double w, double h )
 			_widget->set_horizontal( 0.0, w - 1.0 );
 			_widget->set_vertical( 0.0, h - 1.0 );
 			_widget->compute_layout();
+			_widget->invalidate();
 		} );
 }
 
@@ -166,6 +168,14 @@ void window::mouse_moved( const base::point &p )
 {
 	if ( _widget )
 		in_context( [&,this] { _widget->mouse_move( p ); } );
+}
+
+////////////////////////////////////////
+
+void window::mouse_wheel( int amount )
+{
+	if ( _widget )
+		in_context( [&,this] { _widget->mouse_wheel( amount ); } );
 }
 
 ////////////////////////////////////////

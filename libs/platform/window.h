@@ -109,6 +109,11 @@ public:
 	/// Callback action for mouse motion events.
 	base::action<void( const std::shared_ptr<mouse> &, const base::point & )> mouse_moved;
 
+	/// @brief Action for mouse wheel events.
+	///
+	/// Callback action for mouse wheel events.
+	base::action<void( const std::shared_ptr<mouse> &, int )> mouse_wheel;
+
 	/// @brief Action for key press events.
 	///
 	/// Callback action for key press events.

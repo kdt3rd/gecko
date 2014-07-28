@@ -77,6 +77,16 @@ public:
 		return widget::mouse_move( p );
 	}
 
+	bool mouse_wheel( int amount ) override
+	{
+		for ( auto w: _widgets )
+		{
+			if ( w->mouse_wheel( amount ) )
+				return true;
+		}
+		return widget::mouse_wheel( amount );
+	}
+
 	bool key_press( platform::scancode c ) override
 	{
 		if ( _key_focus )

@@ -43,6 +43,7 @@ protected:
 	void mouse_press( const base::point &p, int button );
 	void mouse_release( const base::point &p, int button );
 	void mouse_moved( const base::point &p );
+	void mouse_wheel( int amount );
 
 	void key_pressed( platform::scancode c );
 	void key_released( platform::scancode c );

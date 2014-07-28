@@ -154,8 +154,12 @@ int dispatcher::execute( void )
 						w->mouse_pressed( _mouse, { double(event.xbutton.x), double(event.xbutton.y) }, event.xbutton.button );
 						break;
 
-					case 4: // Mouse wheel up
-					case 5: // Mouse wheel down
+					case 4:
+						w->mouse_wheel( _mouse, 1 );
+						break;
+
+					case 5:
+						w->mouse_wheel( _mouse, -1 );
 						break;
 				}
 				break;

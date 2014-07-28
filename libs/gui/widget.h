@@ -42,6 +42,11 @@ public:
 		return false;
 	}
 
+	virtual bool mouse_wheel( int a )
+	{
+		return false;
+	}
+
 	virtual bool key_press( platform::scancode c )
 	{
 		return false;
