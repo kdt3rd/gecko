@@ -1,9 +1,60 @@
 
 #include "matrix4.h"
 #include <cstddef>
+#include <cmath>
+#include <base/contract.h>
 
 namespace gl
 {
+
+////////////////////////////////////////
+
+matrix4 matrix4::inverted( void ) const
+{
+    float s0 = get( 0, 0 ) * get( 1, 1 ) - get( 1, 0 ) * get( 0, 1 );
+    float s1 = get( 0, 0 ) * get( 1, 2 ) - get( 1, 0 ) * get( 0, 2 );
+    float s2 = get( 0, 0 ) * get( 1, 3 ) - get( 1, 0 ) * get( 0, 3 );
+    float s3 = get( 0, 1 ) * get( 1, 2 ) - get( 1, 1 ) * get( 0, 2 );
+    float s4 = get( 0, 1 ) * get( 1, 3 ) - get( 1, 1 ) * get( 0, 3 );
+    float s5 = get( 0, 2 ) * get( 1, 3 ) - get( 1, 2 ) * get( 0, 3 );
+
+    float c5 = get( 2, 2 ) * get( 3, 3 ) - get( 3, 2 ) * get( 2, 3 );
+    float c4 = get( 2, 1 ) * get( 3, 3 ) - get( 3, 1 ) * get( 2, 3 );
+    float c3 = get( 2, 1 ) * get( 3, 2 ) - get( 3, 1 ) * get( 2, 2 );
+    float c2 = get( 2, 0 ) * get( 3, 3 ) - get( 3, 0 ) * get( 2, 3 );
+    float c1 = get( 2, 0 ) * get( 3, 2 ) - get( 3, 0 ) * get( 2, 2 );
+    float c0 = get( 2, 0 ) * get( 3, 1 ) - get( 3, 0 ) * get( 2, 1 );
+
+    // Should check for 0 determinant
+	float det = s0 * c5 - s1 * c4 + s2 * c3 + s3 * c2 - s4 * c1 + s5 * c0;
+	precondition( std::fabs( det ) > 0.00001F, "non-invertible matrix" );
+
+    float invdet = 1.F / det;
+
+    matrix4 result;
+
+    result.get( 0, 0 ) = ( get( 1, 1 ) * c5 - get( 1, 2 ) * c4 + get( 1, 3 ) * c3 ) * invdet;
+    result.get( 0, 1 ) = (-get( 0, 1 ) * c5 + get( 0, 2 ) * c4 - get( 0, 3 ) * c3 ) * invdet;
+    result.get( 0, 2 ) = ( get( 3, 1 ) * s5 - get( 3, 2 ) * s4 + get( 3, 3 ) * s3 ) * invdet;
+    result.get( 0, 3 ) = (-get( 2, 1 ) * s5 + get( 2, 2 ) * s4 - get( 2, 3 ) * s3 ) * invdet;
+
+    result.get( 1, 0 ) = (-get( 1, 0 ) * c5 + get( 1, 2 ) * c2 - get( 1, 3 ) * c1 ) * invdet;
+    result.get( 1, 1 ) = ( get( 0, 0 ) * c5 - get( 0, 2 ) * c2 + get( 0, 3 ) * c1 ) * invdet;
+    result.get( 1, 2 ) = (-get( 3, 0 ) * s5 + get( 3, 2 ) * s2 - get( 3, 3 ) * s1 ) * invdet;
+    result.get( 1, 3 ) = ( get( 2, 0 ) * s5 - get( 2, 2 ) * s2 + get( 2, 3 ) * s1 ) * invdet;
+
+    result.get( 2, 0 ) = ( get( 1, 0 ) * c4 - get( 1, 1 ) * c2 + get( 1, 3 ) * c0 ) * invdet;
+    result.get( 2, 1 ) = (-get( 0, 0 ) * c4 + get( 0, 1 ) * c2 - get( 0, 3 ) * c0 ) * invdet;
+    result.get( 2, 2 ) = ( get( 3, 0 ) * s4 - get( 3, 1 ) * s2 + get( 3, 3 ) * s0 ) * invdet;
+    result.get( 2, 3 ) = (-get( 2, 0 ) * s4 + get( 2, 1 ) * s2 - get( 2, 3 ) * s0 ) * invdet;
+
+    result.get( 3, 0 ) = (-get( 1, 0 ) * c3 + get( 1, 1 ) * c1 - get( 1, 2 ) * c0 ) * invdet;
+    result.get( 3, 1 ) = ( get( 0, 0 ) * c3 - get( 0, 1 ) * c1 + get( 0, 2 ) * c0 ) * invdet;
+    result.get( 3, 2 ) = (-get( 3, 0 ) * s3 + get( 3, 1 ) * s1 - get( 3, 2 ) * s0 ) * invdet;
+    result.get( 3, 3 ) = ( get( 2, 0 ) * s3 - get( 2, 1 ) * s1 + get( 2, 2 ) * s0 ) * invdet;
+
+    return result;
+}
 
 ////////////////////////////////////////
 

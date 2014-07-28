@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "vector4.h"
+#include <base/point.h>
 
 namespace gl
 {
@@ -13,7 +14,7 @@ namespace gl
 class matrix4
 {
 public:
-	/// @brief Default constructor
+	/// @brief Default (identity) constructor
 	matrix4( void )
 	{
 	}
@@ -29,6 +30,8 @@ public:
 	{
 		return _data;
 	}
+
+	matrix4 inverted( void ) const;
 
 	/// @brief Multiply by a matrix
 	matrix4 &operator*=( const matrix4 &m );
@@ -81,11 +84,25 @@ public:
 		return { _data[3], _data[7], _data[11], _data[15] };
 	}
 
+	float get( size_t x, size_t y ) const
+	{
+		return _data[y*4+x];
+	}
+
+	float &get( size_t x, size_t y )
+	{
+		return _data[y*4+x];
+	}
+
 	/// @brief Construct identity matrix
 	static matrix4 identity( void );
 
 	/// @brief Construct translation matrix
 	static matrix4 translation( float x, float y, float z = 0.0 );
+	static inline matrix4 translation( const base::point &p )
+	{
+		return translation( p.x(), p.y() );
+	}
 
 	/// @brief Construct scale matrix
 	static matrix4 scale( float x, float y, float z = 1.0 );
