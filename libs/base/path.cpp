@@ -25,6 +25,13 @@ path::path( const point &p )
 
 ////////////////////////////////////////
 
+path::path( const rect &r )
+{
+	rectangle( r );
+}
+
+////////////////////////////////////////
+
 path::~path( void )
 {
 }

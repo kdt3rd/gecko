@@ -29,6 +29,7 @@ public:
 	path( void );
 
 	path( const point &p );
+	path( const rect &r );
 
 	/// @brief Destructor
 	~path( void );
