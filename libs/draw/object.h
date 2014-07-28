@@ -16,6 +16,14 @@ public:
 
 	void create( const std::shared_ptr<canvas> &c, const base::path &path, const base::paint &paint );
 
+	inline void create( const std::shared_ptr<canvas> &c, const base::path &path, const base::color &color )
+	{
+		base::paint p;
+		p.set_fill_color( color );
+		create( c, path, p );
+	}
+
+
 	void draw( gl::context &ctxt ) override;
 
 private:
