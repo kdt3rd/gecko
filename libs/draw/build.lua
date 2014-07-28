@@ -30,6 +30,7 @@ shaders = {
 	"quadrant.vert";
 	"simple.vert";
 	"text.vert";
+	"texture.frag";
 	"color_mesh.frag";
 	"linear_gradient.frag";
 	"radial_gradient.frag";
