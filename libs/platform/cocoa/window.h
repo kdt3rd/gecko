@@ -25,6 +25,7 @@ public:
 
 //	rect geometry( void ) override;
 //	void set_position( double x, double y ) override;
+	void move( double x, double y ) override;
 	void resize( double w, double h ) override;
 	void set_minimum_size( double w, double h ) override;
 

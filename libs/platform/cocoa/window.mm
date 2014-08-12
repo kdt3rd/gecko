@@ -32,6 +32,7 @@ window::window( void )
 
 window::~window( void )
 {
+	std::cout << "Popup window deleted" << std::endl;
 }
 
 ////////////////////////////////////////
@@ -50,6 +51,9 @@ void window::lower( void )
 
 void window::set_popup( void )
 {
+//	NSUInteger mask = [_impl->win styleMask] | NSBorderlessWindowMask;
+	NSUInteger mask = NSBorderlessWindowMask;
+	[_impl->win setStyleMask:mask];
 }
 
 ////////////////////////////////////////
@@ -63,6 +67,7 @@ void window::show( void )
 
 void window::hide( void )
 {
+	std::cout << "Popup window hidden" << std::endl;
 	[_impl->win orderOut:nil];
 }
 
@@ -81,6 +86,16 @@ rect window::geometry( void )
 {
 }
 */
+
+////////////////////////////////////////
+
+void window::move( double x, double y )
+{
+	NSPoint pos;
+	pos.x = x;
+	pos.y = y + _last_h;
+	[_impl->win setFrameOrigin:pos];
+}
 
 ////////////////////////////////////////
 
