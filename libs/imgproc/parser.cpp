@@ -335,7 +335,7 @@ std::shared_ptr<expr> parser::primary_expr( void )
 std::shared_ptr<expr> parser::paren_expr( const char *name )
 {
 	if ( !expect( TOK_PAREN_START ) )
-		throw_runtime( base::format( "expected '(' to begin {0}", name ) );
+		throw_runtime( "expected '(' to begin {0}", name );
 
 	std::shared_ptr<expr> e = expression();
 
@@ -399,28 +399,23 @@ std::shared_ptr<expr> parser::paren_expr( const char *name )
 std::unique_ptr<func> parser::function( void )
 {
 	if ( _token.type() != TOK_KEYWORD || _token.value() != U"function" )
-		throw_runtime( base::format( "expected `function', got '{0}'", _token.value() ) );
+		throw_runtime( "expected `function', got '{0}'", _token.value() );
 	next_token();
 
 	if ( _token.type() != TOK_IDENTIFIER )
-		throw_runtime( base::format( "expected function name, got '{0}'", _token.value() ) );
+		throw_runtime( "expected function name, got '{0}'", _token.value() );
 	std::unique_ptr<func> f( new func( _token.value() ) );
 	next_token();
 
 	if ( expect( TOK_PAREN_START ) )
 	{
 		id_list( [&f]( const std::u32string &a ) { f->add_arg( a ); } );
-		if ( !expect( TOK_PAREN_END ) )
-			throw_runtime( "expected ')'" );
 	}
 	else
 		throw_runtime( "expected '(' to begin function arguments" );
 
 	if ( !expect( TOK_PAREN_END ) )
-	{
-		const std::string fmt( "expected ')' to end function arguments, got '{0}'" );
-		throw_runtime( base::format( fmt, _token.value() ) );
-	}
+		throw_runtime( "expected ')' to end function arguments, got '{0}'", _token.value() );
 
 	f->set_result( expression() );
 
@@ -481,7 +476,7 @@ std::shared_ptr<expr> parser::for_expr( void )
 	id_list( [&result]( const std::u32string &a ) { result->add_variable( a ); } );
 
 	if ( _token.type() != TOK_SYMBOL || _token.value() != U":" )
-		throw_runtime( base::format( "expected ':', got '{0}'", _token.value() ) );
+		throw_runtime( "expected ':', got '{0}'", _token.value() );
 
 	while ( _token.type() != TOK_PAREN_START )
 		result->add_range( expression() );
