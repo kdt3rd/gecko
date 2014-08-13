@@ -1319,20 +1319,19 @@ static int InitPriorityQ( TESStesselator *tess )
 * order in which vertices cross the sweep line.
 */
 {
-	PriorityQ *pq;
-	TESSvertex *v, *vHead;
+	TESSvertex *vHead = &tess->mesh->vHead;
 	int vertexCount = 0;
-
-	vHead = &tess->mesh->vHead;
-	for ( v = vHead->next; v != vHead; v = v->next )
+	for ( TESSvertex *v = vHead->next; v != vHead; v = v->next )
 		vertexCount++;
 	/* Make sure there is enough space for sentinels. */
 	vertexCount += MAX( 8, tess->alloc.extraVertices );
 
-	pq = tess->pq = pqNewPriorityQ( &tess->alloc, vertexCount, ( int ( * )( PQkey, PQkey ) ) tesvertLeq );
-	if ( pq == NULL ) return 0;
+	PriorityQ *pq = tess->pq = pqNewPriorityQ( &tess->alloc, vertexCount, ( int ( * )( PQkey, PQkey ) ) tesvertLeq );
+	if ( pq == NULL )
+		return 0;
 
 	vHead = &tess->mesh->vHead;
+	TESSvertex *v;
 	for ( v = vHead->next; v != vHead; v = v->next )
 	{
 		v->pqHandle = pqInsert( &tess->alloc, pq, v );
@@ -1418,7 +1417,8 @@ int tessComputeInterior( TESStesselator *tess )
 		for ( ;; )
 		{
 			vNext = ( TESSvertex * )pqMinimum( tess->pq );
-			if ( vNext == NULL || ! VertEq( vNext, v ) ) break;
+			if ( vNext == NULL || ! VertEq( vNext, v ) )
+				break;
 
 			/* Merge together all vertices at exactly the same location.
 			* This is more efficient than processing them one at a time,
