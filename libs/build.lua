@@ -7,4 +7,5 @@ SubDir( "script" )
 SubDir( "draw" )
 SubDir( "platform" )
 SubDir( "gui" )
+SubDir( "imgproc" )
 

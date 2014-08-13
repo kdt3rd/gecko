@@ -1,3 +1,4 @@
 
 SubDir( "tests" )
+SubDir( "imgc" )
 
