@@ -1,5 +1,5 @@
 /*
-** SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008) 
+** SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008)
 ** Copyright (C) [dates of first publication] Silicon Graphics, Inc.
 ** All Rights Reserved.
 **
@@ -9,10 +9,10 @@
 ** to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 ** of the Software, and to permit persons to whom the Software is furnished to do so,
 ** subject to the following conditions:
-** 
+**
 ** The above copyright notice including the dates of first publication and either this
 ** permission notice or a reference to http://oss.sgi.com/projects/FreeB/ shall be
-** included in all copies or substantial portions of the Software. 
+** included in all copies or substantial portions of the Software.
 **
 ** THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 ** INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
@@ -20,7 +20,7 @@
 ** BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 ** TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 ** OR OTHER DEALINGS IN THE SOFTWARE.
-** 
+**
 ** Except as contained in this notice, the name of Silicon Graphics, Inc. shall not
 ** be used in advertising or otherwise to promote the sale, use or other dealings in
 ** this Software without prior written authorization from Silicon Graphics, Inc.
@@ -55,17 +55,17 @@ TESSreal tesedgeEval( TESSvertex *u, TESSvertex *v, TESSvertex *w )
 	*/
 	TESSreal gapL, gapR;
 
-	assert( VertLeq( u, v ) && VertLeq( v, w ));
+	assert( VertLeq( u, v ) && VertLeq( v, w ) );
 
 	gapL = v->s - u->s;
 	gapR = w->s - v->s;
 
-	if( gapL + gapR > 0 ) {
-		if( gapL < gapR ) {
-			return (v->t - u->t) + (u->t - w->t) * (gapL / (gapL + gapR));
-		} else {
-			return (v->t - w->t) + (w->t - u->t) * (gapR / (gapL + gapR));
-		}
+	if ( gapL + gapR > 0 )
+	{
+		if ( gapL < gapR )
+			return ( v->t - u->t ) + ( u->t - w->t ) * ( gapL / ( gapL + gapR ) );
+		else
+			return ( v->t - w->t ) + ( w->t - u->t ) * ( gapR / ( gapL + gapR ) );
 	}
 	/* vertical line */
 	return 0;
@@ -79,14 +79,13 @@ TESSreal tesedgeSign( TESSvertex *u, TESSvertex *v, TESSvertex *w )
 	*/
 	TESSreal gapL, gapR;
 
-	assert( VertLeq( u, v ) && VertLeq( v, w ));
+	assert( VertLeq( u, v ) && VertLeq( v, w ) );
 
 	gapL = v->s - u->s;
 	gapR = w->s - v->s;
 
-	if( gapL + gapR > 0 ) {
-		return (v->t - w->t) * gapL + (v->t - u->t) * gapR;
-	}
+	if ( gapL + gapR > 0 )
+		return ( v->t - w->t ) * gapL + ( v->t - u->t ) * gapR;
 	/* vertical line */
 	return 0;
 }
@@ -110,17 +109,17 @@ TESSreal testransEval( TESSvertex *u, TESSvertex *v, TESSvertex *w )
 	*/
 	TESSreal gapL, gapR;
 
-	assert( TransLeq( u, v ) && TransLeq( v, w ));
+	assert( TransLeq( u, v ) && TransLeq( v, w ) );
 
 	gapL = v->t - u->t;
 	gapR = w->t - v->t;
 
-	if( gapL + gapR > 0 ) {
-		if( gapL < gapR ) {
-			return (v->s - u->s) + (u->s - w->s) * (gapL / (gapL + gapR));
-		} else {
-			return (v->s - w->s) + (w->s - u->s) * (gapR / (gapL + gapR));
-		}
+	if ( gapL + gapR > 0 )
+	{
+		if ( gapL < gapR )
+			return ( v->s - u->s ) + ( u->s - w->s ) * ( gapL / ( gapL + gapR ) );
+		else
+			return ( v->s - w->s ) + ( w->s - u->s ) * ( gapR / ( gapL + gapR ) );
 	}
 	/* vertical line */
 	return 0;
@@ -134,14 +133,13 @@ TESSreal testransSign( TESSvertex *u, TESSvertex *v, TESSvertex *w )
 	*/
 	TESSreal gapL, gapR;
 
-	assert( TransLeq( u, v ) && TransLeq( v, w ));
+	assert( TransLeq( u, v ) && TransLeq( v, w ) );
 
 	gapL = v->t - u->t;
 	gapR = w->t - v->t;
 
-	if( gapL + gapR > 0 ) {
-		return (v->s - w->s) * gapL + (v->s - u->s) * gapR;
-	}
+	if ( gapL + gapR > 0 )
+		return ( v->s - w->s ) * gapL + ( v->s - u->s ) * gapR;
 	/* vertical line */
 	return 0;
 }
@@ -155,7 +153,7 @@ int tesvertCCW( TESSvertex *u, TESSvertex *v, TESSvertex *w )
 	* on some degenerate inputs, so the client must have some way to
 	* handle this situation.
 	*/
-	return (u->s*(v->t - w->t) + v->s*(w->t - u->t) + w->s*(u->t - v->t)) >= 0;
+	return ( u->s * ( v->t - w->t ) + v->s * ( w->t - u->t ) + w->s * ( u->t - v->t ) ) >= 0;
 }
 
 /* Given parameters a,x,b,y returns the value (b*x+a*y)/(a+b),
@@ -182,15 +180,16 @@ int tesvertCCW( TESSvertex *u, TESSvertex *v, TESSvertex *w )
 #include <stdlib.h>
 extern int RandomInterpolate;
 
-double Interpolate( double a, double x, double b, double y)
+double Interpolate( double a, double x, double b, double y )
 {
-	printf("*********************%d\n",RandomInterpolate);
-	if( RandomInterpolate ) {
+	printf( "*********************%d\n", RandomInterpolate );
+	if ( RandomInterpolate )
+	{
 		a = 1.2 * drand48() - 0.1;
-		a = (a < 0) ? 0 : ((a > 1) ? 1 : a);
+		a = ( a < 0 ) ? 0 : ( ( a > 1 ) ? 1 : a );
 		b = 1.0 - a;
 	}
-	return RealInterpolate(a,x,b,y);
+	return RealInterpolate( a, x, b, y );
 }
 
 #endif
@@ -198,12 +197,12 @@ double Interpolate( double a, double x, double b, double y)
 #define Swap(a,b)	do { TESSvertex *t = a; a = b; b = t; } while( 0 )
 
 void tesedgeIntersect( TESSvertex *o1, TESSvertex *d1,
-					  TESSvertex *o2, TESSvertex *d2,
-					  TESSvertex *v )
-					  /* Given edges (o1,d1) and (o2,d2), compute their point of intersection.
-					  * The computed point is guaranteed to lie in the intersection of the
-					  * bounding rectangles defined by each edge.
-					  */
+                       TESSvertex *o2, TESSvertex *d2,
+                       TESSvertex *v )
+/* Given edges (o1,d1) and (o2,d2), compute their point of intersection.
+* The computed point is guaranteed to lie in the intersection of the
+* bounding rectangles defined by each edge.
+*/
 {
 	TESSreal z1, z2;
 
@@ -215,47 +214,85 @@ void tesedgeIntersect( TESSvertex *o1, TESSvertex *d1,
 	* using the TransLeq ordering to find the intersection t-value.
 	*/
 
-	if( ! VertLeq( o1, d1 )) { Swap( o1, d1 ); }
-	if( ! VertLeq( o2, d2 )) { Swap( o2, d2 ); }
-	if( ! VertLeq( o1, o2 )) { Swap( o1, o2 ); Swap( d1, d2 ); }
+	if ( ! VertLeq( o1, d1 ) )
+		Swap( o1, d1 );
+	if ( ! VertLeq( o2, d2 ) )
+		Swap( o2, d2 );
+	if ( ! VertLeq( o1, o2 ) )
+	{
+		Swap( o1, o2 );
+		Swap( d1, d2 );
+	}
 
-	if( ! VertLeq( o2, d1 )) {
+	if ( ! VertLeq( o2, d1 ) )
+	{
 		/* Technically, no intersection -- do our best */
-		v->s = (o2->s + d1->s) / 2;
-	} else if( VertLeq( d1, d2 )) {
+		v->s = ( o2->s + d1->s ) / 2;
+	}
+	else if ( VertLeq( d1, d2 ) )
+	{
 		/* Interpolate between o2 and d1 */
 		z1 = EdgeEval( o1, o2, d1 );
 		z2 = EdgeEval( o2, d1, d2 );
-		if( z1+z2 < 0 ) { z1 = -z1; z2 = -z2; }
+		if ( z1 + z2 < 0 )
+		{
+			z1 = -z1;
+			z2 = -z2;
+		}
 		v->s = Interpolate( z1, o2->s, z2, d1->s );
-	} else {
+	}
+	else
+	{
 		/* Interpolate between o2 and d2 */
 		z1 = EdgeSign( o1, o2, d1 );
 		z2 = -EdgeSign( o1, d2, d1 );
-		if( z1+z2 < 0 ) { z1 = -z1; z2 = -z2; }
+		if ( z1 + z2 < 0 )
+		{
+			z1 = -z1;
+			z2 = -z2;
+		}
 		v->s = Interpolate( z1, o2->s, z2, d2->s );
 	}
 
 	/* Now repeat the process for t */
 
-	if( ! TransLeq( o1, d1 )) { Swap( o1, d1 ); }
-	if( ! TransLeq( o2, d2 )) { Swap( o2, d2 ); }
-	if( ! TransLeq( o1, o2 )) { Swap( o1, o2 ); Swap( d1, d2 ); }
+	if ( ! TransLeq( o1, d1 ) )
+		Swap( o1, d1 );
+	if ( ! TransLeq( o2, d2 ) )
+		Swap( o2, d2 );
+	if ( ! TransLeq( o1, o2 ) )
+	{
+		Swap( o1, o2 );
+		Swap( d1, d2 );
+	}
 
-	if( ! TransLeq( o2, d1 )) {
+	if ( ! TransLeq( o2, d1 ) )
+	{
 		/* Technically, no intersection -- do our best */
-		v->t = (o2->t + d1->t) / 2;
-	} else if( TransLeq( d1, d2 )) {
+		v->t = ( o2->t + d1->t ) / 2;
+	}
+	else if ( TransLeq( d1, d2 ) )
+	{
 		/* Interpolate between o2 and d1 */
 		z1 = TransEval( o1, o2, d1 );
 		z2 = TransEval( o2, d1, d2 );
-		if( z1+z2 < 0 ) { z1 = -z1; z2 = -z2; }
+		if ( z1 + z2 < 0 )
+		{
+			z1 = -z1;
+			z2 = -z2;
+		}
 		v->t = Interpolate( z1, o2->t, z2, d1->t );
-	} else {
+	}
+	else
+	{
 		/* Interpolate between o2 and d2 */
 		z1 = TransSign( o1, o2, d1 );
 		z2 = -TransSign( o1, d2, d1 );
-		if( z1+z2 < 0 ) { z1 = -z1; z2 = -z2; }
+		if ( z1 + z2 < 0 )
+		{
+			z1 = -z1;
+			z2 = -z2;
+		}
 		v->t = Interpolate( z1, o2->t, z2, d2->t );
 	}
 }

@@ -1,6 +1,6 @@
 /// @cond LIBTESS
 /*
-** SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008) 
+** SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008)
 ** Copyright (C) [dates of first publication] Silicon Graphics, Inc.
 ** All Rights Reserved.
 **
@@ -10,10 +10,10 @@
 ** to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 ** of the Software, and to permit persons to whom the Software is furnished to do so,
 ** subject to the following conditions:
-** 
+**
 ** The above copyright notice including the dates of first publication and either this
 ** permission notice or a reference to http://oss.sgi.com/projects/FreeB/ shall be
-** included in all copies or substantial portions of the Software. 
+** included in all copies or substantial portions of the Software.
 **
 ** THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 ** INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
@@ -21,7 +21,7 @@
 ** BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 ** TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 ** OR OTHER DEALINGS IN THE SOFTWARE.
-** 
+**
 ** Except as contained in this notice, the name of Silicon Graphics, Inc. shall not
 ** be used in advertising or otherwise to promote the sale, use or other dealings in
 ** this Software without prior written authorization from Silicon Graphics, Inc.
@@ -113,8 +113,8 @@ enum TessElementType
 
 typedef float TESSreal;
 typedef int TESSindex;
-typedef struct TESStesselator TESStesselator;
-typedef struct TESSalloc TESSalloc;
+struct TESStesselator;
+struct TESSalloc;
 
 #define TESS_UNDEF (~(TESSindex)0)
 
@@ -128,18 +128,18 @@ typedef struct TESSalloc TESSalloc;
 // how often to allocate memory from the system versus how much extra space the system
 // should allocate. Reasonable defaults are show in commects below, they will be used if
 // the bucket sizes are zero.
-// 
+//
 // The use may left the memrealloc to be null. In that case, the tesselator will not try to
 // dynamically grow int's internal arrays. The tesselator only needs the reallocation when it
 // has found intersecting segments and needs to add new vertex. This defency can be cured by
 // allocating some extra vertices beforehand. The 'extraVertices' variable allows to specify
-// number of expected extra vertices.  
+// number of expected extra vertices.
 struct TESSalloc
 {
-	void *(*memalloc)( void *userData, unsigned int size );
-	void *(*memrealloc)( void *userData, void* ptr, unsigned int size );
-	void (*memfree)( void *userData, void *ptr );
-	void* userData;				// User data passed to the allocator functions.
+	void *( *memalloc )( void *userData, unsigned int size );
+	void *( *memrealloc )( void *userData, void *ptr, unsigned int size );
+	void ( *memfree )( void *userData, void *ptr );
+	void *userData;				// User data passed to the allocator functions.
 	int meshEdgeBucketSize;		// 512
 	int meshVertexBucketSize;	// 512
 	int meshFaceBucketSize;		// 256
@@ -147,12 +147,12 @@ struct TESSalloc
 	int regionBucketSize;		// 256
 	int extraVertices;			// Number of extra vertices allocated for the priority queue.
 };
-	
+
 // tessNewTess() - Creates a new tesselator.
 // Use tessDeleteTess() to delete the tesselator.
 // Returns:
 //   new tesselator object.
-TESStesselator* tessNewTess( TESSalloc* alloc );
+TESStesselator *tessNewTess( TESSalloc *alloc );
 
 // tessDeleteTess() - Deletes a tesselator.
 // Parameters:
@@ -167,7 +167,7 @@ void tessDeleteTess( TESStesselator *tess );
 //   pointer - pointer to the first coordinate of the first vertex in the array.
 //   stride - defines offset in bytes between consecutive vertices.
 //   count - number of vertices in contour.
-void tessAddContour( TESStesselator *tess, int size, const void* pointer, int stride, int count );
+void tessAddContour( TESStesselator *tess, int size, const void *pointer, int stride, int count );
 
 // tessTesselate() - tesselate contours.
 // Parameters:
@@ -179,25 +179,25 @@ void tessAddContour( TESStesselator *tess, int size, const void* pointer, int st
 //   normal - defines the normal of the input contours, of null the normal is calculated automatically.
 // Returns:
 //   1 if succeed, 0 if failed.
-int tessTesselate( TESStesselator *tess, int windingRule, int elementType, int polySize, int vertexSize, const TESSreal* normal );
+int tessTesselate( TESStesselator *tess, int windingRule, int elementType, int polySize, int vertexSize, const TESSreal *normal );
 
 // tessGetVertexCount() - Returns number of vertices in the tesselated output.
 int tessGetVertexCount( TESStesselator *tess );
 
 // tessGetVertices() - Returns pointer to first coordinate of first vertex.
-const TESSreal* tessGetVertices( TESStesselator *tess );
+const TESSreal *tessGetVertices( TESStesselator *tess );
 
 // tessGetVertexIndices() - Returns pointer to first vertex index.
 // Vertex indices can be used to map the generated vertices to the original vertices.
 // Every point added using tessAddContour() will get a new index starting at 0.
 // New vertices generated at the intersections of segments are assigned value TESS_UNDEF.
-const TESSindex* tessGetVertexIndices( TESStesselator *tess );
-	
+const TESSindex *tessGetVertexIndices( TESStesselator *tess );
+
 // tessGetElementCount() - Returns number of elements in the the tesselated output.
 int tessGetElementCount( TESStesselator *tess );
 
 // tessGetElements() - Returns pointer to the first element.
-const TESSindex* tessGetElements( TESStesselator *tess );
+const TESSindex *tessGetElements( TESStesselator *tess );
 
 #endif // TESSELATOR_H
 /// @endcond

@@ -2,7 +2,6 @@
 Include( BuildFile() )
 
 srcs = {
-	"drawable.cpp";
 	"polylines.cpp";
 	"clipper.cpp";
 	"canvas.cpp";
@@ -15,7 +14,6 @@ srcs = {
 }
 
 tess = {
-	"libtess2/bucketalloc.cpp";
 	"libtess2/dict.cpp";
 	"libtess2/geom.cpp";
 	"libtess2/mesh.cpp";

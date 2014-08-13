@@ -1,6 +1,6 @@
 /// @cond LIBTESS
 /*
-** SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008) 
+** SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008)
 ** Copyright (C) [dates of first publication] Silicon Graphics, Inc.
 ** All Rights Reserved.
 **
@@ -10,10 +10,10 @@
 ** to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 ** of the Software, and to permit persons to whom the Software is furnished to do so,
 ** subject to the following conditions:
-** 
+**
 ** The above copyright notice including the dates of first publication and either this
 ** permission notice or a reference to http://oss.sgi.com/projects/FreeB/ shall be
-** included in all copies or substantial portions of the Software. 
+** included in all copies or substantial portions of the Software.
 **
 ** THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 ** INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
@@ -21,7 +21,7 @@
 ** BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 ** TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 ** OR OTHER DEALINGS IN THE SOFTWARE.
-** 
+**
 ** Except as contained in this notice, the name of Silicon Graphics, Inc. shall not
 ** be used in advertising or otherwise to promote the sale, use or other dealings in
 ** this Software without prior written authorization from Silicon Graphics, Inc.
@@ -30,17 +30,20 @@
 ** Author: Eric Veach, July 1994.
 */
 
-#ifndef MESH_H
-#define MESH_H
+#pragma once
 
 #include "tesselator.h"
+#include <base/memory_pool.h>
 
-typedef struct TESSmesh TESSmesh; 
-typedef struct TESSvertex TESSvertex;
-typedef struct TESSface TESSface;
-typedef struct TESShalfEdge TESShalfEdge;
-typedef struct ActiveRegion ActiveRegion;
+struct TESSmesh;
+struct TESSvertex;
+struct TESSface;
+struct TESShalfEdge;
+struct ActiveRegion;
 
+/* Allocate and free half-edges in pairs for efficiency.
+* The *only* place that should use this fact is allocation/free.
+*/
 /* The mesh structure is similar in spirit, notation, and operations
 * to the "quad-edge" structure (see L. Guibas and J. Stolfi, Primitives
 * for the manipulation of general subdivisions and the computation of
@@ -107,7 +110,8 @@ typedef struct ActiveRegion ActiveRegion;
 * a region which is not part of the output polygon.
 */
 
-struct TESSvertex {
+struct TESSvertex
+{
 	TESSvertex *next;      /* next vertex (never NULL) */
 	TESSvertex *prev;      /* previous vertex (never NULL) */
 	TESShalfEdge *anEdge;    /* a half-edge with this origin */
@@ -120,7 +124,8 @@ struct TESSvertex {
 	TESSindex idx;			/* to allow map result to original verts */
 };
 
-struct TESSface {
+struct TESSface
+{
 	TESSface *next;      /* next face (never NULL) */
 	TESSface *prev;      /* previous face (never NULL) */
 	TESShalfEdge *anEdge;    /* a half edge with this left face */
@@ -132,7 +137,8 @@ struct TESSface {
 	char inside;     /* this face is in the polygon interior */
 };
 
-struct TESShalfEdge {
+struct TESShalfEdge
+{
 	TESShalfEdge *next;      /* doubly-linked list (prev==Sym->next) */
 	TESShalfEdge *Sym;       /* same edge, opposite direction */
 	TESShalfEdge *Onext;     /* next edge CCW around origin */
@@ -146,6 +152,11 @@ struct TESShalfEdge {
 						  from the right face to the left face */
 };
 
+typedef struct
+{
+	TESShalfEdge e, eSym;
+} EdgePair;
+
 #define Rface   Sym->Lface
 #define Dst Sym->Org
 
@@ -157,15 +168,16 @@ struct TESShalfEdge {
 #define Rnext   Oprev->Sym  /* 3 pointers */
 
 
-struct TESSmesh {
+struct TESSmesh
+{
 	TESSvertex vHead;      /* dummy header for vertex list */
 	TESSface fHead;      /* dummy header for face list */
 	TESShalfEdge eHead;      /* dummy header for edge list */
 	TESShalfEdge eHeadSym;   /* and its symmetric counterpart */
 
-	struct BucketAlloc* edgeBucket;
-	struct BucketAlloc* vertexBucket;
-	struct BucketAlloc* faceBucket;
+	base::memory_pool<EdgePair,512> edgeBucket;
+	base::memory_pool<TESSvertex,512> vertexBucket;
+	base::memory_pool<TESSface,256> faceBucket;
 };
 
 /* The mesh operations below have three motivations: completeness,
@@ -253,10 +265,10 @@ TESShalfEdge *tessMeshAddEdgeVertex( TESSmesh *mesh, TESShalfEdge *eOrg );
 TESShalfEdge *tessMeshSplitEdge( TESSmesh *mesh, TESShalfEdge *eOrg );
 TESShalfEdge *tessMeshConnect( TESSmesh *mesh, TESShalfEdge *eOrg, TESShalfEdge *eDst );
 
-TESSmesh *tessMeshNewMesh( TESSalloc* alloc );
-TESSmesh *tessMeshUnion( TESSalloc* alloc, TESSmesh *mesh1, TESSmesh *mesh2 );
+TESSmesh *tessMeshNewMesh( TESSalloc *alloc );
+TESSmesh *tessMeshUnion( TESSalloc *alloc, TESSmesh *mesh1, TESSmesh *mesh2 );
 int tessMeshMergeConvexFaces( TESSmesh *mesh, int maxVertsPerFace );
-void tessMeshDeleteMesh( TESSalloc* alloc, TESSmesh *mesh );
+void tessMeshDeleteMesh( TESSalloc *alloc, TESSmesh *mesh );
 void tessMeshZapFace( TESSmesh *mesh, TESSface *fZap );
 
 #ifdef NDEBUG
@@ -265,5 +277,3 @@ void tessMeshZapFace( TESSmesh *mesh, TESSface *fZap );
 void tessMeshCheckMesh( TESSmesh *mesh );
 #endif
 
-#endif
-/// @endcond LIBTESS

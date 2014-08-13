@@ -1,5 +1,5 @@
 /*
-** SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008) 
+** SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008)
 ** Copyright (C) [dates of first publication] Silicon Graphics, Inc.
 ** All Rights Reserved.
 **
@@ -9,10 +9,10 @@
 ** to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 ** of the Software, and to permit persons to whom the Software is furnished to do so,
 ** subject to the following conditions:
-** 
+**
 ** The above copyright notice including the dates of first publication and either this
 ** permission notice or a reference to http://oss.sgi.com/projects/FreeB/ shall be
-** included in all copies or substantial portions of the Software. 
+** included in all copies or substantial portions of the Software.
 **
 ** THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 ** INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
@@ -20,7 +20,7 @@
 ** BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 ** TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 ** OR OTHER DEALINGS IN THE SOFTWARE.
-** 
+**
 ** Except as contained in this notice, the name of Silicon Graphics, Inc. shall not
 ** be used in advertising or otherwise to promote the sale, use or other dealings in
 ** this Software without prior written authorization from Silicon Graphics, Inc.
@@ -34,35 +34,30 @@
 #include <assert.h>
 #include "mesh.h"
 #include "geom.h"
-#include "bucketalloc.h"
 
 #define TRUE 1
 #define FALSE 0
 
 /************************ Utility Routines ************************/
 
-/* Allocate and free half-edges in pairs for efficiency.
-* The *only* place that should use this fact is allocation/free.
-*/
-typedef struct { TESShalfEdge e, eSym; } EdgePair;
-
 /* MakeEdge creates a new pair of half-edges which form their own loop.
 * No vertex or face structures are allocated, but these must be assigned
 * before the current edge operation is completed.
 */
-static TESShalfEdge *MakeEdge( TESSmesh* mesh, TESShalfEdge *eNext )
+static TESShalfEdge *MakeEdge( TESSmesh *mesh, TESShalfEdge *eNext )
 {
 	TESShalfEdge *e;
 	TESShalfEdge *eSym;
 	TESShalfEdge *ePrev;
-	EdgePair *pair = (EdgePair *)bucketAlloc( mesh->edgeBucket );
-	if (pair == NULL) return NULL;
+	EdgePair *pair = mesh->edgeBucket.allocate();
+	if ( pair == NULL ) return NULL;
 
 	e = &pair->e;
 	eSym = &pair->eSym;
 
 	/* Make sure eNext points to the first edge of the edge pair */
-	if( eNext->Sym < eNext ) { eNext = eNext->Sym; }
+	if ( eNext->Sym < eNext )
+		eNext = eNext->Sym;
 
 	/* Insert in circular doubly-linked list before eNext.
 	* Note that the prev pointer is stored in Sym->next.
@@ -115,14 +110,14 @@ static void Splice( TESShalfEdge *a, TESShalfEdge *b )
 * the new vertex *before* vNext so that algorithms which walk the vertex
 * list will not see the newly created vertices.
 */
-static void MakeVertex( TESSvertex *newVertex, 
-					   TESShalfEdge *eOrig, TESSvertex *vNext )
+static void MakeVertex( TESSvertex *newVertex,
+                        TESShalfEdge *eOrig, TESSvertex *vNext )
 {
 	TESShalfEdge *e;
 	TESSvertex *vPrev;
 	TESSvertex *vNew = newVertex;
 
-	assert(vNew != NULL);
+	assert( vNew != NULL );
 
 	/* insert in circular doubly-linked list before vNext */
 	vPrev = vNext->prev;
@@ -136,10 +131,12 @@ static void MakeVertex( TESSvertex *newVertex,
 
 	/* fix other edges on this vertex loop */
 	e = eOrig;
-	do {
+	do
+	{
 		e->Org = vNew;
 		e = e->Onext;
-	} while( e != eOrig );
+	}
+	while ( e != eOrig );
 }
 
 /* MakeFace( newFace, eOrig, fNext ) attaches a new face and makes it the left
@@ -154,7 +151,7 @@ static void MakeFace( TESSface *newFace, TESShalfEdge *eOrig, TESSface *fNext )
 	TESSface *fPrev;
 	TESSface *fNew = newFace;
 
-	assert(fNew != NULL); 
+	assert( fNew != NULL );
 
 	/* insert in circular doubly-linked list before fNext */
 	fPrev = fNext->prev;
@@ -174,10 +171,12 @@ static void MakeFace( TESSface *newFace, TESShalfEdge *eOrig, TESSface *fNext )
 
 	/* fix other edges on this face loop */
 	e = eOrig;
-	do {
+	do
+	{
 		e->Lface = fNew;
 		e = e->Lnext;
-	} while( e != eOrig );
+	}
+	while ( e != eOrig );
 }
 
 /* KillEdge( eDel ) destroys an edge (the half-edges eDel and eDel->Sym),
@@ -188,7 +187,8 @@ static void KillEdge( TESSmesh *mesh, TESShalfEdge *eDel )
 	TESShalfEdge *ePrev, *eNext;
 
 	/* Half-edges are allocated in pairs, see EdgePair above */
-	if( eDel->Sym < eDel ) { eDel = eDel->Sym; }
+	if ( eDel->Sym < eDel )
+		eDel = eDel->Sym;
 
 	/* delete from circular doubly-linked list */
 	eNext = eDel->next;
@@ -196,7 +196,7 @@ static void KillEdge( TESSmesh *mesh, TESShalfEdge *eDel )
 	eNext->Sym->next = ePrev;
 	ePrev->Sym->next = eNext;
 
-	bucketFree( mesh->edgeBucket, eDel );
+	mesh->edgeBucket.deallocate( reinterpret_cast<EdgePair*>(eDel) );
 }
 
 
@@ -210,10 +210,12 @@ static void KillVertex( TESSmesh *mesh, TESSvertex *vDel, TESSvertex *newOrg )
 
 	/* change the origin of all affected edges */
 	e = eStart;
-	do {
+	do
+	{
 		e->Org = newOrg;
 		e = e->Onext;
-	} while( e != eStart );
+	}
+	while ( e != eStart );
 
 	/* delete from circular doubly-linked list */
 	vPrev = vDel->prev;
@@ -221,7 +223,7 @@ static void KillVertex( TESSmesh *mesh, TESSvertex *vDel, TESSvertex *newOrg )
 	vNext->prev = vPrev;
 	vPrev->next = vNext;
 
-	bucketFree( mesh->vertexBucket, vDel );
+	mesh->vertexBucket.deallocate( vDel );
 }
 
 /* KillFace( fDel ) destroys a face and removes it from the global face
@@ -234,10 +236,12 @@ static void KillFace( TESSmesh *mesh, TESSface *fDel, TESSface *newLface )
 
 	/* change the left face of all affected edges */
 	e = eStart;
-	do {
+	do
+	{
 		e->Lface = newLface;
 		e = e->Lnext;
-	} while( e != eStart );
+	}
+	while ( e != eStart );
 
 	/* delete from circular doubly-linked list */
 	fPrev = fDel->prev;
@@ -245,7 +249,7 @@ static void KillFace( TESSmesh *mesh, TESSface *fDel, TESSface *newLface )
 	fNext->prev = fPrev;
 	fPrev->next = fNext;
 
-	bucketFree( mesh->faceBucket, fDel );
+	mesh->faceBucket.deallocate( fDel );
 }
 
 
@@ -256,21 +260,22 @@ static void KillFace( TESSmesh *mesh, TESSface *fDel, TESSface *newLface )
 */
 TESShalfEdge *tessMeshMakeEdge( TESSmesh *mesh )
 {
-	TESSvertex *newVertex1 = (TESSvertex*)bucketAlloc(mesh->vertexBucket);
-	TESSvertex *newVertex2 = (TESSvertex*)bucketAlloc(mesh->vertexBucket);
-	TESSface *newFace = (TESSface*)bucketAlloc(mesh->faceBucket);
+	TESSvertex *newVertex1 = mesh->vertexBucket.allocate();
+	TESSvertex *newVertex2 = mesh->vertexBucket.allocate();
+	TESSface *newFace = mesh->faceBucket.allocate();
 	TESShalfEdge *e;
 
 	/* if any one is null then all get freed */
-	if (newVertex1 == NULL || newVertex2 == NULL || newFace == NULL) {
-		if (newVertex1 != NULL) bucketFree( mesh->vertexBucket, newVertex1 );
-		if (newVertex2 != NULL) bucketFree( mesh->vertexBucket, newVertex2 );
-		if (newFace != NULL) bucketFree( mesh->faceBucket, newFace );     
+	if ( newVertex1 == NULL || newVertex2 == NULL || newFace == NULL )
+	{
+		if ( newVertex1 != NULL ) mesh->vertexBucket.deallocate( newVertex1 );
+		if ( newVertex2 != NULL ) mesh->vertexBucket.deallocate( newVertex2 );
+		if ( newFace != NULL ) mesh->faceBucket.deallocate( newFace );
 		return NULL;
-	} 
+	}
 
 	e = MakeEdge( mesh, &mesh->eHead );
-	if (e == NULL) return NULL;
+	if ( e == NULL ) return NULL;
 
 	MakeVertex( newVertex1, e, &mesh->vHead );
 	MakeVertex( newVertex2, e->Sym, &mesh->vHead );
@@ -302,19 +307,21 @@ TESShalfEdge *tessMeshMakeEdge( TESSmesh *mesh )
 * If eDst == eOrg->Onext, the new vertex will have a single edge.
 * If eDst == eOrg->Oprev, the old vertex will have a single edge.
 */
-int tessMeshSplice( TESSmesh* mesh, TESShalfEdge *eOrg, TESShalfEdge *eDst )
+int tessMeshSplice( TESSmesh *mesh, TESShalfEdge *eOrg, TESShalfEdge *eDst )
 {
 	int joiningLoops = FALSE;
 	int joiningVertices = FALSE;
 
-	if( eOrg == eDst ) return 1;
+	if ( eOrg == eDst ) return 1;
 
-	if( eDst->Org != eOrg->Org ) {
+	if ( eDst->Org != eOrg->Org )
+	{
 		/* We are merging two disjoint vertices -- destroy eDst->Org */
 		joiningVertices = TRUE;
 		KillVertex( mesh, eDst->Org, eOrg->Org );
 	}
-	if( eDst->Lface != eOrg->Lface ) {
+	if ( eDst->Lface != eOrg->Lface )
+	{
 		/* We are connecting two disjoint loops -- destroy eDst->Lface */
 		joiningLoops = TRUE;
 		KillFace( mesh, eDst->Lface, eOrg->Lface );
@@ -323,9 +330,10 @@ int tessMeshSplice( TESSmesh* mesh, TESShalfEdge *eOrg, TESShalfEdge *eDst )
 	/* Change the edge structure */
 	Splice( eDst, eOrg );
 
-	if( ! joiningVertices ) {
-		TESSvertex *newVertex = (TESSvertex*)bucketAlloc( mesh->vertexBucket );
-		if (newVertex == NULL) return 0;
+	if ( ! joiningVertices )
+	{
+		TESSvertex *newVertex = mesh->vertexBucket.allocate();
+		if ( newVertex == NULL ) return 0;
 
 		/* We split one vertex into two -- the new vertex is eDst->Org.
 		* Make sure the old vertex points to a valid half-edge.
@@ -333,9 +341,10 @@ int tessMeshSplice( TESSmesh* mesh, TESShalfEdge *eOrg, TESShalfEdge *eDst )
 		MakeVertex( newVertex, eDst, eOrg->Org );
 		eOrg->Org->anEdge = eOrg;
 	}
-	if( ! joiningLoops ) {
-		TESSface *newFace = (TESSface*)bucketAlloc( mesh->faceBucket );  
-		if (newFace == NULL) return 0;
+	if ( ! joiningLoops )
+	{
+		TESSface *newFace = mesh->faceBucket.allocate();
+		if ( newFace == NULL ) return 0;
 
 		/* We split one loop into two -- the new loop is eDst->Lface.
 		* Make sure the old face points to a valid half-edge.
@@ -366,23 +375,26 @@ int tessMeshDelete( TESSmesh *mesh, TESShalfEdge *eDel )
 	/* First step: disconnect the origin vertex eDel->Org.  We make all
 	* changes to get a consistent mesh in this "intermediate" state.
 	*/
-	if( eDel->Lface != eDel->Rface ) {
+	if ( eDel->Lface != eDel->Rface )
+	{
 		/* We are joining two loops into one -- remove the left face */
 		joiningLoops = TRUE;
 		KillFace( mesh, eDel->Lface, eDel->Rface );
 	}
 
-	if( eDel->Onext == eDel ) {
+	if ( eDel->Onext == eDel )
 		KillVertex( mesh, eDel->Org, NULL );
-	} else {
+	else
+	{
 		/* Make sure that eDel->Org and eDel->Rface point to valid half-edges */
 		eDel->Rface->anEdge = eDel->Oprev;
 		eDel->Org->anEdge = eDel->Onext;
 
 		Splice( eDel, eDel->Oprev );
-		if( ! joiningLoops ) {
-			TESSface *newFace= (TESSface*)bucketAlloc( mesh->faceBucket );
-			if (newFace == NULL) return 0; 
+		if ( ! joiningLoops )
+		{
+			TESSface *newFace = mesh->faceBucket.allocate();
+			if ( newFace == NULL ) return 0;
 
 			/* We are splitting one loop into two -- create a new loop for eDel. */
 			MakeFace( newFace, eDel, eDel->Lface );
@@ -392,10 +404,13 @@ int tessMeshDelete( TESSmesh *mesh, TESShalfEdge *eDel )
 	/* Claim: the mesh is now in a consistent state, except that eDel->Org
 	* may have been deleted.  Now we disconnect eDel->Dst.
 	*/
-	if( eDelSym->Onext == eDelSym ) {
+	if ( eDelSym->Onext == eDelSym )
+	{
 		KillVertex( mesh, eDelSym->Org, NULL );
 		KillFace( mesh, eDelSym->Lface, NULL );
-	} else {
+	}
+	else
+	{
 		/* Make sure that eDel->Dst and eDel->Lface point to valid half-edges */
 		eDel->Lface->anEdge = eDelSym->Oprev;
 		eDelSym->Org->anEdge = eDelSym->Onext;
@@ -424,7 +439,7 @@ TESShalfEdge *tessMeshAddEdgeVertex( TESSmesh *mesh, TESShalfEdge *eOrg )
 {
 	TESShalfEdge *eNewSym;
 	TESShalfEdge *eNew = MakeEdge( mesh, eOrg );
-	if (eNew == NULL) return NULL;
+	if ( eNew == NULL ) return NULL;
 
 	eNewSym = eNew->Sym;
 
@@ -434,8 +449,8 @@ TESShalfEdge *tessMeshAddEdgeVertex( TESSmesh *mesh, TESShalfEdge *eOrg )
 	/* Set the vertex and face information */
 	eNew->Org = eOrg->Dst;
 	{
-		TESSvertex *newVertex= (TESSvertex*)bucketAlloc( mesh->vertexBucket );
-		if (newVertex == NULL) return NULL;
+		TESSvertex *newVertex = mesh->vertexBucket.allocate();
+		if ( newVertex == NULL ) return NULL;
 
 		MakeVertex( newVertex, eNewSym, eNew->Org );
 	}
@@ -452,8 +467,8 @@ TESShalfEdge *tessMeshAddEdgeVertex( TESSmesh *mesh, TESShalfEdge *eOrg )
 TESShalfEdge *tessMeshSplitEdge( TESSmesh *mesh, TESShalfEdge *eOrg )
 {
 	TESShalfEdge *eNew;
-	TESShalfEdge *tempHalfEdge= tessMeshAddEdgeVertex( mesh, eOrg );
-	if (tempHalfEdge == NULL) return NULL;
+	TESShalfEdge *tempHalfEdge = tessMeshAddEdgeVertex( mesh, eOrg );
+	if ( tempHalfEdge == NULL ) return NULL;
 
 	eNew = tempHalfEdge->Sym;
 
@@ -485,13 +500,14 @@ TESShalfEdge *tessMeshSplitEdge( TESSmesh *mesh, TESShalfEdge *eOrg )
 TESShalfEdge *tessMeshConnect( TESSmesh *mesh, TESShalfEdge *eOrg, TESShalfEdge *eDst )
 {
 	TESShalfEdge *eNewSym;
-	int joiningLoops = FALSE;  
+	int joiningLoops = FALSE;
 	TESShalfEdge *eNew = MakeEdge( mesh, eOrg );
-	if (eNew == NULL) return NULL;
+	if ( eNew == NULL ) return NULL;
 
 	eNewSym = eNew->Sym;
 
-	if( eDst->Lface != eOrg->Lface ) {
+	if ( eDst->Lface != eOrg->Lface )
+	{
 		/* We are connecting two disjoint loops -- destroy eDst->Lface */
 		joiningLoops = TRUE;
 		KillFace( mesh, eDst->Lface, eOrg->Lface );
@@ -509,9 +525,10 @@ TESShalfEdge *tessMeshConnect( TESSmesh *mesh, TESShalfEdge *eOrg, TESShalfEdge 
 	/* Make sure the old face points to a valid half-edge */
 	eOrg->Lface->anEdge = eNewSym;
 
-	if( ! joiningLoops ) {
-		TESSface *newFace= (TESSface*)bucketAlloc( mesh->faceBucket );
-		if (newFace == NULL) return NULL;
+	if ( ! joiningLoops )
+	{
+		TESSface *newFace = mesh->faceBucket.allocate();
+		if ( newFace == NULL ) return NULL;
 
 		/* We split one loop into two -- the new loop is eNew->Lface */
 		MakeFace( newFace, eNew, eOrg->Lface );
@@ -537,32 +554,37 @@ void tessMeshZapFace( TESSmesh *mesh, TESSface *fZap )
 
 	/* walk around face, deleting edges whose right face is also NULL */
 	eNext = eStart->Lnext;
-	do {
+	do
+	{
 		e = eNext;
 		eNext = e->Lnext;
 
 		e->Lface = NULL;
-		if( e->Rface == NULL ) {
+		if ( e->Rface == NULL )
+		{
 			/* delete the edge -- see TESSmeshDelete above */
 
-			if( e->Onext == e ) {
+			if ( e->Onext == e )
 				KillVertex( mesh, e->Org, NULL );
-			} else {
+			else
+			{
 				/* Make sure that e->Org points to a valid half-edge */
 				e->Org->anEdge = e->Onext;
 				Splice( e, e->Oprev );
 			}
 			eSym = e->Sym;
-			if( eSym->Onext == eSym ) {
+			if ( eSym->Onext == eSym )
 				KillVertex( mesh, eSym->Org, NULL );
-			} else {
+			else
+			{
 				/* Make sure that eSym->Org points to a valid half-edge */
 				eSym->Org->anEdge = eSym->Onext;
 				Splice( eSym, eSym->Oprev );
 			}
 			KillEdge( mesh, e );
 		}
-	} while( e != eStart );
+	}
+	while ( e != eStart );
 
 	/* delete from circular doubly-linked list */
 	fPrev = fZap->prev;
@@ -570,42 +592,37 @@ void tessMeshZapFace( TESSmesh *mesh, TESSface *fZap )
 	fNext->prev = fPrev;
 	fPrev->next = fNext;
 
-	bucketFree( mesh->faceBucket, fZap );
+	mesh->faceBucket.deallocate( fZap );
 }
 
 
 /* tessMeshNewMesh() creates a new mesh with no edges, no vertices,
 * and no loops (what we usually call a "face").
 */
-TESSmesh *tessMeshNewMesh( TESSalloc* alloc )
+TESSmesh *tessMeshNewMesh( TESSalloc *alloc )
 {
 	TESSvertex *v;
 	TESSface *f;
 	TESShalfEdge *e;
 	TESShalfEdge *eSym;
-	TESSmesh *mesh = (TESSmesh *)alloc->memalloc( alloc->userData, sizeof( TESSmesh ));
-	if (mesh == NULL) {
+	TESSmesh *mesh = new TESSmesh;
+	if ( mesh == NULL )
 		return NULL;
-	}
-	
-	if (alloc->meshEdgeBucketSize < 16)
-		alloc->meshEdgeBucketSize = 16;
-	if (alloc->meshEdgeBucketSize > 4096)
-		alloc->meshEdgeBucketSize = 4096;
-	
-	if (alloc->meshVertexBucketSize < 16)
-		alloc->meshVertexBucketSize = 16;
-	if (alloc->meshVertexBucketSize > 4096)
-		alloc->meshVertexBucketSize = 4096;
-	
-	if (alloc->meshFaceBucketSize < 16)
-		alloc->meshFaceBucketSize = 16;
-	if (alloc->meshFaceBucketSize > 4096)
-		alloc->meshFaceBucketSize = 4096;
 
-	mesh->edgeBucket = createBucketAlloc( alloc, "Mesh Edges", sizeof(EdgePair), alloc->meshEdgeBucketSize );
-	mesh->vertexBucket = createBucketAlloc( alloc, "Mesh Vertices", sizeof(TESSvertex), alloc->meshVertexBucketSize );
-	mesh->faceBucket = createBucketAlloc( alloc, "Mesh Faces", sizeof(TESSface), alloc->meshFaceBucketSize );
+	if ( alloc->meshEdgeBucketSize < 16 )
+		alloc->meshEdgeBucketSize = 16;
+	if ( alloc->meshEdgeBucketSize > 4096 )
+		alloc->meshEdgeBucketSize = 4096;
+
+	if ( alloc->meshVertexBucketSize < 16 )
+		alloc->meshVertexBucketSize = 16;
+	if ( alloc->meshVertexBucketSize > 4096 )
+		alloc->meshVertexBucketSize = 4096;
+
+	if ( alloc->meshFaceBucketSize < 16 )
+		alloc->meshFaceBucketSize = 16;
+	if ( alloc->meshFaceBucketSize > 4096 )
+		alloc->meshFaceBucketSize = 4096;
 
 	v = &mesh->vHead;
 	f = &mesh->fHead;
@@ -646,7 +663,7 @@ TESSmesh *tessMeshNewMesh( TESSalloc* alloc )
 /* tessMeshUnion( mesh1, mesh2 ) forms the union of all structures in
 * both meshes, and returns the new mesh (the old meshes are destroyed).
 */
-TESSmesh *tessMeshUnion( TESSalloc* alloc, TESSmesh *mesh1, TESSmesh *mesh2 )
+TESSmesh *tessMeshUnion( TESSalloc *alloc, TESSmesh *mesh1, TESSmesh *mesh2 )
 {
 	TESSface *f1 = &mesh1->fHead;
 	TESSvertex *v1 = &mesh1->vHead;
@@ -656,21 +673,24 @@ TESSmesh *tessMeshUnion( TESSalloc* alloc, TESSmesh *mesh1, TESSmesh *mesh2 )
 	TESShalfEdge *e2 = &mesh2->eHead;
 
 	/* Add the faces, vertices, and edges of mesh2 to those of mesh1 */
-	if( f2->next != f2 ) {
+	if ( f2->next != f2 )
+	{
 		f1->prev->next = f2->next;
 		f2->next->prev = f1->prev;
 		f2->prev->next = f1;
 		f1->prev = f2->prev;
 	}
 
-	if( v2->next != v2 ) {
+	if ( v2->next != v2 )
+	{
 		v1->prev->next = v2->next;
 		v2->next->prev = v1->prev;
 		v2->prev->next = v1;
 		v1->prev = v2->prev;
 	}
 
-	if( e2->next != e2 ) {
+	if ( e2->next != e2 )
+	{
 		e1->Sym->next->Sym->next = e2->next;
 		e2->next->Sym->next = e1->Sym->next;
 		e2->Sym->next->Sym->next = e1;
@@ -691,7 +711,7 @@ static int CountFaceVerts( TESSface *f )
 		n++;
 		eCur = eCur->Lnext;
 	}
-	while (eCur != f->anEdge);
+	while ( eCur != f->anEdge );
 	return n;
 }
 
@@ -701,84 +721,60 @@ int tessMeshMergeConvexFaces( TESSmesh *mesh, int maxVertsPerFace )
 	TESShalfEdge *eCur, *eNext, *eSym;
 	TESSvertex *vStart;
 	int curNv, symNv;
-	
-	for( f = mesh->fHead.next; f != &mesh->fHead; f = f->next )
+
+	for ( f = mesh->fHead.next; f != &mesh->fHead; f = f->next )
 	{
 		// Skip faces which are outside the result.
-		if( !f->inside )
+		if ( !f->inside )
 			continue;
 
 		eCur = f->anEdge;
 		vStart = eCur->Org;
-			
-		while (1)
+
+		while ( 1 )
 		{
 			eNext = eCur->Lnext;
 			eSym = eCur->Sym;
 
 			// Try to merge if the neighbour face is valid.
-			if( eSym && eSym->Lface && eSym->Lface->inside )
+			if ( eSym && eSym->Lface && eSym->Lface->inside )
 			{
 				// Try to merge the neighbour faces if the resulting polygons
 				// does not exceed maximum number of vertices.
 				curNv = CountFaceVerts( f );
 				symNv = CountFaceVerts( eSym->Lface );
-				if( (curNv+symNv-2) <= maxVertsPerFace )
+				if ( ( curNv + symNv - 2 ) <= maxVertsPerFace )
 				{
 					// Merge if the resulting poly is convex.
-					if( VertCCW( eCur->Lprev->Org, eCur->Org, eSym->Lnext->Lnext->Org ) &&
-						VertCCW( eSym->Lprev->Org, eSym->Org, eCur->Lnext->Lnext->Org ) )
+					if ( VertCCW( eCur->Lprev->Org, eCur->Org, eSym->Lnext->Lnext->Org ) &&
+					        VertCCW( eSym->Lprev->Org, eSym->Org, eCur->Lnext->Lnext->Org ) )
 					{
 						eNext = eSym->Lnext;
-						if( !tessMeshDelete( mesh, eSym ) )
+						if ( !tessMeshDelete( mesh, eSym ) )
 							return 0;
 						eCur = 0;
 					}
 				}
 			}
-			
-			if( eCur && eCur->Lnext->Org == vStart )
+
+			if ( eCur && eCur->Lnext->Org == vStart )
 				break;
-				
+
 			// Continue to next edge.
 			eCur = eNext;
 		}
 	}
-	
+
 	return 1;
 }
 
 
-#ifdef DELETE_BY_ZAPPING
-
 /* tessMeshDeleteMesh( mesh ) will free all storage for any valid mesh.
 */
-void tessMeshDeleteMesh( TESSalloc* alloc, TESSmesh *mesh )
+void tessMeshDeleteMesh( TESSalloc *alloc, TESSmesh *mesh )
 {
-	TESSface *fHead = &mesh->fHead;
-
-	while( fHead->next != fHead ) {
-		tessMeshZapFace( fHead->next );
-	}
-	assert( mesh->vHead.next == &mesh->vHead );
-
-	alloc->memfree( alloc->userData, mesh );
+	delete mesh;
 }
-
-#else
-
-/* tessMeshDeleteMesh( mesh ) will free all storage for any valid mesh.
-*/
-void tessMeshDeleteMesh( TESSalloc* alloc, TESSmesh *mesh )
-{
-	deleteBucketAlloc(mesh->edgeBucket);
-	deleteBucketAlloc(mesh->vertexBucket);
-	deleteBucketAlloc(mesh->faceBucket);
-
-	alloc->memfree( alloc->userData, mesh );
-}
-
-#endif
 
 #ifndef NDEBUG
 
@@ -794,37 +790,44 @@ void tessMeshCheckMesh( TESSmesh *mesh )
 	TESShalfEdge *e, *ePrev;
 
 	fPrev = fHead;
-	for( fPrev = fHead ; (f = fPrev->next) != fHead; fPrev = f) {
+	for ( fPrev = fHead ; ( f = fPrev->next ) != fHead; fPrev = f )
+	{
 		assert( f->prev == fPrev );
 		e = f->anEdge;
-		do {
+		do
+		{
 			assert( e->Sym != e );
 			assert( e->Sym->Sym == e );
 			assert( e->Lnext->Onext->Sym == e );
 			assert( e->Onext->Sym->Lnext == e );
 			assert( e->Lface == f );
 			e = e->Lnext;
-		} while( e != f->anEdge );
+		}
+		while ( e != f->anEdge );
 	}
 	assert( f->prev == fPrev && f->anEdge == NULL );
 
 	vPrev = vHead;
-	for( vPrev = vHead ; (v = vPrev->next) != vHead; vPrev = v) {
+	for ( vPrev = vHead ; ( v = vPrev->next ) != vHead; vPrev = v )
+	{
 		assert( v->prev == vPrev );
 		e = v->anEdge;
-		do {
+		do
+		{
 			assert( e->Sym != e );
 			assert( e->Sym->Sym == e );
 			assert( e->Lnext->Onext->Sym == e );
 			assert( e->Onext->Sym->Lnext == e );
 			assert( e->Org == v );
 			e = e->Onext;
-		} while( e != v->anEdge );
+		}
+		while ( e != v->anEdge );
 	}
 	assert( v->prev == vPrev && v->anEdge == NULL );
 
 	ePrev = eHead;
-	for( ePrev = eHead ; (e = ePrev->next) != eHead; ePrev = e) {
+	for ( ePrev = eHead ; ( e = ePrev->next ) != eHead; ePrev = e )
+	{
 		assert( e->Sym->next == ePrev->Sym );
 		assert( e->Sym != e );
 		assert( e->Sym->Sym == e );
@@ -834,10 +837,10 @@ void tessMeshCheckMesh( TESSmesh *mesh )
 		assert( e->Onext->Sym->Lnext == e );
 	}
 	assert( e->Sym->next == ePrev->Sym
-		&& e->Sym == &mesh->eHeadSym
-		&& e->Sym->Sym == e
-		&& e->Org == NULL && e->Dst == NULL
-		&& e->Lface == NULL && e->Rface == NULL );
+	        && e->Sym == &mesh->eHeadSym
+	        && e->Sym->Sym == e
+	        && e->Org == NULL && e->Dst == NULL
+	        && e->Lface == NULL && e->Rface == NULL );
 }
 
 #endif
