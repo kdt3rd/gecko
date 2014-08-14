@@ -17,11 +17,15 @@ expr::~expr( void )
 
 void func::write( std::ostream &out ) const
 {
-	out << _name << '(';
-	std::copy( _args.begin(), _args.end(), std::ostream_iterator<std::u32string>( out, "," ) );
-	out << ")\n{\n\t";
+	out << "function " << _name << "( ";
+	if ( !_args.empty() )
+	{
+		std::copy( _args.begin(), _args.end()-1, std::ostream_iterator<std::u32string>( out, ", " ) );
+		out << _args.back();
+	}
+	out << " )\n{\n    ";
 	_result->write( out );
-	out << "\n}\n";
+	out << ";\n}\n";
 }
 
 ////////////////////////////////////////
@@ -81,13 +85,6 @@ void operator_expr::write( std::ostream &out ) const
 
 ////////////////////////////////////////
 
-void aggregate_expr::write( std::ostream &out ) const
-{
-	out << "( " << *_value << " )";
-}
-
-////////////////////////////////////////
-
 void tuple_expr::write( std::ostream &out ) const
 {
 	out << "{ " << *_value << " }";
@@ -97,14 +94,7 @@ void tuple_expr::write( std::ostream &out ) const
 
 void call_expr::write( std::ostream &out ) const
 {
-	out << "( " << *_value << " )";
-}
-
-////////////////////////////////////////
-
-void feature_expr::write( std::ostream &out ) const
-{
-	out << '.' << _value;
+	out << *_func << "( " << *_args << " )";
 }
 
 ////////////////////////////////////////
@@ -124,7 +114,7 @@ void chain_expr::write( std::ostream &out ) const
 		}
 
 		// Check for "obj.f" or "f(...)" and skip the space
-		if ( !( _value->can_be_feature() && ( next->can_be_feature() || next->is_call() ) ) )
+		if ( !next->is_call() )
 			out << ' ';
 		_next->write( out );
 	}
@@ -137,11 +127,52 @@ void list_expr::write( std::ostream &out ) const
 	value()->write( out );
 	if ( _next )
 	{
+		out << "; ";
+		_next->write( out );
+	}
+}
+
+////////////////////////////////////////
+
+void arguments_expr::write( std::ostream &out ) const
+{
+	value()->write( out );
+	if ( _next )
+	{
 		out << ", ";
 		_next->write( out );
 	}
 }
 
+////////////////////////////////////////
+
+void block_expr::write( std::ostream &out ) const
+{
+	out << "{ ";
+	value()->write( out );
+	out << "; }";
+}
+
+////////////////////////////////////////
+
+std::ostream &operator<<( std::ostream &out, const std::shared_ptr<expr> &e )
+{
+	out << *e;
+	return out;
+}
+
+void for_expr::write( std::ostream &out ) const
+{
+	out << "for ( ";
+
+	std::copy( _vars.begin(), _vars.end() - 1, std::ostream_iterator<std::u32string>( out, ", " ) );
+	out << _vars.back() << ": ";
+
+	std::copy( _ranges.begin(), _ranges.end() - 1, std::ostream_iterator<std::shared_ptr<expr>>( out, ", " ) );
+	out << *(_ranges.back()) << " ) ";
+
+	_result->write( out );
+}
 ////////////////////////////////////////
 
 }
