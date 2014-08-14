@@ -90,7 +90,7 @@ font::get_glyph( char32_t char_code )
 //		size_t height = (size_t)ceilf(ascent + descent);
 
 		// Draw the text 
-		CGFloat x = 0.0;
+		CGFloat x = 0.5;
 		CGFloat y = descent;
 		CGContextSetTextPosition( ctx, x, y );
 		CTLineDraw( line, ctx );
