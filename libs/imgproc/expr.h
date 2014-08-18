@@ -71,16 +71,31 @@ private:
 
 ////////////////////////////////////////
 
-class closed_expr : public expr
+class circumfix_expr : public expr
 {
 public:
-	closed_expr( const std::u32string &op, const std::u32string &cl, const std::shared_ptr<expr> &x );
+	circumfix_expr( const std::u32string &op, const std::u32string &cl, const std::shared_ptr<expr> &x );
 
 	void write( std::ostream &out ) const override;
 
 private:
 	std::u32string _open, _close;
 	std::shared_ptr<expr> _x;
+};
+
+////////////////////////////////////////
+
+class postcircumfix_expr : public expr
+{
+public:
+	postcircumfix_expr( const std::u32string &op, const std::u32string &cl, const std::shared_ptr<expr> &x, const std::shared_ptr<expr> &y );
+
+	void write( std::ostream &out ) const override;
+
+private:
+	std::u32string _open, _close;
+	std::shared_ptr<expr> _x;
+	std::shared_ptr<expr> _y;
 };
 
 ////////////////////////////////////////

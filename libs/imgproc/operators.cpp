@@ -9,14 +9,16 @@ namespace imgproc
 
 std::map<std::u32string,std::shared_ptr<base_operator>> operators =
 {
-	{ U"-", std::make_shared<preinfix_operator>( 100, 10 ) },
-	{ U"+", std::make_shared<preinfix_operator>( 100, 10 ) },
+	{ U"-", std::make_shared<dualfix_operator>( 100, 10 ) },
+	{ U"+", std::make_shared<dualfix_operator>( 100, 10 ) },
 	{ U"!", std::make_shared<postfix_operator>( 90 ) },
 	{ U"*", std::make_shared<infix_operator>( 20 ) },
 	{ U"/", std::make_shared<infix_operator>( 20 ) },
 	{ U"**", std::make_shared<infix_operator>( 20, false ) },
 	{ U"(", std::make_shared<circumfix_operator>( U")" ) },
 	{ U")", std::make_shared<base_operator>() },
+	{ U"[", std::make_shared<postcircumfix_operator>( U"]" ) },
+	{ U"]", std::make_shared<base_operator>() },
 	{ U"|", std::make_shared<circumfix_operator>( U"|" ) },
 };
 
@@ -128,21 +130,21 @@ std::shared_ptr<expr> postfix_operator::left( expr_parser &parser, const std::u3
 
 ////////////////////////////////////////
 
-preinfix_operator::preinfix_operator( int64_t pre_bp, int64_t in_bp )
+dualfix_operator::dualfix_operator( int64_t pre_bp, int64_t in_bp )
 	: _pre_bp( pre_bp ), _in_bp( in_bp )
 {
 }
 
 ////////////////////////////////////////
 
-int64_t preinfix_operator::lbp( void )
+int64_t dualfix_operator::lbp( void )
 {
 	return _in_bp;
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<expr> preinfix_operator::left( expr_parser &parser, const std::u32string &op, const std::shared_ptr<expr> &left )
+std::shared_ptr<expr> dualfix_operator::left( expr_parser &parser, const std::u32string &op, const std::shared_ptr<expr> &left )
 {
 	auto right = parser.expression( _in_bp );
 	return std::make_shared<infix_expr>( op, left, right );
@@ -150,7 +152,7 @@ std::shared_ptr<expr> preinfix_operator::left( expr_parser &parser, const std::u
 
 ////////////////////////////////////////
 
-std::shared_ptr<expr> preinfix_operator::right( expr_parser &parser, const std::u32string &op )
+std::shared_ptr<expr> dualfix_operator::right( expr_parser &parser, const std::u32string &op )
 {
 	auto operand = parser.expression( _pre_bp );
 	return std::make_shared<prefix_expr>( op, operand );
@@ -169,7 +171,30 @@ std::shared_ptr<expr> circumfix_operator::right( expr_parser &parser, const std:
 {
 	auto operand = parser.expression();
 	parser.match( _close );
-	return std::make_shared<closed_expr>( op, _close, operand );
+	return std::make_shared<circumfix_expr>( op, _close, operand );
+}
+
+////////////////////////////////////////
+
+postcircumfix_operator::postcircumfix_operator( const std::u32string &close )
+	: _close( close )
+{
+}
+
+////////////////////////////////////////
+
+int64_t postcircumfix_operator::lbp( void )
+{
+	return 100;
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<expr> postcircumfix_operator::left( expr_parser &parser, const std::u32string &op, const std::shared_ptr<expr> &left )
+{
+	auto right = parser.expression();
+	parser.match( _close );
+	return std::make_shared<postcircumfix_expr>( op, _close, left, right );
 }
 
 ////////////////////////////////////////

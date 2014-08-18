@@ -87,14 +87,14 @@ private:
 
 ////////////////////////////////////////
 
-class preinfix_operator : public base_operator
+class dualfix_operator : public base_operator
 {
 public:
-	preinfix_operator( int64_t pre_bp, int64_t in_bp );
+	dualfix_operator( int64_t pre_bp, int64_t in_bp );
 
 	virtual int64_t lbp( void );
-	virtual std::shared_ptr<expr> left( expr_parser &parser, const std::u32string &op, const std::shared_ptr<expr> &left );
 	virtual std::shared_ptr<expr> right( expr_parser &parser, const std::u32string &op );
+	virtual std::shared_ptr<expr> left( expr_parser &parser, const std::u32string &op, const std::shared_ptr<expr> &left );
 
 private:
 	int64_t _pre_bp, _in_bp;
@@ -107,6 +107,19 @@ class circumfix_operator : public base_operator
 public:
 	circumfix_operator( const std::u32string &close );
 	virtual std::shared_ptr<expr> right( expr_parser &parser, const std::u32string &op );
+
+private:
+	std::u32string _close;
+};
+
+////////////////////////////////////////
+
+class postcircumfix_operator : public base_operator
+{
+public:
+	postcircumfix_operator( const std::u32string &close );
+	int64_t lbp( void ) override;
+	std::shared_ptr<expr> left( expr_parser &parser, const std::u32string &op, const std::shared_ptr<expr> &left ) override;
 
 private:
 	std::u32string _close;

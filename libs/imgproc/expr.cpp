@@ -65,17 +65,34 @@ void infix_expr::write( std::ostream &out ) const
 
 ////////////////////////////////////////
 
-closed_expr::closed_expr( const std::u32string &op, const std::u32string &cl, const std::shared_ptr<expr> &x )
+circumfix_expr::circumfix_expr( const std::u32string &op, const std::u32string &cl, const std::shared_ptr<expr> &x )
 	: _open( op ), _close( cl ), _x( x )
 {
 }
 
 ////////////////////////////////////////
 
-void closed_expr::write( std::ostream &out ) const
+void circumfix_expr::write( std::ostream &out ) const
 {
 	out << _open;
 	_x->write( out );
+	out << _close;
+}
+
+////////////////////////////////////////
+
+postcircumfix_expr::postcircumfix_expr( const std::u32string &op, const std::u32string &cl, const std::shared_ptr<expr> &x, const std::shared_ptr<expr> &y )
+	: _open( op ), _close( cl ), _x( x ), _y( y )
+{
+}
+
+////////////////////////////////////////
+
+void postcircumfix_expr::write( std::ostream &out ) const
+{
+	_x->write( out );
+	out << _open;
+	_y->write( out );
 	out << _close;
 }
 
