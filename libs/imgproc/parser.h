@@ -22,6 +22,7 @@ public:
 	void operator()( void );
 
 	bool has_messages( void ) const { return !_messages.empty(); }
+	bool has_errors( void ) const { return _has_errors; }
 	const std::vector<message> &messages( void ) const { return _messages; }
 
 private:
@@ -31,6 +32,8 @@ private:
 
 	bool expect( const std::u32string &c );
 	bool expect( token_type t );
+
+	bool is_loop_modifier( const std::shared_ptr<expr> &e );
 
 	void next_token( void );
 
@@ -46,6 +49,7 @@ private:
 	std::shared_ptr<expr> expression( void );
 	std::shared_ptr<expr> primary_expr( void );
 	std::shared_ptr<expr> arguments( void );
+	std::vector<std::shared_ptr<expr>> expr_block( void );
 	std::shared_ptr<expr> if_expr( void );
 	std::shared_ptr<expr> for_range( void );
 	std::shared_ptr<expr> for_expr( void );
@@ -59,6 +63,10 @@ private:
 	std::vector<std::shared_ptr<func>> &_funcs;
 	std::vector<std::u32string> _comments;
 	std::vector<message> _messages;
+	std::map<std::shared_ptr<expr>,std::pair<location,location>> _expr_locs;
+	bool _parsing_range = false;
+	bool _parsing_assign = false;
+	bool _has_errors = false;
 };
 
 ////////////////////////////////////////

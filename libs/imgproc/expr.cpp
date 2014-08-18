@@ -15,6 +15,72 @@ expr::~expr( void )
 
 ////////////////////////////////////////
 
+prefix_expr::prefix_expr( const std::u32string &op, const std::shared_ptr<expr> &x )
+	: _op( op ), _x( x )
+{
+}
+
+////////////////////////////////////////
+
+void prefix_expr::write( std::ostream &out ) const
+{
+	out << _op << '(';
+	_x->write( out );
+	out << ')';
+}
+
+////////////////////////////////////////
+
+postfix_expr::postfix_expr( const std::u32string &op, const std::shared_ptr<expr> &x )
+	: _op( op ), _x( x )
+{
+}
+
+////////////////////////////////////////
+
+void postfix_expr::write( std::ostream &out ) const
+{
+	out << '(';
+	_x->write( out );
+	out << ')' << _op;
+}
+
+////////////////////////////////////////
+
+infix_expr::infix_expr( const std::u32string &op, const std::shared_ptr<expr> &x, const std::shared_ptr<expr> &y )
+	: _op( op ), _x( x ), _y( y )
+{
+}
+
+////////////////////////////////////////
+
+void infix_expr::write( std::ostream &out ) const
+{
+	out << '(';
+	_x->write( out );
+	out << ')' << _op << '(';
+	_y->write( out );
+	out << ')';
+}
+
+////////////////////////////////////////
+
+closed_expr::closed_expr( const std::u32string &op, const std::u32string &cl, const std::shared_ptr<expr> &x )
+	: _open( op ), _close( cl ), _x( x )
+{
+}
+
+////////////////////////////////////////
+
+void closed_expr::write( std::ostream &out ) const
+{
+	out << _open;
+	_x->write( out );
+	out << _close;
+}
+
+////////////////////////////////////////
+
 void func::write( std::ostream &out ) const
 {
 	out << "function " << _name << "( ";
@@ -81,6 +147,14 @@ void identifier_expr::write( std::ostream &out ) const
 void operator_expr::write( std::ostream &out ) const
 {
 	out << _value;
+}
+
+////////////////////////////////////////
+
+void assign_expr::write( std::ostream &out ) const
+{
+	out << _var << " = ";
+	_expr->write( out );
 }
 
 ////////////////////////////////////////

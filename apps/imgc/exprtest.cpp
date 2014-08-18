@@ -2,7 +2,7 @@
 #include <base/contract.h>
 #include <fstream>
 #include <imgproc/token.h>
-#include <imgproc/parser.h>
+#include <imgproc/expr_parser.h>
 #include <map>
 #include <memory>
 
@@ -14,27 +14,22 @@ int safemain( int argc, char *argv[] )
 	precondition( argc == 2, "expected single argument" );
 
 	std::ifstream src( argv[1] );
-
-	/*
 	imgproc::iterator token( src );
-	while ( token.next() )
-		std::cout << token << '\n';
-	*/
 
-	std::vector<std::shared_ptr<imgproc::func>> funcs;
-	imgproc::parser parser( funcs, src );
+	imgproc::expr_parser parser( token );
 
-	parser();
-	if ( parser.has_errors() )
-		std::cout << "ERROR: parsing " << argv[1] << std::endl;
-	for ( auto msg: parser.messages() )
-		std::cout << msg << std::endl;
+	auto e = parser.expression();
 
-	for ( auto f: funcs )
+	if ( token )
+		throw_runtime( "didn't parse everything: '{0}'", token.value() );
+
+	if ( e )
 	{
-		f->write( std::cout );
+		e->write( std::cout );
 		std::cout << std::endl;
 	}
+	else
+		throw_runtime( "null expression" );
 
 	return 0;
 }

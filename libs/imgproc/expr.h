@@ -28,6 +28,63 @@ public:
 
 ////////////////////////////////////////
 
+class prefix_expr : public expr
+{
+public:
+	prefix_expr( const std::u32string &op, const std::shared_ptr<expr> &x );
+
+	void write( std::ostream &out ) const override;
+
+private:
+	std::u32string _op;
+	std::shared_ptr<expr> _x;
+};
+
+////////////////////////////////////////
+
+class postfix_expr : public expr
+{
+public:
+	postfix_expr( const std::u32string &op, const std::shared_ptr<expr> &x );
+
+	void write( std::ostream &out ) const override;
+
+private:
+	std::u32string _op;
+	std::shared_ptr<expr> _x;
+};
+
+////////////////////////////////////////
+
+class infix_expr : public expr
+{
+public:
+	infix_expr( const std::u32string &op, const std::shared_ptr<expr> &x, const std::shared_ptr<expr> &y );
+
+	void write( std::ostream &out ) const override;
+
+private:
+	std::u32string _op;
+	std::shared_ptr<expr> _x;
+	std::shared_ptr<expr> _y;
+};
+
+////////////////////////////////////////
+
+class closed_expr : public expr
+{
+public:
+	closed_expr( const std::u32string &op, const std::u32string &cl, const std::shared_ptr<expr> &x );
+
+	void write( std::ostream &out ) const override;
+
+private:
+	std::u32string _open, _close;
+	std::shared_ptr<expr> _x;
+};
+
+////////////////////////////////////////
+
 class func
 {
 public:
@@ -510,6 +567,26 @@ private:
 	std::shared_ptr<expr> _end;
 	std::shared_ptr<expr> _by;
 
+};
+
+////////////////////////////////////////
+
+class assign_expr : public expr
+{
+public:
+	assign_expr( std::u32string var, const std::shared_ptr<expr> &e )
+		: _var( var ), _expr( e )
+	{
+	}
+
+	const std::u32string &variable( void ) const { return _var; }
+	std::shared_ptr<expr> expression( void ) const { return _expr; }
+
+	virtual void write( std::ostream &out ) const;
+
+private:
+	std::u32string _var;
+	std::shared_ptr<expr> _expr;
 };
 
 ////////////////////////////////////////

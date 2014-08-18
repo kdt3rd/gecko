@@ -27,7 +27,8 @@ enum token_type
 	TOK_SEPARATOR,
 	TOK_EXPRESSION_END,
 	TOK_STRING,
-	TOK_SYMBOL,
+	TOK_OPERATOR,
+	TOK_ASSIGN,
 	TOK_IF,
 	TOK_FOR,
 	TOK_FUNCTION,
@@ -64,7 +65,7 @@ public:
 	inline const location &end_location( void ) const { return _end; }
 
 private:
-	void parse_symbol( void );
+	void parse_operator( void );
 	void parse_identifier( void );
 	void parse_comment( void );
 	void parse_string( void );

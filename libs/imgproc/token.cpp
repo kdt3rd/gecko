@@ -101,6 +101,12 @@ iterator &iterator::next( void )
 		_type = TOK_SEPARATOR;
 		next_utf();
 	}
+	else if ( _c == '=' )
+	{
+		// Assignment separator
+		_type = TOK_ASSIGN;
+		next_utf();
+	}
 	else if ( _c == '\"' )
 		parse_string();
 	else if ( _c == '\'' )
@@ -119,13 +125,13 @@ iterator &iterator::next( void )
 		else
 		{
 			_value += comment_start;
-			parse_symbol();
+			parse_operator();
 		}
 	}
 	else if ( utf::is_identifier_start( _c ) )
 		parse_identifier();
 	else if ( utf::is_pattern_syntax( _c ) )
-		parse_symbol();
+		parse_operator();
 	else if ( utf::is_number_decimal( _c ) )
 		parse_number();
 	else
@@ -195,9 +201,9 @@ void iterator::skip_comments( void )
 
 ////////////////////////////////////////
 
-void iterator::parse_symbol( void )
+void iterator::parse_operator( void )
 {
-	_type = TOK_SYMBOL;
+	_type = TOK_OPERATOR;
 	while ( utf::is_pattern_syntax( _c ) && _c != U';' && _c != U',' && _c != U'{' && _c != U'}' && _c != U'(' && _c != U')' )
 		next_utf();
 }
@@ -525,6 +531,7 @@ const char *token_name( token_type t )
 {
 	switch ( t )
 	{
+		case TOK_ASSIGN:         return "assign";
 		case TOK_BLOCK_END:      return "block end";
 		case TOK_BLOCK_START:    return "block start";
 		case TOK_CHARACTER:      return "character";
@@ -537,7 +544,7 @@ const char *token_name( token_type t )
 		case TOK_EXPRESSION_END: return "expr end";
 		case TOK_SEPARATOR:      return "separator";
 		case TOK_STRING:         return "string";
-		case TOK_SYMBOL:         return "symbol";
+		case TOK_OPERATOR:       return "operator";
 		case TOK_IF:
 		case TOK_ELSE:
 		case TOK_FUNCTION:
