@@ -102,10 +102,10 @@ private:
 
 ////////////////////////////////////////
 
-class open_operator : public base_operator
+class circumfix_operator : public base_operator
 {
 public:
-	open_operator( const std::u32string &close );
+	circumfix_operator( const std::u32string &close );
 	virtual std::shared_ptr<expr> right( expr_parser &parser, const std::u32string &op );
 
 private:

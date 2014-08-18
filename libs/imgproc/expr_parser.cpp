@@ -56,7 +56,7 @@ std::pair<std::u32string,std::shared_ptr<base_operator>> expr_parser::next_token
 		if ( _it.type() == TOK_NUMBER )
 			op = std::make_shared<primary_operator>();
 		else
-			throw_runtime( "unknown operator '{0}'", _it.value() );
+			op = std::make_shared<end_operator>();
 	}
 	else
 		op = oplookup->second;

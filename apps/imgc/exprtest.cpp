@@ -21,7 +21,7 @@ int safemain( int argc, char *argv[] )
 	auto e = parser.expression();
 
 	if ( token )
-		throw_runtime( "didn't parse everything: '{0}'", token.value() );
+		std::cout << base::format( "didn't parse everything: '{0}'", token.value() ) << std::endl;;
 
 	if ( e )
 	{

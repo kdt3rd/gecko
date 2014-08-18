@@ -15,9 +15,9 @@ std::map<std::u32string,std::shared_ptr<base_operator>> operators =
 	{ U"*", std::make_shared<infix_operator>( 20 ) },
 	{ U"/", std::make_shared<infix_operator>( 20 ) },
 	{ U"**", std::make_shared<infix_operator>( 20, false ) },
-	{ U"[", std::make_shared<open_operator>( U"]" ) },
-	{ U"]", std::make_shared<base_operator>() },
-	{ U"|", std::make_shared<open_operator>( U"|" ) },
+	{ U"(", std::make_shared<circumfix_operator>( U")" ) },
+	{ U")", std::make_shared<base_operator>() },
+	{ U"|", std::make_shared<circumfix_operator>( U"|" ) },
 };
 
 ////////////////////////////////////////
@@ -37,14 +37,14 @@ int64_t base_operator::lbp( void )
 
 std::shared_ptr<expr> base_operator::right( expr_parser &parser, const std::u32string &op )
 {
-	throw_runtime( "operator '{0}' not prefix" );
+	throw_runtime( "expected operand, got '{0}'", op );
 }
 
 ////////////////////////////////////////
 
 std::shared_ptr<expr> base_operator::left( expr_parser &parser, const std::u32string &op, const std::shared_ptr<expr> &left )
 {
-	throw_runtime( "operator '{0}' not infix" );
+	throw_runtime( "expected operand, got '{0}'", op );
 }
 
 ////////////////////////////////////////
@@ -158,14 +158,14 @@ std::shared_ptr<expr> preinfix_operator::right( expr_parser &parser, const std::
 
 ////////////////////////////////////////
 
-open_operator::open_operator( const std::u32string &close )
+circumfix_operator::circumfix_operator( const std::u32string &close )
 	: _close( close )
 {
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<expr> open_operator::right( expr_parser &parser, const std::u32string &op )
+std::shared_ptr<expr> circumfix_operator::right( expr_parser &parser, const std::u32string &op )
 {
 	auto operand = parser.expression();
 	parser.match( _close );
