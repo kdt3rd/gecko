@@ -9,7 +9,7 @@ namespace base
 
 void print_exception( std::ostream &out, const std::exception &e, int level )
 {
-	out << std::string( level, ' ' ) << "error: " << e.what() << '\n';
+	out << "  " << e.what() << '\n';
 	try
 	{
 		std::rethrow_if_nested( e );
