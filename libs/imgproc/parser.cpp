@@ -6,6 +6,7 @@
 
 #include "operators.h"
 #include "parser.h"
+#include "expr_parser.h"
 
 ////////////////////////////////////////
 
@@ -49,7 +50,7 @@ void parser::operator()( void )
 			next_token();
 
 			// Search for "function" keyword
-			while ( _token && _token.type() != TOK_FUNCTION )
+			while ( _token && _token.type() != TOK_FUNCTION && _token.type() != TOK_PUBLIC )
 				next_token();
 		}
 	}
@@ -169,75 +170,12 @@ void parser::comments( void )
 
 std::shared_ptr<expr> parser::expression( void )
 {
-	location start = _token.start_location();
-	std::vector<std::shared_ptr<expr>> result;
+	if ( _token.type() == TOK_FOR || _token.type() == TOK_IF || _token.type() == TOK_BLOCK_START )
+		return primary_expr();
 
-	bool done = false;
-	while ( !done )
-	{
-		std::shared_ptr<expr> e;
-		bool operators = false;
-		while ( _token.type() == TOK_OPERATOR )
-		{
-			result.emplace_back( std::make_shared<operator_expr>( _token.value() ) );
-			next_token();
-			operators = true;
-		}
-
-		// Expression should be separated by operators
-		if ( !operators && !result.empty() )
-		{
-			switch ( _token.type() )
-			{
-				case TOK_PAREN_END:
-				case TOK_EXPRESSION_END:
-				case TOK_BLOCK_END:
-				case TOK_SEPARATOR:
-				case TOK_COMMA:
-				case TOK_ELSE:
-					done = true;
-					break;
-
-				case TOK_FOR:
-					if ( result.size() == 1 && is_loop_modifier( result.back() ) )
-						break;
-					throw_runtime( "expressions should be separated by operators or ';' at '{0}'", _token.value() );
-
-				case TOK_TO:
-				case TOK_BY:
-					if ( !_parsing_range )
-						throw_runtime( "expressions should be separated by operators or ';' at '{0}'", _token.value() );
-					break;
-
-				default:
-					throw_runtime( "expressions should be separated by operators or ';' at '{0}'", _token.value() );
-			}
-		}
-
-		if ( !done )
-			e = primary_expr();
-		if ( e )
-		{
-			result.push_back( e );
-
-			if ( _token.type() == TOK_EXPRESSION_END )
-				done = true;
-		}
-		else
-			done = true;
-	}
-
-	std::shared_ptr<expr> ret;
-
-	if ( result.empty() )
-		throw_runtime( "expected expression, got '{0}'", _token.value() );
-
-	if ( result.size() == 1 )
-		ret = result[0];
-	else
-		ret = std::make_shared<chain_expr>( result.begin(), result.end() );
-	_expr_locs[ret] = std::make_pair( start, _previous_end );
-	return ret;
+	expr_parser eparser( _token, [&]() { return this->primary_expr(); } );
+	auto result = eparser.expression();
+	return result;
 }
 
 ////////////////////////////////////////
@@ -266,7 +204,9 @@ std::shared_ptr<expr> parser::primary_expr( void )
 		auto id = std::make_shared<identifier_expr>( _token.value() );
 		next_token();
 		if ( _token.type() == TOK_PAREN_START )
+		{
 			result = std::make_shared<call_expr>( id, arguments() );
+		}
 		else if ( _token.type() == TOK_ASSIGN )
 		{
 			next_token();
@@ -301,7 +241,7 @@ std::shared_ptr<expr> parser::primary_expr( void )
 	else if ( _token.type() == TOK_IF )
 		result = if_expr();
 	else if ( _token.type() == TOK_FOR )
-			result = for_expr();
+		result = for_expr();
 
 	return result;
 }
@@ -324,7 +264,7 @@ std::shared_ptr<expr> parser::arguments( void )
 		list.emplace_back( expression() );
 
 	if ( !expect( TOK_PAREN_END ) )
-		throw_runtime( "expected ')', got '{0}'", _token.value() );
+		throw_runtime( "expected ')' to finish arguments, got '{0}'", _token.value() );
 
 	return std::make_shared<arguments_expr>( list.begin(), list.end() );
 }
@@ -371,6 +311,13 @@ std::vector<std::shared_ptr<expr>> parser::expr_block( void )
 
 std::unique_ptr<func> parser::function( void )
 {
+	bool ispub = false;
+	if ( _token.type() == TOK_PUBLIC )
+	{
+		next_token();
+		ispub = true;
+	}
+
 	if ( _token.type() != TOK_FUNCTION )
 		throw_runtime( "expected `function', got '{0}'", _token.value() );
 	next_token();
@@ -485,7 +432,6 @@ std::shared_ptr<expr> parser::for_expr( void )
 	}
 
 	result->set_result( expression() );
-
 	return result;
 }
 

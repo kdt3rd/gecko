@@ -9,13 +9,28 @@ namespace
 {
 	std::u32string newlines( U"\x000A\x000B\x000C\x000D\x0085\x2028\x2029" );
 
-	std::map<std::u32string,imgproc::token_type> keywords = {
+	const std::map<std::u32string,imgproc::token_type> keywords = {
 		{ U"for", imgproc::TOK_FOR },
+		{ U"public", imgproc::TOK_PUBLIC },
 		{ U"function", imgproc::TOK_FUNCTION },
 		{ U"if", imgproc::TOK_IF },
 		{ U"else", imgproc::TOK_ELSE },
 		{ U"to", imgproc::TOK_TO },
 		{ U"by", imgproc::TOK_BY },
+	};
+
+	const std::set<char32_t> special =
+	{
+		U'{',
+		U'}',
+		U'(',
+		U')',
+		U',',
+		U';',
+		U':',
+		U'=',
+		U'\"',
+		U'\'',
 	};
 }
 
@@ -150,8 +165,7 @@ iterator &iterator::next( void )
 bool iterator::split( const std::u32string &s )
 {
 	precondition( _next.empty(), "cannot split multiple times" );
-	if ( s.empty() )
-		return true;
+	precondition( !s.empty(), "cannot split nothing" );
 
 	if ( _value.compare( 0, s.size(), s ) == 0 )
 	{
@@ -204,7 +218,7 @@ void iterator::skip_comments( void )
 void iterator::parse_operator( void )
 {
 	_type = TOK_OPERATOR;
-	while ( utf::is_pattern_syntax( _c ) && _c != U';' && _c != U',' && _c != U'{' && _c != U'}' && _c != U'(' && _c != U')' )
+	while ( utf::is_pattern_syntax( _c ) && special.find( _c ) == special.end() )
 		next_utf();
 }
 

@@ -31,6 +31,7 @@ enum token_type
 	TOK_ASSIGN,
 	TOK_IF,
 	TOK_FOR,
+	TOK_PUBLIC,
 	TOK_FUNCTION,
 	TOK_ELSE,
 	TOK_TO,

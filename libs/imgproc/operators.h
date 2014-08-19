@@ -31,7 +31,12 @@ public:
 class primary_operator : public base_operator
 {
 public:
+	primary_operator( const std::shared_ptr<expr> &e );
+
 	virtual std::shared_ptr<expr> right( expr_parser &parser, const std::u32string &op );
+
+private:
+	std::shared_ptr<expr> _expr;
 };
 
 ////////////////////////////////////////

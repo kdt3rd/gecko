@@ -9,16 +9,35 @@ namespace imgproc
 
 std::map<std::u32string,std::shared_ptr<base_operator>> operators =
 {
+	{ U"<", std::make_shared<infix_operator>( 10 ) },
+	{ U"<=", std::make_shared<infix_operator>( 10 ) },
+	{ U">", std::make_shared<infix_operator>( 10 ) },
+	{ U">=", std::make_shared<infix_operator>( 10 ) },
+	{ U"==", std::make_shared<infix_operator>( 10 ) },
+	{ U"!=", std::make_shared<infix_operator>( 10 ) },
+
+	{ U"&&", std::make_shared<infix_operator>( 10 ) },
+	{ U"||", std::make_shared<infix_operator>( 10 ) },
+
 	{ U"-", std::make_shared<dualfix_operator>( 100, 10 ) },
 	{ U"+", std::make_shared<dualfix_operator>( 100, 10 ) },
-	{ U"!", std::make_shared<postfix_operator>( 90 ) },
 	{ U"*", std::make_shared<infix_operator>( 20 ) },
+	{ U"×", std::make_shared<infix_operator>( 20 ) },
 	{ U"/", std::make_shared<infix_operator>( 20 ) },
-	{ U"**", std::make_shared<infix_operator>( 20, false ) },
-	{ U"(", std::make_shared<circumfix_operator>( U")" ) },
-	{ U")", std::make_shared<base_operator>() },
+	{ U"÷", std::make_shared<infix_operator>( 20 ) },
+	{ U"√", std::make_shared<prefix_operator>( 20 ) },
+	{ U"∛", std::make_shared<prefix_operator>( 20 ) },
+	{ U"∜", std::make_shared<prefix_operator>( 20 ) },
+
 	{ U"[", std::make_shared<postcircumfix_operator>( U"]" ) },
 	{ U"]", std::make_shared<base_operator>() },
+
+	{ U"⌈", std::make_shared<circumfix_operator>( U"⌉" ) },
+	{ U"⌉", std::make_shared<base_operator>() },
+
+	{ U"⌊", std::make_shared<circumfix_operator>( U"⌋" ) },
+	{ U"⌋", std::make_shared<base_operator>() },
+
 	{ U"|", std::make_shared<circumfix_operator>( U"|" ) },
 };
 
@@ -51,9 +70,16 @@ std::shared_ptr<expr> base_operator::left( expr_parser &parser, const std::u32st
 
 ////////////////////////////////////////
 
+primary_operator::primary_operator( const std::shared_ptr<expr> &e )
+	: _expr( e )
+{
+}
+
+////////////////////////////////////////
+
 std::shared_ptr<expr> primary_operator::right( expr_parser &parser, const std::u32string &op )
 {
-	return std::make_shared<number_expr>( op );
+	return _expr;
 }
 
 ////////////////////////////////////////
