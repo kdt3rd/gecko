@@ -7,6 +7,7 @@
 #include <vector>
 #include <stdexcept>
 #include <iterator>
+#include <base/contract.h>
 
 namespace imgproc
 {
@@ -21,7 +22,6 @@ public:
 	virtual bool is_primary( void ) const { return false; }
 	virtual bool is_list( void ) const { return false; }
 	virtual bool is_call( void ) const { return false; }
-	virtual bool can_be_feature( void ) const { return false; }
 
 	virtual void write( std::ostream &out ) const = 0;
 };
@@ -172,8 +172,6 @@ public:
 	{
 	}
 
-	virtual bool can_be_feature( void ) const { return true; }
-
 	virtual void write( std::ostream &out ) const;
 };
 
@@ -196,47 +194,34 @@ public:
 
 ////////////////////////////////////////
 
-class feature_expr : public value_expr
+class arguments_expr : public expr
 {
 public:
-	feature_expr( std::u32string f )
-		: value_expr( std::move( f ) )
+	template<typename iter>
+	arguments_expr( iter begin, const iter &end )
 	{
+		if ( begin == end )
+			throw_runtime( "empty expression list" );
+
+		_value = *begin;
+		++begin;
+
+		if ( begin != end )
+			_next = std::make_shared<arguments_expr>( begin, end );
 	}
 
-	virtual bool can_be_feature( void ) const { return true; }
-
-	virtual ~feature_expr( void )
-	{
-	}
-
-	virtual void write( std::ostream &out ) const;
-};
-
-////////////////////////////////////////
-
-class aggregate_expr : public expr
-{
-public:
-	aggregate_expr( void )
-	{
-	}
-
-	aggregate_expr( const std::shared_ptr<expr> &e )
-		: _value( e )
-	{
-	}
-
-	virtual ~aggregate_expr( void )
+	virtual ~arguments_expr( void )
 	{
 	}
 
 	const std::shared_ptr<expr> &value( void ) const { return _value; }
+	const std::shared_ptr<expr> &next( void ) const { return _next; }
 
 	virtual void write( std::ostream &out ) const;
 
 private:
 	std::shared_ptr<expr> _value;
+	std::shared_ptr<expr> _next;
 };
 
 ////////////////////////////////////////
@@ -274,8 +259,8 @@ public:
 	{
 	}
 
-	call_expr( const std::shared_ptr<expr> &e )
-		: _value( e )
+	call_expr( const std::shared_ptr<expr> &func, const std::shared_ptr<expr> &args )
+		: _func( func ), _args( args )
 	{
 	}
 
@@ -285,12 +270,14 @@ public:
 
 	virtual bool is_call( void ) const { return true; }
 
-	const std::shared_ptr<expr> &value( void ) const { return _value; }
+	const std::shared_ptr<expr> &function( void ) const { return _func; }
+	const std::shared_ptr<expr> &arguments( void ) const { return _args; }
 
 	virtual void write( std::ostream &out ) const;
 
 protected:
-	std::shared_ptr<expr> _value;
+	std::shared_ptr<expr> _func;
+	std::shared_ptr<expr> _args;
 };
 
 ////////////////////////////////////////
@@ -307,7 +294,7 @@ public:
 	chain_expr( iter begin, const iter &end )
 	{
 		if ( begin == end )
-			throw std::runtime_error( "empty expression list" );
+			throw_runtime( "empty expression list" );
 
 		_value = *begin;
 		++begin;
@@ -344,7 +331,7 @@ public:
 	list_expr( iter begin, const iter &end )
 	{
 		if ( begin == end )
-			throw std::runtime_error( "empty expression list" );
+			throw_runtime( "empty expression list" );
 
 		_value = *begin;
 		++begin;
@@ -367,6 +354,36 @@ public:
 private:
 	std::shared_ptr<expr> _value;
 	std::shared_ptr<expr> _next;
+};
+
+////////////////////////////////////////
+
+class block_expr : public expr
+{
+public:
+	block_expr( const std::shared_ptr<expr> &list )
+		: _value( list )
+	{
+	}
+
+	template<typename iter>
+	block_expr( iter begin, const iter &end )
+		: _value( std::make_shared<list_expr>( begin, end ) )
+	{
+	}
+
+	virtual ~block_expr( void )
+	{
+	}
+
+	const std::shared_ptr<expr> &value( void ) const { return _value; }
+
+	virtual bool is_list( void ) const { return true; }
+
+	virtual void write( std::ostream &out ) const;
+
+private:
+	std::shared_ptr<expr> _value;
 };
 
 ////////////////////////////////////////
@@ -397,12 +414,7 @@ public:
 		_result = r;
 	}
 
-	void write( std::ostream &out ) const override
-	{
-		out << "for ( ";
-		std::copy( _vars.begin(), _vars.end(), std::ostream_iterator<std::u32string>( out, ", " ) );
-		out << " ) ";
-	}
+	void write( std::ostream &out ) const override;
 
 private:
 	std::vector<std::u32string> _vars;
@@ -455,6 +467,49 @@ private:
 	std::shared_ptr<expr> _condition;
 	std::shared_ptr<expr> _true;
 	std::shared_ptr<expr> _false;
+};
+
+////////////////////////////////////////
+
+class range_expr : public expr
+{
+public:
+	range_expr( std::shared_ptr<expr> &r )
+		: _start( r )
+	{
+	}
+
+	range_expr( std::shared_ptr<expr> &start, std::shared_ptr<expr> &end )
+		: _start( start ), _end( end )
+	{
+	}
+
+	range_expr( std::shared_ptr<expr> &start, std::shared_ptr<expr> &end, std::shared_ptr<expr> &by )
+		: _start( start ), _end( end ), _by( by )
+	{
+	}
+
+	virtual void write( std::ostream &out ) const override
+	{
+		_start->write( out );
+		if ( _end )
+		{
+			out << " to ";
+			_end->write( out );
+
+			if ( _by )
+			{
+				out << " by ";
+				_by->write( out );
+			}
+		}
+	}
+
+private:
+	std::shared_ptr<expr> _start;
+	std::shared_ptr<expr> _end;
+	std::shared_ptr<expr> _by;
+
 };
 
 ////////////////////////////////////////

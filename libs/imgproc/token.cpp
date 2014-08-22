@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <map>
 #include <utf/utf.h>
 #include <base/contract.h>
 #include "token.h"
@@ -8,11 +9,13 @@ namespace
 {
 	std::u32string newlines( U"\x000A\x000B\x000C\x000D\x0085\x2028\x2029" );
 
-	std::set<std::u32string> keywords = {
-		U"for",
-		U"function",
-		U"if",
-		U"else",
+	std::map<std::u32string,imgproc::token_type> keywords = {
+		{ U"for", imgproc::TOK_FOR },
+		{ U"function", imgproc::TOK_FUNCTION },
+		{ U"if", imgproc::TOK_IF },
+		{ U"else", imgproc::TOK_ELSE },
+		{ U"to", imgproc::TOK_TO },
+		{ U"by", imgproc::TOK_BY },
 	};
 }
 
@@ -89,14 +92,20 @@ iterator &iterator::next( void )
 	else if ( _c == ';' )
 	{
 		// Statement terminator
-		_type = TOK_STATEMENT_END;
+		_type = TOK_EXPRESSION_END;
+		next_utf();
+	}
+	else if ( _c == ':' )
+	{
+		// Separator
+		_type = TOK_SEPARATOR;
 		next_utf();
 	}
 	else if ( _c == '\"' )
 		parse_string();
 	else if ( _c == '\'' )
 		parse_char();
-	else if ( _c == 0x2AFD ) // Double slash character
+	else if ( _c == 0x2AFD || _c == '#' ) // Double slash character or hash
 	{
 		_whitespace.push_back( _c );
 		parse_comment();
@@ -200,8 +209,9 @@ void iterator::parse_identifier( void )
 	_type = TOK_IDENTIFIER;
 	while ( _utf && utf::is_identifier_continue( _c ) )
 		next_utf();
-	if ( keywords.find( _value ) != keywords.end() )
-		_type = TOK_KEYWORD;
+	auto k = keywords.find( _value );
+	if ( k != keywords.end() )
+		_type = k->second;
 }
 
 ////////////////////////////////////////
@@ -236,7 +246,7 @@ void iterator::parse_comment( void )
 				next_utf();
 			}
 		}
-		_type = TOK_COMMENT_BLOCK;
+		_type = TOK_COMMENT;
 	}
 	else
 	{
@@ -520,16 +530,21 @@ const char *token_name( token_type t )
 		case TOK_CHARACTER:      return "character";
 		case TOK_COMMA:          return "comma";
 		case TOK_COMMENT:        return "comment";
-		case TOK_COMMENT_BLOCK:  return "comment block";
 		case TOK_IDENTIFIER:     return "identifier";
-		case TOK_KEYWORD:        return "keyword";
 		case TOK_NUMBER:         return "number";
 		case TOK_PAREN_END:      return "paren end";
 		case TOK_PAREN_START:    return "paren open";
-		case TOK_STATEMENT_END:  return "stmt end";
+		case TOK_EXPRESSION_END: return "expr end";
+		case TOK_SEPARATOR:      return "separator";
 		case TOK_STRING:         return "string";
 		case TOK_SYMBOL:         return "symbol";
-		default:		        return "unknown";
+		case TOK_IF:
+		case TOK_ELSE:
+		case TOK_FUNCTION:
+		case TOK_TO:
+		case TOK_BY:
+		case TOK_FOR:            return "keyword";
+		default:		         return "unknown";
 	}
 }
 

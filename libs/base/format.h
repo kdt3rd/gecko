@@ -87,7 +87,7 @@ private:
 ///   - + Show plus sign for positive numbers.
 ///   - p Precision for floating point numbers.
 ///   - a Alignment, left or right (followed by a single letter l or r).
-///   - # Comment, can be followed by anything (except a closing }).
+///   - # Comment, can be followed by anything (except a closing curly brace).
 ///
 /// @param fmt Format string with specifiers for the given data.
 /// @param data Data to format.

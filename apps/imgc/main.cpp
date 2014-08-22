@@ -39,6 +39,11 @@ int safemain( int argc, char *argv[] )
 		std::cout << msg << std::endl;
 
 	std::cout << "Got " << funcs.size() << " functions" << std::endl;
+	for ( auto f: funcs )
+	{
+		f->write( std::cout );
+		std::cout << std::endl;
+	}
 
 	return 0;
 }

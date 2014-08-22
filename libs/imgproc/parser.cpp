@@ -34,19 +34,19 @@ void parser::operator()( void )
 	{
 		try
 		{
-			std::cout << "parsing function" << std::endl;
 			std::shared_ptr<func> f( function().release() );
 			if ( f )
 				_funcs.push_back( f );
-			std::cout << "parsing done" << std::endl;
 		}
 		catch ( std::exception &e )
 		{
 			std::stringstream msg;
 			base::print_exception( msg, e );
 			add_error( msg.str() );
+			next_token();
+
 			// Search for "function" keyword
-			while ( _token && _token.type() != TOK_KEYWORD && _token.value() != U"function" )
+			while ( _token && _token.type() != TOK_FUNCTION )
 				next_token();
 		}
 	}
@@ -85,8 +85,9 @@ void parser::next_token( void )
 	_previous_end = _token.end_location();
 	do
 	{
-		if( !_token.next() )
-			throw_runtime( "end of file" );
+		_token.next();
+//		if( !_token.next() )
+//			throw_runtime( "end of file" );
 	} while ( _token.type() == TOK_COMMENT );
 }
 
@@ -136,7 +137,7 @@ void parser::add_info( const std::string &msg )
 
 void parser::comments( void )
 {
-	while ( _token.type() == TOK_COMMENT || _token.type() == TOK_COMMENT_BLOCK )
+	while ( _token.type() == TOK_COMMENT )
 	{
 		_comments.push_back( std::move( _token.value() ) );
 		next_token();
@@ -147,116 +148,67 @@ void parser::comments( void )
 
 std::shared_ptr<expr> parser::expression( void )
 {
-	std::vector<std::shared_ptr<expr>> list;
 	std::vector<std::shared_ptr<expr>> result;
 
-	std::shared_ptr<expr> e;
-	do
+	bool done = false;
+	while ( !done )
 	{
-		if ( _token.type() == TOK_COMMA )
+		std::shared_ptr<expr> e;
+		bool symbols = false;
+		while ( _token.type() == TOK_SYMBOL )
 		{
-			list.emplace_back( new chain_expr( result.begin(), result.end() ) );
-			result.clear();
+			symbols = true;
+			result.emplace_back( new operator_expr( _token.value() ) );
 			next_token();
 		}
 
-		e.reset();
-		bool nosymbol = true;
-		while ( _token.type() == TOK_SYMBOL )
-		{
-			if ( _token.value().back() == U'.' && _token.size() > 1 )
-				_token.split( _token.size() - 1 );
-
-			if ( _token.value() == U"." )
-			{
-				next_token();
-				if ( _token.type() != TOK_IDENTIFIER )
-					add_error( "expected feature name after '.' operator" );
-				else
-				{
-					nosymbol = true;
-					result.emplace_back( new feature_expr( std::move( _token.value() ) ) );
-					next_token();
-				}
-			}
-			else
-			{
-				nosymbol = false;
-				result.emplace_back( new operator_expr( _token.value() ) );
-				next_token();
-			}
-		}
-
-		if ( !result.empty() && nosymbol && _token.type() != TOK_PAREN_START )
+		// Expression should be separated by operators
+		if ( !symbols && !result.empty() )
 		{
 			switch ( _token.type() )
 			{
-				case TOK_STRING:
-				case TOK_NUMBER:
-				case TOK_CHARACTER:
-				case TOK_IDENTIFIER:
-					add_warning( "expression does not end properly" );
+				case TOK_PAREN_END:
+				case TOK_EXPRESSION_END:
+				case TOK_BLOCK_END:
+				case TOK_SEPARATOR:
+				case TOK_COMMA:
 					break;
 
-				case TOK_UNKNOWN:
-				case TOK_SYMBOL:
-				case TOK_COMMA:
-				case TOK_BLOCK_START:
-				case TOK_BLOCK_END:
-				case TOK_PAREN_END:
-				case TOK_STATEMENT_END:
-				case TOK_KEYWORD:
-				case TOK_COMMENT:
-				case TOK_COMMENT_BLOCK:
-				case TOK_PAREN_START:
+				case TOK_IF:
+				case TOK_ELSE:
+				case TOK_FOR:
+				case TOK_FUNCTION:
+				case TOK_TO:
+				case TOK_BY:
 					break;
+
+				default:
+					std::cerr << *result.back() << std::endl;
+					throw_runtime( "expressions should be separated at '{0}'", _token.value() );
 			}
-			break;
 		}
 
 		e = primary_expr();
 		if ( e )
 		{
-			auto paren = std::dynamic_pointer_cast<aggregate_expr>( e );
-			if ( !result.empty() )
+			result.push_back( e );
+
+			if ( _token.type() == TOK_EXPRESSION_END )
 			{
-				if ( paren && result.back()->can_be_feature() )
-					result.emplace_back( new call_expr( paren->value() ) );
-				else if ( nosymbol )
-				{
-					if ( paren->value()->is_list() )
-					{
-						add_error( "missing feature name or operator" );
-						result.emplace_back( new error_expr( "missing feature name or operator" ) );
-					}
-					else
-					{
-						add_error( "missing feature name for call" );
-						result.emplace_back( new error_expr( "missing feature name" ) );
-					}
-
-					result.emplace_back( new call_expr( paren->value() ) );
-				}
-				else
-					result.push_back( e );
+				next_token();
+				done = true;
 			}
-			else
-				result.push_back( e );
 		}
-	} while ( e );
-
-	if ( list.empty() )
-	{
-		if ( result.empty() )
-			return std::shared_ptr<expr>( new error_expr( "expected expression" ) );
-		else if ( result.size() == 1 )
-			return result[0];
 		else
-			return std::shared_ptr<expr>( new chain_expr( result.begin(), result.end() ) );
+			done = true;
 	}
 
-	list.emplace_back( new chain_expr( result.begin(), result.end() ) );
-	return std::shared_ptr<expr>( new list_expr( list.begin(), list.end() ) );
+	if ( result.empty() )
+		throw_runtime( "expected expression, got '{0}'", _token.value() );
+	else if ( result.size() == 1 )
+		return result[0];
+	else
+		return std::shared_ptr<expr>( new chain_expr( result.begin(), result.end() ) );
 }
 
 ////////////////////////////////////////
@@ -284,145 +236,92 @@ std::shared_ptr<expr> parser::primary_expr( void )
 	{
 		result.reset( new identifier_expr( _token.value() ) );
 		next_token();
+		if ( _token.type() == TOK_PAREN_START )
+			result = std::make_shared<call_expr>( result, arguments() );
 	}
 	else if ( _token.type() == TOK_PAREN_START )
 	{
 		next_token();
 		std::shared_ptr<expr> e = expression();
 		if ( e )
-		{
-			if ( bool(std::dynamic_pointer_cast<aggregate_expr>( e )) )
-				result = e;
-			else
-				result.reset( new aggregate_expr( e ) );
-		}
+			result = e;
 		if ( expect( TOK_PAREN_END ) )
 		{
 			if ( !e )
-				add_error( "empty parentheses" );
+				throw_runtime( "empty parentheses" );
 		}
 		else
-		{
-			add_error( "missing ')' to end expression" );
-			size_t here = _token.end_location().line_number();
-			while ( here == _token.end_location().line_number() && _token.type() != TOK_PAREN_END )
-				next_token();
-			if ( _token.type() == TOK_PAREN_END )
-				next_token();
-		}
+			throw_runtime( "missing ')' to end expression" );
 	}
 	else if ( _token.type() == TOK_BLOCK_START )
 	{
-		std::cout << "starting block" << std::endl;
 		next_token();
+		std::vector<std::shared_ptr<expr>> list;
 		while ( _token.type() != TOK_BLOCK_END )
-			result = expression();
+			list.emplace_back( expression() );
+		result = std::make_shared<block_expr>( list.begin(), list.end() );
 		expect( TOK_BLOCK_END );
 	}
-	else if ( _token.type() == TOK_KEYWORD )
-	{
-		if ( _token.value() == U"if" )
-			if_expr();
-		else if ( _token.value() == U"else" )
-			for_expr();
-	}
+	else if ( _token.type() == TOK_IF )
+		result = if_expr();
+	else if ( _token.type() == TOK_FOR )
+			result = for_expr();
 
 	return result;
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<expr> parser::paren_expr( const char *name )
+std::shared_ptr<expr> parser::arguments( void )
 {
 	if ( !expect( TOK_PAREN_START ) )
-		throw_runtime( base::format( "expected '(' to begin {0}", name ) );
+		throw_runtime( "expected '(', got '{0}'", _token.value() );
 
-	std::shared_ptr<expr> e = expression();
+	std::vector<std::shared_ptr<expr>> list;
+
+	// Expression is empty
+	if ( _token.type() == TOK_PAREN_END )
+		return std::shared_ptr<expr>();
+
+	list.emplace_back( expression() );
+	while ( expect( TOK_COMMA ) )
+		list.emplace_back( expression() );
 
 	if ( !expect( TOK_PAREN_END ) )
-	{
-		if ( e )
-		{
-			std::stringstream str;
-			str << "expected ')' to end " << name;
-			add_error( str.str() );
-		}
+		throw_runtime( "expected ')', got '{0}'", _token.value() );
 
-		std::stringstream err;
-		while ( true )
-		{
-			if ( _token.type() == TOK_PAREN_END )
-			{
-				next_token();
-				break;
-			}
-			if ( _token.type() == TOK_BLOCK_START || _token.type() == TOK_BLOCK_END || _token.type() == TOK_STATEMENT_END || _token.type() == TOK_KEYWORD )
-			{
-				std::stringstream str;
-				str << "missing ')' to end " << name;
-				add_info( str.str() );
-				break;
-			}
-
-			err << _token.whitespace() << _token.value();
-			next_token();
-		}
-
-		if ( !err.str().empty() )
-		{
-			std::shared_ptr<expr> msg( new error_expr( err.str() ) );
-			if ( e )
-				e.reset( new chain_expr( e, msg ) );
-			else
-			{
-				std::stringstream str;
-				str << "bad " << name;
-				add_error( str.str() );
-				e = msg;
-			}
-		}
-	}
-
-	if ( !e )
-	{
-		std::stringstream str;
-		str << "missing " << name;
-		e.reset( new error_expr( str.str() ) );
-		add_error( str.str() );
-	}
-
-	return e;
+	return std::make_shared<arguments_expr>( list.begin(), list.end() );
 }
 
 ////////////////////////////////////////
 
 std::unique_ptr<func> parser::function( void )
 {
-	if ( _token.type() != TOK_KEYWORD || _token.value() != U"function" )
-		throw_runtime( base::format( "expected `function', got '{0}'", _token.value() ) );
+	if ( _token.type() != TOK_FUNCTION )
+		throw_runtime( "expected `function', got '{0}'", _token.value() );
 	next_token();
 
 	if ( _token.type() != TOK_IDENTIFIER )
-		throw_runtime( base::format( "expected function name, got '{0}'", _token.value() ) );
+		throw_runtime( "expected function name, got '{0}'", _token.value() );
 	std::unique_ptr<func> f( new func( _token.value() ) );
 	next_token();
 
 	if ( expect( TOK_PAREN_START ) )
-	{
 		id_list( [&f]( const std::u32string &a ) { f->add_arg( a ); } );
-		if ( !expect( TOK_PAREN_END ) )
-			throw_runtime( "expected ')'" );
-	}
 	else
 		throw_runtime( "expected '(' to begin function arguments" );
 
 	if ( !expect( TOK_PAREN_END ) )
-	{
-		const std::string fmt( "expected ')' to end function arguments, got '{0}'" );
-		throw_runtime( base::format( fmt, _token.value() ) );
-	}
+		throw_runtime( "expected ')' to end function arguments, got '{0}'", _token.value() );
 
-	f->set_result( expression() );
+	if ( !expect( TOK_BLOCK_START ) )
+		throw_runtime( "expected '{' to begin function, got '{0}'", _token.value() );
+
+	std::vector<std::shared_ptr<expr>> list;
+	while ( !expect( TOK_BLOCK_END ) )
+		list.emplace_back( expression() );
+
+	f->set_result( std::make_shared<list_expr>( list.begin(), list.end() ) );
 
 	return f;
 }
@@ -454,40 +353,63 @@ void parser::id_list( const std::function<void(std::u32string &)> &cb )
 
 std::shared_ptr<expr> parser::if_expr( void )
 {
-	if ( _token.type() != TOK_KEYWORD || _token.value() != U"if" )
-		throw_runtime( "expected `if'" );
+	if ( _token.type() != TOK_IF )
+		throw_runtime( "expected `if', got '{0}'", _token.value() );
 	next_token();
 
 	auto result = std::make_shared<imgproc::if_expr>();
-	result->set_condition( paren_expr( "if" ) );
+
+	if ( !expect( TOK_PAREN_START ) )
+		throw_runtime( "expected '(' to start 'if' condition, got '{0}'", _token.value() );
+	result->set_condition( expression() );
+	if ( !expect( TOK_PAREN_END ) )
+		throw_runtime( "expected ')' to end 'if' condition, got '{0}'", _token.value() );
+
 	result->set_result( expression() );
-	if ( _token.type() == TOK_KEYWORD && _token.value() == U"else" )
+	if ( _token.type() == TOK_ELSE )
+	{
+		next_token();
 		result->set_else( expression() );
+	}
 	return result;
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<expr> parser::for_range( void )
+{
+	std::shared_ptr<expr> start, end, by;
+	start = expression();
+	if ( expect( TOK_TO ) )
+	{
+		end = expression();
+		if ( expect( TOK_BY ) )
+			by = expression();
+	}
+
+	return std::make_shared<range_expr>( start, end, by );
 }
 
 ////////////////////////////////////////
 
 std::shared_ptr<expr> parser::for_expr( void )
 {
-	if ( _token.type() != TOK_KEYWORD || _token.value() != U"for" )
+	if ( _token.type() != TOK_FOR )
 		throw_runtime( "expected `for'" );
 	next_token();
 
-	if ( _token.type() != TOK_PAREN_START )
+	auto result = std::make_shared<imgproc::for_expr>();
+
+	if ( !expect( TOK_PAREN_START ) )
 		throw_runtime( "expected `(' after 'for', got '{0}'", _token.value() );
 
-	auto result = std::make_shared<imgproc::for_expr>();
 	id_list( [&result]( const std::u32string &a ) { result->add_variable( a ); } );
 
-	if ( _token.type() != TOK_SYMBOL || _token.value() != U":" )
-		throw_runtime( base::format( "expected ':', got '{0}'", _token.value() ) );
+	if ( !expect( TOK_SEPARATOR ) )
+		throw_runtime( "expected ':', got '{0}'", _token.value() );
 
-	while ( _token.type() != TOK_PAREN_START )
-		result->add_range( expression() );
-
-	if ( _token.type() != TOK_PAREN_END )
-		throw_runtime( "expected `)' to close 'for', got '{0}'", _token.value() );
+	while ( !expect( TOK_PAREN_END ) )
+		result->add_range( for_range() );
 
 	result->set_result( expression() );
 

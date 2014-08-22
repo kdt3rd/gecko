@@ -45,8 +45,9 @@ private:
 
 	std::shared_ptr<expr> expression( void );
 	std::shared_ptr<expr> primary_expr( void );
-	std::shared_ptr<expr> paren_expr( const char *name );
+	std::shared_ptr<expr> arguments( void );
 	std::shared_ptr<expr> if_expr( void );
+	std::shared_ptr<expr> for_range( void );
 	std::shared_ptr<expr> for_expr( void );
 	
 	std::unique_ptr<func> function( void );
