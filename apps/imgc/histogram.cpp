@@ -14,7 +14,7 @@ buffer<float,1> uniform_buckets( int64_t nbuckets, float lo, float hi )
 
 	for ( int64_t b = 0; b < nbuckets + 1; ++b )
 	{
-		result( b ) = lerp( lo, hi, float( b ) / float( nbuckets + 1 ) );
+		result( b ) = lerp( lo, hi, float( b ) / float( nbuckets ) );
 	}
 
 	return result;
@@ -22,10 +22,10 @@ buffer<float,1> uniform_buckets( int64_t nbuckets, float lo, float hi )
 
 buffer<int64_t,1> histogram( const buffer<float,2> &img, const buffer<float,1> &buckets )
 {
-	buffer<int64_t,1> result( buckets.upper( 0 ) - 1 - buckets.lower( 0 ) + 1 );
+	buffer<int64_t,1> result( buckets.upper( 0 ) - buckets.lower( 0 ) - 1 );
 
 	result.set_offset( buckets.lower( 0 ) );
-	for ( int64_t b = buckets.lower( 0 ); b < buckets.upper( 0 ) - 1; ++b )
+	for ( int64_t b = result.lower( 0 ); b < result.upper( 0 ); ++b )
 	{
 		int64_t count = 0;
 		for ( int64_t y = img.lower( 1 ); y < img.upper( 1 ); ++y )

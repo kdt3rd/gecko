@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <array>
+#include <memory>
 
 namespace imgproc
 {
