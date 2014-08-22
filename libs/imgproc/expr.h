@@ -118,6 +118,18 @@ public:
 		_result = r;
 	}
 
+	const std::u32string &name( void ) const
+	{
+		return _name;
+	}
+
+	const std::vector<std::u32string> &args( void ) const
+	{
+		return _args;
+	}
+
+	const std::shared_ptr<expr> result( void ) const { return _result; }
+
 	void write( std::ostream &out ) const;
 
 private:

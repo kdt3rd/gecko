@@ -125,6 +125,7 @@ elseif System() == "Darwin" then
 	COCOA_FLAGS, COCOA_INCLUDE, COCOA_LIBS = Package( "Cocoa" )
 	FREETYPE_FLAGS, FREETYPE_INCLUDE, FREETYPE_LIBS = Package( "freetype2" )
 	FONTCONFIG_FLAGS, FONTCONFIG_INCLUDE, FONTCONFIG_LIBS = Package( "fontconfig" )
+	PNG_FLAGS, PNG_INCLUDE, PNG_LIBS = Package( "libpng" )
 	GL_FLAGS, GL_INCLUDE, GL_LIBS = Package( "OpenGL" )
 elseif System() == "Windows" then
 	FREETYPE_FLAGS, FREETYPE_INCLUDE, FREETYPE_LIBS = Package( "freetype2" )
