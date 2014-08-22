@@ -8,4 +8,5 @@ SubDir( "draw" )
 SubDir( "platform" )
 SubDir( "gui" )
 SubDir( "imgproc" )
+SubDir( "viewer" )
 

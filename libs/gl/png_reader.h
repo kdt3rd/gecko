@@ -1,0 +1,16 @@
+
+#pragma once
+
+#include "texture.h"
+
+namespace gl
+{
+
+////////////////////////////////////////
+
+gl::texture png_read( const char *file_name );
+
+////////////////////////////////////////
+
+}
+

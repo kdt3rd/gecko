@@ -117,6 +117,7 @@ if System() == "Linux" then
 	XLIB_FLAGS, XLIB_INCLUDE, XLIB_LIBS = Package( "x11" )
 --	XCB_FLAGS, XCB_INCLUDE, XCB_LIBS = Package( "xcb", "xcb-keysyms" )
 	FREETYPE_FLAGS, FREETYPE_INCLUDE, FREETYPE_LIBS = Package( "freetype2" )
+	PNG_FLAGS, PNG_INCLUDE, PNG_LIBS = Package( "libpng" )
 	FONTCONFIG_FLAGS, FONTCONFIG_INCLUDE, FONTCONFIG_LIBS = Package( "fontconfig" )
 	GL_FLAGS, GL_INCLUDE, GL_LIBS = Package( "gl" )
 	GL_LIBS = GL_LIBS .. " -ldl"

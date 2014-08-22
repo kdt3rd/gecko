@@ -1,5 +1,6 @@
 
 Include( GL_INCLUDE )
+Include( PNG_INCLUDE )
 
 srcs = {
 	"texture.cpp";
@@ -8,7 +9,8 @@ srcs = {
 	"context.cpp";
 	"matrix4.cpp";
 	"check.cpp";
+	"png_reader.cpp";
 	"gl3w.c";
 }
 
-Library( "gl", Compile( srcs ), LinkLibs( "base" ), LinkSys( GL_LIBS ) );
+Library( "gl", Compile( srcs ), LinkLibs( "base" ), LinkSys( GL_LIBS, PNG_LIBS ) );
