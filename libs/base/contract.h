@@ -108,6 +108,10 @@ public:
 #define throw_runtime( ... ) \
 	throw_location( std::runtime_error( base::format( __VA_ARGS__ ) ) )
 
+/// @brief If check is not true, throw a postcondition_error
+#define throw_not_yet() \
+	throw_location( std::logic_error( "not yet implemented" ) )
+
 /// @brief Throw a errno error using format
 /// @sa base::format
 #define throw_errno( ... ) \
@@ -115,11 +119,15 @@ public:
 
 /// @brief If check is not true, throw a precondition_error
 #define precondition( check, ... ) \
-	if ( !(check) ) throw_location( base::precondition_error( base::format( __VA_ARGS__ ) ) )
+	do { if ( !(check) ) throw_location( base::precondition_error( base::format( __VA_ARGS__ ) ) ); } while ( false )
 
 /// @brief If check is not true, throw a postcondition_error
 #define postcondition( check, ... ) \
-	if ( !(check) ) throw_location( base::postcondition_error( base::format( __VA_ARGS__ ) ) )
+	do { if ( !(check) ) throw_location( base::postcondition_error( base::format( __VA_ARGS__ ) ) ); } while ( false )
+
+/// @brief If check is not true, throw a postcondition_error
+#define logic_check( check, ... ) \
+	do { if ( !(check) ) throw_location( std::logic_error( base::format( __VA_ARGS__ ) ) ); } while ( false )
 
 /// @}
 
