@@ -33,7 +33,7 @@ private:
 	bool expect( const std::u32string &c );
 	bool expect( token_type t );
 
-	bool is_loop_modifier( const std::shared_ptr<expr> &e );
+	bool is_loop_modifier( const std::u32string &n );
 
 	void next_token( void );
 
@@ -48,11 +48,11 @@ private:
 
 	std::shared_ptr<expr> expression( void );
 	std::shared_ptr<expr> primary_expr( void );
-	std::shared_ptr<expr> arguments( void );
-	std::vector<std::shared_ptr<expr>> expr_block( void );
+	std::shared_ptr<expr> expr_block( void );
 	std::shared_ptr<expr> if_expr( void );
 	std::shared_ptr<expr> for_range( void );
-	std::shared_ptr<expr> for_expr( void );
+	std::shared_ptr<for_expr> for_expr( void );
+	std::vector<std::shared_ptr<expr>> arguments( void );
 	
 	std::unique_ptr<func> function( void );
 
@@ -66,6 +66,7 @@ private:
 	std::map<std::shared_ptr<expr>,std::pair<location,location>> _expr_locs;
 	bool _parsing_range = false;
 	bool _parsing_assign = false;
+	bool _parsing_block = false;
 	bool _has_errors = false;
 };
 

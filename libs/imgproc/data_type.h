@@ -35,5 +35,21 @@ inline std::string type_name( data_type t )
 
 ////////////////////////////////////////
 
+inline std::ostream &operator<<( std::ostream &out, data_type t )
+{
+	out << type_name( t );
+	return out;
+}
+
+////////////////////////////////////////
+
+inline std::ostream &operator<<( std::ostream &out, const type &t )
+{
+	out << type_name( t.first ) << '[' << t.second << ']';
+	return out;
+}
+
+////////////////////////////////////////
+
 }
 

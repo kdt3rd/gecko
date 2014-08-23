@@ -26,10 +26,12 @@ public:
 private:
 	std::shared_ptr<func> get_function( const std::u32string &name );
 
-	void compile( const std::shared_ptr<func> &f, const std::shared_ptr<scope> &scope, std::stringstream &code );
+	void compile( const std::shared_ptr<func> &f, std::shared_ptr<scope> &scope );
+
+	type result_type( const std::shared_ptr<expr> &e, const std::shared_ptr<scope> &scope );
 
 	std::ostream &_cpp;
-	std::map<std::u32string,std::shared_ptr<func>> _funcs;
+	std::shared_ptr<scope> _globals = std::make_shared<scope>();;
 };
 
 ////////////////////////////////////////
