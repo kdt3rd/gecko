@@ -268,7 +268,13 @@ type call_expr::result_type( std::shared_ptr<scope> &sc ) const
 	for ( size_t i = 0; i < _args.size(); ++i )
 		args.push_back( _args[i]->result_type( sc ) );
 
-	return sc->functions()->compile( _func, args );
+	if ( sc->functions()->get( _func ) )
+		return sc->functions()->compile( _func, args );
+	else
+	{
+		auto t = sc->get( _func );
+		return { t.get_type().first, 0 };
+	}
 }
 
 ////////////////////////////////////////
@@ -369,23 +375,18 @@ void for_expr::write( std::ostream &out ) const
 
 type for_expr::result_type( std::shared_ptr<scope> &sc ) const
 {
-	if ( _mod.empty() )
-	{
-		auto newsc = std::make_shared<scope>( sc );
-		for ( size_t i = 0; i < _vars.size(); ++i )
-			newsc->add( _vars[i], { data_type::UINT32, 0 } );
+	auto newsc = std::make_shared<scope>( sc );
+	for ( size_t i = 0; i < _vars.size(); ++i )
+		newsc->add( _vars[i], { data_type::UINT32, 0 } );
 
-		auto t = _result->result_type( newsc );
+	auto t = _result->result_type( newsc );
+
+	if ( _mod.empty() )
 		return { t.first, _vars.size() };
-	}
 	else if ( _mod == U"count" )
-	{
 		return { data_type::UINT32, 0 };
-	}
 	else if ( _mod == U"sum" )
-	{
 		return { data_type::FLOAT32, 0 };
-	}
 	else
 		throw_not_yet();
 }
@@ -409,7 +410,13 @@ void if_expr::write( std::ostream &out ) const
 
 type if_expr::result_type( std::shared_ptr<scope> &scope ) const
 {
-	throw_not_yet();
+	auto t = _true->result_type( scope );
+	if ( _false )
+	{
+		auto o = _false->result_type( scope );
+		logic_check( t == o, "if/else type mismatch" );
+	}
+	return t;
 }
 
 ////////////////////////////////////////
