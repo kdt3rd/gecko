@@ -4,5 +4,5 @@ local srcs = {
 	"xml.cpp";
 }
 
-Executable( "gen_table", Compile( srcs ) )
+Executable( "gen_table", Compile( srcs ), LinkSys( "z" ) )
 

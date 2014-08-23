@@ -12,6 +12,7 @@
 #include <cassert>
 #include <cmath>
 #include <stdexcept>
+#include <zlib.h>
 
 #include "compressed_table.h"
 #include "xml.h"
@@ -479,9 +480,64 @@ int safemain( int argc, char *argv[] )
 
 	{
 		std::cout << "Reading UCD XML file" << std::endl;
-		std::ifstream in( argv[1] );
+		std::string fn = argv[1];
 		ucd_reader reader;
-		in >> reader;
+
+		std::ifstream in( fn.c_str() );
+		if ( fn.find( ".gz" ) != std::string::npos )
+		{
+			static const size_t kChunk = 16384;
+			z_stream strm;
+			strm.zalloc = Z_NULL;
+			strm.zfree = Z_NULL;
+			strm.opaque = Z_NULL;
+
+			Bytef tmpBuf[kChunk];
+
+			std::string slurp;
+			while ( in )
+			{
+				ssize_t n = in.read( reinterpret_cast<char *>( tmpBuf ), kChunk ).gcount();
+				if ( n > 0 )
+					slurp.append( reinterpret_cast<char *>( tmpBuf ), n );
+			}
+
+			strm.avail_in = slurp.size();
+			strm.next_in = reinterpret_cast<Bytef *>( const_cast<char *>( slurp.data() ) );
+
+			int zErr = inflateInit2( &strm, 16+MAX_WBITS );
+			if ( zErr != Z_OK )
+			{
+				std::cerr << "Unable to init compression library" << std::endl;
+				return -1;
+			}
+
+			std::string decomp;
+
+			while ( zErr != Z_STREAM_END )
+			{
+				strm.avail_out = kChunk;
+				strm.next_out = tmpBuf;
+
+				zErr = inflate( &strm, Z_SYNC_FLUSH );
+				if ( zErr != Z_OK && zErr != Z_STREAM_END )
+				{
+					std::cerr << "Error reading compressed file: " << zErr << std::endl;
+					return -1;
+				}
+
+				decomp.append( reinterpret_cast<char *>( tmpBuf ), kChunk - strm.avail_out );
+			}
+
+			zErr = inflateEnd( &strm );
+
+			std::stringstream x( decomp );
+			x >> reader;
+		}
+		else
+		{
+			in >> reader;
+		}
 		std::cout << "Completed reading UCD XML file" << std::endl;
 	}
 

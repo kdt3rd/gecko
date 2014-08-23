@@ -12,7 +12,7 @@ local gens = {
 	BuildFile( "utfnorm.cpp" );
 }
 
-local xml = SourceFile( "tables/ucd.all.flat.xml" );
+local xml = SourceFile( "tables/ucd.all.flat.xml.gz" );
 
 Run( xml, gens, BuildFile(), BinFile( "gen_table" ), xml )
 
