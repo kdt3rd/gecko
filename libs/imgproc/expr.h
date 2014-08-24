@@ -111,6 +111,19 @@ public:
 	{
 	}
 
+	template<typename ...Args>
+	func( std::u32string n, const Args &...args )
+		: _name( std::move( n ) )
+	{
+		std::array<std::u32string,sizeof...(args)> list
+		{{
+			args...
+		}};
+
+		for ( auto arg: list )
+			add_arg( arg );
+	}
+
 	void add_arg( std::u32string a )
 	{
 		_args.push_back( std::move( a ) );
@@ -465,6 +478,16 @@ public:
 	void set_result( const std::shared_ptr<expr> &r )
 	{
 		_result = r;
+	}
+
+	const std::vector<std::u32string> &variables( void ) const
+	{
+		return _vars;
+	}
+
+	const std::vector<std::shared_ptr<expr>> &ranges( void ) const
+	{
+		return _ranges;
 	}
 
 	void write( std::ostream &out ) const override;

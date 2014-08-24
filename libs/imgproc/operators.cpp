@@ -9,12 +9,12 @@ namespace imgproc
 
 std::map<std::u32string,std::shared_ptr<base_operator>> operators =
 {
-	{ U"<", std::make_shared<infix_operator>( 10 ) },
-	{ U"<=", std::make_shared<infix_operator>( 10 ) },
-	{ U">", std::make_shared<infix_operator>( 10 ) },
-	{ U">=", std::make_shared<infix_operator>( 10 ) },
-	{ U"==", std::make_shared<infix_operator>( 10 ) },
-	{ U"!=", std::make_shared<infix_operator>( 10 ) },
+	{ U"<", std::make_shared<infix_operator>( 40 ) },
+	{ U"<=", std::make_shared<infix_operator>( 40 ) },
+	{ U">", std::make_shared<infix_operator>( 40 ) },
+	{ U">=", std::make_shared<infix_operator>( 40 ) },
+	{ U"==", std::make_shared<infix_operator>( 40 ) },
+	{ U"!=", std::make_shared<infix_operator>( 40 ) },
 
 	{ U"&&", std::make_shared<infix_operator>( 10 ) },
 	{ U"||", std::make_shared<infix_operator>( 10 ) },
@@ -24,13 +24,14 @@ std::map<std::u32string,std::shared_ptr<base_operator>> operators =
 	{ U"*", std::make_shared<infix_operator>( 20 ) },
 	{ U"×", std::make_shared<infix_operator>( 20 ) },
 	{ U"/", std::make_shared<infix_operator>( 20 ) },
+	{ U"%", std::make_shared<infix_operator>( 20 ) },
 	{ U"÷", std::make_shared<infix_operator>( 20 ) },
-	{ U"√", std::make_shared<prefix_operator>( 20 ) },
-	{ U"∛", std::make_shared<prefix_operator>( 20 ) },
-	{ U"∜", std::make_shared<prefix_operator>( 20 ) },
+	{ U"√", std::make_shared<prefix_operator>( 30 ) },
+	{ U"∛", std::make_shared<prefix_operator>( 30 ) },
+	{ U"∜", std::make_shared<prefix_operator>( 30 ) },
 
-	{ U"[", std::make_shared<postcircumfix_operator>( U"]" ) },
-	{ U"]", std::make_shared<base_operator>() },
+//	{ U"[", std::make_shared<postcircumfix_operator>( U"]" ) },
+//	{ U"]", std::make_shared<base_operator>() },
 
 	{ U"⌈", std::make_shared<circumfix_operator>( U"⌉" ) },
 	{ U"⌉", std::make_shared<base_operator>() },

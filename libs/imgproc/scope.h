@@ -21,6 +21,11 @@ public:
 	{
 	}
 
+	bool has( const std::u32string &n )
+	{
+		return bool( get( n ) );
+	}
+
 	std::shared_ptr<func> get( const std::u32string &n )
 	{
 		auto f = _functions.find( n );
@@ -42,6 +47,7 @@ public:
 	}
 
 private:
+
 	std::function<type(const std::u32string &, const std::vector<type> &)> _compile;
 	std::map<std::u32string,std::shared_ptr<func>> _functions;
 };

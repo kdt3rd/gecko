@@ -437,6 +437,9 @@ std::shared_ptr<for_expr> parser::for_expr( void )
 
 	id_list( [&result]( const std::u32string &a ) { result->add_variable( a ); } );
 
+	if ( result->variables().empty() )
+		throw_runtime( "for loop variable(s) missing" );
+
 	if ( !expect( TOK_SEPARATOR ) )
 		throw_runtime( "expected ':', got '{0}'", _token.value() );
 
@@ -445,6 +448,15 @@ std::shared_ptr<for_expr> parser::for_expr( void )
 		_parsing_range = true;
 		on_scope_exit { _parsing_range = false; };
 		result->add_range( for_range() );
+	}
+
+	if ( result->ranges().empty() )
+		throw_runtime( "no range(s) specified for loop" );
+
+	if ( result->ranges().size() > 1 )
+	{
+		if ( result->variables().size() != result->ranges().size() )
+			throw_runtime( "expected {0} ranges, got {1}", result->variables().size(), result->ranges().size() );
 	}
 
 	result->set_result( expression() );

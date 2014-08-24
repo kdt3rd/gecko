@@ -268,7 +268,7 @@ type call_expr::result_type( std::shared_ptr<scope> &sc ) const
 	for ( size_t i = 0; i < _args.size(); ++i )
 		args.push_back( _args[i]->result_type( sc ) );
 
-	if ( sc->functions()->get( _func ) )
+	if ( sc->functions()->has( _func ) )
 		return sc->functions()->compile( _func, args );
 	else
 	{
@@ -375,9 +375,17 @@ void for_expr::write( std::ostream &out ) const
 
 type for_expr::result_type( std::shared_ptr<scope> &sc ) const
 {
+	// Process the range, make sure they are of the correct type
+	for ( auto r: _ranges )
+	{
+		auto t = r->result_type( sc );
+//		if ( t.second != 0 )
+//			throw_runtime( "range of invalid type ({0})", t );
+	}
+
 	auto newsc = std::make_shared<scope>( sc );
-	for ( size_t i = 0; i < _vars.size(); ++i )
-		newsc->add( _vars[i], { data_type::UINT32, 0 } );
+	for ( auto v: _vars )
+		newsc->add( v, { data_type::UINT32, 0 } );
 
 	auto t = _result->result_type( newsc );
 
@@ -441,7 +449,35 @@ void range_expr::write( std::ostream &out ) const
 
 type range_expr::result_type( std::shared_ptr<scope> &scope ) const
 {
-	throw_not_yet();
+	auto t = _start->result_type( scope );
+//	if ( t.second != 0 )
+//	{
+//		std::stringstream msg;
+//		_start->write( msg );
+//		throw_runtime( "got array {0} for range expression ({1})", t, msg.str() );
+//	}
+	if ( _end )
+	{
+		auto t = _end->result_type( scope );
+//		if ( t.second != 0 )
+//		{
+//			std::stringstream msg;
+//			_end->write( msg );
+//			throw_runtime( "got array {0} for range end expression ({1})", t, msg.str() );
+//		}
+	}
+
+	if ( _by )
+	{
+		auto t = _end->result_type( scope );
+//		if ( t.second != 0 )
+//		{
+//			std::stringstream msg;
+//			_by->write( msg );
+//			throw_runtime( "got array {0} for range by expression ({1})", t, msg.str() );
+//		}
+	}
+	return t;
 }
 
 ////////////////////////////////////////

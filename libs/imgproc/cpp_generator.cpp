@@ -17,6 +17,11 @@ cpp_generator::cpp_generator( std::ostream &cpp )
 	} );
 
 	_globals->set_functions( table );
+
+	// Add built-in functions
+	table->add( U"floor", std::make_shared<func>( U"floor", U"x" ) );
+	table->add( U"ceil", std::make_shared<func>( U"ceil", U"x" ) );
+	table->add( U"abs", std::make_shared<func>( U"abs", U"x" ) );
 }
 
 ////////////////////////////////////////
@@ -37,6 +42,12 @@ type cpp_generator::generate( const std::u32string &name, const std::vector<type
 	const auto &args = f->args();
 
 	precondition( args.size() == types.size(), "expected {0} argument types, but got {1}", args.size(), types.size() );
+
+	if ( !f->result() )
+	{
+		// Built-in function
+		return types.front();
+	}
 
 	auto sc = std::make_shared<scope>( _globals );
 	for ( size_t a = 0; a < args.size(); ++a )
