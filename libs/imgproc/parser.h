@@ -50,7 +50,7 @@ private:
 	std::shared_ptr<expr> primary_expr( void );
 	std::shared_ptr<expr> expr_block( void );
 	std::shared_ptr<expr> if_expr( void );
-	std::shared_ptr<expr> for_range( void );
+	std::shared_ptr<range_expr> for_range( void );
 	std::shared_ptr<for_expr> for_expr( void );
 	std::vector<std::shared_ptr<expr>> arguments( void );
 	

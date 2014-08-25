@@ -26,7 +26,8 @@ public:
 private:
 	std::shared_ptr<func> get_function( const std::u32string &name );
 
-	void compile( const std::shared_ptr<func> &f, std::shared_ptr<scope> &scope );
+	// Compile a top-level expression
+	void compile( std::ostream &code, size_t indent, std::shared_ptr<scope> &sc, const std::shared_ptr<expr> &expr, const char *result );
 
 	type result_type( const std::shared_ptr<expr> &e, const std::shared_ptr<scope> &scope );
 

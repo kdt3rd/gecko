@@ -45,8 +45,32 @@ inline std::ostream &operator<<( std::ostream &out, data_type t )
 
 inline std::ostream &operator<<( std::ostream &out, const type &t )
 {
-	out << type_name( t.first ) << '[' << t.second << ']';
+	out << type_name( t.first ) << ',' << t.second;
 	return out;
+}
+
+////////////////////////////////////////
+
+inline std::string cpp_type( const type &t )
+{
+	std::ostringstream tmp;
+	if ( t.second > 0 )
+		tmp << "buffer<" << t << "> ";
+	else
+		tmp << t.first << ' ';
+	return tmp.str();
+}
+
+////////////////////////////////////////
+
+inline std::string cpp_type_const_ref( const type &t )
+{
+	std::ostringstream tmp;
+	if ( t.second > 0 )
+		tmp << "const buffer<" << t << "> &";
+	else
+		tmp << t.first << ' ';
+	return tmp.str();
 }
 
 ////////////////////////////////////////
