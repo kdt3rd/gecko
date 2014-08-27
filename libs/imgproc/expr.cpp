@@ -40,11 +40,9 @@ type prefix_expr::result_type( std::shared_ptr<scope> &scope ) const
 
 ////////////////////////////////////////
 
-void prefix_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
+std::string prefix_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
 {
-	code.source() << '(' << operation();
-	expression()->compile( code, scope );
-	code.source() << ')';
+	return base::format( "({0}{1})", operation(), expression()->compile( code, scope ) );
 }
 
 ////////////////////////////////////////
@@ -72,11 +70,9 @@ type postfix_expr::result_type( std::shared_ptr<scope> &scope ) const
 
 ////////////////////////////////////////
 
-void postfix_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
+std::string postfix_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
 {
-	code.source() << '(';
-	expression()->compile( code, scope );
-	code.source() << operation() << ')';
+	return base::format( "({0}{1})", expression()->compile( code, scope ), operation() );
 }
 
 ////////////////////////////////////////
@@ -109,13 +105,9 @@ type infix_expr::result_type( std::shared_ptr<scope> &scope ) const
 
 ////////////////////////////////////////
 
-void infix_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
+std::string infix_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
 {
-	code.source() << '(';
-	expression1()->compile( code, scope );
-	code.source() << operation();
-	expression2()->compile( code, scope );
-	code.source() << ')';
+	return base::format( "({0}{1}{2})", expression1()->compile( code, scope ), operation(), expression2()->compile( code, scope ) );
 }
 
 ////////////////////////////////////////
@@ -143,8 +135,9 @@ type circumfix_expr::result_type( std::shared_ptr<scope> &scope ) const
 
 ////////////////////////////////////////
 
-void circumfix_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
+std::string circumfix_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
 {
+	throw_not_yet();
 }
 
 ////////////////////////////////////////
@@ -173,8 +166,9 @@ type postcircumfix_expr::result_type( std::shared_ptr<scope> &scope ) const
 
 ////////////////////////////////////////
 
-void postcircumfix_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
+std::string postcircumfix_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
 {
+	throw_not_yet();
 }
 
 ////////////////////////////////////////
@@ -221,8 +215,9 @@ type error_expr::result_type( std::shared_ptr<scope> &scope ) const
 
 ////////////////////////////////////////
 
-void error_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
+std::string error_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
 {
+	throw_not_yet();
 }
 
 ////////////////////////////////////////
@@ -241,9 +236,9 @@ type number_expr::result_type( std::shared_ptr<scope> &scope ) const
 
 ////////////////////////////////////////
 
-void number_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
+std::string number_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
 {
-	code.source() << value();
+	return base::format( "{0}({1})", cpp_type( code.expected() ), value() );
 }
 
 ////////////////////////////////////////
@@ -262,9 +257,13 @@ type identifier_expr::result_type( std::shared_ptr<scope> &scope ) const
 
 ////////////////////////////////////////
 
-void identifier_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
+std::string identifier_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
 {
-	code.source() << value();
+	const std::u32string &v = value();
+	if ( scope->get( v ).get_type() != code.expected() )
+		return base::format( "{0}({1})", cpp_type( code.expected() ), value() );
+	else
+		return base::format( "{0}", value() );
 }
 
 ////////////////////////////////////////
@@ -297,8 +296,9 @@ type assign_expr::result_type( std::shared_ptr<scope> &scope ) const
 
 ////////////////////////////////////////
 
-void assign_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
+std::string assign_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
 {
+	throw_not_yet();
 }
 
 ////////////////////////////////////////
@@ -346,17 +346,19 @@ type call_expr::result_type( std::shared_ptr<scope> &sc ) const
 
 ////////////////////////////////////////
 
-void call_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
+std::string call_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
 {
-	code.source() << function() << "( ";
+	std::stringstream str;
+	str << function() << "( ";
 	const auto &args = arguments();
 	for ( size_t i = 0; i < args.size(); ++i )
 	{
 		if ( i > 0 )
-			code.source() << ", ";
+			str << ", ";
 		args[i]->compile( code, scope );
 	}
-	code.source() << " )";
+	str << " )";
+	return str.str();
 }
 
 ////////////////////////////////////////
@@ -388,8 +390,9 @@ type chain_expr::result_type( std::shared_ptr<scope> &scope ) const
 
 ////////////////////////////////////////
 
-void chain_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
+std::string chain_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
 {
+	throw_not_yet();
 }
 
 ////////////////////////////////////////
@@ -427,8 +430,9 @@ type arguments_expr::result_type( std::shared_ptr<scope> &scope ) const
 
 ////////////////////////////////////////
 
-void arguments_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
+std::string arguments_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
 {
+	throw_not_yet();
 }
 
 ////////////////////////////////////////
@@ -479,14 +483,14 @@ type for_expr::result_type( std::shared_ptr<scope> &sc ) const
 
 	auto newsc = std::make_shared<scope>( sc );
 	for ( auto v: _vars )
-		newsc->add( v, { data_type::UINT32, 0 } );
+		newsc->add( v, { data_type::UINT64, 0 } );
 
 	auto t = _result->result_type( newsc );
 
 	if ( _mod.empty() )
 		return { t.first, _vars.size() };
 	else if ( _mod == U"count" )
-		return { data_type::UINT32, 0 };
+		return { data_type::UINT64, 0 };
 	else if ( _mod == U"sum" )
 		return { data_type::FLOAT32, 0 };
 	else
@@ -495,8 +499,10 @@ type for_expr::result_type( std::shared_ptr<scope> &sc ) const
 
 ////////////////////////////////////////
 
-void for_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
+std::string for_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
 {
+//	throw_not_yet();
+	return std::string( "/* not yet */" );
 }
 
 ////////////////////////////////////////
@@ -529,8 +535,9 @@ type if_expr::result_type( std::shared_ptr<scope> &scope ) const
 
 ////////////////////////////////////////
 
-void if_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
+std::string if_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
 {
+	throw_not_yet();
 }
 
 ////////////////////////////////////////
@@ -588,8 +595,9 @@ type range_expr::result_type( std::shared_ptr<scope> &scope ) const
 
 ////////////////////////////////////////
 
-void range_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
+std::string range_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
 {
+	throw_not_yet();
 }
 
 ////////////////////////////////////////

@@ -62,7 +62,7 @@ type cpp_generator::generate( const std::u32string &name, const std::vector<type
 	auto t = f->result()->result_type( sc );
 
 	std::ostringstream code;
-	code << "\n" << cpp_type( t ) << name << "( ";
+	code << "\n" << cpp_type( t ) << ' ' << name << "( ";
 	for ( size_t a = 0; a < args.size(); ++a )
 	{
 		if ( a > 0 )
@@ -72,8 +72,8 @@ type cpp_generator::generate( const std::u32string &name, const std::vector<type
 	code << " )\n";
 	code << "{\n";
 
-	code << '\t' << cpp_type( t ) << "result;\n";
-	compile( code, 1, sc, f->result(),"result" );
+	code << '\t' << cpp_type( t ) << ' ' << "result;\n";
+	compile( code, 1, sc, f->result(), variable( U"result", t ) );
 
 	code << '\t' << "return result;\n";
 
@@ -91,12 +91,12 @@ type cpp_generator::generate( const std::u32string &name, const std::vector<type
 
 ////////////////////////////////////////
 
-void cpp_generator::compile( std::ostream &code, size_t indent, std::shared_ptr<scope> &sc, const std::shared_ptr<expr> &expr, const char *result )
+void cpp_generator::compile( std::ostream &code, size_t indent, std::shared_ptr<scope> &sc, const std::shared_ptr<expr> &expr, const variable &result )
 {
 	std::string ind( indent, '\t' );
-	compile_context cc( code, { data_type::FLOAT32, 0 } );
 	if ( auto e = std::dynamic_pointer_cast<for_expr>( expr ) )
 	{
+		compile_context cc( code, { data_type::INT64, 0 } );
 		auto newsc = std::make_shared<scope>( sc );
 		const auto &vars = e->variables();
 		const auto &ranges = e->ranges();
@@ -137,10 +137,10 @@ void cpp_generator::compile( std::ostream &code, size_t indent, std::shared_ptr<
 			}
 			code << ind << "{\n";
 			indent++;
-			newsc->add( vars[i], { data_type::UINT32, 0 } );
+			newsc->add( vars[i], { data_type::UINT64, 0 } );
 		}
 
-		code << ind << '\t' << result << "( ";
+		code << ind << '\t' << result.name() << "( ";
 		for ( size_t i = 0; i < vars.size(); ++i )
 		{
 			if ( i > 0 )
@@ -148,7 +148,8 @@ void cpp_generator::compile( std::ostream &code, size_t indent, std::shared_ptr<
 			code << vars[i];
 		}
 		code << " ) = ";
-		e->result()->compile( cc, newsc );
+		compile_context cc2( code, { result.get_type().first, 0 } );
+		code << e->result()->compile( cc2, newsc );
 		code << ";\n";
 
 		for ( size_t i = 0; i < vars.size(); ++i )
@@ -163,8 +164,8 @@ void cpp_generator::compile( std::ostream &code, size_t indent, std::shared_ptr<
 	{
 		std::ostringstream tmp;
 		compile_context cc( tmp, { data_type::FLOAT32, 0 } );
-		expr->compile( cc, sc );
-		code << ind << result << " = " << tmp.str() << ";\n";
+		code << expr->compile( cc, sc );
+		code << ind << result.name() << " = " << tmp.str() << ";\n";
 	}
 }
 

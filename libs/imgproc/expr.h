@@ -26,7 +26,14 @@ public:
 	const type &expected( void ) { return _expected; }
 	std::ostream &source( void ) { return _source; }
 
+	template<typename ...Args>
+	void line( Args ...args )
+	{
+		_source << _indent << base::format( std::forward( args )... ) << '\n';
+	}
+
 private:
+	std::string _indent;
 	std::ostream &_source;
 	type _expected;
 };
@@ -40,7 +47,7 @@ public:
 
 	virtual void write( std::ostream &out ) const = 0;
 	virtual type result_type( std::shared_ptr<scope> &scope ) const = 0;
-	virtual void compile( compile_context &code, std::shared_ptr<scope> &scope ) const = 0;
+	virtual std::string compile( compile_context &code, std::shared_ptr<scope> &scope ) const = 0;
 };
 
 ////////////////////////////////////////
@@ -52,7 +59,7 @@ public:
 
 	void write( std::ostream &out ) const override;
 	type result_type( std::shared_ptr<scope> &scope ) const override;
-	void compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
+	std::string compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
 
 	std::u32string operation( void ) const { return _op; }
 	std::shared_ptr<expr> expression( void ) const { return _x; }
@@ -71,7 +78,7 @@ public:
 
 	void write( std::ostream &out ) const override;
 	type result_type( std::shared_ptr<scope> &scope ) const override;
-	void compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
+	std::string compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
 
 	std::u32string operation( void ) const { return _op; }
 	std::shared_ptr<expr> expression( void ) const { return _x; }
@@ -90,7 +97,7 @@ public:
 
 	void write( std::ostream &out ) const override;
 	type result_type( std::shared_ptr<scope> &scope ) const override;
-	void compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
+	std::string compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
 
 	std::u32string operation( void ) const { return _op; }
 	std::shared_ptr<expr> expression1( void ) const { return _x; }
@@ -111,7 +118,7 @@ public:
 
 	void write( std::ostream &out ) const override;
 	type result_type( std::shared_ptr<scope> &scope ) const override;
-	void compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
+	std::string compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
 
 private:
 	std::u32string _open, _close;
@@ -127,7 +134,7 @@ public:
 
 	void write( std::ostream &out ) const override;
 	type result_type( std::shared_ptr<scope> &scope ) const override;
-	void compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
+	std::string compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
 
 private:
 	std::u32string _open, _close;
@@ -204,7 +211,7 @@ public:
 
 	virtual void write( std::ostream &out ) const;
 	type result_type( std::shared_ptr<scope> &scope ) const override;
-	void compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
+	std::string compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
 
 protected:
 	std::string _msg;
@@ -254,7 +261,7 @@ public:
 
 	virtual void write( std::ostream &out ) const;
 	type result_type( std::shared_ptr<scope> &scope ) const override;
-	void compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
+	std::string compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
 };
 
 ////////////////////////////////////////
@@ -273,7 +280,7 @@ public:
 
 	virtual void write( std::ostream &out ) const;
 	type result_type( std::shared_ptr<scope> &scope ) const override;
-	void compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
+	std::string compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
 };
 
 ////////////////////////////////////////
@@ -322,7 +329,7 @@ public:
 
 	virtual void write( std::ostream &out ) const;
 	type result_type( std::shared_ptr<scope> &scope ) const override;
-	void compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
+	std::string compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
 
 private:
 	std::shared_ptr<expr> _value;
@@ -380,7 +387,7 @@ public:
 
 	virtual void write( std::ostream &out ) const;
 	type result_type( std::shared_ptr<scope> &scope ) const override;
-	void compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
+	std::string compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
 
 protected:
 	std::u32string _func;
@@ -419,7 +426,7 @@ public:
 
 	virtual void write( std::ostream &out ) const;
 	type result_type( std::shared_ptr<scope> &scope ) const override;
-	void compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
+	std::string compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
 
 private:
 	std::shared_ptr<expr> _value;
@@ -509,7 +516,7 @@ public:
 
 	virtual void write( std::ostream &out ) const override;
 	type result_type( std::shared_ptr<scope> &scope ) const override;
-	void compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
+	std::string compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
 
 	std::shared_ptr<expr> start( void ) const { return _start; }
 	std::shared_ptr<expr> end( void ) const { return _end; }
@@ -567,7 +574,7 @@ public:
 
 	void write( std::ostream &out ) const override;
 	type result_type( std::shared_ptr<scope> &scope ) const override;
-	void compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
+	std::string compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
 
 	std::shared_ptr<expr> result( void ) const { return _result; }
 
@@ -608,7 +615,7 @@ public:
 
 	virtual void write( std::ostream &out ) const override;
 	type result_type( std::shared_ptr<scope> &scope ) const override;
-	void compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
+	std::string compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
 
 private:
 	std::shared_ptr<expr> _condition;
@@ -648,7 +655,7 @@ public:
 
 	virtual void write( std::ostream &out ) const;
 	type result_type( std::shared_ptr<scope> &scope ) const override;
-	void compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
+	std::string compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
 
 private:
 	std::u32string _var;

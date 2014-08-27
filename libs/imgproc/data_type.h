@@ -11,6 +11,11 @@ enum class data_type
 	UINT8,
 	UINT16,
 	UINT32,
+	UINT64,
+	INT8,
+	INT16,
+	INT32,
+	INT64,
 	FLOAT32,
 	FLOAT64
 };
@@ -28,6 +33,11 @@ inline std::string type_name( data_type t )
 		case data_type::UINT8: return "uint8_t";
 		case data_type::UINT16: return "uint16_t";
 		case data_type::UINT32: return "uint32_t";
+		case data_type::UINT64: return "uint64_t";
+		case data_type::INT8: return "int8_t";
+		case data_type::INT16: return "int16_t";
+		case data_type::INT32: return "int32_t";
+		case data_type::INT64: return "int64_t";
 		case data_type::FLOAT32: return "float";
 		case data_type::FLOAT64: return "double";
 	}
@@ -55,9 +65,9 @@ inline std::string cpp_type( const type &t )
 {
 	std::ostringstream tmp;
 	if ( t.second > 0 )
-		tmp << "buffer<" << t << "> ";
+		tmp << "buffer<" << t << '>';
 	else
-		tmp << t.first << ' ';
+		tmp << t.first;
 	return tmp.str();
 }
 
