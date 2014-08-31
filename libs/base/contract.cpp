@@ -9,6 +9,8 @@ namespace base
 
 void print_exception( std::ostream &out, const std::exception &e, int level )
 {
+	if ( level == 0 )
+		out << "ERROR:\n";
 	out << "  " << e.what() << '\n';
 	try
 	{
