@@ -730,9 +730,15 @@ std::string range_expr::compile( compile_context &code, std::shared_ptr<scope> &
 	}
 	else
 	{
-		code.set_lower_range( _index );
-		on_scope_exit { code.clear_range_index(); };
-		tmp << _start->compile( code, sc ) << ';';
+		auto t = _start->result_type( sc );
+		if ( t.second == 0 )
+			tmp << "0;";
+		else
+		{
+			code.set_lower_range( _index );
+			on_scope_exit { code.clear_range_index(); };
+			tmp << _start->compile( code, sc ) << ';';
+		}
 
 		code.set_upper_range( _index );
 		on_scope_exit { code.clear_range_index(); };
@@ -777,10 +783,15 @@ std::string range_expr::get_size( compile_context &code, std::shared_ptr<scope> 
 std::string range_expr::get_offset( compile_context &code, std::shared_ptr<scope> &sc ) const
 {
 	std::stringstream tmp;
-	code.set_lower_range( _index );
-	on_scope_exit { code.clear_range_index(); };
-	tmp << "static_cast<int64_t>(";
-	tmp << _start->compile( code, sc ) << ')';
+	if ( _end )
+	{
+		code.set_lower_range( _index );
+		on_scope_exit { code.clear_range_index(); };
+		tmp << "static_cast<int64_t>(";
+		tmp << _start->compile( code, sc ) << ')';
+	}
+	else
+		tmp << '0';
 	return tmp.str();
 }
 
