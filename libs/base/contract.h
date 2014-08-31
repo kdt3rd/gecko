@@ -108,6 +108,11 @@ public:
 #define throw_runtime( ... ) \
 	throw_location( std::runtime_error( base::format( __VA_ARGS__ ) ) )
 
+/// @brief Throw a logic error using format
+/// @sa base::format
+#define throw_logic( ... ) \
+	throw_location( std::logic_error( base::format( __VA_ARGS__ ) ) )
+
 /// @brief If check is not true, throw a postcondition_error
 #define throw_not_yet() \
 	throw_location( std::logic_error( "not yet implemented" ) )
