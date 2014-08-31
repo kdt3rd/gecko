@@ -1,0 +1,39 @@
+
+function lerp( l, h, m )
+{
+	h * m + l * ( 1.0 - m )
+}
+
+# Create uniform buckets
+public function uniform_buckets( nbuckets, lo, hi )
+{
+	for ( b: nbuckets + 1 )
+		lerp( lo, hi, b / nbuckets )
+}
+
+# Histogram
+public function histogram( img, buckets )
+{
+	for ( b: buckets - 1 )
+	{
+		l = buckets( b );
+		u = buckets( b + 1 );
+		count for ( x, y: img )
+		{
+			img( x, y ) >= l && img( x, y ) < u
+		}
+	}
+}
+
+# Calculate cummulative histogram
+public function accumulate_histogram( histo )
+{
+	for ( b: histo )
+		sum for ( h: 0 to b ) histo( h )
+}
+
+function test( input )
+{
+	histogram( input, uniform_buckets( 128, 0, 1 ) )
+}
+

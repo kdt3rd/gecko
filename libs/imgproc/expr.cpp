@@ -4,6 +4,7 @@
 #include <utf/utf.h>
 #include <iterator>
 #include <memory>
+#include <base/scope_guard.h>
 #include "scope.h"
 
 namespace imgproc
@@ -107,7 +108,9 @@ type infix_expr::result_type( std::shared_ptr<scope> &scope ) const
 
 std::string infix_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
 {
-	return base::format( "({0}{1}{2})", expression1()->compile( code, scope ), operation(), expression2()->compile( code, scope ) );
+	std::string e1 = expression1()->compile( code, scope );
+	std::string e2 = expression2()->compile( code, scope );
+	return base::format( "({0} {1} {2})", e1, operation(), e2 );
 }
 
 ////////////////////////////////////////
@@ -238,7 +241,10 @@ type number_expr::result_type( std::shared_ptr<scope> &scope ) const
 
 std::string number_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
 {
-	return base::format( "{0}({1})", cpp_type( code.expected() ), value() );
+	if ( code.expected().first != data_type::UNKNOWN )
+		return base::format( "{0}({1})", cpp_type( code.expected() ), value() );
+	else
+		return base::format( "{0}", value() );
 }
 
 ////////////////////////////////////////
@@ -260,7 +266,9 @@ type identifier_expr::result_type( std::shared_ptr<scope> &scope ) const
 std::string identifier_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
 {
 	const std::u32string &v = value();
-	if ( scope->get( v ).get_type() != code.expected() )
+	if ( code.has_range_modifier() )
+		return code.range( value() );
+	if ( scope->get( v ).get_type() != code.expected() && code.expected().first != data_type::UNKNOWN )
 		return base::format( "{0}({1})", cpp_type( code.expected() ), value() );
 	else
 		return base::format( "{0}", value() );
@@ -282,23 +290,28 @@ void assign_expr::write( std::ostream &out ) const
 	out << _var << " = ";
 	_expr->write( out );
 	out << "; ";
-	_next->write( out );
+	if ( _next )
+		_next->write( out );
 }
 
 ////////////////////////////////////////
 
-type assign_expr::result_type( std::shared_ptr<scope> &scope ) const
+type assign_expr::result_type( std::shared_ptr<scope> &sc ) const
 {
-	auto t = _next->result_type( scope );
-	scope->add( _var, t );
-	return t;
+	auto t = _expr->result_type( sc );
+	sc->add( _var, t );
+	return _next->result_type( sc );
 }
 
 ////////////////////////////////////////
 
-std::string assign_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
+std::string assign_expr::compile( compile_context &code, std::shared_ptr<scope> &sc ) const
 {
-	throw_not_yet();
+	std::string e = _expr->compile( code, sc );
+	auto t = _expr->result_type( sc );
+	code.line( "{0} {1} = {2};", cpp_type( t ), _var, e );
+	sc->add( _var, t );
+	return _next->compile( code, sc );
 }
 
 ////////////////////////////////////////
@@ -355,7 +368,7 @@ std::string call_expr::compile( compile_context &code, std::shared_ptr<scope> &s
 	{
 		if ( i > 0 )
 			str << ", ";
-		args[i]->compile( code, scope );
+		str << args[i]->compile( code, scope );
 	}
 	str << " )";
 	return str.str();
@@ -476,7 +489,7 @@ type for_expr::result_type( std::shared_ptr<scope> &sc ) const
 	// Process the range, make sure they are of the correct type
 	for ( auto r: _ranges )
 	{
-		auto t = r->result_type( sc );
+//		auto t = r->result_type( sc );
 //		if ( t.second != 0 )
 //			throw_runtime( "range of invalid type ({0})", t );
 	}
@@ -492,17 +505,120 @@ type for_expr::result_type( std::shared_ptr<scope> &sc ) const
 	else if ( _mod == U"count" )
 		return { data_type::UINT64, 0 };
 	else if ( _mod == U"sum" )
-		return { data_type::FLOAT32, 0 };
+		return t;
 	else
 		throw_not_yet();
 }
 
 ////////////////////////////////////////
 
-std::string for_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
+std::string for_expr::compile( compile_context &code, std::shared_ptr<scope> &sc ) const
 {
-//	throw_not_yet();
-	return std::string( "/* not yet */" );
+	if ( _mod == U"count" )
+	{
+		code.line( "int64_t _count = 0;" );
+		auto newsc = std::make_shared<scope>( sc );
+
+		for ( int i = _vars.size() - 1; i >= 0; --i )
+		{
+			std::string exp = "for ( " + _ranges[i]->compile( code, newsc ) + " )";
+			code.line( exp, _vars[i] );
+			code.line( "{" );
+			code.indent_more();
+			newsc->add( _vars[i], { data_type::UINT64, 0 } );
+		}
+
+		code.line( "_count += {0};", result()->compile( code, newsc ) );
+
+		for ( size_t i = 0; i < _vars.size(); ++i )
+		{
+			code.indent_less();
+			code.line( "}" );
+		}
+		return "_count";
+	}
+	else if ( _mod == U"sum" )
+	{
+		auto tmpsc = std::make_shared<scope>( sc );
+		for ( auto v: _vars )
+			tmpsc->add( v, { data_type::UINT64, 0 } );
+
+		auto t = _result->result_type( tmpsc );
+
+		code.line( "{0} _sum = 0;", cpp_type( t ) );
+
+		auto newsc = std::make_shared<scope>( sc );
+		for ( int i = _vars.size() - 1; i >= 0; --i )
+		{
+			std::string exp = "for ( " + _ranges[i]->compile( code, newsc ) + " )";
+			code.line( exp, _vars[i] );
+			code.line( "{" );
+			code.indent_more();
+			newsc->add( _vars[i], { data_type::UINT64, 0 } );
+		}
+
+		code.line( "_sum += {0};", result()->compile( code, newsc ) );
+
+		for ( size_t i = 0; i < _vars.size(); ++i )
+		{
+			code.indent_less();
+			code.line( "}" );
+		}
+		return "_sum";
+	}
+	else if ( _mod == U"max" )
+	{
+		throw_not_yet();
+	}
+	else if ( _mod == U"min" )
+	{
+		throw_not_yet();
+	}
+	else
+	{
+		auto t = result_type( sc );
+		std::stringstream sizes;
+		std::stringstream offsets;
+		for ( size_t i = 0; i < t.second; ++i )
+		{
+			if ( i > 0 )
+				sizes << ", ";
+			code.line( "int64_t _size{0} = {1};", i, _ranges[i]->get_size( code, sc ) );
+			sizes << "_size" << i;
+			code.line( "int64_t _offset{0} = {1};", i, _ranges[i]->get_offset( code, sc ) );
+			offsets << "_offset" << i;
+		}
+		if ( sizes.str().empty() )
+			code.line( "{0} _result;", cpp_type( t ), sizes.str() );
+		else
+		{
+			code.line( "{0} _result( {1} );", cpp_type( t ), sizes.str() );
+			code.line( "_result.set_offset( {0} );", offsets.str() );
+		}
+		auto newsc = std::make_shared<scope>( sc );
+
+		std::stringstream vars;
+		for ( size_t i = _vars.size(); i > 0; --i )
+		{
+			if ( i != _vars.size() )
+				vars << ", ";
+			vars << _vars[i-1];
+			std::string exp = "for ( " + _ranges[i-1]->compile( code, newsc ) + " )";
+			code.line( exp, _vars[i-1] );
+			code.line( "{" );
+			code.indent_more();
+			newsc->add( _vars[i-1], { data_type::UINT64, 0 } );
+		}
+
+		code.line( "_result( {0} ) = {1};", vars.str(), result()->compile( code, newsc ) );
+
+		for ( size_t i = 0; i < _vars.size(); ++i )
+		{
+			code.indent_less();
+			code.line( "}" );
+		}
+		return "_result";
+	}
 }
 
 ////////////////////////////////////////
@@ -562,6 +678,8 @@ void range_expr::write( std::ostream &out ) const
 
 type range_expr::result_type( std::shared_ptr<scope> &scope ) const
 {
+	return { data_type::INT64, 0 };
+	/*
 	auto t = _start->result_type( scope );
 //	if ( t.second != 0 )
 //	{
@@ -571,7 +689,7 @@ type range_expr::result_type( std::shared_ptr<scope> &scope ) const
 //	}
 	if ( _end )
 	{
-		auto t = _end->result_type( scope );
+		_end->result_type( scope );
 //		if ( t.second != 0 )
 //		{
 //			std::stringstream msg;
@@ -582,7 +700,7 @@ type range_expr::result_type( std::shared_ptr<scope> &scope ) const
 
 	if ( _by )
 	{
-		auto t = _end->result_type( scope );
+		_end->result_type( scope );
 //		if ( t.second != 0 )
 //		{
 //			std::stringstream msg;
@@ -591,13 +709,79 @@ type range_expr::result_type( std::shared_ptr<scope> &scope ) const
 //		}
 	}
 	return t;
+	*/
 }
 
 ////////////////////////////////////////
 
-std::string range_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
+std::string range_expr::compile( compile_context &code, std::shared_ptr<scope> &sc ) const
 {
-	throw_not_yet();
+	std::stringstream tmp;
+	tmp << "int64_t {0} = ";
+	if ( _end )
+	{
+		code.set_lower_range( _index );
+		on_scope_exit { code.clear_range_index(); };
+   		tmp << _start->compile( code, sc ) << ';';
+
+		code.set_upper_range( _index );
+		on_scope_exit { code.clear_range_index(); };
+		tmp << " {0} < " << _end->compile( code, sc ) << ';';
+	}
+	else
+	{
+		code.set_lower_range( _index );
+		on_scope_exit { code.clear_range_index(); };
+		tmp << _start->compile( code, sc ) << ';';
+
+		code.set_upper_range( _index );
+		on_scope_exit { code.clear_range_index(); };
+		tmp << " {0} < " << _start->compile( code, sc ) << ';';
+	}
+	tmp << " {0} += ";
+	if ( _by )
+		tmp << _by->compile( code, sc );
+	else
+		tmp << "1";
+	return std::move( tmp.str() );
+}
+
+////////////////////////////////////////
+
+std::string range_expr::get_size( compile_context &code, std::shared_ptr<scope> &sc ) const
+{
+	std::stringstream tmp;
+	tmp << "static_cast<int64_t>( ";
+	if ( _end )
+	{
+		code.set_upper_range( _index );
+		on_scope_exit { code.clear_range_index(); };
+		tmp << '(' << _end->compile( code, sc ) << " - ";
+
+		code.set_lower_range( _index );
+		on_scope_exit { code.clear_range_index(); };
+	   	tmp << _start->compile( code, sc ) << ')';
+	}
+	else
+	{
+		code.set_upper_range( _index );
+		on_scope_exit { code.clear_range_index(); };
+		tmp << '(' << _start->compile( code, sc ) << ')';
+	}
+	tmp << " )";
+	return tmp.str();
+}
+
+////////////////////////////////////////
+
+std::string range_expr::get_offset( compile_context &code, std::shared_ptr<scope> &sc ) const
+{
+	std::stringstream tmp;
+	code.set_lower_range( _index );
+	on_scope_exit { code.clear_range_index(); };
+	tmp << "static_cast<int64_t>(";
+	tmp << _start->compile( code, sc ) << ')';
+	return tmp.str();
 }
 
 ////////////////////////////////////////

@@ -292,7 +292,10 @@ std::shared_ptr<expr> parser::expr_block( void )
 	std::vector<std::shared_ptr<expr>> list;
 	do
 	{
-		list.emplace_back( expression() );
+		auto e = expression();
+		if ( !e )
+			throw_runtime( "oops: {0}", _token );
+		list.emplace_back( e );
 		if ( _token.type() == TOK_EXPRESSION_END )
 			next_token();
 	} while ( !expect( TOK_BLOCK_END ) );
@@ -457,6 +460,11 @@ std::shared_ptr<for_expr> parser::for_expr( void )
 	{
 		if ( result->variables().size() != result->ranges().size() )
 			throw_runtime( "expected {0} ranges, got {1}", result->variables().size(), result->ranges().size() );
+	}
+	else
+	{
+		while ( result->ranges().size() < result->variables().size() )
+			result->add_range( std::make_shared<range_expr>( *result->ranges().back() ) );
 	}
 
 	result->set_result( expression() );

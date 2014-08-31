@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <base/contract.h>
+
 namespace imgproc
 {
 
@@ -17,7 +19,8 @@ enum class data_type
 	INT32,
 	INT64,
 	FLOAT32,
-	FLOAT64
+	FLOAT64,
+	UNKNOWN,
 };
 
 ////////////////////////////////////////
@@ -40,6 +43,7 @@ inline std::string type_name( data_type t )
 		case data_type::INT64: return "int64_t";
 		case data_type::FLOAT32: return "float";
 		case data_type::FLOAT64: return "double";
+		default: throw_logic( "unknown data type" );
 	}
 }
 

@@ -43,7 +43,17 @@ void cpp_generator::add_functions( const std::vector<std::shared_ptr<func>> &fun
 
 type cpp_generator::generate( const std::u32string &name, const std::vector<type> &types )
 {
-	std::cout << std::flush;
+	auto sig = std::make_pair( name, types );
+	auto check = _compiled.find( sig );
+	if ( check != _compiled.end() )
+	{
+		if ( check->second.first == data_type::UNKNOWN )
+			throw_runtime( "recursive function {0} not allowed", name );
+		return check->second;
+	}
+	_compiled[sig] = { data_type::UNKNOWN, 0 };
+
+	std::cout << "Generating " << name << std::endl;
 	auto f = get_function( name );
 	const auto &args = f->args();
 
@@ -52,6 +62,7 @@ type cpp_generator::generate( const std::u32string &name, const std::vector<type
 	if ( !f->result() )
 	{
 		// Built-in function
+		_compiled[sig] = types.front();
 		return types.front();
 	}
 
@@ -61,112 +72,31 @@ type cpp_generator::generate( const std::u32string &name, const std::vector<type
 
 	auto t = f->result()->result_type( sc );
 
-	std::ostringstream code;
-	code << "\n" << cpp_type( t ) << ' ' << name << "( ";
+	std::ostringstream out;
+	compile_context code( out );
+	code.line();
+
+	std::stringstream ar;
 	for ( size_t a = 0; a < args.size(); ++a )
 	{
 		if ( a > 0 )
-			code << ", ";
-		code << cpp_type_const_ref( types[a] ) << args[a];
+			ar << ", ";
+		ar << cpp_type_const_ref( types[a] ) << args[a];
 	}
-	code << " )\n";
-	code << "{\n";
+	code.line( "{0} {1}( {2} )", cpp_type( t ), name, ar.str() );
+	code.line( "{" );
 
-	code << '\t' << cpp_type( t ) << ' ' << "result;\n";
-	compile( code, 1, sc, f->result(), variable( U"result", t ) );
+	code.indent_more();
+	std::string res = f->result()->compile( code, sc );
+	code.line( "return {0};", res );
 
-	code << '\t' << "return result;\n";
+	code.indent_less();
+	code.line( "}" );
 
-	code << "}\n\n";
+	_cpp << out.str();
 
-	std::cout << "Generating for: " << name << '\n';
-	for ( size_t i = 0 ; i < types.size(); ++i )
-		std::cout << "  " << types[i] << '\n';
-	std::cout << " => " << t << std::endl;
-
-	_cpp << code.str();
-
+	_compiled[sig] = t;
 	return t;
-}
-
-////////////////////////////////////////
-
-void cpp_generator::compile( std::ostream &code, size_t indent, std::shared_ptr<scope> &sc, const std::shared_ptr<expr> &expr, const variable &result )
-{
-	std::string ind( indent, '\t' );
-	if ( auto e = std::dynamic_pointer_cast<for_expr>( expr ) )
-	{
-		compile_context cc( code, { data_type::INT64, 0 } );
-		auto newsc = std::make_shared<scope>( sc );
-		const auto &vars = e->variables();
-		const auto &ranges = e->ranges();
-		for ( int i = vars.size() - 1; i >= 0; --i )
-		{
-			ind = std::string( indent, '\t' );
-			code << ind << "for ( int64_t " << vars[i] << " = ";
-			std::shared_ptr<range_expr> range;
-			if ( ranges.size() > 1 )
-				range = ranges[i];
-			else
-				range = ranges.front();
-			if ( range->end() )
-			{
-				range->start()->compile( cc, newsc );
-				code << "; " << vars[i] << " < ";
-				range->end()->compile( cc, newsc );
-				code << "; " << vars[i] << " += ";
-				if ( range->by() )
-					range->by()->compile( cc, newsc );
-				else
-					code << "1";
-				code << " )\n";
-			}
-			else
-			{
-				std::ostringstream tmp;
-				compile_context cc2( tmp, { data_type::FLOAT32, 0 } );
-				range->start()->compile( cc2, newsc );
-				code << tmp.str() << ".lower( " << i << " ); ";
-				code << vars[i] << " < " << tmp.str() << ".upper( " << i << " )" << "; ";
-				code << vars[i] << " += ";
-				if ( range->by() )
-					range->by()->compile( cc, newsc );
-				else
-					code << "1";
-				code << " )\n";
-			}
-			code << ind << "{\n";
-			indent++;
-			newsc->add( vars[i], { data_type::UINT64, 0 } );
-		}
-
-		code << ind << '\t' << result.name() << "( ";
-		for ( size_t i = 0; i < vars.size(); ++i )
-		{
-			if ( i > 0 )
-				code << ", ";
-			code << vars[i];
-		}
-		code << " ) = ";
-		compile_context cc2( code, { result.get_type().first, 0 } );
-		code << e->result()->compile( cc2, newsc );
-		code << ";\n";
-
-		for ( size_t i = 0; i < vars.size(); ++i )
-		{
-			indent--;
-			ind = std::string( indent, '\t' );
-			code << ind << "}\n";
-		}
-		code << "\n";
-	}
-	else
-	{
-		std::ostringstream tmp;
-		compile_context cc( tmp, { data_type::FLOAT32, 0 } );
-		code << expr->compile( cc, sc );
-		code << ind << result.name() << " = " << tmp.str() << ";\n";
-	}
 }
 
 ////////////////////////////////////////

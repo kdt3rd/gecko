@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <memory>
+#include <utility>
 #include <vector>
 #include <stdexcept>
 #include <iterator>
@@ -18,8 +19,13 @@ namespace imgproc
 class compile_context
 {
 public:
-	compile_context( std::ostream &src, const type &exp )
-		: _source( src ), _expected( exp )
+	compile_context( std::ostream &src, const type &exp, size_t indent = 0 )
+		: _indent( indent, '\t' ), _source( src ), _expected( exp )
+	{
+	}
+
+	compile_context( std::ostream &src, size_t indent = 0 )
+		: _indent( indent, '\t' ), _source( src )
 	{
 	}
 
@@ -29,13 +35,77 @@ public:
 	template<typename ...Args>
 	void line( Args ...args )
 	{
-		_source << _indent << base::format( std::forward( args )... ) << '\n';
+		_source << _indent << base::format( std::forward<Args>( args )... ) << '\n';
+	}
+
+	void line( const char *l )
+	{
+		_source << _indent << l << '\n';
+	}
+
+	void line( const std::string &l )
+	{
+		_source << _indent << l << '\n';
+	}
+
+	void line( const std::u32string &l )
+	{
+		_source << _indent << l << '\n';
+	}
+
+	void line( void )
+	{
+		_source << '\n';
+	}
+
+	void indent_more( void )
+	{
+		_indent.push_back( '\t' );
+	}
+
+	void indent_less( void )
+	{
+		precondition( !_indent.empty(), "indent negative" );
+		_indent.pop_back();
+	}
+
+	void set_upper_range( size_t i )
+	{
+		_range_index.emplace_back( i, true );
+	}
+
+	void set_lower_range( size_t i )
+	{
+		_range_index.emplace_back( i, false );
+	}
+
+	void clear_range_index( void )
+	{
+		_range_index.pop_back();
+	}
+
+	bool has_range_modifier( void ) const
+	{
+		return !_range_index.empty();
+	}
+
+	template<typename T>
+	std::string range( const T &u )
+	{
+		std::stringstream result;
+		precondition( has_range_modifier(), "not inside range" );
+		if ( _range_index.back().second )
+			result << "_upper(" << u << ',' << _range_index.back().first << ')';
+		else
+			result << "_lower(" << u << ',' << _range_index.back().first << ')';
+		return result.str();
 	}
 
 private:
+	std::vector<std::pair<size_t,bool>> _range_index;
 	std::string _indent;
 	std::ostream &_source;
-	type _expected;
+	type _expected = { data_type::UNKNOWN, 0 };
 };
 
 ////////////////////////////////////////
@@ -172,6 +242,7 @@ public:
 
 	void set_result( const std::shared_ptr<expr> &r )
 	{
+		precondition( r, "missing result" );
 		_result = r;
 	}
 
@@ -517,16 +588,20 @@ public:
 	virtual void write( std::ostream &out ) const override;
 	type result_type( std::shared_ptr<scope> &scope ) const override;
 	std::string compile( compile_context &code, std::shared_ptr<scope> &scope ) const override;
+	std::string get_size( compile_context &code, std::shared_ptr<scope> &scope ) const;
+	std::string get_offset( compile_context &code, std::shared_ptr<scope> &scope ) const;
+
+	void set_index( size_t idx ) { _index = idx; }
 
 	std::shared_ptr<expr> start( void ) const { return _start; }
 	std::shared_ptr<expr> end( void ) const { return _end; }
 	std::shared_ptr<expr> by( void ) const { return _by; }
 
 private:
+	size_t _index = 0;
 	std::shared_ptr<expr> _start;
 	std::shared_ptr<expr> _end;
 	std::shared_ptr<expr> _by;
-
 };
 
 ////////////////////////////////////////
@@ -554,6 +629,7 @@ public:
 
 	void add_range( const std::shared_ptr<range_expr> &r )
 	{
+		r->set_index( _ranges.size() );
 		_ranges.push_back( r );
 	}
 

@@ -12,7 +12,7 @@ namespace
 
 int safemain( int argc, char *argv[] )
 {
-	precondition( argc == 2, "expected single argument" );
+	precondition( argc == 3, "expected two argument: input and output" );
 
 	std::ifstream src( argv[1] );
 
@@ -32,7 +32,7 @@ int safemain( int argc, char *argv[] )
 		std::cout << std::endl;
 	}
 
-	std::ofstream cppout( "imgc.cpp" );
+	std::ofstream cppout( argv[2] );
 	imgproc::cpp_generator gen( cppout );
 	gen.add_functions( funcs );
 

@@ -1,6 +1,7 @@
 
 #include "expr_parser.h"
 #include "operators.h"
+#include <base/backtrace.h>
 
 namespace imgproc
 {
@@ -10,7 +11,7 @@ namespace imgproc
 expr_parser::expr_parser( iterator &it, const std::function<std::shared_ptr<expr>(void)> &primary )
 	: _it( it ), _primary( primary )
 {
-	_token = next_token();
+	next_token();
 }
 
 ////////////////////////////////////////
@@ -18,14 +19,14 @@ expr_parser::expr_parser( iterator &it, const std::function<std::shared_ptr<expr
 std::shared_ptr<expr> expr_parser::expression( int64_t rbp )
 {
 	auto t = _token;
-	_token = next_token();
+	next_token();
 
 	auto left = t.second->right( *this, t.first );
 
 	while ( rbp < _token.second->lbp() )
 	{
 		t = _token;
-		_token = next_token();
+		next_token();
 		left = t.second->left( *this, t.first, left );
 	}
 
@@ -38,21 +39,20 @@ void expr_parser::match( std::u32string &op )
 {
 	if ( op != _token.first )
 		throw_runtime( "expected '{0}', got '{1}'", op, _token.first );
-	_token = next_token();
+	next_token();
 }
 
 ////////////////////////////////////////
 
-std::pair<std::u32string,std::shared_ptr<base_operator>> expr_parser::next_token( void )
+void expr_parser::next_token( void )
 {
 	if ( _gottoken )
 		_it.next();
 
-	std::pair<std::u32string,std::shared_ptr<base_operator>> result;
 	if ( !_it )
 	{
-		result = std::make_pair( std::u32string(), std::make_shared<end_operator>() );
-		return result;
+		_token = std::make_pair( std::u32string(), std::make_shared<end_operator>() );
+		return;
 	}
 
 	_gottoken = true;
@@ -73,20 +73,17 @@ std::pair<std::u32string,std::shared_ptr<base_operator>> expr_parser::next_token
 		_it.split( opname );
 
 		std::shared_ptr<base_operator> op( oplookup->second );
-		result = std::make_pair( opname, op );
+		_token = std::make_pair( opname, op );
 	}
 	else
 	{
 		auto op = std::make_shared<primary_operator>( _primary() );
-		if ( op )
-		{
-			_gottoken = false;
-			result = std::make_pair( _it.value(), op );
-		}
+		_gottoken = false;
+		if ( op->expression() )
+			_token = std::make_pair( _it.value(), op );
 		else
-			result = std::make_pair( _it.value(), std::make_shared<end_operator>() );
+			_token = std::make_pair( std::u32string(), std::make_shared<end_operator>() );
 	}
-	return result;
 }
 
 ////////////////////////////////////////

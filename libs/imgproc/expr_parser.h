@@ -21,7 +21,7 @@ public:
 	void match( std::u32string &op );
 
 private:
-	std::pair<std::u32string,std::shared_ptr<base_operator>> next_token( void );
+	void next_token( void );
 	std::pair<std::u32string,std::shared_ptr<base_operator>> _token;
 	iterator &_it;
 	std::function<std::shared_ptr<expr>(void)> _primary;

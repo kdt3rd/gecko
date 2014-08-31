@@ -35,6 +35,9 @@ public:
 
 	virtual std::shared_ptr<expr> right( expr_parser &parser, const std::u32string &op );
 
+	std::shared_ptr<expr> expression( void ) const { return _expr; }
+	
+
 private:
 	std::shared_ptr<expr> _expr;
 };
