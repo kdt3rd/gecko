@@ -12,6 +12,7 @@ srcs = {
 	"paint.cpp";
 	"pack.cpp";
 	"sha256.cpp";
+	"backtrace.cpp";
 }
 
 Library( "base", Compile( srcs ) );
