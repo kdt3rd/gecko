@@ -446,12 +446,15 @@ std::shared_ptr<for_expr> parser::for_expr( void )
 	if ( !expect( TOK_SEPARATOR ) )
 		throw_runtime( "expected ':', got '{0}'", _token.value() );
 
-	while ( !expect( TOK_PAREN_END ) )
+	do
 	{
 		_parsing_range = true;
 		on_scope_exit { _parsing_range = false; };
 		result->add_range( for_range() );
-	}
+	} while ( expect( TOK_COMMA ) );
+
+	if ( !expect( TOK_PAREN_END ) )
+		throw_runtime( "expected ')', got '{0}'", _token.value() );
 
 	if ( result->ranges().empty() )
 		throw_runtime( "no range(s) specified for loop" );

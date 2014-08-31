@@ -516,7 +516,7 @@ std::string for_expr::compile( compile_context &code, std::shared_ptr<scope> &sc
 {
 	if ( _mod == U"count" )
 	{
-		code.line( "int64_t _count = 0;" );
+		code.line( "uint64_t _count = 0;" );
 		auto newsc = std::make_shared<scope>( sc );
 
 		for ( int i = _vars.size() - 1; i >= 0; --i )
@@ -582,7 +582,10 @@ std::string for_expr::compile( compile_context &code, std::shared_ptr<scope> &sc
 		for ( size_t i = 0; i < t.second; ++i )
 		{
 			if ( i > 0 )
+			{
 				sizes << ", ";
+				offsets << ", ";
+			}
 			code.line( "int64_t _size{0} = {1};", i, _ranges[i]->get_size( code, sc ) );
 			sizes << "_size" << i;
 			code.line( "int64_t _offset{0} = {1};", i, _ranges[i]->get_offset( code, sc ) );
@@ -602,7 +605,7 @@ std::string for_expr::compile( compile_context &code, std::shared_ptr<scope> &sc
 		{
 			if ( i != _vars.size() )
 				vars << ", ";
-			vars << _vars[i-1];
+			vars << _vars[_vars.size()-i];
 			std::string exp = "for ( " + _ranges[i-1]->compile( code, newsc ) + " )";
 			code.line( exp, _vars[i-1] );
 			code.line( "{" );
@@ -651,9 +654,24 @@ type if_expr::result_type( std::shared_ptr<scope> &scope ) const
 
 ////////////////////////////////////////
 
-std::string if_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
+std::string if_expr::compile( compile_context &code, std::shared_ptr<scope> &sc ) const
 {
-	throw_not_yet();
+	auto t = _true->result_type( sc );
+	code.line( "{0} _ifresult;", cpp_type( t ) );
+	code.line( "if ( {0} )", _condition->compile( code, sc ) );
+	code.line( "{" );
+	code.indent_more();
+	code.line( "_ifresult = {0};", _true->compile( code, sc ) );
+	code.indent_less();
+	code.line( "}" );
+	code.line( "else" );
+	code.line( "{" );
+	code.indent_more();
+	code.line( "_ifresult = {0};", _false->compile( code, sc ) );
+	code.indent_less();
+	code.line( "}" );
+
+	return "_ifresult";
 }
 
 ////////////////////////////////////////

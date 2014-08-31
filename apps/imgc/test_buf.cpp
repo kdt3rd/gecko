@@ -9,10 +9,33 @@
 
 using namespace imgproc;
 
-buffer<int64_t,1> test( const buffer<float,2> &input );
+buffer<float,2> test( const buffer<float,2> &input );
 
 namespace
 {
+
+std::ostream &operator<<( std::ostream &out, const buffer<float,2> &img )
+{
+	int64_t inc = img.size(0) / 64; 
+	for ( int64_t y = img.lower(1); y < img.upper(1); y += inc*2 )
+	{
+		for ( int64_t x = img.lower(0); x < img.upper(0); x += inc )
+		{
+			if ( img( x, y ) < 0.1 )
+				out << " ";
+			else if ( img( x, y ) < 0.25 )
+				out << "░";
+			else if ( img( x, y ) < 0.5 )
+				out << "▒";
+			else if ( img( x, y ) < 0.75 )
+				out << "▓";
+			else
+				out << "█";
+		}
+		out << '\n';
+	}
+	return out;
+}
 
 int safemain( int argc, char *argv[] )
 {
@@ -20,9 +43,8 @@ int safemain( int argc, char *argv[] )
 
 	auto histo = test( img );
 
-	for ( int64_t i = histo.lower( 0 ); i < histo.upper( 0 ); ++i )
-		std::cout << base::format( "{0,w3} {1,w4} {2}\n", i, histo( i ), std::string( histo( i ) / 25, '*' ) );
-	std::cout << std::flush;
+	std::cout << img << std::endl;;
+	std::cout << histo << std::endl;;
 
 	return 0;
 }

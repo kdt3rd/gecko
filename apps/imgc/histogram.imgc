@@ -32,8 +32,17 @@ public function accumulate_histogram( histo )
 		sum for ( h: 0 to b ) histo( h )
 }
 
+public function show_histogram( histo, height, scale )
+{
+	for ( x, y: histo, height )
+	{
+		if ( height - y >= histo(x) * scale ) 0.0 else 1.0
+	}
+}
+
 function test( input )
 {
-	histogram( input, uniform_buckets( 128, 0, 1 ) )
+	h = histogram( input, uniform_buckets( 128, 0, 1 ) );
+	show_histogram( h, 128, 1.0/32.0 );
 }
 

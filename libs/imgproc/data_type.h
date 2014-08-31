@@ -11,12 +11,12 @@ namespace imgproc
 enum class data_type
 {
 	UINT8,
-	UINT16,
-	UINT32,
-	UINT64,
 	INT8,
+	UINT16,
 	INT16,
+	UINT32,
 	INT32,
+	UINT64,
 	INT64,
 	FLOAT32,
 	FLOAT64,

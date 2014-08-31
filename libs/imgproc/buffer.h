@@ -123,6 +123,11 @@ public:
 		std::cout << std::endl;
 	}
 
+	const void *data( void ) const
+	{
+		return _data.get();
+	}
+
 private:
 	std::shared_ptr<Type> _data;
 	int64_t _offset[N], _size[N], _stride[N];
@@ -146,13 +151,13 @@ int64_t _lower( const buffer<Type,N> &b, size_t n )
 
 inline int64_t _upper( float x, size_t n )
 {
-	precondition( n == 0, "dimension too large" );
+//	precondition( n == 0, "dimension too large" );
 	return static_cast<int64_t>( x );
 }
 
 inline int64_t _lower( float x, size_t n )
 {
-	precondition( n == 0, "dimension too large" );
+//	precondition( n == 0, "dimension too large" );
 	return 0;
 }
 
