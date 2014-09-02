@@ -208,14 +208,6 @@ std::shared_ptr<expr> parser::primary_expr( void )
 			on_scope_exit { _parsing_block = prev_block; };
 			result = std::make_shared<assign_expr>( id->value(), expression() );
 		}
-		else if ( _token.type() == TOK_FOR )
-		{
-			if ( !is_loop_modifier( id->value() ) )
-				throw_runtime( "unknown loop modifier \"{0}\"", id->value() );
-			auto f = for_expr();
-			f->set_modifier( id->value() );
-			result = f;
-		}
 		else
 			result = id;
 	}
@@ -235,6 +227,27 @@ std::shared_ptr<expr> parser::primary_expr( void )
 		}
 		else
 			throw_runtime( "missing ')' to end expression" );
+	}
+	else if ( _token.type() == TOK_MOD_START )
+	{
+		next_token();
+		if ( _token.type() == TOK_IDENTIFIER )
+		{
+			std::u32string mod = _token.value();
+			next_token();
+			if ( !expect( TOK_MOD_END ) )
+				throw_runtime( "expected ']' to end modifier, got '{0}'", _token.value() );
+			if ( _token.type() == TOK_FOR )
+			{
+				auto e = for_expr();
+				e->set_modifier( mod );
+				result = e;
+			}
+			else
+				throw_runtime( "expected loop after modifier, got '{0}'", _token.value() );
+		}
+		else
+			throw_runtime( "expected identifier for modifier, got '{0}'", _token.value() );
 	}
 	else if ( _token.type() == TOK_BLOCK_START )
 		result = expr_block();

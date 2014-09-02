@@ -97,6 +97,18 @@ iterator &iterator::next( void )
 		_type = TOK_PAREN_END;
 		next_utf();
 	}
+	else if ( _c == '[' )
+	{
+		// Expression ordering
+		_type = TOK_MOD_START;
+		next_utf();
+	}
+	else if ( _c == ']' )
+	{
+		// Expression ordering
+		_type = TOK_MOD_END;
+		next_utf();
+	}
 	else if ( _c == ',' )
 	{
 		// Argument separator

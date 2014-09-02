@@ -568,11 +568,63 @@ std::string for_expr::compile( compile_context &code, std::shared_ptr<scope> &sc
 	}
 	else if ( _mod == U"max" )
 	{
-		throw_not_yet();
+		auto tmpsc = std::make_shared<scope>( sc );
+		for ( auto v: _vars )
+			tmpsc->add( v, { data_type::UINT64, 0 } );
+
+		auto t = _result->result_type( tmpsc );
+
+		std::string thetype = cpp_type( t );
+		code.line( "{0} _max = 0;", thetype );
+
+		auto newsc = std::make_shared<scope>( sc );
+		for ( int i = _vars.size() - 1; i >= 0; --i )
+		{
+			std::string exp = "for ( " + _ranges[i]->compile( code, newsc ) + " )";
+			code.line( exp, _vars[i] );
+			code.line( "{" );
+			code.indent_more();
+			newsc->add( _vars[i], { data_type::UINT64, 0 } );
+		}
+
+		code.line( "_max = std::max( _max, {0}({1}) );", thetype, result()->compile( code, newsc ) );
+
+		for ( size_t i = 0; i < _vars.size(); ++i )
+		{
+			code.indent_less();
+			code.line( "}" );
+		}
+		return "_max";
 	}
 	else if ( _mod == U"min" )
 	{
-		throw_not_yet();
+		auto tmpsc = std::make_shared<scope>( sc );
+		for ( auto v: _vars )
+			tmpsc->add( v, { data_type::UINT64, 0 } );
+
+		auto t = _result->result_type( tmpsc );
+
+		std::string thetype = cpp_type( t );
+		code.line( "{0} _min = 0;", thetype );
+
+		auto newsc = std::make_shared<scope>( sc );
+		for ( int i = _vars.size() - 1; i >= 0; --i )
+		{
+			std::string exp = "for ( " + _ranges[i]->compile( code, newsc ) + " )";
+			code.line( exp, _vars[i] );
+			code.line( "{" );
+			code.indent_more();
+			newsc->add( _vars[i], { data_type::UINT64, 0 } );
+		}
+
+		code.line( "_min = std::min( _min, {0}({1}) );", thetype, result()->compile( code, newsc ) );
+
+		for ( size_t i = 0; i < _vars.size(); ++i )
+		{
+			code.indent_less();
+			code.line( "}" );
+		}
+		return "_min";
 	}
 	else
 	{
