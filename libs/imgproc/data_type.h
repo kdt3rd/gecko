@@ -2,6 +2,7 @@
 #pragma once
 
 #include <base/contract.h>
+#include <utf/utf.h>
 
 namespace imgproc
 {
@@ -77,11 +78,16 @@ inline std::string cpp_type( const type &t )
 
 ////////////////////////////////////////
 
-inline std::string cpp_type_const_ref( const type &t )
+inline std::string cpp_type_const_ref( const type &t, const std::u32string &mod )
 {
 	std::ostringstream tmp;
 	if ( t.second > 0 )
-		tmp << "const buffer<" << t << "> &";
+	{
+		if ( mod.empty() )
+			tmp << "const buffer<" << t << "> &";
+		else
+			tmp << "const buffer_" << mod << "<" << t << "> &";
+	}
 	else
 		tmp << t.first << ' ';
 	return tmp.str();

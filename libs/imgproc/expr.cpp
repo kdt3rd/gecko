@@ -502,6 +502,8 @@ type for_expr::result_type( std::shared_ptr<scope> &sc ) const
 
 	if ( _mod.empty() )
 		return { t.first, _vars.size() };
+	else if ( _mod == U"checker" )
+		return { t.first, _vars.size() };
 	else if ( _mod == U"count" )
 		return { data_type::UINT64, 0 };
 	else if ( _mod == U"sum" )
@@ -625,6 +627,54 @@ std::string for_expr::compile( compile_context &code, std::shared_ptr<scope> &sc
 			code.line( "}" );
 		}
 		return "_min";
+	}
+	else if ( _mod == U"checker" )
+	{
+		auto t = result_type( sc );
+		std::stringstream sizes;
+		std::stringstream offsets;
+		for ( size_t i = 0; i < t.second; ++i )
+		{
+			if ( i > 0 )
+			{
+				sizes << ", ";
+				offsets << ", ";
+			}
+			code.line( "int64_t _size{0} = {1};", i, _ranges[i]->get_size( code, sc ) );
+			sizes << "_size" << i;
+			code.line( "int64_t _offset{0} = {1};", i, _ranges[i]->get_offset( code, sc ) );
+			offsets << "_offset" << i;
+		}
+		if ( sizes.str().empty() )
+			code.line( "{0} _result;", cpp_type( t ), sizes.str() );
+		else
+		{
+			code.line( "{0} _result( {1} );", cpp_type( t ), sizes.str() );
+			code.line( "_result.set_offset( {0} );", offsets.str() );
+		}
+		auto newsc = std::make_shared<scope>( sc );
+
+		std::stringstream vars;
+		for ( size_t i = _vars.size(); i > 0; --i )
+		{
+			if ( i != _vars.size() )
+				vars << ", ";
+			vars << _vars[_vars.size()-i];
+			std::string exp = "for ( " + _ranges[i-1]->compile( code, newsc ) + " )";
+			code.line( exp, _vars[i-1] );
+			code.line( "{" );
+			code.indent_more();
+			newsc->add( _vars[i-1], { data_type::UINT64, 0 } );
+		}
+
+		code.line( "_result( {0} ) = {1};", vars.str(), result()->compile( code, newsc ) );
+
+		for ( size_t i = 0; i < _vars.size(); ++i )
+		{
+			code.indent_less();
+			code.line( "}" );
+		}
+		return "_result";
 	}
 	else
 	{

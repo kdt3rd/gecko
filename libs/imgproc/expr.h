@@ -232,12 +232,13 @@ public:
 		}};
 
 		for ( auto arg: list )
-			add_arg( arg );
+			add_arg( arg, std::u32string() );
 	}
 
-	void add_arg( std::u32string a )
+	void add_arg( std::u32string a, std::u32string mod )
 	{
 		_args.push_back( std::move( a ) );
+		_mods.push_back( std::move( mod ) );
 	}
 
 	void set_result( const std::shared_ptr<expr> &r )
@@ -256,6 +257,11 @@ public:
 		return _args;
 	}
 
+	const std::vector<std::u32string> &arg_modifiers( void ) const
+	{
+		return _mods;
+	}
+
 	const std::shared_ptr<expr> result( void ) const { return _result; }
 
 	void write( std::ostream &out ) const;
@@ -263,6 +269,7 @@ public:
 private:
 	std::u32string _name;
 	std::vector<std::u32string> _args;
+	std::vector<std::u32string> _mods;
 	std::shared_ptr<expr> _result;
 };
 

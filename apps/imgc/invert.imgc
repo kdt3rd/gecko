@@ -1,0 +1,8 @@
+
+// Test function
+function test( input )
+{
+	for ( x, y: input )
+		1.0 - input( x, y )
+}
+

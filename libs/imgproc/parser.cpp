@@ -362,7 +362,7 @@ std::unique_ptr<func> parser::function( void )
 	next_token();
 
 	if ( expect( TOK_PAREN_START ) )
-		id_list( [&f]( const std::u32string &a ) { f->add_arg( a ); } );
+		arg_list( [&f]( const std::u32string &a, const std::u32string &mod ) { f->add_arg( a, mod ); } );
 	else
 		throw_runtime( "expected '(' to begin function arguments" );
 
@@ -395,6 +395,57 @@ void parser::id_list( const std::function<void(std::u32string &)> &cb )
 				throw_runtime( "expected identifier" );
 		}
 	}
+}
+
+////////////////////////////////////////
+
+void parser::arg_list( const std::function<void(std::u32string &,std::u32string &)> &cb )
+{
+	if ( arg( cb ) )
+	{
+		while ( _token.type() == TOK_COMMA )
+		{
+			next_token();
+			if ( !arg( cb ) )
+				throw_runtime( "expected identifier for argument name, got '{0}'", _token.value() );
+		}
+	}
+}
+
+////////////////////////////////////////
+
+bool parser::arg( const std::function<void(std::u32string &,std::u32string &)> &cb )
+{
+	std::u32string mod;
+	if ( _token.type() == TOK_IDENTIFIER )
+	{
+		cb( _token.value(), mod );
+		next_token();
+		return true;
+	}
+	else if ( expect( TOK_MOD_START ) )
+	{
+		if ( _token.type() == TOK_IDENTIFIER )
+		{
+			mod = _token.value();
+			next_token();
+			if ( !expect( TOK_MOD_END ) )
+				throw_runtime( "expected ']', got '{0}'", _token.value() );
+		}
+		else
+			throw_runtime( "expected modifier, got '{0}'", _token.value() );
+
+		if ( _token.type() == TOK_IDENTIFIER )
+		{
+			cb( _token.value(), mod );
+			next_token();
+		}
+		else
+			throw_runtime( "expected argument name, got '{0}'", _token.value() );
+		return true;
+	}
+
+	return false;
 }
 
 ////////////////////////////////////////

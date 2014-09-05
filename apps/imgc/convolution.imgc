@@ -1,0 +1,42 @@
+
+// Triangle filter (point sample)
+function triangle( radius )
+{
+	for ( x: floor( -radius ) to ceil( radius ) )
+		abs( 1 - x / radius );
+}
+
+// Normalize a filter
+function normalize( filter )
+{
+	sum = [sum] for ( x: filter ) filter( x );
+	for ( x: filter )
+		filter( x ) / sum
+}
+
+// X convolution
+function convolve_x( [reflect]img, filter )
+{
+	for ( x, y: img )
+		[sum] for ( i: filter ) img( x + i, y ) * filter( i )
+}
+
+// Y convolution
+function convolve_y( [reflect]img, filter )
+{
+	for ( x, y: img )
+		[sum] for ( i: filter ) img( x, y + i ) * filter( i )
+}
+
+// Separable convolve
+function separable_convolve( img, filter )
+{
+	convolve_y( convolve_x( img, filter ), filter )
+}
+
+// Example of using it
+function test( input )
+{
+	separable_convolve( input, normalize( triangle( 50 ) ) )
+}
+

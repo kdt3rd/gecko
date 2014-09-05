@@ -57,6 +57,8 @@ private:
 	std::unique_ptr<func> function( void );
 
 	void id_list( const std::function<void(std::u32string &)> &cb );
+	void arg_list( const std::function<void(std::u32string &,std::u32string &)> &cb );
+	bool arg( const std::function<void(std::u32string &,std::u32string &)> &cb );
 
 	location _previous_end;
 	iterator _token;

@@ -57,8 +57,10 @@ type cpp_generator::generate( const std::u32string &name, const std::vector<type
 	std::cout << "Generating " << name << std::endl;
 	auto f = get_function( name );
 	const auto &args = f->args();
+	const auto &mods = f->arg_modifiers();
 
 	precondition( args.size() == types.size(), "expected {0} argument types, but got {1}", args.size(), types.size() );
+	precondition( args.size() == mods.size(), "expected {0} argument modifiers, but got {1}", args.size(), mods.size() );
 
 	if ( !f->result() )
 	{
@@ -82,7 +84,7 @@ type cpp_generator::generate( const std::u32string &name, const std::vector<type
 	{
 		if ( a > 0 )
 			ar << ", ";
-		ar << cpp_type_const_ref( types[a] ) << args[a];
+		ar << cpp_type_const_ref( types[a], mods[a] ) << args[a];
 	}
 	code.line( "{0} {1}( {2} )", cpp_type( t ), name, ar.str() );
 	code.line( "{" );
