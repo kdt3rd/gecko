@@ -2,8 +2,12 @@
 Include( PNG_INCLUDE );
 
 
-local imgc = SourceFile( "convolution.imgc" )
+local imgc = {
+	SourceFile( "filters.imgc" );
+}
+
 local imgcpp = BuildFile( "test.cpp" )
+
 Run( imgc, imgcpp, BuildFile(), BinFile( "imgc" ), imgc, imgcpp )
 
 Executable( "imgc", Compile( "main.cpp" ), LinkLibs( "imgproc" ) )

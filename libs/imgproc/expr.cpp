@@ -359,16 +359,21 @@ type call_expr::result_type( std::shared_ptr<scope> &sc ) const
 
 ////////////////////////////////////////
 
-std::string call_expr::compile( compile_context &code, std::shared_ptr<scope> &scope ) const
+std::string call_expr::compile( compile_context &code, std::shared_ptr<scope> &sc ) const
 {
 	std::stringstream str;
-	str << function() << "( ";
+	auto func = sc->functions()->get( function() );
+
+	if ( func )
+		str << func->name() << "( ";
+	else
+		str << function() << "( ";
 	const auto &args = arguments();
 	for ( size_t i = 0; i < args.size(); ++i )
 	{
 		if ( i > 0 )
 			str << ", ";
-		str << args[i]->compile( code, scope );
+		str << args[i]->compile( code, sc );
 	}
 	str << " )";
 	return str.str();

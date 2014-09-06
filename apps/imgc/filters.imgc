@@ -1,0 +1,53 @@
+
+// Filter functions.
+// A filter function is an integral from 'a' to 'b'.
+// When integrated from -1 to 1, the result should be 1 (it is normalized).
+
+////////////////////////////////////////
+
+// Box function
+function box( a, b )
+{
+	sa = clamp( a, -1, 1 );
+	sb = clamp( b, -1, 1 );
+	( sb - sa ) * 0.5;
+}
+
+////////////////////////////////////////
+
+// Triangle function
+function triangle( a, b )
+{
+	ca = clamp( a, -1, 1 );
+	cb = clamp( b, -1, 1 );
+	sa = ( 2.0 - abs( ca ) ) * ca + 1;
+	sb = ( 2.0 - abs( cb ) ) * cb + 1;
+	( sb - sa ) * 0.5;
+}
+
+////////////////////////////////////////
+
+// Gaussian function
+function gaussian( a, b )
+{
+	ca = clamp( a, -1, 1 );
+	cb = clamp( b, -1, 1 );
+	sa = 0.55303064330427195028 * erf( ca * 1.17741002251547 );
+    sb = 0.55303064330427195028 * erf( cb * 1.17741002251547 );
+	sb - sa;
+}
+
+////////////////////////////////////////
+
+function test()
+{
+	for ( x: 100 )
+	{
+		x1 = ( x - 50.0 ) / 50.0;
+		x2 = ( x - 49.0 ) / 50.0;
+		gaussian( x1, x2 )
+	}
+}
+
+////////////////////////////////////////
+

@@ -9,7 +9,8 @@
 
 using namespace imgproc;
 
-buffer<float,2> test( const buffer<float,2> &input );
+//buffer<float,2> test( const buffer<float,2> &input );
+buffer<float,1> test( void );
 
 namespace
 {
@@ -37,14 +38,22 @@ std::ostream &operator<<( std::ostream &out, const buffer<float,2> &img )
 	return out;
 }
 
+std::ostream &operator<<( std::ostream &out, const buffer<float,1> &img )
+{
+	int64_t inc = img.size(0) / 64; 
+	for ( int64_t x = img.lower(0); x < img.upper(0); x += inc )
+		out << " " << x << ' ' << img(x) << '\n';
+	return out;
+}
+
 int safemain( int argc, char *argv[] )
 {
-	auto img = png_read( "/home/iangodin/Pictures/mandril.png" );
+//	auto img = png_read( "/home/iangodin/Pictures/mandril.png" );
 
-	auto histo = test( img );
+	auto result = test();
 
-	std::cout << img << std::endl;;
-	std::cout << histo << std::endl;;
+//	std::cout << img << std::endl;;
+	std::cout << result << std::endl;;
 
 	return 0;
 }

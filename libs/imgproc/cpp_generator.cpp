@@ -23,12 +23,15 @@ cpp_generator::cpp_generator( std::ostream &cpp )
 	_cpp << "#include <imgproc/buffer.h>\n";
 	_cpp << "#include <cmath>\n";
 	_cpp << "using namespace imgproc;";
+	_cpp << "float clamp( float x, float mn, float mx ) { return std::max( std::min( x, mx ), mn ); }";
 	_cpp << "\n";
 
 	// Add built-in functions
 	table->add( U"floor", std::make_shared<func>( U"std::floor", U"x" ) );
 	table->add( U"ceil", std::make_shared<func>( U"std::ceil", U"x" ) );
-	table->add( U"abs", std::make_shared<func>( U"std::abs", U"x" ) );
+	table->add( U"abs", std::make_shared<func>( U"std::fabs", U"x" ) );
+	table->add( U"erf", std::make_shared<func>( U"std::erf", U"x" ) );
+	table->add( U"clamp", std::make_shared<func>( U"clamp", U"x", U"mn", U"mx" ) );
 }
 
 ////////////////////////////////////////
