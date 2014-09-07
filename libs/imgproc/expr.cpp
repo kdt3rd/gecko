@@ -256,9 +256,9 @@ void identifier_expr::write( std::ostream &out ) const
 
 ////////////////////////////////////////
 
-type identifier_expr::result_type( std::shared_ptr<scope> &scope ) const
+type identifier_expr::result_type( std::shared_ptr<scope> &sc ) const
 {
-	return scope->get( _value ).get_type();
+	return sc->get( _value ).get_type();
 }
 
 ////////////////////////////////////////
@@ -482,9 +482,9 @@ void for_expr::write( std::ostream &out ) const
 	out << _vars.back() << ": ";
 
 	std::copy( _ranges.begin(), _ranges.end() - 1, std::ostream_iterator<std::shared_ptr<expr>>( out, ", " ) );
-	out << *(_ranges.back()) << " ) ";
-
+	out << *(_ranges.back()) << " ) { ";
 	_result->write( out );
+	out << " }";
 }
 
 ////////////////////////////////////////

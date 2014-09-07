@@ -239,7 +239,7 @@ std::shared_ptr<expr> parser::primary_expr( void )
 				throw_runtime( "expected ']' to end modifier, got '{0}'", _token.value() );
 			if ( _token.type() == TOK_FOR )
 			{
-				auto e = for_expr();
+				auto e = loop_expr();
 				e->set_modifier( mod );
 				result = e;
 			}
@@ -263,7 +263,7 @@ std::shared_ptr<expr> parser::primary_expr( void )
 		bool prev_block = _parsing_block;
 		_parsing_block = false;
 		on_scope_exit { _parsing_block = prev_block; };
-		result = for_expr();
+		result = loop_expr();
 	}
 
 	return result;
@@ -345,11 +345,11 @@ std::shared_ptr<expr> parser::expr_block( void )
 
 std::unique_ptr<func> parser::function( void )
 {
-	bool ispub = false;
+//	bool ispub = false;
 	if ( _token.type() == TOK_PUBLIC )
 	{
 		next_token();
-		ispub = true;
+//		ispub = true;
 	}
 
 	if ( _token.type() != TOK_FUNCTION )
@@ -475,7 +475,7 @@ std::shared_ptr<expr> parser::if_expr( void )
 
 ////////////////////////////////////////
 
-std::shared_ptr<range_expr> parser::for_range( void )
+std::shared_ptr<range_expr> parser::loop_range( void )
 {
 	std::shared_ptr<expr> start, end, by;
 	start = expression();
@@ -491,7 +491,7 @@ std::shared_ptr<range_expr> parser::for_range( void )
 
 ////////////////////////////////////////
 
-std::shared_ptr<for_expr> parser::for_expr( void )
+std::shared_ptr<for_expr> parser::loop_expr( void )
 {
 	if ( _token.type() != TOK_FOR )
 		throw_runtime( "expected `for'" );
@@ -514,7 +514,7 @@ std::shared_ptr<for_expr> parser::for_expr( void )
 	{
 		_parsing_range = true;
 		on_scope_exit { _parsing_range = false; };
-		result->add_range( for_range() );
+		result->add_range( loop_range() );
 	} while ( expect( TOK_COMMA ) );
 
 	if ( !expect( TOK_PAREN_END ) )
@@ -534,6 +534,9 @@ std::shared_ptr<for_expr> parser::for_expr( void )
 			result->add_range( std::make_shared<range_expr>( *result->ranges().back() ) );
 	}
 
+	bool oldassign = _parsing_assign;
+	_parsing_assign = false;
+	on_scope_exit { _parsing_assign = oldassign; };
 	result->set_result( expression() );
 	return result;
 }
