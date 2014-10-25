@@ -5,6 +5,7 @@
 #include <functional>
 
 #include "expr.h"
+#include "function.h"
 #include "token.h"
 #include "message.h"
 
@@ -16,8 +17,8 @@ namespace imgproc
 class parser
 {
 public:
-	parser( std::vector<std::shared_ptr<func>> &funcs, std::istream &in, utf::mode m = utf::UTF8 );
-	parser( std::vector<std::shared_ptr<func>> &funcs, const iterator &tok );
+	parser( std::vector<std::shared_ptr<function>> &funcs, std::istream &in, utf::mode m = utf::UTF8 );
+	parser( std::vector<std::shared_ptr<function>> &funcs, const iterator &tok );
 
 	void operator()( void );
 
@@ -50,11 +51,11 @@ private:
 	std::shared_ptr<expr> primary_expr( void );
 	std::shared_ptr<expr> expr_block( void );
 	std::shared_ptr<expr> if_expr( void );
-	std::shared_ptr<range_expr> loop_range( void );
-	std::shared_ptr<for_expr> loop_expr( void );
+	std::shared_ptr<expr> loop_range( void );
+	std::shared_ptr<expr> loop_expr( void );
 	std::vector<std::shared_ptr<expr>> arguments( void );
 	
-	std::unique_ptr<func> function( void );
+	std::unique_ptr<function> get_function( void );
 
 	void id_list( const std::function<void(std::u32string &)> &cb );
 	void arg_list( const std::function<void(std::u32string &,std::u32string &)> &cb );
@@ -62,7 +63,7 @@ private:
 
 	location _previous_end;
 	iterator _token;
-	std::vector<std::shared_ptr<func>> &_funcs;
+	std::vector<std::shared_ptr<function>> &_funcs;
 	std::vector<std::u32string> _comments;
 	std::vector<message> _messages;
 	std::map<std::shared_ptr<expr>,std::pair<location,location>> _expr_locs;

@@ -15,14 +15,14 @@ int safemain( int argc, char *argv[] )
 	precondition( argc > 2, "expected at least two argument: input(s) and output" );
 
 	std::ofstream cppout( argv[argc-1] );
-	imgproc::cpp_generator gen( cppout );
+//	imgproc::cpp_generator gen( cppout );
 
 
 	for ( int i = 1; i < argc-1; ++i )
 	{
 		std::ifstream src( argv[i] );
 
-		std::vector<std::shared_ptr<imgproc::func>> funcs;
+		std::vector<std::shared_ptr<imgproc::function>> funcs;
 		imgproc::parser parser( funcs, src );
 		parser();
 		for ( auto msg: parser.messages() )
@@ -30,12 +30,12 @@ int safemain( int argc, char *argv[] )
 		if ( parser.has_errors() )
 			throw_runtime( "ERROR: parsing {0}", argv[1] );
 		for ( auto f: funcs )
-			std::cout << "Function " << f->name() << std::endl;
-		gen.add_functions( funcs );
+			std::cout << "Function " << f->name() << ":\n" << f->result() << std::endl;
+//		gen.add_functions( funcs );
 	}
 
-	std::vector<imgproc::type> args; // { { imgproc::data_type::FLOAT32, 2 } }; 
-	gen.generate( U"test", args );
+//	std::vector<imgproc::var_type> args; // { { imgproc::data_type::FLOAT32, 2 } }; 
+//	gen.compile( gen.get_function( U"test" ), args );
 
 	return 0;
 }

@@ -109,7 +109,7 @@ int64_t infix_operator::lbp( void )
 std::shared_ptr<expr> infix_operator::left( expr_parser &parser, const std::u32string &op, const std::shared_ptr<expr> &left )
 {
 	auto right = parser.expression( _bp - ( _left_assoc ? 0 : 1 ) );
-	return std::make_shared<infix_expr>( op, left, right );
+	return std::make_shared<expr>( infix_expr( op, left, right ) );
 }
 
 ////////////////////////////////////////
@@ -131,7 +131,7 @@ int64_t prefix_operator::lbp( void )
 std::shared_ptr<expr> prefix_operator::right( expr_parser &parser, const std::u32string &op )
 {
 	auto operand = parser.expression( _bp );
-	return std::make_shared<prefix_expr>( op, operand );
+	return std::make_shared<expr>( prefix_expr( op, operand ) );
 }
 
 ////////////////////////////////////////
@@ -152,7 +152,7 @@ int64_t postfix_operator::lbp( void )
 
 std::shared_ptr<expr> postfix_operator::left( expr_parser &parser, const std::u32string &op, const std::shared_ptr<expr> &left )
 {
-	return std::make_shared<postfix_expr>( op, left );
+	return std::make_shared<expr>( postfix_expr( op, left ) );
 }
 
 ////////////////////////////////////////
@@ -174,7 +174,7 @@ int64_t dualfix_operator::lbp( void )
 std::shared_ptr<expr> dualfix_operator::left( expr_parser &parser, const std::u32string &op, const std::shared_ptr<expr> &left )
 {
 	auto right = parser.expression( _in_bp );
-	return std::make_shared<infix_expr>( op, left, right );
+	return std::make_shared<expr>( infix_expr( op, left, right ) );
 }
 
 ////////////////////////////////////////
@@ -182,7 +182,7 @@ std::shared_ptr<expr> dualfix_operator::left( expr_parser &parser, const std::u3
 std::shared_ptr<expr> dualfix_operator::right( expr_parser &parser, const std::u32string &op )
 {
 	auto operand = parser.expression( _pre_bp );
-	return std::make_shared<prefix_expr>( op, operand );
+	return std::make_shared<expr>( prefix_expr( op, operand ) );
 }
 
 ////////////////////////////////////////
@@ -198,7 +198,7 @@ std::shared_ptr<expr> circumfix_operator::right( expr_parser &parser, const std:
 {
 	auto operand = parser.expression();
 	parser.match( _close );
-	return std::make_shared<circumfix_expr>( op, _close, operand );
+	return std::make_shared<expr>( circumfix_expr( op, _close, operand ) );
 }
 
 ////////////////////////////////////////
@@ -221,7 +221,7 @@ std::shared_ptr<expr> postcircumfix_operator::left( expr_parser &parser, const s
 {
 	auto right = parser.expression();
 	parser.match( _close );
-	return std::make_shared<postcircumfix_expr>( op, _close, left, right );
+	return std::make_shared<expr>( postcircumfix_expr( op, _close, left, right ) );
 }
 
 ////////////////////////////////////////

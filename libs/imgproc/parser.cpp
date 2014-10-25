@@ -15,7 +15,7 @@ namespace imgproc
 
 ////////////////////////////////////////
 
-parser::parser( std::vector<std::shared_ptr<func>> &funcs, std::istream &in, utf::mode m )
+parser::parser( std::vector<std::shared_ptr<function>> &funcs, std::istream &in, utf::mode m )
 	: _token( in, m ), _funcs( funcs )
 {
 	next_token();
@@ -23,7 +23,7 @@ parser::parser( std::vector<std::shared_ptr<func>> &funcs, std::istream &in, utf
 
 ////////////////////////////////////////
 
-parser::parser( std::vector<std::shared_ptr<func>> &funcs, const iterator &tok )
+parser::parser( std::vector<std::shared_ptr<function>> &funcs, const iterator &tok )
 	: _token( tok ), _funcs( funcs )
 {
 	next_token();
@@ -37,7 +37,7 @@ void parser::operator()( void )
 	{
 		try
 		{
-			std::shared_ptr<func> f( function().release() );
+			std::shared_ptr<function> f( get_function().release() );
 			if ( f )
 				_funcs.push_back( f );
 		}
@@ -167,7 +167,7 @@ void parser::comments( void )
 
 std::shared_ptr<expr> parser::expression( void )
 {
-	if ( _token.type() == TOK_FOR || _token.type() == TOK_IF || _token.type() == TOK_BLOCK_START )
+	if ( _token.type() == TOK_FOR || _token.type() == TOK_IF || _token.type() == TOK_BLOCK_START || _token.type() == TOK_LAMBDA )
 		return primary_expr();
 
 	expr_parser eparser( _token, [&]() { return this->primary_expr(); } );
@@ -179,37 +179,46 @@ std::shared_ptr<expr> parser::expression( void )
 
 std::shared_ptr<expr> parser::primary_expr( void )
 {
-	std::shared_ptr<expr> result;
+	auto result = std::make_shared<expr>();
 
 	if ( _token.type() == TOK_NUMBER )
 	{
-		result = std::make_shared<number_expr>( _token.value() );
+		result->set<number_expr>( _token.value() );
 		next_token();
 	}
 	else if ( _token.type() == TOK_IDENTIFIER )
 	{
-		auto id = std::make_shared<identifier_expr>( _token.value() );
+		identifier_expr id( _token.value() );
 		next_token();
 		if ( _token.type() == TOK_PAREN_START )
 		{
-			result = std::make_shared<call_expr>( id->value(), std::move( arguments() ) );
+			result->set<call_expr>( id.value(), std::move( arguments() ) );
 		}
-		else if ( _token.type() == TOK_ASSIGN )
+		else if ( _token.type() == TOK_OPERATOR && _token.value()[0] == '=' )
 		{
-			next_token();
-			if ( !_parsing_block )
-				throw_runtime( "assignments can only be in blocks" );
-			if ( _parsing_assign )
-				throw_runtime( "double assignment" );
-			_parsing_assign = true;
-			on_scope_exit { _parsing_assign = false; };
-			bool prev_block = _parsing_block;
-			_parsing_block = false;
-			on_scope_exit { _parsing_block = prev_block; };
-			result = std::make_shared<assign_expr>( id->value(), expression() );
+			std::u32string op = _token.value();
+			while ( !op.empty() && operators.find( op ) == operators.end() )
+				op.pop_back();
+
+			if ( op.empty() )
+			{
+				next_token();
+				if ( !_parsing_block )
+					throw_runtime( "assignments can only be in blocks" );
+				if ( _parsing_assign )
+					throw_runtime( "double assignment" );
+				_parsing_assign = true;
+				on_scope_exit { _parsing_assign = false; };
+				bool prev_block = _parsing_block;
+				_parsing_block = false;
+				on_scope_exit { _parsing_block = prev_block; };
+				result->set<assign_expr>( id.value(), expression() );
+			}
+			else
+				result->set<identifier_expr>( id );
 		}
 		else
-			result = id;
+			result->set<identifier_expr>( id );
 	}
 	else if ( _token.type() == TOK_PAREN_START )
 	{
@@ -239,9 +248,8 @@ std::shared_ptr<expr> parser::primary_expr( void )
 				throw_runtime( "expected ']' to end modifier, got '{0}'", _token.value() );
 			if ( _token.type() == TOK_FOR )
 			{
-				auto e = loop_expr();
-				e->set_modifier( mod );
-				result = e;
+				result = loop_expr();
+				result->get<for_expr>().add_modifier( mod );
 			}
 			else
 				throw_runtime( "expected loop after modifier, got '{0}'", _token.value() );
@@ -264,6 +272,11 @@ std::shared_ptr<expr> parser::primary_expr( void )
 		_parsing_block = false;
 		on_scope_exit { _parsing_block = prev_block; };
 		result = loop_expr();
+	}
+	else if ( _token.type() == TOK_LAMBDA )
+	{
+		auto f = std::shared_ptr<function>( get_function().release() );
+		result = std::make_shared<expr>( lambda_expr( f ) );
 	}
 
 	return result;
@@ -317,23 +330,22 @@ std::shared_ptr<expr> parser::expr_block( void )
 		throw_runtime( "block with no expressions" );
 
 	std::shared_ptr<expr> last = list.back();
-	auto a = std::dynamic_pointer_cast<assign_expr>( last );
-	if ( a )
+	if ( last->is<assign_expr>() )
 	{
-		auto loc = _expr_locs[a];
+		auto loc = _expr_locs[last];
 		throw_runtime( "last expression in block cannot be an assignment (starting at {0})", loc.first );
 	}
 	list.pop_back();
 
 	while ( !list.empty() )
 	{
-		auto a = std::dynamic_pointer_cast<assign_expr>( list.back() );
-		if ( !a )
+		auto &a = list.back();
+		if ( !a->is<assign_expr>() )
 		{
-			auto loc = _expr_locs[list.back()];
+			auto loc = _expr_locs[a];
 			throw_runtime( "expected assignment (starting at {0})", loc.first );
 		}
-		a->set_next( last );
+		a->get<assign_expr>().set_next( last );
 		last = a;
 		list.pop_back();
 	}
@@ -343,7 +355,7 @@ std::shared_ptr<expr> parser::expr_block( void )
 
 ////////////////////////////////////////
 
-std::unique_ptr<func> parser::function( void )
+std::unique_ptr<function> parser::get_function( void )
 {
 //	bool ispub = false;
 	if ( _token.type() == TOK_PUBLIC )
@@ -352,13 +364,20 @@ std::unique_ptr<func> parser::function( void )
 //		ispub = true;
 	}
 
-	if ( _token.type() != TOK_FUNCTION )
+	if ( _token.type() == TOK_FUNCTION )
+	{
+		next_token();
+		if ( _token.type() != TOK_IDENTIFIER )
+			throw_runtime( "expected function name, got '{0}'", _token.value() );
+	}
+	else if ( _token.type() != TOK_LAMBDA )
 		throw_runtime( "expected `function', got '{0}'", _token.value() );
-	next_token();
 
-	if ( _token.type() != TOK_IDENTIFIER )
-		throw_runtime( "expected function name, got '{0}'", _token.value() );
-	std::unique_ptr<func> f( new func( _token.value() ) );
+	std::unique_ptr<function> f;
+	if ( _token.type() != TOK_LAMBDA )
+		f.reset( new function( _token.value() ) );
+	else
+		f.reset( new function );
 	next_token();
 
 	if ( expect( TOK_PAREN_START ) )
@@ -456,26 +475,27 @@ std::shared_ptr<expr> parser::if_expr( void )
 		throw_runtime( "expected `if', got '{0}'", _token.value() );
 	next_token();
 
-	auto result = std::make_shared<imgproc::if_expr>();
-
 	if ( !expect( TOK_PAREN_START ) )
 		throw_runtime( "expected '(' to start 'if' condition, got '{0}'", _token.value() );
-	result->set_condition( expression() );
+	auto cond = expression();
 	if ( !expect( TOK_PAREN_END ) )
 		throw_runtime( "expected ')' to end 'if' condition, got '{0}'", _token.value() );
 
-	result->set_result( expression() );
+	auto wtrue = expression();
+	decltype(wtrue) wfalse;
 	if ( _token.type() == TOK_ELSE )
 	{
 		next_token();
-		result->set_else( expression() );
+		wfalse = expression();
 	}
-	return result;
+
+	imgproc::if_expr result( cond, wtrue, wfalse );
+	return std::make_shared<expr>( std::move( result ) );
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<range_expr> parser::loop_range( void )
+std::shared_ptr<expr> parser::loop_range( void )
 {
 	std::shared_ptr<expr> start, end, by;
 	start = expression();
@@ -486,25 +506,25 @@ std::shared_ptr<range_expr> parser::loop_range( void )
 			by = expression();
 	}
 
-	return std::make_shared<range_expr>( start, end, by );
+	return std::make_shared<expr>( range_expr( start, end, by ) );
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<for_expr> parser::loop_expr( void )
+std::shared_ptr<expr> parser::loop_expr( void )
 {
 	if ( _token.type() != TOK_FOR )
 		throw_runtime( "expected `for'" );
 	next_token();
 
-	auto result = std::make_shared<imgproc::for_expr>();
+	for_expr result;
 
 	if ( !expect( TOK_PAREN_START ) )
 		throw_runtime( "expected `(' after 'for', got '{0}'", _token.value() );
 
-	id_list( [&result]( const std::u32string &a ) { result->add_variable( a ); } );
+	id_list( [&result]( const std::u32string &a ) { result.add_variable( a ); } );
 
-	if ( result->variables().empty() )
+	if ( result.variables().empty() )
 		throw_runtime( "for loop variable(s) missing" );
 
 	if ( !expect( TOK_SEPARATOR ) )
@@ -514,31 +534,32 @@ std::shared_ptr<for_expr> parser::loop_expr( void )
 	{
 		_parsing_range = true;
 		on_scope_exit { _parsing_range = false; };
-		result->add_range( loop_range() );
+		result.add_range( std::move( loop_range()->get<range_expr>() ) );
 	} while ( expect( TOK_COMMA ) );
 
 	if ( !expect( TOK_PAREN_END ) )
 		throw_runtime( "expected ')', got '{0}'", _token.value() );
 
-	if ( result->ranges().empty() )
+	if ( result.ranges().empty() )
 		throw_runtime( "no range(s) specified for loop" );
 
-	if ( result->ranges().size() > 1 )
+	if ( result.ranges().size() > 1 )
 	{
-		if ( result->variables().size() != result->ranges().size() )
-			throw_runtime( "expected {0} ranges, got {1}", result->variables().size(), result->ranges().size() );
+		if ( result.variables().size() != result.ranges().size() )
+			throw_runtime( "expected {0} ranges, got {1}", result.variables().size(), result.ranges().size() );
 	}
 	else
 	{
-		while ( result->ranges().size() < result->variables().size() )
-			result->add_range( std::make_shared<range_expr>( *result->ranges().back() ) );
+		while ( result.ranges().size() < result.variables().size() )
+			result.add_range( range_expr( result.ranges().back() ) );
 	}
 
 	bool oldassign = _parsing_assign;
 	_parsing_assign = false;
 	on_scope_exit { _parsing_assign = oldassign; };
-	result->set_result( expression() );
-	return result;
+	result.set_result( expression() );
+
+	return std::make_shared<expr>( std::move( result ) );
 }
 
 ////////////////////////////////////////

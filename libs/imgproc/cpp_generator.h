@@ -19,19 +19,20 @@ class cpp_generator
 public:
 	cpp_generator( std::ostream &cpp );
 
-	void add_functions( const std::vector<std::shared_ptr<func>> &funcs );
+	void add_functions( const std::vector<std::shared_ptr<function>> &funcs );
 
-	type generate( const std::u32string &name, const std::vector<type> &args );
+	var_type compile( const std::shared_ptr<function> &f, const std::vector<var_type> &args );
+
+	std::shared_ptr<function> get_function( const std::u32string &name );
 
 private:
-	std::shared_ptr<func> get_function( const std::u32string &name );
 
-	type result_type( const std::shared_ptr<expr> &e, const std::shared_ptr<scope> &scope );
+	var_type result_type( const std::shared_ptr<expr> &e, const std::shared_ptr<scope> &sc );
 
 	std::ostream &_cpp;
-	std::shared_ptr<scope> _globals = std::make_shared<scope>();
+	std::shared_ptr<scope> _globals;
 
-	std::map<std::pair<std::u32string,std::vector<type>>,type> _compiled;
+	std::map<std::pair<std::u32string,std::vector<var_type>>,var_type> _compiled;
 };
 
 ////////////////////////////////////////

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iostream>
+#include <iterator> 
 #include <sstream>
 #include <tuple>
 #include <stdexcept>
@@ -164,6 +165,56 @@ std::basic_ostream<CharT> &operator<<( std::basic_ostream<CharT> &out, const for
 
 	return out;
 }
+
+////////////////////////////////////////
+
+template <class T, class charT=char, class traits=std::char_traits<charT> > 
+class infix_ostream_iterator : public std::iterator<std::output_iterator_tag,void,void,void,void> 
+{ 
+public: 
+	typedef charT char_type; 
+	typedef traits traits_type; 
+	typedef std::basic_ostream<charT,traits> ostream_type; 
+
+	infix_ostream_iterator( ostream_type &s ) 
+		: _first_elem( true ), _os( s ), _delimiter( 0 )
+	{
+	} 
+
+	infix_ostream_iterator( ostream_type &s, const charT *d ) 
+		: _first_elem( true ), _os( s ), _delimiter( d )
+	{
+	} 
+
+	infix_ostream_iterator<T,charT,traits> &operator=( const T &item ) 
+	{ 
+		if ( !_first_elem && _delimiter != 0 ) 
+			_os << _delimiter; 
+		_os << item; 
+		_first_elem = false; 
+		return *this; 
+	} 
+
+	infix_ostream_iterator<T,charT,traits> &operator*( void )
+	{ 
+		return *this; 
+	} 
+
+	infix_ostream_iterator<T,charT,traits> &operator++( void )
+	{ 
+		return *this; 
+	} 
+
+	infix_ostream_iterator<T,charT,traits> &operator++( int )
+	{ 
+		return *this; 
+	} 
+
+private:
+	bool _first_elem; 
+	std::basic_ostream<charT,traits> &_os; 
+	charT const *_delimiter; 
+};
 
 ////////////////////////////////////////
 

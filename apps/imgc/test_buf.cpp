@@ -55,6 +55,12 @@ int safemain( int argc, char *argv[] )
 //	std::cout << img << std::endl;;
 	std::cout << result << std::endl;;
 
+	float sum = 0.F;
+	for ( int64_t i = result.lower( 0 ); i < result.upper( 0 ); ++i )
+		sum += result( i );
+
+	std::cerr << "Sum = " << sum << std::endl;
+
 	return 0;
 }
 

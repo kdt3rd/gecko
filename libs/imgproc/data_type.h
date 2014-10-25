@@ -9,48 +9,107 @@ namespace imgproc
 
 ////////////////////////////////////////
 
-enum class data_type
+enum class pod_type
 {
-	UINT8,
+	BOOLEAN,
 	INT8,
-	UINT16,
+	UINT8,
 	INT16,
-	UINT32,
+	UINT16,
 	INT32,
-	UINT64,
+	UINT32,
 	INT64,
+	UINT64,
 	FLOAT32,
 	FLOAT64,
+	FUNCTION,
 	UNKNOWN,
 };
 
 ////////////////////////////////////////
 
-typedef std::pair<data_type,size_t> type;
+class var_type
+{
+public:
+	var_type( void )
+		: _type( pod_type::UNKNOWN ), _dims( 0 )
+	{
+	}
+
+	var_type( pod_type t, size_t d )
+		: _type( t ), _dims( d )
+	{
+	}
+
+	pod_type base_type( void ) const { return _type; }
+	size_t dimensions( void ) const { return _dims; }
+
+	bool operator==( const var_type &o ) const
+	{
+		return _type == o._type && _dims == o._dims;
+	}
+
+	bool operator!=( const var_type &o ) const
+	{
+		return _type != o._type || _dims != o._dims;
+	}
+
+	bool operator<( const var_type &o ) const
+	{
+		if ( _type < o._type )
+			return true;
+		else if ( _type == o._type )
+			return _dims < o._dims;
+		return false;
+	}
+
+private:
+	pod_type _type;
+	size_t _dims;
+};
 
 ////////////////////////////////////////
 
-inline std::string type_name( data_type t )
+inline pod_type merge( pod_type t1, pod_type t2 )
+{
+	// If both type match, all done
+	if ( t1 == t2 )
+		return t1;
+
+	if ( t1 == pod_type::FUNCTION || t2 == pod_type::FUNCTION )
+		throw_runtime( "cannot combine function types" );
+
+	// Ensure t1 is the "greater" type
+	if ( t1 < t2 )
+		return t2;
+
+	return t1;
+}
+
+////////////////////////////////////////
+
+inline std::string type_name( pod_type t )
 {
 	switch ( t )
 	{
-		case data_type::UINT8: return "uint8_t";
-		case data_type::UINT16: return "uint16_t";
-		case data_type::UINT32: return "uint32_t";
-		case data_type::UINT64: return "uint64_t";
-		case data_type::INT8: return "int8_t";
-		case data_type::INT16: return "int16_t";
-		case data_type::INT32: return "int32_t";
-		case data_type::INT64: return "int64_t";
-		case data_type::FLOAT32: return "float";
-		case data_type::FLOAT64: return "double";
+		case pod_type::UINT8: return "uint8";
+		case pod_type::UINT16: return "uint16";
+		case pod_type::UINT32: return "uint32";
+		case pod_type::UINT64: return "uint64";
+		case pod_type::INT8: return "int8";
+		case pod_type::INT16: return "int16";
+		case pod_type::INT32: return "int32";
+		case pod_type::INT64: return "int64";
+		case pod_type::FLOAT32: return "float";
+		case pod_type::FLOAT64: return "double";
+		case pod_type::FUNCTION: return "std::function";
 		default: throw_logic( "unknown data type" );
 	}
 }
 
 ////////////////////////////////////////
 
-inline std::ostream &operator<<( std::ostream &out, data_type t )
+inline std::ostream &operator<<( std::ostream &out, pod_type t )
 {
 	out << type_name( t );
 	return out;
@@ -58,30 +117,32 @@ inline std::ostream &operator<<( std::ostream &out, data_type t )
 
 ////////////////////////////////////////
 
-inline std::ostream &operator<<( std::ostream &out, const type &t )
+inline std::ostream &operator<<( std::ostream &out, const var_type &t )
 {
-	out << type_name( t.first ) << ',' << t.second;
+	out << type_name( t.base_type() );
+	if ( t.dimensions() > 0 )
+		out << 'x' << t.dimensions();
 	return out;
 }
 
 ////////////////////////////////////////
 
-inline std::string cpp_type( const type &t )
+inline std::string cpp_type( const var_type &t )
 {
 	std::ostringstream tmp;
-	if ( t.second > 0 )
+	if ( t.dimensions() > 0 )
 		tmp << "buffer<" << t << '>';
 	else
-		tmp << t.first;
+		tmp << t.base_type();
 	return tmp.str();
 }
 
 ////////////////////////////////////////
 
-inline std::string cpp_type_const_ref( const type &t, const std::u32string &mod )
+inline std::string cpp_type_const_ref( const var_type &t, const std::u32string &mod )
 {
 	std::ostringstream tmp;
-	if ( t.second > 0 )
+	if ( t.dimensions() > 0 )
 	{
 		if ( mod.empty() )
 			tmp << "const buffer<" << t << "> &";
@@ -89,7 +150,7 @@ inline std::string cpp_type_const_ref( const type &t, const std::u32string &mod 
 			tmp << "const buffer_" << mod << "<" << t << "> &";
 	}
 	else
-		tmp << t.first << ' ';
+		tmp << t.base_type() << ' ';
 	return tmp.str();
 }
 

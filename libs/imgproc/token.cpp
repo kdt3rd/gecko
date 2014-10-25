@@ -17,6 +17,7 @@ namespace
 		{ U"else", imgproc::TOK_ELSE },
 		{ U"to", imgproc::TOK_TO },
 		{ U"by", imgproc::TOK_BY },
+		{ U"lambda", imgproc::TOK_LAMBDA },
 	};
 
 	const std::set<char32_t> special =
@@ -125,12 +126,6 @@ iterator &iterator::next( void )
 	{
 		// Separator
 		_type = TOK_SEPARATOR;
-		next_utf();
-	}
-	else if ( _c == '=' )
-	{
-		// Assignment separator
-		_type = TOK_ASSIGN;
 		next_utf();
 	}
 	else if ( _c == '\"' )
@@ -556,7 +551,6 @@ const char *token_name( token_type t )
 {
 	switch ( t )
 	{
-		case TOK_ASSIGN:         return "assign";
 		case TOK_BLOCK_END:      return "block end";
 		case TOK_BLOCK_START:    return "block start";
 		case TOK_CHARACTER:      return "character";
@@ -573,6 +567,7 @@ const char *token_name( token_type t )
 		case TOK_IF:
 		case TOK_ELSE:
 		case TOK_FUNCTION:
+		case TOK_LAMBDA:
 		case TOK_TO:
 		case TOK_BY:
 		case TOK_FOR:            return "keyword";

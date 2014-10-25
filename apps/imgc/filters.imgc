@@ -39,13 +39,70 @@ function gaussian( a, b )
 
 ////////////////////////////////////////
 
+// Generate a Lanczos N function
+function lanczos( N )
+{
+	lambda( x )
+	{
+        if ( x == 0 )
+			1
+		else
+		{
+			t = x * pi * N; 
+			s * sin( t ) / t * ( sin( t / s ) / ( t / s ) )
+		}
+	}
+}
+
+////////////////////////////////////////
+
+// Lanczos 2 function
+function lanczos2( a, b )
+{
+	ca = clamp( a, -1, 1 );
+	cb = clamp( b, -1, 1 );
+	gaussian_quadrature( lanczos( 2 ), ca, cb );
+}
+
+////////////////////////////////////////
+
+// Lanczos 3 function
+function lanczos3( a, b )
+{
+	ca = clamp( a, -1, 1 );
+	cb = clamp( b, -1, 1 );
+	gaussian_quadrature( lanczos( 3 ), ca, cb );
+}
+
+////////////////////////////////////////
+
+// Lanczos 5 function
+function lanczos5( a, b )
+{
+	ca = clamp( a, -1, 1 );
+	cb = clamp( b, -1, 1 );
+	gaussian_quadrature( lanczos( 5 ), ca, cb );
+}
+
+////////////////////////////////////////
+
+// Lanczos 7 function
+function lanczos7( a, b )
+{
+	ca = clamp( a, -1, 1 );
+	cb = clamp( b, -1, 1 );
+	gaussian_quadrature( lanczos( 7 ), ca, cb );
+}
+
+////////////////////////////////////////
+
 function test()
 {
 	for ( x: 100 )
 	{
 		x1 = ( x - 50.0 ) / 50.0;
 		x2 = ( x - 49.0 ) / 50.0;
-		gaussian( x1, x2 )
+		lanczos2( x1, x2 )
 	}
 }
 

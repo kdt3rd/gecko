@@ -30,7 +30,6 @@ enum token_type
 	TOK_EXPRESSION_END,
 	TOK_STRING,
 	TOK_OPERATOR,
-	TOK_ASSIGN,
 	TOK_IF,
 	TOK_FOR,
 	TOK_PUBLIC,
@@ -38,6 +37,7 @@ enum token_type
 	TOK_ELSE,
 	TOK_TO,
 	TOK_BY,
+	TOK_LAMBDA,
 	TOK_UNKNOWN,
 };
 
