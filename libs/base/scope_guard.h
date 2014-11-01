@@ -48,6 +48,12 @@ private:
 	bool _active;
 };
 
+template<class function>
+scope_guard<function> make_guard( function f )
+{
+	return std::move( scope_guard<function>( f ) );
+}
+
 namespace detail
 {
 	enum class scope_guardOnExit {};

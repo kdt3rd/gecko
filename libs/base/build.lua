@@ -13,6 +13,7 @@ srcs = {
 	"pack.cpp";
 	"sha256.cpp";
 	"backtrace.cpp";
+	"cmd_line.cpp";
 }
 
 Library( "base", Compile( srcs ) );

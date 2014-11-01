@@ -1,5 +1,6 @@
 
 --Executable( "test_layout", Compile( "test_layout.cpp" ), LinkLibs( "layout", platform ) )
+Executable( "test_cmdline", Compile( "test_cmdline.cpp" ), LinkLibs( "base" ) )
 Executable( "test_format", Compile( "test_format.cpp" ), LinkLibs( "base", "utf" ) )
 Executable( "test_exception", Compile( "test_exception.cpp" ), LinkLibs( "base", "utf" ) )
 Executable( "test_signal", Compile( "test_signal.cpp" ), LinkLibs( "base" ) )
