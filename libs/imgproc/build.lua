@@ -12,6 +12,7 @@ local srcs =
 	"type.cpp";
 	"unifier.cpp";
 	"environment.cpp";
+	"decl.cpp";
 }
 
 Library( "imgproc", Compile( srcs ), LinkLibs( "utf", "base" ) );

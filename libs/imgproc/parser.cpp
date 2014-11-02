@@ -31,7 +31,7 @@ parser::parser( std::vector<std::shared_ptr<function>> &funcs, const iterator &t
 
 ////////////////////////////////////////
 
-void parser::operator()( void )
+void parser::parse( void )
 {
 	while ( _token )
 	{

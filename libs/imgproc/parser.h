@@ -17,10 +17,10 @@ namespace imgproc
 class parser
 {
 public:
-	parser( std::vector<std::shared_ptr<function>> &funcs, std::istream &in, utf::mode m = utf::UTF8 );
+	parser( std::vector<std::shared_ptr<function>> &funcs, std::istream &in, utf::mode = utf::UTF8 );
 	parser( std::vector<std::shared_ptr<function>> &funcs, const iterator &tok );
 
-	void operator()( void );
+	void parse( void );
 
 	bool has_messages( void ) const { return !_messages.empty(); }
 	bool has_errors( void ) const { return _has_errors; }

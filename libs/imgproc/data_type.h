@@ -92,6 +92,7 @@ inline std::string type_name( pod_type t )
 {
 	switch ( t )
 	{
+		case pod_type::BOOLEAN: return "bool";
 		case pod_type::UINT8: return "uint8";
 		case pod_type::UINT16: return "uint16";
 		case pod_type::UINT32: return "uint32";
@@ -102,9 +103,28 @@ inline std::string type_name( pod_type t )
 		case pod_type::INT64: return "int64";
 		case pod_type::FLOAT32: return "float";
 		case pod_type::FLOAT64: return "double";
-		case pod_type::FUNCTION: return "std::function";
+		case pod_type::FUNCTION: return "function";
 		default: throw_logic( "unknown data type" );
 	}
+}
+
+////////////////////////////////////////
+
+inline pod_type type_enum( const std::u32string &t )
+{
+	if ( t == U"bool" ) return pod_type::BOOLEAN;
+	if ( t == U"uint8" ) return pod_type::UINT8;
+	if ( t == U"uint16" ) return pod_type::UINT16;
+	if ( t == U"uint32" ) return pod_type::UINT32;
+	if ( t == U"uint64" ) return pod_type::UINT64;
+	if ( t == U"int8" ) return pod_type::INT8;
+	if ( t == U"int16" ) return pod_type::INT16;
+	if ( t == U"int32" ) return pod_type::INT32;
+	if ( t == U"int64" ) return pod_type::INT64;
+	if ( t == U"float" ) return pod_type::FLOAT32;
+	if ( t == U"double" ) return pod_type::FLOAT64;
+	if ( t == U"function" ) return pod_type::FUNCTION;
+	return pod_type::UNKNOWN;
 }
 
 ////////////////////////////////////////
