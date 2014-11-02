@@ -1,9 +1,12 @@
 
 #include <base/contract.h>
+#include <base/cmd_line.h>
+#include <base/scope_guard.h>
 #include <fstream>
 #include <imgproc/token.h>
 #include <imgproc/parser.h>
 #include <imgproc/cpp_generator.h>
+#include <imgproc/decl.h>
 #include <map>
 #include <memory>
 
@@ -12,30 +15,52 @@ namespace
 
 int safemain( int argc, char *argv[] )
 {
-	precondition( argc > 2, "expected at least two argument: input(s) and output" );
+	base::cmd_line options( argv[0],
+		base::cmd_line::option( 'h', "help", "",       base::cmd_line::arg<0>, "Print help message and exit", false ),
+		base::cmd_line::option( 'p', "path", "<path>", base::cmd_line::multi,  "Include path", true ),
+		base::cmd_line::option(  0,  "",     "<func>", base::cmd_line::args,   "Test file", true )
+	);
 
-	std::ofstream cppout( argv[argc-1] );
-//	imgproc::cpp_generator gen( cppout );
-
-
-	for ( int i = 1; i < argc-1; ++i )
+	auto option_error = base::make_guard( [&]()
 	{
-		std::ifstream src( argv[i] );
+		std::cerr << options << std::endl;
+	} );
 
-		std::vector<std::shared_ptr<imgproc::function>> funcs;
-		imgproc::parser parser( funcs, src );
-		parser();
-		for ( auto msg: parser.messages() )
-			std::cout << msg << std::endl;
-		if ( parser.has_errors() )
-			throw_runtime( "ERROR: parsing {0}", argv[1] );
-		for ( auto f: funcs )
-			std::cout << "Function " << f->name() << ":\n" << f->result() << std::endl;
-//		gen.add_functions( funcs );
+	options.parse( argc, argv );
+
+	option_error.dismiss();
+
+	if ( options["help"] )
+	{
+		std::cerr << options << std::endl;
+		return 0;
 	}
 
-//	std::vector<imgproc::var_type> args; // { { imgproc::data_type::FLOAT32, 2 } }; 
-//	gen.compile( gen.get_function( U"test" ), args );
+	std::vector<std::shared_ptr<imgproc::function>> funcs;
+	for ( auto &path: options["path"].values() )
+	{
+		std::ifstream src( path );
+		imgproc::parser parser( funcs, src );
+
+		parser.parse();
+		for ( auto msg: parser.messages() )
+			std::cout << msg << std::endl;
+
+		if ( parser.has_errors() )
+			throw_runtime( "ERROR: parsing {0}", path );
+	}
+
+//	for ( auto f: funcs )
+//		std::cout << "Function " << f->name() << ":\n" << f->result() << std::endl;
+
+	for ( auto &func: options["<func>"].values() )
+	{
+		std::stringstream str( func );
+		imgproc::decl d;
+		imgproc::iterator tok( str );
+		d.parse( tok );
+		std::cout << "Compiling: " << d << std::endl;
+	}
 
 	return 0;
 }
