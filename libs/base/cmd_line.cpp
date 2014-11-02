@@ -200,6 +200,23 @@ cmd_line::simple_usage( void ) const
 ////////////////////////////////////////
 
 bool
+cmd_line::multi( option &opt, size_t &idx, const std::vector<std::string> &args )
+{
+	if ( !opt.is_non_option() )
+		++idx;
+
+	if ( idx >= args.size() || args[idx].find( '-' ) == 0 )
+		throw_runtime( "option '{0}' expected at least 1 value", opt.name() );
+
+	opt.add_value( args[idx] );
+	++idx;
+
+	return true;
+}
+
+////////////////////////////////////////
+
+bool
 cmd_line::args( option &opt, size_t &idx, const std::vector<std::string> &args )
 {
 	if ( !opt.is_non_option() )

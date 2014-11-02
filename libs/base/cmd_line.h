@@ -230,6 +230,7 @@ public:
 	}
 
 	static bool args( option &opt, size_t &idx, const std::vector<std::string> &args );
+	static bool multi( option &opt, size_t &idx, const std::vector<std::string> &args );
 	static bool counted( option &opt, size_t &idx, const std::vector<std::string> &args );
 
 private:
