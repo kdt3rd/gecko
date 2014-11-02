@@ -9,38 +9,45 @@ namespace
 
 int safemain( int argc, char *argv[] )
 {
-	base::cmd_line options(
-		base::cmd_line::option( 'h', "help",  "",              base::cmd_line::opt_none, "Print help message and exit" ),
-		base::cmd_line::option( 0,   "file",  "<file>",        base::cmd_line::opt_one,  "File to show" ),
-		base::cmd_line::option( 'l', "",      "<log>",         base::cmd_line::opt_one,  "Log files" ),
-		base::cmd_line::option( 'f', "frame", "<start> <end>", base::cmd_line::opt<2>,  "Frame range" ),
-		base::cmd_line::option( 0,   "",      "<file>",        base::cmd_line::opt_one,  "Test file" ),
-		base::cmd_line::option( 0,   "",      "<file> ...",    base::cmd_line::opt_many, "List of files to show" )
+	base::cmd_line options( argv[0],
+		base::cmd_line::option( 'h', "help",  "",              base::cmd_line::arg<0>,   "Print help message and exit", false ),
+		base::cmd_line::option(  0,  "file",  "<file>",        base::cmd_line::arg<1>,   "File to show", false ),
+		base::cmd_line::option( 'l', "",      "[<log>]",       base::cmd_line::arg<0,1>, "Log files", false ),
+		base::cmd_line::option( 'v', "",      "",              base::cmd_line::counted,  "Verbose (can be specified many times)", false ),
+		base::cmd_line::option( 'r', "range", "<start> <end>", base::cmd_line::arg<2>,   "Frame range", false ),
+		base::cmd_line::option(  0,  "",      "<arg>",         base::cmd_line::arg<1>,   "Test file", true ),
+		base::cmd_line::option(  0,  "",      "<file> ...",    base::cmd_line::args,     "List of files to show", true )
 	);
 
-	auto errhandler = base::make_guard( [&]() { std::cerr << "Usage:\n" << options; } );
+	auto errhandler = base::make_guard( [&]() { std::cerr << options << std::endl; } );
 
 	options.parse( argc, argv );
 
-	if ( options[0] )
+	if ( options["help"] )
+	{
 		std::cout << "Help!\n" << options << std::endl;
+		errhandler.dismiss();
+	}
 
-	if ( options[1] )
-		std::cout << "File: " << options[1].value() << std::endl;
+	if ( auto &opt = options["file"] )
+		std::cout << "File: " << opt.value() << std::endl;
 
-	if ( options[2] )
-		std::cout << "Log:  " << options[2].value() << std::endl;
+	if ( auto &opt = options["l"] )
+		std::cout << "Log:  " << ( opt.count() == 1 ? options[2].value() : "" ) << std::endl;
 
-	if ( options[3] )
-		std::cout << "Frame: " << options[3].values().at(0) << '-' << options[3].values().at(1) << std::endl;
+	if ( auto &opt = options["v"] )
+		std::cout << "Verbose:" << opt.count() << std::endl;
 
-	if ( options[4] )
-		std::cout << "List: " << options[4].value() << std::endl;
+	if ( auto &opt = options["range"] )
+		std::cout << "Range:" << opt.values().at(0) << '-' << options[4].values().at(1) << std::endl;
 
-	if ( options[5] )
+	if ( auto &opt = options["<arg>"] )
+		std::cout << "Arg:  " << opt.value() << std::endl;
+
+	if ( auto &opt = options["<file> ..."] )
 	{
 		std::cout << "List:\n";
-		for ( auto &v: options[5].values() )
+		for ( auto &v: opt.values() )
 			std::cout << "  " << v << '\n';
 	}
 

@@ -4,6 +4,7 @@
 #include <functional>
 #include <vector>
 #include <string>
+#include <limits>
 #include "contract.h"
 
 namespace base
@@ -19,8 +20,8 @@ public:
 	public:
 		typedef std::function<bool(option&,size_t&,const std::vector<std::string>&)> callback;
 
-		option( char s, const char *l, const char *a, const callback &c, const char *msg );
-		option( char s, const std::string &l, const std::string &a, const callback &c, const std::string &msg );
+		option( char s, const char *l, const char *a, const callback &c, const char *msg, bool required = false );
+		option( char s, const std::string &l, const std::string &a, const callback &c, const std::string &msg, bool required = false );
 
 		const std::string &long_name( void ) const
 		{
@@ -32,19 +33,9 @@ public:
 			return _short;
 		}
 
-		std::string name( void ) const
-		{
-			if ( _long.empty() )
-			{
-				if ( _short )
-					return std::string( &_short, 1 );
-				return std::string( "<unnamed>" );
-			}
-			return _long;
+		std::string name( void ) const;
 
-		}
-
-		const std::string &args( void ) const
+		const std::string &args_help( void ) const
 		{
 			return _args;
 		}
@@ -70,9 +61,19 @@ public:
 			return _values;
 		}
 
+		size_t count( void ) const
+		{
+			return _values.size();
+		}
+
 		void set( void )
 		{
 			_has_value = true;
+		}
+
+		bool required( void ) const
+		{
+			return _required;
 		}
 
 		void set_value( const std::string &v )
@@ -106,17 +107,21 @@ public:
 		callback _callback;
 		char _short = '\0';
 		bool _has_value = false;
+		bool _required = false;
 	};
 
 	template<typename Range>
-	cmd_line( const Range &opts )
-		: _options( std::begin( opts ), std::end( opts ) )
+	cmd_line( const char *prog, const Range &opts )
+		: _program( prog ), _options( std::begin( opts ), std::end( opts ) )
 	{
+		precondition( prog != nullptr, "null program name" );
 	}
 
 	template<typename ...Opts>
-	cmd_line( const option &o, Opts ...opts )
+	cmd_line( const char *prog, const option &o, Opts ...opts )
+		: _program( prog )
 	{
+		precondition( prog != nullptr, "null program name" );
 		add( o, opts... );
 	}
 
@@ -142,6 +147,9 @@ public:
 		return _options.at( idx );
 	}
 
+	const option &operator[]( const char *n ) const;
+	option &operator[]( const char *n );
+
 	size_t size( void ) const
 	{
 		return _options.size();
@@ -155,19 +163,21 @@ public:
 	void parse( int argc, char *argv[] );
 	void parse( const std::vector<std::string> &opts );
 
-	static bool opt_none( option &opt, size_t &idx, const std::vector<std::string> &args );
-	static bool opt_one( option &opt, size_t &idx, const std::vector<std::string> &args );
-	static bool opt_optional( option &opt, size_t &idx, const std::vector<std::string> &args );
-	static bool opt_many( option &opt, size_t &idx, const std::vector<std::string> &args );
+	std::string simple_usage( void ) const;
 
 	template<size_t n>
-	static bool opt( option &opt, size_t &idx, const std::vector<std::string> &args )
+	static bool arg( option &opt, size_t &idx, const std::vector<std::string> &args )
 	{
 		if ( opt )
-			throw_runtime( "option '{0}' already specified", opt.name() );
+			return false;
+
 		if ( !opt.is_non_option() )
 			++idx;
-		for ( size_t i = 0; i < n; ++i )
+
+		if ( n == 0 )
+			opt.set();
+
+		for ( size_t i = opt.count(); i < n; ++i )
 		{
 			if ( idx < args.size() )
 			{
@@ -182,7 +192,48 @@ public:
 		return true;
 	}
 
+	template<size_t a,size_t b>
+	static bool arg( option &opt, size_t &idx, const std::vector<std::string> &args )
+	{
+		static_assert( a < b, "invalid argument range" );
+		if ( opt )
+			throw_runtime( "option '{0}' already specified", opt.name() );
+
+		if ( !opt.is_non_option() )
+			++idx;
+
+		if ( a == 0 )
+			opt.set();
+
+		for ( size_t i = 0; i < b; ++i )
+		{
+			if ( idx < args.size() )
+			{
+				if ( args[idx].find( '-' ) == 0 )
+				{
+					if ( i < a )
+						throw_runtime( "option '{0}' needs at least {1} values (got {2})", opt.name(), a, i );
+					break;
+				}
+				opt.add_value( args[idx] );
+				++idx;
+			}
+			else
+			{
+				if ( i < a )
+					throw_runtime( "option '{0}' needs at least {1} values (got {2})", opt.name(), a, i );
+				break;
+			}
+		}
+
+		return true;
+	}
+
+	static bool args( option &opt, size_t &idx, const std::vector<std::string> &args );
+	static bool counted( option &opt, size_t &idx, const std::vector<std::string> &args );
+
 private:
+	std::string _program;
 	std::vector<option> _options;
 };
 
