@@ -77,19 +77,31 @@ namespace utf
 		iterator( std::istream &str, mode m = UTF8 );
 
 		/// @brief Get current Unicde code point
-		inline char32_t operator *() const { return _value; }
+		inline char32_t operator *() const
+		{
+			return _value;
+		}
 
 		/// @brief Move to the next code point
 		iterator &operator++();
 
 		/// @brief Is the iterator valid
-		inline operator bool() const { return (bool)_stream; }
+		inline operator bool() const
+		{
+			return (bool)_stream;
+		}
 
 		/// @brief The current line number
-		inline size_t line_number( void ) const { return _line; }
+		inline size_t line_number( void ) const
+		{
+			return _line;
+		}
 
 		/// @brief The current code point within the line
-		inline size_t char_number( void ) const { return _char; }
+		inline size_t char_number( void ) const
+		{
+			return _char;
+		}
 
 	private:
 		mode _mode = UTF8;
