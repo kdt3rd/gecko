@@ -78,6 +78,6 @@ namespace utf
 	double number_value( char32_t cp );
 
 	/// @brief The integer value of a number character
-	int64_t integer_value( char32_t cp );
+	uint64_t integer_value( char32_t cp );
 }
 

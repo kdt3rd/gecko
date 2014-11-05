@@ -140,12 +140,12 @@ std::map<std::string,double> numberValues
 	{ "3/5", 3.0/5.0 },
 	{ "3/8", 3.0/8.0 },
 	{ "4/5", 4.0/5.0 },
-	{ "5/2", -1 },
-	{ "5/6", -1 },
-	{ "5/8", -1 },
-	{ "7/2", -1 },
-	{ "7/8", -1 },
-	{ "9/2", -1 }
+	{ "5/2", 5.0/2.0 },
+	{ "5/6", 5.0/6.0 },
+	{ "5/8", 5.0/8.0 },
+	{ "7/2", 7.0/2.0 },
+	{ "7/8", 7.0/8.0 },
+	{ "9/2", 9.0/2.0 }
 };
 
 ////////////////////////////////////////
@@ -592,7 +592,7 @@ int safemain( int argc, char *argv[] )
 	// Create arrays of numerical values
 	std::vector<uint8_t> valueidx( maxcp, 0 );
 	std::vector<double> doubleVals( 1, std::numeric_limits<double>::quiet_NaN() );
-	std::vector<int64_t> intVals( 1, std::numeric_limits<int64_t>::max() );
+	std::vector<uint64_t> intVals( 1, std::numeric_limits<uint64_t>::max() );
 	for ( size_t i = 0; i < maxcp; ++i )
 	{
 		if ( !std::isnan( nvalue[i] ) )
@@ -608,16 +608,16 @@ int safemain( int argc, char *argv[] )
 			{
 				doubleVals.push_back( v );
 
-				if ( v >= std::numeric_limits<int64_t>::lowest() && v < std::numeric_limits<uint64_t>::max() )
+				if ( v >= std::numeric_limits<uint64_t>::lowest() && v < std::numeric_limits<uint64_t>::max() )
 				{
-					int64_t iv = static_cast<int64_t>( v );
+					uint64_t iv = static_cast<uint64_t>( v );
 					if ( Equal<double>::test( v, double(iv) ) )
 						intVals.push_back( iv );
 					else
-						intVals.push_back( std::numeric_limits<int64_t>::max() );
+						intVals.push_back( std::numeric_limits<uint64_t>::max() );
 				}
 				else
-					intVals.push_back( std::numeric_limits<int64_t>::max() );
+					intVals.push_back( std::numeric_limits<uint64_t>::max() );
 			}
 
 			valueidx[i] = static_cast<uint8_t>( f );
@@ -756,9 +756,9 @@ int safemain( int argc, char *argv[] )
 		for ( size_t i = 1; i < doubleVals.size(); ++i )
 			out << ", " << doubleVals[i];
 		out << "};\n";
-		out << "int64_t ivalues[] = { " << std::numeric_limits<int64_t>::max();
+		out << "uint64_t ivalues[] = { " << std::numeric_limits<uint64_t>::max() << 'U';
 		for ( size_t i = 1; i < intVals.size(); ++i )
-			out << ", " << intVals[i];
+			out << ", " << intVals[i] << 'U';
 		out << "};\n";
 
 		out << "double number_value( char32_t cp )\n";
@@ -766,7 +766,7 @@ int safemain( int argc, char *argv[] )
 		out << "\treturn dvalues[ get_value( cp ) ];\n";
 		out << "}\n";
 
-		out << "int64_t integer_value( char32_t cp )\n";
+		out << "uint64_t integer_value( char32_t cp )\n";
 		out << "{\n";
 		out << "\treturn ivalues[ get_value( cp ) ];\n";
 		out << "}\n";
