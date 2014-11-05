@@ -21,7 +21,8 @@ enum token_type
 	TOK_COMMA,
 	TOK_COMMENT,
 	TOK_IDENTIFIER,
-	TOK_NUMBER,
+	TOK_INTEGER,
+	TOK_FLOATING,
 	TOK_PAREN_END,
 	TOK_PAREN_START,
 	TOK_MOD_END,
@@ -48,12 +49,40 @@ class iterator
 public:
 	iterator( std::istream &str, utf::mode m = utf::UTF8 );
 
-	token_type type( void ) const { return _type; }
+	token_type type( void ) const
+	{
+		return _type;
+	}
 
-	size_t size( void ) const { return _value.size(); }
-	const std::u32string &value( void ) const { return _value; }
-	std::u32string &value( void ) { return _value; }
-	const std::u32string &whitespace( void ) const { return _whitespace; }
+	size_t size( void ) const
+	{
+		return _value.size();
+	}
+
+	const std::u32string &value( void ) const
+	{
+		return _value;
+	}
+
+	std::u32string &value( void )
+	{
+		return _value;
+	}
+
+	const std::u32string &whitespace( void ) const
+	{
+		return _whitespace;
+	}
+
+	uint64_t integer( void ) const
+	{
+		return _ival;
+	}
+
+	double floating( void ) const
+	{
+		return _fval;
+	}
 
 	iterator &next( void );
 	bool split( const std::u32string &s );
@@ -84,7 +113,9 @@ private:
 	location _end;
 	utf::iterator _utf;
 	char32_t _c = 0;
-	token_type _type;
+	double _fval = 0;
+	uint64_t _ival = 0;
+	token_type _type = TOK_UNKNOWN;
 	std::u32string _whitespace;
 	std::u32string _value;
 	std::u32string _next;

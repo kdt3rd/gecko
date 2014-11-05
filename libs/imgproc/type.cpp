@@ -77,6 +77,13 @@ std::string type_operator::name( void ) const
 
 ////////////////////////////////////////
 
+void type_operator::add( type t )
+{
+	_types.emplace_back( std::move( t ) );
+}
+
+////////////////////////////////////////
+
 std::ostream &operator<<( std::ostream &out, const type &t )
 {
 	printer p( out );

@@ -56,6 +56,11 @@ private:
 class type_operator
 {
 public:
+	type_operator( void )
+		: _type( pod_type::UNKNOWN, 0 )
+	{
+	}
+
 	type_operator( const var_type &t )
 		: _type( t )
 	{
@@ -109,6 +114,8 @@ public:
 	}
 
 	std::string name( void ) const;
+
+	void add( type t );
 
 private:
 	var_type _type;

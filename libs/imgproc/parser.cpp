@@ -181,9 +181,14 @@ std::shared_ptr<expr> parser::primary_expr( void )
 {
 	auto result = std::make_shared<expr>();
 
-	if ( _token.type() == TOK_NUMBER )
+	if ( _token.type() == TOK_INTEGER )
 	{
-		result->set<number_expr>( _token.value() );
+		result->set<integer_expr>( _token.value(), _token.integer() );
+		next_token();
+	}
+	else if ( _token.type() == TOK_FLOATING )
+	{
+		result->set<floating_expr>( _token.value(), _token.floating() );
 		next_token();
 	}
 	else if ( _token.type() == TOK_IDENTIFIER )

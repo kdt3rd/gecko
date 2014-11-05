@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "data_type.h"
+#include "type.h"
 #include "token.h"
 #include <vector>
 
@@ -27,9 +27,9 @@ public:
 		_name = std::move( n );
 	}
 
-	void add_arg( var_type t )
+	void add_arg( type_operator t )
 	{
-		_args.emplace_back( t );
+		_type.add( t );
 	}
 
 	const std::u32string &name( void ) const
@@ -37,16 +37,16 @@ public:
 		return _name;
 	}
 
-	const std::vector<var_type> &args( void ) const
+	const type_operator &type( void ) const
 	{
-		return _args;
+		return _type;
 	}
 
 	void parse( iterator &token );
 
 private:
 	std::u32string _name;
-	std::vector<var_type> _args;
+	type_operator _type;
 };
 
 ////////////////////////////////////////

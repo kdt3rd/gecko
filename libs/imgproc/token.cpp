@@ -51,13 +51,6 @@ iterator::iterator( std::istream &str, utf::mode m )
 
 iterator &iterator::next( void )
 {
-	if ( !_next.empty() )
-	{
-		_value.swap( _next );
-		_next.clear();
-		return *this;
-	}
-
 	_type = TOK_UNKNOWN;
 	_value.clear();
 
@@ -170,13 +163,11 @@ iterator &iterator::next( void )
 
 bool iterator::split( const std::u32string &s )
 {
-	precondition( _next.empty(), "cannot split multiple times" );
-	precondition( !s.empty(), "cannot split nothing" );
-
-	if ( _value.compare( 0, s.size(), s ) == 0 )
+	size_t n = s.size();
+	if ( _value.compare( 0, n, s ) == 0 )
 	{
-		_next = _value.substr( s.size() );
-		_value.resize( s.size() );
+		_next.insert( 0, _value.substr( n ) );
+		_value.resize( n );
 		return true;
 	}
 
@@ -187,10 +178,11 @@ bool iterator::split( const std::u32string &s )
 
 bool iterator::split( const char32_t *s )
 {
+	precondition( s != nullptr, "null string" );
 	size_t n = std::char_traits<char32_t>::length( s );
 	if ( _value.compare( 0, n, s ) == 0 )
 	{
-		_next = _value.substr( n );
+		_next.insert( 0, _value.substr( n ) );
 		_value.resize( n );
 		return true;
 	}
@@ -202,11 +194,10 @@ bool iterator::split( const char32_t *s )
 
 bool iterator::split( size_t n )
 {
-	precondition( _next.empty(), "cannot split multiple times" );
 	if ( n >= _value.size() )
 		return false;
 
-	_next = _value.substr( n );
+	_next.insert( 0, _value.substr( n ) );
 	_value.resize( n );
 	return true;
 }
@@ -226,6 +217,19 @@ void iterator::parse_operator( void )
 	_type = TOK_OPERATOR;
 	while ( utf::is_pattern_syntax( _c ) && special.find( _c ) == special.end() )
 		next_utf();
+
+	// Deal with '.' starting a number
+	if ( utf::is_number( _c ) )
+	{
+		if ( _value == U"." )
+			parse_decimal();
+		else if ( _value.back() == '.' )
+		{
+			_next.insert( 0, 1, _c );
+			_c = '.';
+			_value.pop_back();
+		}
+	}
 }
 
 ////////////////////////////////////////
@@ -335,10 +339,8 @@ void iterator::parse_char( void )
 
 void iterator::parse_number( void )
 {
-	// Parse a decimal number
-	int64_t v = utf::integer_value( _c );
-	
-	if ( v == 0 )
+	_ival = utf::integer_value( _c );
+	if ( _ival == 0 )
 	{
 		next_utf();
 		// Number with different bases
@@ -350,12 +352,13 @@ void iterator::parse_number( void )
 				next_utf();
 				while ( utf::is_number_decimal( _c ) )
 				{
-					v = utf::integer_value( _c );
-					if ( v < 0 || v > 1 )
-						break;;
+					uint64_t v = utf::integer_value( _c );
+					if ( v > 1 )
+						throw_runtime( "expected binary digit" );
+					_ival = ( _ival << 1 ) + v;
 					next_utf();
 				}
-				_type = TOK_NUMBER;
+				_type = TOK_INTEGER;
 				break;
 
 			case 'c':
@@ -364,12 +367,13 @@ void iterator::parse_number( void )
 				next_utf();
 				while ( utf::is_number_decimal( _c ) )
 				{
-					v = utf::integer_value( _c );
-					if ( v < 0 || v > 7 )
-						break;
+					uint64_t v = utf::integer_value( _c );
+					if ( v > 7 )
+						throw_runtime( "expected octal digit" );
+					_ival = ( _ival << 3 ) + v;
 					next_utf();
 				}
-				_type = TOK_NUMBER;
+				_type = TOK_INTEGER;
 				break;
 
 			case 'x':
@@ -377,28 +381,25 @@ void iterator::parse_number( void )
 				// Hexadecimal number
 				next_utf();
 				while ( utf::is_hex_digit( _c ) )
+				{
+					uint64_t v = utf::integer_value( _c );
+					_ival = ( _ival << 4 ) + v;
 					next_utf();
-				_type = TOK_NUMBER;
+				}
+				_type = TOK_INTEGER;
 				break;
 
 			default:
-				// Unknown base...
 				if ( utf::is_number( _c ) )
-				{
-					// Numbers shouldn't start with 0 without a base...
-					while ( utf::is_number( *_utf ) )
-						next_utf();
-					_type = TOK_UNKNOWN;
-				}
+					// Unknown base...
+					throw_runtime( "0 should be followed by a base letter" );
 				else
-				{
 					// else it's just a 0 by itself, which is okay... continue as a decimal
 					parse_decimal();
-				}
 				break;
 		}
 	}
-	else if ( v > 0 )
+	else if ( _ival > 0 )
 		parse_decimal();
 }
 
@@ -406,25 +407,71 @@ void iterator::parse_number( void )
 
 void iterator::parse_decimal( void )
 {
+	std::string tmp;
+	_type = TOK_INTEGER;
+
+	if ( _value == U"." )
+	{
+		tmp.push_back( '.' );
+		_type = TOK_FLOATING;
+	}
+
 	while ( utf::is_number_decimal( _c ) )
+	{
+		tmp.push_back( '0' + utf::integer_value( _c ) );
 		next_utf();
+	}
 
 	if ( _c == '.' )
 	{
+		tmp.push_back( '.' );
 		next_utf();
 		while ( utf::is_number_decimal( _c ) )
+		{
+			tmp.push_back( '0' + utf::integer_value( _c ) );
 			next_utf();
+		}
+		_type = TOK_FLOATING;
 	}
 
 	if ( _c == 'e' || _c == 'E' )
 	{
+		tmp.push_back( 'e' );
 		next_utf();
-		if ( _c == '-' || _c == '+' )
+		if ( _c == '-' )
+		{
+			tmp.push_back( '-' );
 			next_utf();
+		}
+		if ( _c == '+' )
+		{
+			tmp.push_back( '+' );
+			next_utf();
+		}
 		while ( utf::is_number_decimal( _c ) )
+		{
+			tmp.push_back( '0' + utf::integer_value( _c ) );
 			next_utf();
+		}
+		_type = TOK_FLOATING;
 	}
-	_type = TOK_NUMBER;
+
+	if ( tmp.empty() )
+		tmp.push_back( '0' );
+	if ( _type == TOK_INTEGER )
+	{
+		size_t pos = 0;
+		_ival = std::stoull( tmp, &pos );
+		if ( pos != tmp.size() )
+			throw_runtime( "could not parse floating point number: {0}", tmp );
+	}
+	else if ( _type == TOK_FLOATING )
+	{
+		size_t pos = 0;
+		_fval = std::stod( tmp, &pos );
+		if ( pos != tmp.size() )
+			throw_runtime( "could not parse floating point number: {0}", tmp );
+	}
 }
 
 ////////////////////////////////////////
@@ -517,8 +564,16 @@ void iterator::parse_escape( void )
 void iterator::next_utf( void )
 {
 	_value += _c;
-	++_utf;
-	_c = *_utf;
+	if ( _next.empty() )
+	{
+		++_utf;
+		_c = *_utf;
+	}
+	else
+	{
+		_c = _next.front();
+		_next.erase( 0, 1 );
+	}
 }
 
 ////////////////////////////////////////
@@ -534,6 +589,10 @@ void iterator::skip_utf( void )
 std::ostream &operator<<( std::ostream &out, const iterator &i )
 {
 	out << i.type() << ' ' << i.value();
+	if ( i.type() == TOK_INTEGER )
+		out << ' ' << i.integer();
+	else if ( i.type() == TOK_FLOATING )
+		out << ' ' << i.floating();
 	return out;
 }
 
@@ -557,7 +616,8 @@ const char *token_name( token_type t )
 		case TOK_COMMA:          return "comma";
 		case TOK_COMMENT:        return "comment";
 		case TOK_IDENTIFIER:     return "identifier";
-		case TOK_NUMBER:         return "number";
+		case TOK_INTEGER:        return "integer";
+		case TOK_FLOATING:       return "floating";
 		case TOK_PAREN_END:      return "paren end";
 		case TOK_PAREN_START:    return "paren open";
 		case TOK_EXPRESSION_END: return "expr end";

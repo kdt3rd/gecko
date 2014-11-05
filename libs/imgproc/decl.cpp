@@ -49,7 +49,7 @@ decl::parse( iterator &token )
 			token.next();
 		}
 
-		_args.emplace_back( pt, dims );
+		_type.add( type_operator( pt, dims ) );
 	}
 
 	if ( token.type() != TOK_PAREN_END )
@@ -63,13 +63,14 @@ std::ostream &operator<<( std::ostream &out, const decl &d )
 {
 	bool first = true;
 	out << d.name() << '(';
-	for ( const auto &a: d.args() )
+	for ( const auto &a: d.type() )
 	{
 		if ( !first )
 			out << ',';
 		first = false;
-		out << a.base_type();
-		switch ( a.dimensions() )
+		out << a;
+		/*
+		switch ( a )
 		{
 			case 0: break;
 			case 1: out << "(x)"; break;
@@ -78,6 +79,7 @@ std::ostream &operator<<( std::ostream &out, const decl &d )
 			case 4: out << "(x,y,z,w)"; break;
 			default: out << "(...)"; break;
 		}
+		*/
 	}
 	out << ')';
 	return out;

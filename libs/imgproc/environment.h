@@ -25,7 +25,13 @@ public:
 		return _env[n];
 	}
 
-	type operator()( const number_expr &e )
+	type operator()( const integer_expr &e )
+	{
+		// TODO pick the "minimum" type possible
+		return type_operator( pod_type::INT64, 0 );
+	}
+
+	type operator()( const floating_expr &e )
 	{
 		// TODO pick the "minimum" type possible
 		return type_operator( pod_type::FLOAT32, 0 );

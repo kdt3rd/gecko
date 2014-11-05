@@ -43,7 +43,12 @@ public:
 		_out << '(' << e.expression1() << e.open() << e.expression2() << e.close() << ')';
 	}
 
-	void operator()( const number_expr &e )
+	void operator()( const integer_expr &e )
+	{
+		_out << e.value();
+	}
+
+	void operator()( const floating_expr &e )
 	{
 		_out << e.value();
 	}
@@ -156,9 +161,14 @@ public:
 		return std::make_shared<expr>( postcircumfix_expr( e ) );
 	}
 
-	std::shared_ptr<expr> operator()( const number_expr &e )
+	std::shared_ptr<expr> operator()( const integer_expr &e )
 	{
-		return std::make_shared<expr>( number_expr( e ) );
+		return std::make_shared<expr>( integer_expr( e ) );
+	}
+
+	std::shared_ptr<expr> operator()( const floating_expr &e )
+	{
+		return std::make_shared<expr>( floating_expr( e ) );
 	}
 
 	std::shared_ptr<expr> operator()( const identifier_expr &e )

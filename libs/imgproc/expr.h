@@ -21,11 +21,11 @@ class function;
 
 ////////////////////////////////////////
 
-class number_expr
+class integer_expr
 {
 public:
-	number_expr( std::u32string t )
-		: _value( t )
+	integer_expr( std::u32string t, uint64_t v )
+		: _value( t ), _i( v )
 	{
 	}
 
@@ -34,8 +34,39 @@ public:
 		return _value;
 	}
 
+	uint64_t integer( void ) const
+	{
+		return _i;
+	}
+
 protected:
 	std::u32string _value;
+	uint64_t _i;
+};
+
+////////////////////////////////////////
+
+class floating_expr
+{
+public:
+	floating_expr( std::u32string t, double v )
+		: _value( t ), _f( v )
+	{
+	}
+
+	const std::u32string &value( void ) const
+	{
+		return _value;
+	}
+
+	double floating( void ) const
+	{
+		return _f;
+	}
+
+protected:
+	std::u32string _value;
+	double _f;
 };
 
 ////////////////////////////////////////
@@ -418,7 +449,8 @@ class expr : public base::variant<
 	infix_expr,
 	circumfix_expr,
 	postcircumfix_expr,
-	number_expr,
+	integer_expr,
+	floating_expr,
 	identifier_expr,
 	call_expr,
 	if_expr,

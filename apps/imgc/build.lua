@@ -14,4 +14,5 @@ local imgcpp = BuildFile( "test.cpp" )
 Executable( "imgc", Compile( "main.cpp" ), LinkLibs( "imgproc" ) )
 --Executable( "test_buf", Compile( "test_buf.cpp", "png_reader.cpp", imgcpp ), LinkLibs( "imgproc" ), LinkSys( PNG_LIBS ) )
 Executable( "test_new", Compile( "newtest.cpp" ), LinkLibs( "imgproc" ) )
+Executable( "test_token", Compile( "test_token.cpp" ), LinkLibs( "imgproc" ) )
 
