@@ -114,6 +114,16 @@ public:
 		return _types.empty();
 	}
 
+	size_t size( void ) const
+	{
+		return _types.size();
+	}
+
+	const type &at( size_t i ) const
+	{
+		return _types.at( i );
+	}
+
 	pod_type base_type( void ) const
 	{
 		return _type.base_type();

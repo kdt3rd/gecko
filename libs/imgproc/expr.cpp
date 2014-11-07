@@ -201,7 +201,7 @@ public:
 
 	std::shared_ptr<expr> operator()( const assign_expr &e )
 	{
-		throw_not_yet();
+		return std::make_shared<expr>( assign_expr( e.variable(), e.expression()->clone(), e.next()->clone() ) );
 	}
 
 	std::shared_ptr<expr> operator()( const lambda_expr &e )

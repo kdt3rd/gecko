@@ -29,6 +29,41 @@ enum class pod_type
 
 ////////////////////////////////////////
 
+inline bool is_signed( pod_type t )
+{
+	switch ( t )
+	{
+		case pod_type::INT8:
+		case pod_type::INT16:
+		case pod_type::INT32:
+		case pod_type::INT64:
+			return true;
+
+		default:
+			return false;
+	}
+}
+
+////////////////////////////////////////
+
+inline bool is_unsigned( pod_type t )
+{
+	switch ( t )
+	{
+		case pod_type::UINT8:
+		case pod_type::UINT16:
+		case pod_type::UINT32:
+		case pod_type::UINT64:
+			return true;
+
+		default:
+			return false;
+	}
+
+}
+
+////////////////////////////////////////
+
 class var_type
 {
 public:

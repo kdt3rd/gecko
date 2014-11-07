@@ -46,7 +46,7 @@ public:
 		add_constraint( range.begin(), range.end() );
 	}
 
-	type get( const type_variable &tv );
+	type get( const type &tv );
 
 	void unify( void );
 

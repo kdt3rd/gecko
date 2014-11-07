@@ -106,6 +106,165 @@ private:
 
 ////////////////////////////////////////
 
+type environment::operator()( const integer_expr &e )
+{
+	uint64_t v = e.integer();
+
+	if ( v <= std::numeric_limits<uint8_t>::max() )
+		return type_operator( pod_type::UINT8, 0 );
+
+	if ( v <= std::numeric_limits<uint16_t>::max() )
+		return type_operator( pod_type::UINT16, 0 );
+
+	if ( v <= std::numeric_limits<uint32_t>::max() )
+		return type_operator( pod_type::UINT32, 0 );
+
+	return type_operator( pod_type::UINT64, 0 );
+}
+
+////////////////////////////////////////
+
+type environment::operator()( const floating_expr &e )
+{
+	// TODO when should we use FLOAT32?
+	return type_operator( pod_type::FLOAT64, 0 );
+}
+
+////////////////////////////////////////
+
+type environment::operator()( const identifier_expr &e )
+{
+	auto i = _env.find( e.value() );
+	if ( i == _env.end() )
+		throw_runtime( "undefined symbol {0}", e.value() );
+	return i->second;
+}
+
+////////////////////////////////////////
+
+type environment::operator()( const prefix_expr &e )
+{
+	type result = new_type();
+	auto t = visit( e.expression() );
+	_unify.add_constraint( result, t );
+	return result;
+}
+
+////////////////////////////////////////
+
+type environment::operator()( const postfix_expr &e )
+{
+	type result = new_type();
+	auto t = visit( e.expression() );
+	_unify.add_constraint( result, t );
+	return result;
+}
+
+////////////////////////////////////////
+
+type environment::operator()( const infix_expr &e )
+{
+	type result = new_type();
+	auto t1 = visit( e.expression1() );
+	auto t2 = visit( e.expression2() );
+
+	_unify.unify();
+	t1 = _unify.get( t1 );
+	t2 = _unify.get( t2 );
+
+	_unify.add_constraint( result, join( t1.get<type_operator>(), t2.get<type_operator>() ) );
+	return result;
+}
+
+////////////////////////////////////////
+
+type environment::operator()( const circumfix_expr &e )
+{
+	return visit( e.expression() );
+	type result = new_type();
+	auto t = visit( e.expression() );
+	_unify.add_constraint( result, t );
+	return result;
+}
+
+////////////////////////////////////////
+
+type environment::operator()( const postcircumfix_expr &e )
+{
+	type result = new_type();
+	auto t1 = visit( e.expression1() );
+	auto t2 = visit( e.expression2() );
+	_unify.add_constraint( result, t2 );
+	_unify.add_constraint( result, t1 );
+	return result;
+}
+
+////////////////////////////////////////
+
+type environment::operator()( const call_expr &e )
+{
+	throw_not_yet();
+}
+
+////////////////////////////////////////
+
+type environment::operator()( const if_expr &e )
+{
+	type result = new_type();
+	auto c = visit( e.condition() );
+	_unify.add_constraint( c, type_operator( pod_type::BOOLEAN, 0 ) );
+
+	auto e1 = visit( e.when_true() );
+	auto e2 = visit( e.when_false() );
+	_unify.add_constraint( result, e1 );
+	_unify.add_constraint( result, e2 );
+
+	return result;
+}
+
+////////////////////////////////////////
+
+type environment::operator()( const range_expr &e )
+{
+	return type_operator( pod_type::INT64, 0 );
+}
+
+////////////////////////////////////////
+
+type environment::operator()( const for_expr &e )
+{
+	auto t = visit( e.result() );
+
+	// TODO
+	throw_not_yet();
+}
+
+////////////////////////////////////////
+
+type environment::operator()( const assign_expr &e )
+{
+	auto t = visit( e.expression() );
+	_unify.unify();
+	t = _unify.get( t );
+
+	if ( _env.find( e.variable() ) != _env.end() )
+		throw_runtime( "variable {0} already defined", e.variable() );
+
+	_env[e.variable()] = t;
+
+	return visit( e.next() );
+}
+
+////////////////////////////////////////
+
+type environment::operator()( const lambda_expr &e )
+{
+	// TODO
+	throw_not_yet();
+}
+
+////////////////////////////////////////
+
 void environment::unify( std::shared_ptr<expr> &e )
 {
 	_unify.unify();
@@ -120,6 +279,70 @@ type environment::visit( const std::shared_ptr<expr> &e )
 	auto t = base::visit<type>( *this, *e );
 	e->set_type( std::move( t ) );
 	return e->get_type();
+}
+
+////////////////////////////////////////
+
+type environment::join( const type_operator &t1, const type_operator &t2 )
+{
+	if ( t1.base_type() > t2.base_type() )
+		return join( t2, t1 );
+
+	precondition( t1.dimensions() == t2.dimensions(), "cannot join {0} and {1}", t1, t2 );
+
+	if ( t1.base_type() == t2.base_type() )
+		return t1;
+
+	switch ( t2.base_type() )
+	{
+		case pod_type::UINT8:
+			if ( is_unsigned( t1.base_type() ) )
+				return t2;
+			else if ( is_signed( t1.base_type() ) )
+				return type_operator( pod_type::INT8, t1.dimensions() );
+			break;
+
+		case pod_type::UINT16:
+			if ( is_unsigned( t1.base_type() ) )
+				return t2;
+			else if ( is_signed( t1.base_type() ) )
+				return type_operator( pod_type::INT16, t1.dimensions() );
+			break;
+
+		case pod_type::UINT32:
+			if ( is_unsigned( t1.base_type() ) )
+				return t2;
+			else if ( is_signed( t1.base_type() ) )
+				return type_operator( pod_type::INT32, t1.dimensions() );
+			break;
+
+		case pod_type::UINT64:
+			if ( is_unsigned( t1.base_type() ) )
+				return t2;
+			else if ( is_signed( t1.base_type() ) )
+				return type_operator( pod_type::INT64, t1.dimensions() );
+			break;
+
+		case pod_type::INT8:
+		case pod_type::INT16:
+		case pod_type::INT32:
+		case pod_type::INT64:
+			if ( is_signed( t1.base_type() ) || is_unsigned( t1.base_type() ) )
+				return t2;
+			break;
+
+		case pod_type::FLOAT16:
+		case pod_type::FLOAT32:
+		case pod_type::FLOAT64:
+			if ( is_signed( t1.base_type() ) || is_unsigned( t1.base_type() ) )
+				return t2;
+			break;
+
+		default:
+			break;
+	}
+
+	throw_runtime( "cannot join {0} and {1}", t1, t2 );
 }
 
 ////////////////////////////////////////

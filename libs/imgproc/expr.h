@@ -390,6 +390,11 @@ private:
 class assign_expr
 {
 public:
+	assign_expr( std::u32string var, const std::shared_ptr<expr> &e, const std::shared_ptr<expr> &n )
+		: _var( var ), _expr( e ), _next( n )
+	{
+	}
+
 	assign_expr( std::u32string var, const std::shared_ptr<expr> &e )
 		: _var( var ), _expr( e )
 	{
