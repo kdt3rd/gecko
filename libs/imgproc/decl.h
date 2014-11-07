@@ -44,7 +44,15 @@ public:
 
 	void parse( iterator &token );
 
+	const type_operator &get_type( void ) const
+	{
+		return _type;
+	}
+	
+
 private:
+	type_operator parse_type( iterator &token );
+
 	std::u32string _name;
 	type_operator _type;
 };

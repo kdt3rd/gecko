@@ -35,8 +35,8 @@ void unifier::operator()( const type_operator &x, const type_variable &y )
 
 void unifier::operator()( const type_operator &x, const type_operator &y )
 {
-	if ( x.compare_type( y ) )
-		throw_runtime( "mismatch" );
+	if ( !x.compare_type( y ) )
+		throw_runtime( "mismatch: {0} and {1}", x, y );
 
 	for ( auto xi = x.begin(), yi = y.begin(); xi != x.end(); ++xi, ++yi )
 		_stack.emplace_back( *xi, *yi );

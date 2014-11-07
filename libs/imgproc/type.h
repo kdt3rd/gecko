@@ -85,7 +85,8 @@ public:
 
 	bool compare_type( const type_operator &o ) const
 	{
-		return _type == o._type;
+		bool ret = ( _type == o._type );
+		return ret;
 	}
 
 	std::vector<type>::iterator begin( void )
@@ -113,9 +114,29 @@ public:
 		return _types.empty();
 	}
 
+	pod_type base_type( void ) const
+	{
+		return _type.base_type();
+	}
+
+	size_t dimensions( void ) const
+	{
+		return _type.dimensions();
+	}
+
 	std::string name( void ) const;
 
 	void add( type t );
+
+	void set_type( pod_type t )
+	{
+		_type.set_type( t );
+	}
+
+	void set_dimensions( size_t d )
+	{
+		_type.set_dimensions( d );
+	}
 
 private:
 	var_type _type;

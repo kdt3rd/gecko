@@ -7,6 +7,7 @@
 #include <imgproc/parser.h>
 #include <imgproc/cpp_generator.h>
 #include <imgproc/decl.h>
+#include <imgproc/environment.h>
 #include <map>
 #include <memory>
 
@@ -18,7 +19,7 @@ int safemain( int argc, char *argv[] )
 	base::cmd_line options( argv[0],
 		base::cmd_line::option( 'h', "help", "",       base::cmd_line::arg<0>, "Print help message and exit", false ),
 		base::cmd_line::option( 'p', "path", "<path>", base::cmd_line::multi,  "Include path", true ),
-		base::cmd_line::option(  0,  "",     "<func>", base::cmd_line::args,   "Test file", true )
+		base::cmd_line::option(  0,  "",     "<func>, ...", base::cmd_line::args,   "Test file", true )
 	);
 
 	auto option_error = base::make_guard( [&]()
@@ -50,16 +51,27 @@ int safemain( int argc, char *argv[] )
 			throw_runtime( "ERROR: parsing {0}", path );
 	}
 
-//	for ( auto f: funcs )
-//		std::cout << "Function " << f->name() << ":\n" << f->result() << std::endl;
-
-	for ( auto &func: options["<func>"].values() )
+	for ( auto &func: options["<func>, ..."].values() )
 	{
 		std::stringstream str( func );
 		imgproc::decl d;
 		imgproc::iterator tok( str );
 		d.parse( tok );
-		std::cout << "Compiling: " << d << std::endl;
+
+		std::vector<imgproc::type_operator> args;
+		for ( auto &a: d.get_type() )
+			args.push_back( a.get<imgproc::type_operator>() );
+
+		for ( auto &f: funcs )
+		{
+			if ( d.name() == f->name() )
+			{
+				std::cout << "Compiling: " << d << std::endl;
+				auto r = imgproc::infer( *f, args );
+				std::cout << r->get_type() << std::endl;
+			}
+		}
+
 	}
 
 	return 0;

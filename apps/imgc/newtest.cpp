@@ -17,9 +17,7 @@ int safemain( int argc, char *argv[] )
 
 	function f( U"add", U"x", U"y" );
 	f.set_result( e );
-	auto args = { var_type( pod_type::FLOAT32, 0 ), var_type( pod_type::FLOAT32, 0 ) };
-
-
+	auto args = { type_operator( pod_type::FLOAT32, 0 ), type_operator( pod_type::FLOAT32, 0 ) };
 	std::cout << e << " = " << infer( f, args )->get_type() << std::endl;
 
 	/*

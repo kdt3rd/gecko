@@ -20,6 +20,7 @@ enum class pod_type
 	UINT32,
 	INT64,
 	UINT64,
+	FLOAT16,
 	FLOAT32,
 	FLOAT64,
 	FUNCTION,
@@ -61,6 +62,16 @@ public:
 		else if ( _type == o._type )
 			return _dims < o._dims;
 		return false;
+	}
+
+	void set_type( pod_type t )
+	{
+		_type = t;
+	}
+
+	void set_dimensions( size_t d )
+	{
+		_dims = d;
 	}
 
 private:
@@ -141,7 +152,7 @@ inline std::ostream &operator<<( std::ostream &out, const var_type &t )
 {
 	out << type_name( t.base_type() );
 	if ( t.dimensions() > 0 )
-		out << 'x' << t.dimensions();
+		out << '*' << t.dimensions();
 	return out;
 }
 
