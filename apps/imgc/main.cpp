@@ -51,6 +51,7 @@ int safemain( int argc, char *argv[] )
 			throw_runtime( "ERROR: parsing {0}", path );
 	}
 
+	imgproc::environment env( funcs );
 	for ( auto &func: options["<func>, ..."].values() )
 	{
 		std::stringstream str( func );
@@ -67,11 +68,11 @@ int safemain( int argc, char *argv[] )
 			if ( d.name() == f->name() )
 			{
 				std::cout << "Compiling: " << d << std::endl;
-				auto r = imgproc::infer( *f, args );
+				auto r = env.infer( *f, args );
 				std::cout << r->get_type() << std::endl;
+				break;
 			}
 		}
-
 	}
 
 	return 0;

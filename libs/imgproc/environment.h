@@ -16,15 +16,7 @@ class function;
 class environment
 {
 public:
-	const type &operator[]( const std::u32string &n ) const
-	{
-		return _env.at( n );
-	}
-
-	type &operator[]( const std::u32string &n )
-	{
-		return _env[n];
-	}
+	environment( std::vector<std::shared_ptr<function>> &f );
 
 	type operator()( const integer_expr &e );
 	type operator()( const floating_expr &e );
@@ -49,11 +41,12 @@ public:
 		return type();
 	}
 
-	void unify( std::shared_ptr<expr> &e );
-
-	type visit( const std::shared_ptr<expr> &e );
+	std::shared_ptr<expr> infer( const function &f, const std::vector<type_operator> &arg_types );
 
 private:
+	type visit( const std::shared_ptr<expr> &e );
+	void unify( std::shared_ptr<expr> &e );
+
 	type new_type( void )
 	{
 		return type_variable( ++_type_id );
@@ -64,11 +57,8 @@ private:
 	size_t _type_id = 0;
 	unifier _unify;
 	std::map<std::u32string,type> _env;
+	std::vector<std::shared_ptr<function>> &_funcs;
 };
-
-////////////////////////////////////////
-
-std::shared_ptr<expr> infer( const function &f, const std::vector<type_operator> &arg_types );
 
 ////////////////////////////////////////
 

@@ -255,9 +255,15 @@ public:
 		return _args;
 	}
 
+	void set_instance( const std::shared_ptr<expr> &i )
+	{
+		_instance = i;
+	}
+
 protected:
 	std::u32string _func;
 	std::vector<std::shared_ptr<expr>> _args;
+	std::shared_ptr<expr> _instance;
 };
 
 ////////////////////////////////////////
@@ -333,6 +339,11 @@ class for_expr
 {
 public:
 	for_expr( void )
+	{
+	}
+
+	for_expr( const std::vector<std::u32string> &m, const std::vector<std::u32string> &v, const std::vector<range_expr> &ranges, std::shared_ptr<expr> result )
+		: _mods( m ), _vars( v ), _ranges( ranges ), _result( result )
 	{
 	}
 

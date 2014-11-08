@@ -56,7 +56,6 @@ public:
 
 	void operator()( const call_expr &e )
 	{
-		throw_not_yet();
 	}
 
 	void operator()( const if_expr &e )
@@ -103,6 +102,13 @@ public:
 private:
 	unifier &_unify;
 };
+
+////////////////////////////////////////
+
+environment::environment( std::vector<std::shared_ptr<function>> &f )
+	: _funcs( f )
+{
+}
 
 ////////////////////////////////////////
 
@@ -203,7 +209,26 @@ type environment::operator()( const postcircumfix_expr &e )
 
 type environment::operator()( const call_expr &e )
 {
-	throw_not_yet();
+	std::vector<type_operator> args;
+	for ( auto &arg: e.arguments() )
+	{
+		auto t1 = visit( arg );
+		_unify.unify();
+		t1 = _unify.get( t1 );
+		args.push_back( t1.get<type_operator>() );
+	}
+
+	for ( auto &f: _funcs )
+	{
+		if ( f->name() == e.function() )
+		{
+			environment env( _funcs );
+			auto e = env.infer( *f, args );
+			return e->get_type();
+		}
+	}
+
+	throw_runtime( "function {0} not found", e.function() );
 }
 
 ////////////////////////////////////////
@@ -347,19 +372,18 @@ type environment::join( const type_operator &t1, const type_operator &t2 )
 
 ////////////////////////////////////////
 
-std::shared_ptr<expr> infer( const function &f, const std::vector<type_operator> &arg_types )
+std::shared_ptr<expr> environment::infer( const function &f, const std::vector<type_operator> &arg_types )
 {
 	precondition( arg_types.size() == f.args().size(), "mismatch for argument types" );
 
 	std::shared_ptr<expr> result = f.result()->clone();
 
-	environment env;
+	_env.clear();
 	for ( size_t i = 0; i < arg_types.size(); ++i )
-		env[f.args()[i]] = arg_types[i];
+		_env[f.args()[i]] = arg_types[i];
 
-	env.visit( result );
-	env.unify( result );
-
+	visit( result );
+	unify( result );
 	return result;
 }
 
