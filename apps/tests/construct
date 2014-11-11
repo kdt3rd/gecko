@@ -1,0 +1,17 @@
+
+--Executable( "test_layout", Compile( "test_layout.cpp" ), LinkLibs( "layout", platform ) )
+
+--KDT-- Executable( "test_format", Compile( "test_format.cpp" ), LinkLibs( "base", "utf" ) )
+--KDT-- Executable( "test_exception", Compile( "test_exception.cpp" ), LinkLibs( "base", "utf" ) )
+Executable( "test_signal", Compile( "test_signal.cpp" ), libs.base.lib )
+--KDT-- Executable( "test_platform", Compile( "test_platform.cpp" ), LinkLibs( "platform" ) )
+--KDT-- Executable( "test_app", Compile( "test_app.cpp" ), LinkLibs( "gui" ) )
+--KDT-- Executable( "test_font", Compile( "test_font.cpp" ), LinkLibs( "script" ) )
+Executable( "test_hash", Compile( "test_hash.cpp" ), libs.base.lib )
+Executable( "test_mempool", Compile( "test_mempool.cpp" ), libs.base.lib )
+Executable( "test_variant", Compile( "test_variant.cpp" ), libs.base.lib )
+
+--KDT-- Application( "Test Application", "test_app" )
+--KDT-- Application( "Test Platform", "test_platform" )
+--Application( "Test", "test" )
+
