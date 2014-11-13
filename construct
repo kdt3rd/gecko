@@ -38,4 +38,5 @@ SetOption( "threads", "on" )
 Include( "libs" )
 
 libs = SubDir( "libs" )
+print( "base: " .. tostring(libs.base.lib) )
 apps = SubDir( "apps" )
