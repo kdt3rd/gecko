@@ -7,30 +7,11 @@ BuildConfiguration{ name="Debug", optimization="debug" }
 DefaultConfiguration( "Build" )
 
 if sys.system() == "Linux" then
-	X11 = ExternalLibrary( "x11" )
-	if X11 == nil then
-		error( "X11 library required" )
-	end
-
-	PNG = ExternalLibrary( "libpng" )
-	if PNG == nil then
-		error( "png library required" )
-	end
-
-	FREETYPE = ExternalLibrary( "freetype2" )
-	if FREETYPE == nil then
-		error( "Freetype library required" )
-	end
-
-	FONTCONFIG = ExternalLibrary( "fontconfig" )
-	if FONTCONFIG == nil then
-		error( "fontconfig library required" )
-	end
-
-	GL = ExternalLibrary( "gl" )
-	if GL == nil then
-		error( "OpenGL library required" )
-	end
+	X11 = assert( ExternalLibrary( "x11" ), "X11 library required" )
+	PNG = assert( ExternalLibrary( "libpng" ), "png library required" )
+	FREETYPE = assert( ExternalLibrary( "freetype2" ), "Freetype library required" )
+	FONTCONFIG = assert( ExternalLibrary( "fontconfig" ), "fontconfig library required" )
+	GL = assert( ExternalLibrary( "gl" ), "OpenGL library required" )
 end
 
 EnableLanguages( "c++11" )
@@ -40,3 +21,4 @@ Include( "libs" )
 libs = SubDir( "libs" )
 print( "base: " .. tostring(libs.base.lib) )
 apps = SubDir( "apps" )
+
