@@ -105,7 +105,7 @@ private:
 
 ////////////////////////////////////////
 
-environment::environment( std::vector<std::shared_ptr<function>> &f )
+environment::environment( std::map<std::u32string,std::shared_ptr<function>> &f )
 	: _funcs( f )
 {
 }
@@ -142,7 +142,15 @@ type environment::operator()( const identifier_expr &e )
 {
 	auto i = _env.find( e.value() );
 	if ( i == _env.end() )
+	{
+		auto f = _funcs.find( e.value() );
+		if ( f != _funcs.end() )
+		{
+			return type_operator( pod_type::FUNCTION, 0 );
+		}
+
 		throw_runtime( "undefined symbol {0}", e.value() );
+	}
 	return i->second;
 }
 
@@ -218,14 +226,12 @@ type environment::operator()( const call_expr &e )
 		args.push_back( t1.get<type_operator>() );
 	}
 
-	for ( auto &f: _funcs )
+	auto f = _funcs[e.function()];
+	if ( f )
 	{
-		if ( f->name() == e.function() )
-		{
-			environment env( _funcs );
-			auto e = env.infer( *f, args );
-			return e->get_type();
-		}
+		environment env( _funcs );
+		auto e = env.infer( *f, args );
+		return e->get_type();
 	}
 
 	throw_runtime( "function {0} not found", e.function() );
@@ -258,10 +264,15 @@ type environment::operator()( const range_expr &e )
 
 type environment::operator()( const for_expr &e )
 {
-	auto t = visit( e.result() );
+	for ( auto &v: e.variables() )
+	{
+		if ( _env.find( v ) != _env.end() )
+			throw_runtime( "variable {0} already defined", v );
+		_env[v] = type_operator( pod_type::INT64, 0 );
+	}
 
-	// TODO
-	throw_not_yet();
+	auto t = visit( e.result() );
+	return t;
 }
 
 ////////////////////////////////////////

@@ -2,6 +2,7 @@
 #pragma once
 
 #include <map>
+#include <string>
 #include <functional>
 
 #include "expr.h"
@@ -17,8 +18,8 @@ namespace imgproc
 class parser
 {
 public:
-	parser( std::vector<std::shared_ptr<function>> &funcs, std::istream &in, utf::mode = utf::UTF8 );
-	parser( std::vector<std::shared_ptr<function>> &funcs, const iterator &tok );
+	parser( std::map<std::u32string,std::shared_ptr<function>> &funcs, std::istream &in, utf::mode = utf::UTF8 );
+	parser( std::map<std::u32string,std::shared_ptr<function>> &funcs, const iterator &tok );
 
 	void parse( void );
 
@@ -63,7 +64,7 @@ private:
 
 	location _previous_end;
 	iterator _token;
-	std::vector<std::shared_ptr<function>> &_funcs;
+	std::map<std::u32string,std::shared_ptr<function>> &_funcs;
 	std::vector<std::u32string> _comments;
 	std::vector<message> _messages;
 	std::map<std::shared_ptr<expr>,std::pair<location,location>> _expr_locs;

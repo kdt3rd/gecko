@@ -15,7 +15,7 @@ namespace imgproc
 
 ////////////////////////////////////////
 
-parser::parser( std::vector<std::shared_ptr<function>> &funcs, std::istream &in, utf::mode m )
+parser::parser( std::map<std::u32string,std::shared_ptr<function>> &funcs, std::istream &in, utf::mode m )
 	: _token( in, m ), _funcs( funcs )
 {
 	next_token();
@@ -23,7 +23,7 @@ parser::parser( std::vector<std::shared_ptr<function>> &funcs, std::istream &in,
 
 ////////////////////////////////////////
 
-parser::parser( std::vector<std::shared_ptr<function>> &funcs, const iterator &tok )
+parser::parser( std::map<std::u32string,std::shared_ptr<function>> &funcs, const iterator &tok )
 	: _token( tok ), _funcs( funcs )
 {
 	next_token();
@@ -39,7 +39,7 @@ void parser::parse( void )
 		{
 			std::shared_ptr<function> f( get_function().release() );
 			if ( f )
-				_funcs.push_back( f );
+				_funcs[f->name()] = f;
 		}
 		catch ( std::exception &e )
 		{

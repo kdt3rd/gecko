@@ -196,7 +196,7 @@ public:
 
 	std::shared_ptr<expr> operator()( const for_expr &e )
 	{
-		throw_not_yet();
+		return std::make_shared<expr>( for_expr( e.modifiers(), e.variables(), e.ranges(), e.result()->clone() ) );
 	}
 
 	std::shared_ptr<expr> operator()( const assign_expr &e )

@@ -1,0 +1,21 @@
+
+function b( y )
+{
+	y + 1.4
+}
+
+function a( x )
+{
+	x + b( 1000 )
+}
+
+function test()
+{
+	a( 5 )
+}
+
+function foo()
+{
+	for ( x: 42 )
+		4
+}

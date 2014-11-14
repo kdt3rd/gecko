@@ -37,7 +37,7 @@ int safemain( int argc, char *argv[] )
 		return 0;
 	}
 
-	std::vector<std::shared_ptr<imgproc::function>> funcs;
+	std::map<std::u32string,std::shared_ptr<imgproc::function>> funcs;
 	for ( auto &path: options["path"].values() )
 	{
 		std::ifstream src( path );
@@ -63,16 +63,15 @@ int safemain( int argc, char *argv[] )
 		for ( auto &a: d.get_type() )
 			args.push_back( a.get<imgproc::type_operator>() );
 
-		for ( auto &f: funcs )
+		auto f = funcs[d.name()];
+		if ( f )
 		{
-			if ( d.name() == f->name() )
-			{
-				std::cout << "Compiling: " << d << std::endl;
-				auto r = env.infer( *f, args );
-				std::cout << r->get_type() << std::endl;
-				break;
-			}
+			std::cout << "Compiling: " << d << std::endl;
+			auto r = env.infer( *f, args );
+			std::cout << r->get_type() << std::endl;
 		}
+		else
+			std::cout << "Function " << d.name() << " not found" << std::endl;
 	}
 
 	return 0;

@@ -16,7 +16,7 @@ class function;
 class environment
 {
 public:
-	environment( std::vector<std::shared_ptr<function>> &f );
+	environment( std::map<std::u32string,std::shared_ptr<function>> &f );
 
 	type operator()( const integer_expr &e );
 	type operator()( const floating_expr &e );
@@ -57,7 +57,7 @@ private:
 	size_t _type_id = 0;
 	unifier _unify;
 	std::map<std::u32string,type> _env;
-	std::vector<std::shared_ptr<function>> &_funcs;
+	std::map<std::u32string,std::shared_ptr<function>> &_funcs;
 };
 
 ////////////////////////////////////////
