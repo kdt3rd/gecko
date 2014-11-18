@@ -1,0 +1,9 @@
+
+local img = {
+	"integrate.imgc",
+	"filters.img"
+}
+
+imgc = Executable( "imgc", "main.cpp", UseLibraries( "imgproc" ) )
+test_new = Executable( "test_new", "newtest.cpp", UseLibraries( "imgproc" ) )
+test_token = Executable( "test_token", "test_token.cpp", UseLibraries( "imgproc" ) )

@@ -12,6 +12,7 @@ if sys.system() == "Linux" then
 	FREETYPE = assert( ExternalLibrary( "freetype2" ), "Freetype library required" )
 	FONTCONFIG = assert( ExternalLibrary( "fontconfig" ), "fontconfig library required" )
 	GL = assert( ExternalLibrary( "gl" ), "OpenGL library required" )
+	Z = assert( ExternalLibrary( "z" ), "zlib library required" )
 end
 
 EnableLanguages( "c++11" )
@@ -19,6 +20,5 @@ SetOption( "threads", "on" )
 Include( "libs" )
 
 libs = SubDir( "libs" )
-print( "base: " .. tostring(libs.base.lib) )
 apps = SubDir( "apps" )
 

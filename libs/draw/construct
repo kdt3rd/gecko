@@ -1,0 +1,74 @@
+
+local srcs = {
+	"polylines.cpp";
+	"clipper.cpp";
+	"canvas.cpp";
+	"geometry.cpp";
+	"glyph.cpp";
+	"composite.cpp";
+	"object.cpp";
+	"stretchable.cpp";
+	"color_wheel.cpp";
+}
+
+local tess = {
+	"libtess2/dict.cpp";
+	"libtess2/geom.cpp";
+	"libtess2/mesh.cpp";
+	"libtess2/priorityq.cpp";
+	"libtess2/sweep.cpp";
+	"libtess2/tess.cpp";
+}
+
+local shaders = {
+	"color_mesh.vert";
+	"position_uv.vert";
+	"quadrant.vert";
+	"simple.vert";
+	"text.vert";
+	"texture.frag";
+	"color_mesh.frag";
+	"linear_gradient.frag";
+	"radial_gradient.frag";
+	"conical_gradient.frag";
+	"single_color.frag";
+	"text_bitmap.frag";
+}
+
+local cpp_shaders = {
+	"#include \"shaders.h\"";
+	"using base::resource;";
+	"namespace draw";
+	"{";
+	"	base::data_resource shaders( {";
+}
+
+shader_h = CreateFile( "shaders.h", {
+	"#pragma once";
+	"#include <base/data_resource.h>";
+	"namespace draw";
+	"{";
+	"extern base::data_resource shaders;";
+	"}";
+} )
+
+shader_code = GenerateSourceDataFile{
+	output = "shaders.cpp",
+	input_items = shaders,
+	file_prefix = cpp_shaders,
+	file_suffix = { " } );", "}" },
+	item_prefix = { "\tresource { \"$item_name\",",
+					"\t\t{"
+	},
+	item_indent = "\t\t\t",
+	item_transform_func = "binary_cstring", -- eventually a lua function
+	item_suffix = { "\t\t}, $item_file_size",
+					"\t}" },
+	comma_separate = true
+}
+shader_code:addDependency( "order", shader_h )
+
+local comp = Compile( srcs, tess, shader_code )
+comp:includeArtifactDir()
+
+lib = Library( "draw", comp, UseLibraries( "gl", "script" ) )

@@ -1,0 +1,15 @@
+DL = nil
+if sys.system() == "Linux" then
+	DL = ExternalLibrary( "dl" )
+end
+
+lib = Library( "gl",
+			   "texture.cpp",
+			   "shader.cpp",
+			   "program.cpp",
+			   "context.cpp",
+			   "matrix4.cpp",
+			   "check.cpp",
+			   "png_reader.cpp",
+			   "gl3w.c",
+			   GL, PNG, DL )

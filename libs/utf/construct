@@ -1,0 +1,22 @@
+
+utf_gens = CodeFilter{
+	tag="utf_gen_table",
+	name="utf_gen_table",
+	exe_source={ "tables/gen_table.cpp",
+				 "tables/xml.cpp",
+				 Z },
+	cmd={ "cd", "$current_output_dir", "&&", "$exe", "$in" },
+	sources={ "tables/ucd.all.flat.xml.gz" },
+	outputs={ "utfprop.cpp", "utfcat.cpp", "utfnorm.cpp" },
+	description="UTF $in",
+}
+
+lib = Library( "utf",
+			   "utf.cpp",
+			   utf_gens )
+lib:addIncludes( SourceDir() )
+
+test = Executable( "utf_test",
+				   "test.cpp",
+				   lib )
+

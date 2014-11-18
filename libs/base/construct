@@ -10,6 +10,7 @@ lib = Library( "base",
 	"paint.cpp",
 	"pack.cpp",
 	"sha256.cpp",
-	"backtrace.cpp"
+	"backtrace.cpp",
+	"cmd_line.cpp"
 );
 

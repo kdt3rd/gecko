@@ -1,0 +1,2 @@
+
+Executable( "image_viewer", "main.cpp", UseLibraries( "viewer", "gui" ) )

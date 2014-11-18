@@ -1,0 +1,2 @@
+
+lib = Library( "layout", "simple_area.cpp", UseLibraries( "base" ) )

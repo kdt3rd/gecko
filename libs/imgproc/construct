@@ -1,0 +1,17 @@
+
+lib = Library( "imgproc",
+	"token.cpp",
+	"expr.cpp",
+	"message.cpp",
+	"parser.cpp",
+	"operators.cpp",
+	"expr_parser.cpp",
+--	"cpp_generator.cpp",
+	"function.cpp",
+	"type.cpp",
+	"unifier.cpp",
+	"environment.cpp",
+	"decl.cpp",
+	UseLibraries( "utf", "base" ) )
+
+			   

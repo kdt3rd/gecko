@@ -1,0 +1,54 @@
+
+local srcs = {
+	"viewer.cpp"
+}
+
+local shaders = {
+	"shader.vert";
+	"shader.frag";
+	"errorA.frag";
+	"errorB.frag";
+	"textureA.frag";
+	"textureB.frag";
+	"nolutA.frag";
+	"nolutB.frag";
+	"nowipe.frag";
+}
+
+shader_h = CreateFile( "shaders.h", {
+	"#pragma once";
+	"#include <base/data_resource.h>";
+	"namespace viewer";
+	"{";
+	"extern base::data_resource shaders;";
+	"}";
+} )
+
+shader_code = GenerateSourceDataFile{
+	output = "shaders.cpp",
+	input_items = shaders,
+	file_prefix = {
+		"#include \"shaders.h\"";
+		"using base::resource;";
+		"namespace viewer";
+		"{";
+		"	base::data_resource shaders( {";
+	},
+	file_suffix = { " } );", "}" },
+	item_prefix = { "\tresource { \"$item_name\",",
+					"\t\t{"
+	},
+	item_indent = "\t\t\t",
+	item_transform_func = "binary_cstring", -- eventually a lua function
+	item_suffix = { "\t\t}, $item_file_size",
+					"\t}" },
+	comma_separate = true
+}
+shader_code:addDependency( "order", shader_h )
+
+local comp = Compile( srcs, shader_code )
+comp:includeArtifactDir()
+
+lib = Library( "viewer",
+			   comp,
+			   UseLibraries( "gl" ) )

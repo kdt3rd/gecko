@@ -1,4 +1,4 @@
 
 SubDir( "tests" )
---SubDir( "imgc" )
---SubDir( "viewer" )
+SubDir( "imgc" )
+SubDir( "viewer" )

@@ -1,0 +1,68 @@
+
+local platform = {
+	incs = {
+	};
+
+	srcs = {
+		"platform.cpp";
+		"system.cpp";
+		"screen.cpp";
+		"window.cpp";
+		"timer.cpp";
+		"keyboard.cpp";
+		"mouse.cpp";
+		"dispatcher.cpp";
+	};
+
+	libs = {
+		"draw";
+	};
+
+	syslibs = {
+	};
+}
+
+function Platform( p )
+	if p.incs then
+	for i, s in ipairs( p.incs ) do
+		table.insert( platform.incs, s )
+	end
+	end
+
+	if p.srcs then
+	for i, s in ipairs( p.srcs ) do
+		table.insert( platform.srcs, p.name .. "/" .. s )
+	end
+	end
+
+	if p.libs then
+	for i, s in ipairs( p.libs ) do
+		table.insert( platform.libs, s )
+	end
+	end
+
+	if p.syslibs then
+	for i, s in ipairs( p.syslibs ) do
+		table.insert( platform.syslibs, s )
+	end
+	end
+end
+
+vars = { Platform = Platform }
+
+local s = sys.system()
+if s == "Linux" then
+	--platform = SubDir( "xcb" )
+	table.insert( platform.srcs, "linux.cpp" )
+	SubDir( "xlib", vars )
+elseif s == "Darwin" then
+	table.insert( platform.srcs, "darwin.cpp" )
+	SubDir( "cocoa", vars )
+elseif s == "Windows" then
+	table.insert( platform.srcs, "mswin.cpp" )
+	SubDir( "mswin", vars )
+end
+
+Include( platform.incs )
+
+lib = Library( "platform", platform.srcs, UseLibraries( table.unpack( platform.libs or {} ) ), platform.syslibs )
