@@ -1,4 +1,12 @@
 
 /// @namespace utf
 /// @brief Unicode utilities
-
+///
+/// Unicode is a standard for encoding written characters.
+/// It provides a numeric value (code point) and a name for each character. 
+/// It is universal and supports most written languages (over 1 million characters).
+/// It also provides guidelines for text processing and handling.
+///
+/// This library supports Unicode version 7.0.0.
+/// For more information, <a href="http://www.unicode.org/versions/Unicode7.0.0/">see here</a>
+///
