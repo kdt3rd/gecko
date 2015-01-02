@@ -1,6 +1,6 @@
 .SUFFIXES:
 .DEFAULT: default
-.PHONY: default debug release mingw build clean graph config cmake
+.PHONY: default debug release mingw build clean graph config docs
 .NOTPARALLEL:
 .SILENT:
 .ONESHELL:
@@ -22,34 +22,49 @@ endif
 endif
 endif
 
-TARGETS := $(filter-out default debug release build mingw clean graph config cmake,${MAKECMDGOALS})
+TARGETS := $(filter-out docs default debug release build mingw clean graph config,${MAKECMDGOALS})
+ifneq ($(findstring docs,${MAKECMDGOALS}),docs)
 override MAKECMDGOALS :=
+endif
 
-default:
-	./configure ${BUILD_TYPE}
+default: ${BUILD_DIR}/
 	ninja ${NINJA_ARGS} -C ${BUILD_DIR} ${TARGETS}
 
-debug: default
+debug: debug/
+	ninja ${NINJA_ARGS} -C ${BUILD_DIR} ${TARGETS}
 
-mingw: default
+mingw: mingw/
+	ninja ${NINJA_ARGS} -C ${BUILD_DIR} ${TARGETS}
 
-release: default
+release: release/
+	ninja ${NINJA_ARGS} -C ${BUILD_DIR} ${TARGETS}
 
-build: default
+build: build/
+	ninja ${NINJA_ARGS} -C ${BUILD_DIR} ${TARGETS}
 
-cmake: config
+debug/:
+	constructor
+
+mingw/:
+	constructor
+
+release/:
+	constructor
+
+build/:
+	constructor --verbose
 
 config:
-	./configure build
-	./configure release
-	./configure debug
-	./configure mingw
+	constructor
 
 clean:
 	rm -rf debug release build mingw
 
 graph:
 	ninja -C build -t graph ${TARGETS} | sed s\"`pwd`/\"\"g > deps.dot
+
+docs:
+	env DOX_OUTPUT_DIR=`pwd`/build/docs DOX_SOURCE_DIR=`pwd` doxygen docs/doxyfile
 
 ifneq ("${TARGETS}","")
 
