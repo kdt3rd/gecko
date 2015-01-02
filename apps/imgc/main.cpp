@@ -55,13 +55,14 @@ int safemain( int argc, char *argv[] )
 	for ( auto &func: options["<func>, ..."].values() )
 	{
 		std::stringstream str( func );
-		imgproc::decl d;
 		imgproc::iterator tok( str );
+		imgproc::decl d;
+
 		d.parse( tok );
 
-		std::vector<imgproc::type_operator> args;
+		std::vector<imgproc::type> args;
 		for ( auto &a: d.get_type() )
-			args.push_back( a.get<imgproc::type_operator>() );
+			args.push_back( a );
 
 		auto f = funcs[d.name()];
 		if ( f )

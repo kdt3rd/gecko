@@ -23,7 +23,6 @@ enum class pod_type
 	FLOAT16,
 	FLOAT32,
 	FLOAT64,
-	FUNCTION,
 	UNKNOWN,
 };
 
@@ -64,15 +63,15 @@ inline bool is_unsigned( pod_type t )
 
 ////////////////////////////////////////
 
-class var_type
+class data_type
 {
 public:
-	var_type( void )
+	data_type( void )
 		: _type( pod_type::UNKNOWN ), _dims( 0 )
 	{
 	}
 
-	var_type( pod_type t, size_t d )
+	data_type( pod_type t, size_t d )
 		: _type( t ), _dims( d )
 	{
 	}
@@ -80,17 +79,17 @@ public:
 	pod_type base_type( void ) const { return _type; }
 	size_t dimensions( void ) const { return _dims; }
 
-	bool operator==( const var_type &o ) const
+	bool operator==( const data_type &o ) const
 	{
 		return _type == o._type && _dims == o._dims;
 	}
 
-	bool operator!=( const var_type &o ) const
+	bool operator!=( const data_type &o ) const
 	{
 		return _type != o._type || _dims != o._dims;
 	}
 
-	bool operator<( const var_type &o ) const
+	bool operator<( const data_type &o ) const
 	{
 		if ( _type < o._type )
 			return true;
@@ -122,10 +121,7 @@ inline pod_type merge( pod_type t1, pod_type t2 )
 	if ( t1 == t2 )
 		return t1;
 
-	if ( t1 == pod_type::FUNCTION || t2 == pod_type::FUNCTION )
-		throw_runtime( "cannot combine function types" );
-
-	// Ensure t1 is the "greater" type
+	// Return the "greater" type
 	if ( t1 < t2 )
 		return t2;
 
@@ -149,7 +145,7 @@ inline std::string type_name( pod_type t )
 		case pod_type::INT64: return "int64";
 		case pod_type::FLOAT32: return "float";
 		case pod_type::FLOAT64: return "double";
-		case pod_type::FUNCTION: return "function";
+		case pod_type::UNKNOWN: return "unknown";
 		default: throw_logic( "unknown data type" );
 	}
 }
@@ -169,7 +165,7 @@ inline pod_type type_enum( const std::u32string &t )
 	if ( t == U"int64" ) return pod_type::INT64;
 	if ( t == U"float" ) return pod_type::FLOAT32;
 	if ( t == U"double" ) return pod_type::FLOAT64;
-	if ( t == U"function" ) return pod_type::FUNCTION;
+	if ( t == U"unknown" ) return pod_type::UNKNOWN;
 	return pod_type::UNKNOWN;
 }
 
@@ -183,7 +179,7 @@ inline std::ostream &operator<<( std::ostream &out, pod_type t )
 
 ////////////////////////////////////////
 
-inline std::ostream &operator<<( std::ostream &out, const var_type &t )
+inline std::ostream &operator<<( std::ostream &out, const data_type &t )
 {
 	out << type_name( t.base_type() );
 	if ( t.dimensions() > 0 )
@@ -193,7 +189,7 @@ inline std::ostream &operator<<( std::ostream &out, const var_type &t )
 
 ////////////////////////////////////////
 
-inline std::string cpp_type( const var_type &t )
+inline std::string cpp_type( const data_type &t )
 {
 	std::ostringstream tmp;
 	if ( t.dimensions() > 0 )
@@ -205,7 +201,7 @@ inline std::string cpp_type( const var_type &t )
 
 ////////////////////////////////////////
 
-inline std::string cpp_type_const_ref( const var_type &t, const std::u32string &mod )
+inline std::string cpp_type_const_ref( const data_type &t, const std::u32string &mod )
 {
 	std::ostringstream tmp;
 	if ( t.dimensions() > 0 )

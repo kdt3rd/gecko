@@ -23,7 +23,7 @@ public:
 	{
 	}
 
-	void set_compile( const std::function<var_type(const std::shared_ptr<function> &, const std::vector<var_type> &)> &cmp )
+	void set_compile( const std::function<data_type(const std::shared_ptr<function> &, const std::vector<data_type> &)> &cmp )
 	{
 		_compile = cmp;
 	}
@@ -54,18 +54,21 @@ public:
 		return f->second;
 	}
 
-	void add( const std::u32string &n, const var_type &t )
+	void add( const std::u32string &n, const data_type &t )
 	{
 		_variables.emplace( std::make_pair( n, variable( n, t ) ) );
 	}
 
 	void add_function( const std::u32string &n, const std::shared_ptr<function> &f )
 	{
+		// TODO
+		/*
 		add( n, { pod_type::FUNCTION, 0 } );
 		_functions.emplace( std::make_pair( n, f ) );
+		*/
 	}
 
-	var_type compile( const std::shared_ptr<function> &f, const std::vector<var_type> &args )
+	data_type compile( const std::shared_ptr<function> &f, const std::vector<data_type> &args )
 	{
 		return _compile( f, args );
 	}
@@ -74,7 +77,7 @@ private:
 	std::shared_ptr<scope> _parent;
 	std::map<std::u32string,variable> _variables;
 	std::map<std::u32string,std::shared_ptr<function>> _functions;
-	std::function<var_type(const std::shared_ptr<function> &, const std::vector<var_type> &)> _compile;
+	std::function<data_type(const std::shared_ptr<function> &, const std::vector<data_type> &)> _compile;
 };
 
 ////////////////////////////////////////

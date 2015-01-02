@@ -249,7 +249,7 @@ public:
 	{
 		return _func;
 	}
-	
+
 	const std::vector<std::shared_ptr<expr>> &arguments( void ) const
 	{
 		return _args;
@@ -316,9 +316,6 @@ public:
 		: _start( start ), _end( end ), _by( by )
 	{
 	}
-
-//	std::string get_size( compile_context &code, std::shared_ptr<scope> &scope ) const;
-//	std::string get_offset( compile_context &code, std::shared_ptr<scope> &scope ) const;
 
 	void set_index( size_t idx ) { _index = idx; }
 

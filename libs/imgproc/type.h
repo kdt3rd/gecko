@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <typeindex>
+#include <memory>
 #include <base/variant.h>
 #include "data_type.h"
 
@@ -30,7 +31,7 @@ public:
 	size_t id( void ) const
 	{
 		return _id;
-	}	
+	}
 
 	bool operator==( const type_variable &v ) const
 	{
@@ -46,119 +47,139 @@ public:
 	{
 		return id() < v.id();
 	}
-	
+
 private:
 	size_t _id;
 };
 
 ////////////////////////////////////////
 
-class type_operator
+class type_primary
 {
 public:
-	type_operator( void )
-		: _type( pod_type::UNKNOWN, 0 )
+	type_primary( void )
 	{
 	}
 
-	type_operator( const var_type &t )
+	// @brief Unknown type
+	type_primary( pod_type t )
 		: _type( t )
 	{
 	}
 
-	type_operator( pod_type t, size_t d = 0 )
-		: _type( t, d )
+	bool is_compatible( const type_primary &o ) const
 	{
+		if ( _type == pod_type::UNKNOWN || o._type == pod_type::UNKNOWN )
+			return true;
+
+		if ( _type == o._type )
+			return true;
+
+		return false;
 	}
 
-	template<typename Iterator>
-	type_operator( const var_type &t, Iterator first, Iterator last )
-		: _type( t ), _types( first, last )
+	pod_type get_type( void ) const
 	{
+		return _type;
 	}
-
-	template<typename Range>
-	type_operator( const var_type &t, Range range )
-		: _type( t ), _types( range.begin(), range.end() )
-	{
-	}
-
-	bool compare_type( const type_operator &o ) const
-	{
-		bool ret = ( _type == o._type );
-		return ret;
-	}
-
-	std::vector<type>::iterator begin( void )
-	{
-		return _types.begin();
-	}
-
-	std::vector<type>::iterator end( void )
-	{
-		return _types.end();
-	}
-
-	std::vector<type>::const_iterator begin( void ) const
-	{
-		return _types.begin();
-	}
-
-	std::vector<type>::const_iterator end( void ) const
-	{
-		return _types.end();
-	}
-
-	bool empty( void ) const
-	{
-		return _types.empty();
-	}
-
-	size_t size( void ) const
-	{
-		return _types.size();
-	}
-
-	const type &at( size_t i ) const
-	{
-		return _types.at( i );
-	}
-
-	pod_type base_type( void ) const
-	{
-		return _type.base_type();
-	}
-
-	size_t dimensions( void ) const
-	{
-		return _type.dimensions();
-	}
-
-	std::string name( void ) const;
-
-	void add( type t );
 
 	void set_type( pod_type t )
 	{
-		_type.set_type( t );
-	}
-
-	void set_dimensions( size_t d )
-	{
-		_type.set_dimensions( d );
+		_type = t;
 	}
 
 private:
-	var_type _type;
-	std::vector<type> _types;
+	pod_type _type = pod_type::UNKNOWN;
 };
 
 ////////////////////////////////////////
 
-class type : public base::variant<type_variable,type_operator>
+class type_callable
+{
+public:
+	enum call_type
+	{
+		IMAGE,
+		FUNCTION,
+		UNKNOWN
+	};
+
+	type_callable( void )
+	{
+	}
+
+	type_callable( type result, call_type c = UNKNOWN );
+
+	std::vector<type>::iterator begin( void )
+	{
+		return _args.begin();
+	}
+
+	std::vector<type>::iterator end( void )
+	{
+		return _args.end();
+	}
+
+	std::vector<type>::const_iterator begin( void ) const
+	{
+		return _args.begin();
+	}
+
+	std::vector<type>::const_iterator end( void ) const
+	{
+		return _args.end();
+	}
+
+	bool empty( void ) const
+	{
+		return _args.empty();
+	}
+
+	size_t size( void ) const
+	{
+		return _args.size();
+	}
+
+	const type &at( size_t i ) const
+	{
+		return _args.at( i );
+	}
+
+	void add_arg( type t );
+
+	type &get_result( void )
+	{
+		return *_result;
+	}
+
+	const type &get_result( void ) const
+	{
+		return *_result;
+	}
+
+	call_type get_call_type( void ) const
+	{
+		return _call;
+	}
+
+	std::vector<type> &args( void )
+	{
+		return _args;
+	}
+
+private:
+	call_type _call = UNKNOWN;
+	std::shared_ptr<type> _result;
+	std::vector<type> _args;
+};
+
+////////////////////////////////////////
+
+class type : public base::variant<type_variable,type_primary,type_callable>
 {
 public:
 	using variant::variant;
+
 };
 
 ////////////////////////////////////////

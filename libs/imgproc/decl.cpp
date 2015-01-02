@@ -23,12 +23,12 @@ decl::parse( iterator &token )
 
 	while ( token.type() != TOK_PAREN_END )
 	{
-		_type.add( parse_type( token ) );
+		_type.add_arg( parse_type( token ) );
 
 		if ( token.type() == TOK_COMMA )
 			token.next();
 		else if ( token.type() != TOK_PAREN_END )
-			throw_runtime( "expected ',' or ')' for arguments, got '{0}'", token );
+			throw_runtime( "expected ',' or ')', got '{0}'", token );
 	}
 
 	if ( token.type() != TOK_PAREN_END )
@@ -38,27 +38,32 @@ decl::parse( iterator &token )
 
 ////////////////////////////////////////
 
-type_operator
+type
 decl::parse_type( iterator &token )
 {
-	type_operator result;
+	type_primary ty;
 
-	if ( token.type() != TOK_IDENTIFIER && token.type() != TOK_FUNCTION )
+	if ( token.type() != TOK_IDENTIFIER )
 		throw_runtime( "expected type name, got '{0}'", token );
+
 	pod_type pt = type_enum( token.value() );
+
 	if ( pt == pod_type::UNKNOWN )
 		throw_runtime( "expected type name, got '{0}'", token );
 	token.next();
 
-	result.set_type( pt );
+	ty.set_type( pt );
 
 	size_t dims = 0;
 	if ( token.type() == TOK_PAREN_START )
 	{
+//		ty.set_type( var_type::FUNCTION );
 		token.next();
 		while ( token.type() == TOK_IDENTIFIER )
 		{
-			type_operator arg = parse_type( token );
+			type arg = parse_type( token );
+			// TODO
+			/*
 			if ( pt == pod_type::FUNCTION )
 				result.add( arg );
 			else
@@ -67,6 +72,7 @@ decl::parse_type( iterator &token )
 					throw_runtime( "expected uint64 for array index, got '{0}'", arg );
 				++dims;
 			}
+			*/
 			if ( token.type() == TOK_COMMA )
 				token.next();
 			else if ( token.type() != TOK_PAREN_END )
@@ -76,13 +82,11 @@ decl::parse_type( iterator &token )
 		if ( token.type() != TOK_PAREN_END )
 			throw_runtime( "expected ')' to end arguments, got '{0}'", token );
 		token.next();
+
+		return type_callable( ty );
 	}
-	else if ( pt == pod_type::FUNCTION )
-		throw_runtime( "expected '(' to begin function arguments, got '{0}'", token );
-
-	result.set_dimensions( dims );
-
-	return result;
+	else
+		return ty;
 }
 
 ////////////////////////////////////////
@@ -91,7 +95,7 @@ std::ostream &operator<<( std::ostream &out, const decl &d )
 {
 	bool first = true;
 	out << d.name() << '(';
-	for ( const auto &a: d.type() )
+	for ( const auto &a: d.get_type() )
 	{
 		if ( !first )
 			out << ',';

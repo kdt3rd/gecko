@@ -1,21 +1,24 @@
 
-function b( y )
+function double( x )
 {
-	y + 1.4
+	x + x
 }
 
-function a( x )
+function square( x )
 {
-	x + b( 1000 )
+	x * x
 }
 
-function test()
+function doit(x)
 {
-	a( 5 )
+	if ( x )
+		double
+	else
+		square
 }
 
-function foo()
+function test( which, x )
 {
-	for ( x: 42 )
-		4
+	func = doit( which );
+	func( x );
 }

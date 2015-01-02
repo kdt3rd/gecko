@@ -30,22 +30,44 @@ public:
 
 	void operator()( const type_variable &t )
 	{
-		_out << "var(" << t.id() << ')';
+		_out << "#" << t.id();
 	}
 
-	void operator()( const type_operator &t )
+	void operator()( const type_primary &t )
 	{
-		_out << "t(" << t.name() << ")";
+		_out << t.get_type();
+	}
+
+	void operator()( const type_callable &t )
+	{
+		char c1 = '{', c2 = '}';
+		if ( t.get_call_type() == type_callable::IMAGE )
+		{
+			c1 = '[';
+			c2 = ']';
+		}
+		else if ( t.get_call_type() == type_callable::FUNCTION )
+		{
+			c1 = '(';
+			c2 = ')';
+		}
+
+		_out << '*';
 		if ( !t.empty() )
 		{
-			_out << ": {";
-			for ( const auto &st: t )
+			bool first = true;
+			_out << c1;
+			for ( auto i: t )
 			{
-				_out << ' ';
-				visit( *this, st );
+				if ( !first )
+					_out << ',';
+				_out << i;
 			}
-			_out << " }";
+			_out << c2;
+			_out << " -> ";
 		}
+
+		_out << t.get_result();
 	}
 
 	// Compile-time check for any missing operator() implementation
@@ -53,6 +75,14 @@ public:
 	void operator()( T a )
 	{
 		static_assert( base::always_false<T>::value, "missing operator() for variant types" );
+	}
+
+	void visit( const type &t )
+	{
+		if ( t.valid() )
+			base::visit( *this, t );
+		else
+			_out << "unknown";
 	}
 
 private:
@@ -68,18 +98,16 @@ namespace imgproc
 
 ////////////////////////////////////////
 
-std::string type_operator::name( void ) const
+type_callable::type_callable( type result, call_type c )
+	: _call( c ), _result( std::make_shared<type>( std::move( result ) ) )
 {
-	std::stringstream tmp;
-	tmp << _type;
-	return tmp.str();
 }
 
 ////////////////////////////////////////
 
-void type_operator::add( type t )
+void type_callable::add_arg( type t )
 {
-	_types.emplace_back( std::move( t ) );
+	_args.emplace_back( std::move( t ) );
 }
 
 ////////////////////////////////////////
@@ -87,7 +115,8 @@ void type_operator::add( type t )
 std::ostream &operator<<( std::ostream &out, const type &t )
 {
 	printer p( out );
-	base::visit( p, t );
+	p.visit( t );
+
 	return out;
 }
 

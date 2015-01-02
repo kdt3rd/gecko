@@ -8,10 +8,11 @@ namespace imgproc
 
 ////////////////////////////////////////
 
+/// @brief Variable name and type.
 class variable
 {
 public:
-	variable( const std::u32string &n, const var_type &t )
+	variable( const std::u32string &n, const data_type &t )
 		: _name( n ), _type( t )
 	{
 	}
@@ -21,14 +22,14 @@ public:
 		return _name;
 	}
 
-	const var_type &type( void ) const
+	const data_type &type( void ) const
 	{
 		return _type;
 	}
 
 private:
 	std::u32string _name;
-	var_type _type;
+	data_type _type;
 };
 
 ////////////////////////////////////////

@@ -357,6 +357,7 @@ protected:
 
 ////////////////////////////////////////
 
+/*
 template<typename Buf>
 int64_t _upper( const Buf &b, size_t n )
 {
@@ -380,6 +381,7 @@ inline int64_t _lower( float x, size_t n )
 //	precondition( n == 0, "dimension too large" );
 	return 0;
 }
+*/
 
 ////////////////////////////////////////
 

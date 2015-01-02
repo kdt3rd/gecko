@@ -240,6 +240,8 @@ std::ostream &operator<<( std::ostream &out, const std::shared_ptr<expr> &e )
 {
 	printer p( out );
 	base::visit( p, *e );
+	if ( e->get_type().valid() )
+		out << '@' << e->get_type() << '@';
 	return out;
 }
 

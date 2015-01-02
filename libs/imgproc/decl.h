@@ -27,9 +27,9 @@ public:
 		_name = std::move( n );
 	}
 
-	void add_arg( type_operator t )
+	void add_arg( type t )
 	{
-		_type.add( t );
+		_type.add_arg( t );
 	}
 
 	const std::u32string &name( void ) const
@@ -37,24 +37,18 @@ public:
 		return _name;
 	}
 
-	const type_operator &type( void ) const
-	{
-		return _type;
-	}
-
 	void parse( iterator &token );
 
-	const type_operator &get_type( void ) const
+	const type_callable &get_type( void ) const
 	{
 		return _type;
 	}
-	
 
 private:
-	type_operator parse_type( iterator &token );
+	type parse_type( iterator &token );
 
 	std::u32string _name;
-	type_operator _type;
+	type_callable _type;
 };
 
 ////////////////////////////////////////

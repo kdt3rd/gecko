@@ -41,23 +41,30 @@ public:
 		return type();
 	}
 
-	std::shared_ptr<expr> infer( const function &f, const std::vector<type_operator> &arg_types );
+	std::shared_ptr<expr> infer( const function &f, std::vector<type> &arg_types );
 
 private:
+	typedef std::map<std::u32string,type> scope;
+
+	std::shared_ptr<expr> unify( const function &f, std::vector<type> &arg_types );
+	std::shared_ptr<expr> unify( const function &f, type_callable &call );
+
+	type find_scope( const std::u32string &name );
+	void add_scope( const std::u32string &name, const type &ty );
+
 	type visit( const std::shared_ptr<expr> &e );
-	void unify( std::shared_ptr<expr> &e );
 
-	type new_type( void )
-	{
-		return type_variable( ++_type_id );
-	}
+	type new_type( void );
 
-	type join( const type_operator &t1, const type_operator &t2 );
+	type join( const type_primary &t1, const type_primary &t2 );
 
 	size_t _type_id = 0;
 	unifier _unify;
-	std::map<std::u32string,type> _env;
+	std::vector<scope> _env;
+	std::vector<std::shared_ptr<expr>> _current;
 	std::map<std::u32string,std::shared_ptr<function>> &_funcs;
+	std::map<const void *,std::shared_ptr<expr>> _func_exprs;
+	std::map<size_t,std::shared_ptr<expr>> _var_exprs;
 };
 
 ////////////////////////////////////////

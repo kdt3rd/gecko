@@ -16,6 +16,7 @@ extern std::map<std::u32string,std::shared_ptr<base_operator>> operators;
 
 ////////////////////////////////////////
 
+/// @brief Base class for operators
 class base_operator
 {
 public:
@@ -28,6 +29,7 @@ public:
 
 ////////////////////////////////////////
 
+/// @brief Placeholder for primary expression
 class primary_operator : public base_operator
 {
 public:
@@ -36,7 +38,7 @@ public:
 	virtual std::shared_ptr<expr> right( expr_parser &parser, const std::u32string &op );
 
 	std::shared_ptr<expr> expression( void ) const { return _expr; }
-	
+
 
 private:
 	std::shared_ptr<expr> _expr;
@@ -44,6 +46,7 @@ private:
 
 ////////////////////////////////////////
 
+/// @brief Represents the end of operators.
 class end_operator : public base_operator
 {
 public:
@@ -52,6 +55,7 @@ public:
 
 ////////////////////////////////////////
 
+/// @brief Infix operator.
 class infix_operator : public base_operator
 {
 public:
@@ -67,6 +71,7 @@ private:
 
 ////////////////////////////////////////
 
+/// @brief Prefix operator.
 class prefix_operator : public base_operator
 {
 public:
@@ -81,6 +86,7 @@ private:
 
 ////////////////////////////////////////
 
+/// @brief Postfix operator.
 class postfix_operator : public base_operator
 {
 public:
@@ -95,6 +101,7 @@ private:
 
 ////////////////////////////////////////
 
+/// @brief Dualfix operator
 class dualfix_operator : public base_operator
 {
 public:
@@ -110,6 +117,7 @@ private:
 
 ////////////////////////////////////////
 
+/// @brief Circumfix operator (e.g. |x|)
 class circumfix_operator : public base_operator
 {
 public:
@@ -122,6 +130,7 @@ private:
 
 ////////////////////////////////////////
 
+/// @brief Postcircumfix operator (e.g. a[x])
 class postcircumfix_operator : public base_operator
 {
 public:
