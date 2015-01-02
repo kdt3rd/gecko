@@ -9,6 +9,7 @@ namespace platform { namespace mswin
 
 ////////////////////////////////////////
 
+/// @brief Microsoft Windows screen.
 class screen : public platform::screen
 {
 public:

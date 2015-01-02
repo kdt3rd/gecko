@@ -277,3 +277,4 @@ void tessMeshZapFace( TESSmesh *mesh, TESSface *fZap );
 void tessMeshCheckMesh( TESSmesh *mesh );
 #endif
 
+/// @endcond

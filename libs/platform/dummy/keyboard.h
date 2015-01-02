@@ -8,6 +8,7 @@ namespace platform { namespace dummy
 
 ////////////////////////////////////////
 
+/// @brief Dummy keyboard class
 class keyboard : public platform::keyboard
 {
 public:

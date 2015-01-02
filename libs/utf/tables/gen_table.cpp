@@ -479,7 +479,6 @@ int safemain( int argc, char *argv[] )
 	}
 
 	{
-		std::cout << "Reading UCD XML file" << std::endl;
 		std::string fn = argv[1];
 		ucd_reader reader;
 
@@ -538,7 +537,6 @@ int safemain( int argc, char *argv[] )
 		{
 			in >> reader;
 		}
-		std::cout << "Completed reading UCD XML file" << std::endl;
 	}
 
 	// Create composition information

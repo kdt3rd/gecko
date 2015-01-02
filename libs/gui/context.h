@@ -10,6 +10,7 @@ namespace gui
 
 ////////////////////////////////////////
 
+/// @brief Context for gui.
 class context
 {
 public:

@@ -51,8 +51,6 @@ void color_wheel::create( const std::shared_ptr<canvas> &c, const base::point &c
 
 void color_wheel::draw( gl::context &ctxt )
 {
-	using target = gl::texture::target;
-
 	ctxt.use_program( _fill_prog );
 	_fill_prog->set_uniform( "mvp_matrix", ctxt.current_matrix() );
 

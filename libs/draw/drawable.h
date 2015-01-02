@@ -14,6 +14,7 @@ namespace draw
 
 ////////////////////////////////////////
 
+/// @brief Abstract drawable class.
 class drawable
 {
 public:

@@ -148,7 +148,7 @@ public:
 	{
 		auto t = std::tuple_cat( _values, std::tie( v ) );
 		visitor_multi<Result, Visitor, decltype(t), V2, Variants...> newv( _realv, t, tuple_tail( _rest ) );
-		visit( newv, std::get<0>( _rest ) );
+		return visit( newv, std::get<0>( _rest ) );
 	}
 
 private:
@@ -243,7 +243,7 @@ public:
 
 		static_assert( Helper::template is_valid<TT>(), "invalid invariant type" );
 
-		// First we destroy the current contents	
+		// First we destroy the current contents
 		Helper::destroy( _type_id, &_data );
 		new (&_data) TT( std::forward<Args>( args )... );
 		_type_id = typeid(TT);
@@ -280,14 +280,14 @@ public:
 		return _type_id.name();
 	}
 
-private: 
+private:
 	static const size_t _data_size = static_max<sizeof(Ts)...>::value;
 	static const size_t _data_align = static_max<alignof(Ts)...>::value;
 
 	using DataType = typename std::aligned_storage<_data_size, _data_align>::type;
 
 	using Helper = variant_helper<Ts...>;
-	
+
 	static inline std::type_index invalid_type( void )
 	{
 		return typeid(void);

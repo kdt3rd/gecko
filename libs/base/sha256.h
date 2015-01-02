@@ -9,7 +9,7 @@ namespace base
 
 ////////////////////////////////////////
 
-
+/// @brief SHA256 encryption.
 class sha256
 {
 public:

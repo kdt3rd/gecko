@@ -75,3 +75,4 @@ struct Dict
 	int ( *leq )( void *frame, DictKey key1, DictKey key2 );
 };
 
+/// @endcond

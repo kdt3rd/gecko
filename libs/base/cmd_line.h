@@ -15,6 +15,7 @@ namespace base
 class cmd_line
 {
 public:
+	/// @brief Describes a command-line option
 	class option
 	{
 	public:
@@ -125,6 +126,7 @@ public:
 		add( o, opts... );
 	}
 
+	/// @brief Add several options
 	template<typename ...Opts>
 	void add( const option &o, Opts ...opts )
 	{
@@ -132,39 +134,49 @@ public:
 		add( opts... );
 	}
 
+	/// @brief Add one option.
 	void add( const option &o )
 	{
 		_options.push_back( o );
 	}
 
-	const option &operator[]( size_t idx ) const
+	/// @brief Get nth option.
+	const option &operator[]( size_t n ) const
 	{
-		return _options.at( idx );
+		return _options.at( n );
 	}
 
-	option &operator[]( size_t idx )
+	/// @brief Get nth option.
+	option &operator[]( size_t n )
 	{
-		return _options.at( idx );
+		return _options.at( n );
 	}
 
+	/// @brief Get option by name.
 	const option &operator[]( const char *n ) const;
+
+	/// @brief Get option by name.
 	option &operator[]( const char *n );
 
+	/// @brief Get number of options.
 	size_t size( void ) const
 	{
 		return _options.size();
 	}
 
+	/// @brief Return vector of options.
 	const std::vector<option> &options( void ) const
 	{
 		return _options;
 	}
 
+	/// @brief1
 	void parse( int argc, char *argv[] );
 	void parse( const std::vector<std::string> &opts );
 
 	std::string simple_usage( void ) const;
 
+	// Handle argument requiring "n" strings
 	template<size_t n>
 	static bool arg( option &opt, size_t &idx, const std::vector<std::string> &args )
 	{
@@ -192,6 +204,7 @@ public:
 		return true;
 	}
 
+	// Handle argument requiring between "a" and "b" strings
 	template<size_t a,size_t b>
 	static bool arg( option &opt, size_t &idx, const std::vector<std::string> &args )
 	{
@@ -230,7 +243,9 @@ public:
 	}
 
 	static bool args( option &opt, size_t &idx, const std::vector<std::string> &args );
+
 	static bool multi( option &opt, size_t &idx, const std::vector<std::string> &args );
+
 	static bool counted( option &opt, size_t &idx, const std::vector<std::string> &args );
 
 private:

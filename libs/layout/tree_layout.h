@@ -103,6 +103,9 @@ public:
 				if ( _tab )
 					_tab->set_minimum( _tab_size, 0.0 );
 				break;
+
+			default:
+				throw_logic( "unknown direction" );
 		}
 
 		master.set_minimum( minw + _pad[0] + _pad[1], minh + _pad[2] + _pad[3] );
