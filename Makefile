@@ -22,10 +22,8 @@ endif
 endif
 endif
 
-TARGETS := $(filter-out docs default debug release build mingw clean graph config,${MAKECMDGOALS})
-ifneq ($(findstring docs,${MAKECMDGOALS}),docs)
-override MAKECMDGOALS :=
-endif
+TARGETS := $(filter-out default debug release build mingw clean graph config,${MAKECMDGOALS})
+MAKECMDGOALS :=
 
 default: ${BUILD_DIR}/
 	ninja ${NINJA_ARGS} -C ${BUILD_DIR} ${TARGETS}
@@ -62,13 +60,3 @@ clean:
 
 graph:
 	ninja -C build -t graph ${TARGETS} | sed s\"`pwd`/\"\"g > deps.dot
-
-docs:
-	env DOX_OUTPUT_DIR=`pwd`/build/docs DOX_SOURCE_DIR=`pwd` doxygen docs/doxyfile
-
-ifneq ("${TARGETS}","")
-
-% :: default
-	@
-
-endif
