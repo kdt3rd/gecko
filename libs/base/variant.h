@@ -183,7 +183,7 @@ private:
 template<typename ...Ts>
 class variant
 {
-public: 
+public:
 	variant( void )
 	{
 	}

@@ -34,12 +34,9 @@ namespace base
 namespace locale
 {
 
-
 ////////////////////////////////////////
 
-
-void
-set( const std::string &l )
+void set( const std::string &l )
 {
 	if ( l.empty() )
 		std::locale::global( std::locale::classic() );
@@ -48,8 +45,9 @@ set( const std::string &l )
 	std::locale::global( loc );
 }
 
-std::string
-language( void )
+////////////////////////////////////////
+
+std::string language( void )
 {
 	std::string n = std::locale("").name();
 	if ( n == "*" || n == "C" )
@@ -92,9 +90,8 @@ language( void )
 	return lang.substr( 0, lang.find_first_of( "-_@." ) );
 }
 
-
 ////////////////////////////////////////
 
-} // locale
+}
 
-} // base
+}

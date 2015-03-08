@@ -12,6 +12,7 @@ lib = Library( "base",
 	"sha256.cpp",
 	"backtrace.cpp",
 	"cmd_line.cpp",
-	"language.cpp"
+	"language.cpp",
+	"json.cpp"
 );
 

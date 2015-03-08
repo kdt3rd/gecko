@@ -24,9 +24,7 @@
 
 #include <string>
 
-
 ////////////////////////////////////////
-
 
 namespace base
 {
@@ -39,7 +37,7 @@ std::string language( void );
 
 }
 
-} // namespace base
+}
 
 
 
