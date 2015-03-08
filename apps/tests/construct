@@ -3,6 +3,7 @@
 
 local base = libs.base.lib
 local utf = libs.utf.lib
+local sqlite = libs.sqlite.lib
 
 Executable( "test_format", "test_format.cpp", base, utf )
 Executable( "test_exception", Compile( "test_exception.cpp" ), base, utf )
@@ -13,6 +14,7 @@ Executable( "test_font", "test_font.cpp", UseLibraries( "script" ) )
 Executable( "test_hash", "test_hash.cpp", base )
 Executable( "test_mempool", "test_mempool.cpp", base )
 Executable( "test_variant", "test_variant.cpp", base )
+Executable( "test_database", "test_database.cpp", sqlite, base )
 
 --KDT-- Application( "Test Application", "test_app" )
 --KDT-- Application( "Test Platform", "test_platform" )

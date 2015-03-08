@@ -1,0 +1,14 @@
+DL = nil
+if sys.system() == "Linux" then
+	DL = ExternalLibrary( "dl" )
+end
+
+lib = Library( "sqlite",
+	"sqlite3.c",
+	"database.cpp",
+	"statement.cpp",
+	"field.cpp",
+	"transaction.cpp",
+	DL
+);
+
