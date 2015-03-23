@@ -16,6 +16,7 @@ Executable( "test_mempool", "test_mempool.cpp", base )
 Executable( "test_variant", "test_variant.cpp", base )
 Executable( "test_database", "test_database.cpp", sqlite, base )
 Executable( "test_json", "test_json.cpp", base )
+Executable( "test_math", "test_math.cpp", base )
 
 --KDT-- Application( "Test Application", "test_app" )
 --KDT-- Application( "Test Platform", "test_platform" )

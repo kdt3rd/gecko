@@ -13,6 +13,8 @@ lib = Library( "base",
 	"backtrace.cpp",
 	"cmd_line.cpp",
 	"language.cpp",
-	"json.cpp"
+	"json.cpp",
+	"math_functions.cpp",
+	"ratio.cpp"
 );
 

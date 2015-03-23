@@ -1,0 +1,18 @@
+
+#pragma once
+
+#include <cstdint>
+
+namespace base
+{
+
+////////////////////////////////////////
+
+namespace math
+{
+	int64_t gcd( int64_t a, int64_t b );
+}
+
+////////////////////////////////////////
+
+}
