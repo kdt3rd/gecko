@@ -46,5 +46,12 @@ std::string to_string( const T &t )
 
 ////////////////////////////////////////
 
+inline bool begins_with( const std::string &s, const std::string &start )
+{
+	return s.compare( 0, start.length(), start ) == 0;
+}
+
+////////////////////////////////////////
+
 }
 
