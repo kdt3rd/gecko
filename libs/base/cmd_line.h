@@ -12,6 +12,7 @@ namespace base
 
 ////////////////////////////////////////
 
+/// @brief Command-line option parser.
 class cmd_line
 {
 public:

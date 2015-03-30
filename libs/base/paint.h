@@ -28,7 +28,7 @@ public:
 	paint( void );
 	paint( const color &c, double w = 1.0 );
 	~paint( void );
-	
+
 	void set_stroke( const color &c, double w ) { _stroke_color = c; _stroke_width = w; }
 
 	void set_stroke_color( const color &c ) { _stroke_color = c; }

@@ -10,6 +10,7 @@ namespace draw
 
 ////////////////////////////////////////
 
+/// @brief Drawable made up of other drawables.
 class composite : public drawable
 {
 public:

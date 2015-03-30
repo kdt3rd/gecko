@@ -36,6 +36,8 @@ size_t json::size( void ) const
 		return get<json_object>().size();
 	if ( is<json_array>() )
 		return get<json_array>().size();
+	if ( is<json_string>() )
+		return get<json_string>().size();
 	return 0;
 }
 

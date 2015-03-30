@@ -71,7 +71,7 @@ class nth_variadic
 
 ////////////////////////////////////////
 
-// Statically compute max template argument
+/// @brief Statically compute max template argument.
 template <size_t Arg1, size_t ...Others>
 struct static_max;
 

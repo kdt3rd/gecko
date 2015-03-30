@@ -12,6 +12,7 @@ namespace sqlite
 
 ////////////////////////////////////////
 
+/// @brief SQLite database.
 class database
 {
 public:

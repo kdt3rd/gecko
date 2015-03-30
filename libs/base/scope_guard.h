@@ -10,22 +10,25 @@ namespace base
 
 /// @brief Run a function, unless dismiss is called
 ///
-/// Store a function and call it upon destruction, unless dismiss is called.
+/// Store a function and call it upon destruction, unless dismiss is called first.
 template <class function>
 class scope_guard
 {
 public:
+	/// @brief Constructor.
 	scope_guard( function f )
 		: _f( std::move( f ) ), _active(true)
 	{
 	}
 
+	/// @brief Destructor.
 	~scope_guard( void )
 	{
 		if ( _active )
 			_f();
 	}
 
+	/// @brief Dismiss the guard.
 	void dismiss( void )
 	{
 		_active = false;
@@ -37,6 +40,7 @@ public:
 
 	scope_guard &operator=( const scope_guard & ) = delete;
 
+	/// @brief Move constructor.
 	scope_guard( scope_guard && rhs )
 		: _f( std::move( rhs._f ) ), _active( rhs._active )
 	{
@@ -48,6 +52,7 @@ private:
 	bool _active;
 };
 
+/// @brief Create a scope guard from a function.
 template<class function>
 scope_guard<function> make_guard( function f )
 {

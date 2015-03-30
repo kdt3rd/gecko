@@ -9,8 +9,8 @@ namespace base
 
 ////////////////////////////////////////
 
-format_specifier::format_specifier( const char * &fmt, const char *end )
-	: index( 0 ), width( -1 ), base( 10 ), precision( -1 ), alignment( -1 ), fill( ' ' ), upper_case( false ), show_plus( false )
+detail::format_specifier::format_specifier( const char * &fmt, const char *end )
+	: index( 0 ), width( -1 ), radix( 10 ), precision( -1 ), alignment( -1 ), fill( ' ' ), upper_case( false ), show_plus( false )
 {
 	precondition( fmt != end, "empty format specifier" );
 	precondition( *fmt == '{', "format specifier expected '{' (got '{0}')", *fmt );
@@ -26,12 +26,12 @@ format_specifier::format_specifier( const char * &fmt, const char *end )
 				break;
 
 			case 'b':
-				base = parse_number( fmt, end );
+				radix = parse_number( fmt, end );
 				upper_case = false;
 				break;
 
 			case 'B':
-				base = parse_number( fmt, end );
+				radix = parse_number( fmt, end );
 				upper_case = true;
 				break;
 
@@ -79,18 +79,18 @@ format_specifier::format_specifier( const char * &fmt, const char *end )
 ////////////////////////////////////////
 
 void
-format_specifier::apply( std::ostream &out )
+detail::format_specifier::apply( std::ostream &out )
 {
 	if ( width >= 0 )
 		out.width( width );
 
 	out.unsetf( std::ios_base::basefield );
-	switch ( base )
+	switch ( radix )
 	{
 		case 8: out.setf( std::ios_base::oct ); break;
 		case 10: out.setf( std::ios_base::dec ); break;
 		case 16: out.setf( std::ios_base::hex ); break;
-		default: throw_runtime( "unsupported base: {0}", base );
+		default: throw_runtime( "unsupported base: {0}", radix );
 	}
 
 	out.unsetf( std::ios_base::floatfield );
@@ -123,19 +123,8 @@ format_specifier::apply( std::ostream &out )
 
 ////////////////////////////////////////
 
-bool
-format_specifier::begin( const char * &fmt, const char *end )
-{
-	while ( fmt != end && *fmt != '{' )
-		++fmt;
-
-	return fmt != end;
-}
-
-////////////////////////////////////////
-
 int
-format_specifier::parse_number( const char * &fmt, const char *end )
+detail::format_specifier::parse_number( const char * &fmt, const char *end )
 {
 	char start = *fmt++;
 	int n = 0;

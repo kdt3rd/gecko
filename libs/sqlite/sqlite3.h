@@ -1,3 +1,4 @@
+/// @cond SQLITE3
 /*
 ** 2001 September 15
 **
@@ -7713,3 +7714,4 @@ struct sqlite3_rtree_query_info {
 
 #endif  /* ifndef _SQLITE3RTREE_H_ */
 
+/// @endcond

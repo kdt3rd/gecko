@@ -15,6 +15,9 @@
 namespace base
 {
 
+namespace detail
+{
+
 ////////////////////////////////////////
 
 template<typename... Ts>
@@ -178,46 +181,57 @@ private:
 	Tuple _values;
 };
 
+}
+
 ////////////////////////////////////////
 
+/// @brief Variant type (aka tagged union).
 template<typename ...Ts>
 class variant
 {
 public:
+	/// @brief Constructor
 	variant( void )
 	{
 	}
 
+	/// @brief Copy constructor
 	variant( const variant<Ts...> &old )
 		: _type_id( old._type_id )
 	{
 		Helper::copy( old._type_id, &old._data, &_data );
 	}
 
+	/// @brief Move constructor
 	variant( variant<Ts...> &&old )
 		: _type_id( old._type_id )
 	{
 		Helper::move( old._type_id, &old._data, &_data );
 	}
 
+	/// @brief Constructor with move value.
 	template<typename T, typename base::enable_if_any<int,std::is_base_of<Ts,typename std::remove_const<T>::type>::value...>::type * = nullptr>
 	variant( T &&t )
 	{
 		set<T>( std::move( t ) );
 	}
 
+	/// @brief Constructor with value.
 	template<typename T, typename base::enable_if_any<int,std::is_base_of<Ts,typename std::remove_const<T>::type>::value...>::type * = nullptr>
 	variant( const T &t )
 	{
 		set<T>( t );
 	}
 
+	/// @brief Destructor
 	~variant( void )
 	{
 		Helper::destroy( _type_id, &_data );
 	}
 
-	// Serves as both the move and the copy asignment operator.
+	/// @breif Assignment operator.
+	///
+	/// Serves as both the move and the copy asignment operator.
 	variant<Ts...>& operator=( variant<Ts...> old )
 	{
 		std::swap( _type_id, old._type_id );
@@ -225,17 +239,20 @@ public:
 		return *this;
 	}
 
+	/// @brief Check is we are holding the given type.
 	template<typename T>
 	bool is( void ) const
 	{
 		return _type_id == typeid(T);
 	}
 
+	/// @brief Check is we have a value.
 	bool valid( void ) const
 	{
 		return _type_id != invalid_type();
 	}
 
+	/// @brief Set value to the given type.
 	template<typename T, typename... Args>
 	void set( Args &&...args )
 	{
@@ -249,6 +266,7 @@ public:
 		_type_id = typeid(TT);
 	}
 
+	/// @brief Get the value as the given type.
 	template<typename T>
 	T& get( void )
 	{
@@ -259,6 +277,7 @@ public:
 			throw std::bad_cast();
 	}
 
+	/// @brief Get the value as the given type.
 	template<typename T>
 	const T& get( void ) const
 	{
@@ -269,12 +288,14 @@ public:
 			throw std::bad_cast();
 	}
 
+	/// @brief Clear the variant to empty.
 	void clear( void )
 	{
 		Helper::destroy( _type_id, &_data );
 		_type_id = invalid_type();
 	}
 
+	/// @brief Name of the current type.
 	const char *type_name( void ) const
 	{
 		return _type_id.name();
@@ -286,7 +307,7 @@ private:
 
 	using DataType = typename std::aligned_storage<_data_size, _data_align>::type;
 
-	using Helper = variant_helper<Ts...>;
+	using Helper = detail::variant_helper<Ts...>;
 
 	static inline std::type_index invalid_type( void )
 	{
@@ -299,18 +320,20 @@ private:
 
 ////////////////////////////////////////
 
+/// @brief Apply the visitor to the variant.
 template<typename Result = void, typename Visitor, typename ...Ts>
 Result visit( Visitor &v, const variant<Ts...> &x )
 {
-	return visitor_helper<Ts...>::template visit<Result,Visitor,base::variant<Ts...>>( v, x );
+	return detail::visitor_helper<Ts...>::template visit<Result,Visitor,base::variant<Ts...>>( v, x );
 }
 
 ////////////////////////////////////////
 
+/// @brief Apply the visitor with multiple variants.
 template<typename Result = void, typename Visitor, typename Variant1, typename Variant2, typename ...Variants>
 static Result visit( Visitor &v, const Variant1 &x, const Variant2 &y, const Variants &...vs )
 {
-	visitor_multi<Result, Visitor, std::tuple<>, Variant1, Variant2, Variants...> newv( v, std::tuple<>(), y, vs... );
+	detail::visitor_multi<Result, Visitor, std::tuple<>, Variant1, Variant2, Variants...> newv( v, std::tuple<>(), y, vs... );
 	visit( newv, x );
 }
 

@@ -15,22 +15,108 @@ namespace base
 
 ////////////////////////////////////////
 
+namespace detail
+{
+
+/// @brief Parse a format specifier
+class format_specifier
+{
+public:
+	/// @brief Parse the format specifier given.
+	format_specifier( const char *&fmt, const char *end );
+
+	/// @brief Index of specifier.
+	int index;
+
+	/// @brief Width of specifier.
+	int width;
+
+	/// @brief Base for numbers.
+	int radix;
+
+	/// @brief Precision for numbers.
+	int precision;
+
+	/// @brief Alignment withing width.
+	int alignment;
+
+	/// @brief Fill character.
+	char fill;
+
+	/// @brief Use uppercase for numbers with base > 10.
+	bool upper_case;
+
+	/// @brief Show plus sign for positive numbers.
+	bool show_plus;
+
+	/// @brief Apply output stream settings for this specifier.
+	void apply( std::ostream &out );
+
+private:
+	static int parse_number( const char * &fmt, const char *end );
+};
+
+}
+
+////////////////////////////////////////
+
+/// @brief Holds a format string with attached arguments.
 template<typename ... Args>
 class format_holder
 {
 public:
+	/// @brief Construct format holder.
 	format_holder( std::string fmt, const Args &...args )
 		: _fmt( std::move( fmt ) ), _args( std::tie( args... ) )
 	{
 	}
 
+	/// @brief Convert to a string.
 	operator std::string()
 	{
 		std::ostringstream str;
-		str << *this;
+		write( str );
 		return str.str();
 	}
 
+	/// @brief Write the string to output stream.
+	template <typename CharT>
+	void write( std::basic_ostream<CharT> &out ) const
+	{
+		const char *start = format_begin();
+		const char *end = format_end();
+		const char *cur = start;
+		const char *prev = start;
+
+		try
+		{
+			while ( begin( cur, end ) )
+			{
+				out.write( prev, int( cur - prev ) );
+				std::ios::fmtflags flags( out.flags() );
+
+				detail::format_specifier spec( cur, end );
+				spec.apply( out );
+
+				output( out, size_t(spec.index) );
+				prev = cur + 1;
+
+				out.flags( flags );
+			}
+			out.write( prev, int( cur - prev ) );
+		}
+		catch ( ... )
+		{
+			std::string tmp( start, end );
+			size_t errpos = cur - start;
+			tmp.insert( errpos + 1, ansi::reset );
+			tmp.insert( errpos, ansi::invert );
+			tmp = replace( std::move( tmp ), '\n', "\\n" );
+			std::throw_with_nested( std::runtime_error( "parse error in format \"" + tmp + '\"' ) );
+		}
+	}
+
+private:
 	template <typename CharT>
 	void output( std::basic_ostream<CharT> &out, size_t x ) const
 	{
@@ -40,11 +126,10 @@ public:
 	const char *format_begin( void ) const { return _fmt.c_str(); }
 	const char *format_end( void ) const { return _fmt.c_str() + _fmt.size(); }
 
-private:
 	template <typename CharT, size_t I, size_t N>
 	struct get_arg
 	{
-		typedef get_arg<CharT,I+1,N-1> base;
+		typedef get_arg<CharT,I+1,N-1> base_class;
 
 		template<typename Tuple>
 		static void output( std::basic_ostream<CharT> &out, const Tuple &t, size_t x )
@@ -54,7 +139,7 @@ private:
 				out << std::get<I>( t );
 				return;
 			}
-			base::output( out, t, x );
+			base_class::output( out, t, x );
 		}
 	};
 
@@ -67,6 +152,14 @@ private:
 			throw std::runtime_error( "Invalid fmt format string or missing argument" );
 		}
 	};
+
+	bool begin( const char * &fmt, const char *end ) const
+	{
+		while ( fmt != end && *fmt != '{' )
+			++fmt;
+		return fmt != end;
+	}
+
 
 	std::string _fmt;
 	std::tuple<const Args&...> _args;
@@ -103,66 +196,11 @@ format_holder<Args...> format( std::string fmt, const Args &...data )
 
 ////////////////////////////////////////
 
-class format_specifier
-{
-public:
-	/// Parse the format specifier given.
-	format_specifier( const char *&fmt, const char *end );
-
-	int index;
-	int width;
-	int base;
-	int precision;
-	int alignment;
-	char fill;
-	bool upper_case;
-	bool show_plus;
-
-	void apply( std::ostream &out );
-
-	static bool begin( const char * &fmt, const char *end );
-
-private:
-	static int parse_number( const char * &fmt, const char *end );
-};
-
-////////////////////////////////////////
-
+/// @brief Stream output operator for format_holder.
 template<typename CharT, typename ... Args>
 std::basic_ostream<CharT> &operator<<( std::basic_ostream<CharT> &out, const format_holder<Args...> &fmt )
 {
-	const char *start = fmt.format_begin();
-	const char *end = fmt.format_end();
-	const char *cur = start;
-	const char *prev = start;
-
-	try
-	{
-		while ( format_specifier::begin( cur, end ) )
-		{
-			out.write( prev, int( cur - prev ) );
-			std::ios::fmtflags flags( out.flags() );
-
-			format_specifier spec( cur, end );
-			spec.apply( out );
-
-			fmt.output( out, size_t(spec.index) );
-			prev = cur + 1;
-
-			out.flags( flags );
-		}
-		out.write( prev, int( cur - prev ) );
-	}
-	catch ( ... )
-	{
-		std::string tmp( start, end );
-		size_t errpos = cur - start;
-		tmp.insert( errpos + 1, ansi::reset );
-		tmp.insert( errpos, ansi::invert );
-		tmp = replace( std::move( tmp ), '\n', "\\n" );
-		std::throw_with_nested( std::runtime_error( "parse error in format \"" + tmp + '\"' ) );
-	}
-
+	fmt.write( out );
 	return out;
 }
 
