@@ -44,7 +44,7 @@ public:
 	{
 		return { _x - p._x, _y - p._y };
 	}
-	
+
 	point operator+( const point &p ) const
 	{
 		return { _x + p._x, _y + p._y };
@@ -83,7 +83,81 @@ private:
 
 ////////////////////////////////////////
 
+/// @brief Output operator for point.
 inline std::ostream &operator<<( std::ostream &out, const point &p )
+{
+	out << p.x() << ',' << p.y();
+	return out;
+}
+
+////////////////////////////////////////
+
+/// @brief Integer point.
+class ipoint
+{
+public:
+	constexpr ipoint( void )
+	{
+	}
+
+	constexpr ipoint( int64_t xx, int64_t yy )
+		: _x( xx ), _y( yy )
+	{
+	}
+
+	constexpr int64_t x( void ) const { return _x; }
+	constexpr int64_t y( void ) const { return _y; }
+
+	void set( int64_t xx, int64_t yy )
+	{
+		_x = xx;
+		_y = yy;
+	}
+
+	void move_by( int64_t xx, int64_t yy )
+	{
+		_x += xx;
+		_y += yy;
+	}
+
+	void set_x( int64_t xx ) { _x = xx; }
+	void set_y( int64_t yy ) { _y = yy; }
+
+	ipoint delta( const ipoint &p ) const
+	{
+		return { _x - p._x, _y - p._y };
+	}
+
+	ipoint operator+( const ipoint &p ) const
+	{
+		return { _x + p._x, _y + p._y };
+	}
+
+	ipoint operator-( const ipoint &p ) const
+	{
+		return { _x - p._x, _y - p._y };
+	}
+
+	ipoint operator*( int64_t v ) const
+	{
+		return { _x * v, _y * v };
+	}
+
+	static inline int64_t distance_squared( const ipoint &p1, const ipoint &p2 )
+	{
+		int64_t dx = p1.x() - p2.x();
+		int64_t dy = p1.y() - p2.y();
+		return dx * dx + dy * dy;
+	}
+
+private:
+	int64_t _x = 0, _y = 0;
+};
+
+////////////////////////////////////////
+
+/// @brief Output operator for integer point.
+inline std::ostream &operator<<( std::ostream &out, const ipoint &p )
 {
 	out << p.x() << ',' << p.y();
 	return out;

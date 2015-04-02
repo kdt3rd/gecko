@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <cstdint>
 
 namespace base
 {
@@ -79,8 +80,77 @@ private:
 	double _w = 0.0, _h = 0.0;
 };
 
+////////////////////////////////////////
+
 /// @brief Stream out a size object
 inline std::ostream &operator<<( std::ostream &out, const size &s )
+{
+	out << s.w() << 'x' << s.h();
+	return out;
+}
+
+////////////////////////////////////////
+
+/// @brief Width and height (integer)
+class isize
+{
+public:
+	/// @brief Default constructor
+	constexpr isize( void )
+	{
+	}
+
+	/// @brief Constructor with width and height
+	constexpr isize( int64_t ww, int64_t hh )
+		: _w( ww ), _h( hh )
+	{
+	}
+
+	/// @brief Width
+	constexpr int64_t w( void ) const { return _w; }
+
+	/// @brief Height
+	constexpr int64_t h( void ) const { return _h; }
+
+	/// @brief Set the width and height
+	void set( int64_t ww, int64_t hh )
+	{
+		_w = ww;
+		_h = hh;
+	}
+
+	/// @brief Set the width
+	void set_width( int64_t ww ) { _w = ww; }
+
+	/// @brief Set the height
+	void set_height( int64_t hh ) { _h = hh; }
+
+	/// @brief Shrink width and height
+	void shrink( int64_t dw, int64_t dh ) { _w -= dw; _h -= dh; }
+
+	/// @brief Grow width and height
+	void grow( int64_t dw, int64_t dh ) { _w += dw; _h += dh; }
+
+	/// @brief Add two sizes together
+	isize operator+( const isize &s ) const
+	{
+		return { _w + s._w, _h + s._h };
+	}
+
+	/// @brief Add two sizes together
+	bool operator<( const isize &o ) const
+	{
+		return _w < o._w || ( _w == o._w && _h < o._h );
+	}
+
+private:
+	int64_t _w = 0, _h = 0;
+};
+
+////////////////////////////////////////
+
+/// @brief Stream out a integer size object
+inline std::ostream &operator<<( std::ostream &out, const isize &s )
 {
 	out << s.w() << 'x' << s.h();
 	return out;

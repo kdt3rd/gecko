@@ -53,5 +53,12 @@ inline bool begins_with( const std::string &s, const std::string &start )
 
 ////////////////////////////////////////
 
+constexpr size_t length( const char *s )
+{
+	return *s ? 1 + length( s + 1 ) : 0;
+}
+
+////////////////////////////////////////
+
 }
 
