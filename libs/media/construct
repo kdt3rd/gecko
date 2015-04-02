@@ -1,0 +1,7 @@
+
+lib = Library( "media",
+	"container.cpp",
+	"riff/fourcc.cpp",
+	"riff/chunk.cpp"
+)
+
