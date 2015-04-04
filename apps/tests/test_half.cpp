@@ -13,7 +13,12 @@ int safemain( void )
 	using base::half;
 	using namespace base::literal;
 
-	half x( 1.0 );
+	std::cout << "sizeof(half) = " << sizeof(half) << std::endl;
+
+	half y( base::half::binary, 0 );
+	std::cout << "0 = " << y << std::endl;
+
+	half x( 1.F );
 	std::cout << "1.0 = " << x << std::endl;
 
 	x = 2.0;

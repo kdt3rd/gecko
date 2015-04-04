@@ -134,9 +134,6 @@ namespace base
 		/// Tag type for binary construction.
 		struct binary_t {};
 
-		/// Tag for binary construction.
-		constexpr binary_t binary = binary_t();
-
 		/// Temporary half-precision expression.
 		/// This class represents a half-precision expression which just stores a single-precision value internally.
 		struct expr
@@ -727,6 +724,9 @@ namespace base
 		friend struct std::hash<half>;
 
 	public:
+		/// Tag for binary construction.
+		static constexpr detail::binary_t binary = detail::binary_t();
+
 		/// Default constructor.
 		/// This initializes the half to 0. Although this does not match the builtin types' default-initialization semantics
 		/// and may be less efficient than no initialization, it is needed to provide proper value-initialization semantics.
@@ -740,6 +740,10 @@ namespace base
 		/// Conversion constructor.
 		/// \param rhs float to convert
 		explicit half(float rhs) : data_(detail::float2half<round_style>(rhs)) {}
+
+		/// Constructor.
+		/// \param bits binary representation to set half to
+		constexpr half(detail::binary_t, detail::uint16 bits) : data_(bits) {}
 
 		/// Conversion to single-precision.
 		/// \return single precision value representing expression value
@@ -816,13 +820,11 @@ namespace base
 		/// \return non-decremented half value
 		half operator--(int) { half out(*this); --*this; return out; }
 
+		void set_bits( detail::uint16 x ) { data_ = x; }
+
 	private:
 		/// Rounding mode to use (always `std::round_indeterminate`)
 		static const std::float_round_style round_style = (std::float_round_style)(HALF_ROUND_STYLE);
-
-		/// Constructor.
-		/// \param bits binary representation to set half to
-		constexpr half(detail::binary_t, detail::uint16 bits) : data_(bits) {}
 
 		/// Internal binary representation
 		detail::uint16 data_;
@@ -937,7 +939,7 @@ namespace base
 
 			/// Get NaN.
 			/// \return Half-precision quiet NaN
-			static half nanh(const char*) { return half(binary, 0x7FFF); }
+			static half nanh(const char*) { return half(half::binary, 0x7FFF); }
 
 			/// Exponential implementation.
 			/// \param arg function argument
@@ -1124,22 +1126,22 @@ namespace base
 			/// Floor implementation.
 			/// \param arg value to round
 			/// \return rounded value
-			static half floor(half arg) { return half(binary, round_half<std::round_toward_neg_infinity>(arg.data_)); }
+			static half floor(half arg) { return half(half::binary, round_half<std::round_toward_neg_infinity>(arg.data_)); }
 
 			/// Ceiling implementation.
 			/// \param arg value to round
 			/// \return rounded value
-			static half ceil(half arg) { return half(binary, round_half<std::round_toward_infinity>(arg.data_)); }
+			static half ceil(half arg) { return half(half::binary, round_half<std::round_toward_infinity>(arg.data_)); }
 
 			/// Truncation implementation.
 			/// \param arg value to round
 			/// \return rounded value
-			static half trunc(half arg) { return half(binary, round_half<std::round_toward_zero>(arg.data_)); }
+			static half trunc(half arg) { return half(half::binary, round_half<std::round_toward_zero>(arg.data_)); }
 
 			/// Nearest integer implementation.
 			/// \param arg value to round
 			/// \return rounded value
-			static half round(half arg) { return half(binary, round_half_up(arg.data_)); }
+			static half round(half arg) { return half(half::binary, round_half_up(arg.data_)); }
 
 			/// Nearest integer implementation.
 			/// \param arg value to round
@@ -1149,7 +1151,7 @@ namespace base
 			/// Nearest integer implementation.
 			/// \param arg value to round
 			/// \return rounded value
-			static half rint(half arg) { return half(binary, round_half<half::round_style>(arg.data_)); }
+			static half rint(half arg) { return half(half::binary, round_half<half::round_style>(arg.data_)); }
 
 			/// Nearest integer implementation.
 			/// \param arg value to round
@@ -1178,7 +1180,7 @@ namespace base
 				int e = m >> 10;
 				if(!e)
 					for(m<<=1; m<0x400; m<<=1,--e) ;
-				return *exp = e-14, half(binary, static_cast<uint16>((arg.data_&0x8000)|0x3800|(m&0x3FF)));
+				return *exp = e-14, half(half::binary, static_cast<uint16>((arg.data_&0x8000)|0x3800|(m&0x3FF)));
 			}
 
 			/// Decompression implementation.
@@ -1189,16 +1191,16 @@ namespace base
 			{
 				unsigned int e = arg.data_ & 0x7C00;
 				if(e > 0x6000)
-					return *iptr = arg, (e==0x7C00&&(arg.data_&0x3FF)) ? arg : half(binary, arg.data_&0x8000);
+					return *iptr = arg, (e==0x7C00&&(arg.data_&0x3FF)) ? arg : half(half::binary, arg.data_&0x8000);
 				if(e < 0x3C00)
 					return iptr->data_ = arg.data_ & 0x8000, arg;
 				e >>= 10;
 				unsigned int mask = (1<<(25-e)) - 1, m = arg.data_ & mask;
 				iptr->data_ = arg.data_ & ~mask;
 				if(!m)
-					return half(binary, arg.data_&0x8000);
+					return half(half::binary, arg.data_&0x8000);
 				for(; m<0x400; m<<=1,--e) ;
-				return half(binary, static_cast<uint16>((arg.data_&0x8000)|(e<<10)|(m&0x3FF)));
+				return half(half::binary, static_cast<uint16>((arg.data_&0x8000)|(e<<10)|(m&0x3FF)));
 			}
 
 			/// Scaling implementation.
@@ -1253,7 +1255,7 @@ namespace base
 					value |= ((value>>15)-1) & 1;
 				else if(half::round_style == std::round_toward_neg_infinity)
 					value |= value >> 15;
-				return half(binary, value);
+				return half(half::binary, value);
 			}
 
 			/// Exponent implementation.
@@ -1282,7 +1284,7 @@ namespace base
 			{
 				int exp = arg.data_ & 0x7FFF;
 				if(!exp)
-					return half(binary, 0xFC00);
+					return half(half::binary, 0xFC00);
 				if(exp < 0x7C00)
 				{
 					if(!(exp>>=10))
@@ -1291,7 +1293,7 @@ namespace base
 				}
 				if(exp > 0x7C00)
 					return arg;
-				return half(binary, 0x7C00);
+				return half(half::binary, 0x7C00);
 			}
 
 			/// Enumeration implementation.
@@ -1306,10 +1308,10 @@ namespace base
 				if(tabs > 0x7C00 || from.data_ == to.data_ || !(fabs|tabs))
 					return to;
 				if(!fabs)
-					return half(binary, (to.data_&0x8000)+1);
+					return half(half::binary, (to.data_&0x8000)+1);
 				bool lt = (signbit(from) ? (static_cast<int17>(0x8000)-from.data_) : static_cast<int17>(from.data_)) <
 					(signbit(to) ? (static_cast<int17>(0x8000)-to.data_) : static_cast<int17>(to.data_));
-				return half(binary, from.data_+(((from.data_>>15)^static_cast<uint16>(lt))<<1)-1);
+				return half(half::binary, from.data_+(((from.data_>>15)^static_cast<uint16>(lt))<<1)-1);
 			}
 
 			/// Enumeration implementation.
@@ -1324,15 +1326,15 @@ namespace base
 				if(builtin_isnan(to) || lfrom == to)
 					return half(static_cast<float>(to));
 				if(!(from.data_&0x7FFF))
-					return half(binary, (static_cast<detail::uint16>(builtin_signbit(to))<<15)+1);
-				return half(binary, from.data_+(((from.data_>>15)^static_cast<uint16>(lfrom<to))<<1)-1);
+					return half(half::binary, (static_cast<detail::uint16>(builtin_signbit(to))<<15)+1);
+				return half(half::binary, from.data_+(((from.data_>>15)^static_cast<uint16>(lfrom<to))<<1)-1);
 			}
 
 			/// Sign implementation
 			/// \param x first operand
 			/// \param y second operand
 			/// \return composed value
-			static half copysign(half x, half y) { return half(binary, x.data_^((x.data_^y.data_)&0x8000)); }
+			static half copysign(half x, half y) { return half(half::binary, x.data_^((x.data_^y.data_)&0x8000)); }
 
 			/// Classification implementation.
 			/// \param arg value to classify
@@ -1477,12 +1479,12 @@ namespace base
 			/// Negation implementation.
 			/// \param arg value to negate
 			/// \return negated value
-			static constexpr half negate(half arg) { return half(binary, arg.data_^0x8000); }
+			static constexpr half negate(half arg) { return half(half::binary, arg.data_^0x8000); }
 
 			/// Absolute value implementation.
 			/// \param arg function argument
 			/// \return absolute value
-			static half fabs(half arg) { return half(binary, arg.data_&0x7FFF); }
+			static half fabs(half arg) { return half(half::binary, arg.data_&0x7FFF); }
 		};
 		template<> struct unary_specialized<expr>
 		{
@@ -1551,8 +1553,8 @@ namespace base
 			static half cast(U arg) { return cast_impl(arg, is_float<U>()); };
 
 		private:
-			static half cast_impl(U arg, true_type) { return half(binary, float2half<R>(static_cast<float>(arg))); }
-			static half cast_impl(U arg, false_type) { return half(binary, int2half<R>(arg)); }
+			static half cast_impl(U arg, true_type) { return half(half::binary, float2half<R>(static_cast<float>(arg))); }
+			static half cast_impl(U arg, false_type) { return half(half::binary, int2half<R>(arg)); }
 		};
 		template<typename T,std::float_round_style R> struct half_caster<T,half,R>
 		{
@@ -2476,32 +2478,32 @@ namespace std
 		static constexpr int max_exponent10 = 4;
 
 		/// Smallest positive normal value.
-		static constexpr base::half min() noexcept { return base::half(base::detail::binary, 0x0400); }
+		static constexpr base::half min() noexcept { return base::half(base::half::binary, 0x0400); }
 
 		/// Smallest finite value.
-		static constexpr base::half lowest() noexcept { return base::half(base::detail::binary, 0xFBFF); }
+		static constexpr base::half lowest() noexcept { return base::half(base::half::binary, 0xFBFF); }
 
 		/// Largest finite value.
-		static constexpr base::half max() noexcept { return base::half(base::detail::binary, 0x7BFF); }
+		static constexpr base::half max() noexcept { return base::half(base::half::binary, 0x7BFF); }
 
 		/// Difference between one and next representable value.
-		static constexpr base::half epsilon() noexcept { return base::half(base::detail::binary, 0x1400); }
+		static constexpr base::half epsilon() noexcept { return base::half(base::half::binary, 0x1400); }
 
 		/// Maximum rounding error.
 		static constexpr base::half round_error() noexcept
-			{ return base::half(base::detail::binary, (round_style==std::round_to_nearest) ? 0x3800 : 0x3C00); }
+			{ return base::half(base::half::binary, (round_style==std::round_to_nearest) ? 0x3800 : 0x3C00); }
 
 		/// Positive infinity.
-		static constexpr base::half infinity() noexcept { return base::half(base::detail::binary, 0x7C00); }
+		static constexpr base::half infinity() noexcept { return base::half(base::half::binary, 0x7C00); }
 
 		/// Quiet NaN.
-		static constexpr base::half quiet_NaN() noexcept { return base::half(base::detail::binary, 0x7FFF); }
+		static constexpr base::half quiet_NaN() noexcept { return base::half(base::half::binary, 0x7FFF); }
 
 		/// Signalling NaN.
-		static constexpr base::half signaling_NaN() noexcept { return base::half(base::detail::binary, 0x7DFF); }
+		static constexpr base::half signaling_NaN() noexcept { return base::half(base::half::binary, 0x7DFF); }
 
 		/// Smallest positive subnormal value.
-		static constexpr base::half denorm_min() noexcept { return base::half(base::detail::binary, 0x0001); }
+		static constexpr base::half denorm_min() noexcept { return base::half(base::half::binary, 0x0001); }
 	};
 
 	/// Hash function for half-precision floats.
