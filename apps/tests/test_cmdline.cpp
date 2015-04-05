@@ -20,13 +20,12 @@ int safemain( int argc, char *argv[] )
 	);
 
 	auto errhandler = base::make_guard( [&]() { std::cerr << options << std::endl; } );
-
 	options.parse( argc, argv );
+	errhandler.dismiss();
 
 	if ( options["help"] )
 	{
 		std::cout << "Help!\n" << options << std::endl;
-		errhandler.dismiss();
 	}
 
 	if ( auto &opt = options["file"] )
@@ -53,7 +52,6 @@ int safemain( int argc, char *argv[] )
 
 	std::cout << std::flush;
 
-	errhandler.dismiss();
 	return 0;
 }
 

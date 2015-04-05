@@ -39,6 +39,9 @@ public:
 		add_paths( paths... );
 	}
 
+	/// @brief Construct URI and hide the password if present.
+	explicit uri( char *str );
+
 	const std::string &scheme( void ) const
 	{
 		return _scheme;

@@ -1,5 +1,6 @@
 
 #include "cmd_line.h"
+#include <cstring>
 
 namespace base
 {
@@ -104,22 +105,22 @@ void
 cmd_line::parse( int argc, char *argv[] )
 {
 	precondition( argc > 0, "not enough arguments" );
-	std::vector<std::string> tmp( argv+1, argv+argc );
+	std::vector<char *> tmp( argv+1, argv+argc );
 	parse( tmp );
 }
 
 ////////////////////////////////////////
 
 void
-cmd_line::parse( const std::vector<std::string> &args )
+cmd_line::parse( const std::vector<char *> &args )
 {
 	size_t current = 0;
-	
+
 	while ( current < args.size() )
 	{
-		const std::string &arg = args[current];
+		char *arg = args[current];
 
-		if ( arg == "--" )
+		if ( std::strcmp( arg, "--" ) == 0 )
 		{
 			++current;
 			break;
@@ -144,7 +145,7 @@ cmd_line::parse( const std::vector<std::string> &args )
 	// After the "--", no options allowed (only arguments)
 	while ( current < args.size() )
 	{
-		const std::string &arg = args[current];
+		char *arg = args[current];
 		bool matched = false;
 		for ( auto &opt: _options )
 		{
@@ -200,12 +201,12 @@ cmd_line::simple_usage( void ) const
 ////////////////////////////////////////
 
 bool
-cmd_line::multi( option &opt, size_t &idx, const std::vector<std::string> &args )
+cmd_line::multi( option &opt, size_t &idx, const std::vector<char *> &args )
 {
 	if ( !opt.is_non_option() )
 		++idx;
 
-	if ( idx >= args.size() || args[idx].find( '-' ) == 0 )
+	if ( idx >= args.size() || args[idx][0] == '-' )
 		throw_runtime( "option '{0}' expected at least 1 value", opt.name() );
 
 	opt.add_value( args[idx] );
@@ -217,17 +218,17 @@ cmd_line::multi( option &opt, size_t &idx, const std::vector<std::string> &args 
 ////////////////////////////////////////
 
 bool
-cmd_line::args( option &opt, size_t &idx, const std::vector<std::string> &args )
+cmd_line::args( option &opt, size_t &idx, const std::vector<char *> &args )
 {
 	if ( !opt.is_non_option() )
 		++idx;
 
-	if ( idx >= args.size() || args[idx].find( '-' ) == 0 )
+	if ( idx >= args.size() || args[idx][0] == '-' )
 		throw_runtime( "option '{0}' expected at least 1 value", opt.name() );
 
 	while ( idx < args.size() )
 	{
-		if ( args[idx].find( '-' ) == 0 )
+		if ( args[idx][0] == '-' )
 			break;
 		opt.add_value( args[idx] );
 		++idx;
@@ -239,10 +240,10 @@ cmd_line::args( option &opt, size_t &idx, const std::vector<std::string> &args )
 ////////////////////////////////////////
 
 bool
-cmd_line::counted( option &opt, size_t &idx, const std::vector<std::string> &args )
+cmd_line::counted( option &opt, size_t &idx, const std::vector<char *> &args )
 {
 	precondition( !opt.is_non_option(), "unnamed option not allowed as counted flag" );
-	opt.add_value( std::string() );
+	opt.add_value( nullptr );
 	++idx;
 	return true;
 }

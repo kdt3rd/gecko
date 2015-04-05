@@ -9,6 +9,18 @@ namespace base
 
 ////////////////////////////////////////
 
+uri::uri( char *str )
+{
+	parse( str );
+	while ( *str != '\0' )
+	{
+		*str = '*';
+		++str;
+	}
+}
+
+////////////////////////////////////////
+
 std::string uri::escape( const std::string &str )
 {
 	const std::string reserved = ":/?#[]@!$&'()*+,;=";

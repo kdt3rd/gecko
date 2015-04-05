@@ -20,7 +20,7 @@ public:
 	class option
 	{
 	public:
-		typedef std::function<bool(option&,size_t&,const std::vector<std::string>&)> callback;
+		typedef std::function<bool(option&,size_t&,const std::vector<char *>&)> callback;
 
 		option( char s, const char *l, const char *a, const callback &c, const char *msg, bool required = false );
 		option( char s, const std::string &l, const std::string &a, const callback &c, const std::string &msg, bool required = false );
@@ -52,13 +52,13 @@ public:
 			return _has_value;
 		}
 
-		const std::string &value( void ) const
+		char *value( void ) const
 		{
 			precondition( _values.size() == 1, "only 1 argument required" );
 			return _values[0];
 		}
 
-		const std::vector<std::string> &values( void ) const
+		const std::vector<char *> &values( void ) const
 		{
 			return _values;
 		}
@@ -78,7 +78,7 @@ public:
 			return _required;
 		}
 
-		void set_value( const std::string &v )
+		void set_value( char *v )
 		{
 			if ( _values.empty() )
 				_values.push_back( v );
@@ -87,13 +87,13 @@ public:
 			_has_value = true;
 		}
 
-		void add_value( std::string v )
+		void add_value( char *v )
 		{
-			_values.emplace_back( std::move( v ) );
+			_values.push_back( v );
 			_has_value = true;
 		}
 
-		bool call( size_t &idx, const std::vector<std::string> &args )
+		bool call( size_t &idx, const std::vector<char *> &args )
 		{
 			return _callback( *this, idx, args );
 		}
@@ -105,7 +105,7 @@ public:
 		std::string _long;
 		std::string _help;
 		std::string _args;
-		std::vector<std::string> _values;
+		std::vector<char *> _values;
 		callback _callback;
 		char _short = '\0';
 		bool _has_value = false;
@@ -171,15 +171,16 @@ public:
 		return _options;
 	}
 
-	/// @brief1
+	/// @brief Parse options.
 	void parse( int argc, char *argv[] );
-	void parse( const std::vector<std::string> &opts );
+	void parse( const std::vector<char *> &args );
 
+	/// @brief Simple usage message
 	std::string simple_usage( void ) const;
 
 	// Handle argument requiring "n" strings
 	template<size_t n>
-	static bool arg( option &opt, size_t &idx, const std::vector<std::string> &args )
+	static bool arg( option &opt, size_t &idx, const std::vector<char *> &args )
 	{
 		if ( opt )
 			return false;
@@ -194,7 +195,7 @@ public:
 		{
 			if ( idx < args.size() )
 			{
-				if ( args[idx].find( '-' ) == 0 )
+				if ( args[idx][0] == '-' )
 					throw_runtime( "option '{0}' needs {1} values (got {2})", opt.name(), n, i );
 				opt.add_value( args[idx] );
 				++idx;
@@ -207,7 +208,7 @@ public:
 
 	// Handle argument requiring between "a" and "b" strings
 	template<size_t a,size_t b>
-	static bool arg( option &opt, size_t &idx, const std::vector<std::string> &args )
+	static bool arg( option &opt, size_t &idx, const std::vector<char *> &args )
 	{
 		static_assert( a < b, "invalid argument range" );
 		if ( opt )
@@ -223,7 +224,7 @@ public:
 		{
 			if ( idx < args.size() )
 			{
-				if ( args[idx].find( '-' ) == 0 )
+				if ( args[idx][0] == '-' )
 				{
 					if ( i < a )
 						throw_runtime( "option '{0}' needs at least {1} values (got {2})", opt.name(), a, i );
@@ -243,11 +244,11 @@ public:
 		return true;
 	}
 
-	static bool args( option &opt, size_t &idx, const std::vector<std::string> &args );
+	static bool args( option &opt, size_t &idx, const std::vector<char *> &args );
 
-	static bool multi( option &opt, size_t &idx, const std::vector<std::string> &args );
+	static bool multi( option &opt, size_t &idx, const std::vector<char *> &args );
 
-	static bool counted( option &opt, size_t &idx, const std::vector<std::string> &args );
+	static bool counted( option &opt, size_t &idx, const std::vector<char *> &args );
 
 private:
 	std::string _program;

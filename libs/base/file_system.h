@@ -16,17 +16,13 @@ namespace base
 class file_system
 {
 public:
-	virtual ~file_system( void )
-	{
-	}
+	virtual ~file_system( void );
 
 	virtual directory_iterator readdir( const uri &path ) = 0;
 
-	/*
-	std::istream open_for_read( const base::uri &u );
-	std::ostream open_for_write( const base::uri &u );
-	std::ostream create( const base::uri &u );
-	*/
+//	virtual std::istream open_read( const base::uri &path ) = 0;
+//	virtual std::ostream open_write( const base::uri &path ) = 0;
+//	virtual std::ostream create( const base::uri &path ) = 0;
 
 	static std::shared_ptr<file_system> get( const uri &path )
 	{
