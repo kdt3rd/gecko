@@ -145,25 +145,10 @@ void uri::parse( const std::string &str )
 			size_t slash = path.find( '/', 2 );
 			auto auth = path.substr( 2, slash - 2 );
 			path.erase( 0, slash );
-
-			size_t at = auth.find( '@' );
-			if ( at > auth.size() )
-				at = 0;
-			else
-				at = at + 1;
-			size_t pcolon = auth.find( ':', at );
-
-			if ( at > 0 && at < auth.size() )
-				_user = unescape( auth.substr( 0, at - 1 ) );
-			_host = unescape( auth.substr( at, pcolon - at ) );
-			if ( pcolon < auth.size() )
-				_port = std::stoi( auth.substr( pcolon + 1 ) );
-			else
-				_port = 0;
+			parse_authority( auth );
 		}
 		else if ( path[0] != '/' )
 			throw_runtime( "expected uri path to start with slash: '{0}'", str );
-
 	}
 	else
 		path = str;
@@ -172,6 +157,29 @@ void uri::parse( const std::string &str )
 	_path.erase( std::remove( _path.begin(), _path.end(), std::string() ), _path.end() );
 	for ( auto &p: _path )
 		p = unescape( p );
+}
+
+////////////////////////////////////////
+
+void uri::parse_authority( const std::string &auth )
+{
+	if ( auth.empty() )
+		return;
+
+	size_t at = auth.find( '@' );
+	if ( at > auth.size() )
+		at = 0;
+	else
+		at = at + 1;
+	size_t pcolon = auth.find( ':', at );
+
+	if ( at > 0 && at < auth.size() )
+		_user = unescape( auth.substr( 0, at - 1 ) );
+	_host = unescape( auth.substr( at, pcolon - at ) );
+	if ( pcolon < auth.size() )
+		_port = std::stoi( auth.substr( pcolon + 1 ) );
+	else
+		_port = 0;
 }
 
 ////////////////////////////////////////

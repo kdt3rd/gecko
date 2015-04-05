@@ -60,6 +60,13 @@ int safemain( void )
 	check( "http://host.com/with\%20space", false );
 	check( "http://host.com/with space", true );
 
+	base::uri test( "file", "" );
+	test /= "file.txt";
+	std::cout << test << std::endl;
+
+	test = base::uri( "file", "" ) / "hello" / "world";
+	std::cout << test << std::endl;
+
 	return 0;
 }
 

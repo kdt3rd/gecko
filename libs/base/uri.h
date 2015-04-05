@@ -19,6 +19,14 @@ class uri
 public:
 	uri( const std::string &str );
 
+	template<typename ... Types>
+	uri( std::string sch, std::string auth, Types ...paths )
+	{
+		_scheme = sch;
+		parse_authority( auth );
+		add_paths( paths... );
+	}
+
 	const std::string &scheme( void ) const
 	{
 		return _scheme;
@@ -78,6 +86,28 @@ public:
 		return *this;
 	}
 
+	uri &operator/=( const std::string &str )
+	{
+		add_path( str );
+		return *this;
+	}
+
+	void add_path( const std::string &str )
+	{
+		_path.push_back( str );
+	}
+
+	template<typename ...Types>
+	void add_paths( const std::string &str, Types ...rest )
+	{
+		add_path( str );
+		add_paths( rest... );
+	}
+
+	void add_paths( void )
+	{
+	}
+
 	void split_query( std::vector<std::pair<std::string,std::string>> &q );
 
 	std::shared_ptr<std::istream> open_for_read( void );
@@ -94,6 +124,7 @@ private:
 	static std::map<std::string,std::function<std::shared_ptr<std::ostream>(const base::uri &)>> _writers;
 
 	void parse( const std::string &str );
+	void parse_authority( const std::string &str );
 
 	std::string _scheme;
 	std::string _user;
@@ -107,6 +138,16 @@ private:
 ////////////////////////////////////////
 
 std::ostream &operator<<( std::ostream &out, const uri &u );
+
+inline uri operator/( const uri &u, const std::string &str )
+{
+	return std::move( uri( u ) /= str );
+}
+
+inline uri operator/( uri &&u, const std::string &str )
+{
+	return std::move( u /= str );
+}
 
 ////////////////////////////////////////
 
