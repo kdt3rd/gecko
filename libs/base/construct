@@ -16,6 +16,8 @@ lib = Library( "base",
 	"json.cpp",
 	"math_functions.cpp",
 	"ratio.cpp",
-	"uri.cpp"
+	"uri.cpp",
+	"file_system.cpp",
+	"posix_file_system.cpp"
 );
 

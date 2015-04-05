@@ -5,8 +5,6 @@
 #include <iostream>
 #include <cstdint>
 #include <vector>
-#include <map>
-#include <memory>
 
 namespace base
 {
@@ -17,13 +15,27 @@ namespace base
 class uri
 {
 public:
-	uri( const std::string &str );
+	uri( void )
+	{
+	}
+
+	uri( const std::string &str )
+	{
+		parse( str );
+	}
 
 	template<typename ... Types>
 	uri( std::string sch, std::string auth, Types ...paths )
 	{
 		_scheme = sch;
 		parse_authority( auth );
+		add_paths( paths... );
+	}
+
+	template<typename ... Types>
+	uri( const uri &parent, Types ...paths )
+		: uri( parent )
+	{
 		add_paths( paths... );
 	}
 
@@ -110,19 +122,15 @@ public:
 
 	void split_query( std::vector<std::pair<std::string,std::string>> &q );
 
-	std::shared_ptr<std::istream> open_for_read( void );
-	std::shared_ptr<std::ostream> open_for_write( void );
+	explicit operator bool( void ) const
+	{
+		return !_scheme.empty();
+	}
 
 	static std::string escape( const std::string &str );
 	static std::string unescape( const std::string &str );
 
-	static void register_read_handler( const std::string &sch, const std::function<std::shared_ptr<std::istream>(const base::uri &)> &open );
-	static void register_write_handler( const std::string &sch, const std::function<std::shared_ptr<std::ostream>(const base::uri &)> &open );
-
 private:
-	static std::map<std::string,std::function<std::shared_ptr<std::istream>(const base::uri &)>> _readers;
-	static std::map<std::string,std::function<std::shared_ptr<std::ostream>(const base::uri &)>> _writers;
-
 	void parse( const std::string &str );
 	void parse_authority( const std::string &str );
 

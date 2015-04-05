@@ -9,14 +9,6 @@ namespace base
 
 ////////////////////////////////////////
 
-uri::uri( const std::string &str )
-	: _path()
-{
-	parse( str );
-}
-
-////////////////////////////////////////
-
 std::string uri::escape( const std::string &str )
 {
 	const std::string reserved = ":/?#[]@!$&'()*+,;=";
@@ -87,27 +79,6 @@ void uri::split_query( std::vector<std::pair<std::string,std::string>> &parsed )
 		parsed.emplace_back( std::move( fv[0] ), std::move( fv[1] ) );
 	}
 }
-
-////////////////////////////////////////
-
-std::shared_ptr<std::istream> uri::open_for_read( void )
-{
-	auto &o = _readers.at( _scheme );
-	return o( *this );
-}
-
-////////////////////////////////////////
-
-std::shared_ptr<std::ostream> uri::open_for_write( void )
-{
-	auto &o = _writers.at( _scheme );
-	return o( *this );
-}
-
-////////////////////////////////////////
-
-std::map<std::string,std::function<std::shared_ptr<std::istream>(const base::uri &)>> uri::_readers;
-std::map<std::string,std::function<std::shared_ptr<std::ostream>(const base::uri &)>> uri::_writers;
 
 ////////////////////////////////////////
 
