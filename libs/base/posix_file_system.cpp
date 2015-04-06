@@ -7,6 +7,8 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <stddef.h>
+#include <fstream>
+#include <memory>
 
 namespace base
 {
@@ -40,6 +42,30 @@ directory_iterator posix_file_system::readdir( const uri &path )
 	};
 
 	return directory_iterator( next_entry );
+}
+
+////////////////////////////////////////
+
+std::unique_ptr<std::istream> posix_file_system::open_read( const base::uri &path )
+{
+	precondition( path.scheme() == "file", "posix_file_system expected \"file\" uri" );
+	return std::unique_ptr<std::ifstream>( new std::ifstream( path.full_path() ) );
+}
+
+////////////////////////////////////////
+
+std::unique_ptr<std::ostream> posix_file_system::open_write( const base::uri &path )
+{
+	precondition( path.scheme() == "file", "posix_file_system expected \"file\" uri" );
+	return std::unique_ptr<std::ofstream>( new std::ofstream( path.full_path() ) );
+}
+
+////////////////////////////////////////
+
+std::unique_ptr<std::ostream> posix_file_system::create( const base::uri &path )
+{
+	precondition( path.scheme() == "file", "posix_file_system expected \"file\" uri" );
+	return std::unique_ptr<std::ofstream>( new std::ofstream( path.full_path(), std::ios_base::trunc ) );
 }
 
 ////////////////////////////////////////
