@@ -21,6 +21,7 @@ Executable( "test_math", "test_math.cpp", base )
 Executable( "test_uri", "test_uri.cpp", base )
 Executable( "test_half", "test_half.cpp", base )
 Executable( "test_fs", "test_fs.cpp", base )
+Executable( "test_range", "test_range.cpp", base )
 
 --KDT-- Application( "Test Application", "test_app" )
 --KDT-- Application( "Test Platform", "test_platform" )
