@@ -15,7 +15,7 @@ namespace media
 class track
 {
 public:
-	track( std::string n, int64_t b, int64_t e, const std::function<std::shared_ptr<frame>(int64_t)> &get );
+	track( std::string n, int64_t b, int64_t e );
 	~track( void );
 
 	const std::string &name( void ) const
@@ -33,19 +33,8 @@ public:
 		return _end;
 	}
 
-	std::shared_ptr<frame> operator[]( int64_t f )
-	{
-		return _get( f );
-	}
-
-	std::shared_ptr<frame> at( int64_t f )
-	{
-		return _get( f );
-	}
-
 private:
 	int64_t _begin, _end;
-	std::function<std::shared_ptr<frame>(int64_t)> _get;
 	std::string _name;
 };
 
