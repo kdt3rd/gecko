@@ -78,6 +78,14 @@ std::string uri::unescape( const std::string &str )
 
 ////////////////////////////////////////
 
+void uri::add_path( const std::string &path )
+{
+	split( path, '/', std::back_inserter( _path ) );
+	_path.erase( std::remove( _path.begin(), _path.end(), std::string() ), _path.end() );
+}
+
+////////////////////////////////////////
+
 void uri::split_query( std::vector<std::pair<std::string,std::string>> &parsed )
 {
 	std::vector<std::string> list;
@@ -90,6 +98,30 @@ void uri::split_query( std::vector<std::pair<std::string,std::string>> &parsed )
 			throw_runtime( "invalid field/value query '{0}'", q );
 		parsed.emplace_back( std::move( fv[0] ), std::move( fv[1] ) );
 	}
+}
+
+////////////////////////////////////////
+
+std::string uri::pretty( void ) const
+{
+	std::stringstream out;
+	out << scheme() << ':';
+	if ( !host().empty() )
+	{
+		out << "//";
+		if ( !user().empty() )
+			out << user() << '@';
+		out << host();
+		if ( port() != 0 )
+			out << ':' << to_string( port() );
+	}
+	for ( auto &p: path() )
+		out << '/' << p;
+	if ( !query().empty() )
+		out << '?' << query();
+	if ( !fragment().empty() )
+		out << '#' << fragment();
+	return out.str();
 }
 
 ////////////////////////////////////////
@@ -136,8 +168,7 @@ void uri::parse( const std::string &str )
 	else
 		path = str;
 
-	split( path, '/', std::back_inserter( _path ) );
-	_path.erase( std::remove( _path.begin(), _path.end(), std::string() ), _path.end() );
+	add_path( path );
 	for ( auto &p: _path )
 		p = unescape( p );
 }

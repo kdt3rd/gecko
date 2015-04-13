@@ -20,6 +20,8 @@ directory_iterator posix_file_system::readdir( const uri &path )
 	precondition( path.scheme() == "file", "posix_file_system expected \"file\" uri" );
 	std::string fpath = path.full_path();
 	std::shared_ptr<DIR> dir( ::opendir( fpath.c_str() ), []( DIR *d ) { ::closedir( d ); } );
+	if ( !dir )
+		throw_errno( "opendir failed on {0}", fpath );
 
 	size_t n = std::max( ::pathconf( fpath.c_str(), _PC_NAME_MAX), long(255) ) + 1;
 	n += offsetof( struct dirent, d_name );

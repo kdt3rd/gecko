@@ -27,6 +27,7 @@ public:
 	static std::shared_ptr<file_system> get( const uri &path )
 	{
 		precondition( path, "invalid uri" );
+		precondition( _fs.find( path.scheme() ) != _fs.end(), "no file system for scheme" );
 		return _fs.at( path.scheme() );
 	}
 

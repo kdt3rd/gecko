@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cstdint>
 #include <vector>
+#include "contract.h"
 
 namespace base
 {
@@ -72,6 +73,11 @@ public:
 		return _path;
 	}
 
+	const std::string &path( size_t i ) const
+	{
+		return _path.at( i );
+	}
+
 	std::string full_path( void ) const
 	{
 		std::string result;
@@ -107,10 +113,16 @@ public:
 		return *this;
 	}
 
-	void add_path( const std::string &str )
+	uri parent( void ) const
 	{
-		_path.push_back( str );
+		precondition( !_path.empty(), "no parent uri" );
+
+		uri result( *this );
+		result.path().pop_back();
+		return result;
 	}
+
+	void add_path( const std::string &str );
 
 	template<typename ...Types>
 	void add_paths( const std::string &str, Types ...rest )
@@ -124,6 +136,8 @@ public:
 	}
 
 	void split_query( std::vector<std::pair<std::string,std::string>> &q );
+
+	std::string pretty( void ) const;
 
 	explicit operator bool( void ) const
 	{
