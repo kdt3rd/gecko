@@ -18,6 +18,12 @@ public:
 	{
 	}
 
+	size_t add_channel( std::string n, image_buffer &i )
+	{
+		_names[std::move(n)] = _channels.size();
+		_channels.push_back( i );
+	}
+
 	size_t add_channel( image_buffer &i )
 	{
 		_channels.push_back( i );

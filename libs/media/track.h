@@ -15,8 +15,14 @@ namespace media
 class track
 {
 public:
-	track( std::string n, int64_t b, int64_t e );
-	~track( void );
+	track( std::string n, int64_t b, int64_t e )
+		: _name( n ), _begin( b ), _end( e )
+	{
+	}
+
+	virtual ~track( void )
+	{
+	}
 
 	const std::string &name( void ) const
 	{
@@ -34,8 +40,8 @@ public:
 	}
 
 private:
-	int64_t _begin, _end;
 	std::string _name;
+	int64_t _begin, _end;
 };
 
 ////////////////////////////////////////

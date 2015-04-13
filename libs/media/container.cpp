@@ -6,18 +6,14 @@ namespace media
 
 ////////////////////////////////////////
 
-container::container( const std::function<void(container&)> &upd )
-	: _update( upd )
+container::container( void )
 {
 }
 
 ////////////////////////////////////////
 
-void container::update( void )
+container::~container( void )
 {
-	if ( _outofdate )
-		_update( *this );
-	_outofdate = false;
 }
 
 ////////////////////////////////////////

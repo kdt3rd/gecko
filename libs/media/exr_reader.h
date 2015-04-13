@@ -9,7 +9,7 @@ namespace media
 
 ////////////////////////////////////////
 
-container exr_reader( base::uri &u );
+container exr_reader( const base::uri &u );
 
 ////////////////////////////////////////
 

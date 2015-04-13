@@ -25,6 +25,7 @@ Executable( "test_fs", "test_fs.cpp", base )
 Executable( "test_range", "test_range.cpp", base )
 Executable( "test_size", "test_size.cpp", base )
 Executable( "test_riff", "test_riff.cpp", media, base )
+Executable( "test_exr", "test_exr.cpp", media, base )
 
 --KDT-- Application( "Test Application", "test_app" )
 --KDT-- Application( "Test Platform", "test_platform" )

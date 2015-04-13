@@ -19,22 +19,11 @@ namespace media
 class image_buffer
 {
 public:
-	template<typename T>
-	image_buffer( int64_t w, int64_t h )
-		: _data( static_cast<void*>( new T[w*h] ), base::array_deleter<T>() ),
-		  _bits( sizeof(T) * 8 ),
-		  _offset( 0 ),
-		  _width( w ), _height( h ),
-		  _xstride( sizeof(T)*8 ), _ystride( sizeof(T)*8*w ),
-		  _floating( std::is_floating_point<T>::value ),
-		  _unsigned( std::is_unsigned<T>::value )
-	{
-		static_assert( sizeof(T) % 8 == 0, "data type should be multiple of 8 bits" );
-	}
+	template<typename T> struct type {};
 
 	template<typename T>
 	image_buffer( const std::shared_ptr<T> &data, int64_t w, int64_t h )
-		: _data( data ), _width( w ), _height( h ),
+		: _data( data ),
 		  _bits( sizeof(T) * 8 ),
 		  _offset( 0 ),
 		  _width( w ), _height( h ),
@@ -42,7 +31,6 @@ public:
 		  _floating( std::is_floating_point<T>::value ),
 		  _unsigned( std::is_unsigned<T>::value )
 	{
-		static_assert( sizeof(T) % 8 == 0, "data type should be multiple of 8 bits" );
 	}
 
 	template<typename T>
@@ -55,10 +43,27 @@ public:
 		  _floating( std::is_floating_point<T>::value ),
 		  _unsigned( std::is_unsigned<T>::value )
 	{
-		static_assert( sizeof(T) % 8 == 0, "data type should be multiple of 8 bits" );
 	}
 
 	void get_scanline( int64_t y, float *line, int64_t stride = 1 ) const;
+
+	void *data( void )
+	{
+		return _data.get();
+	}
+
+	const void *data( void ) const
+	{
+		return _data.get();
+	}
+
+	template<typename T>
+	static image_buffer simple_buffer( int64_t w, int64_t h )
+	{
+		auto data = std::shared_ptr<T>( new T[w*h], base::array_deleter<T>() );
+		return image_buffer( data, w, h );
+	}
+
 
 private:
 	void get_scanline_u8( int64_t y, float *line, int64_t stride ) const;
