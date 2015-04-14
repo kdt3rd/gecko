@@ -49,7 +49,7 @@ std::shared_ptr<gl::texture> canvas::gradient( const base::gradient &g, size_t n
 	auto ret = new_texture();
 	{
 		auto txt = ret->bind( gl::texture::target::TEXTURE_RECTANGLE );
-		txt.image_2d( gl::format::RGBA, bytes.size(), 1, gl::image_type::UNSIGNED_BYTE, bytes.data() );
+		txt.image_2d_rgba( gl::format::RGBA, bytes.size(), 1, gl::image_type::UNSIGNED_BYTE, bytes.data() );
 	}
 	return ret;
 }
@@ -167,7 +167,7 @@ canvas::draw_text( const std::shared_ptr<script::font> &font, const base::point 
 		txt.set_filters( gl::filter::LINEAR, gl::filter::LINEAR );
 	checkgl();
 
-		txt.image_2d( gl::format::RED,
+		txt.image_2d_red( gl::format::RED,
 					  font->bitmap_width(),
 					  font->bitmap_height(),
 					  gl::image_type::UNSIGNED_BYTE,

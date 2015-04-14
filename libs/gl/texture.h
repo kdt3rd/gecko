@@ -30,13 +30,27 @@ public:
 		other._target = 0;
 	}
 
-	void image_2d( format f, size_t w, size_t h, image_type type, const void *data )
+	void image_2d_red( format f, size_t w, size_t h, image_type type, const void *data )
 	{
-		glTexImage2D( _target, 0, static_cast<GLint>(f), w, h, 0, static_cast<GLenum>(f), static_cast<GLenum>(type), data );
+		glTexImage2D( _target, 0, static_cast<GLint>(f), w, h, 0, GL_RED, static_cast<GLenum>(type), data );
 	}
 
-	void subimage_2d( format f, int x, int y, size_t w, size_t h, image_type type,
-					  const void *data )
+	void image_2d_rg( format f, size_t w, size_t h, image_type type, const void *data )
+	{
+		glTexImage2D( _target, 0, static_cast<GLint>(f), w, h, 0, GL_RG, static_cast<GLenum>(type), data );
+	}
+
+	void image_2d_rgba( format f, size_t w, size_t h, image_type type, const void *data )
+	{
+		glTexImage2D( _target, 0, static_cast<GLint>(f), w, h, 0, GL_RGBA, static_cast<GLenum>(type), data );
+	}
+
+	void image_2d_rgb( format f, size_t w, size_t h, image_type type, const void *data )
+	{
+		glTexImage2D( _target, 0, static_cast<GLint>(f), w, h, 0, GL_RGB, static_cast<GLenum>(type), data );
+	}
+
+	void subimage_2d( format f, int x, int y, size_t w, size_t h, image_type type, const void *data )
 	{
 		glTexSubImage2D( _target, 0, GLint(x), GLint(y), GLsizei(w), GLsizei(h),
 						 static_cast<GLenum>(f), static_cast<GLenum>(type), data );

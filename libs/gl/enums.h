@@ -133,6 +133,7 @@ enum class image_type
 	UNSIGNED_SHORT_5_6_5 = GL_UNSIGNED_SHORT_5_6_5,
 	UNSIGNED_SHORT_4_4_4_4 = GL_UNSIGNED_SHORT_4_4_4_4,
 	UNSIGNED_SHORT_5_5_5_1 = GL_UNSIGNED_SHORT_5_5_5_1,
+	HALF = GL_HALF_FLOAT,
 };
 
 ////////////////////////////////////////
@@ -143,6 +144,7 @@ enum class format
 	RG = GL_RG,
 	RGB = GL_RGB,
 	RGBA = GL_RGBA,
+	RGBA_HALF = GL_RGBA16F,
 };
 
 ////////////////////////////////////////
