@@ -104,6 +104,14 @@ void window::invalidate( const base::rect &r )
 
 ////////////////////////////////////////
 
+window::bound_context window::bind( void )
+{
+	_window->acquire();
+	return bound_context( [=]( void ) { _window->release(); } );
+}
+
+////////////////////////////////////////
+
 void window::paint( void )
 {
 	_window->acquire();

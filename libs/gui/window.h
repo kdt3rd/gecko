@@ -3,6 +3,7 @@
 
 #include "widget.h"
 #include "context.h"
+#include <base/scope_guard.h>
 
 namespace platform
 {
@@ -35,6 +36,9 @@ public:
 	double height( void ) const;
 
 	void invalidate( const base::rect &r ) override;
+
+	typedef base::scope_guard<std::function<void(void)>> bound_context;
+	bound_context bind( void );
 
 protected:
 	void paint( void );
