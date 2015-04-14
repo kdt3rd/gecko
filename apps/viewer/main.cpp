@@ -5,6 +5,10 @@
 #include <functional>
 #include <memory>
 
+#include <base/cmd_line.h>
+#include <base/posix_file_system.h>
+#include <media/exr_reader.h>
+#include <media/video_track.h>
 #include <gui/application.h>
 #include <viewer/viewer.h>
 
@@ -17,6 +21,16 @@ namespace {
 
 int safemain( int argc, char **argv )
 {
+	base::cmd_line options( argv[0],
+		base::cmd_line::option(  0,  "", "<img>", base::cmd_line::arg<0,1>, "Image to show", true )
+	);
+
+	auto errhandler = base::make_guard( [&]() { std::cerr << options << std::endl; } );
+	options.parse( argc, argv );
+	errhandler.dismiss();
+
+	base::file_system::add( "file", std::make_shared<base::posix_file_system>() );
+
 	app = std::make_shared<gui::application>();
 	app->push();
 
@@ -27,6 +41,26 @@ int safemain( int argc, char **argv )
 	win->set_widget( viewer );
 
 	win->show();
+
+	if ( auto &opt = options["<img>"] )
+	{
+		auto context = win->bind();
+
+		auto v = opt.value();
+		media::container c = media::exr_reader( base::uri( "file", "", v ) );
+		auto t = std::dynamic_pointer_cast<media::video_track>( c.at( 0 ) );
+		auto f = t->at( t->begin() );
+
+		auto &chan = f->at( 0 );
+
+		auto txt = std::make_shared<gl::texture>();
+		{
+			auto tbind = txt->bind( gl::texture::target::TEXTURE_RECTANGLE );
+			tbind.image_2d( gl::format::RGBA_HALF, chan.width(), chan.height(), gl::image_type::HALF, chan.data() );
+		}
+		viewer->set_texture_a( txt );
+	}
+
 	int code = app->run();
 	app->pop();
 	app.reset();

@@ -1,2 +1,2 @@
 
-Executable( "image_viewer", "main.cpp", UseLibraries( "viewer", "gui" ) )
+Executable( "image_viewer", "main.cpp", UseLibraries( "viewer", "gui", "media" ) )
