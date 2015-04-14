@@ -98,7 +98,7 @@ public:
 			imgbuf.set_offset( c * sizeof(base::half) * 8 );
 			auto data = static_cast<base::half*>( imgbuf.data() ) - disp.min.x - disp.min.y * w;
 			std::cout << "Channel: " << _channels.at( c ) << std::endl;
-			fbuf.insert( _channels.at( c ), Imf::Slice( Imf::HALF, reinterpret_cast<char*>( data ), sizeof( base::half ) * _channels.size(), sizeof( base::half ) * w, 1, 1, 0.0 ) );
+			fbuf.insert( _channels.at( c ), Imf::Slice( Imf::HALF, reinterpret_cast<char*>( data ), sizeof(base::half) * _channels.size(), sizeof(base::half) * _channels.size() * w, 1, 1, 0.0 ) );
 			result->add_channel( _channels.at( c ), imgbuf );
 		}
 
