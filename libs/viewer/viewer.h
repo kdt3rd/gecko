@@ -13,7 +13,8 @@ class viewer : public gui::widget
 public:
 	viewer( void );
 
-	void set_texture( const std::shared_ptr<gl::texture> &t );
+	void set_texture_a( const std::shared_ptr<gl::texture> &t );
+	void set_texture_b( const std::shared_ptr<gl::texture> &t );
 
 	void paint( const std::shared_ptr<draw::canvas> &c ) override;
 

@@ -26,21 +26,10 @@ namespace viewer
 
 viewer::viewer( void )
 {
-	_textureA = std::make_shared<gl::texture>( gl::png_read( "/home/iangodin/Pictures/mandril.png" ) );
-	{
-		auto txt = _textureA->bind( gl::texture::target::TEXTURE_RECTANGLE, 0 );
-		txt.set_wrapping( gl::wrapping::CLAMP_TO_BORDER );
-		txt.set_border_color( base::color( 0, 0, 0, 0 ) );
-	}
+	set_texture_a( std::make_shared<gl::texture>( gl::png_read( "/home/iangodin/Pictures/mandril.png" ) ) );
+	set_texture_b( std::make_shared<gl::texture>( gl::png_read( "/home/iangodin/Pictures/lena.png" ) ) );
 
-	_textureB = std::make_shared<gl::texture>( gl::png_read( "/home/iangodin/Pictures/lena.png" ) );
-	{
-		auto txt = _textureB->bind( gl::texture::target::TEXTURE_RECTANGLE, 0 );
-		txt.set_wrapping( gl::wrapping::CLAMP_TO_BORDER );
-		txt.set_border_color( base::color( 0, 0, 0, 0 ) );
-	}
-
-	_zoomA = 2;
+	_zoomA = 1;
 	_panB.set( 512, 0 );
 }
 
@@ -114,8 +103,26 @@ void viewer::paint( const std::shared_ptr<draw::canvas> &c )
 
 ////////////////////////////////////////
 
-void viewer::set_texture( const std::shared_ptr<gl::texture> &t )
+void viewer::set_texture_a( const std::shared_ptr<gl::texture> &t )
 {
+	_textureA = t;
+	{
+		auto txt = _textureA->bind( gl::texture::target::TEXTURE_RECTANGLE, 0 );
+		txt.set_wrapping( gl::wrapping::CLAMP_TO_BORDER );
+		txt.set_border_color( base::color( 0, 0, 0, 0 ) );
+	}
+}
+
+////////////////////////////////////////
+
+void viewer::set_texture_b( const std::shared_ptr<gl::texture> &t )
+{
+	_textureB = t;
+	{
+		auto txt = _textureB->bind( gl::texture::target::TEXTURE_RECTANGLE, 0 );
+		txt.set_wrapping( gl::wrapping::CLAMP_TO_BORDER );
+		txt.set_border_color( base::color( 0, 0, 0, 0 ) );
+	}
 }
 
 ////////////////////////////////////////
