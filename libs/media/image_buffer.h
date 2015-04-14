@@ -35,7 +35,7 @@ public:
 
 	template<typename T>
 	image_buffer( const std::shared_ptr<T> &data, int64_t w, int64_t h, int64_t xstride, int64_t ystride )
-		: _data( data ), _width( w ), _height( h ),
+		: _data( data ),
 		  _bits( sizeof(T) * 8 ),
 		  _offset( 0 ),
 		  _width( w ), _height( h ),
@@ -45,16 +45,32 @@ public:
 	{
 	}
 
+	int64_t width( void ) const
+	{
+		return _width;
+	}
+
+	int64_t height( void ) const
+	{
+		return _height;
+	}
+
 	void get_scanline( int64_t y, float *line, int64_t stride = 1 ) const;
+
+	void set_offset( int64_t offset_bits )
+	{
+		precondition( offset_bits % 8 == 0, "offset should be multiple of 8 bits" );
+		_offset = offset_bits;
+	}
 
 	void *data( void )
 	{
-		return _data.get();
+		return static_cast<char *>( _data.get() ) + _offset / 8;
 	}
 
 	const void *data( void ) const
 	{
-		return _data.get();
+		return static_cast<const char *>( _data.get() ) + _offset / 8;
 	}
 
 	template<typename T>
@@ -63,7 +79,6 @@ public:
 		auto data = std::shared_ptr<T>( new T[w*h], base::array_deleter<T>() );
 		return image_buffer( data, w, h );
 	}
-
 
 private:
 	void get_scanline_u8( int64_t y, float *line, int64_t stride ) const;

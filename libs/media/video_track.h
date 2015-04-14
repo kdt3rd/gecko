@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "image_frame.h"
 #include "track.h"
 
 namespace media

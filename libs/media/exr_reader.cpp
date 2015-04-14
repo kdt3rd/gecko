@@ -15,6 +15,8 @@
 #include <ImfMultiView.h>
 #include <ImfStandardAttributes.h>
 
+#include <algorithm>
+
 namespace media
 {
 
@@ -86,16 +88,24 @@ public:
 		int64_t h = disp.max.y - disp.min.y + 1;
 		Imf::FrameBuffer fbuf;
 
-		for ( auto &c: _channels )
+		std::shared_ptr<base::half> buffer( new base::half[w*_channels.size()*h], base::array_deleter<base::half>() );
+		int64_t xstride = sizeof(base::half) * 8 * _channels.size();
+		int64_t ystride = xstride * w;
+
+		for ( size_t c = 0; c < _channels.size(); ++c )
 		{
-			auto imgbuf = image_buffer::simple_buffer<base::half>( w, h );
-			char *data = static_cast<char*>( imgbuf.data() ) - disp.min.x - disp.min.y * w;
-			fbuf.insert( c, Imf::Slice( Imf::HALF, data, sizeof( base::half ), sizeof( base::half ) * w, 1, 1, 0.0 ) );
-			result->add_channel( std::move( c ), imgbuf );
+			image_buffer imgbuf( buffer, w, h, xstride, ystride );
+			imgbuf.set_offset( c * sizeof(base::half) * 8 );
+			auto data = static_cast<base::half*>( imgbuf.data() ) - disp.min.x - disp.min.y * w;
+			std::cout << "Channel: " << _channels.at( c ) << std::endl;
+			fbuf.insert( _channels.at( c ), Imf::Slice( Imf::HALF, reinterpret_cast<char*>( data ), sizeof( base::half ) * _channels.size(), sizeof( base::half ) * w, 1, 1, 0.0 ) );
+			result->add_channel( _channels.at( c ), imgbuf );
 		}
 
 		input.setFrameBuffer( fbuf );
 		input.readPixels( disp.min.y, disp.max.y );
+
+		return result;
 	}
 
 private:
@@ -111,6 +121,7 @@ void addexrtrack( container &c, const base::uri &u, int64_t start, int64_t last,
 	std::vector<std::string> chans;
 	for ( auto chan = channels.begin(); chan != channels.end(); ++chan )
 		chans.emplace_back( chan.name() );
+	std::reverse( chans.begin(), chans.end() );
 	if ( !chans.empty() )
 		c.add_track( std::make_shared<exr_track>( std::move( track ), start, last, u, part, std::move( chans ) ) );
 }
@@ -128,7 +139,6 @@ container exr_reader( const base::uri &u )
 
 	file_sequence fseq( u );
 	auto fs = base::file_system::get( fseq.uri() );
-
 	{
 		auto dir = fs->readdir( u.parent() );
 		while ( ++dir )
@@ -153,6 +163,7 @@ container exr_reader( const base::uri &u )
 		auto *mview = header.findTypedAttribute<Imf::StringVectorAttribute>( "multiView" );
 		if ( Imf::hasMultiView( header ) )
 		{
+			std::cout << "Multi view " << fseq.get_frame( start ).pretty() << std::endl;
 			const auto &mview = Imf::multiView( header );
 			for ( auto &v: mview )
 				addexrtrack( result, u, start, last, v, 0, Imf::channelsInView( v, header.channels(), mview ) );
@@ -164,6 +175,8 @@ container exr_reader( const base::uri &u )
 				addexrtrack( result, u, start, last, header.name(), 0, header.channels() );
 			if ( header.hasView() )
 				addexrtrack( result, u, start, last, header.view(), 0, header.channels() );
+			if ( !header.hasName() && !header.hasView() )
+				addexrtrack( result, u, start, last, "default", 0, header.channels() );
 		}
 	}
 	else

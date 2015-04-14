@@ -5,6 +5,7 @@
 #include <base/cmd_line.h>
 #include <base/posix_file_system.h>
 #include <media/exr_reader.h>
+#include <media/video_track.h>
 #include <sstream>
 #include <iostream>
 #include <typeindex>
@@ -28,7 +29,9 @@ int safemain( int argc, char *argv[] )
 
 		for ( auto &v: opt.values() )
 		{
-			media::exr_reader( base::uri( "file", "", v ) );
+			media::container c = media::exr_reader( base::uri( "file", "", v ) );
+			auto t = std::dynamic_pointer_cast<media::video_track>( c.at( 0 ) );
+			auto f = t->at( t->begin() );
 		}
 	}
 
