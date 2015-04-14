@@ -68,7 +68,6 @@ public:
 	exr_track( std::string n, int64_t b, int64_t e, const base::uri &files, size_t part, std::vector<std::string> &&chan )
 		: video_track( std::move( n ), b, e ), _files( files ), _part( part ), _channels( std::move( chan ) )
 	{
-		std::cout << "  Added track " << name() << std::endl;
 	}
 
 	virtual std::shared_ptr<image_frame> at( int64_t f ) override
@@ -97,7 +96,6 @@ public:
 			image_buffer imgbuf( buffer, w, h, xstride, ystride );
 			imgbuf.set_offset( c * sizeof(base::half) * 8 );
 			auto data = static_cast<base::half*>( imgbuf.data() ) - disp.min.x - disp.min.y * w;
-			std::cout << "Channel: " << _channels.at( c ) << std::endl;
 			fbuf.insert( _channels.at( c ), Imf::Slice( Imf::HALF, reinterpret_cast<char*>( data ), sizeof(base::half) * _channels.size(), sizeof(base::half) * _channels.size() * w, 1, 1, 0.0 ) );
 			result->add_channel( _channels.at( c ), imgbuf );
 		}
@@ -151,7 +149,6 @@ container exr_reader( const base::uri &u )
 			}
 		}
 	}
-	std::cout << base::format( "Range for {0} = {1} - {2}", u.pretty(), start, last ) << std::endl;
 
 	std::shared_ptr<std::istream> stream = fs->open_read( fseq.get_frame( start ) );
 	exr_istream estr( *stream );
@@ -163,7 +160,6 @@ container exr_reader( const base::uri &u )
 		auto *mview = header.findTypedAttribute<Imf::StringVectorAttribute>( "multiView" );
 		if ( Imf::hasMultiView( header ) )
 		{
-			std::cout << "Multi view " << fseq.get_frame( start ).pretty() << std::endl;
 			const auto &mview = Imf::multiView( header );
 			for ( auto &v: mview )
 				addexrtrack( result, u, start, last, v, 0, Imf::channelsInView( v, header.channels(), mview ) );
