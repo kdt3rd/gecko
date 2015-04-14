@@ -56,7 +56,7 @@ int safemain( int argc, char **argv )
 		auto txt = std::make_shared<gl::texture>();
 		{
 			auto tbind = txt->bind( gl::texture::target::TEXTURE_RECTANGLE );
-			tbind.image_2d( gl::format::RGBA_HALF, chan.width(), chan.height(), gl::image_type::HALF, chan.data() );
+			tbind.image_2d_rgba( gl::format::RGBA_HALF, chan.width(), chan.height(), gl::image_type::HALF, chan.data() );
 		}
 		viewer->set_texture_a( txt );
 	}
