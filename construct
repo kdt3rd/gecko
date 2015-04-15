@@ -14,6 +14,7 @@ DefaultConfiguration( "build" )
 if sys.system() == "Linux" then
 	X11 = assert( ExternalLibrary( "x11" ), "X11 library required" )
 	PNG = assert( ExternalLibrary( "libpng" ), "png library required" )
+    EXR = assert( ExternalLibrary( "OpenEXR" ), "OpenEXR library required" )
 	FREETYPE = assert( ExternalLibrary( "freetype2" ), "Freetype library required" )
 	FONTCONFIG = assert( ExternalLibrary( "fontconfig" ), "fontconfig library required" )
 	GL = assert( ExternalLibrary( "gl" ), "OpenGL library required" )

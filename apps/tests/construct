@@ -4,6 +4,7 @@
 local base = libs.base.lib
 local utf = libs.utf.lib
 local sqlite = libs.sqlite.lib
+local media = libs.media.lib
 
 Executable( "test_format", "test_format.cpp", base, utf )
 Executable( "test_exception", Compile( "test_exception.cpp" ), base, utf )
@@ -23,6 +24,8 @@ Executable( "test_half", "test_half.cpp", base )
 Executable( "test_fs", "test_fs.cpp", base )
 Executable( "test_range", "test_range.cpp", base )
 Executable( "test_size", "test_size.cpp", base )
+Executable( "test_riff", "test_riff.cpp", media, base )
+Executable( "test_exr", "test_exr.cpp", media, base )
 
 --KDT-- Application( "Test Application", "test_app" )
 --KDT-- Application( "Test Platform", "test_platform" )

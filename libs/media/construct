@@ -1,0 +1,12 @@
+
+lib = Library( "media",
+	"image_buffer.cpp",
+	"container.cpp",
+	"file_sequence.cpp",
+	"exr_reader.cpp",
+	"riff/fourcc.cpp",
+	"riff/chunk.cpp",
+	EXR,
+	UseLibraries( "base" )
+)
+
