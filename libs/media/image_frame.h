@@ -14,29 +14,46 @@ namespace media
 class image_frame
 {
 public:
-	image_frame( void )
+	image_frame( int64_t w, int64_t h )
+		: _width( w ), _height( h )
 	{
 	}
 
 	size_t add_channel( std::string n, image_buffer &i )
 	{
+		precondition( i.width() == _width, "invalid channel width" );
+		precondition( i.height() == _height, "invalid channel height" );
 		_names[std::move(n)] = _channels.size();
 		_channels.push_back( i );
 	}
 
 	size_t add_channel( image_buffer &i )
 	{
+		precondition( i.width() == _width, "invalid channel width" );
+		precondition( i.height() == _height, "invalid channel height" );
 		_channels.push_back( i );
 	}
 
 	size_t add_channel( image_buffer &&i )
 	{
+		precondition( i.width() == _width, "invalid channel width" );
+		precondition( i.height() == _height, "invalid channel height" );
 		_channels.push_back( std::move( i ) );
 	}
 
 	void add_name( size_t chan, std::string name )
 	{
 		_names[std::move(name)] = chan;
+	}
+
+	int64_t width( void ) const
+	{
+		return _width;
+	}
+
+	int64_t height( void ) const
+	{
+		return _height;
 	}
 
 	size_t size( void ) const
@@ -79,7 +96,25 @@ public:
 		return std::string();
 	}
 
+	template<typename ...Channels>
+	bool has_channels( const char *c, Channels ...channels )
+	{
+		return has_channel( c ) && has_channels( channels... );
+	}
+
+	bool has_channel( const char *c )
+	{
+		return _names.find( c ) != _names.end();
+	}
+
 private:
+	bool has_channels( void )
+	{
+		return true;
+	}
+
+	int64_t _width;
+	int64_t _height;
 	std::map<std::string,size_t> _names;
 	std::vector<image_buffer> _channels;
 };

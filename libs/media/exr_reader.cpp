@@ -72,8 +72,6 @@ public:
 
 	virtual std::shared_ptr<image_frame> at( int64_t f ) override
 	{
-		auto result = std::make_shared<image_frame>();
-
 		auto fs = base::file_system::get( _files.uri() );
 		std::shared_ptr<std::istream> stream = fs->open_read( _files.get_frame( f ) );
 		exr_istream estr( *stream );
@@ -87,17 +85,38 @@ public:
 		int64_t h = disp.max.y - disp.min.y + 1;
 		Imf::FrameBuffer fbuf;
 
-		std::shared_ptr<base::half> buffer( new base::half[w*_channels.size()*h], base::array_deleter<base::half>() );
-		int64_t xstride = sizeof(base::half) * 8 * _channels.size();
-		int64_t ystride = xstride * w;
+		auto result = std::make_shared<image_frame>( w, h );
 
 		for ( size_t c = 0; c < _channels.size(); ++c )
 		{
-			image_buffer imgbuf( buffer, w, h, xstride, ystride );
-			imgbuf.set_offset( c * sizeof(base::half) * 8 );
-			auto data = static_cast<base::half*>( imgbuf.data() ) - disp.min.x - disp.min.y * w;
-			fbuf.insert( _channels.at( c ), Imf::Slice( Imf::HALF, reinterpret_cast<char*>( data ), sizeof(base::half) * _channels.size(), sizeof(base::half) * _channels.size() * w, 1, 1, 0.0 ) );
-			result->add_channel( _channels.at( c ), imgbuf );
+			const std::string &cname = _channels.at( c );
+			const Imf::Channel &imfchan = header.channels()[cname];
+			image_buffer imgbuf;
+			int64_t bytes = 0;
+			switch ( imfchan.type )
+			{
+				case Imf::UINT:
+					bytes = sizeof(uint32_t);
+					imgbuf = image_buffer::simple_buffer<uint32_t>( w, h );
+					break;
+
+				case Imf::HALF:
+					bytes = sizeof(base::half);
+					imgbuf = image_buffer::simple_buffer<base::half>( w, h );
+					break;
+
+				case Imf::FLOAT:
+					bytes = sizeof(float);
+					imgbuf = image_buffer::simple_buffer<float>( w, h );
+					break;
+
+				default:
+					throw_logic( "unknown OpenEXR pixel type {0}", static_cast<int>( imfchan.type ) );
+			}
+
+			char *data = static_cast<char*>( imgbuf.data() ) - ( disp.min.x + disp.min.y * w ) * bytes;
+			fbuf.insert( cname, Imf::Slice( imfchan.type, data, bytes, bytes * w, 1, 1, 0.0 ) );
+			result->add_channel( cname, imgbuf );
 		}
 
 		input.setFrameBuffer( fbuf );

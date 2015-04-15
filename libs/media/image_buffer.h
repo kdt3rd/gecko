@@ -21,6 +21,10 @@ class image_buffer
 public:
 	template<typename T> struct type {};
 
+	image_buffer( void )
+	{
+	}
+
 	template<typename T>
 	image_buffer( const std::shared_ptr<T> &data, int64_t w, int64_t h )
 		: _data( data ),
