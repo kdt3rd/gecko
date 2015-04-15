@@ -2522,5 +2522,8 @@ namespace std
 		result_type operator()(argument_type arg) const
 			{ return hash<base::detail::uint16>()(static_cast<unsigned int>(arg.data_)&-(arg.data_!=0x8000)); }
 	};
+
+	template<> struct is_floating_point<base::half> : std::true_type {};
+	template<> struct is_unsigned<base::half> : std::false_type {};
 }
 
