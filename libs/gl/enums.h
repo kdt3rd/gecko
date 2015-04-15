@@ -134,6 +134,7 @@ enum class image_type
 	UNSIGNED_SHORT_4_4_4_4 = GL_UNSIGNED_SHORT_4_4_4_4,
 	UNSIGNED_SHORT_5_5_5_1 = GL_UNSIGNED_SHORT_5_5_5_1,
 	HALF = GL_HALF_FLOAT,
+	FLOAT = GL_FLOAT,
 };
 
 ////////////////////////////////////////
@@ -144,7 +145,28 @@ enum class format
 	RG = GL_RG,
 	RGB = GL_RGB,
 	RGBA = GL_RGBA,
+
+	RED_HALF = GL_R16F,
+	RG_HALF = GL_RG16F,
+	RGB_HALF = GL_RGB16F,
 	RGBA_HALF = GL_RGBA16F,
+
+	RED_FLOAT = GL_R32F,
+	RG_FLOAT = GL_RG32F,
+	RGB_FLOAT = GL_RGB32F,
+	RGBA_FLOAT = GL_RGBA32F,
+};
+
+////////////////////////////////////////
+
+enum class swizzle
+{
+	RED = GL_RED,
+	GREEN = GL_GREEN,
+	BLUE = GL_BLUE,
+	ALPHA = GL_ALPHA,
+	ONE = GL_ONE,
+	ZERO = GL_ZERO,
 };
 
 ////////////////////////////////////////

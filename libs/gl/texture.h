@@ -35,19 +35,14 @@ public:
 		glTexImage2D( _target, 0, static_cast<GLint>(f), w, h, 0, GL_RED, static_cast<GLenum>(type), data );
 	}
 
-	void image_2d_rg( format f, size_t w, size_t h, image_type type, const void *data )
+	void image_2d_rgb( format f, size_t w, size_t h, image_type type, const void *data )
 	{
-		glTexImage2D( _target, 0, static_cast<GLint>(f), w, h, 0, GL_RG, static_cast<GLenum>(type), data );
+		glTexImage2D( _target, 0, static_cast<GLint>(f), w, h, 0, GL_RGB, static_cast<GLenum>(type), data );
 	}
 
 	void image_2d_rgba( format f, size_t w, size_t h, image_type type, const void *data )
 	{
 		glTexImage2D( _target, 0, static_cast<GLint>(f), w, h, 0, GL_RGBA, static_cast<GLenum>(type), data );
-	}
-
-	void image_2d_rgb( format f, size_t w, size_t h, image_type type, const void *data )
-	{
-		glTexImage2D( _target, 0, static_cast<GLint>(f), w, h, 0, GL_RGB, static_cast<GLenum>(type), data );
 	}
 
 	void subimage_2d( format f, int x, int y, size_t w, size_t h, image_type type, const void *data )
@@ -79,6 +74,12 @@ public:
 
 		float color[] = { float(c.red()), float(c.green()), float(c.blue()), float(c.alpha()) };
 		glTexParameterfv( _target, GL_TEXTURE_BORDER_COLOR, color );
+	}
+
+	void set_swizzle( swizzle r, swizzle g, swizzle b, swizzle a = swizzle::ONE )
+	{
+		GLint mask[4] = { static_cast<GLint>(r), static_cast<GLint>(g), static_cast<GLint>(b), static_cast<GLint>(a) };
+		glTexParameteriv( _target, GL_TEXTURE_SWIZZLE_RGBA, mask );
 	}
 
 	void mipmap( void )
