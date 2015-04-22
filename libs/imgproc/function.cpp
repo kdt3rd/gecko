@@ -7,6 +7,17 @@ namespace imgproc
 
 ////////////////////////////////////////
 
+std::shared_ptr<function> function::clone( void ) const
+{
+	auto result = std::make_shared<function>( _name );
+	result->set_result( _result->clone() );
+	for ( size_t i = 0; i < _args.size(); ++i )
+		result->add_arg( _args[i], _mods[i] );
+	return result;
+}
+
+////////////////////////////////////////
+
 std::ostream &operator<<( std::ostream &out, const function &f )
 {
 	if ( f.name().empty() )

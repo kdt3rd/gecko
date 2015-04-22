@@ -16,7 +16,7 @@ namespace imgproc
 // Forward declare a generic expression
 class expr;
 
-// Forward declare function for lamdba expressions
+// Forward declare function for lambda expressions
 class function;
 
 ////////////////////////////////////////

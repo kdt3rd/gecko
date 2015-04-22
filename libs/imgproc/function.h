@@ -62,6 +62,8 @@ public:
 
 	const std::shared_ptr<expr> result( void ) const { return _result; }
 
+	std::shared_ptr<function> clone( void ) const;
+
 private:
 	std::u32string _name;
 	std::vector<std::u32string> _args;

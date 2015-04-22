@@ -42,10 +42,9 @@ int safemain( int argc, char *argv[] )
 	{
 		std::ifstream src( path );
 		imgproc::parser parser( funcs, src );
-
 		parser.parse();
 		for ( auto msg: parser.messages() )
-			std::cout << msg << std::endl;
+			std::cerr << msg << std::endl;
 
 		if ( parser.has_errors() )
 			throw_runtime( "ERROR: parsing {0}", path );
@@ -54,25 +53,34 @@ int safemain( int argc, char *argv[] )
 	imgproc::environment env( funcs );
 	for ( auto &func: options["<func>, ..."].values() )
 	{
-		std::stringstream str( func );
-		imgproc::iterator tok( str );
-		imgproc::decl d;
-
-		d.parse( tok );
-
-		std::vector<imgproc::type> args;
-		for ( auto &a: d.get_type() )
-			args.push_back( a );
-
-		auto f = funcs[d.name()];
-		if ( f )
+		try
 		{
-			std::cout << "Compiling: " << d << std::endl;
-			auto r = env.infer( *f, args );
-			std::cout << r->get_type() << std::endl;
+			std::stringstream str( func );
+			imgproc::iterator tok( str );
+			imgproc::decl d;
+
+			d.parse( tok );
+
+			std::vector<imgproc::type> args;
+			for ( auto &a: d.get_type() )
+				args.push_back( a );
+
+			auto f = funcs[d.name()];
+			if ( f )
+			{
+				std::cerr << "Compiling: " << d << std::endl;
+				auto r = env.infer( *f, args );
+				std::cerr << r->get_type() << std::endl;
+			}
+			else
+				std::cerr << "Function " << d.name() << " not found" << std::endl;
 		}
-		else
-			std::cout << "Function " << d.name() << " not found" << std::endl;
+		catch ( std::exception &e )
+		{
+			std::cerr << "ERROR: function " << func << '\n';
+			base::print_exception( std::cerr, e, 1 );
+		}
+
 	}
 
 	return 0;

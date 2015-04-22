@@ -44,7 +44,7 @@ void parser::parse( void )
 		catch ( std::exception &e )
 		{
 			std::stringstream msg;
-			msg << '\n';
+			msg << "at " << _token.start_location() << '\n';
 			base::print_exception( msg, e );
 			add_error( msg.str() );
 			next_token();

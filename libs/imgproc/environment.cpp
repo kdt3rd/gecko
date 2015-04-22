@@ -324,8 +324,13 @@ type environment::operator()( const assign_expr &e )
 
 type environment::operator()( const lambda_expr &e )
 {
-	// TODO
-	throw_not_yet();
+	type_callable result( visit( e.result() ), type_callable::FUNCTION );
+
+	for ( auto &arg: e.args() )
+		result.add_arg(  );
+
+
+	return result;
 }
 
 ////////////////////////////////////////

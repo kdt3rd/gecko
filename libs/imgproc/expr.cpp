@@ -206,7 +206,7 @@ public:
 
 	std::shared_ptr<expr> operator()( const lambda_expr &e )
 	{
-		throw_not_yet();
+		return std::make_shared<expr>( lambda_expr( e.get_function()->clone() ) );
 	}
 
 	// Compile-time check for any missing operator() implementation
