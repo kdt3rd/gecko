@@ -22,7 +22,7 @@ namespace {
 int safemain( int argc, char **argv )
 {
 	base::cmd_line options( argv[0],
-		base::cmd_line::option(  0,  "", "<img>", base::cmd_line::arg<0,1>, "Image to show", true )
+		base::cmd_line::option(  0,  "", "<img>", base::cmd_line::arg<0,1>, "Image to show", false )
 	);
 
 	auto errhandler = base::make_guard( [&]() { std::cerr << options << std::endl; } );
