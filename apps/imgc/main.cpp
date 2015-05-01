@@ -2,6 +2,7 @@
 #include <base/contract.h>
 #include <base/cmd_line.h>
 #include <base/scope_guard.h>
+#include <utf/utf.h>
 #include <fstream>
 #include <imgproc/token.h>
 #include <imgproc/parser.h>
@@ -50,6 +51,7 @@ int safemain( int argc, char *argv[] )
 			throw_runtime( "ERROR: parsing {0}", path );
 	}
 
+	imgproc::cpp_generator gen( std::cout );
 	imgproc::environment env( funcs );
 	for ( auto &func: options["<func>, ..."].values() )
 	{
@@ -70,17 +72,17 @@ int safemain( int argc, char *argv[] )
 			{
 				std::cerr << "Compiling: " << d << std::endl;
 				auto r = env.infer( *f, args );
-				std::cerr << r->get_type() << std::endl;
+				imgproc::function tmp( *f, r );
+				gen.compile( tmp, args );
 			}
 			else
 				std::cerr << "Function " << d.name() << " not found" << std::endl;
 		}
 		catch ( std::exception &e )
 		{
-			std::cerr << "ERROR: function " << func << '\n';
+			std::cerr << "\nERROR: function " << func << '\n';
 			base::print_exception( std::cerr, e, 1 );
 		}
-
 	}
 
 	return 0;

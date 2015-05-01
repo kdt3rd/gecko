@@ -527,9 +527,10 @@ std::shared_ptr<expr> parser::loop_expr( void )
 	if ( !expect( TOK_PAREN_START ) )
 		throw_runtime( "expected `(' after 'for', got '{0}'", _token.value() );
 
-	id_list( [&result]( const std::u32string &a ) { result.add_variable( a ); } );
+	std::vector<std::u32string> vars;
+	id_list( [&vars]( const std::u32string &a ) { vars.push_back( a ); } );
 
-	if ( result.variables().empty() )
+	if ( vars.empty() )
 		throw_runtime( "for loop variable(s) missing" );
 
 	if ( !expect( TOK_SEPARATOR ) )
@@ -550,14 +551,16 @@ std::shared_ptr<expr> parser::loop_expr( void )
 
 	if ( result.ranges().size() > 1 )
 	{
-		if ( result.variables().size() != result.ranges().size() )
-			throw_runtime( "expected {0} ranges, got {1}", result.variables().size(), result.ranges().size() );
+		if ( vars.size() != result.ranges().size() )
+			throw_runtime( "expected {0} ranges, got {1}", vars.size(), result.ranges().size() );
 	}
 	else
 	{
-		while ( result.ranges().size() < result.variables().size() )
+		while ( result.ranges().size() < vars.size() )
 			result.add_range( range_expr( result.ranges().back() ) );
 	}
+
+	result.set_variable_names( std::move( vars ) );
 
 	bool oldassign = _parsing_assign;
 	_parsing_assign = false;

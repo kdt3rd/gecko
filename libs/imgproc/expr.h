@@ -317,7 +317,16 @@ public:
 	{
 	}
 
+	size_t index( void ) const { return _index; }
+
 	void set_index( size_t idx ) { _index = idx; }
+
+	void set_variable( std::u32string v )
+	{
+		_variable = std::move( v );
+	}
+
+	const std::u32string &variable( void ) const { return _variable; }
 
 	std::shared_ptr<expr> start( void ) const { return _start; }
 	std::shared_ptr<expr> end( void ) const { return _end; }
@@ -325,6 +334,7 @@ public:
 
 private:
 	size_t _index = 0;
+	std::u32string _variable;
 	std::shared_ptr<expr> _start;
 	std::shared_ptr<expr> _end;
 	std::shared_ptr<expr> _by;
@@ -339,19 +349,14 @@ public:
 	{
 	}
 
-	for_expr( const std::vector<std::u32string> &m, const std::vector<std::u32string> &v, const std::vector<range_expr> &ranges, std::shared_ptr<expr> result )
-		: _mods( m ), _vars( v ), _ranges( ranges ), _result( result )
+	for_expr( const std::vector<std::u32string> &m, const std::vector<range_expr> &ranges, std::shared_ptr<expr> result )
+		: _mods( m ), _ranges( ranges ), _result( result )
 	{
 	}
 
 	void add_modifier( const std::u32string &mod )
 	{
 		_mods.push_back( mod );
-	}
-
-	void add_variable( std::u32string n )
-	{
-		_vars.push_back( std::move( n ) );
 	}
 
 	void add_range( range_expr &&r )
@@ -370,12 +375,6 @@ public:
 		return _mods;
 	}
 
-
-	const std::vector<std::u32string> &variables( void ) const
-	{
-		return _vars;
-	}
-
 	const std::vector<range_expr> &ranges( void ) const
 	{
 		return _ranges;
@@ -386,9 +385,15 @@ public:
 		return _result;
 	}
 
+	void set_variable_names( std::vector<std::u32string> &&vars )
+	{
+		precondition( vars.size() == _ranges.size(), "invalid number of variable names" );
+		for ( size_t i = 0; i < vars.size(); ++i )
+			_ranges[i].set_variable( std::move( vars[i] ) );
+	}
+
 private:
 	std::vector<std::u32string> _mods;
-	std::vector<std::u32string> _vars;
 	std::vector<range_expr> _ranges;
 	std::shared_ptr<expr> _result;
 };

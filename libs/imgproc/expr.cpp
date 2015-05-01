@@ -91,11 +91,11 @@ public:
 		}
 
 		_out << "for ( ";
-		auto &vars = e.variables();
-		std::copy( vars.begin(), vars.end(), base::infix_ostream_iterator<std::u32string>( _out, ", " ) );
+		auto &ranges = e.ranges();
+		for ( size_t i = 1; i < ranges.size(); ++i )
+			_out << ranges[i-1].variable() << ", ";
 
 		_out << ": ";
-		auto &ranges = e.ranges();
 		for ( size_t i = 1; i < ranges.size(); ++i )
 		{
 			this->operator()( ranges[i-1] );
@@ -196,7 +196,7 @@ public:
 
 	std::shared_ptr<expr> operator()( const for_expr &e )
 	{
-		return std::make_shared<expr>( for_expr( e.modifiers(), e.variables(), e.ranges(), e.result()->clone() ) );
+		return std::make_shared<expr>( for_expr( e.modifiers(), e.ranges(), e.result()->clone() ) );
 	}
 
 	std::shared_ptr<expr> operator()( const assign_expr &e )

@@ -6,7 +6,7 @@ lib = Library( "imgproc",
 	"parser.cpp",
 	"operators.cpp",
 	"expr_parser.cpp",
---	"cpp_generator.cpp",
+	"cpp_generator.cpp",
 	"function.cpp",
 	"type.cpp",
 	"unifier.cpp",
@@ -14,4 +14,4 @@ lib = Library( "imgproc",
 	"decl.cpp",
 	UseLibraries( "utf", "base" ) )
 
-			   
+

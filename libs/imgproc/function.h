@@ -33,6 +33,11 @@ public:
 	{
 	}
 
+	function( const function &f, const std::shared_ptr<expr> &result )
+		: _name( f.name() ), _args( f.args() ), _mods( f.arg_modifiers() ), _result( result )
+	{
+	}
+
 	void add_arg( std::u32string a, std::u32string mod )
 	{
 		_args.push_back( std::move( a ) );

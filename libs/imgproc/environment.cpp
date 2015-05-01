@@ -302,8 +302,8 @@ type environment::operator()( const range_expr &e )
 type environment::operator()( const for_expr &e )
 {
 	_env.emplace_back();
-	for ( auto &v: e.variables() )
-		add_scope( v, type_primary( pod_type::INT64 ) );
+	for ( auto &v: e.ranges() )
+		add_scope( v.variable(), type_primary( pod_type::INT64 ) );
 
 	type result = visit( e.result() );
 	_env.pop_back();
@@ -324,13 +324,14 @@ type environment::operator()( const assign_expr &e )
 
 type environment::operator()( const lambda_expr &e )
 {
+	/*
 	type_callable result( visit( e.result() ), type_callable::FUNCTION );
 
 	for ( auto &arg: e.args() )
 		result.add_arg(  );
 
-
 	return result;
+	*/
 }
 
 ////////////////////////////////////////
