@@ -6,6 +6,8 @@
 #include <base/string_util.h>
 #include <base/file_system.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-register"
 #include <ImfMultiPartInputFile.h>
 #include <ImfInputPart.h>
 #include <ImfVersion.h>
@@ -14,6 +16,7 @@
 #include <ImfChannelList.h>
 #include <ImfMultiView.h>
 #include <ImfStandardAttributes.h>
+#pragma GCC diagnostic pop
 
 #include <algorithm>
 
