@@ -20,8 +20,8 @@ xErrorCB( Display *d, XErrorEvent *e )
 
 	XGetErrorText( d, e->error_code, errorBuf, 4096 );
 	std::cerr << "ERROR: Xlib Error"
-			  << "\n  Major/Minor: " << e->request_code << " / " << e->minor_code
-			  << "\n   Error code: " << e->error_code
+			  << "\n  Major/Minor: " << int(e->request_code) << " / " << int(e->minor_code)
+			  << "\n   Error code: " << int(e->error_code)
 			  << "\n      Message: " << errorBuf << std::endl;
 
 	return 0;
