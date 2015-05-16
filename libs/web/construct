@@ -1,0 +1,9 @@
+
+lib = Library( "web",
+	"request.cpp",
+	"response.cpp",
+	"client.cpp",
+	"server.cpp",
+	UseLibraries( "net" )
+);
+
