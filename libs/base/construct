@@ -18,6 +18,7 @@ lib = Library( "base",
 	"ratio.cpp",
 	"uri.cpp",
 	"file_system.cpp",
-	"posix_file_system.cpp"
+	"posix_file_system.cpp",
+	"thread_pool.cpp"
 );
 
