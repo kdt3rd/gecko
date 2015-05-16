@@ -2,6 +2,8 @@
 #pragma once
 
 #include <sstream>
+#include <map>
+#include <string>
 #include <net/tcp_socket.h>
 
 namespace web
@@ -14,11 +16,7 @@ class response
 public:
 	response( net::tcp_socket &socket );
 
-	response( response &&r )
-		: _content( r._content.str() )
-	{
-	}
-
+	/*
 	template <class T>
 	response &operator<<( const T &t )
 	{
@@ -36,9 +34,11 @@ public:
 	{
 		return manip( *this );
 	}
+	*/
 
 private:
-	std::stringstream _content;
+	std::string _content;
+	std::map<std::string,std::string> _header;
 };
 
 ////////////////////////////////////////
