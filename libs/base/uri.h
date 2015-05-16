@@ -63,6 +63,13 @@ public:
 		return _port;
 	}
 
+	uint16_t port( uint16_t default_port ) const
+	{
+		if ( _port == 0 )
+			return default_port;
+		return _port;
+	}
+
 	const std::vector<std::string> &path( void ) const
 	{
 		return _path;
