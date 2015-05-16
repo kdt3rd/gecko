@@ -83,5 +83,17 @@ response::response( net::tcp_socket &socket )
 
 ////////////////////////////////////////
 
+void response::send( net::tcp_socket &socket )
+{
+	std::string tmp = base::format("HTTP/{0} {1} {2}\r\n", _version, _status, "OK" );
+	for ( auto &h: _header )
+		tmp += base::format( "{0}: {1}\r\n", h.first, h.second );
+	tmp += base::format( "Content-Length: {0}\r\n\r\n", _content.size() );
+	socket.write( tmp.c_str(), tmp.size() );
+	socket.write( _content.c_str(), _content.size() );
+}
+
+////////////////////////////////////////
+
 }
 

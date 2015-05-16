@@ -14,30 +14,29 @@ namespace web
 class response
 {
 public:
+	response( void )
+	{
+	}
+
 	response( net::tcp_socket &socket );
 
-	/*
-	template <class T>
-	response &operator<<( const T &t )
+	response &operator<<( const std::string &t )
 	{
-		_content << t;
+		_content += t;
 		return *this;
 	}
 
-	response &operator<<( std::ostream &(*manip)( std::ostream & ) )
+	void set_header( std::string n, std::string v )
 	{
-		_content << manip;
-		return *this;
+		_header[std::move( n )] = std::move( v );
 	}
 
-	response &operator<<( response &(*manip)( response & ) )
-	{
-		return manip( *this );
-	}
-	*/
+	void send( net::tcp_socket &socket );
 
 private:
 	std::string _content;
+	std::string _version = "1.1";
+	size_t _status = 200;
 	std::map<std::string,std::string> _header;
 };
 

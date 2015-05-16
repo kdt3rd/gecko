@@ -16,6 +16,16 @@ public:
 	request( net::tcp_socket &socket );
 	request( std::string method, const base::uri &path, std::string version = "1.1" );
 
+	const std::string &method( void ) const
+	{
+		return _method;
+	}
+
+	const base::uri &path( void ) const
+	{
+		return _path;
+	}
+
 	void set_header( std::string n, std::string v )
 	{
 		_header[std::move( n )] = std::move( v );

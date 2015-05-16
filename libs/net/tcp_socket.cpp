@@ -45,7 +45,14 @@ tcp_socket::tcp_socket( void )
 	int low_delay = IPTOS_LOWDELAY;
 	if ( setsockopt( _socket, IPPROTO_IP, IP_TOS, &low_delay, sizeof(low_delay) ) < 0 )
 		throw_errno( "setsockopt/lowdelay" );
+}
 
+////////////////////////////////////////
+
+void tcp_socket::listen( int conn )
+{
+	if ( ::listen( _socket, conn ) )
+		throw_errno( "TCP socket listen" );
 }
 
 ////////////////////////////////////////
@@ -108,7 +115,7 @@ std::shared_ptr<tcp_socket> tcp_socket::accept( void )
     while ( ( socket = ::accept( _socket, (struct sockaddr *)&clientaddr, &len ) ) < 0 )
     {
         if ( errno != EINTR && errno != ECONNABORTED )
-            throw_errno( "accept" );
+            throw_errno( "TCP socket accept failed" );
     }
 
     return std::unique_ptr<tcp_socket>( new tcp_socket( socket ) );
@@ -129,11 +136,11 @@ void tcp_socket::read( void *buf, size_t bytes )
         if ( nread < 0 )
         {
             if ( errno != EINTR )
-                throw_errno( "tcp_socket read" );
+                throw_errno( "TCP socket read" );
             continue;
         }
         if ( nread == 0 )
-			throw_location( std::system_error( ECONNABORTED, std::system_category(), "tcp_socket read" ) );
+			throw_location( std::system_error( ECONNABORTED, std::system_category(), "TCP socket read" ) );
         nleft -= nread;
         mem += nread;
     }

@@ -46,7 +46,7 @@ void socket::bind( uint32_t host, uint16_t port )
 	local.sin_port = htons( port );
 
     if ( ::bind( _socket, (struct sockaddr *)&local, sizeof(local) ) == -1 )
-        throw_errno( "binding to {0}:{1}", host, port );
+        throw_errno( "socking binding to {0}:{1}", host, port );
 }
 
 ////////////////////////////////////////

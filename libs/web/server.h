@@ -18,9 +18,9 @@ namespace web
 class server
 {
 public:
-	server( uint16_t port, size_t threads = 1 );
-
 	typedef std::function<void( response&, request& )> handler;
+
+	server( uint16_t port, size_t threads = 1 );
 
 	handler &resource( const std::string &method, const std::string &re );
 

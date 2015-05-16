@@ -3,6 +3,7 @@
 #include <base/thread_pool.h>
 #include <base/scope_guard.h>
 #include <net/tcp_socket.h>
+#include <regex>
 
 namespace web
 {
@@ -36,6 +37,7 @@ void server::run( void )
 
 	net::tcp_socket socket;
 	socket.bind( _port );
+	socket.listen( 5 );
 
 	while ( !_done )
 	{
@@ -48,7 +50,36 @@ void server::run( void )
 
 void server::handle_client( net::tcp_socket &client )
 {
-	// Read request and process it...
+	std::cout << "CLIENT CONNECT" << std::endl;
+	request req( client );
+	const auto &resources = _resources.find( req.method() );
+	if ( resources != _resources.end() )
+	{
+		std::string path = req.path().full_path();
+		for ( auto &r: resources->second )
+		{
+			std::regex re( r.first );
+			if ( std::regex_match( path, re ) )
+			{
+				response resp;
+				r.second( resp, req );
+				resp.send( client );
+				return;
+			}
+		}
+	}
+
+	const auto &handler = _defaults.find( req.method() );
+	if ( handler != _defaults.end() )
+	{
+		response resp;
+		handler->second( resp, req );
+		resp.send( client );
+		return;
+	}
+
+	response resp;
+	resp.send( client );
 }
 
 ////////////////////////////////////////

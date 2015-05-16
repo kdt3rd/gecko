@@ -19,6 +19,8 @@ class tcp_socket : public socket
 public:
 	tcp_socket( void );
 
+	void listen( int conn );
+
 	void connect( const base::uri &host, uint16_t default_port, double timeout = 0.0 )
 	{
 		connect( address( host.host() ), host.port( default_port ), timeout );
