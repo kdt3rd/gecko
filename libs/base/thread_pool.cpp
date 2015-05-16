@@ -41,9 +41,9 @@ void thread_pool::queue( const std::function<void(void)> &f )
 
 void thread_pool::work( void )
 {
-	std::function<void(void)> task;
 	while ( true )
 	{
+		std::function<void(void)> task;
 		{
 			std::unique_lock<std::mutex> lock( _mutex );
 			while ( !_done && _work.empty() )
