@@ -4,8 +4,8 @@
 
 ////////////////////////////////////////
 
-parser::parser( void )
-	: _func( "test" )
+parser::parser( const std::string &n )
+	: _func( n )
 {
 }
 

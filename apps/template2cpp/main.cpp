@@ -32,14 +32,16 @@ int safemain( int argc, char *argv[] )
 	if ( auto &opt = options["output"] )
 		outfile = opt.value();
 
-	std::string base = base::basename( infile );
+	std::string func = base::basename( infile );
+	if ( auto &opt = options["function"] )
+		func = opt.value();
 
 	if ( infile == outfile )
 		throw_runtime( "cannot overwrite input file" );
 
 	// Parsed information
 	std::ifstream in( infile );
-	parser p;
+	parser p( func );
 	p.parse( in );
 
 	std::ofstream out( outfile );

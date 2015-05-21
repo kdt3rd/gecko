@@ -8,7 +8,7 @@
 class parser
 {
 public:
-	parser( void );
+	parser( const std::string &main );
 
 	void parse( std::istream &in );
 	void save( std::ostream &out );

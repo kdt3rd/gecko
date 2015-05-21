@@ -1,2 +1,15 @@
 
 template2cpp = Executable( "template2cpp", "main.cpp", "function.cpp", "parser.cpp", UseLibraries( "base" ) )
+
+AddTool{ tag="template2cpp", name="template2cpp",
+         exe=template2cpp,
+         description="T2C $out",
+         options={
+         },
+         option_defaults={
+         },
+         input_extensions={ ".html", ".txt" },
+         output_extensions={ ".cpp" },
+         cmd={"$exe", "$in", "-o", "$out"}
+}
+
