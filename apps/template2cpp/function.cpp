@@ -26,13 +26,10 @@ void function::push_text( bool trim )
 			char c = _builder[i];
 			switch ( c )
 			{
-				case '"':
-					_code.push_back( '\\' );
-					_code.push_back( c );
-					break;
-
+				case '"': _code.append( "\\\"" ); break;
 				case '\t': _code.append( "\\t" ); break;
 				case '\n': _code.append( "\\n" ); break;
+				case '\r': _code.append( "\\r" ); break;
 
 				default:
 					_code.push_back( c );

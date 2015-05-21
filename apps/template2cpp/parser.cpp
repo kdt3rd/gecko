@@ -107,11 +107,7 @@ void parser::parse_expr( std::istream &in )
 		}
 	}
 	if ( in.get() != '}' )
-		throw_runtime( "unbalanced '}' in expression" );
-	if ( in.peek() == '\n' )
-		in.get();
-
-	_func.push_text();
+		throw_runtime( "missing '}' in expression" );
 }
 
 ////////////////////////////////////////
@@ -256,6 +252,8 @@ void parser::parse_directive( std::istream &in )
 		_includes.push_back( rest );
 	else if ( word == "arg" )
 		_func.add_arg( rest );
+	else if ( word == "function" )
+		_func.set_name( rest );
 	else
 		throw_runtime( "unknown directive '{0}'", word );
 

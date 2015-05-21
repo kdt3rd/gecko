@@ -14,6 +14,11 @@ class function
 public:
 	function( std::string n, size_t indent = 1 );
 
+	void set_name( std::string n )
+	{
+		_name = std::move( n );
+	}
+
 	void add( char c )
 	{
 		_builder.push_back( c );
