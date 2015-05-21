@@ -28,6 +28,8 @@ public:
 
 	void run( void );
 
+	static void not_found( response &resp, request &req );
+
 private:
 	void handle_client( net::tcp_socket &client );
 	std::map<std::string,std::map<std::string,handler>> _resources;

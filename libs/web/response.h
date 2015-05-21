@@ -6,6 +6,8 @@
 #include <string>
 #include <net/tcp_socket.h>
 
+#include "status_code.h"
+
 namespace web
 {
 
@@ -26,6 +28,18 @@ public:
 		return *this;
 	}
 
+	void set_status_code( status_code c )
+	{
+		_status = c;
+		_reason = reason_phrase( _status );
+	}
+
+	void set_status_code( status_code c, std::string reason )
+	{
+		_status = c;
+		_reason = std::move( reason );
+	}
+
 	void set_header( std::string n, std::string v )
 	{
 		_header[std::move( n )] = std::move( v );
@@ -33,10 +47,36 @@ public:
 
 	void send( net::tcp_socket &socket );
 
+	const std::string &content( void ) const
+	{
+		return _content;
+	}
+
+	const std::string &version( void ) const
+	{
+		return _version;
+	}
+
+	status_code status( void ) const
+	{
+		return _status;
+	}
+
+	const std::string &reason( void ) const
+	{
+		return _reason;
+	}
+
+	const std::map<std::string,std::string> &header( void ) const
+	{
+		return _header;
+	}
+
 private:
 	std::string _content;
 	std::string _version = "1.1";
-	size_t _status = 200;
+	status_code _status = status_code::OK;
+	std::string _reason = reason_phrase( status_code::OK );
 	std::map<std::string,std::string> _header;
 };
 

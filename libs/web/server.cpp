@@ -11,6 +11,7 @@ namespace web
 server::server( uint16_t port, size_t threads )
 	: _port( port ), _threads( threads )
 {
+	_defaults["GET"] = &not_found;
 }
 
 ////////////////////////////////////////
@@ -48,9 +49,15 @@ void server::run( void )
 
 ////////////////////////////////////////
 
+void server::not_found( response &resp, request &req )
+{
+	resp.set_status_code( status_code::NOT_FOUND );
+}
+
+////////////////////////////////////////
+
 void server::handle_client( net::tcp_socket &client )
 {
-	std::cout << "CLIENT CONNECT" << std::endl;
 	request req( client );
 	const auto &resources = _resources.find( req.method() );
 	if ( resources != _resources.end() )
@@ -79,6 +86,7 @@ void server::handle_client( net::tcp_socket &client )
 	}
 
 	response resp;
+	resp.set_status_code( status_code::METHOD_NOT_ALLOWED );
 	resp.send( client );
 }
 

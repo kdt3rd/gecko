@@ -1,0 +1,2 @@
+
+template2cpp = Executable( "template2cpp", "main.cpp", "function.cpp", "parser.cpp", UseLibraries( "base" ) )

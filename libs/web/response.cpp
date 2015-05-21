@@ -29,7 +29,14 @@ namespace web
 response::response( net::tcp_socket &socket )
 {
 	std::string line = read_line( socket );
-	std::cout << "STATUS: " << line << std::endl;
+
+	size_t off = line.find( '/' );
+	size_t off2 = line.find( ' ', off );
+	size_t off3 = line.find( ' ', off2 + 1 );
+
+	_version = line.substr( off + 1, off2 - off - 1 );
+	_status = static_cast<status_code>( std::stoi( line.substr( off2 + 1, off2 - off3 - 1 ), nullptr, 10 ) );
+	_reason = line.substr( off3 + 1 );
 
 	line = read_line( socket );
 	while ( !line.empty() )
@@ -37,7 +44,6 @@ response::response( net::tcp_socket &socket )
 		size_t off = line.find( ':' );
 		std::string key( line.substr( 0, off ) );
 		std::string value( line.substr( off + 2 ) );
-		std::cout << "HEADER: " << key << ": " << value << std::endl;
 		_header[key] = value;
 		line = read_line( socket );
 	}
@@ -78,14 +84,13 @@ response::response( net::tcp_socket &socket )
 		_content.resize( _content.size() + size );
 		socket.read( &_content[off], size );
 	}
-	std::cout << "CONTENT:\n" << _content << std::endl;
 }
 
 ////////////////////////////////////////
 
 void response::send( net::tcp_socket &socket )
 {
-	std::string tmp = base::format("HTTP/{0} {1} {2}\r\n", _version, _status, "OK" );
+	std::string tmp = base::format( "HTTP/{0} {1} {2}\r\n", _version, static_cast<int>( _status ), _reason );
 	for ( auto &h: _header )
 		tmp += base::format( "{0}: {1}\r\n", h.first, h.second );
 	tmp += base::format( "Content-Length: {0}\r\n\r\n", _content.size() );

@@ -33,7 +33,7 @@ request::request( net::tcp_socket &socket )
 	size_t off2 = line.find( ' ', off + 1 );
 	size_t off3 = line.find( '/', off2 + 1 );
 	_method = line.substr( 0, off );
-	std::string tmp_path = line.substr( off + 1, off2 - off );
+	std::string tmp_path = line.substr( off + 1, off2 - off - 1 );
 	_version = line.substr( off3 + 1 );
 
 	line = read_line( socket );

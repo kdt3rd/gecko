@@ -24,7 +24,8 @@ int safemain( int argc, char *argv[] )
 		for ( auto &u: opt.values() )
 		{
 			base::uri path( u );
-			test.get( path );
+			web::response resp = test.get( path );
+			std::cout << static_cast<int>( resp.status() ) << ' ' << resp.reason() << "\n" << resp.content() << std::endl;
 		}
 	}
 
