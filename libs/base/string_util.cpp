@@ -18,6 +18,26 @@ std::string trim( const std::string &str, const std::string &ws )
 
 ////////////////////////////////////////
 
+std::string ltrim( const std::string &str, const std::string &ws )
+{
+    auto begin = str.find_first_not_of( ws );
+    if ( begin == std::string::npos )
+        return std::string();
+
+    return str.substr( begin );
+}
+
+////////////////////////////////////////
+
+std::string rtrim( std::string str, const std::string &ws )
+{
+	while ( !str.empty() && ws.find( str.back() ) != std::string::npos )
+		str.pop_back();
+	return std::move( str );
+}
+
+////////////////////////////////////////
+
 std::string replace( std::string &&str, char c, const std::string &replacement )
 {
 	std::string result( std::move( str ) );

@@ -2,3 +2,4 @@
 SubDir( "tests" )
 SubDir( "imgc" )
 SubDir( "viewer" )
+SubDir( "template2cpp" )

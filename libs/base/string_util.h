@@ -11,6 +11,8 @@ namespace base
 ////////////////////////////////////////
 
 std::string trim( const std::string &str, const std::string &ws = " \t\n\r" );
+std::string ltrim( const std::string &str, const std::string &ws = " \t\n\r" );
+std::string rtrim( std::string str, const std::string &ws = " \t\n\r" );
 
 ////////////////////////////////////////
 

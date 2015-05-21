@@ -1,0 +1,8 @@
+
+lib = Library( "net",
+	"address.cpp",
+	"socket.cpp",
+	"tcp_socket.cpp",
+	UseLibraries( "base" )
+);
+
