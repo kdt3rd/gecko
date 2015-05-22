@@ -2,8 +2,8 @@
 #include <cstdint>
 #include <string>
 #include <cstring>
-#include <iostream>
 #include "sha256.h"
+#include "contract.h"
 
 namespace
 {
@@ -121,6 +121,8 @@ namespace base
 
 void sha256::update( const void *m, size_t len )
 {
+	precondition( !_finalized, "sha256 is already finalized" );
+
 	const uint8_t *msg = reinterpret_cast<const uint8_t *>( m );
 	unsigned int block_nb;
 	unsigned int new_len, rem_len, tmp_len;

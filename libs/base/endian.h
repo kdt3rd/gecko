@@ -52,5 +52,12 @@ inline uint64_t byteswap( uint64_t c )
 
 ////////////////////////////////////////
 
+inline uint32_t host2be( uint32_t c )
+{
+	return byteswap( c );
+}
+
+////////////////////////////////////////
+
 
 }
