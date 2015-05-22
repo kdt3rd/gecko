@@ -18,6 +18,12 @@ class tcp_socket : public socket
 {
 public:
 	tcp_socket( void );
+	tcp_socket( tcp_socket &&that )
+		: socket( std::move( that ) )
+	{
+	}
+
+	tcp_socket( const socket &that ) = delete;
 
 	void listen( int conn );
 

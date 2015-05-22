@@ -18,7 +18,7 @@ namespace web
 class server
 {
 public:
-	typedef std::function<void( response&, request& )> handler;
+	typedef std::function<void( request&, net::tcp_socket &client )> handler;
 
 	server( uint16_t port, size_t threads = 1 );
 
@@ -28,7 +28,7 @@ public:
 
 	void run( void );
 
-	static void not_found( response &resp, request &req );
+	static void not_found( request &req, net::tcp_socket &client );
 
 private:
 	void handle_client( net::tcp_socket &client );

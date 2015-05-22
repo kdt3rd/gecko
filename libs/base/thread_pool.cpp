@@ -55,7 +55,14 @@ void thread_pool::work( void )
 			task = std::move( _work.front() );
 			_work.pop_front();
 		}
-		task();
+		try
+		{
+			task();
+		}
+		catch ( ... )
+		{
+			// ignore all errors
+		}
 	}
 }
 

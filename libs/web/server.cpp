@@ -43,51 +43,72 @@ void server::run( void )
 	while ( !_done )
 	{
 		auto client = socket.accept();
-		threads.queue( [=]() { this->handle_client( *client ); } );
+		threads.queue( [=]()
+		{
+			try
+			{
+				this->handle_client( *client );
+			}
+			catch ( const std::exception &e )
+			{
+				try
+				{
+					response resp( "<!DOCTYPE html><html lang=\"en\"><head><title>Internal Server Error</title></head><body>Internal Server Error</body></html>" );
+					resp.set_status_code( status_code::INTERNAL_ERROR );
+					resp.send( *client );
+				}
+				catch ( ... )
+				{
+				}
+				base::print_exception( std::cerr, e );
+			}
+		} );
 	}
 }
 
 ////////////////////////////////////////
 
-void server::not_found( response &resp, request &req )
+void server::not_found( request &req, net::tcp_socket &client )
 {
+	response resp( "<!DOCTYPE html><html lang=\"en\"><head><title>Not Found</title></head><body>404 Not Found</body></html>" );
 	resp.set_status_code( status_code::NOT_FOUND );
+	resp.send( client );
 }
 
 ////////////////////////////////////////
 
 void server::handle_client( net::tcp_socket &client )
 {
-	request req( client );
-	const auto &resources = _resources.find( req.method() );
-	if ( resources != _resources.end() )
+	// TODO support keep-alive connection
+	while ( true )
 	{
-		std::string path = req.path().full_path();
-		for ( auto &r: resources->second )
+		request req( client );
+		const auto &resources = _resources.find( req.method() );
+		if ( resources != _resources.end() )
 		{
-			std::regex re( r.first );
-			if ( std::regex_match( path, re ) )
+			std::string path = req.path().full_path();
+			for ( auto &r: resources->second )
 			{
-				response resp;
-				r.second( resp, req );
-				resp.send( client );
-				return;
+				std::regex re( r.first );
+				if ( std::regex_match( path, re ) )
+				{
+					r.second( req, client );
+					return;
+				}
 			}
 		}
-	}
 
-	const auto &handler = _defaults.find( req.method() );
-	if ( handler != _defaults.end() )
-	{
+		const auto &handler = _defaults.find( req.method() );
+		if ( handler != _defaults.end() )
+		{
+			handler->second( req, client );
+			return;
+		}
+
 		response resp;
-		handler->second( resp, req );
+		resp.set_status_code( status_code::METHOD_NOT_ALLOWED );
 		resp.send( client );
-		return;
 	}
-
-	response resp;
-	resp.set_status_code( status_code::METHOD_NOT_ALLOWED );
-	resp.send( client );
 }
 
 ////////////////////////////////////////

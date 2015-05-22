@@ -26,9 +26,24 @@ public:
 		return _path;
 	}
 
+	const std::string &version( void ) const
+	{
+		return _version;
+	}
+
 	void set_header( std::string n, std::string v )
 	{
 		_header[std::move( n )] = std::move( v );
+	}
+
+	std::string operator[]( const std::string &n )
+	{
+		return _header.at( n );
+	}
+
+	const std::map<std::string,std::string> &header( void ) const
+	{
+		return _header;
 	}
 
 	void send( net::tcp_socket &socket );
@@ -40,6 +55,10 @@ private:
 	std::map<std::string,std::string> _header;
 	std::stringstream _content;
 };
+
+////////////////////////////////////////
+
+std::ostream &operator<<( std::ostream &out, const request &r );
 
 ////////////////////////////////////////
 

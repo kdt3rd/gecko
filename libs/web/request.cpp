@@ -1,14 +1,15 @@
 
 #include "request.h"
+#include <iostream>
 
 namespace
 {
 	std::string read_line( net::tcp_socket &socket )
 	{
 		char c = '\0';
-		socket.read( &c, 1 );
 
 		std::string result;
+		socket.read( &c, 1 );
 		while ( c != '\r' )
 		{
 			result.push_back( c );
@@ -67,6 +68,18 @@ void request::send( net::tcp_socket &server )
 		tmp += base::format( "{0}: {1}\r\n", h.first, h.second );
 	tmp += "\r\n";
 	server.write( tmp.c_str(), tmp.size() );
+}
+
+////////////////////////////////////////
+
+std::ostream &operator<<( std::ostream &out, const request &r )
+{
+	std::string tmp = base::format("{0} {1} HTTP/{2}\r\n", r.method(), r.path().full_path(), r.version() );
+	for ( auto &h: r.header() )
+		tmp += base::format( "{0}: {1}\r\n", h.first, h.second );
+	tmp += "\r\n";
+	out << tmp;
+	return out;
 }
 
 ////////////////////////////////////////

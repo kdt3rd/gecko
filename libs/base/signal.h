@@ -314,7 +314,7 @@ public:
 	/// @brief Remove a callback from the list
 	/// @param conn a connection to remove
 	/// @return true if a callback is removed
-	
+
 	/// @fn collector_result operator()( ... )
 	/// @memberof base::signal
 	/// @brief Call the signal

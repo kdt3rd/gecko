@@ -136,11 +136,11 @@ void tcp_socket::read( void *buf, size_t bytes )
         if ( nread < 0 )
         {
             if ( errno != EINTR )
-                throw_errno( "TCP socket read" );
+                throw_errno( "reading TCP socket {0}", _socket );
             continue;
         }
         if ( nread == 0 )
-			throw_location( std::system_error( ECONNABORTED, std::system_category(), "TCP socket read" ) );
+			throw_location( std::system_error( ECONNABORTED, std::system_category(), base::format( "TCP socket read {0}", _socket ) ) );
         nleft -= nread;
         mem += nread;
     }

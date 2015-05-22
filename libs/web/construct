@@ -5,6 +5,7 @@ lib = Library( "web",
 	"response.cpp",
 	"client.cpp",
 	"server.cpp",
+	"socket.cpp",
 	UseLibraries( "net" )
 );
 

@@ -20,6 +20,11 @@ public:
 	{
 	}
 
+	response( std::string &&c )
+		: _content( std::move( c ) )
+	{
+	}
+
 	response( net::tcp_socket &socket );
 
 	response &operator<<( const std::string &t )
