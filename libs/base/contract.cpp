@@ -24,6 +24,8 @@ void print_exception( std::ostream &out, const std::exception &e, int level )
 	{
 		out << "UNKNOWN EXCEPTION" << std::endl;
 	}
+	if ( level == 0 )
+		out << std::flush;
 }
 
 ////////////////////////////////////////
