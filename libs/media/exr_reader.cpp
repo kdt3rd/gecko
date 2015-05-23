@@ -76,8 +76,8 @@ public:
 	virtual std::shared_ptr<image_frame> at( int64_t f ) override
 	{
 		auto fs = base::file_system::get( _files.uri() );
-		std::shared_ptr<std::istream> stream = fs->open_read( _files.get_frame( f ) );
-		exr_istream estr( *stream );
+		base::istream stream = fs->open_read( _files.get_frame( f ) );
+		exr_istream estr( stream );
 		Imf::MultiPartInputFile file( estr );
 
 		Imf::InputPart input( file, _part );
@@ -172,8 +172,8 @@ container exr_reader( const base::uri &u )
 		}
 	}
 
-	std::shared_ptr<std::istream> stream = fs->open_read( fseq.get_frame( start ) );
-	exr_istream estr( *stream );
+	base::istream stream = fs->open_read( fseq.get_frame( start ) );
+	exr_istream estr( stream );
 
 	Imf::MultiPartInputFile file( estr );
 	if ( file.parts() == 1 )

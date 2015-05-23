@@ -21,6 +21,7 @@ lib = Library( "base",
 	"math_functions.cpp",
 	"ratio.cpp",
 	"uri.cpp",
+	"unix_streambuf.cpp",
 	"file_system.cpp",
 	"posix_file_system.cpp",
 	"thread_pool.cpp"

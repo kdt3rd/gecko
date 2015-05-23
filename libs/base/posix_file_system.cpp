@@ -1,6 +1,7 @@
 
 #include "posix_file_system.h"
 #include "contract.h"
+#include "unix_streambuf.h"
 
 #include <cstring>
 #include <sys/types.h>
@@ -9,6 +10,10 @@
 #include <stddef.h>
 #include <fstream>
 #include <memory>
+
+
+////////////////////////////////////////
+
 
 namespace base
 {
@@ -48,26 +53,20 @@ directory_iterator posix_file_system::readdir( const uri &path )
 
 ////////////////////////////////////////
 
-std::unique_ptr<std::istream> posix_file_system::open_read( const base::uri &path )
+istream
+posix_file_system::open_read( const base::uri &path, std::ios_base::openmode m )
 {
 	precondition( path.scheme() == "file", "posix_file_system expected \"file\" uri" );
-	return std::unique_ptr<std::ifstream>( new std::ifstream( path.full_path() ) );
+	return istream( std::make_shared<unix_streambuf>( m, path.full_path() ) );
 }
 
 ////////////////////////////////////////
 
-std::unique_ptr<std::ostream> posix_file_system::open_write( const base::uri &path )
+ostream
+posix_file_system::open_write( const base::uri &path, std::ios_base::openmode m )
 {
 	precondition( path.scheme() == "file", "posix_file_system expected \"file\" uri" );
-	return std::unique_ptr<std::ofstream>( new std::ofstream( path.full_path() ) );
-}
-
-////////////////////////////////////////
-
-std::unique_ptr<std::ostream> posix_file_system::create( const base::uri &path )
-{
-	precondition( path.scheme() == "file", "posix_file_system expected \"file\" uri" );
-	return std::unique_ptr<std::ofstream>( new std::ofstream( path.full_path(), std::ios_base::trunc ) );
+	return ostream( std::make_shared<unix_streambuf>( m, path.full_path() ) );
 }
 
 ////////////////////////////////////////
