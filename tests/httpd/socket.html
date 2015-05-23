@@ -6,7 +6,7 @@
             function init()
 			{
 				document.getElementById("output").innerHTML += "<p style='color: green;'>> OPENING SOCKET</p>";
-				websocket = new WebSocket("ws://localhost:8080/ws");
+				websocket = new WebSocket("ws://" + window.location.host + "/ws");
 				websocket.onopen = function() { document.getElementById("output").innerHTML += "<p>> CONNECTED</p>"; };
 				websocket.onmessage = function(evt) { document.getElementById("output").innerHTML += "<p style='color: blue;'>> RESPONSE: " + evt.data + "</p>"; };
 				websocket.onerror = function(evt) { document.getElementById("output").innerHTML += "<p style='color: red;'>> ERROR: " + evt.data + "</p>"; };
