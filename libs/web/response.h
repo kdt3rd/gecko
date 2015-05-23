@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <sstream>
 #include <map>
 #include <string>
@@ -87,6 +88,9 @@ private:
 
 ////////////////////////////////////////
 
+std::ostream &operator<<( std::ostream &out, const response &r );
+
+////////////////////////////////////////
 
 }
 

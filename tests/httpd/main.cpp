@@ -36,7 +36,7 @@ int safemain( int argc, char *argv[] )
 	test.resource( "GET", "/ws" ) = []( web::request &req, net::tcp_socket &client )
 	{
 		web::socket ws( req, std::move( client ) );
-		ws.on_message.connect( [&]( const std::string &msg, bool binary )
+		ws.when_message.connect( [&]( const std::string &msg, bool binary )
 		{
 			std::cout << "GOT MESSAGE: " << msg << std::endl;
 			ws.send( msg );

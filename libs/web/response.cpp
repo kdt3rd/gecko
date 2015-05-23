@@ -100,5 +100,17 @@ void response::send( net::tcp_socket &socket )
 
 ////////////////////////////////////////
 
+std::ostream &operator<<( std::ostream &out, const response &r )
+{
+	std::string tmp = base::format( "HTTP/{0} {1} {2}\r\n", r.version(), static_cast<int>( r.status() ), r.reason() );
+	for ( auto &h: r.header() )
+		tmp += base::format( "{0}: {1}\r\n", h.first, h.second );
+	tmp += base::format( "Content-Length: {0}\r\n\r\n", r.content().size() );
+	out << tmp;
+	return out;
+}
+
+////////////////////////////////////////
+
 }
 

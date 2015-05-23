@@ -36,6 +36,8 @@ public:
 		return _socket;
 	}
 
+	void close( void );
+
 protected:
 	int _socket = -1;
 };

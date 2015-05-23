@@ -19,6 +19,8 @@ client::client( std::string agent )
 
 response client::get( const base::uri &path, double timeout )
 {
+	precondition( path.scheme() == "http", "unsupported scheme: {0}", path.pretty() );
+
 	request req( "GET", path );
 	req.set_header( "User-Agent", _agent );
 	req.set_header( "Host", path.host() + ":" + base::to_string( path.port( 80 ) ) );

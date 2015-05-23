@@ -12,7 +12,7 @@ namespace web
 ////////////////////////////////////////
 
 socket::socket( request &req, net::tcp_socket &&client )
-	: _client( std::move( client ) )
+	: _socket( std::move( client ) )
 {
 	if ( req["Connection"] != "Upgrade" )
 		throw_runtime( "Request is not an upgrade connection (got {0})", req["Connection"] );
@@ -30,8 +30,37 @@ socket::socket( request &req, net::tcp_socket &&client )
 	resp.set_header( "Upgrade", "websocket" );
 	resp.set_header( "Connection", "upgrade" );
 	resp.set_header( "Sec-WebSocket-Accept", base::base64_encode( h.data(), h.size() ) );
-	resp.send( _client );
+	resp.send( _socket );
 	_masked = true;
+}
+
+////////////////////////////////////////
+
+socket::socket( base::uri &server, const std::string &agent, double timeout )
+{
+	precondition( server.scheme() == "ws", "not WebSocket scheme: {0}", server.pretty() );
+	_socket.connect( server, 80, timeout );
+
+
+	std::string nonce;
+	nonce.resize( 16 );
+	for( size_t i = 0; i < 16; ++i )
+		nonce[i] = random_byte();
+
+	request req( "GET", server.full_path() );
+	req.set_header( "User-Agent", agent );
+	req.set_header( "Host", server.host() + ":" + base::to_string( server.port( 80 ) ) );
+	req.set_header( "Origin", server.pretty() );
+	req.set_header( "Connection", "Upgrade" );
+	req.set_header( "Upgrade", "websocket" );
+	req.set_header( "Sec-WebSocket-Version", "13" );
+	req.set_header( "Sec-WebSocket-Key", base::base64_encode( nonce ) );
+
+	_socket.connect( server, 80, timeout );
+	req.send( _socket );
+
+	response resp( _socket );
+	_masked = false;
 }
 
 ////////////////////////////////////////
@@ -44,8 +73,6 @@ socket::~socket( void )
 
 void socket::run( void )
 {
-//	on_open( *this );
-
 	std::string message;
 	bool bin = false;
 	bool done = false;
@@ -53,7 +80,7 @@ void socket::run( void )
 	while ( !done )
 	{
 		uint8_t bits;
-		_client.read( &bits, sizeof(bits) );
+		_socket.read( &bits, sizeof(bits) );
 		bool eom = bits & 0x80;
 
 		// opcode
@@ -75,6 +102,7 @@ void socket::run( void )
 
 			case 8:
 				// connection close
+				close();
 				done = true;
 				break;
 
@@ -91,8 +119,7 @@ void socket::run( void )
 				throw_runtime( "unknown WebSocket opcode" );
 				break;
 		}
-
-		_client.read( &bits, sizeof(bits) );
+		_socket.read( &bits, sizeof(bits) );
 		bool masked = bits & 0x80;
 		if ( masked != _masked )
 			throw_runtime( "WebSocket mask mismatch" );
@@ -102,36 +129,34 @@ void socket::run( void )
 		if ( bytes == 126 )
 		{
 			uint16_t b16;
-			_client.read( &b16, sizeof(b16) );
+			_socket.read( &b16, sizeof(b16) );
 			bytes = base::byteswap( b16 );
 		}
 		else if ( bytes == 127 )
 		{
-			_client.read( &bytes, sizeof(bytes) );
+			_socket.read( &bytes, sizeof(bytes) );
 			bytes = base::byteswap( bytes );
 		}
 
 		uint8_t key[4] = {};
 		if ( masked )
-			_client.read( &key, sizeof(key) );
+			_socket.read( &key, sizeof(key) );
 
 		size_t mlen = message.size();
 		message.resize( mlen + bytes );
-		_client.read( &message[0] + mlen, bytes );
+		_socket.read( &message[0] + mlen, bytes );
 		if ( masked )
 		{
 			for ( size_t i = 0; i < bytes; ++i )
 				message[i + mlen] ^= key[i%4];
 		}
 
-		if ( eom )
+		if ( eom && !done )
 		{
-			on_message( message, bin );
+			when_message( message, bin );
 			message.clear();
 		}
 	}
-
-//	on_close( *this );
 }
 
 ////////////////////////////////////////
@@ -140,29 +165,74 @@ void socket::send( const std::string &msg )
 {
 	uint8_t bits;
 	bits = 0x80 | 0x1;
-	_client.write( &bits, 1 );
+	_socket.write( &bits, 1 );
 
 	if( msg.size() < 126 )
 	{
 		bits = uint8_t( msg.size() );
-		_client.write( &bits, 1 );
+		if ( !_masked )
+			bits |= 0x80;
+		_socket.write( &bits, 1 );
 	}
 	else if ( msg.size() < 65536 )
 	{
 		bits = 126;
-		_client.write( &bits, 1 );
+		if ( !_masked )
+			bits |= 0x80;
+		_socket.write( &bits, 1 );
 		uint16_t len = base::byteswap( uint16_t( msg.size() ) );
-		_client.write( &len, sizeof(len) );
+		_socket.write( &len, sizeof(len) );
 	}
 	else
 	{
 		bits = 127;
-		_client.write( &bits, 1 );
+		if ( !_masked )
+			bits |= 0x80;
+		_socket.write( &bits, 1 );
 		uint64_t len = base::byteswap( uint64_t( msg.size() ) );
-		_client.write( &len, sizeof(len) );
+		_socket.write( &len, sizeof(len) );
 	}
 
-	_client.write( msg.c_str(), msg.size() );
+	if ( !_masked )
+	{
+		uint8_t key[4] = {};
+		for ( size_t i = 0; i < 4; ++i )
+			key[i] = random_byte();
+		_socket.write( key, sizeof( key ) );
+
+		std::string tmp;
+		for ( size_t i = 0; i < msg.size(); ++i )
+			tmp.push_back( msg[i] ^ key[i%4] );
+		_socket.write( tmp.c_str(), tmp.size() );
+	}
+	else
+		_socket.write( msg.c_str(), msg.size() );
+}
+
+////////////////////////////////////////
+
+void socket::close( void )
+{
+	if ( !_closed )
+	{
+		uint8_t bits;
+		bits = 0x80 | 0x8;
+		_socket.write( &bits, 1 );
+
+		bits = 0;
+		if ( !_masked )
+			bits |= 0x80;
+		_socket.write( &bits, 1 );
+
+		if ( !_masked )
+		{
+			uint8_t key[4] = {};
+			for ( size_t i = 0; i < 4; ++i )
+				key[i] = random_byte();
+			_socket.write( key, sizeof( key ) );
+		}
+	}
+	_closed = true;
 }
 
 ////////////////////////////////////////

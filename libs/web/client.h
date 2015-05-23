@@ -14,7 +14,7 @@ namespace web
 class client
 {
 public:
-	client( std::string agent );
+	client( std::string agent = "HTTPClient/0.0" );
 
 	response get( const base::uri &host, double timeout = 0.0 );
 

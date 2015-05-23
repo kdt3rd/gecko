@@ -51,5 +51,14 @@ void socket::bind( uint32_t host, uint16_t port )
 
 ////////////////////////////////////////
 
+void socket::close( void )
+{
+	if ( _socket >= 0 )
+		::close( _socket );
+	_socket = -1;
+}
+
+////////////////////////////////////////
+
 }
 
