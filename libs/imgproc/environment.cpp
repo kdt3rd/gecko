@@ -332,6 +332,7 @@ type environment::operator()( const lambda_expr &e )
 
 	return result;
 	*/
+	throw_not_yet();
 }
 
 ////////////////////////////////////////
