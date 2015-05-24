@@ -300,6 +300,11 @@ protected:
 	////// positioning
 	virtual std::streambuf *setbuf( char_type *s, std::streamsize n ) override
 	{
+		// if we're already open, who knows what state we're in, don't
+		// allow the buffer to change
+		if ( this->is_open() )
+			return this;
+
 		if ( ( n > _buf_sz ) || s )
 			_buf_store.reset();
 
@@ -312,6 +317,7 @@ protected:
 			_buf_store.reset( new char_type[_buf_sz] );
 			_buf = _buf_store.get();
 		}
+		update_base_buffer_pointers( -1 );
 
 		return this;
 	}
