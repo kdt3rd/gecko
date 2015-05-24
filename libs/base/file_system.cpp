@@ -78,6 +78,7 @@ file_system::rmdir_all( const uri &path )
 		}
 		for ( auto &p: paths )
 			rmdir_all( p );
+		rmdir( path );
 	}
 	else
 		unlink( path );

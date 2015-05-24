@@ -81,7 +81,7 @@ posix_file_system::readlink( const uri &path, size_t sz )
 	linkname[r] = '\0';
 	fpath.clear();
 	fpath.append( linkname.get() );
-	return uri( fpath );
+	return uri( uri::unescape( fpath ) );
 }
 
 
@@ -206,12 +206,16 @@ posix_file_system::unlink( const uri &path )
 void
 posix_file_system::symlink( const uri &curpath, const uri &newpath )
 {
-	precondition( curpath.scheme() == "file", "posix_file_system expected \"file\" uri" );
 	precondition( newpath.scheme() == "file", "posix_file_system expected \"file\" uri" );
-	std::string curfpath = curpath.full_path();
 	std::string newfpath = newpath.full_path();
-	if ( ::symlink( curfpath.c_str(), newfpath.c_str() ) != 0 )
-		throw_errno( "Creating symlink from {0} to {1}", curfpath, newfpath );
+	std::stringstream pathbuf;
+	if ( curpath.scheme() == "file" )
+		pathbuf << curpath.full_path();
+	else
+		pathbuf << curpath;
+	std::string curfpath = pathbuf.str();
+	if ( ::symlink( curfpath.c_str(), newfpath.c_str() ) == -1 )
+		throw_errno( "Creating symlink {0} to target {1}", newfpath, curfpath );
 }
 
 
