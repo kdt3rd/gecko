@@ -32,7 +32,7 @@ public:
 	void slider_groove( const std::shared_ptr<draw::canvas> &c, const base::rect &rect ) override;
 	void slider_button( const std::shared_ptr<draw::canvas> &c, const base::rect &r, bool pressed, double val ) override;
 
-	virtual void text_cursor( const std::shared_ptr<draw::canvas> &c, const base::point &p, double h );
+	virtual void text_cursor( const std::shared_ptr<draw::canvas> &c, const base::point &p, double h ) override;
 
 private:
 	void construct( const std::shared_ptr<draw::canvas> &c );
