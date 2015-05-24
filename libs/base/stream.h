@@ -53,12 +53,7 @@ public:
 	typedef std::basic_istream<CharT, TraitsT> base_type;
 	typedef base_streambuf<CharT, TraitsT> streambuf_type;
 
-	istream_bufstore( const std::shared_ptr<streambuf_type> &sb )
-			: base_type(), _sbuf( sb )
-	{
-		this->init( _sbuf.get() );
-	}
-	istream_bufstore( std::shared_ptr<streambuf_type> &&sb )
+	istream_bufstore( std::unique_ptr<streambuf_type> &&sb )
 			: base_type(), _sbuf( std::move( sb ) )
 	{
 		this->init( _sbuf.get() );
@@ -94,7 +89,7 @@ public:
 	// members
 
 	// Read the bit in ios_base about rdbuf and the hiding of the
-	// base rdbuf function. Given that we're using a shared_ptr,
+	// base rdbuf function. Given that we're using a pointer,
 	// seems like we should do the same thing to discourage fiddling
 	streambuf_type *rdbuf( void ) const { return _sbuf.get(); }
 	const std::string &uri( void ) const { return _sbuf->get_uri(); }
@@ -104,7 +99,7 @@ protected:
 	istream_bufstore &operator=( const istream_bufstore & ) = delete;
 	
 private:
-	std::shared_ptr<streambuf_type> _sbuf;
+	std::unique_ptr<streambuf_type> _sbuf;
 };
 
 
@@ -126,12 +121,7 @@ public:
 	typedef std::basic_ostream<CharT, TraitsT> base_type;
 	typedef base_streambuf<CharT, TraitsT> streambuf_type;
 
-	ostream_bufstore( const std::shared_ptr<streambuf_type> &sb )
-			: base_type(), _sbuf( sb )
-	{
-		this->init( _sbuf.get() );
-	}
-	ostream_bufstore( std::shared_ptr<streambuf_type> &&sb )
+	ostream_bufstore( std::unique_ptr<streambuf_type> &&sb )
 			: base_type(), _sbuf( std::move( sb ) )
 	{
 		this->init( _sbuf.get() );
@@ -167,16 +157,17 @@ public:
 	// members
 
 	// Read the bit in ios_base about rdbuf and the hiding of the
-	// base rdbuf function. Given that we're using a shared_ptr,
+	// base rdbuf function. Given that we're using a pointer,
 	// seems like we should do the same thing to discourage fiddling
 	streambuf_type *rdbuf( void ) const { return _sbuf.get(); }
+	const std::string &uri( void ) const { return _sbuf->get_uri(); }
 
 protected:
 	ostream_bufstore( const ostream_bufstore & ) = delete;
 	ostream_bufstore &operator=( const ostream_bufstore & ) = delete;
 	
 private:
-	std::shared_ptr<streambuf_type> _sbuf;
+	std::unique_ptr<streambuf_type> _sbuf;
 };
 
 
@@ -198,12 +189,7 @@ public:
 	typedef std::basic_iostream<CharT, TraitsT> base_type;
 	typedef base_streambuf<CharT, TraitsT> streambuf_type;
 
-	iostream_bufstore( const std::shared_ptr<streambuf_type> &sb )
-			: base_type(), _sbuf( sb )
-	{
-		this->init( _sbuf.get() );
-	}
-	iostream_bufstore( std::shared_ptr<streambuf_type> &&sb )
+	iostream_bufstore( std::unique_ptr<streambuf_type> &&sb )
 			: base_type(), _sbuf( std::move( sb ) )
 	{
 		this->init( _sbuf.get() );
@@ -239,16 +225,17 @@ public:
 	// members
 
 	// Read the bit in ios_base about rdbuf and the hiding of the
-	// base rdbuf function. Given that we're using a shared_ptr,
+	// base rdbuf function. Given that we're using a pointer,
 	// seems like we should do the same thing to discourage fiddling
 	streambuf_type *rdbuf( void ) const { return _sbuf.get(); }
+	const std::string &uri( void ) const { return _sbuf->get_uri(); }
 
 protected:
 	iostream_bufstore( const iostream_bufstore & ) = delete;
 	iostream_bufstore &operator=( const iostream_bufstore & ) = delete;
 	
 private:
-	std::shared_ptr<streambuf_type> _sbuf;
+	std::unique_ptr<streambuf_type> _sbuf;
 };
 
 typedef istream_bufstore<char> istream;
