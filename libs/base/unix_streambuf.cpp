@@ -47,8 +47,9 @@ namespace base
 
 unix_streambuf::unix_streambuf( std::ios_base::openmode m,
 								int fd, bool doDup,
-								const std::string &path )
-		: streambuf( m ), _fd( -1 ), _path( path )
+								const std::string &path,
+								size_t bufSz )
+		: streambuf( m, bufSz ), _fd( -1 ), _path( path )
 {
 	if ( doDup )
 	{
@@ -72,8 +73,9 @@ unix_streambuf::unix_streambuf( std::ios_base::openmode m,
 ////////////////////////////////////////
 
 
-unix_streambuf::unix_streambuf( std::ios_base::openmode m, const uri &path )
-		: streambuf( m ), _path( path.full_path() )
+unix_streambuf::unix_streambuf( std::ios_base::openmode m, const uri &path,
+								size_t bufSz )
+		: streambuf( m, bufSz ), _path( path.full_path() )
 {
 	stash_uri( path.pretty() );
 	initFD( m );
@@ -83,8 +85,9 @@ unix_streambuf::unix_streambuf( std::ios_base::openmode m, const uri &path )
 ////////////////////////////////////////
 
 
-unix_streambuf::unix_streambuf( std::ios_base::openmode m, const std::string &path )
-		: streambuf( m ), _path( path )
+unix_streambuf::unix_streambuf( std::ios_base::openmode m, const std::string &path,
+								size_t bufSz )
+		: streambuf( m, bufSz ), _path( path )
 {
 	initFD( m );
 }
@@ -93,8 +96,9 @@ unix_streambuf::unix_streambuf( std::ios_base::openmode m, const std::string &pa
 ////////////////////////////////////////
 
 
-unix_streambuf::unix_streambuf( std::ios_base::openmode m, std::string &&path )
-		: streambuf( m ), _path( std::move( path ) )
+unix_streambuf::unix_streambuf( std::ios_base::openmode m, std::string &&path,
+								size_t bufSz )
+		: streambuf( m, bufSz ), _path( std::move( path ) )
 {
 	initFD( m );
 }

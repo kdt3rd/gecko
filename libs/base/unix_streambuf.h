@@ -49,10 +49,14 @@ public:
 
 	unix_streambuf( std::ios_base::openmode m,
 					int fd, bool doDup,
-					const std::string &path = std::string() );
-	unix_streambuf( std::ios_base::openmode m, const uri &uri );
-	unix_streambuf( std::ios_base::openmode m, const std::string &path );
-	unix_streambuf( std::ios_base::openmode m, std::string &&path );
+					const std::string &path = std::string(),
+					size_t bufSz = 0 );
+	unix_streambuf( std::ios_base::openmode m, const uri &uri,
+					size_t bufSz = 0 );
+	unix_streambuf( std::ios_base::openmode m, const std::string &path,
+					size_t bufSz = 0 );
+	unix_streambuf( std::ios_base::openmode m, std::string &&path,
+					size_t bufSz = 0 );
 	unix_streambuf( unix_streambuf &&u );
 	unix_streambuf &operator=( unix_streambuf &&u );
 	virtual ~unix_streambuf( void );
