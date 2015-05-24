@@ -42,10 +42,15 @@ file_system::stat( const uri &path, struct stat *buf )
 
 	int depth = 0;
 	uri curpath = path;
+	std::shared_ptr<file_system> fs;
 	while ( S_ISLNK( buf->st_mode ) )
 	{
-		curpath = readlink( curpath, buf->st_size + 1 );
-		lstat( curpath, buf );
+		if ( fs )
+			curpath = fs->readlink( curpath, buf->st_size + 1 );
+		else
+			curpath = readlink( curpath, buf->st_size + 1 );
+		fs = get( curpath );
+		fs->lstat( curpath, buf );
 		depth++;
 		if ( depth > 20 )
 			throw std::system_error( ELOOP, std::system_category(), path.pretty() );
