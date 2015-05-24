@@ -26,6 +26,7 @@
 #include <streambuf>
 #include <codecvt>
 #include <cstring>
+#include <string>
 #include <stdexcept>
 #include "utility.h"
 #include "contract.h"
@@ -69,6 +70,7 @@ public:
 		_buf_sz = std::max( std::streamsize(1), _buf_sz );
 		_buf_store.reset( new char_type[_buf_sz] );
 		_buf = _buf_store.get();
+		update_base_buffer_pointers( -1 );
 
 		if ( std::has_facet<codecvt_type>( this->getloc() ) )
 			_codecvt_cache = &std::use_facet<codecvt_type>( this->getloc() );
@@ -77,6 +79,10 @@ public:
 	{
 		this->close();
 	}
+
+	void stash_uri( const std::string &u ) { _uri = u; }
+	void stash_uri( std::string &&u ) { _uri = std::move( u ); }
+	const std::string &get_uri( void ) const { return _uri; }
 
 protected:
 	base_streambuf( const base_streambuf & ) = delete;
@@ -564,7 +570,7 @@ protected:
 			// loop in case of short read from socket or pipe
 			do
 			{
-				nread = read( s, count * sizeof(char_type) );
+				nread = this->read( s, count * sizeof(char_type) );
 				if ( nread == -1 )
 					throw std::runtime_error( "Error reading from streambuf" );
 				if ( nread == 0 )
@@ -758,6 +764,11 @@ protected:
 			this->setg( _buf, _buf, _buf + off );
 		else
 			this->setg( _buf, _buf, _buf );
+
+		if ( isOut && off == 0 && _buf_sz > 1 )
+			this->setp( _buf, _buf + _buf_sz - 1 );
+		else
+			this->setp( nullptr, nullptr );
 	}
 
 	inline void fill_pback( void )
@@ -935,6 +946,8 @@ protected:
 	char_type *_pback_save_cur = nullptr;
 	char_type *_pback_save_end = nullptr;
 	bool _pback_live = false;
+
+	std::string _uri;
 };
 
 typedef base_streambuf<char> streambuf;

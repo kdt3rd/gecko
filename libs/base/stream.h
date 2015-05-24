@@ -97,6 +97,7 @@ public:
 	// base rdbuf function. Given that we're using a shared_ptr,
 	// seems like we should do the same thing to discourage fiddling
 	streambuf_type *rdbuf( void ) const { return _sbuf.get(); }
+	const std::string &uri( void ) const { return _sbuf->get_uri(); }
 
 protected:
 	istream_bufstore( const istream_bufstore & ) = delete;

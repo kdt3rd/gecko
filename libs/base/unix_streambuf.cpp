@@ -32,6 +32,7 @@
 #include <errno.h>
 #include <stdexcept>
 #include <limits>
+#include <iostream>
 
 
 ////////////////////////////////////////
@@ -64,6 +65,17 @@ unix_streambuf::unix_streambuf( std::ios_base::openmode m,
 	else
 		_fd = fd;
 
+	initFD( m );
+}
+
+
+////////////////////////////////////////
+
+
+unix_streambuf::unix_streambuf( std::ios_base::openmode m, const uri &path )
+		: streambuf( m ), _path( path.full_path() )
+{
+	stash_uri( path.pretty() );
 	initFD( m );
 }
 
@@ -214,7 +226,7 @@ unix_streambuf::read( void *outBuf, size_t numBytes )
 			ret = ::read( _fd, outBuf, numBytes );
 		} while ( ret == -1 && errno == EINTR );
 	}
-	return -1;
+	return ret;
 }
 
 
@@ -337,6 +349,7 @@ unix_streambuf::initFD( std::ios_base::openmode m )
 		int nfd = ::open( _path.c_str(), flags, mode );
 		if ( nfd < 0 )
 			throw std::runtime_error( "Unable to open stream '" + _path + "'" );
+		_fd = nfd;
 	}
 
 	if ( m & std::ios_base::ate )
