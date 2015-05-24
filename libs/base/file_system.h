@@ -22,11 +22,11 @@ namespace base
 class file_system
 {
 public:
-	static const std::ios_base::openmode text_read_mode = std::ios_base::in;
-	static const std::ios_base::openmode file_read_mode = (std::ios_base::in|std::ios_base::binary);
+	constexpr static std::ios_base::openmode text_read_mode = std::ios_base::in;
+	constexpr static std::ios_base::openmode file_read_mode = (std::ios_base::in|std::ios_base::binary);
 
-	static const std::ios_base::openmode text_write_mode = (std::ios_base::out|std::ios_base::trunc);
-	static const std::ios_base::openmode file_write_mode = (std::ios_base::out|std::ios_base::trunc|std::ios_base::binary);
+	constexpr static std::ios_base::openmode text_write_mode = (std::ios_base::out|std::ios_base::trunc);
+	constexpr static std::ios_base::openmode file_write_mode = (std::ios_base::out|std::ios_base::trunc|std::ios_base::binary);
 	
 	virtual ~file_system( void );
 
