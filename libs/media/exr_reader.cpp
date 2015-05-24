@@ -19,6 +19,7 @@
 #pragma GCC diagnostic pop
 
 #include <algorithm>
+#include <iostream>
 
 namespace media
 {
@@ -31,29 +32,57 @@ namespace
 class exr_istream : public Imf::IStream
 {
 public:
-	exr_istream( std::istream &str )
-		: IStream( "" ), _stream( str )
+	exr_istream( base::istream &str )
+			: IStream( str.uri().c_str() ), _stream( str )
 	{
 	}
 
 	bool read( char c[], int n ) override
 	{
-		return bool( _stream.read( c, n ) );
+		try
+		{
+			return bool( _stream.read( c, n ) );
+		}
+		catch ( ... )
+		{
+			std::throw_with_nested( std::runtime_error( "Error reading from OpenEXR stream: " + _stream.uri() ) );
+		}
 	}
 
 	Imf::Int64 tellg( void ) override
 	{
-		return _stream.tellg();
+		try
+		{
+			return _stream.tellg();
+		}
+		catch ( ... )
+		{
+			std::throw_with_nested( std::runtime_error( "Error telling position on OpenEXR stream: " + _stream.uri() ) );
+		}
 	}
 
 	void seekg( Imf::Int64 pos ) override
 	{
-		_stream.seekg( pos );
+		try
+		{
+			_stream.seekg( pos );
+		}
+		catch ( ... )
+		{
+			std::throw_with_nested( std::runtime_error( "Error seeking to position on OpenEXR stream: " + _stream.uri() ) );
+		}
 	}
 
 	void clear( void ) override
 	{
-		_stream.clear();
+		try
+		{
+			_stream.clear();
+		}
+		catch ( ... )
+		{
+			std::throw_with_nested( std::runtime_error( "Error clearing on OpenEXR stream: " + _stream.uri() ) );
+		}
 	}
 
 //	bool isMemoryMapped( void ) const override;
@@ -61,7 +90,7 @@ public:
 //	char *readMemoryMapped( int n ) override;
 
 private:
-	std::istream &_stream;
+	base::istream &_stream;
 };
 
 
