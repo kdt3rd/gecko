@@ -60,10 +60,8 @@ public:
 
 	void operator()( const call_expr &e )
 	{
-		_out << e.function() << '(';
 		auto &args = e.arguments();
-		std::copy( args.begin(), args.end(), base::infix_ostream_iterator<std::shared_ptr<expr>>( _out, ", " ) );
-		_out << ')';
+		_out << e.function() << "( " << base::infix_separated( ", ", args ) << " )";
 	}
 
 	void operator()( const if_expr &e )
@@ -84,11 +82,7 @@ public:
 	{
 		auto &mods = e.modifiers();
 		if ( !mods.empty() )
-		{
-			_out << "[ ";
-			std::copy( mods.begin(), mods.end(), base::infix_ostream_iterator<std::u32string>( _out, ", " ) );
-			_out << " ] ";
-		}
+			_out << "[ " << base::infix_separated( ", ", mods ) << " ]";
 
 		_out << "for ( ";
 		auto &ranges = e.ranges();

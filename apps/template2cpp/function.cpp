@@ -91,7 +91,7 @@ void function::save( std::ostream &out )
 	if ( _args.empty() )
 		out << "void";
 	else
-		std::copy( _args.begin(), _args.end(), base::infix_ostream_iterator<std::string>( out, ", " ) );
+		out << base::infix_separated( ", ", _args );
 	out << " )\n";
 	out << "{\n" << _code << "\n\treturn result;\n}\n";
 }

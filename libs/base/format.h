@@ -6,6 +6,8 @@
 #include <iterator>
 #include <sstream>
 #include <tuple>
+#include <vector>
+#include <string>
 #include <stdexcept>
 #include "ansi.h"
 #include "string_util.h"
@@ -206,6 +208,50 @@ std::basic_ostream<CharT> &operator<<( std::basic_ostream<CharT> &out, const for
 
 ////////////////////////////////////////
 
+template<typename Container>
+class infix_separated_printer
+{
+public:
+	infix_separated_printer( std::string sep, const Container &v )
+		: _sep( std::move( sep ) ), _container( v )
+	{
+	}
+
+	void write( std::ostream &out ) const
+	{
+		if ( !_container.empty() )
+		{
+			bool first = true;
+			for ( auto &i: _container )
+			{
+				if ( !first )
+					out << _sep << i;
+				else
+					out << i;
+				first = false;
+			}
+		}
+	}
+
+private:
+	std::string _sep;
+	const Container &_container;
+};
+
+template<typename C>
+std::ostream &operator<<( std::ostream &out, const infix_separated_printer<C> &tmp )
+{
+	tmp.write( out );
+	return out;
+}
+
+template<typename C>
+infix_separated_printer<C> infix_separated( std::string sep, const C &c )
+{
+	return infix_separated_printer<C>( std::move( sep ), c );
+}
+
+#if 0
 /// @brief Stream that insert an infix operator between elements.
 template <class T, class charT=char, class traits=std::char_traits<charT> >
 class infix_ostream_iterator : public std::iterator<std::output_iterator_tag,void,void,void,void>
@@ -254,6 +300,7 @@ private:
 	std::basic_ostream<charT,traits> &_os;
 	charT const *_delimiter;
 };
+#endif
 
 ////////////////////////////////////////
 
