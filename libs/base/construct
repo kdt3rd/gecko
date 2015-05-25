@@ -24,6 +24,7 @@ lib = Library( "base",
 	"unix_streambuf.cpp",
 	"file_system.cpp",
 	"posix_file_system.cpp",
+	"unit_test.cpp",
 	"thread_pool.cpp"
 );
 
