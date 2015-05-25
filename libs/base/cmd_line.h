@@ -112,6 +112,12 @@ public:
 		bool _required = false;
 	};
 
+	cmd_line( const char *prog )
+		: _program( prog )
+	{
+		precondition( prog != nullptr, "null program name" );
+	}
+
 	template<typename Range>
 	cmd_line( const char *prog, const Range &opts )
 		: _program( prog ), _options( std::begin( opts ), std::end( opts ) )
