@@ -1,0 +1,5 @@
+
+local base = libs.base.lib
+
+Executable( "test_fs", "test_fs.cpp", base )
+
