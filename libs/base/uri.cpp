@@ -86,6 +86,18 @@ void uri::add_path( const std::string &path )
 
 ////////////////////////////////////////
 
+uri uri::root( void ) const
+{
+	uri result;
+	result._scheme = _scheme;
+	result._user = _user;
+	result._host = _host;
+	result._port = _port;
+	return result;
+}
+
+////////////////////////////////////////
+
 void uri::split_query( std::vector<std::pair<std::string,std::string>> &parsed )
 {
 	std::vector<std::string> list;

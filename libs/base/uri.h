@@ -142,6 +142,8 @@ public:
 	{
 	}
 
+	uri root( void ) const;
+
 	void split_query( std::vector<std::pair<std::string,std::string>> &q );
 
 	std::string pretty( void ) const;
