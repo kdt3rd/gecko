@@ -27,7 +27,7 @@ public:
 
 	constexpr static std::ios_base::openmode text_write_mode = (std::ios_base::out|std::ios_base::trunc);
 	constexpr static std::ios_base::openmode file_write_mode = (std::ios_base::out|std::ios_base::trunc|std::ios_base::binary);
-	
+
 	virtual ~file_system( void );
 
 	/// @brief Perform a stat, retrieving information about path

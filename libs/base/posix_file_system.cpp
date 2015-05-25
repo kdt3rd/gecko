@@ -29,7 +29,7 @@ posix_file_system::lstat( const uri &path, struct stat *buf )
 	precondition( path.scheme() == "file", "posix_file_system expected \"file\" uri" );
 	std::string fpath = path.full_path();
 	if ( ::lstat( fpath.c_str(), buf ) != 0 )
-		throw_errno( "Retrieving file info for {0}", fpath );
+		throw_errno( "retrieving file info for {0}", fpath );
 }
 
 
@@ -42,7 +42,7 @@ posix_file_system::statfs( const uri &path, struct statvfs *s )
 	precondition( path.scheme() == "file", "posix_file_system expected \"file\" uri" );
 	std::string fpath = path.full_path();
 	if ( ::statvfs( fpath.c_str(), s ) != 0 )
-		throw_errno( "Retrieving filesystem info for {0}", fpath );
+		throw_errno( "retrieving filesystem info for {0}", fpath );
 }
 
 
@@ -142,7 +142,17 @@ posix_file_system::mkdir( const uri &path, mode_t mode )
 	if ( ::mkdir( fpath.c_str(), mode ) == -1 )
 	{
 		if ( errno != EEXIST )
-			throw_errno( "Making directory {0}", fpath );
+			throw_errno( "making directory {0}", fpath );
+		else
+		{
+			struct stat buf = {};
+			this->stat( path, &buf );
+			if ( ! S_ISDIR( buf.st_mode ) )
+			{
+				errno = ENOTDIR;
+				throw_errno( "making directory {0}", fpath );
+			}
+		}
 	}
 }
 
@@ -153,16 +163,25 @@ posix_file_system::mkdir( const uri &path, mode_t mode )
 void
 posix_file_system::mkdir_all( const uri &path, mode_t mode )
 {
-	precondition( path.scheme() == "file", "posix_file_system expected \"file\" uri" );
-	std::string curpath;
+	precondition( path.scheme() == "file", "posix_file_system expected \"file\" uri, got {0}", path.scheme() );
+	base::uri curpath( path.root() );
 	for ( auto &p: path.path() )
 	{
-		curpath += '/';
-		curpath += p;
-		if ( ::mkdir( curpath.c_str(), mode ) == -1 )
+		curpath /= p;
+		if ( ::mkdir( curpath.full_path().c_str(), mode ) == -1 )
 		{
 			if ( errno != EEXIST )
-				throw_errno( "Making directory {0}", curpath );
+				throw_errno( "making directory {0}", curpath );
+			else
+			{
+				struct stat buf = {};
+				this->stat( curpath, &buf );
+				if ( ! S_ISDIR( buf.st_mode ) )
+				{
+					errno = ENOTDIR;
+					throw_errno( "making directory {0}", curpath );
+				}
+			}
 		}
 	}
 }
@@ -179,7 +198,7 @@ posix_file_system::rmdir( const uri &path )
 	if ( ::rmdir( fpath.c_str() ) == -1 )
 	{
 		if ( errno != ENOENT )
-			throw_errno( "Removing directory {0}", fpath );
+			throw_errno( "removing directory {0}", fpath );
 	}
 }
 
@@ -195,7 +214,7 @@ posix_file_system::unlink( const uri &path )
 	if ( ::unlink( fpath.c_str() ) == -1 )
 	{
 		if ( errno != ENOENT )
-			throw_errno( "Unlinking {0}", fpath );
+			throw_errno( "unlinking {0}", fpath );
 	}
 }
 
@@ -215,7 +234,7 @@ posix_file_system::symlink( const uri &curpath, const uri &newpath )
 		pathbuf << curpath;
 	std::string curfpath = pathbuf.str();
 	if ( ::symlink( curfpath.c_str(), newfpath.c_str() ) == -1 )
-		throw_errno( "Creating symlink {0} to target {1}", newfpath, curfpath );
+		throw_errno( "creating symlink {0} to {1}", newfpath, curfpath );
 }
 
 
@@ -225,12 +244,12 @@ posix_file_system::symlink( const uri &curpath, const uri &newpath )
 void
 posix_file_system::link( const uri &curpath, const uri &newpath )
 {
-	precondition( curpath.scheme() == "file", "posix_file_system expected \"file\" uri" );
-	precondition( newpath.scheme() == "file", "posix_file_system expected \"file\" uri" );
+	precondition( curpath.scheme() == "file", "posix_file_system expected \"file\" uri, got {0}", curpath.scheme() );
+	precondition( newpath.scheme() == "file", "posix_file_system expected \"file\" uri, got {0}", newpath.scheme() );
 	std::string curfpath = curpath.full_path();
 	std::string newfpath = newpath.full_path();
 	if ( ::link( curfpath.c_str(), newfpath.c_str() ) != 0 )
-		throw_errno( "Creating hard link from {0} to {1}", curfpath, newfpath );
+		throw_errno( "creating hard link from {0} to {1}", curfpath, newfpath );
 }
 
 
@@ -245,7 +264,7 @@ posix_file_system::rename( const uri &oldpath, const uri &newpath )
 	std::string oldfpath = oldpath.full_path();
 	std::string newfpath = newpath.full_path();
 	if ( ::rename( oldfpath.c_str(), newfpath.c_str() ) != 0 )
-		throw_errno( "Renaming {0} to {1}", oldfpath, newfpath );
+		throw_errno( "renaming {0} to {1}", oldfpath, newfpath );
 }
 
 
