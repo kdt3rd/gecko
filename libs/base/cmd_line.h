@@ -63,6 +63,11 @@ public:
 			return _values;
 		}
 
+		const char *operator[]( size_t i )
+		{
+			return _values.at( i );
+		}
+
 		size_t count( void ) const
 		{
 			return _values.size();
@@ -146,6 +151,8 @@ public:
 	{
 		_options.push_back( o );
 	}
+
+	void add_help( void );
 
 	/// @brief Get nth option.
 	const option &operator[]( size_t n ) const

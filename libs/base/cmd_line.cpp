@@ -75,6 +75,19 @@ cmd_line::option::is_non_option( void )
 
 ////////////////////////////////////////
 
+void cmd_line::add_help( void )
+{
+	auto helpfunc = [=]( option &opt, size_t &i, const std::vector<char *> &vals ) -> bool
+	{
+		std::cout << *this << std::endl;
+		exit( 0 );
+		return true;
+	};
+	add( option( 'h', "help", std::string(), helpfunc, "Print help message and exit", false ) );
+}
+
+////////////////////////////////////////
+
 const cmd_line::option &
 cmd_line::operator[]( const char *n ) const
 {
