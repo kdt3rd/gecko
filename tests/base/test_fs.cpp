@@ -17,12 +17,13 @@ namespace
 
 int safemain( int argc, char *argv[] )
 {
-	base::unit_test fstest( "fs" );
-
 	base::cmd_line options( argv[0] );
+
+	base::unit_test fstest( "fs" );
 	fstest.setup( options );
 
 	auto errhandler = base::make_guard( [&]() { std::cerr << options << std::endl; } );
+	options.add_help();
 	options.parse( argc, argv );
 	errhandler.dismiss();
 
@@ -251,4 +252,5 @@ int main( int argc, char *argv[] )
 	{
 		base::print_exception( std::cerr, e );
 	}
+	return -1;
 }

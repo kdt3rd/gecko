@@ -9,7 +9,6 @@ local net = libs.net.lib
 local web = libs.web.lib
 
 Executable( "test_format", "test_format.cpp", base, utf )
-Executable( "test_exception", Compile( "test_exception.cpp" ), base, utf )
 Executable( "test_signal", "test_signal.cpp", base )
 Executable( "test_platform", "test_platform.cpp", UseLibraries( "platform" ) )
 Executable( "test_app", "test_app.cpp", UseLibraries( "gui" ) )
@@ -19,7 +18,6 @@ Executable( "test_mempool", "test_mempool.cpp", base )
 Executable( "test_variant", "test_variant.cpp", base )
 Executable( "test_database", "test_database.cpp", sqlite, base )
 Executable( "test_json", "test_json.cpp", base )
-Executable( "test_cmdline", "test_cmdline.cpp", base )
 Executable( "test_math", "test_math.cpp", base )
 Executable( "test_uri", "test_uri.cpp", base )
 Executable( "test_half", "test_half.cpp", base )
