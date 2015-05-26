@@ -134,7 +134,7 @@ constexpr size_t length( const const_string<char> &s )
 
 /// @brief locale-specific comparison of strings
 template <typename stringT>
-inline int compare( const stringT &a, const stringT &b, const std::locale &loc = std::locale() )
+inline int collate( const stringT &a, const stringT &b, const std::locale &loc = std::locale() )
 {
     auto &f = std::use_facet<std::collate<typename stringT::value_type>>( loc );
 	return f.compare( a.data(), a.data() + a.size(),
@@ -142,7 +142,7 @@ inline int compare( const stringT &a, const stringT &b, const std::locale &loc =
 }
 
 template <typename stringT>
-inline int compare( const stringT &a,
+inline int collate( const stringT &a,
 					const const_string<typename stringT::value_type, typename stringT::traits_type> &b,
 					const std::locale &loc = std::locale() )
 {
@@ -153,7 +153,7 @@ inline int compare( const stringT &a,
 
 /// @brief locale-specific case insensitive comparison
 template <typename charT, typename traitsT, typename allocT>
-inline int icompare( std::basic_string<charT, traitsT, allocT> a,
+inline int icollate( std::basic_string<charT, traitsT, allocT> a,
 					 std::basic_string<charT, traitsT, allocT> b,
 					 const std::locale &loc = std::locale() )
 {
@@ -164,24 +164,25 @@ inline int icompare( std::basic_string<charT, traitsT, allocT> a,
 					[&](charT v) { return f.tolower( v ); } );
 
     auto &cf = std::use_facet<std::collate<charT>>( loc );
-	return cf.compare( a.data(), a.data() + a.size(),
-					   b.data(), b.data() + b.size() );
+	int ret = cf.compare( a.data(), a.data() + a.size(),
+						  b.data(), b.data() + b.size() );
+	return ret;
 }
 
 template <typename charT, typename traitsT, typename allocT, std::size_t Bsz>
-inline int icompare( std::basic_string<charT, traitsT, allocT> a,
+inline int icollate( std::basic_string<charT, traitsT, allocT> a,
 					 const charT (&b)[Bsz],
 					 const std::locale &loc = std::locale() )
 {
-	return icompare( std::move( a ), std::basic_string<charT, traitsT, allocT>( b, Bsz ), loc );
+	return icollate( std::move( a ), std::basic_string<charT, traitsT, allocT>( b, Bsz - 1 ), loc );
 }
 
 template <typename charT, typename traitsT, typename allocT, std::size_t Bsz>
-inline int icompare( std::basic_string<charT, traitsT, allocT> a,
+inline int icollate( std::basic_string<charT, traitsT, allocT> a,
 					 const charT *b,
 					 const std::locale &loc = std::locale() )
 {
-	return icompare( std::move( a ), std::basic_string<charT, traitsT, allocT>( b ), loc );
+	return icollate( std::move( a ), std::basic_string<charT, traitsT, allocT>( b ), loc );
 }
 
 
@@ -194,7 +195,7 @@ template <typename stringT>
 inline bool
 iless( const stringT &a, const stringT &b )
 {
-	return icompare( a, b ) < 0;
+	return icollate( a, b ) < 0;
 }
 
 
