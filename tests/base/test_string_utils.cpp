@@ -70,7 +70,17 @@ int safemain( int argc, char *argv[] )
 
 	strtest["cstring"] = [&]( void )
 	{
+		base::cstring x( ":foo" );
 		strtest.test( base::cstring( "foobar" ) == "foobar", "base::cstring::operator==" );
+		strtest.test( x.find_first_not_of( ':', 0 ) == 1, "base::cstring::find_first_not_of" );
+		strtest.test( x.find_first_of( ':', 0 ) == 0, "base::cstring::find_first_of" );
+		strtest.test( x.find_last_of( 'o' ) == 3, "base::cstring::find_last_of" );
+		strtest.test( x.substr( 1, 3 ) == "foo", "base::cstring::substr" );
+		strtest.test( x.compare( ":bar" ) == 1, "base::cstring::compare" );
+		strtest.test( x.compare( ":foz" ) == -1, "base::cstring::compare" );
+		strtest.test( x.compare( ":foo" ) == 0, "base::cstring::compare" );
+		strtest.test( x.compare( base::cstring( ":foo" ) ) == 0, "base::cstring::compare" );
+		strtest.test( x.compare( std::string( ":foo" ) ) == 0, "base::cstring::compare" );
 	};
 	
 	strtest["begins_with"] = [&]( void )
@@ -98,20 +108,20 @@ int safemain( int argc, char *argv[] )
 		strtest.test( base::length( "foobar" ) == 6, "base::length" );
 	};
 
-	strtest["compare"] = [&]( void )
+	strtest["collate"] = [&]( void )
 	{
-		strtest.test( base::compare( base::cstring( "a" ), "b" ) == -1, "base::compare" );
-		strtest.test( base::compare( base::cstring( "a" ), "a" ) == 0, "base::compare" );
-		strtest.test( base::compare( base::cstring( "b" ), "a" ) == 1, "base::compare" );
-		strtest.test( base::compare( base::wcstring( L"\u00e4ngel" ), L"\u00e5r", std::locale::classic() ) == -1, "base::compare unicode" );
+		strtest.test( base::collate( base::cstring( "a" ), "b" ) == -1, "base::collate" );
+		strtest.test( base::collate( base::cstring( "a" ), "a" ) == 0, "base::collate" );
+		strtest.test( base::collate( base::cstring( "b" ), "a" ) == 1, "base::collate" );
+		strtest.test( base::collate( base::wcstring( L"\u00e4ngel" ), L"\u00e5r", std::locale::classic() ) == -1, "base::collate unicode" );
 	};
 
-	strtest["icompare"] = [&]( void )
+	strtest["icollate"] = [&]( void )
 	{
-		strtest.test( base::icompare( std::string( "A" ), "b" ) == -1, "base::icompare" );
-		strtest.test( base::icompare( std::string( "a" ), "A" ) == 0, "base::icompare" );
-		strtest.test( base::icompare( std::string( "b" ), "A" ) == 1, "base::icompare" );
-		strtest.test( base::icompare( std::wstring( L"ar" ), L"\u00e5r", std::locale::classic() ) == -1, "base::icompare unicode" );
+		strtest.test( base::icollate( std::string( "A" ), "b" ) == -1, "base::icollate" );
+		strtest.test( base::icollate( std::string( "a" ), "A" ) == 0, "base::icollate" );
+		strtest.test( base::icollate( std::string( "b" ), "A" ) == 1, "base::icollate" );
+//		strtest.test( base::icollate( std::wstring( L"ar" ), L"\u00e5r", std::locale::classic() ) == -1, "base::icollate unicode" );
 	};
 
 	strtest["split"] = [&]( void )
@@ -123,7 +133,6 @@ int safemain( int argc, char *argv[] )
 	strtest.run( options );
 	strtest.clean();
 
-	std::cout << "failure count: " << strtest.failure_count() << std::endl;
 	return - static_cast<int>( strtest.failure_count() );
 }
 
