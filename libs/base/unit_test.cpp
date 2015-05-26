@@ -27,7 +27,7 @@ unit_test::~unit_test( void )
 
 void unit_test::setup( cmd_line &opts )
 {
-	opts.add( cmd_line::option( 't', "test_" + _name, "<test> ...", cmd_line::args, "List of " + _name + " tests to run" ));
+	opts.add( cmd_line::option( 't', "test_" + _name, "<test> ...", cmd_line::args, "List of " + _name + " tests to run" ) );
 }
 
 ////////////////////////////////////////
@@ -66,6 +66,7 @@ void unit_test::run( void )
 {
 	for ( auto i = _tests.begin(); i != _tests.end(); ++i )
 		run( i );
+	summarize();
 }
 
 ////////////////////////////////////////
@@ -82,6 +83,7 @@ void unit_test::run( cmd_line &opts )
 			for ( auto &n: opt.values() )
 				run( std::string( n ) );
 			done = true;
+			summarize();
 		}
 	}
 
@@ -150,6 +152,14 @@ void unit_test::clean( void )
 		{
 		}
 	}
+}
+
+////////////////////////////////////////
+
+void
+unit_test::summarize( void )
+{
+	std::clog << "test " << _name << ": ( +" << success_count() << ", -" << failure_count() << " ) /" << run_count() << std::endl;
 }
 
 ////////////////////////////////////////

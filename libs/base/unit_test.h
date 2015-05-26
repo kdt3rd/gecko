@@ -77,6 +77,8 @@ public:
 
 	void clean( void );
 
+	void summarize( void );
+
 	size_t success_count( void ) const
 	{
 		return _success.size();
