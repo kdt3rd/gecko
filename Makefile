@@ -1,65 +1,56 @@
 .SUFFIXES:
-.DEFAULT: default
-.PHONY: default debug release mingw build clean graph config
+.DEFAULT: all
+.ONESHELL:
 .NOTPARALLEL:
 .SILENT:
-.ONESHELL:
 
-BUILD_TYPE := build
-BUILD_DIR := build
-ifeq ($(findstring debug,${MAKECMDGOALS}),debug)
-BUILD_TYPE := debug
-BUILD_DIR := debug
-else
+.PHONY: all clean graph config release build debug
+LIVE_CONFIG := build
+
 ifeq ($(findstring release,${MAKECMDGOALS}),release)
-BUILD_TYPE := release
-BUILD_DIR := release
-else
-ifeq ($(findstring mingw,${MAKECMDGOALS}),mingw)
-BUILD_TYPE := mingw
-BUILD_DIR := mingw
+LIVE_CONFIG := release
 endif
+ifeq ($(findstring build,${MAKECMDGOALS}),build)
+LIVE_CONFIG := build
 endif
+ifeq ($(findstring debug,${MAKECMDGOALS}),debug)
+LIVE_CONFIG := debug
 endif
 
-TARGETS := $(filter-out default debug release build mingw clean graph config,${MAKECMDGOALS})
+ifeq ("$(wildcard ${LIVE_CONFIG})","")
+NEED_CONFIG := config
+endif
+
+TARGETS := $(filter-out all clean graph config release build debug,${MAKECMDGOALS})
 MAKECMDGOALS :=
 
-default: ${BUILD_DIR}/
-	ninja ${NINJA_ARGS} -C ${BUILD_DIR} ${TARGETS}
-
-debug: debug/
-	ninja ${NINJA_ARGS} -C ${BUILD_DIR} ${TARGETS}
-
-mingw: mingw/
-	ninja ${NINJA_ARGS} -C ${BUILD_DIR} ${TARGETS}
-
-release: release/
-	ninja ${NINJA_ARGS} -C ${BUILD_DIR} ${TARGETS}
-
-build: build/
-	ninja ${NINJA_ARGS} -C ${BUILD_DIR} ${TARGETS}
-
-debug/:
-	constructor
-
-mingw/:
-	constructor
-
-release/:
-	constructor
-
-build/:
-	constructor --verbose
+all: ${LIVE_CONFIG}
 
 config:
+	echo "Generating Build Files..."
 	constructor
 
+release/: ${NEED_CONFIG}
+
+release: release/
+	@cd release; ninja ${TARGETS}
+
+build/: ${NEED_CONFIG}
+
+build: build/
+	@cd build; ninja ${TARGETS}
+
+debug/: ${NEED_CONFIG}
+
+debug: debug/
+	@cd debug; ninja ${TARGETS}
+
+
+${TARGETS} :: all ;
+
 clean:
-	rm -rf debug release build mingw
+	@echo "Cleaning..."
+	@rm -rf release build debug
 
 graph:
-	ninja -C build -t graph ${TARGETS} | sed s\"`pwd`/\"\"g > deps.dot
-
-% :: default
-	@
+	@cd build; ninja -t graph ${TARGETS} | sed s\"`pwd`/\"\"g > ../deps.dot

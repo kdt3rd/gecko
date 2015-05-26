@@ -237,7 +237,7 @@ int safemain( int argc, char *argv[] )
 	fstest.run( options );
 	fstest.clean();
 
-	return 0;
+	return - static_cast<int>( fstest.failure_count() );
 }
 
 }

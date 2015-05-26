@@ -1,7 +1,7 @@
 
 local base = libs.base.lib
 
-Executable( "test_fs", "test_fs.cpp", base )
-Executable( "test_cmdline", "test_cmdline.cpp", base )
-Executable( "test_exception", "test_exception.cpp", base )
-
+AddUnitTest( "test_fs.cpp", base )
+AddUnitTest( "test_cmdline.cpp", base )
+AddUnitTest( "test_exception.cpp", base )
+AddUnitTest( "test_string_utils.cpp", base )

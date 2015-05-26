@@ -1,0 +1,46 @@
+
+tests = Item.new( "__unit_tests" )
+tests:forceTool( "<pseudo>" )
+tests:setPseudoTarget( "test" )
+tests:setUseNameForInput( false )
+tests:setDefaultTarget( false )
+
+function AddUnitTest( fname, libs, cmdline )
+	assert(type(fname)=="string", "Expecting a single filename as a unit test")
+	testname = file.basename( fname )
+	unitname="__unit_test_"..testname
+	e = Executable( testname, fname, libs )
+	e:setDefaultTarget( false )
+	e:setVariable( "exe_dir", "unit_tests" )
+	if cmdline then
+		AddTool{
+			tag=unitname,
+			name=unitname,
+			exe=e,
+			options={},
+			option_defaults={},
+			cmd={"$exe", unpack(cmdline)},
+			description="TEST "..testname,
+			pool="console"
+		}
+	else
+		AddTool{
+			tag=unitname,
+			name=unitname,
+			exe=e,
+			options={},
+			option_defaults={},
+			cmd={"$exe"},
+			description="TEST "..testname,
+			pool="console"
+		}
+	end
+	-- by making it a strange name, it should never be
+	-- generated so should run every time
+	ut = Item.new( "__unit_tests/"..testname )
+	ut:forceTool( unitname )
+	ut:setDefaultTarget( false )
+	ut:setUseNameForInput( false )
+	ut:addDependency( "implicit", e )
+	tests:addDependency( "implicit", ut )
+end
