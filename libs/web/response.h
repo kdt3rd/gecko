@@ -53,6 +53,8 @@ public:
 
 	void send( net::tcp_socket &socket );
 
+	void send( net::tcp_socket &socket, std::istream &out );
+
 	const std::string &content( void ) const
 	{
 		return _content;

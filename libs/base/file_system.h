@@ -119,7 +119,14 @@ public:
 						   std::ios_base::openmode m = (file_read_mode|file_write_mode) ) = 0;
 
 	/// @brief Finds a reference to a filesystem for the given uri
-	static std::shared_ptr<file_system> get( const uri &path );
+	static std::shared_ptr<file_system> get( const uri &path )
+	{
+		return get( path.scheme() );
+	}
+
+	/// @brief Finds a reference to a filesystem for the given uri
+	static std::shared_ptr<file_system> get( const std::string &scheme );
+
 	/// @brief Registers a file system for a specific scheme
 	static void add( const std::string &sch, const std::shared_ptr<file_system> &fs );
 };

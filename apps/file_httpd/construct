@@ -1,0 +1,7 @@
+
+local web = libs.web.lib
+
+Executable( "file_httpd",
+	"main.cpp",
+	web
+)

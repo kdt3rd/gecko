@@ -97,7 +97,7 @@ public:
 protected:
 	istream_bufstore( const istream_bufstore & ) = delete;
 	istream_bufstore &operator=( const istream_bufstore & ) = delete;
-	
+
 private:
 	std::unique_ptr<streambuf_type> _sbuf;
 };
@@ -165,7 +165,7 @@ public:
 protected:
 	ostream_bufstore( const ostream_bufstore & ) = delete;
 	ostream_bufstore &operator=( const ostream_bufstore & ) = delete;
-	
+
 private:
 	std::unique_ptr<streambuf_type> _sbuf;
 };
@@ -233,7 +233,7 @@ public:
 protected:
 	iostream_bufstore( const iostream_bufstore & ) = delete;
 	iostream_bufstore &operator=( const iostream_bufstore & ) = delete;
-	
+
 private:
 	std::unique_ptr<streambuf_type> _sbuf;
 };

@@ -16,11 +16,9 @@ singleton( void )
 	return theFileSystems;
 }
 
-} // empty namespace
-
+}
 
 ////////////////////////////////////////
-
 
 namespace base
 {
@@ -31,9 +29,7 @@ file_system::~file_system( void )
 {
 }
 
-
 ////////////////////////////////////////
-
 
 uri
 file_system::stat( const uri &path, struct stat *buf )
@@ -59,9 +55,7 @@ file_system::stat( const uri &path, struct stat *buf )
 	return std::move( curpath );
 }
 
-
 ////////////////////////////////////////
-
 
 void
 file_system::rmdir_all( const uri &path )
@@ -84,24 +78,20 @@ file_system::rmdir_all( const uri &path )
 		unlink( path );
 }
 
-
 ////////////////////////////////////////
 
-
 std::shared_ptr<file_system>
-file_system::get( const uri &path )
+file_system::get( const std::string &scheme )
 {
-	precondition( path, "invalid uri" );
+	precondition( !scheme.empty(), "invalid empty scheme" );
 	std::unique_lock<std::mutex> lk( theMutex );
 	auto &fs = singleton();
-	auto f = fs.find( path.scheme() );
-	precondition( f != fs.end(), "no file system registered for scheme in path " + path.pretty() );
+	auto f = fs.find( scheme );
+	precondition( f != fs.end(), "no file system registered for scheme {0}", scheme );
 	return f->second;
 }
 
-
 ////////////////////////////////////////
-
 
 void
 file_system::add( const std::string &sch, const std::shared_ptr<file_system> &fs )

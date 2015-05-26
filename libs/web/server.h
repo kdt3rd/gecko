@@ -28,6 +28,7 @@ public:
 
 	void run( void );
 
+	/// @brief Simple not found handler.
 	static void not_found( request &req, net::tcp_socket &client );
 
 private:
