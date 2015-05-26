@@ -33,24 +33,25 @@ config:
 release/: ${NEED_CONFIG}
 
 release: release/
-	@cd /home/kimball/Development/OSS/gecko/release; /home/kimball/bin/ninja ${TARGETS}
+	@cd release; ninja ${TARGETS}
 
 build/: ${NEED_CONFIG}
 
 build: build/
-	@cd /home/kimball/Development/OSS/gecko/build; /home/kimball/bin/ninja ${TARGETS}
+	@cd build; ninja ${TARGETS}
 
 debug/: ${NEED_CONFIG}
 
 debug: debug/
-	@cd /home/kimball/Development/OSS/gecko/debug; /home/kimball/bin/ninja ${TARGETS}
+	@cd debug; ninja ${TARGETS}
 
 
-${TARGETS}: all ;
+${TARGETS} :: all ;
+
+graph:
+	@cd ${LIVE_CONFIG}; ninja -t graph ${TARGETS} | sed s\"`pwd`/\"\"g > ../deps.dot
 
 clean:
 	@echo "Cleaning..."
-	@cd /home/kimball/Development/OSS/gecko/release; /home/kimball/bin/ninja -t clean
-	@cd /home/kimball/Development/OSS/gecko/build; /home/kimball/bin/ninja -t clean
-	@cd /home/kimball/Development/OSS/gecko/debug; /home/kimball/bin/ninja -t clean
+	@rm -rf release build debug
 
