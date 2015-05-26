@@ -69,7 +69,7 @@ int safemain( int argc, char *argv[] )
 			std::stringstream msg;
 			base::print_exception( msg, e );
 			std::vector<std::string> lines;
-			base::split( msg.str(), '\n', std::back_inserter( lines ) );
+			base::split( lines, msg.str(), '\n' );
 			for ( std::string &n: lines )
 				test.message( n );
 			test.success( "tried and failed" );
