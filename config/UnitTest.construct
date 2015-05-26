@@ -19,7 +19,7 @@ function AddUnitTest( fname, libs, cmdline )
 			exe=e,
 			options={},
 			option_defaults={},
-			cmd={"$exe", unpack(cmdline)},
+			cmd={"$exe", table.unpack(cmdline) },
 			description="TEST "..testname,
 			pool="console"
 		}

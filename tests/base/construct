@@ -2,6 +2,6 @@
 local base = libs.base.lib
 
 AddUnitTest( "test_fs.cpp", base )
-AddUnitTest( "test_cmdline.cpp", base )
+AddUnitTest( "test_cmdline.cpp", base, { "hello", "test_file" } )
 AddUnitTest( "test_exception.cpp", base )
 AddUnitTest( "test_string_utils.cpp", base )
