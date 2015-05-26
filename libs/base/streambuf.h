@@ -174,7 +174,8 @@ protected:
 	}
 
 protected:
-	/// \defgroup Subclasses should consider implementing these functions
+	/// @name Virtual methods
+	/// Subclasses should consider implementing these functions
 	/// @{
 
 	/// @brief Returns whether the streambuf is in an open state and
@@ -232,10 +233,11 @@ protected:
 
 	/// @}
 
-	/// \defgroup Subclassed functions from streambuf that are implemented by default
+	/// @name Helper functions
+	/// Subclassed functions from streambuf that are implemented by default
 	/// such that subclasses of this are much simpler
 	/// @{
-	/// 
+	///
 protected:
 	////// locale handling
 	virtual void imbue( const std::locale &l ) override

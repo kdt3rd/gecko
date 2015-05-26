@@ -74,7 +74,8 @@ public:
 
 ////////////////////////////////////////
 
-/// @defgroup base base
+/// @name Macros
+/// Helper macros for throw exceptions.
 /// @{
 
 /// @brief Throw the exception, adding it's source location

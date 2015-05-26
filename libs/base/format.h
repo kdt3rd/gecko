@@ -189,7 +189,7 @@ private:
 /// @param data Data to format.
 /// @return An object that can be converted/casted to a string, or streamed to an std::stream.
 ///
-/// @example test_format.cpp
+/// @example base/ex_format.cpp
 template<typename ... Args>
 format_holder<Args...> format( std::string fmt, const Args &...data )
 {
@@ -198,7 +198,7 @@ format_holder<Args...> format( std::string fmt, const Args &...data )
 
 ////////////////////////////////////////
 
-/// @brief Stream output operator for format_holder.
+/// @brief Stream output operator for format.
 template<typename CharT, typename ... Args>
 std::basic_ostream<CharT> &operator<<( std::basic_ostream<CharT> &out, const format_holder<Args...> &fmt )
 {
@@ -208,15 +208,20 @@ std::basic_ostream<CharT> &operator<<( std::basic_ostream<CharT> &out, const for
 
 ////////////////////////////////////////
 
+/// @brief Print container values with separator.
+/// Commonly used to print vector values separated by a comma.
 template<typename Container>
 class infix_separated_printer
 {
 public:
+	/// @brief Constructor
+	/// A reference to the container is kept, so make sure the container outlives this class.
 	infix_separated_printer( std::string sep, const Container &v )
 		: _sep( std::move( sep ) ), _container( v )
 	{
 	}
 
+	/// @brief Write the container values with separator.
 	void write( std::ostream &out ) const
 	{
 		if ( !_container.empty() )
@@ -238,6 +243,9 @@ private:
 	const Container &_container;
 };
 
+////////////////////////////////////////
+
+/// @brief Print infix separated container.
 template<typename C>
 std::ostream &operator<<( std::ostream &out, const infix_separated_printer<C> &tmp )
 {
@@ -245,62 +253,15 @@ std::ostream &operator<<( std::ostream &out, const infix_separated_printer<C> &t
 	return out;
 }
 
+////////////////////////////////////////
+
+/// @brief Create an infix_separated_printer.
+/// The easy way to print a container with a separator (e.g. comma).
 template<typename C>
 infix_separated_printer<C> infix_separated( std::string sep, const C &c )
 {
 	return infix_separated_printer<C>( std::move( sep ), c );
 }
-
-#if 0
-/// @brief Stream that insert an infix operator between elements.
-template <class T, class charT=char, class traits=std::char_traits<charT> >
-class infix_ostream_iterator : public std::iterator<std::output_iterator_tag,void,void,void,void>
-{
-public:
-	typedef charT char_type;
-	typedef traits traits_type;
-	typedef std::basic_ostream<charT,traits> ostream_type;
-
-	infix_ostream_iterator( ostream_type &s )
-		: _first_elem( true ), _os( s ), _delimiter( 0 )
-	{
-	}
-
-	infix_ostream_iterator( ostream_type &s, const charT *d )
-		: _first_elem( true ), _os( s ), _delimiter( d )
-	{
-	}
-
-	infix_ostream_iterator<T,charT,traits> &operator=( const T &item )
-	{
-		if ( !_first_elem && _delimiter != 0 )
-			_os << _delimiter;
-		_os << item;
-		_first_elem = false;
-		return *this;
-	}
-
-	infix_ostream_iterator<T,charT,traits> &operator*( void )
-	{
-		return *this;
-	}
-
-	infix_ostream_iterator<T,charT,traits> &operator++( void )
-	{
-		return *this;
-	}
-
-	infix_ostream_iterator<T,charT,traits> &operator++( int )
-	{
-		return *this;
-	}
-
-private:
-	bool _first_elem;
-	std::basic_ostream<charT,traits> &_os;
-	charT const *_delimiter;
-};
-#endif
 
 ////////////////////////////////////////
 
