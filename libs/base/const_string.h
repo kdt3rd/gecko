@@ -72,7 +72,7 @@ public:
 	constexpr const_string( void ) : _str( nullptr ), _sz( 0 ) {}
 	template <std::size_t N>
 	constexpr const_string( const value_type (&s)[N] ) : _str( s ), _sz( N - 1 ) {}
-	constexpr const_string( const value_type *s, size_type N ) : _str( s ), _sz( N - 1 ) {}
+	constexpr const_string( const value_type *s, size_type N ) : _str( s ), _sz( N ) {}
 	template <typename allocTs>
 	constexpr const_string( const std::basic_string<charT, traitsT, allocTs> &s ) : _str( s.data() ), _sz( s.size() ) {}
 	constexpr const_string( const value_type *s ) : _str( s ), _sz( const_length( s ) ) {}
@@ -141,7 +141,7 @@ public:
 	template <std::size_t N>
 	constexpr int compare( size_type pos, size_type n, const value_type (&s)[N] ) const
 	{
-		return substr( pos, n ).compare( const_string( s, N ) );
+		return substr( pos, n ).compare( const_string( s, N - 1 ) );
 	}
 
 	constexpr int compare( size_type pos, size_type n, const value_type *s ) const
@@ -169,7 +169,7 @@ public:
 	constexpr size_type find_first_not_of( value_type c, size_type pos = 0 ) const
 	{
 		return ( pos < size() ?
-				 ( ! traits_type::eq( _str[pos], c ) ? pos : find_first_of( c, pos + 1 ) ) :
+				 ( ! traits_type::eq( _str[pos], c ) ? pos : find_first_not_of( c, pos + 1 ) ) :
 				 npos );
 	}
 
