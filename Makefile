@@ -1,6 +1,6 @@
 .SUFFIXES:
 .DEFAULT: default
-.PHONY: default debug release mingw build clean graph config docs
+.PHONY: default debug release mingw build clean graph config
 .NOTPARALLEL:
 .SILENT:
 .ONESHELL:
@@ -60,3 +60,6 @@ clean:
 
 graph:
 	ninja -C build -t graph ${TARGETS} | sed s\"`pwd`/\"\"g > deps.dot
+
+% :: default
+	@
