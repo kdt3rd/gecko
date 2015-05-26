@@ -34,6 +34,7 @@ void unit_test::setup( cmd_line &opts )
 
 void unit_test::success( const std::string &msg )
 {
+	_success.insert( _running.back() );
 	std::clog << ansi::green << " SUCCESS " << ansi::reset << _running.back() << ": " << msg << std::endl;
 }
 
@@ -41,6 +42,7 @@ void unit_test::success( const std::string &msg )
 
 void unit_test::failure( const std::string &msg )
 {
+	_failure.insert( _running.back() );
 	std::clog << ansi::red << " FAILURE " << ansi::reset << _running.back() << ": " << msg << std::endl;
 }
 
