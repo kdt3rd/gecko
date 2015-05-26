@@ -44,62 +44,69 @@ namespace base
 ////////////////////////////////////////
 
 
-template<typename Inserter>
+template <typename stringT, typename Delim, typename Inserter>
 inline void
-split( const std::string &str, char delim, Inserter insert )
+split( const stringT &str, const Delim &delim, Inserter insert, bool skip_empty = false )
 {
-	/// @todo Implement this in a more efficient way.
-	std::stringstream ss( str );
-	std::string item;
-	while ( std::getline( ss, item, delim ) )
-		insert = item;
-}
-
-
-////////////////////////////////////////
-
-
-template <typename stringT>
-inline void
-split( std::vector<stringT> &__ret, const stringT &__str, const stringT &__sep, bool __skip_empty = false )
-{
-	__ret.clear();
-
-	if ( __skip_empty )
+	if ( skip_empty )
 	{
-		typename stringT::size_type __last = __str.find_first_not_of( __sep, 0 );
-		typename stringT::size_type __cur = __str.find_first_of( __sep, __last );
+		typename stringT::size_type last = str.find_first_not_of( delim, 0 );
+		typename stringT::size_type cur = str.find_first_of( delim, last );
 		
-		while ( __cur != stringT::npos || __last < __str.size() )
+		while ( cur != stringT::npos || last < str.size() )
 		{
-			if ( __cur != __last )
-				__ret.push_back( __str.substr( __last, __cur - __last ) );
-			__last = __str.find_first_not_of( __sep, __cur );
-			__cur = __str.find_first_of( __sep, __last );
+			if ( cur != last )
+				insert = str.substr( last, cur - last );
+			last = str.find_first_not_of( delim, cur );
+			cur = str.find_first_of( delim, last );
 		}
 	}
 	else
 	{
-		typename stringT::size_type __last = 0;
-		typename stringT::size_type __cur = __str.find_first_of( __sep, __last );
+		typename stringT::size_type last = 0;
+		typename stringT::size_type cur = str.find_first_of( delim, last );
 
 		do
 		{
-			if ( __cur == stringT::npos )
+			if ( cur == stringT::npos )
 			{
-				if ( __last == __str.size() )
-					__ret.push_back( stringT() );
+				if ( last == str.size() )
+					insert = stringT();
 				else
-					__ret.push_back( __str.substr( __last ) );
+					insert = str.substr( last );
 				break;
 			}
 			else
-				__ret.push_back( __str.substr( __last, __cur - __last ) );
+				insert = str.substr( last, cur - last );
 
-			__last = __cur + 1;
-			__cur = __str.find_first_of( __sep, __last );
-		} while ( __last != stringT::npos );
+			last = cur + 1;
+			cur = str.find_first_of( delim, last );
+		} while ( last != stringT::npos );
 	}
+}
+
+//template<typename Inserter>
+//inline void
+//split( const std::string &str, char delim, Inserter insert )
+//{
+//	/// @todo Implement this in a more efficient way.
+//	std::stringstream ss( str );
+//	std::string item;
+//	while ( std::getline( ss, item, delim ) )
+//		insert = item;
+//}
+
+
+////////////////////////////////////////
+
+
+template <typename stringT>
+inline void
+split( std::vector<stringT> &ret, const stringT &str, const stringT &sep, bool skip_empty = false )
+{
+	ret.clear();
+
+	split( str, sep, std::back_inserter( ret ), skip_empty );
 }
 
 
@@ -108,11 +115,11 @@ split( std::vector<stringT> &__ret, const stringT &__str, const stringT &__sep, 
 
 template <typename stringT>
 inline void
-split( std::vector<stringT> &__ret, const stringT &__str,
-	   const typename stringT::value_type *__sep,
-	   bool __skip_empty = false )
+split( std::vector<stringT> &ret, const stringT &str,
+	   const typename stringT::value_type *sep,
+	   bool skip_empty = false )
 {
-	split( __ret, __str, stringT( __sep ), __skip_empty );
+	split( ret, str, stringT( sep ), skip_empty );
 }
 
 
@@ -121,11 +128,31 @@ split( std::vector<stringT> &__ret, const stringT &__str,
 
 template <typename stringT>
 inline std::vector<stringT>
-split( const stringT &__str, const stringT &__sep, bool __skip_empty = false )
+split( const stringT &str, const stringT &sep, bool skip_empty = false )
 {
-	std::vector<stringT> __ret;
-	split( __ret, __str, __sep, __skip_empty );
-	return __ret;
+	std::vector<stringT> retval;
+	if ( sep.size() == 1 )
+		split( str, sep[0], std::back_inserter( retval ), skip_empty );
+	else
+		split( str, sep, std::back_inserter( retval ), skip_empty );
+	return std::move( retval );
+}
+
+
+////////////////////////////////////////
+
+
+template <typename stringT, std::size_t sepSz>
+std::vector<stringT>
+split( const stringT &str, const typename stringT::value_type (&sep)[sepSz],
+	   bool skip_empty = false )
+{
+	std::vector<stringT> retval;
+	if ( sepSz == 2 )
+		split( str, sep[0], std::back_inserter( retval ), skip_empty );
+	else
+		split( str, stringT( sep, sepSz - 1 ), std::back_inserter( retval ), skip_empty );
+	return std::move( retval );
 }
 
 
@@ -134,10 +161,10 @@ split( const stringT &__str, const stringT &__sep, bool __skip_empty = false )
 
 template <typename stringT>
 std::vector<stringT>
-split( const stringT &__str, const typename stringT::value_type *__sep,
-	   bool __skip_empty = false )
+split( const stringT &str, const typename stringT::value_type *sep,
+	   bool skip_empty = false )
 {
-	return split( __str, stringT( __sep ), __skip_empty );
+	return split( str, stringT( sep ), skip_empty );
 }
 
 
@@ -146,47 +173,12 @@ split( const stringT &__str, const typename stringT::value_type *__sep,
 
 template <typename stringT>
 inline void
-split( std::vector<stringT> &__ret, const stringT &__str,
-	   typename stringT::value_type __sep,
-	   bool __skip_empty = false )
+split( std::vector<stringT> &ret, const stringT &str,
+	   typename stringT::value_type sep,
+	   bool skip_empty = false )
 {
-	__ret.clear();
-
-	if ( __skip_empty )
-	{
-		typename stringT::size_type __last = __str.find_first_not_of( __sep, 0 );
-		typename stringT::size_type __cur = __str.find_first_of( __sep, __last );
-
-		while ( __cur != stringT::npos || __last < __str.size() )
-		{
-			if ( __cur != __last )
-				__ret.push_back( __str.substr( __last, __cur - __last ) );
-			__last = __str.find_first_not_of( __sep, __cur );
-			__cur = __str.find_first_of( __sep, __last );
-		}
-	}
-	else
-	{
-		typename stringT::size_type __last = 0;
-		typename stringT::size_type __cur = __str.find_first_of( __sep, __last );
-
-		do
-		{
-			if ( __cur == stringT::npos )
-			{
-				if ( __last == __str.size() )
-					__ret.push_back( stringT() );
-				else
-					__ret.push_back( __str.substr( __last ) );
-				break;
-			}
-			else
-				__ret.push_back( __str.substr( __last, __cur - __last ) );
-
-			__last = __cur + 1;
-			__cur = __str.find_first_of( __sep, __last );
-		} while ( __last != stringT::npos );
-	}
+	ret.clear();
+	split( str, sep, std::back_inserter( ret ), skip_empty );
 }
 
 
@@ -195,12 +187,12 @@ split( std::vector<stringT> &__ret, const stringT &__str,
 
 template <typename stringT>
 std::vector<stringT>
-split( const stringT &__str, typename stringT::value_type __sep,
-	   bool __skip_empty = false )
+split( const stringT &str, typename stringT::value_type sep,
+	   bool skip_empty = false )
 {
-	std::vector<stringT> __ret;
-	split( __ret, __str, __sep, __skip_empty );
-	return __ret;
+	std::vector<stringT> ret;
+	split( str, sep, std::back_inserter( ret ), skip_empty );
+	return std::move( ret );
 }
 
 
