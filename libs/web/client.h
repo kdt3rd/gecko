@@ -11,11 +11,14 @@ namespace web
 
 ////////////////////////////////////////
 
+/// @brief HTTP client
 class client
 {
 public:
+	/// @brief Constructor
 	client( std::string agent = "HTTPClient/0.0" );
 
+	/// @brief Get an HTTP resource.
 	response get( const base::uri &host, double timeout = 0.0 );
 
 private:

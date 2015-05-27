@@ -1,0 +1,7 @@
+
+/// @namespace web
+/// @brief Web and HTTP utilities
+///
+/// Library containing a web server, web client, support the WebSocket protocol.
+///
+

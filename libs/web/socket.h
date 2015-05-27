@@ -10,6 +10,7 @@ namespace web
 
 ////////////////////////////////////////
 
+/// @brief WebSocket class.
 class socket
 {
 public:
@@ -19,14 +20,19 @@ public:
 	/// @brief Open a WebSocket to a server
 	socket( base::uri &server, const std::string &agent = "WSClient/0.0", double timeout = 0.0 );
 
+	/// @brief Destructor
 	~socket( void );
 
+	/// @brief Message callback
 	base::signal<void(const std::string &,bool)> when_message;
 
+	/// @brief Send a message.
 	void send( const std::string &msg );
 
+	/// @brief Run the socket.
 	void run( void );
 
+	/// @brief Close the socket.
 	void close( void );
 
 protected:

@@ -15,17 +15,23 @@ namespace web
 
 ////////////////////////////////////////
 
+/// @brief A web server.
 class server
 {
 public:
+	/// @brief Type for a function handling an HTTP request
 	typedef std::function<void( request&, net::tcp_socket &client )> handler;
 
+	/// @brief Constructor
 	server( uint16_t port, size_t threads = 1 );
 
+	/// @brief Add a resource handler
 	handler &resource( const std::string &method, const std::string &re );
 
+	/// @brief Add a default resource handler
 	handler &default_resource( const std::string &method );
 
+	/// @brief Run the server (forever)
 	void run( void );
 
 	/// @brief Simple not found handler.
