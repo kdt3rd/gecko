@@ -28,6 +28,7 @@ unit_test::~unit_test( void )
 void unit_test::setup( cmd_line &opts )
 {
 	opts.add( cmd_line::option( 't', "test_" + _name, "<test> ...", cmd_line::args, "List of " + _name + " tests to run" ) );
+	opts.add( cmd_line::option( 'q', "", "", cmd_line::counted, "Quiet mode (can be specified multiple times" ) );
 }
 
 ////////////////////////////////////////
@@ -35,7 +36,8 @@ void unit_test::setup( cmd_line &opts )
 void unit_test::success( const std::string &msg )
 {
 	_success.insert( _running.back() );
-	std::clog << ansi::green << " SUCCESS " << ansi::reset << _running.back() << ": " << msg << std::endl;
+	if ( _quiet < 1 )
+		std::clog << ansi::green << " SUCCESS " << ansi::reset << _running.back() << ": " << msg << std::endl;
 }
 
 ////////////////////////////////////////
@@ -43,21 +45,31 @@ void unit_test::success( const std::string &msg )
 void unit_test::failure( const std::string &msg )
 {
 	_failure.insert( _running.back() );
-	std::clog << ansi::red << " FAILURE " << ansi::reset << _running.back() << ": " << msg << std::endl;
+	if ( _quiet < 2 )
+		std::clog << ansi::red << " FAILURE " << ansi::reset << _running.back() << ": " << msg << std::endl;
 }
 
 ////////////////////////////////////////
 
 void unit_test::warning( const std::string &msg )
 {
-	std::clog << ansi::yellow << " WARNING " << ansi::reset << _running.back() << ": " << msg << std::endl;
+	if ( _quiet < 2 )
+		std::clog << ansi::yellow << " WARNING " << ansi::reset << _running.back() << ": " << msg << std::endl;
 }
 
 ////////////////////////////////////////
 
 void unit_test::message( const std::string &msg )
 {
-	std::clog << ansi::blue << " MESSAGE " << ansi::reset << _running.back() << ": " << msg << std::endl;
+	if ( _quiet < 1 )
+		std::clog << ansi::blue << " MESSAGE " << ansi::reset << _running.back() << ": " << msg << std::endl;
+}
+
+////////////////////////////////////////
+
+void unit_test::set_quiet( int level )
+{
+	_quiet = level;
 }
 
 ////////////////////////////////////////
@@ -86,6 +98,9 @@ void unit_test::run( cmd_line &opts )
 			summarize();
 		}
 	}
+
+	if ( auto &q = opts["q"] )
+		_quiet = q.count();
 
 	if ( !done )
 		run();
@@ -159,7 +174,18 @@ void unit_test::clean( void )
 void
 unit_test::summarize( void )
 {
-	std::clog << "test " << _name << ": ( +" << success_count() << ", -" << failure_count() << " ) /" << run_count() << std::endl;
+	if ( _quiet > 0 && _quiet < 3 )
+	{
+		if ( success_count() == run_count() )
+			std::clog << ansi::green << " SUCCESS " << ansi::reset << _name << ": " << run_count() << " / " << run_count() << " passed" << std::endl;
+		else
+		{
+			std::clog << ansi::red << " FAILURE " << ansi::reset << _name << ": ( "
+					  << ansi::green << success_count() << ansi::reset << ", "
+					  << ansi::red << failure_count() << ansi::reset
+					  << " ) / " << run_count() << std::endl;
+		}
+	}
 }
 
 ////////////////////////////////////////

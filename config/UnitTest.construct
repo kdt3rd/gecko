@@ -19,7 +19,7 @@ function AddUnitTest( fname, libs, cmdline )
 			exe=e,
 			options={},
 			option_defaults={},
-			cmd={"$exe", table.unpack(cmdline) },
+			cmd={"$exe", "-q", table.unpack(cmdline) },
 			description="TEST "..testname,
 			pool="console"
 		}
@@ -30,7 +30,7 @@ function AddUnitTest( fname, libs, cmdline )
 			exe=e,
 			options={},
 			option_defaults={},
-			cmd={"$exe"},
+			cmd={"$exe", "-q"},
 			description="TEST "..testname,
 			pool="console"
 		}

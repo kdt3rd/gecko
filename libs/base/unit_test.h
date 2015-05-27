@@ -71,6 +71,8 @@ public:
 		message( std::string( format( std::forward<Args>( args )... ) ) );
 	}
 
+	void set_quiet( int level );
+
 	void run( void );
 	void run( const std::string &n );
 	void run( cmd_line &opts );
@@ -112,6 +114,7 @@ private:
 
 	std::string _name;
 	std::function<void(void)> _test;
+	int _quiet = 0;
 };
 
 ////////////////////////////////////////
