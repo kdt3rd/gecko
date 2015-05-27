@@ -213,6 +213,22 @@ cmd_line::simple_usage( void ) const
 
 ////////////////////////////////////////
 
+bool cmd_line::flag( option &opt, size_t &idx, const std::vector<char *> &args )
+{
+	precondition( !opt.is_non_option(), "flag should be a normal option" );
+
+	if ( opt )
+		return false;
+
+	++idx;
+
+	opt.set();
+
+	return true;
+}
+
+////////////////////////////////////////
+
 bool
 cmd_line::args( option &opt, size_t &idx, const std::vector<char *> &args )
 {

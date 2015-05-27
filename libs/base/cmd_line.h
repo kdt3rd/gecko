@@ -13,6 +13,7 @@ namespace base
 ////////////////////////////////////////
 
 /// @brief Command-line parameters parser.
+///
 /// Given a list of options, it will parse command line parameters and accumulate all values into each options.
 /// Any errors will (e.g. unknown or mal-formed parameters) will trigger an exception.
 ///
@@ -310,6 +311,9 @@ public:
 		return true;
 	}
 
+	/// @brief Handle a flag (with no values)
+	static bool flag( option &opt, size_t &idx, const std::vector<char *> &args );
+
 	/// @brief Handle a list of values
 	/// This will grab all values until the end, or a string starting with "-" is encountered.
 	static bool args( option &opt, size_t &idx, const std::vector<char *> &args );
@@ -330,6 +334,7 @@ private:
 
 ////////////////////////////////////////
 
+/// @brief Print help message
 std::ostream &operator<<( std::ostream &out, const cmd_line &opts );
 
 ////////////////////////////////////////
