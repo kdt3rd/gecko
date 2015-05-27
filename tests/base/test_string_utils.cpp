@@ -130,6 +130,22 @@ int safemain( int argc, char *argv[] )
 		strtest.test( base::split( base::cstring( ":foo:" ), ':', true ).size() == 1, "base::split( cstring ':foo:' on ':' (skip empty) == 1" );
 	};
 
+	strtest["to_upper"] = [&]( void )
+	{
+		strtest.test( base::to_upper( std::string( "foo" ) ) == "FOO", "base::to_upper" );
+		strtest.test( base::to_upper( std::string( "FOO" ) ) == "FOO", "base::to_upper" );
+		strtest.test( base::to_upper( std::string( "ooF" ) ) == "OOF", "base::to_upper" );
+		strtest.test( base::to_upper( std::wstring( L"Zoë" ), std::locale( "en_US.UTF-8" ) ) == L"ZOË", "base::to_upper" );
+	};
+
+	strtest["to_lower"] = [&]( void )
+	{
+		strtest.test( base::to_lower( std::string( "foo" ) ) == "foo", "base::to_upper" );
+		strtest.test( base::to_lower( std::string( "FOO" ) ) == "foo", "base::to_upper" );
+		strtest.test( base::to_lower( std::string( "ooF" ) ) == "oof", "base::to_upper" );
+		strtest.test( base::to_lower( std::wstring( L"Zoë" ), std::locale( "en_US.UTF-8" ) ) == L"zoë", "base::to_upper" );
+	};
+
 	strtest.run( options );
 	strtest.clean();
 
