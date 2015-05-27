@@ -76,10 +76,10 @@ int safemain( int argc, char *argv[] )
 		}
 	};
 
-	test.run();
+	test.run( options );
 	test.clean();
 
-	return 0;
+	return - static_cast<int>( test.failure_count() );
 }
 
 }
