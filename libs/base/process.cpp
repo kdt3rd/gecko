@@ -103,7 +103,7 @@ process::process( const std::string &exe, const std::vector<std::string> &args )
 					throw_errno( "getting number of file (creating process)" );
 				for ( int f = 0; f < int(lim.rlim_cur); ++f )
 				{
-					if ( f != STDERR_FILENO && f != STDOUT_FILENO && f != STDERR_FILENO )
+					if ( f != STDIN_FILENO && f != STDOUT_FILENO && f != STDERR_FILENO )
 						::close( f );
 				}
 

@@ -36,6 +36,21 @@ public:
 		return *_stderr.get();
 	}
 
+	void close_in( void )
+	{
+		_stdin.reset();
+	}
+
+	void close_out( void )
+	{
+		_stdout.reset();
+	}
+
+	void close_err( void )
+	{
+		_stderr.reset();
+	}
+
 	id_type id( void ) const
 	{
 		return _id;
