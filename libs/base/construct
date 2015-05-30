@@ -25,6 +25,7 @@ lib = Library( "base",
 	"file_system.cpp",
 	"posix_file_system.cpp",
 	"unit_test.cpp",
-	"thread_pool.cpp"
+	"thread_pool.cpp",
+	"process.cpp"
 );
 

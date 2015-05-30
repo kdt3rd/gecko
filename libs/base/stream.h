@@ -126,6 +126,7 @@ public:
 	{
 		this->init( _sbuf.get() );
 	}
+
 	ostream_bufstore( ostream_bufstore &&o )
 			: base_type( std::move( o ) ),
 			  _sbuf( std::move( o._sbuf ) )
@@ -140,8 +141,8 @@ public:
 		base_type::set_rdbuf( _sbuf.get() );
 		return *this;
 	}
-	void
-	swap( ostream_bufstore &rhs )
+
+	void swap( ostream_bufstore &rhs )
 	{
 		base_type::swap( rhs );
 		std::swap( _sbuf, rhs._sbuf );
@@ -194,6 +195,7 @@ public:
 	{
 		this->init( _sbuf.get() );
 	}
+
 	iostream_bufstore( iostream_bufstore &&o )
 			: base_type( std::move( o ) ),
 			  _sbuf( std::move( o._sbuf ) )
@@ -208,8 +210,8 @@ public:
 		base_type::set_rdbuf( _sbuf.get() );
 		return *this;
 	}
-	void
-	swap( iostream_bufstore &rhs )
+
+	void swap( iostream_bufstore &rhs )
 	{
 		base_type::swap( rhs );
 		std::swap( _sbuf, rhs._sbuf );
