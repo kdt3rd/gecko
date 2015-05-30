@@ -6,6 +6,7 @@ lib = Library( "web",
 	"client.cpp",
 	"server.cpp",
 	"socket.cpp",
+	"json_rpc.cpp",
 	UseLibraries( "net" )
 );
 
