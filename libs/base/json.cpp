@@ -113,6 +113,15 @@ json &json::at( size_t idx )
 
 ////////////////////////////////////////
 
+bool json::has( const std::string &name ) const
+{
+	precondition( is<json_object>(), "not a json object" );
+	auto &obj = get<json_object>();
+	return obj.find( name ) != obj.end();
+}
+
+////////////////////////////////////////
+
 void json::push_back( const json &x )
 {
 	if ( !valid() || is<json_null>() )
@@ -129,8 +138,21 @@ void json::push_back( json &&x )
 	if ( !valid() || is<json_null>() )
 		set<json_array>();
 
-	precondition( is<json_array>(), "not a json array ({0})", type_name() );
+	precondition( is<json_array>(), "not a json array" );
 	get<json_array>().push_back( std::move( x ) );
+}
+
+////////////////////////////////////////
+
+json &json::push_back( void )
+{
+	if ( !valid() || is<json_null>() )
+		set<json_array>();
+
+	precondition( is<json_array>(), "not a json array" );
+	auto &tmp = get<json_array>();
+	tmp.push_back( json_null() );
+	return tmp.back();
 }
 
 ////////////////////////////////////////

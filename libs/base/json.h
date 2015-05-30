@@ -87,6 +87,12 @@ public:
 		set<json_number>( x );
 	}
 
+	/// @brief JSON integer constructor
+	json( int x )
+	{
+		set<json_number>( x );
+	}
+
 	/// @brief JSON string constructor
 	json( const char *x )
 	{
@@ -154,6 +160,11 @@ public:
 	/// This value must be an array.
 	json &at( size_t idx );
 
+	/// @brief Return whether json object has this key
+	///
+	/// This value must be an object.
+	bool has( const std::string &name ) const;
+
 	/// @brief Append JSON value to end of array.
 	///
 	/// This value will become a JSON array if it is currently null.
@@ -165,6 +176,12 @@ public:
 	/// This value will become a JSON array if it is currently null.
 	/// Otherwise, this value must be an array.
 	void push_back( json &&x );
+
+	/// @brief Push null value to end of array.
+	///
+	/// This value will become a JSON array if it is currently null.
+	/// Otherwise, this value must be an array.
+	json &push_back( void );
 
 private:
 	void parse_value( std::istream_iterator<char> &it, std::istream_iterator<char> &end, int &line );
