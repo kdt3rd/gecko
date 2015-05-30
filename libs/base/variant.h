@@ -268,7 +268,7 @@ public:
 
 	/// @brief Get the value as the given type.
 	template<typename T>
-	T& get( void )
+	T &get( void )
 	{
 		// It is a dynamic_cast-like behaviour
 		if ( _type_id == typeid(T) )
@@ -279,7 +279,7 @@ public:
 
 	/// @brief Get the value as the given type.
 	template<typename T>
-	const T& get( void ) const
+	const T &get( void ) const
 	{
 		// It is a dynamic_cast-like behaviour
 		if ( _type_id == typeid(T) )

@@ -34,32 +34,27 @@
 #include <limits>
 #include <iostream>
 
-
-////////////////////////////////////////
-
-
 namespace base
 {
 
-
 ////////////////////////////////////////
 
-
-unix_streambuf::unix_streambuf( std::ios_base::openmode m,
-								int fd, bool doDup,
-								const std::string &path,
-								size_t bufSz )
-		: streambuf( m, bufSz ), _fd( -1 ), _path( path )
+unix_streambuf::unix_streambuf( std::ios_base::openmode m, int fd, bool doDup, const std::string &path, size_t bufSz )
+	: streambuf( m, bufSz ), _fd( -1 ), _path( path )
 {
 	if ( doDup )
 	{
-		int nfd = fcntl( fd, F_DUPFD_CLOEXEC, int(0) );
-		if ( nfd < 0 )
+		int nfd = dup( fd );
+		while ( nfd < 0 )
 		{
-			if ( path.empty() )
-				throw std::runtime_error( "Unable to duplicate file descriptor" );
-			else
-				throw std::runtime_error( "Unable to duplicate file descriptor for path '" + path + "'" );
+			if ( errno != EINTR || errno != EBUSY )
+			{
+				if ( path.empty() )
+					throw_errno( "duplicating file descriptor" );
+				else
+					throw_errno( "duplicating file descriptor ({0})", path );
+			}
+			nfd = dup( fd );
 		}
 		_fd = nfd;
 	}
@@ -69,43 +64,32 @@ unix_streambuf::unix_streambuf( std::ios_base::openmode m,
 	initFD( m );
 }
 
-
 ////////////////////////////////////////
 
-
-unix_streambuf::unix_streambuf( std::ios_base::openmode m, const uri &path,
-								size_t bufSz )
+unix_streambuf::unix_streambuf( std::ios_base::openmode m, const uri &path, size_t bufSz )
 		: streambuf( m, bufSz ), _path( path.full_path() )
 {
 	stash_uri( path.pretty() );
 	initFD( m );
 }
 
-
 ////////////////////////////////////////
 
-
-unix_streambuf::unix_streambuf( std::ios_base::openmode m, const std::string &path,
-								size_t bufSz )
+unix_streambuf::unix_streambuf( std::ios_base::openmode m, const std::string &path, size_t bufSz )
 		: streambuf( m, bufSz ), _path( path )
 {
 	initFD( m );
 }
 
-
 ////////////////////////////////////////
 
-
-unix_streambuf::unix_streambuf( std::ios_base::openmode m, std::string &&path,
-								size_t bufSz )
+unix_streambuf::unix_streambuf( std::ios_base::openmode m, std::string &&path, size_t bufSz )
 		: streambuf( m, bufSz ), _path( std::move( path ) )
 {
 	initFD( m );
 }
 
-
 ////////////////////////////////////////
-
 
 unix_streambuf::unix_streambuf( unix_streambuf &&u )
 		: streambuf( std::move( u ) ), _fd( base::exchange( u._fd, -1 ) ),
@@ -113,12 +97,9 @@ unix_streambuf::unix_streambuf( unix_streambuf &&u )
 {
 }
 
-
 ////////////////////////////////////////
 
-
-unix_streambuf &
-unix_streambuf::operator=( unix_streambuf &&u )
+unix_streambuf &unix_streambuf::operator=( unix_streambuf &&u )
 {
 	streambuf::operator=( std::move( u ) );
 	_fd = base::exchange( u._fd, -1 );
@@ -126,42 +107,32 @@ unix_streambuf::operator=( unix_streambuf &&u )
 	return *this;
 }
 
-
 ////////////////////////////////////////
-
 
 unix_streambuf::~unix_streambuf( void )
 {
 	this->close();
 }
 
-
 ////////////////////////////////////////
 
-
-void
-unix_streambuf::swap( unix_streambuf &u )
+void unix_streambuf::swap( unix_streambuf &u )
 {
 	streambuf::swap( u );
 	std::swap( _fd, u._fd );
 	std::swap( _path, u._path );
 }
 
-
 ////////////////////////////////////////
-
 
 bool unix_streambuf::is_open( void ) const
 {
 	return _fd >= 0;
 }
 
-
 ////////////////////////////////////////
 
-
-void
-unix_streambuf::close( void ) noexcept
+void unix_streambuf::close( void ) noexcept
 {
 	if ( _fd >= 0 )
 	{
@@ -170,12 +141,9 @@ unix_streambuf::close( void ) noexcept
 	}
 }
 
-
 ////////////////////////////////////////
 
-
-unix_streambuf::off_type
-unix_streambuf::bytes_avail( void )
+unix_streambuf::off_type unix_streambuf::bytes_avail( void )
 {
 	if ( _fd < 0 )
 		return 0;
@@ -202,12 +170,9 @@ unix_streambuf::bytes_avail( void )
 	return 0;
 }
 
-
 ////////////////////////////////////////
 
-
-unix_streambuf::off_type
-unix_streambuf::seek( off_type off, std::ios_base::seekdir dir )
+unix_streambuf::off_type unix_streambuf::seek( off_type off, std::ios_base::seekdir dir )
 {
 	off_type ret = -1;
 	if ( _fd >= 0 )
@@ -215,12 +180,9 @@ unix_streambuf::seek( off_type off, std::ios_base::seekdir dir )
 	return ret;
 }
 
-
 ////////////////////////////////////////
 
-
-std::streamsize
-unix_streambuf::read( void *outBuf, size_t numBytes )
+std::streamsize unix_streambuf::read( void *outBuf, size_t numBytes )
 {
 	std::streamsize ret = -1;
 	if ( _fd >= 0 )
@@ -233,12 +195,9 @@ unix_streambuf::read( void *outBuf, size_t numBytes )
 	return ret;
 }
 
-
 ////////////////////////////////////////
 
-
-std::streamsize
-unix_streambuf::write( const void *outBuf, size_t numBytes )
+std::streamsize unix_streambuf::write( const void *outBuf, size_t numBytes )
 {
 	std::streamsize nleft = numBytes;
 
@@ -265,13 +224,9 @@ unix_streambuf::write( const void *outBuf, size_t numBytes )
 	return numBytes - nleft;
 }
 
-
 ////////////////////////////////////////
 
-
-std::streamsize
-unix_streambuf::writev( const void *outBuf1, size_t numBytes1,
-						const void *outBuf2, size_t numBytes2 )
+std::streamsize unix_streambuf::writev( const void *outBuf1, size_t numBytes1, const void *outBuf2, size_t numBytes2 )
 {
 	const char *s1 = reinterpret_cast<const char *>( outBuf1 );
 	const char *s2 = reinterpret_cast<const char *>( outBuf2 );
@@ -314,17 +269,14 @@ unix_streambuf::writev( const void *outBuf1, size_t numBytes1,
 	return numBytes1 + numBytes2 - nleft;
 }
 
-
 ////////////////////////////////////////
 
-
-void
-unix_streambuf::initFD( std::ios_base::openmode m )
+void unix_streambuf::initFD( std::ios_base::openmode m )
 {
 	if ( _fd == -1 )
 	{
 		if ( _path.empty() )
-			throw std::logic_error( "No valid path provided to open file" );
+			throw_logic( "invalid path to open file" );
 
 		int flags = 0;
 
@@ -352,23 +304,20 @@ unix_streambuf::initFD( std::ios_base::openmode m )
 		mode_t mode = (S_IRUSR|S_IWUSR) | (S_IRGRP|S_IWGRP) | (S_IROTH|S_IWOTH);
 		int nfd = ::open( _path.c_str(), flags, mode );
 		if ( nfd < 0 )
-			throw std::runtime_error( "Unable to open stream '" + _path + "'" );
+			throw_runtime( "unable to open '{0}'", _path );
 		_fd = nfd;
 	}
 
 	if ( m & std::ios_base::ate )
 	{
-		off_type goEnd = this->seek( 0, std::ios_base::end );
-		if ( goEnd == -1 )
-			throw std::runtime_error( "Unable to seek to the end of the stream but open flags say to go to end" );
+		if ( this->seek( 0, std::ios_base::end ) == -1 )
+			throw_runtime( "unable to seek to the end of the stream" );
 	}
 }
 
-
 ////////////////////////////////////////
 
-
-} // base
+}
 
 
 

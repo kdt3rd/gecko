@@ -10,7 +10,7 @@ namespace base
 
 ////////////////////////////////////////
 
-namespace tuple_impl
+namespace detail
 {
 
 template<typename Function, typename Tuple, size_t ...S>
@@ -24,9 +24,9 @@ auto expand_call( Function &f, Tuple &&params, sequence<S...> ) -> decltype( f( 
 ////////////////////////////////////////
 
 template<typename Function, typename ...Args>
-auto apply( Function &f, const std::tuple<Args...> &params ) -> decltype( tuple_impl::expand_call( f, params, typename base::gen_sequence<sizeof...(Args)>::type() ) )
+auto apply( Function &f, const std::tuple<Args...> &params ) -> decltype( detail::expand_call( f, params, typename base::gen_sequence<sizeof...(Args)>::type() ) )
 {
-	return tuple_impl::expand_call( f, params, typename base::gen_sequence<sizeof...(Args)>::type() );
+	return detail::expand_call( f, params, typename base::gen_sequence<sizeof...(Args)>::type() );
 }
 
 ////////////////////////////////////////

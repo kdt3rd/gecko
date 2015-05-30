@@ -52,7 +52,7 @@ split( const stringT &str, const Delim &delim, Inserter insert, bool skip_empty 
 	{
 		typename stringT::size_type last = str.find_first_not_of( delim, 0 );
 		typename stringT::size_type cur = str.find_first_of( delim, last );
-		
+
 		while ( cur != stringT::npos || last < str.size() )
 		{
 			if ( cur != last )

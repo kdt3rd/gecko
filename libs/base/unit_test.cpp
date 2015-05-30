@@ -4,6 +4,7 @@
 #include "contract.h"
 #include "scope_guard.h"
 #include "reverse.h"
+#include "string_split.h"
 #include <algorithm>
 
 namespace base
@@ -144,6 +145,12 @@ void unit_test::run( std::map<std::string,std::function<void(void)>>::iterator &
 	}
 	catch ( std::exception &e )
 	{
+		std::stringstream tmp;
+		base::print_exception( tmp, e );
+		std::vector<std::string> lines;
+		base::split( tmp.str(), '\n', std::back_inserter( lines ), true );
+		for ( auto &l: lines )
+			message( l );
 		failure( std::string( e.what() ) );
 	}
 
