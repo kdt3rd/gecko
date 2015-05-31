@@ -16,7 +16,16 @@ class process
 public:
 	typedef pid_t id_type;
 
-	process( const std::string &exe, const std::vector<std::string> &args );
+	process( void );
+
+	void set_input( const std::string &in_file );
+	void set_ouput( const std::string &out_file );
+	void set_error( const std::string &err_file );
+	void set_ouput_error( const std::string &out_file );
+
+	void set_pipe( bool in, bool out, bool err );
+
+	void execute( const std::string &exe, const std::vector<std::string> &args );
 
 	base::ostream &std_in( void )
 	{
@@ -60,7 +69,10 @@ public:
 	void wait( void );
 
 private:
-	id_type _id;
+	id_type _id = 0;
+	int _fdin = -1;
+	int _fdout = -1;
+	int _fderr = -1;
 	std::unique_ptr<base::istream> _stdout;
 	std::unique_ptr<base::istream> _stderr;
 	std::unique_ptr<base::ostream> _stdin;

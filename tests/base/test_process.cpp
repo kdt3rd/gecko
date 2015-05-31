@@ -31,16 +31,15 @@ int safemain( int argc, char *argv[] )
 
 	test["echo"] = [&]( void )
 	{
-		base::process proc( "/bin/echo", { "-n", "Hello World" } );
+		base::process proc;
+		proc.set_pipe( false, true, false );
+		proc.execute( "/bin/echo", { "Hello World" } );
 		test.message( "pid {0}", proc.id() );
+
 		std::istream &out = proc.std_out();
-		char c = out.get();
 		std::string msg;
-		while ( out )
-		{
-			msg.push_back( c );
-			c = out.get();
-		}
+		std::getline( out, msg );
+
 		if ( msg == "Hello World" )
 			test.success( "{0}", msg );
 		else
@@ -49,24 +48,39 @@ int safemain( int argc, char *argv[] )
 
 	test["cat"] = [&]( void )
 	{
-		base::process proc( "/usr/bin/cat", {} );
+		base::process proc;
+		proc.set_pipe( true, true, false );
+		proc.execute( "/usr/bin/cat", {} );
 		test.message( "pid {0}", proc.id() );
 		{
 			std::ostream &inp = proc.std_in();
-			inp << "Hello World";
+			inp << "Hello World\n";
 		}
 		proc.close_in();
 
 		std::istream &out = proc.std_out();
-
-		char c = out.get();
 		std::string msg;
-		while ( out )
-		{
-			msg.push_back( c );
-			c = out.get();
-		}
+		std::getline( out, msg );
+
 		if ( msg == "Hello World" )
+			test.success( "{0}", msg );
+		else
+			test.failure( "{0}", msg );
+	};
+
+	test["error"] = [&]( void )
+	{
+		base::process proc;
+		proc.set_pipe( true, true, true );
+		proc.execute( "/usr/bin/cat", { "/tmp/doesnt_exist" } );
+
+		test.message( "pid {0}", proc.id() );
+
+		std::istream &err = proc.std_err();
+		std::string msg;
+		std::getline( err, msg );
+
+		if ( msg.find( "No such file" ) != std::string::npos )
 			test.success( "{0}", msg );
 		else
 			test.failure( "{0}", msg );

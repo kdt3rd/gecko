@@ -3,13 +3,32 @@
 #include "stream.h"
 #include "unix_streambuf.h"
 #include <sys/resource.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 namespace base
 {
 
 namespace detail
 {
+
+int safe_dup( int fsrc )
+{
+	int result = -1;
+	while ( result < 0 )
+	{
+		result = dup( fsrc );
+		if ( result == -1 )
+		{
+			if ( errno != EBUSY || errno != EINTR )
+				throw_errno( "dup( {0} )", fsrc );
+		}
+	}
+
+	return result;
+}
 
 void safe_dup( int fsrc, int fdst )
 {
@@ -50,23 +69,25 @@ public:
 		return _pipe[1];
 	}
 
-	void close_dup_read( int new_read_fd )
-	{
-		safe_dup( read(), new_read_fd );
-		this->close();
-	}
-
-	void close_dup_write( int new_write_fd )
-	{
-		safe_dup( write(), new_write_fd );
-		this->close();
-	}
-
 	void close( void )
 	{
 		::close( _pipe[0] );
 		::close( _pipe[1] );
 		_pipe[0] = _pipe[1] = -1;
+	}
+
+	int steal_read( void )
+	{
+		int result = -1;
+		std::swap( result, _pipe[0] );
+		return result;
+	}
+
+	int steal_write( void )
+	{
+		int result = -1;
+		std::swap( result, _pipe[1] );
+		return result;
 	}
 
 private:
@@ -77,15 +98,110 @@ private:
 
 ////////////////////////////////////////
 
-process::process( const std::string &exe, const std::vector<std::string> &args )
+process::process( void )
+{
+}
+
+////////////////////////////////////////
+
+void process::set_input( const std::string &in_file )
+{
+	_stdin.reset();
+	if ( _fdin >= 0 )
+		::close( _fdin );
+
+	_fdin = ::open( in_file.c_str(), O_RDONLY );
+	if ( _fdin < 0 )
+		throw_errno( "opening process input ({0})", in_file );
+}
+
+////////////////////////////////////////
+
+void process::set_ouput( const std::string &out_file )
+{
+	_stdout.reset();
+	if ( _fdout >= 0 )
+		::close( _fdout );
+
+	_fdout = ::open( out_file.c_str(), O_WRONLY | O_APPEND );
+	if ( _fdout < 0 )
+		throw_errno( "opening process output ({0})", out_file );
+}
+
+////////////////////////////////////////
+
+void process::set_error( const std::string &err_file )
+{
+	_stderr.reset();
+	if ( _fderr >= 0 )
+		::close( _fderr );
+
+	_fderr = ::open( err_file.c_str(), O_RDONLY );
+	if ( _fderr < 0 )
+		throw_errno( "opening process error ({0})", err_file );
+}
+
+////////////////////////////////////////
+
+void process::set_ouput_error( const std::string &out_file )
+{
+	_stdout.reset();
+	_stderr.reset();
+	if ( _fdout >= 0 )
+		::close( _fdout );
+	if ( _fderr >= 0 )
+		::close( _fderr );
+
+	_fdout = ::open( out_file.c_str(), O_WRONLY | O_APPEND );
+	if ( _fdout < 0 )
+		throw_errno( "opening process output/error ({0})", out_file );
+	_fderr = detail::safe_dup( _fdout );
+}
+
+////////////////////////////////////////
+
+void process::set_pipe( bool in, bool out, bool err )
+{
+	if ( in )
+	{
+		if ( _fdin >= 0 )
+			::close( _fdin );
+		detail::pipe sin;
+		_fdin = sin.steal_read();
+		auto bin = std::unique_ptr<base::ostream::streambuf_type>( new base::unix_streambuf( std::ios_base::out | std::ios_base::binary, sin.steal_write(), false, "stdin" ) );
+		_stdin = std::unique_ptr<base::ostream>( new base::ostream( std::move( bin ) ) );
+	}
+
+	if ( out )
+	{
+		if ( _fdout >= 0 )
+			::close( _fdout );
+		detail::pipe sout;
+		_fdout = sout.steal_write();
+		auto bout = std::unique_ptr<base::istream::streambuf_type>( new base::unix_streambuf( std::ios_base::in | std::ios_base::binary, sout.steal_read(), false, "stdout" ) );
+		_stdout = std::unique_ptr<base::istream>( new base::istream( std::move( bout ) ) );
+	}
+
+	if ( err )
+	{
+		if ( _fderr >= 0 )
+			::close( _fderr );
+		detail::pipe serr;
+		_fderr = serr.steal_write();
+		auto berr = std::unique_ptr<base::istream::streambuf_type>( new base::unix_streambuf( std::ios_base::in | std::ios_base::binary, serr.steal_read(), false, "stderr" ) );
+		_stderr = std::unique_ptr<base::istream>( new base::istream( std::move( berr ) ) );
+	}
+}
+
+////////////////////////////////////////
+
+void process::execute( const std::string &exe, const std::vector<std::string> &args )
 {
 	try
 	{
-		detail::pipe sin, sout, serr;
-
 		_id = fork();
 		if ( _id == -1 )
-			throw_errno( "fork" );
+			throw_errno( "process fork" );
 
 		if ( _id == 0 )
 		{
@@ -93,9 +209,12 @@ process::process( const std::string &exe, const std::vector<std::string> &args )
 			try
 			{
 				// Close/dup the appriopriate I/O.
-				sin.close_dup_read( STDIN_FILENO );
-				sout.close_dup_write( STDOUT_FILENO );
-				serr.close_dup_write( STDERR_FILENO );
+				if ( _fdin >= 0 )
+					detail::safe_dup( _fdin, STDIN_FILENO );
+				if ( _fdout >= 0 )
+					detail::safe_dup( _fdout, STDOUT_FILENO );
+				if ( _fderr >= 0 )
+					detail::safe_dup( _fderr, STDERR_FILENO );
 
 				// Close all other files.
 				struct rlimit lim;
@@ -124,18 +243,6 @@ process::process( const std::string &exe, const std::vector<std::string> &args )
 				base::print_exception( std::cerr, e );
 			}
 			exit( -1 );
-		}
-		else
-		{
-			// The normal process continues...
-			auto bin = std::unique_ptr<base::ostream::streambuf_type>( new base::unix_streambuf( std::ios_base::out | std::ios_base::binary, sin.write(), true, "stdin" ) );
-			_stdin = std::unique_ptr<base::ostream>( new base::ostream( std::move( bin ) ) );
-
-			auto bout = std::unique_ptr<base::istream::streambuf_type>( new base::unix_streambuf( std::ios_base::in | std::ios_base::binary, sout.read(), true, "stdout" ) );
-			_stdout = std::unique_ptr<base::istream>( new base::istream( std::move( bout ) ) );
-
-			auto berr = std::unique_ptr<base::istream::streambuf_type>( new base::unix_streambuf( std::ios_base::in | std::ios_base::binary, serr.read(), true, "stderr" ) );
-			_stderr = std::unique_ptr<base::istream>( new base::istream( std::move( berr ) ) );
 		}
 	}
 	catch ( ... )
