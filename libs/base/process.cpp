@@ -117,13 +117,13 @@ void process::set_input( const std::string &in_file )
 
 ////////////////////////////////////////
 
-void process::set_ouput( const std::string &out_file )
+void process::set_output( const std::string &out_file )
 {
 	_stdout.reset();
 	if ( _fdout >= 0 )
 		::close( _fdout );
 
-	_fdout = ::open( out_file.c_str(), O_WRONLY | O_APPEND );
+	_fdout = ::open( out_file.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0644 );
 	if ( _fdout < 0 )
 		throw_errno( "opening process output ({0})", out_file );
 }
@@ -136,7 +136,7 @@ void process::set_error( const std::string &err_file )
 	if ( _fderr >= 0 )
 		::close( _fderr );
 
-	_fderr = ::open( err_file.c_str(), O_RDONLY );
+	_fderr = ::open( err_file.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0644 );
 	if ( _fderr < 0 )
 		throw_errno( "opening process error ({0})", err_file );
 }
@@ -152,7 +152,7 @@ void process::set_ouput_error( const std::string &out_file )
 	if ( _fderr >= 0 )
 		::close( _fderr );
 
-	_fdout = ::open( out_file.c_str(), O_WRONLY | O_APPEND );
+	_fdout = ::open( out_file.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0644 );
 	if ( _fdout < 0 )
 		throw_errno( "opening process output/error ({0})", out_file );
 	_fderr = detail::safe_dup( _fdout );
