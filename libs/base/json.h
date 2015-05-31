@@ -105,6 +105,12 @@ public:
 		set<json_bool>( x );
 	}
 
+	/// @brief JSON null constructor
+	json( json_null x )
+	{
+		set<json_null>( x );
+	}
+
 	/// @brief Parse a json value from the given string.
 	void parse( const std::string &str );
 
