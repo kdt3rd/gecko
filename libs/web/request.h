@@ -4,6 +4,7 @@
 #include <base/uri.h>
 #include <net/tcp_socket.h>
 #include <map>
+#include "web_base.h"
 
 namespace web
 {
@@ -11,7 +12,7 @@ namespace web
 ////////////////////////////////////////
 
 /// @brief HTTP request
-class request
+class request : public web_base
 {
 public:
 	/// @brief Server constructor
@@ -35,25 +36,6 @@ public:
 		return _path;
 	}
 
-	/// @brief HTTP version
-	/// This should be "1.1"
-	const std::string &version( void ) const
-	{
-		return _version;
-	}
-
-	/// @brief Add HTTP header name/value pair.
-	void set_header( std::string n, std::string v )
-	{
-		_header[std::move( n )] = std::move( v );
-	}
-
-	/// @brief Get an HTTP header value
-	std::string operator[]( const std::string &n )
-	{
-		return _header.at( n );
-	}
-
 	/// @brief Get the full map of HTTP header.
 	const std::map<std::string,std::string> &header( void ) const
 	{
@@ -66,9 +48,6 @@ public:
 private:
 	std::string _method;
 	base::uri _path;
-	std::string _version;
-	std::map<std::string,std::string> _header;
-	std::stringstream _content;
 };
 
 ////////////////////////////////////////

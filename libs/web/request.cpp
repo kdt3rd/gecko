@@ -2,26 +2,6 @@
 #include "request.h"
 #include <iostream>
 
-namespace
-{
-	std::string read_line( net::tcp_socket &socket )
-	{
-		char c = '\0';
-
-		std::string result;
-		socket.read( &c, 1 );
-		while ( c != '\r' )
-		{
-			result.push_back( c );
-			socket.read( &c, 1 );
-		}
-		socket.read( &c, 1 );
-		if ( c != '\n' )
-			throw_runtime( "invalid HTTP line" );
-		return std::move( result );
-	}
-}
-
 namespace web
 {
 
@@ -50,12 +30,14 @@ request::request( net::tcp_socket &socket )
 	auto host = _header.find( "Host" );
 	if ( host != _header.end() )
 		_path = base::uri( "http", host->second, tmp_path );
+
+	read_content( socket );
 }
 
 ////////////////////////////////////////
 
 request::request( std::string method, const base::uri &path, std::string version )
-	: _method( std::move( method ) ), _path( path ), _version( std::move( version ) )
+	: web_base( std::move( version ) ), _method( std::move( method ) ), _path( path )
 {
 }
 
@@ -66,8 +48,12 @@ void request::send( net::tcp_socket &server )
 	std::string tmp = base::format("{0} {1} HTTP/{2}\r\n", _method, _path.full_path(), _version );
 	for ( auto &h: _header )
 		tmp += base::format( "{0}: {1}\r\n", h.first, h.second );
+	if ( !_content.empty() )
+		tmp += base::format( "Content-Length: {0}\r\n", _content.size() );
 	tmp += "\r\n";
 	server.write( tmp.c_str(), tmp.size() );
+	if ( !_content.empty() )
+		server.write( _content.c_str(), _content.size() );
 }
 
 ////////////////////////////////////////

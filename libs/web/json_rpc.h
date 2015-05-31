@@ -20,10 +20,31 @@ inline void from_json( const base::json &j, int64_t &v )
 	v = j.get<base::json_number>();
 }
 
+inline void from_json( const base::json &j, uint64_t &v )
+{
+	v = static_cast<uint64_t>( j.get<base::json_number>() );
+}
+
 inline void from_json( const base::json &j, bool &v )
 {
 	v = j.get<base::json_bool>();
 }
+
+template<typename T>
+void from_json( const base::json &j, std::vector<T> &v )
+{
+	T def;
+	v.resize( j.size(), def );
+	for ( size_t i = 0; i < j.size(); ++i )
+		from_json( j[i], v[i] );
+}
+
+template<typename T>
+void from_json( const base::json &j, T &v )
+{
+	v.load_json( j );
+}
+
 
 ////////////////////////////////////////
 
@@ -42,9 +63,32 @@ inline void to_json( int64_t v, base::json &j )
 	j.set<base::json_number>( v );
 }
 
+inline void to_json( uint64_t v, base::json &j )
+{
+	j.set<base::json_number>( v );
+}
+
 inline void to_json( bool v, base::json &j )
 {
 	j.set<base::json_bool>( v );
+}
+
+inline void to_json( const base::json &v, base::json &j )
+{
+	j = v;
+}
+
+template<typename T>
+void to_json( const std::vector<T> &v, base::json &j )
+{
+	for ( auto &x: v )
+		to_json( x, j.push_back() );
+}
+
+template<typename T>
+void to_json( const T &v, base::json &j )
+{
+	v.save_json( j );
 }
 
 ////////////////////////////////////////
@@ -182,7 +226,7 @@ public:
 	base::json local_call( const std::string &rpc );
 	base::json local_call( const base::json &rpc );
 
-	template<typename T, typename ...Args>
+	template<typename ...Args>
 	base::json remote_call( const std::string &method, Args ...args )
 	{
 		base::json result;
@@ -193,7 +237,6 @@ public:
 		base::json params;
 		push_helper( params, args... );
 		result["params"] = std::move( params );
-		std::cout << result << std::endl;
 		return std::move( result );
 	}
 
@@ -204,6 +247,13 @@ private:
 		using web::to_json;
 		to_json( a, params.push_back() );
 		push_helper( params, args... );
+	}
+
+	template<typename Arg>
+	void push_helper( base::json &params, Arg a )
+	{
+		using web::to_json;
+		to_json( a, params.push_back() );
 	}
 
 	base::json call( const char *name, const base::json &param );

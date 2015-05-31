@@ -1,6 +1,7 @@
 
 lib = Library( "web",
 	"status_code.cpp",
+	"web_base.cpp",
 	"request.cpp",
 	"response.cpp",
 	"client.cpp",
