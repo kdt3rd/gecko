@@ -2,16 +2,22 @@
 #include "process.h"
 #include "stream.h"
 #include "unix_streambuf.h"
+#include "scope_guard.h"
+#include <mutex>
+#include <condition_variable>
+#include <map>
+#include <thread>
 #include <sys/resource.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
 
 namespace base
 {
 
-namespace detail
+namespace
 {
 
 int safe_dup( int fsrc )
@@ -94,6 +100,10 @@ private:
 	int _pipe[2];
 };
 
+std::mutex the_mutex;
+std::condition_variable the_condition;
+std::map<pid_t,process*> the_processes;
+
 }
 
 ////////////////////////////////////////
@@ -155,7 +165,7 @@ void process::set_ouput_error( const std::string &out_file )
 	_fdout = ::open( out_file.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0644 );
 	if ( _fdout < 0 )
 		throw_errno( "opening process output/error ({0})", out_file );
-	_fderr = detail::safe_dup( _fdout );
+	_fderr = safe_dup( _fdout );
 }
 
 ////////////////////////////////////////
@@ -166,7 +176,7 @@ void process::set_pipe( bool in, bool out, bool err )
 	{
 		if ( _fdin >= 0 )
 			::close( _fdin );
-		detail::pipe sin;
+		pipe sin;
 		_fdin = sin.steal_read();
 		auto bin = std::unique_ptr<base::ostream::streambuf_type>( new base::unix_streambuf( std::ios_base::out | std::ios_base::binary, sin.steal_write(), false, "stdin" ) );
 		_stdin = std::unique_ptr<base::ostream>( new base::ostream( std::move( bin ) ) );
@@ -176,7 +186,7 @@ void process::set_pipe( bool in, bool out, bool err )
 	{
 		if ( _fdout >= 0 )
 			::close( _fdout );
-		detail::pipe sout;
+		pipe sout;
 		_fdout = sout.steal_write();
 		auto bout = std::unique_ptr<base::istream::streambuf_type>( new base::unix_streambuf( std::ios_base::in | std::ios_base::binary, sout.steal_read(), false, "stdout" ) );
 		_stdout = std::unique_ptr<base::istream>( new base::istream( std::move( bout ) ) );
@@ -186,7 +196,7 @@ void process::set_pipe( bool in, bool out, bool err )
 	{
 		if ( _fderr >= 0 )
 			::close( _fderr );
-		detail::pipe serr;
+		pipe serr;
 		_fderr = serr.steal_write();
 		auto berr = std::unique_ptr<base::istream::streambuf_type>( new base::unix_streambuf( std::ios_base::in | std::ios_base::binary, serr.steal_read(), false, "stderr" ) );
 		_stderr = std::unique_ptr<base::istream>( new base::istream( std::move( berr ) ) );
@@ -210,11 +220,11 @@ void process::execute( const std::string &exe, const std::vector<std::string> &a
 			{
 				// Close/dup the appriopriate I/O.
 				if ( _fdin >= 0 )
-					detail::safe_dup( _fdin, STDIN_FILENO );
+					safe_dup( _fdin, STDIN_FILENO );
 				if ( _fdout >= 0 )
-					detail::safe_dup( _fdout, STDOUT_FILENO );
+					safe_dup( _fdout, STDOUT_FILENO );
 				if ( _fderr >= 0 )
-					detail::safe_dup( _fderr, STDERR_FILENO );
+					safe_dup( _fderr, STDERR_FILENO );
 
 				// Close all other files.
 				struct rlimit lim;
@@ -244,6 +254,16 @@ void process::execute( const std::string &exe, const std::vector<std::string> &a
 			}
 			exit( -1 );
 		}
+		else
+		{
+			std::unique_lock<std::mutex> lock( the_mutex );
+			if ( the_processes.empty() )
+			{
+				std::thread collector( []( void ) { collect_zombies(); } );
+				collector.detach();
+			}
+			the_processes[_id] = this;
+		}
 	}
 	catch ( ... )
 	{
@@ -255,6 +275,73 @@ void process::execute( const std::string &exe, const std::vector<std::string> &a
 
 void process::kill( bool force )
 {
+	throw_not_yet();
+}
+
+////////////////////////////////////////
+
+void process::wait( void )
+{
+	std::unique_lock<std::mutex> lock( the_mutex );
+	the_condition.wait( lock, [=]( void ){ return !this->signaled() && !this->exited(); } );
+}
+
+////////////////////////////////////////
+
+void process::update_status( int status )
+{
+	_exited = WIFEXITED( status );
+	if ( _exited )
+		_exit_status = WEXITSTATUS( status );
+	else
+		_exit_status = 0;
+
+	_signaled = WIFSIGNALED( status );
+	if ( _signaled )
+		_exit_signal = WTERMSIG( status );
+	else
+		_exit_signal = 0;
+
+	_id = 0;
+}
+
+////////////////////////////////////////
+
+void process::collect_zombies( void )
+{
+	std::cout << "Zombie collecting started" << std::endl;
+	on_scope_exit { std::cout << "Zombie collecting done" << std::endl; };
+	while ( true )
+	{
+		int status = 0;
+		int ret = ::wait( &status );
+		if ( ret == -1 )
+		{
+			if ( errno == EINTR )
+				continue;
+			if ( errno == ECHILD )
+			{
+				std::unique_lock<std::mutex> lock( the_mutex );
+				if ( the_processes.empty() )
+					return;
+				else
+					break;
+			}
+			throw_errno( "waiting on child processes" );
+		}
+		else
+		{
+			std::cout << "Process " << ret << " done" << std::endl;
+			std::unique_lock<std::mutex> lock( the_mutex );
+			auto i = the_processes.find( pid_t(ret) );
+			if ( i != the_processes.end() )
+			{
+				i->second->update_status( status );
+				the_processes.erase( i );
+				the_condition.notify_all();
+			}
+		}
+	}
 }
 
 ////////////////////////////////////////

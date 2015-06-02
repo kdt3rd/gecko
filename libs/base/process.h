@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <atomic>
 #include <unistd.h>
 #include "stream.h"
 
@@ -65,10 +66,34 @@ public:
 		return _id;
 	}
 
+	bool exited( void )
+	{
+		return _exited;
+	}
+
+	bool signaled( void )
+	{
+		return _signaled;
+	}
+
+	uint8_t exit_status( void )
+	{
+		return _exit_status;
+	}
+
+	int exit_signal( void )
+	{
+		return _exit_signal;
+	}
+
 	void kill( bool force = false );
+
 	void wait( void );
 
 private:
+	static void collect_zombies( void );
+	void update_status( int status );
+
 	id_type _id = 0;
 	int _fdin = -1;
 	int _fdout = -1;
@@ -76,6 +101,12 @@ private:
 	std::unique_ptr<base::istream> _stdout;
 	std::unique_ptr<base::istream> _stderr;
 	std::unique_ptr<base::ostream> _stdin;
+
+	std::atomic<bool> _exited{ false };
+	std::atomic<bool> _signaled{ false };
+
+	std::atomic<uint8_t> _exit_status{ 0 };
+	std::atomic<int> _exit_signal{ 0 };
 };
 
 ////////////////////////////////////////
