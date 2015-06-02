@@ -111,6 +111,11 @@ public:
 		set<json_null>( x );
 	}
 
+	json( const json &x )
+		: variant( x )
+	{
+	}
+
 	/// @brief Parse a json value from the given string.
 	void parse( const std::string &str );
 
