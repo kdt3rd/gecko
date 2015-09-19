@@ -228,5 +228,5 @@ inline stringT to_upper( const stringT &str, const std::locale &loc = std::local
 
 ////////////////////////////////////////
 
-} // namespace base
+}
 
