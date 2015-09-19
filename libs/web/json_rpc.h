@@ -30,6 +30,11 @@ inline void from_json( const base::json &j, bool &v )
 	v = j.get<base::json_bool>();
 }
 
+inline void from_json( const base::json &j, base::json &v )
+{
+	v = j;
+}
+
 template<typename T>
 void from_json( const base::json &j, std::vector<T> &v )
 {
@@ -227,7 +232,7 @@ public:
 	base::json local_call( const base::json &rpc );
 
 	template<typename ...Args>
-	base::json remote_call( const std::string &method, Args ...args )
+	base::json create_call( const std::string &method, Args ...args )
 	{
 		base::json result;
 		result["jsonrpc"] = "2.0";
@@ -237,7 +242,24 @@ public:
 		base::json params;
 		push_helper( params, args... );
 		result["params"] = std::move( params );
+
 		return std::move( result );
+	}
+
+	template<typename Result>
+	Result call_result( const base::json &r )
+	{
+		throw_error( r );
+
+		Result result;
+		from_json( r["result"], result );
+		return std::move( result );
+	}
+
+	template<typename Result>
+	Result call_result( const std::string &s )
+	{
+		return call_result<Result>( base::json::create( s ) );
 	}
 
 private:
@@ -256,7 +278,13 @@ private:
 		to_json( a, params.push_back() );
 	}
 
+	void push_helper( base::json &params )
+	{
+	}
+
 	base::json call( const char *name, const base::json &param );
+	base::json error( int code, base::json &&data = base::json() );
+	void throw_error( const base::json &r );
 
 	std::map<std::string,std::shared_ptr<detail::base_function>> _function;
 };

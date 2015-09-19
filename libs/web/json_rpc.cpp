@@ -26,7 +26,15 @@ json_rpc::json_rpc( void )
 base::json json_rpc::local_call( const std::string &rpc )
 {
 	base::json tmp;
-	tmp.parse( rpc );
+	try
+	{
+		tmp.parse( rpc );
+	}
+	catch ( std::exception &e )
+	{
+		return error( -32700, base::json( e.what() ) );
+	}
+
 	return local_call( tmp );
 }
 
@@ -34,23 +42,48 @@ base::json json_rpc::local_call( const std::string &rpc )
 
 base::json json_rpc::local_call( const base::json &rpc )
 {
-	precondition( rpc["jsonrpc"].get<std::string>() == "2.0", "server only allows json RPC 2.0" );
-
-	std::string method = rpc["method"].get<std::string>();
-	if ( method.empty() )
-		throw_runtime( "json RPC requires non-empty method name" );
-
-	base::json result;
-	result["jsonrpc"] = "2.0";
-	result["id"] = rpc.at( "id" );
-	if ( rpc.has( "params" ) )
-		result["result"] = call( method.c_str(), rpc["params"] );
-	else
+	try
 	{
-		base::json params;
-		result["result"] = call( method.c_str(), params );
+		if ( !rpc.has( "jsonrpc" ) )
+			return error( -32600, "jsonrpc version missing" );
+		if( rpc["jsonrpc"].get<std::string>() != "2.0" )
+			return error( -32600, base::json( std::string( base::format( "expect jsonrpc version 2.0, got {0}", rpc["jsonrpc"].get<std::string>() ) ) ) );
 	}
-	return std::move( result );
+	catch ( std::exception &e )
+	{
+		return error( -32600, e.what() );
+	}
+
+	std::string method;
+	try
+	{
+		if ( !rpc.has( "method" ) )
+			return error( -32601, "no method specified" );
+		method = rpc["method"].get<std::string>();
+		if ( method.empty() )
+			return error( -32601, "empty method name" );
+	}
+	catch ( std::exception &e )
+	{
+		return error( -32601, e.what() );
+	}
+
+	try
+	{
+		base::json result;
+		result["jsonrpc"] = "2.0";
+		if ( rpc.has( "id" ) )
+			result["id"] = rpc.at( "id" );
+		if ( rpc.has( "params" ) )
+			result.append( call( method.c_str(), rpc["params"] ) );
+		else
+			result.append( call( method.c_str(), base::json() ) );
+		return std::move( result );
+	}
+	catch ( std::exception &e )
+	{
+		return error( -32603, e.what() );
+	}
 }
 
 ////////////////////////////////////////
@@ -60,13 +93,88 @@ base::json json_rpc::call( const char *name, const base::json &param )
 	try
 	{
 		base::json result;
-		_function.at( name )->call( result, param );
+		_function.at( name )->call( result["result"], param );
 		return std::move( result );
 	}
-	catch ( ... )
+	catch ( std::exception &e )
 	{
-		throw_add( "json RPC call {0}( {1} ) error", name, param );
+		return error( -32603, base::json( e.what() ) );
 	}
+}
+
+////////////////////////////////////////
+
+base::json json_rpc::error( int code, base::json &&data )
+{
+	base::json result;
+	base::json &error = result["error"];
+	error["code"] = code;
+	switch ( code )
+	{
+		case -32700:
+			error["message"] = "Parse error";
+			break;
+
+		case -32600:
+			error["message"] = "Invalid request";
+			break;
+
+		case -32601:
+			error["message"] = "Method not found";
+			break;
+
+		case -32602:
+			error["message"] = "Invalid params";
+			break;
+
+		case -32603:
+			error["message"] = "Internal error";
+			break;
+
+		default:
+			error["message"] = "Server error";
+			break;
+	}
+	if ( data.valid() )
+		error["data"] = std::move( data );
+
+	return std::move( result );
+}
+
+////////////////////////////////////////
+
+void json_rpc::throw_error( const base::json &r )
+{
+	if ( r.has( "error" ) )
+	{
+		auto &err = r["error"];
+		if ( err.has( "data" ) )
+		{
+			auto &data = err["data"];
+			if ( data.is<std::string>() )
+				throw_runtime( data.get<std::string>() );
+			else
+			{
+				std::string tmp;
+				tmp << data;
+				throw_runtime( tmp );
+			}
+		}
+		else if ( err.has( "message" ) )
+		{
+			auto &data = err["message"];
+			if ( data.is<std::string>() )
+				throw_runtime( data.get<std::string>() );
+			else
+			{
+				std::string tmp;
+				tmp << data;
+				throw_runtime( tmp );
+			}
+		}
+	}
+	else if ( !r.has( "result" ) )
+		throw_runtime( "json rpc expected error or result" );
 }
 
 ////////////////////////////////////////

@@ -35,11 +35,11 @@ void parser::parse_text( std::istream &in )
 		int c = in.get();
 		if ( std::char_traits<char>::not_eof( c ) )
 		{
-			if ( c == '{' )
+			if ( c == '[' )
 			{
 				switch ( in.peek() )
 				{
-					case '{':
+					case '[':
 						_func.push_text();
 						parse_expr( in );
 						break;
@@ -75,14 +75,14 @@ void parser::parse_text( std::istream &in )
 
 void parser::parse_expr( std::istream &in )
 {
-	precondition( in.get() == '{', "missing '{' to start expression" );
+	precondition( in.get() == '[', "missing '[' to start expression" );
 	int count = 0;
 	while ( !in.eof() && in )
 	{
 		int c = in.get();
 		if ( std::char_traits<char>::not_eof( c ) )
 		{
-			if ( c == '}' )
+			if ( c == ']' )
 			{
 				if ( count == 0 )
 				{
@@ -92,7 +92,7 @@ void parser::parse_expr( std::istream &in )
 				_func.add( c );
 				--count;
 			}
-			else if ( c == '{' )
+			else if ( c == '[' )
 			{
 				_func.add( c );
 				++count;
@@ -106,8 +106,8 @@ void parser::parse_expr( std::istream &in )
 				_func.add( c );
 		}
 	}
-	if ( in.get() != '}' )
-		throw_runtime( "missing '}' in expression" );
+	if ( in.get() != ']' )
+		throw_runtime( "missing ']' in expression" );
 }
 
 ////////////////////////////////////////
@@ -151,7 +151,7 @@ void parser::parse_code( std::istream &in )
 		int c = in.get();
 		if ( std::char_traits<char>::not_eof( c ) )
 		{
-			if ( c == '}' )
+			if ( c == ']' )
 			{
 				if ( count == 0 )
 				{
@@ -161,7 +161,7 @@ void parser::parse_code( std::istream &in )
 				_func.add( c );
 				--count;
 			}
-			else if ( c == '{' )
+			else if ( c == '[' )
 			{
 				_func.add( c );
 				++count;
@@ -184,7 +184,7 @@ void parser::parse_code( std::istream &in )
 	else if ( word == "endfor" || word == "endif" )
 	{
 		_func.unindent();
-		_func.add( '}' );
+		_func.add( ']' );
 		_func.push_code();
 	}
 }
@@ -211,7 +211,7 @@ void parser::parse_directive( std::istream &in )
 		int c = in.get();
 		if ( std::char_traits<char>::not_eof( c ) )
 		{
-			if ( c == '}' )
+			if ( c == ']' )
 			{
 				if ( count == 0 )
 				{
@@ -220,7 +220,7 @@ void parser::parse_directive( std::istream &in )
 				rest.push_back( c );
 				--count;
 			}
-			else if ( c == '{' )
+			else if ( c == '[' )
 			{
 				rest.push_back( c );
 				++count;
@@ -278,7 +278,7 @@ void parser::parse_comment( std::istream &in )
 		int c = in.get();
 		if ( std::char_traits<char>::not_eof( c ) )
 		{
-			if ( c == '}' )
+			if ( c == ']' )
 				break;
 			else
 				_func.add( c );

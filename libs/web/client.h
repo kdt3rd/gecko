@@ -3,6 +3,7 @@
 
 #include <string>
 #include <base/uri.h>
+#include <base/json.h>
 
 #include "response.h"
 
@@ -21,6 +22,13 @@ public:
 	/// @brief Get an HTTP resource.
 	response get( const base::uri &host, double timeout = 0.0 );
 	response post( const base::uri &host, std::string &&v, double timeout = 0.0 );
+	response post( const base::uri &host, const base::json &v, double timeout = 0.0 )
+	{
+		std::string tmp;
+		tmp <<  v;
+		return post( host, std::move( tmp ), timeout );
+	}
+
 
 private:
 	std::string _agent;

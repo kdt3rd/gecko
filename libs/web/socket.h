@@ -3,6 +3,7 @@
 
 #include "request.h"
 #include <base/signal.h>
+#include <base/json.h>
 #include <random>
 
 namespace web
@@ -27,10 +28,41 @@ public:
 	base::signal<void(const std::string &,bool)> when_message;
 
 	/// @brief Send a message.
-	void send( const std::string &msg );
+	void send( const char *msg, size_t len );
+
+	/// @brief Send a message.
+	void send( const char *msg )
+	{
+		send( msg, std::strlen( msg ) );
+	}
+
+	/// @brief Send a message.
+	void send( const std::string &msg )
+	{
+		send( msg.c_str(), msg.size() );
+	}
+
+	/// @brief Send a message.
+	void send( const base::json &msg );
 
 	/// @brief Run the socket.
 	void run( void );
+
+	/// @brief Wait for a message.
+	/// @param message String to fill in with message.
+	/// @param binary Set to true of the message is binary, false if text.
+	/// @returns false if the connection closed.
+	bool wait( std::string &message, bool &binary );
+
+	/// @brief Wait for a message.
+	/// @param message String to fill in with message.
+	/// @returns false if the connection closed.
+	bool wait( std::string &message )
+	{
+		bool bin;
+		return wait( message, bin );
+	}
+
 
 	/// @brief Close the socket.
 	void close( void );

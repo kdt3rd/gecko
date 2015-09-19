@@ -74,8 +74,23 @@ socket::~socket( void )
 void socket::run( void )
 {
 	std::string message;
-	bool bin = false;
 	bool done = false;
+	bool bin = false;
+
+	while ( wait( message, bin ) )
+	{
+		when_message( message, bin );
+		message.clear();
+	}
+}
+
+////////////////////////////////////////
+
+bool socket::wait( std::string &message, bool &bin )
+{
+	bool done = false;
+	bool gotmsg = false;
+	bin = false;
 
 	while ( !done )
 	{
@@ -153,35 +168,38 @@ void socket::run( void )
 
 		if ( eom && !done )
 		{
-			when_message( message, bin );
-			message.clear();
+			done = true;
+			gotmsg = true;
 		}
 	}
+
+	return gotmsg;
 }
 
 ////////////////////////////////////////
 
-void socket::send( const std::string &msg )
+void socket::send( const char *msg, size_t len )
 {
 	uint8_t bits;
 	bits = 0x80 | 0x1;
 	_socket.write( &bits, 1 );
 
-	if( msg.size() < 126 )
+	if( len < 126 )
 	{
-		bits = uint8_t( msg.size() );
+		bits = uint8_t( len );
 		if ( !_masked )
 			bits |= 0x80;
 		_socket.write( &bits, 1 );
 	}
-	else if ( msg.size() < 65536 )
+	else if ( len < 65536 )
 	{
 		bits = 126;
 		if ( !_masked )
 			bits |= 0x80;
 		_socket.write( &bits, 1 );
-		uint16_t len = base::byteswap( uint16_t( msg.size() ) );
-		_socket.write( &len, sizeof(len) );
+		/// @todo Deal with endianess here.
+		uint16_t l = base::byteswap( uint16_t( len ) );
+		_socket.write( &l, sizeof(l) );
 	}
 	else
 	{
@@ -189,8 +207,8 @@ void socket::send( const std::string &msg )
 		if ( !_masked )
 			bits |= 0x80;
 		_socket.write( &bits, 1 );
-		uint64_t len = base::byteswap( uint64_t( msg.size() ) );
-		_socket.write( &len, sizeof(len) );
+		uint64_t l = base::byteswap( uint64_t( len ) );
+		_socket.write( &l, sizeof(l) );
 	}
 
 	if ( !_masked )
@@ -201,12 +219,22 @@ void socket::send( const std::string &msg )
 		_socket.write( key, sizeof( key ) );
 
 		std::string tmp;
-		for ( size_t i = 0; i < msg.size(); ++i )
+		tmp.reserve( len );
+		for ( size_t i = 0; i < len; ++i )
 			tmp.push_back( msg[i] ^ key[i%4] );
 		_socket.write( tmp.c_str(), tmp.size() );
 	}
 	else
-		_socket.write( msg.c_str(), msg.size() );
+		_socket.write( msg, len );
+}
+
+////////////////////////////////////////
+
+void socket::send( const base::json &msg )
+{
+	std::string tmp;
+	tmp << msg;
+	send( tmp );
 }
 
 ////////////////////////////////////////

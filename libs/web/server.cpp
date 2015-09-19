@@ -79,7 +79,7 @@ void server::not_found( request &req, net::tcp_socket &client )
 
 void server::handle_client( net::tcp_socket &client )
 {
-	// TODO support keep-alive connection
+	// TODO support keep-alive connection properly
 	while ( true )
 	{
 		request req( client );
