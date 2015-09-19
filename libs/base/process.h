@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <atomic>
+#include <functional>
 #include <unistd.h>
 #include "stream.h"
 
@@ -15,9 +16,10 @@ namespace base
 class process
 {
 public:
-	typedef pid_t id_type;
+	typedef pid_t id_t;
 
 	process( void );
+	~process( void );
 
 	void set_input( const std::string &in_file );
 	void set_output( const std::string &out_file );
@@ -27,6 +29,8 @@ public:
 	void set_pipe( bool in, bool out, bool err );
 
 	void execute( const std::string &exe, const std::vector<std::string> &args );
+
+	void set_callback( const std::function<void(void)> &cb );
 
 	base::ostream &std_in( void )
 	{
@@ -61,7 +65,7 @@ public:
 		_stderr.reset();
 	}
 
-	id_type id( void ) const
+	id_t id( void ) const
 	{
 		return _id;
 	}
@@ -86,7 +90,7 @@ public:
 		return _exit_signal;
 	}
 
-	void kill( bool force = false );
+	void terminate( bool force = false );
 
 	void wait( void );
 
@@ -94,7 +98,7 @@ private:
 	static void collect_zombies( void );
 	void update_status( int status );
 
-	id_type _id = 0;
+	id_t _id = 0;
 	int _fdin = -1;
 	int _fdout = -1;
 	int _fderr = -1;
@@ -107,6 +111,8 @@ private:
 
 	std::atomic<uint8_t> _exit_status{ 0 };
 	std::atomic<int> _exit_signal{ 0 };
+
+	std::function<void(void)> _callback;
 };
 
 ////////////////////////////////////////

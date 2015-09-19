@@ -102,7 +102,7 @@ private:
 
 std::mutex the_mutex;
 std::condition_variable the_condition;
-std::map<pid_t,process*> the_processes;
+std::map<process::id_t,process*> the_processes;
 
 }
 
@@ -110,6 +110,27 @@ std::map<pid_t,process*> the_processes;
 
 process::process( void )
 {
+}
+
+////////////////////////////////////////
+
+process::~process( void )
+{
+	if ( _id != 0 )
+	{
+		auto tmp = _id;
+		try
+		{
+			terminate( true );
+		}
+		catch ( ... )
+		{
+			// Silently try to kill the process
+		}
+
+		std::unique_lock<std::mutex> lock( the_mutex );
+		the_processes.erase( tmp );
+	}
 }
 
 ////////////////////////////////////////
@@ -273,9 +294,33 @@ void process::execute( const std::string &exe, const std::vector<std::string> &a
 
 ////////////////////////////////////////
 
-void process::kill( bool force )
+void process::set_callback( const std::function<void(void)> &cb )
 {
-	throw_not_yet();
+	std::unique_lock<std::mutex> lock( the_mutex );
+	_callback = cb;
+	if ( _exited || _signaled )
+	{
+		try
+		{
+			_callback();
+		}
+		catch ( ... )
+		{
+		}
+	}
+}
+
+////////////////////////////////////////
+
+void process::terminate( bool force )
+{
+	if ( _id > 0 )
+	{
+		if ( force )
+			::kill( _id, SIGKILL );
+		else
+			::kill( _id, SIGTERM );
+	}
 }
 
 ////////////////////////////////////////
@@ -303,14 +348,24 @@ void process::update_status( int status )
 		_exit_signal = 0;
 
 	_id = 0;
+
+	if ( _callback )
+	{
+		std::cout << "Callback" << std::endl;
+		try
+		{
+			_callback();
+		}
+		catch ( ... )
+		{
+		}
+	}
 }
 
 ////////////////////////////////////////
 
 void process::collect_zombies( void )
 {
-	std::cout << "Zombie collecting started" << std::endl;
-	on_scope_exit { std::cout << "Zombie collecting done" << std::endl; };
 	while ( true )
 	{
 		int status = 0;
@@ -331,7 +386,6 @@ void process::collect_zombies( void )
 		}
 		else
 		{
-			std::cout << "Process " << ret << " done" << std::endl;
 			std::unique_lock<std::mutex> lock( the_mutex );
 			auto i = the_processes.find( pid_t(ret) );
 			if ( i != the_processes.end() )
