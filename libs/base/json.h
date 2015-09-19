@@ -194,6 +194,15 @@ public:
 	/// Otherwise, this value must be an array.
 	json &push_back( void );
 
+	void append( json &&that );
+
+	static base::json create( const std::string &s )
+	{
+		base::json result;
+		result.parse( s );
+		return std::move( result );
+	}
+
 private:
 	void parse_value( std::istream_iterator<char> &it, std::istream_iterator<char> &end, int &line );
 	void parse_array( std::istream_iterator<char> &it, std::istream_iterator<char> &end, int &line );

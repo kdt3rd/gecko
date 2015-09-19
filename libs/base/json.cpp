@@ -21,11 +21,16 @@ void json::parse( const std::string &str )
 
 void json::parse( std::istream &in )
 {
+	auto flags = in.flags();
+	in.unsetf( std::ios_base::skipws );
+
 	std::istream_iterator<char> it( in );
 	std::istream_iterator<char> end;
 
 	int line = 1;
 	parse_value( it, end, line );
+
+	in.flags( flags );
 }
 
 ////////////////////////////////////////
@@ -153,6 +158,15 @@ json &json::push_back( void )
 	auto &tmp = get<json_array>();
 	tmp.push_back( json_null() );
 	return tmp.back();
+}
+
+////////////////////////////////////////
+
+void json::append( json &&that )
+{
+	precondition( is<json_object>(), "not a json object" );
+	for ( auto i: that.get<json_object>() )
+		(*this)[i.first] = std::move( i.second );
 }
 
 ////////////////////////////////////////
