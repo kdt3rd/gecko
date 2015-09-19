@@ -1,5 +1,6 @@
 
 #include "thread_pool.h"
+#include "contract.h"
 
 namespace base
 {
@@ -28,8 +29,31 @@ thread_pool::~thread_pool( void )
 
 ////////////////////////////////////////
 
+void thread_pool::queue_delayed( const std::function<void(void)> &f, double seconds )
+{
+	using namespace std::chrono;
+
+	precondition( f, "invalid function to queue" );
+	if ( seconds <= 0.0 )
+		queue( f );
+
+	duration<double> wait_time( seconds );
+
+	auto queue_time = steady_clock::now() + duration_cast<steady_clock::duration>( wait_time );
+
+	std::unique_lock<std::mutex> lock( _mutex );
+//	if ( _delayed.empty() )
+//		_delay_thread = std::thread( [=]( void ) { this->process_delay(); } );
+
+	_delayed[queue_time] = f;
+}
+
+////////////////////////////////////////
+
 void thread_pool::queue( const std::function<void(void)> &f )
 {
+	precondition( f, "invalid function to queue" );
+
 	std::unique_lock<std::mutex> lock( _mutex );
 	if ( _workers.empty() )
 		return f();
