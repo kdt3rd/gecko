@@ -8,7 +8,6 @@ local media = libs.media.lib
 local net = libs.net.lib
 local web = libs.web.lib
 
-Executable( "test_format", "test_format.cpp", base, utf )
 Executable( "test_signal", "test_signal.cpp", base )
 Executable( "test_platform", "test_platform.cpp", UseLibraries( "platform" ) )
 Executable( "test_app", "test_app.cpp", UseLibraries( "gui" ) )
@@ -28,6 +27,8 @@ Executable( "test_exr", "test_exr.cpp", media, base )
 Executable( "test_tcp", "test_tcp.cpp", net )
 Executable( "test_web", "test_web.cpp", web )
 Executable( "test_ws", "test_ws.cpp", web )
+
+Executable( "segfault", "segfault.cpp" )
 
 --KDT-- Application( "Test Application", "test_app" )
 --KDT-- Application( "Test Platform", "test_platform" )
