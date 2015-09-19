@@ -45,7 +45,7 @@ int safemain( int argc, char *argv[] )
 	{
 		if ( auto &opt = options["l"] )
 		{
-			if ( opt.count() == 1 )
+			if ( opt.size() == 1 )
 				test.success( "log option is '{0}'", opt[0] );
 			else
 				test.success( "log option is empty" );
@@ -57,7 +57,7 @@ int safemain( int argc, char *argv[] )
 	test["verbose"] = [&]( void )
 	{
 		if ( auto &opt = options["v"] )
-			test.success( "verbose was specified {0} times", opt.count() );
+			test.success( "verbose was specified {0} times", opt.size() );
 		else
 			test.success( "verbose was not specified" );
 	};

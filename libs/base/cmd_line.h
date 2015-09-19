@@ -103,10 +103,20 @@ public:
 			return _values.at( i );
 		}
 
-		/// @brief The count of values this option has.
-		size_t count( void ) const
+		bool empty( void ) const
+		{
+			return _values.empty();
+		}
+
+		/// @brief The number of values this option has.
+		size_t size( void ) const
 		{
 			return _values.size();
+		}
+
+		void clear( void )
+		{
+			_values.clear();
 		}
 
 		/// @brief Mark this option has having been set.
@@ -258,7 +268,7 @@ public:
 		if ( n == 0 )
 			opt.set();
 
-		for ( size_t i = opt.count(); i < n; ++i )
+		for ( size_t i = opt.size(); i < n; ++i )
 		{
 			if ( idx < args.size() )
 			{
