@@ -54,7 +54,7 @@ decl::parse_type( iterator &token )
 
 	ty.set_type( pt );
 
-	size_t dims = 0;
+//	size_t dims = 0;
 	if ( token.type() == TOK_PAREN_START )
 	{
 //		ty.set_type( var_type::FUNCTION );

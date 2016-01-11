@@ -2,6 +2,7 @@
 #include "color.h"
 #include <cmath>
 #include <algorithm>
+#include <functional>
 
 namespace 
 {
@@ -95,15 +96,15 @@ void color::get_hsl( double &h, double &s, double &l )
 
 	l = ( max + min ) / 2;
 
-	if ( max == min )
+	if ( std::equal_to<double>()( max, min ) )
 		h = s = 0;
 	else
 	{
 		double d = max - min;
 		s = l > 0.5 ? ( d / ( 2 - max - min ) ) : ( d / ( max + min ) );
-		if ( max == _r )
+		if ( std::equal_to<double>()( max, _r ) )
 			h = ( _g - _b ) / d  + ( _g < _b ? 6 : 0 );
-		else if ( max == _g )
+		else if ( std::equal_to<double>()( max, _g ) )
 			h = ( _b - _r ) / d + 2;
 		else
 			h = ( _r - _g ) / d + 4;
@@ -132,7 +133,7 @@ namespace {
 
 void color::set_hsl( double h, double s, double l )
 {
-	if ( s == 0 )
+	if ( std::equal_to<double>()( s, 0 ) )
 		_r = _g = _b = l;
 	else
 	{

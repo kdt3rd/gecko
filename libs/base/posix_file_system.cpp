@@ -11,6 +11,175 @@
 #include <fstream>
 #include <memory>
 #include <system_error>
+#include <mutex>
+#include <map>
+#include <tuple>
+#include <thread>
+#ifdef __linux
+#include <sys/inotify.h>
+#endif
+
+
+////////////////////////////////////////
+
+
+namespace
+{
+
+std::mutex theWatcherMutex;
+// only need one of these per process, right?
+std::shared_ptr<base::fs_watcher> theWatcher;
+
+class posix_watcher : public base::fs_watcher
+{
+public:
+#ifdef __APPLE__
+# error "Need to implement posix_watcher using kqueue"
+#elif defined(__linux)
+	posix_watcher( void )
+			: _notify_fd( inotify_init1( IN_NONBLOCK|IN_CLOEXEC ) )
+	{
+		if ( _notify_fd == -1 )
+			throw_errno( "Unable to initialize notification watcher" );
+
+		_watch_thread = std::thread( &posix_watcher::watchThread, this );
+	}
+	~posix_watcher( void )
+	{
+		if ( _notify_fd != -1 )
+			::close( _notify_fd );
+	}
+
+	void registerWatch( const base::uri &path, base::fs_watch &w,
+						base::fs_event mask, bool recursive ) override
+	{
+		std::string p = path.full_path();
+		uint32_t imask = 0;
+
+		if ( mask & base::fs_event::CREATED )
+			imask |= IN_CREATE;
+		if ( mask & base::fs_event::DELETED )
+			imask |= IN_DELETE;
+		if ( mask & base::fs_event::MODIFIED )
+			imask |= IN_MODIFY;
+		if ( mask & base::fs_event::RENAMED_FROM )
+			imask |= IN_MOVED_FROM;
+		if ( mask & base::fs_event::RENAMED_TO )
+			imask |= IN_MOVED_TO;
+
+		int wd = inotify_add_watch( _notify_fd, p.c_str(), imask );
+		if ( wd != 0 )
+			throw_errno( "Unable to create file system watch on {0}", path );
+
+		if ( recursive )
+			throw_not_yet();
+
+		std::unique_lock<std::mutex> lk( theWatcherMutex );
+		_watches[wd] = std::make_tuple( path, mask, &w );
+	}
+
+	void move( base::fs_watch &w, base::fs_watch &neww ) override
+	{
+		std::unique_lock<std::mutex> lk( theWatcherMutex );
+		bool found = false;
+		for ( auto &i: _watches )
+		{
+			if ( std::get<2>( i.second ) == &w )
+			{
+				std::get<2>( i.second ) = &neww;
+				found = true;
+				break;
+			}
+		}
+		precondition( found, "Unregistered watch class received in unregister" );
+	}
+
+	void unregisterWatch( base::fs_watch &w ) override
+	{
+		std::unique_lock<std::mutex> lk( theWatcherMutex );
+
+		bool found = false;
+		for ( auto i = _watches.begin(); i != _watches.end(); ++i )
+		{
+			if ( std::get<2>( i->second ) == &w )
+			{
+				int r = inotify_rm_watch( _notify_fd, i->first );
+				if ( r != 0 )
+					throw_errno( "Unable to remove file system watch on {0}", std::get<0>( i->second ) );
+				_watches.erase( i );
+				found = true;
+				break;
+			}
+		}
+
+		precondition( found, "Unregistered watch class received in unregister" );
+		if ( _watches.empty() )
+		{
+			_watch_thread.join();
+			// should be the same as delete this
+			theWatcher.reset();
+			return;
+		}
+	}
+
+private:
+	void watchThread( void )
+	{
+		std::unique_lock<std::mutex> lk( theWatcherMutex );
+		constexpr size_t kBufSize = 16384;
+//		constexpr size_t kEvtSize = sizeof(inotify_event) + NAME_MAX + 1;
+//		constexpr size_t kNumEvents = kBufSize / kEvtSize;
+		std::unique_ptr<uint8_t[]> buf( new uint8_t[kBufSize] );
+
+		while ( true )
+		{
+			if ( _watches.empty() )
+				break;
+
+			ssize_t nRead = ::read( _notify_fd, buf.get(), kBufSize );
+			if ( nRead < 0 )
+			{
+				if ( errno == EINTR )
+					continue;
+				throw_errno( "Unable to read from inotify FD" );
+			}
+
+			ssize_t cur = 0;
+			uint8_t *ptr = buf.get();
+			while ( cur < nRead )
+			{
+				struct inotify_event *inevt = reinterpret_cast<struct inotify_event *>( ptr );
+				cur += inevt->len;
+				if ( static_cast<size_t>( nRead - cur ) < sizeof(inotify_event) )
+					throw_runtime( "Partial read of inotify stack" );
+
+				auto w = _watches.find( inevt->wd );
+				if ( w != _watches.end() )
+				{
+					
+				}
+			}
+		}
+		::close( _notify_fd );
+		_notify_fd = -1;
+	}
+
+	std::thread _watch_thread;
+	std::map< int, std::tuple<base::uri, base::fs_event, base::fs_watch *> > _watches;
+	int _notify_fd;
+#endif
+};
+
+std::shared_ptr<base::fs_watcher>
+getWatcher( void )
+{
+	std::unique_lock<std::mutex> lk( theWatcherMutex );
+	if ( ! theWatcher )
+		theWatcher = std::make_shared<posix_watcher>();
+	return theWatcher;
+}
+
+}
 
 
 ////////////////////////////////////////
@@ -61,7 +230,7 @@ posix_file_system::readlink( const uri &path, size_t sz )
 		if ( ::lstat( fpath.c_str(), &sbuf ) != 0 )
 			throw std::system_error( errno, std::system_category(), fpath );
 
-		sz = sbuf.st_size + 1;
+		sz = static_cast<size_t>( sbuf.st_size ) + 1;
 	}
 	std::unique_ptr<char[]> linkname;
 	ssize_t r;
@@ -73,12 +242,12 @@ posix_file_system::readlink( const uri &path, size_t sz )
 		if ( r == -1 )
 			throw std::system_error( errno, std::system_category(), fpath );
 
-		if ( r <= sz )
+		if ( static_cast<size_t>( r ) <= sz )
 			break;
 		sz *= 2;
 	} while ( true );
 
-	linkname[r] = '\0';
+	linkname[static_cast<size_t>(r)] = '\0';
 	fpath.clear();
 	fpath.append( linkname.get() );
 	return uri( uri::unescape( fpath ) );
@@ -107,7 +276,7 @@ directory_iterator posix_file_system::readdir( const uri &path )
 	if ( !dir )
 		throw_errno( "opendir failed on {0}", fpath );
 
-	size_t n = std::max( ::pathconf( fpath.c_str(), _PC_NAME_MAX), long(255) ) + 1;
+	size_t n = static_cast<size_t>( std::max( ::pathconf( fpath.c_str(), _PC_NAME_MAX), long(255) ) ) + 1;
 	n += offsetof( struct dirent, d_name );
 	std::shared_ptr<struct dirent> dir_ent( reinterpret_cast<dirent*>( new char[n] ), []( struct dirent *d ) { delete [] reinterpret_cast<char*>( d ); } );
 
@@ -118,11 +287,17 @@ directory_iterator posix_file_system::readdir( const uri &path )
 		{
 			if ( result )
 			{
-				if ( strcmp( result->d_name, "." ) != 0 && strcmp( result->d_name, ".." ) != 0 )
-					return uri( path, result->d_name );
+				if ( result->d_name[0] == '.' )
+				{
+					if ( result->d_name[1] == '\0' ||
+						 ( result->d_name[1] == '.' && result->d_name[2] == '\0' ) )
+						continue;
+				}
+				
+				return uri( path, result->d_name );
 			}
-			else
-				return uri();
+
+			return uri();
 		}
 		throw_errno( "reading directory {0}", path );
 	};
@@ -278,7 +453,7 @@ posix_file_system::open_read( const base::uri &path, std::ios_base::openmode m )
 	std::unique_ptr<unix_streambuf> sb( new unix_streambuf( m, path, page_size ) );
 	istream ret( std::move( sb ) );
 	ret.exceptions( std::ios_base::failbit );
-	return std::move( ret );
+	return ret;
 }
 
 
@@ -292,7 +467,7 @@ posix_file_system::open_write( const base::uri &path, std::ios_base::openmode m 
 	std::unique_ptr<unix_streambuf> sb( new unix_streambuf( m, path, page_size ) );
 	ostream ret( std::move( sb ) );
 	ret.exceptions( std::ios_base::failbit );
-	return std::move( ret );
+	return ret;
 }
 
 
@@ -306,7 +481,22 @@ posix_file_system::open( const base::uri &path, std::ios_base::openmode m )
 	std::unique_ptr<unix_streambuf> sb( new unix_streambuf( m, path, page_size ) );
 	iostream ret( std::move( sb ) );
 	ret.exceptions( std::ios_base::failbit );
-	return std::move( ret );
+	return ret;
+}
+
+
+////////////////////////////////////////
+
+
+fs_watch
+posix_file_system::watch( const base::uri &path,
+						  const fs_watch::event_handler &evtcb,
+						  fs_event evt_mask, bool recursive )
+{
+	auto fsw = getWatcher();
+	fs_watch retval( fsw, evtcb );
+	fsw->registerWatch( path, retval, evt_mask, recursive );
+	return retval;
 }
 
 

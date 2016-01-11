@@ -12,7 +12,7 @@ std::string websocket( void );
 namespace
 {
 
-int safemain( int argc, char *argv[] )
+int safemain( int /*argc*/, char * /*argv*/ [] )
 {
 	web::server test( 8080, 10 );
 	test.default_resource( "GET" ) = []( web::request &req, net::tcp_socket &client )
@@ -21,13 +21,13 @@ int safemain( int argc, char *argv[] )
 		web::server::not_found( req, client );
 	};
 
-	test.resource( "GET", "/hello" ) = []( web::request &req, net::tcp_socket &client )
+	test.resource( "GET", "/hello" ) = []( web::request &, net::tcp_socket &client )
 	{
 		web::response resp( hello( "World" ) );
 		resp.send( client );
 	};
 
-	test.resource( "GET", "/socket" ) = []( web::request &req, net::tcp_socket &client )
+	test.resource( "GET", "/socket" ) = []( web::request &, net::tcp_socket &client )
 	{
 		web::response resp( websocket() );
 		resp.send( client );
@@ -36,7 +36,7 @@ int safemain( int argc, char *argv[] )
 	test.resource( "GET", "/ws" ) = []( web::request &req, net::tcp_socket &client )
 	{
 		web::socket ws( req, std::move( client ) );
-		ws.when_message.connect( [&]( const std::string &msg, bool binary )
+		ws.when_message.connect( [&]( const std::string &msg, bool )
 		{
 			std::cout << "GOT MESSAGE: " << msg << std::endl;
 			ws.send( msg );
@@ -45,7 +45,7 @@ int safemain( int argc, char *argv[] )
 		ws.run();
 	};
 
-	test.resource( "GET", "/exception" ) = []( web::request &req, net::tcp_socket &client )
+	test.resource( "GET", "/exception" ) = []( web::request &, net::tcp_socket & )
 	{
 		throw_runtime( "Ooops, error" );
 	};

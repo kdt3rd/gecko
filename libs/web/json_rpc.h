@@ -17,7 +17,7 @@ inline void from_json( const base::json &j, std::string &v )
 
 inline void from_json( const base::json &j, int64_t &v )
 {
-	v = j.get<base::json_number>();
+	v = static_cast<int64_t>( j.get<base::json_number>() );
 }
 
 inline void from_json( const base::json &j, uint64_t &v )
@@ -243,7 +243,7 @@ public:
 		push_helper( params, args... );
 		result["params"] = std::move( params );
 
-		return std::move( result );
+		return result;
 	}
 
 	template<typename Result>
@@ -278,7 +278,7 @@ private:
 		to_json( a, params.push_back() );
 	}
 
-	void push_helper( base::json &params )
+	void push_helper( base::json & /*params*/ )
 	{
 	}
 

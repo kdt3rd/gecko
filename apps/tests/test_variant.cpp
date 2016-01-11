@@ -24,7 +24,7 @@ public:
 
 	// Compile-time check for any missing operator() implementation
 	template<typename T>
-	void operator()( T a )
+	void operator()( T /*a*/ )
 	{
 		static_assert( base::always_false<T>::value, "missing operator() for variant types" );
 	}
@@ -55,7 +55,7 @@ public:
 
 	// Compile-time check for any missing operator() implementation
 	template<typename T1, typename T2>
-	void operator()( T1 a, T2 b )
+	void operator()( T1 /*a*/, T2 /*b*/ )
 	{
 		static_assert( base::always_false<T1,T2>::value, "missing operator() for variant types" );
 	}
@@ -72,7 +72,7 @@ int safemain( void )
 	x.set<int>( 42 );
 	std::cout << "int = " << base::visit<bool>( v, x ) << std::endl;
 
-	x.set<float>( 3.141592 );
+	x.set<float>( 3.141592F );
 	std::cout << "float = " << base::visit<bool>( v, x ) << std::endl;
 
 	variant y;

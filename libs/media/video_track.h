@@ -12,6 +12,8 @@ namespace media
 class video_track : public track
 {
 public:
+	virtual ~video_track( void );
+
 	using track::track;
 
 	std::shared_ptr<image_frame> operator[]( int64_t f )

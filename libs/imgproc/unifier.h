@@ -29,7 +29,7 @@ public:
 
 	// Compile-time check for any missing operator() implementation
 	template<typename T1, typename T2>
-	void operator()( T1 a, T2 b )
+	void operator()( T1, T2 )
 	{
 		static_assert( base::always_false<T1,T2>::value, "missing operator() for unifier types" );
 	}

@@ -90,7 +90,7 @@ void stretchable::draw( gl::context &ctxt )
 	{
 		gl::bound_texture tx;
 		if ( _fill_texture )
-			tx = std::move( _fill_texture->bind( target::TEXTURE_RECTANGLE, 0 ) );
+			tx = _fill_texture->bind( target::TEXTURE_RECTANGLE, 0 );
 
 		if ( _fill_prog )
 		{

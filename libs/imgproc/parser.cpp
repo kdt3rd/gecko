@@ -197,7 +197,7 @@ std::shared_ptr<expr> parser::primary_expr( void )
 		next_token();
 		if ( _token.type() == TOK_PAREN_START )
 		{
-			result->set<call_expr>( id.value(), std::move( arguments() ) );
+			result->set<call_expr>( id.value(), arguments() );
 		}
 		else if ( _token.type() == TOK_OPERATOR && _token.value()[0] == '=' )
 		{

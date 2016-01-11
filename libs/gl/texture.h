@@ -32,22 +32,26 @@ public:
 
 	void image_2d_red( format f, size_t w, size_t h, image_type type, const void *data )
 	{
-		glTexImage2D( _target, 0, static_cast<GLint>(f), w, h, 0, GL_RED, static_cast<GLenum>(type), data );
+		glTexImage2D( _target, 0, static_cast<GLint>(f), static_cast<GLsizei>(w),
+					  static_cast<GLsizei>(h), 0, GL_RED, static_cast<GLenum>(type), data );
 	}
 
 	void image_2d_rgb( format f, size_t w, size_t h, image_type type, const void *data )
 	{
-		glTexImage2D( _target, 0, static_cast<GLint>(f), w, h, 0, GL_RGB, static_cast<GLenum>(type), data );
+		glTexImage2D( _target, 0, static_cast<GLint>(f), static_cast<GLsizei>(w),
+					  static_cast<GLsizei>(h), 0, GL_RGB, static_cast<GLenum>(type), data );
 	}
 
 	void image_2d_rgba( format f, size_t w, size_t h, image_type type, const void *data )
 	{
-		glTexImage2D( _target, 0, static_cast<GLint>(f), w, h, 0, GL_RGBA, static_cast<GLenum>(type), data );
+		glTexImage2D( _target, 0, static_cast<GLint>(f), static_cast<GLsizei>(w),
+					  static_cast<GLsizei>(h), 0, GL_RGBA, static_cast<GLenum>(type), data );
 	}
 
 	void subimage_2d( format f, int x, int y, size_t w, size_t h, image_type type, const void *data )
 	{
-		glTexSubImage2D( _target, 0, GLint(x), GLint(y), GLsizei(w), GLsizei(h),
+		glTexSubImage2D( _target, 0, static_cast<GLint>(x), static_cast<GLint>(y),
+						 static_cast<GLsizei>(w), static_cast<GLsizei>(h),
 						 static_cast<GLenum>(f), static_cast<GLenum>(type), data );
 	}
 
@@ -142,7 +146,7 @@ public:
 
 	inline bound_texture bind( target targ, int unit )
 	{
-		glActiveTexture( GL_TEXTURE0 + unit );
+		glActiveTexture( static_cast<GLenum>( GL_TEXTURE0 + unit ) );
 		return bind( targ );
 	}
 

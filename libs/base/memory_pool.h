@@ -53,7 +53,7 @@ public:
 	}
 
 	/// @brief Allocate an object from the pool.
-	pointer allocate( size_type n = 1, const_pointer hint = 0 )
+	pointer allocate( size_type n = 1, const_pointer /*hint*/ = 0 )
 	{
 		precondition( n == 1, "memory pool can only allocate 1 item" );
 
@@ -89,7 +89,7 @@ public:
 	template<typename U, typename ...Args>
 	void construct( U *p, Args &&...args )
 	{
-		::new((void *)p) U( std::forward<Args>( args )... );
+		::new(static_cast<void *>(p)) U( std::forward<Args>( args )... );
 	}
 
 	/// @brief Call destructor of object.

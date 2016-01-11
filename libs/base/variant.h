@@ -27,25 +27,25 @@ template<typename F, typename... Ts>
 class variant_helper<F, Ts...>
 {
 public:
-	static void destroy( std::type_index id, void *data )
+	static void destroy( std::size_t id, void *data )
 	{
-		if ( id == typeid(F) )
+		if ( id == typeid(F).hash_code() )
 			reinterpret_cast<F*>(data)->~F();
 		else
 			variant_helper<Ts...>::destroy( id, data );
 	}
 
-	static void move( std::type_index old_t, void *old_v, void *new_v )
+	static void move( std::size_t old_t, void *old_v, void *new_v )
 	{
-		if ( old_t == typeid(F) )
+		if ( old_t == typeid(F).hash_code() )
 			new (new_v) F( std::move( *reinterpret_cast<F*>( old_v ) ) );
 		else
 			variant_helper<Ts...>::move( old_t, old_v, new_v );
 	}
 
-	static void copy( std::type_index old_t, const void *old_v, void *new_v )
+	static void copy( std::size_t old_t, const void *old_v, void *new_v )
 	{
-		if ( old_t == typeid(F) )
+		if ( old_t == typeid(F).hash_code() )
 			new (new_v) F( *reinterpret_cast<const F*>( old_v ) );
 		else
 			variant_helper<Ts...>::copy( old_t, old_v, new_v );
@@ -56,21 +56,28 @@ public:
 	{
 		return std::is_base_of<F,T>::value || std::is_same<F,T>::value || variant_helper<Ts...>::template is_valid<T>();
 	}
+
+	static const char *type_name( std::size_t id )
+	{
+		if ( id == typeid(F).hash_code() )
+			return typeid(F).name();
+		return variant_helper<Ts...>::type_name( id );
+	}
 };
 
 template<>
 class variant_helper<>
 {
 public:
-	static void destroy( std::type_index id, void *data )
+	static void destroy( std::size_t, void * )
 	{
 	}
 
-	static void move( std::type_index old_t, void *old_v, void *new_v )
+	static void move( std::size_t, void *, void * )
 	{
 	}
 
-	static void copy( std::type_index old_t, const void *old_v, void *new_v )
+	static void copy( std::size_t, const void *, void * )
 	{
 	}
 
@@ -78,6 +85,11 @@ public:
 	static constexpr bool is_valid( void )
 	{
 		return false;
+	}
+
+	static const char *type_name( std::size_t )
+	{
+		return typeid(void).name();
 	}
 };
 
@@ -164,7 +176,7 @@ template<typename Result, typename Visitor, typename Tuple, typename Variant>
 class visitor_multi<Result,Visitor,Tuple,Variant>
 {
 public:
-	visitor_multi( Visitor &v, const Tuple &t, std::tuple<> nothing )
+	visitor_multi( Visitor &v, const Tuple &t, std::tuple<> )
 		: _realv( v ), _values( t )
 	{
 	}
@@ -226,16 +238,29 @@ public:
 	/// @brief Destructor
 	~variant( void )
 	{
-		Helper::destroy( _type_id, &_data );
+		clear();
 	}
 
-	/// @breif Assignment operator.
-	///
-	/// Serves as both the move and the copy asignment operator.
-	variant<Ts...>& operator=( variant<Ts...> old )
+	/// @brief Assignment operator.
+	variant<Ts...>& operator=( const variant<Ts...> &old )
 	{
-		std::swap( _type_id, old._type_id );
-		std::swap( _data, old._data );
+		if ( &old != this )
+		{
+			clear();
+			_type_id = old._type_id;
+			Helper::copy( old._type_id, &old._data, &_data );
+		}
+
+		return *this;
+	}
+
+	/// @brief Assignment operator.
+	variant<Ts...>& operator=( variant<Ts...> &&old )
+	{
+		clear();
+		_type_id = old._type_id;
+		Helper::move( old._type_id, &old._data, &_data );
+
 		return *this;
 	}
 
@@ -243,7 +268,7 @@ public:
 	template<typename T>
 	bool is( void ) const
 	{
-		return _type_id == typeid(T);
+		return _type_id == typeid(T).hash_code();
 	}
 
 	/// @brief Check is we have a value.
@@ -258,12 +283,11 @@ public:
 	{
 		using TT = typename std::remove_reference<T>::type;
 
-		static_assert( Helper::template is_valid<TT>(), "invalid invariant type" );
+		static_assert( Helper::template is_valid<TT>(), "invalid variant type" );
 
-		// First we destroy the current contents
 		Helper::destroy( _type_id, &_data );
 		new (&_data) TT( std::forward<Args>( args )... );
-		_type_id = typeid(TT);
+		_type_id = typeid(TT).hash_code();
 	}
 
 	/// @brief Get the value as the given type.
@@ -271,10 +295,10 @@ public:
 	T &get( void )
 	{
 		// It is a dynamic_cast-like behaviour
-		if ( _type_id == typeid(T) )
+		if ( _type_id == typeid(T).hash_code() )
 			return *reinterpret_cast<T*>( &_data );
-		else
-			throw std::bad_cast();
+
+		throw std::bad_cast();
 	}
 
 	/// @brief Get the value as the given type.
@@ -282,10 +306,10 @@ public:
 	const T &get( void ) const
 	{
 		// It is a dynamic_cast-like behaviour
-		if ( _type_id == typeid(T) )
+		if ( _type_id == typeid(T).hash_code() )
 			return *reinterpret_cast<const T*>( &_data );
-		else
-			throw std::bad_cast();
+
+		throw std::bad_cast();
 	}
 
 	/// @brief Clear the variant to empty.
@@ -298,23 +322,19 @@ public:
 	/// @brief Name of the current type.
 	const char *type_name( void ) const
 	{
-		return _type_id.name();
+		return Helper::type_name( _type_id );
 	}
 
 private:
-	static const size_t _data_size = static_max<sizeof(Ts)...>::value;
-	static const size_t _data_align = static_max<alignof(Ts)...>::value;
-
-	using DataType = typename std::aligned_storage<_data_size, _data_align>::type;
-
 	using Helper = detail::variant_helper<Ts...>;
 
-	static inline std::type_index invalid_type( void )
+	static inline std::size_t invalid_type( void )
 	{
-		return typeid(void);
+		return std::size_t(-1);//typeid(void).hash_code();
 	}
 
-	std::type_index _type_id = invalid_type();
+	typedef typename std::aligned_union<0, Ts...>::type DataType;
+	std::size_t _type_id = invalid_type();
 	DataType _data;
 };
 

@@ -25,7 +25,6 @@ namespace
 {
 
 constexpr uint32_t BLOCK_SIZE = 64;  // bytes per SHA1 block
-constexpr uint32_t DIGEST_INTS = 5;  // number of 32bit integers per SHA1 digest
 constexpr uint32_t BLOCK_INTS = 16;  // number of 32bit integers per SHA1 block
 
 }

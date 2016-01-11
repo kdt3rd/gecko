@@ -8,10 +8,10 @@ Doxygen = doxygen.Doxygen
 local unit_test = LoadToolModule( "UnitTest" )
 AddUnitTest = unit_test.AddUnitTest
 
-BuildConfiguration{ name="release", optimization="heavy" }
-BuildConfiguration{ name="build", optimization="optdebug" }
-BuildConfiguration{ name="debug", optimization="debug" }
---BuildConfiguration{ name="Win64", opt="optimize", toolset="cross" }
+BuildConfiguration{ name="release", optimization="heavy", warnings="most" }
+BuildConfiguration{ name="build", optimization="optdebug", warnings="most" }
+BuildConfiguration{ name="debug", optimization="debug", warnings="most" }
+--BuildConfiguration{ name="Win64", opt="optimize", toolset="cross", warnings="most" }
 DefaultConfiguration( "build" )
 
 if sys.system() == "Linux" then

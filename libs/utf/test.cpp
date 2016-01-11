@@ -9,7 +9,7 @@ void dump( std::u32string &str );
 
 ////////////////////////////////////////
 
-std::map<char,char32_t> hex
+static std::map<char,char32_t> hex
 {
 	{ '0', 0 },
 	{ '1', 1 },
@@ -34,7 +34,7 @@ std::map<char,char32_t> hex
 void dump( std::u32string &str )
 {
 	for ( size_t k = 0; k < str.size(); ++k )
-		std::cout << std::hex << (uint32_t)str[k] << ' ';
+		std::cout << std::hex << static_cast<uint32_t>( str[k] ) << ' ';
 	std::cout << std::dec;
 }
 

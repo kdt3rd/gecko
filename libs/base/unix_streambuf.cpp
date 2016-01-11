@@ -39,7 +39,7 @@ namespace base
 
 ////////////////////////////////////////
 
-unix_streambuf::unix_streambuf( std::ios_base::openmode m, int fd, bool doDup, const std::string &path, size_t bufSz )
+unix_streambuf::unix_streambuf( std::ios_base::openmode m, int fd, bool doDup, const std::string &path, std::streamsize bufSz )
 	: streambuf( m, bufSz ), _fd( -1 ), _path( path )
 {
 	if ( doDup )
@@ -66,7 +66,7 @@ unix_streambuf::unix_streambuf( std::ios_base::openmode m, int fd, bool doDup, c
 
 ////////////////////////////////////////
 
-unix_streambuf::unix_streambuf( std::ios_base::openmode m, const uri &path, size_t bufSz )
+unix_streambuf::unix_streambuf( std::ios_base::openmode m, const uri &path, std::streamsize bufSz )
 		: streambuf( m, bufSz ), _path( path.full_path() )
 {
 	stash_uri( path.pretty() );
@@ -75,7 +75,7 @@ unix_streambuf::unix_streambuf( std::ios_base::openmode m, const uri &path, size
 
 ////////////////////////////////////////
 
-unix_streambuf::unix_streambuf( std::ios_base::openmode m, const std::string &path, size_t bufSz )
+unix_streambuf::unix_streambuf( std::ios_base::openmode m, const std::string &path, std::streamsize bufSz )
 		: streambuf( m, bufSz ), _path( path )
 {
 	initFD( m );
@@ -83,7 +83,7 @@ unix_streambuf::unix_streambuf( std::ios_base::openmode m, const std::string &pa
 
 ////////////////////////////////////////
 
-unix_streambuf::unix_streambuf( std::ios_base::openmode m, std::string &&path, size_t bufSz )
+unix_streambuf::unix_streambuf( std::ios_base::openmode m, std::string &&path, std::streamsize bufSz )
 		: streambuf( m, bufSz ), _path( std::move( path ) )
 {
 	initFD( m );
@@ -199,7 +199,7 @@ std::streamsize unix_streambuf::read( void *outBuf, size_t numBytes )
 
 std::streamsize unix_streambuf::write( const void *outBuf, size_t numBytes )
 {
-	std::streamsize nleft = numBytes;
+	size_t nleft = numBytes;
 
 	if ( _fd < 0 )
 		return 0;
@@ -208,20 +208,21 @@ std::streamsize unix_streambuf::write( const void *outBuf, size_t numBytes )
 	do
 	{
 		const ssize_t ret = ::write( _fd, s, nleft );
-		if ( ret == -1 && errno == EINTR )
-			continue;
-
 		if ( ret == -1 )
+		{
+			if ( errno == EINTR )
+				continue;
 			break;
+		}
 
-		nleft -= ret;
+		nleft -= static_cast<size_t>( ret );
 		if ( nleft == 0 )
 			break;
 
 		s += ret;
 	} while ( true );
 
-	return numBytes - nleft;
+	return static_cast<std::streamsize>( numBytes - nleft );
 }
 
 ////////////////////////////////////////
@@ -231,8 +232,8 @@ std::streamsize unix_streambuf::writev( const void *outBuf1, size_t numBytes1, c
 	const char *s1 = reinterpret_cast<const char *>( outBuf1 );
 	const char *s2 = reinterpret_cast<const char *>( outBuf2 );
 
-	std::streamsize nleft = numBytes1 + numBytes2;
-	std::streamsize n1_left = numBytes1;
+	size_t nleft = numBytes1 + numBytes2;
+	size_t n1_left = numBytes1;
 
 	struct iovec iov[2];
 	iov[1].iov_base = const_cast<char*>(s2);
@@ -243,7 +244,7 @@ std::streamsize unix_streambuf::writev( const void *outBuf1, size_t numBytes1, c
 		iov[0].iov_base = const_cast<char*>(s1);
 		iov[0].iov_len = n1_left;
 
-		const std::streamsize ret = ::writev( _fd, iov, 2 );
+		std::streamsize ret = ::writev( _fd, iov, 2 );
 		if ( ret == -1 )
 		{
 			if ( errno == EINTR )
@@ -251,22 +252,25 @@ std::streamsize unix_streambuf::writev( const void *outBuf1, size_t numBytes1, c
 			break;
 		}
 
-		nleft -= ret;
+		nleft -= static_cast<size_t>( ret );
 		if ( nleft == 0 )
 			break;
 
-		const std::streamsize off = ret - n1_left;
+		const std::streamsize off = ret - static_cast<std::streamsize>( n1_left );
 		if ( off >= 0 )
 		{
-			nleft -= this->write( s2 + off, numBytes2 - off );
+			// only have the second buffer left, just do a normal write instead of
+			// writev
+			ret = this->write( s2 + off, numBytes2 - static_cast<size_t>( off ) );
+			nleft -= static_cast<size_t>( ret );
 			break;
 		}
 
 		s1 += ret;
-		n1_left -= ret;
+		n1_left -= static_cast<size_t>( ret );
 	}
 
-	return numBytes1 + numBytes2 - nleft;
+	return static_cast<std::streamsize>( numBytes1 + numBytes2 - nleft );
 }
 
 ////////////////////////////////////////

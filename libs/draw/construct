@@ -3,6 +3,7 @@ local srcs = {
 	"polylines.cpp";
 	"clipper.cpp";
 	"canvas.cpp";
+	"drawable.cpp";
 	"geometry.cpp";
 	"glyph.cpp";
 	"composite.cpp";

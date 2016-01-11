@@ -14,6 +14,15 @@ popup::popup( const std::shared_ptr<platform::window> &w )
 	_window->set_popup();
 }
 
+
+////////////////////////////////////////
+
+
+popup::~popup( void )
+{
+}
+
+
 ////////////////////////////////////////
 
 

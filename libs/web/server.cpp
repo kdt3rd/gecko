@@ -68,7 +68,7 @@ void server::run( void )
 
 ////////////////////////////////////////
 
-void server::not_found( request &req, net::tcp_socket &client )
+void server::not_found( request &, net::tcp_socket &client )
 {
 	response resp( "<!DOCTYPE html><html lang=\"en\"><head><title>Not Found</title></head><body>404 Not Found</body></html>" );
 	resp.set_status_code( status_code::NOT_FOUND );

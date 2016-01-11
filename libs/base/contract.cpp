@@ -5,6 +5,26 @@
 namespace base
 {
 
+location_exception::~location_exception( void )
+{
+}
+
+
+////////////////////////////////////////
+
+precondition_error::~precondition_error( void )
+{
+}
+
+
+////////////////////////////////////////
+
+
+postcondition_error::~postcondition_error( void )
+{
+}
+
+
 ////////////////////////////////////////
 
 void print_exception( std::ostream &out, const std::exception &e, int level )

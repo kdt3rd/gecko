@@ -1,5 +1,6 @@
 
 #include "json_rpc.h"
+#include <iostream>
 
 namespace web
 {
@@ -46,8 +47,11 @@ base::json json_rpc::local_call( const base::json &rpc )
 	{
 		if ( !rpc.has( "jsonrpc" ) )
 			return error( -32600, "jsonrpc version missing" );
-		if( rpc["jsonrpc"].get<std::string>() != "2.0" )
+		if( rpc["jsonrpc"].get<base::json_string>() != "2.0" )
+		{
+			std::cout << "ACK: " << rpc << std::endl;
 			return error( -32600, base::json( std::string( base::format( "expect jsonrpc version 2.0, got {0}", rpc["jsonrpc"].get<std::string>() ) ) ) );
+		}
 	}
 	catch ( std::exception &e )
 	{
@@ -78,7 +82,7 @@ base::json json_rpc::local_call( const base::json &rpc )
 			result.append( call( method.c_str(), rpc["params"] ) );
 		else
 			result.append( call( method.c_str(), base::json() ) );
-		return std::move( result );
+		return result;
 	}
 	catch ( std::exception &e )
 	{
@@ -93,8 +97,9 @@ base::json json_rpc::call( const char *name, const base::json &param )
 	try
 	{
 		base::json result;
-		_function.at( name )->call( result["result"], param );
-		return std::move( result );
+		base::json &out = result["result"];
+		_function.at( name )->call( out, param );
+		return result;
 	}
 	catch ( std::exception &e )
 	{
@@ -138,7 +143,7 @@ base::json json_rpc::error( int code, base::json &&data )
 	if ( data.valid() )
 		error["data"] = std::move( data );
 
-	return std::move( result );
+	return result;
 }
 
 ////////////////////////////////////////

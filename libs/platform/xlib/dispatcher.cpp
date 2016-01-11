@@ -117,7 +117,7 @@ int dispatcher::execute( void )
 				int length = Xutf8LookupString( w->input_context(), &event.xkey, keybuf, sizeof(keybuf), nullptr, &status );
 				if ( length > 0 )
 				{
-					std::stringstream tmp( std::string( keybuf, length ) );
+					std::stringstream tmp( std::string( keybuf, size_t(length) ) );
 					utf::iterator it( tmp, utf::UTF8 );
 					while ( ++it )
 					{
@@ -151,7 +151,7 @@ int dispatcher::execute( void )
 					case 1:
 					case 2:
 					case 3:
-						w->mouse_pressed( _mouse, { double(event.xbutton.x), double(event.xbutton.y) }, event.xbutton.button );
+						w->mouse_pressed( _mouse, { double(event.xbutton.x), double(event.xbutton.y) }, int(event.xbutton.button) );
 						break;
 
 					case 4:
@@ -173,7 +173,7 @@ int dispatcher::execute( void )
 					case 1:
 					case 2:
 					case 3:
-						w->mouse_released( _mouse, { double(event.xbutton.x), double(event.xbutton.y) }, event.xbutton.button );
+						w->mouse_released( _mouse, { double(event.xbutton.x), double(event.xbutton.y) }, int(event.xbutton.button) );
 						break;
 
 					case 4: // Mouse wheel up

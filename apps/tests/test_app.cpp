@@ -18,11 +18,11 @@
 #include <gui/line_edit.h>
 #include <gui/color_picker.h>
 
-constexpr double padding = 12;
-std::shared_ptr<gui::application> app;
-std::shared_ptr<gui::menu> extra;
-
 namespace {
+
+static constexpr double padding = 12;
+static std::shared_ptr<gui::application> app;
+static std::shared_ptr<gui::menu> extra;
 
 ////////////////////////////////////////
 

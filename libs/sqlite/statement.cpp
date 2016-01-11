@@ -79,7 +79,7 @@ size_t statement::size( void ) const
 
 field statement::get( size_t f )
 {
-	return field( _stmt, f );
+	return field( _stmt, static_cast<int>( f ) );
 }
 
 ////////////////////////////////////////
@@ -87,7 +87,7 @@ field statement::get( size_t f )
 statement::statement( sqlite3 *db, const char *sql, size_t nsql )
 	: _db( db )
 {
-	int ret = sqlite3_prepare_v2( db, sql, nsql, &_stmt, NULL );
+	int ret = sqlite3_prepare_v2( db, sql, static_cast<int>( nsql ), &_stmt, NULL );
 	if ( ret != SQLITE_OK )
 		throw_runtime( sqlite3_errmsg( _db ) );
 }

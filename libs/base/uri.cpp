@@ -202,7 +202,7 @@ void uri::parse_authority( const std::string &auth )
 		_user = unescape( auth.substr( 0, at - 1 ) );
 	_host = unescape( auth.substr( at, pcolon - at ) );
 	if ( pcolon < auth.size() )
-		_port = std::stoi( auth.substr( pcolon + 1 ) );
+		_port = static_cast<uint16_t>( std::stoul( auth.substr( pcolon + 1 ) ) );
 	else
 		_port = 0;
 }

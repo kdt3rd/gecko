@@ -34,6 +34,8 @@
 #define GEOM_H
 
 #include "mesh.h"
+#include "priorityq.h"
+#include <functional>
 
 #ifdef NO_BRANCH_CONDITIONS
 /* MIPS architecture has special instructions to evaluate boolean
@@ -44,8 +46,8 @@
 #define VertLeq(u,v)	(((u)->s < (v)->s) | \
 	((u)->s == (v)->s & (u)->t <= (v)->t))
 #else
-#define VertEq(u,v) ((u)->s == (v)->s && (u)->t == (v)->t)
-#define VertLeq(u,v) (((u)->s < (v)->s) || ((u)->s == (v)->s && (u)->t <= (v)->t))
+#define VertEq(u,v) (std::equal_to<TESSreal>()((u)->s, (v)->s) && std::equal_to<TESSreal>()((u)->t, (v)->t))
+#define VertLeq(u,v) (((u)->s < (v)->s) || (std::equal_to<TESSreal>()((u)->s, (v)->s) && (u)->t <= (v)->t))
 #endif
 
 #define EdgeEval(u,v,w)	tesedgeEval(u,v,w)
@@ -53,7 +55,7 @@
 
 /* Versions of VertLeq, EdgeSign, EdgeEval with s and t transposed. */
 
-#define TransLeq(u,v) (((u)->t < (v)->t) || ((u)->t == (v)->t && (u)->s <= (v)->s))
+#define TransLeq(u,v) (((u)->t < (v)->t) || (std::equal_to<TESSreal>()((u)->t, (v)->t) && (u)->s <= (v)->s))
 #define TransEval(u,v,w) testransEval(u,v,w)
 #define TransSign(u,v,w) testransSign(u,v,w)
 
@@ -66,7 +68,7 @@
 
 #define VertCCW(u,v,w) tesvertCCW(u,v,w)
 
-int tesvertLeq( TESSvertex *u, TESSvertex *v );
+int tesvertLeq( PQkey u, PQkey v );
 TESSreal	tesedgeEval( TESSvertex *u, TESSvertex *v, TESSvertex *w );
 TESSreal	tesedgeSign( TESSvertex *u, TESSvertex *v, TESSvertex *w );
 TESSreal	testransEval( TESSvertex *u, TESSvertex *v, TESSvertex *w );

@@ -17,15 +17,15 @@ public:
 	{
 	}
 
-	void operator()( const integer_expr &e )
+	void operator()( const integer_expr & /*e*/ )
 	{
 	}
 
-	void operator()( const floating_expr &e )
+	void operator()( const floating_expr & /*e*/ )
 	{
 	}
 
-	void operator()( const identifier_expr &e )
+	void operator()( const identifier_expr & /*e*/ )
 	{
 	}
 
@@ -70,7 +70,7 @@ public:
 		visit( e.when_false() );
 	}
 
-	void operator()( const range_expr &e )
+	void operator()( const range_expr & /*e*/ )
 	{
 	}
 
@@ -85,7 +85,7 @@ public:
 		visit( e.next() );
 	}
 
-	void operator()( const lambda_expr &e )
+	void operator()( const lambda_expr & /*e*/ )
 	{
 		// TODO
 		throw_not_yet();
@@ -93,7 +93,7 @@ public:
 
 	// Compile-time check for any missing operator() implementation
 	template<typename T>
-	void operator()( T a )
+	void operator()( T /*a*/ )
 	{
 		static_assert( base::always_false<T>::value, "missing operator() for variant types" );
 	}
@@ -141,7 +141,7 @@ type environment::operator()( const integer_expr &e )
 
 ////////////////////////////////////////
 
-type environment::operator()( const floating_expr &e )
+type environment::operator()( const floating_expr & /*e*/ )
 {
 	// TODO when should we use FLOAT32?
 	return type_primary( pod_type::FLOAT64 );
@@ -204,10 +204,10 @@ type environment::operator()( const infix_expr &e )
 type environment::operator()( const circumfix_expr &e )
 {
 	return visit( e.expression() );
-	type result = new_type();
-	auto t = visit( e.expression() );
-	_unify.add_constraint( result, t );
-	return result;
+//	type result = new_type();
+//	auto t = visit( e.expression() );
+//	_unify.add_constraint( result, t );
+//	return result;
 }
 
 ////////////////////////////////////////
@@ -292,7 +292,7 @@ type environment::operator()( const if_expr &e )
 
 ////////////////////////////////////////
 
-type environment::operator()( const range_expr &e )
+type environment::operator()( const range_expr & /*e*/ )
 {
 	return type_primary( pod_type::INT64 );
 }
@@ -322,7 +322,7 @@ type environment::operator()( const assign_expr &e )
 
 ////////////////////////////////////////
 
-type environment::operator()( const lambda_expr &e )
+type environment::operator()( const lambda_expr & /*e*/ )
 {
 	/*
 	type_callable result( visit( e.result() ), type_callable::FUNCTION );
@@ -440,7 +440,10 @@ type environment::join( const type_primary &t1, const type_primary &t2 )
 				return t2;
 			break;
 
-		default:
+		case pod_type::BOOLEAN:
+			return t2;
+
+		case pod_type::UNKNOWN:
 			break;
 	}
 

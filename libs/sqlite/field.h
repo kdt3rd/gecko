@@ -20,6 +20,10 @@ class field
 public:
 	/// @brief Destructor.
 	~field( void );
+	field( const field & ) = default;
+	field &operator=( const field & ) = default;
+	field( field && ) = default;
+	field &operator=( field && ) = default;
 
 	/// @brief Name of the field.
 	std::string name( void ) const;

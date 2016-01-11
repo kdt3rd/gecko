@@ -48,7 +48,7 @@ public:
 
 	void data( const std::vector<D> &data, usage u )
 	{
-		glBufferData( _target, data.size() * sizeof(D), data.data(), static_cast<GLenum>( u ) );
+		glBufferData( _target, static_cast<GLsizeiptr>( data.size() * sizeof(D) ), data.data(), static_cast<GLenum>( u ) );
 	}
 
 	void sub_data( const D *data, size_t offset, size_t n )
@@ -63,7 +63,7 @@ public:
 
 	void draw( primitive prim, size_t n )
 	{
-		glDrawElements( static_cast<GLenum>( prim ), n, gl_data_type<D>::value, nullptr );
+		glDrawElements( static_cast<GLenum>( prim ), static_cast<GLsizei>( n ), gl_data_type<D>::value, nullptr );
 	}
 
 private:

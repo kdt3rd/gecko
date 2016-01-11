@@ -19,11 +19,18 @@ class location_exception : public std::exception
 public:
 	/// @brief Constructor
 	location_exception( const char *file, int line )
+		: _line( line ), _file( file )
 	{
 		std::ostringstream str;
 		str << "file " << file << " line " << line;
-		_msg = std::move( str.str() );
+		_msg = str.str();
 	}
+		
+	virtual ~location_exception( void );
+	location_exception( const location_exception &e ) = default;
+	location_exception( location_exception &&e ) = default;
+	location_exception &operator=( const location_exception &e ) = default;
+	location_exception &operator=( location_exception &&e ) = default;
 
 	/// @brief Get the source file location.
 	const char *file( void ) const
@@ -38,7 +45,7 @@ public:
 	}
 
 	/// @brief Get the exception message
-	virtual const char *what( void ) const throw() override
+	virtual const char *what( void ) const noexcept override
 	{
 		return _msg.c_str();
 	}
@@ -60,6 +67,11 @@ void print_exception( std::ostream &out, const std::exception &e, int level = 0 
 class precondition_error : public std::logic_error
 {
 public:
+	virtual ~precondition_error( void );
+	precondition_error( const precondition_error &e ) = default;
+	precondition_error( precondition_error &&e ) = default;
+	precondition_error &operator=( const precondition_error &e ) = default;
+	precondition_error &operator=( precondition_error &&e ) = default;
 	using std::logic_error::logic_error;
 };
 
@@ -69,6 +81,11 @@ public:
 class postcondition_error : public std::logic_error
 {
 public:
+	virtual ~postcondition_error( void );
+	postcondition_error( const postcondition_error &e ) = default;
+	postcondition_error( postcondition_error &&e ) = default;
+	postcondition_error &operator=( const postcondition_error &e ) = default;
+	postcondition_error &operator=( postcondition_error &&e ) = default;
 	using std::logic_error::logic_error;
 };
 

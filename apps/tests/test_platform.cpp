@@ -8,7 +8,7 @@
 namespace
 {
 
-int safemain( int argc, char **argv )
+int safemain( int /*argc*/, char * /*argv*/ [] )
 {
 	auto sys = platform::platform::common().create();
 
@@ -22,7 +22,7 @@ int safemain( int argc, char **argv )
 	win->exposed.callback( [&]( void )
 	{
 		win->acquire();
-		glViewport( 0, 0, win->width(), win->height() );
+		glViewport( 0, 0, static_cast<GLsizei>(win->width()), static_cast<GLsizei>(win->height()) );
 		glClearColor( 0.0, 1.0, 0.0, 1.0 );
 		glClear( GL_COLOR_BUFFER_BIT );
 		win->release();

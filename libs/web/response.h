@@ -33,6 +33,12 @@ public:
 	/// @brief Constructor from a server socket
 	response( net::tcp_socket &socket );
 
+	virtual ~response( void );
+	response( const response & ) = default;
+	response( response && ) = default;
+	response &operator=( const response & ) = default;
+	response &operator=( response && ) = default;
+
 	/// @brief Stream operator to add to response content.
 	response &operator<<( const std::string &t )
 	{

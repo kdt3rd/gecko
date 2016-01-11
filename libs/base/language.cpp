@@ -81,11 +81,11 @@ std::string language( void )
 	}
 	else
 	{
-		lang = nPos;
+		lang = n;
 	}
 
 	for ( char &x: lang )
-		x = std::tolower( x );
+		x = static_cast<char>( std::tolower( x ) );
 
 	return lang.substr( 0, lang.find_first_of( "-_@." ) );
 }

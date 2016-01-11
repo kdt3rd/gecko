@@ -28,13 +28,13 @@ void color_wheel::create( const std::shared_ptr<canvas> &c, const base::point &c
 		double m = double(i) / double(_data_size);
 		double a = m * PI * 2.0;
 		auto p = center + base::point::polar( radius, a );
-		coords.push_back( p.x() );
-		coords.push_back( p.y() );
+		coords.push_back( static_cast<float>( p.x() ) );
+		coords.push_back( static_cast<float>( p.y() ) );
 
 		color.set_hsl( a, 1.0, 0.4 );
-		coords.push_back( color.red() );
-		coords.push_back( color.green() );
-		coords.push_back( color.blue() );
+		coords.push_back( static_cast<float>( color.red() ) );
+		coords.push_back( static_cast<float>( color.green() ) );
+		coords.push_back( static_cast<float>( color.blue() ) );
 	}
 
 	_fill_prog = c->program( "color_mesh.vert", "color_mesh.frag" );

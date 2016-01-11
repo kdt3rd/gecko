@@ -35,7 +35,7 @@ public:
 
 	// Compile-time check for any missing operator() implementation
 	template<typename T>
-	type operator()( T a )
+	type operator()( T /*a*/ )
 	{
 		static_assert( base::always_false<T>::value, "missing operator() for variant types" );
 		return type();

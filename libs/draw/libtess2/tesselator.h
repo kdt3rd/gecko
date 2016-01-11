@@ -33,6 +33,9 @@
 #ifndef TESSELATOR_H
 #define TESSELATOR_H
 
+#include <cstdint>
+#include <cstdlib>
+
 // See OpenGL Red Book for description of the winding rules
 // http://www.glprogramming.com/red/chapter11.html
 enum TessWindingRule
@@ -116,7 +119,7 @@ typedef int TESSindex;
 struct TESStesselator;
 struct TESSalloc;
 
-#define TESS_UNDEF (~(TESSindex)0)
+#define TESS_UNDEF (~TESSindex(0))
 
 // Custom memory allocator interface.
 // The internal memory allocator allocates mesh edges, vertices and faces
@@ -136,8 +139,8 @@ struct TESSalloc;
 // number of expected extra vertices.
 struct TESSalloc
 {
-	void *( *memalloc )( void *userData, unsigned int size );
-	void *( *memrealloc )( void *userData, void *ptr, unsigned int size );
+	void *( *memalloc )( void *userData, size_t size );
+	void *( *memrealloc )( void *userData, void *ptr, size_t size );
 	void ( *memfree )( void *userData, void *ptr );
 	void *userData;				// User data passed to the allocator functions.
 	int meshEdgeBucketSize;		// 512

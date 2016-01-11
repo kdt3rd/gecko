@@ -59,7 +59,7 @@ public:
 		_variables.emplace( std::make_pair( n, variable( n, t ) ) );
 	}
 
-	void add_function( const std::u32string &n, const std::shared_ptr<function> &f )
+	void add_function( const std::u32string & /*n*/, const std::shared_ptr<function> & /*f*/ )
 	{
 		// TODO
 		/*

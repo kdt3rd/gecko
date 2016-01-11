@@ -35,9 +35,9 @@ int safemain( int argc, char *argv[] )
 		test.message( "print_param {0} {1} {2}", x, y, z ? "true" : "false" );
 	};
 
-	server.method<void(void)>( "string_message" ) = []( void )
+	server.method<base::json(void)>( "string_message" ) = []( void ) -> base::json
 	{
-		return "Hello World";
+		return base::json("Hello World");
 	};
 
 	test["void_call"] = [&]( void )
@@ -48,10 +48,10 @@ int safemain( int argc, char *argv[] )
 		params.push_back( false );
 
 		base::json rpc;
-		rpc["jsonrpc"] = "2.0";
-		rpc["method"] = "print_param";
+		rpc["jsonrpc"] = std::string( "2.0" );
+		rpc["method"] = std::string( "print_param" );
 		rpc["params"] = std::move( params );
-		rpc["id"] = 1;
+		rpc["id"] = base::json( 1 );
 
 		test.message( "return {0}", server.local_call( rpc ) );
 		test.success( "void_call successful" );

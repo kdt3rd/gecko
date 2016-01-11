@@ -185,8 +185,8 @@ namespace base
 		/// Check for infinity.
 		/// \tparam T argument type (builtin floating point type)
 		/// \param arg value to query
-		/// \retval true if infinity
-		/// \retval false else
+		/// \return true if infinity
+		/// \return false else
 		template<typename T> bool builtin_isinf(T arg)
 		{
 			return std::isinf(arg);
@@ -195,8 +195,8 @@ namespace base
 		/// Check for NaN.
 		/// \tparam T argument type (builtin floating point type)
 		/// \param arg value to query
-		/// \retval true if not a number
-		/// \retval false else
+		/// \return true if not a number
+		/// \return false else
 		template<typename T> bool builtin_isnan(T arg)
 		{
 			return std::isnan(arg);
@@ -205,8 +205,8 @@ namespace base
 		/// Check sign.
 		/// \tparam T argument type (builtin floating point type)
 		/// \param arg value to query
-		/// \retval true if signbit set
-		/// \retval false else
+		/// \return true if signbit set
+		/// \return false else
 		template<typename T> bool builtin_signbit(T arg)
 		{
 			return std::signbit(arg);
@@ -301,7 +301,7 @@ namespace base
 		/// \return binary representation of half-precision value
 		template<std::float_round_style R> uint16 float2half_impl(float value, false_type)
 		{
-			uint16 hbits = builtin_signbit(value) << 15;
+			uint16 hbits = static_cast<uint16>( builtin_signbit(value) << 15 );
 			if(value == 0.0f)
 				return hbits;
 			if(builtin_isnan(value))
@@ -348,7 +348,7 @@ namespace base
 		/// Convert single-precision to half-precision.
 		/// \param value single-precision value
 		/// \return binary representation of half-precision value
-		template<std::float_round_style R> uint16 float2half(float value)
+		template<std::float_round_style R> constexpr uint16 float2half(float value)
 		{
 			return float2half_impl<R>(value, bool_type<std::numeric_limits<float>::is_iec559&&sizeof(uint32)==sizeof(float)>());
 		}
@@ -720,7 +720,7 @@ namespace base
 		friend struct detail::unary_specialized<half>;
 		friend struct detail::binary_specialized<half,half>;
 		template<typename,typename,std::float_round_style> friend struct detail::half_caster;
-		friend class std::numeric_limits<half>;
+		friend struct std::numeric_limits<half>;
 		friend struct std::hash<half>;
 
 	public:
@@ -733,7 +733,6 @@ namespace base
 		constexpr half() : data_() {}
 
 		/// Copy constructor.
-		/// \tparam T type of concrete half expression
 		/// \param rhs half expression to copy from
 		half(detail::expr rhs) : data_(detail::float2half<round_style>(rhs)) {}
 
@@ -750,7 +749,6 @@ namespace base
 		operator float() const { return detail::half2float(data_); }
 
 		/// Assignment operator.
-		/// \tparam T type of concrete half expression
 		/// \param rhs half expression to copy from
 		/// \return reference to this half
 		half& operator=(detail::expr rhs) { return *this = static_cast<float>(rhs); }
@@ -824,7 +822,7 @@ namespace base
 
 	private:
 		/// Rounding mode to use (always `std::round_indeterminate`)
-		static const std::float_round_style round_style = (std::float_round_style)(HALF_ROUND_STYLE);
+		static const std::float_round_style round_style = static_cast<std::float_round_style>(HALF_ROUND_STYLE);
 
 		/// Internal binary representation
 		detail::uint16 data_;
@@ -1311,7 +1309,7 @@ namespace base
 					return half(half::binary, (to.data_&0x8000)+1);
 				bool lt = (signbit(from) ? (static_cast<int17>(0x8000)-from.data_) : static_cast<int17>(from.data_)) <
 					(signbit(to) ? (static_cast<int17>(0x8000)-to.data_) : static_cast<int17>(to.data_));
-				return half(half::binary, from.data_+(((from.data_>>15)^static_cast<uint16>(lt))<<1)-1);
+				return half(half::binary, from.data_+uint16(((from.data_>>15)^static_cast<uint16>(lt))<<1)-uint16(1));
 			}
 
 			/// Enumeration implementation.
@@ -1323,11 +1321,11 @@ namespace base
 				if(isnan(from))
 					return from;
 				long double lfrom = static_cast<long double>(from);
-				if(builtin_isnan(to) || lfrom == to)
+				if(builtin_isnan(to) || std::equal_to<long double>()( lfrom, to) )
 					return half(static_cast<float>(to));
 				if(!(from.data_&0x7FFF))
-					return half(half::binary, (static_cast<detail::uint16>(builtin_signbit(to))<<15)+1);
-				return half(half::binary, from.data_+(((from.data_>>15)^static_cast<uint16>(lfrom<to))<<1)-1);
+					return half(half::binary, static_cast<detail::uint16>((builtin_signbit(to)<<15)+1));
+				return half(half::binary, from.data_+uint16(((from.data_>>15)^static_cast<uint16>(lfrom<to))<<1)-uint16(1));
 			}
 
 			/// Sign implementation
@@ -1338,8 +1336,8 @@ namespace base
 
 			/// Classification implementation.
 			/// \param arg value to classify
-			/// \retval true if infinite number
-			/// \retval false else
+			/// \return true if infinite number
+			/// \return false else
 			static int fpclassify(half arg)
 			{
 				unsigned int abs = arg.data_ & 0x7FFF;
@@ -1354,85 +1352,85 @@ namespace base
 
 			/// Classification implementation.
 			/// \param arg value to classify
-			/// \retval true if finite number
-			/// \retval false else
+			/// \return true if finite number
+			/// \return false else
 			static bool isfinite(half arg) { return (arg.data_&0x7C00) != 0x7C00; }
 
 			/// Classification implementation.
 			/// \param arg value to classify
-			/// \retval true if infinite number
-			/// \retval false else
+			/// \return true if infinite number
+			/// \return false else
 			static bool isinf(half arg) { return (arg.data_&0x7FFF) == 0x7C00; }
 
 			/// Classification implementation.
 			/// \param arg value to classify
-			/// \retval true if not a number
-			/// \retval false else
+			/// \return true if not a number
+			/// \return false else
 			static bool isnan(half arg) { return (arg.data_&0x7FFF) > 0x7C00; }
 
 			/// Classification implementation.
 			/// \param arg value to classify
-			/// \retval true if normal number
-			/// \retval false else
+			/// \return true if normal number
+			/// \return false else
 			static bool isnormal(half arg) { return ((arg.data_&0x7C00)!=0) & ((arg.data_&0x7C00)!=0x7C00); }
 
 			/// Sign bit implementation.
 			/// \param arg value to check
-			/// \retval true if signed
-			/// \retval false if unsigned
+			/// \return true if signed
+			/// \return false if unsigned
 			static bool signbit(half arg) { return (arg.data_&0x8000) != 0; }
 
 			/// Comparison implementation.
 			/// \param x first operand
 			/// \param y second operand
-			/// \retval true if operands equal
-			/// \retval false else
+			/// \return true if operands equal
+			/// \return false else
 			static bool isequal(half x, half y) { return (x.data_==y.data_ || !((x.data_|y.data_)&0x7FFF)) && !isnan(x); }
 
 			/// Comparison implementation.
 			/// \param x first operand
 			/// \param y second operand
-			/// \retval true if operands not equal
-			/// \retval false else
+			/// \return true if operands not equal
+			/// \return false else
 			static bool isnotequal(half x, half y) { return (x.data_!=y.data_ && ((x.data_|y.data_)&0x7FFF)) || isnan(x); }
 
 			/// Comparison implementation.
 			/// \param x first operand
 			/// \param y second operand
-			/// \retval true if \a x > \a y
-			/// \retval false else
+			/// \return true if \a x > \a y
+			/// \return false else
 			static bool isgreater(half x, half y) { return !isnan(x) && !isnan(y) && ((signbit(x) ? (static_cast<int17>(0x8000)-x.data_) :
 				static_cast<int17>(x.data_)) > (signbit(y) ? (static_cast<int17>(0x8000)-y.data_) : static_cast<int17>(y.data_))); }
 
 			/// Comparison implementation.
 			/// \param x first operand
 			/// \param y second operand
-			/// \retval true if \a x >= \a y
-			/// \retval false else
+			/// \return true if \a x >= \a y
+			/// \return false else
 			static bool isgreaterequal(half x, half y) { return !isnan(x) && !isnan(y) && ((signbit(x) ? (static_cast<int17>(0x8000)-x.data_) :
 				static_cast<int17>(x.data_)) >= (signbit(y) ? (static_cast<int17>(0x8000)-y.data_) : static_cast<int17>(y.data_))); }
 
 			/// Comparison implementation.
 			/// \param x first operand
 			/// \param y second operand
-			/// \retval true if \a x < \a y
-			/// \retval false else
+			/// \return true if \a x < \a y
+			/// \return false else
 			static bool isless(half x, half y) { return !isnan(x) && !isnan(y) && ((signbit(x) ? (static_cast<int17>(0x8000)-x.data_) :
 				static_cast<int17>(x.data_)) < (signbit(y) ? (static_cast<int17>(0x8000)-y.data_) : static_cast<int17>(y.data_))); }
 
 			/// Comparison implementation.
 			/// \param x first operand
 			/// \param y second operand
-			/// \retval true if \a x <= \a y
-			/// \retval false else
+			/// \return true if \a x <= \a y
+			/// \return false else
 			static bool islessequal(half x, half y) { return !isnan(x) && !isnan(y) && ((signbit(x) ? (static_cast<int17>(0x8000)-x.data_) :
 				static_cast<int17>(x.data_)) <= (signbit(y) ? (static_cast<int17>(0x8000)-y.data_) : static_cast<int17>(y.data_))); }
 
 			/// Comparison implementation.
 			/// \param x first operand
 			/// \param y second operand
-			/// \retval true neither \a x > \a y nor \a x < \a y
-			/// \retval false else
+			/// \return true neither \a x > \a y nor \a x < \a y
+			/// \return false else
 			static bool islessgreater(half x, half y)
 			{
 				if(isnan(x) || isnan(y))
@@ -1445,8 +1443,8 @@ namespace base
 			/// Comparison implementation.
 			/// \param x first operand
 			/// \param y second operand
-			/// \retval true if operand unordered
-			/// \retval false else
+			/// \return true if operand unordered
+			/// \return false else
 			static bool isunordered(half x, half y) { return isnan(x) || isnan(y); }
 
 		private:
@@ -1543,35 +1541,35 @@ namespace base
 		/// \tparam T destination type
 		/// \tparam U source type
 		/// \tparam R rounding mode to use
-		template<typename T,typename U,std::float_round_style R=(std::float_round_style)(HALF_ROUND_STYLE)> struct half_caster {};
+		template<typename T,typename U,std::float_round_style R=std::float_round_style(HALF_ROUND_STYLE)> struct half_caster {};
 		template<typename U,std::float_round_style R> struct half_caster<half,U,R>
 		{
 			static_assert(std::is_arithmetic<U>::value, "half_cast from non-arithmetic type unsupported");
 
 
 			typedef half type;
-			static half cast(U arg) { return cast_impl(arg, is_float<U>()); };
+			static constexpr half cast(U arg) { return cast_impl(arg, is_float<U>()); }
 
 		private:
-			static half cast_impl(U arg, true_type) { return half(half::binary, float2half<R>(static_cast<float>(arg))); }
-			static half cast_impl(U arg, false_type) { return half(half::binary, int2half<R>(arg)); }
+			static constexpr half cast_impl(U arg, true_type) { return half(half::binary, float2half<R>(static_cast<float>(arg))); }
+			static constexpr half cast_impl(U arg, false_type) { return half(half::binary, int2half<R>(arg)); }
 		};
 		template<typename T,std::float_round_style R> struct half_caster<T,half,R>
 		{
 			static_assert(std::is_arithmetic<T>::value, "half_cast to non-arithmetic type unsupported");
 
 			typedef T type;
-			template<typename U> static T cast(U arg) { return cast_impl(arg, is_float<T>()); }
+			template<typename U> static constexpr T cast(U arg) { return cast_impl(arg, is_float<T>()); }
 
 		private:
-			static T cast_impl(float arg, true_type) { return static_cast<T>(arg); }
-			static T cast_impl(half arg, false_type) { return half2int<R,T>(arg.data_); }
+			static constexpr T cast_impl(float arg, true_type) { return static_cast<T>(arg); }
+			static constexpr T cast_impl(half arg, false_type) { return half2int<R,T>(arg.data_); }
 		};
 		template<typename T,std::float_round_style R> struct half_caster<T,expr,R> : public half_caster<T,half,R> {};
 		template<std::float_round_style R> struct half_caster<half,half,R>
 		{
 			typedef half type;
-			static half cast(half arg) { return arg; }
+			static constexpr half cast(half arg) { return arg; }
 		};
 		template<std::float_round_style R> struct half_caster<half,expr,R> : public half_caster<half,half,R> {};
 
@@ -1581,43 +1579,43 @@ namespace base
 		/// Comparison for equality.
 		/// \param x first operand
 		/// \param y second operand
-		/// \retval true if operands equal
-		/// \retval false else
+		/// \return true if operands equal
+		/// \return false else
 		template<typename T,typename U> typename enable<bool,T,U>::type operator==(T x, U y) { return functions::isequal(x, y); }
 
 		/// Comparison for inequality.
 		/// \param x first operand
 		/// \param y second operand
-		/// \retval true if operands not equal
-		/// \retval false else
+		/// \return true if operands not equal
+		/// \return false else
 		template<typename T,typename U> typename enable<bool,T,U>::type operator!=(T x, U y) { return functions::isnotequal(x, y); }
 
 		/// Comparison for less than.
 		/// \param x first operand
 		/// \param y second operand
-		/// \retval true if \a x less than \a y
-		/// \retval false else
+		/// \return true if \a x less than \a y
+		/// \return false else
 		template<typename T,typename U> typename enable<bool,T,U>::type operator<(T x, U y) { return functions::isless(x, y); }
 
 		/// Comparison for greater than.
 		/// \param x first operand
 		/// \param y second operand
-		/// \retval true if \a x greater than \a y
-		/// \retval false else
+		/// \return true if \a x greater than \a y
+		/// \return false else
 		template<typename T,typename U> typename enable<bool,T,U>::type operator>(T x, U y) { return functions::isgreater(x, y); }
 
 		/// Comparison for less equal.
 		/// \param x first operand
 		/// \param y second operand
-		/// \retval true if \a x less equal \a y
-		/// \retval false else
+		/// \return true if \a x less equal \a y
+		/// \return false else
 		template<typename T,typename U> typename enable<bool,T,U>::type operator<=(T x, U y) { return functions::islessequal(x, y); }
 
 		/// Comparison for greater equal.
 		/// \param x first operand
 		/// \param y second operand
-		/// \retval true if \a x greater equal \a y
-		/// \retval false else
+		/// \return true if \a x greater equal \a y
+		/// \return false else
 		template<typename T,typename U> typename enable<bool,T,U>::type operator>=(T x, U y) { return functions::isgreaterequal(x, y); }
 
 		/// \}
@@ -2121,9 +2119,9 @@ namespace base
 		/// Extract exponent.
 		/// \param arg number to query
 		/// \return floating point exponent
-		/// \retval FP_ILOGB0 for zero
-		/// \retval FP_ILOGBNAN for NaN
-		/// \retval MAX_INT for infinity
+		/// \return FP_ILOGB0 for zero
+		/// \return FP_ILOGBNAN for NaN
+		/// \return MAX_INT for infinity
 //		template<typename T> typename enable<int,T>::type ilogb(T arg) { return functions::ilogb(arg); }
 		inline int ilogb(half arg) { return functions::ilogb(arg); }
 		inline int ilogb(expr arg) { return functions::ilogb(arg); }
@@ -2170,51 +2168,51 @@ namespace base
 
 		/// Classify floating point value.
 		/// \param arg number to classify
-		/// \retval FP_ZERO for positive and negative zero
-		/// \retval FP_SUBNORMAL for subnormal numbers
-		/// \retval FP_INFINITY for positive and negative infinity
-		/// \retval FP_NAN for NaNs
-		/// \retval FP_NORMAL for all other (normal) values
+		/// \return FP_ZERO for positive and negative zero
+		/// \return FP_SUBNORMAL for subnormal numbers
+		/// \return FP_INFINITY for positive and negative infinity
+		/// \return FP_NAN for NaNs
+		/// \return FP_NORMAL for all other (normal) values
 //		template<typename T> typename enable<int,T>::type fpclassify(T arg) { return functions::fpclassify(arg); }
 		inline int fpclassify(half arg) { return functions::fpclassify(arg); }
 		inline int fpclassify(expr arg) { return functions::fpclassify(arg); }
 
 		/// Check if finite number.
 		/// \param arg number to check
-		/// \retval true if neither infinity nor NaN
-		/// \retval false else
+		/// \return true if neither infinity nor NaN
+		/// \return false else
 //		template<typename T> typename enable<bool,T>::type isfinite(T arg) { return functions::isfinite(arg); }
 		inline bool isfinite(half arg) { return functions::isfinite(arg); }
 		inline bool isfinite(expr arg) { return functions::isfinite(arg); }
 
 		/// Check for infinity.
 		/// \param arg number to check
-		/// \retval true for positive or negative infinity
-		/// \retval false else
+		/// \return true for positive or negative infinity
+		/// \return false else
 //		template<typename T> typename enable<bool,T>::type isinf(T arg) { return functions::isinf(arg); }
 		inline bool isinf(half arg) { return functions::isinf(arg); }
 		inline bool isinf(expr arg) { return functions::isinf(arg); }
 
 		/// Check for NaN.
 		/// \param arg number to check
-		/// \retval true for NaNs
-		/// \retval false else
+		/// \return true for NaNs
+		/// \return false else
 //		template<typename T> typename enable<bool,T>::type isnan(T arg) { return functions::isnan(arg); }
 		inline bool isnan(half arg) { return functions::isnan(arg); }
 		inline bool isnan(expr arg) { return functions::isnan(arg); }
 
 		/// Check if normal number.
 		/// \param arg number to check
-		/// \retval true if normal number
-		/// \retval false if either subnormal, zero, infinity or NaN
+		/// \return true if normal number
+		/// \return false if either subnormal, zero, infinity or NaN
 //		template<typename T> typename enable<bool,T>::type isnormal(T arg) { return functions::isnormal(arg); }
 		inline bool isnormal(half arg) { return functions::isnormal(arg); }
 		inline bool isnormal(expr arg) { return functions::isnormal(arg); }
 
 		/// Check sign.
 		/// \param arg number to check
-		/// \retval true for negative number
-		/// \retval false for positive number
+		/// \return true for negative number
+		/// \return false for positive number
 //		template<typename T> typename enable<bool,T>::type signbit(T arg) { return functions::signbit(arg); }
 		inline bool signbit(half arg) { return functions::signbit(arg); }
 		inline bool signbit(expr arg) { return functions::signbit(arg); }
@@ -2226,8 +2224,8 @@ namespace base
 		/// Comparison for greater than.
 		/// \param x first operand
 		/// \param y second operand
-		/// \retval true if \a x greater than \a y
-		/// \retval false else
+		/// \return true if \a x greater than \a y
+		/// \return false else
 //		template<typename T,typename U> typename enable<bool,T,U>::type isgreater(T x, U y) { return functions::isgreater(x, y); }
 		inline bool isgreater(half x, half y) { return functions::isgreater(x, y); }
 		inline bool isgreater(half x, expr y) { return functions::isgreater(x, y); }
@@ -2237,8 +2235,8 @@ namespace base
 		/// Comparison for greater equal.
 		/// \param x first operand
 		/// \param y second operand
-		/// \retval true if \a x greater equal \a y
-		/// \retval false else
+		/// \return true if \a x greater equal \a y
+		/// \return false else
 //		template<typename T,typename U> typename enable<bool,T,U>::type isgreaterequal(T x, U y) { return functions::isgreaterequal(x, y); }
 		inline bool isgreaterequal(half x, half y) { return functions::isgreaterequal(x, y); }
 		inline bool isgreaterequal(half x, expr y) { return functions::isgreaterequal(x, y); }
@@ -2248,8 +2246,8 @@ namespace base
 		/// Comparison for less than.
 		/// \param x first operand
 		/// \param y second operand
-		/// \retval true if \a x less than \a y
-		/// \retval false else
+		/// \return true if \a x less than \a y
+		/// \return false else
 //		template<typename T,typename U> typename enable<bool,T,U>::type isless(T x, U y) { return functions::isless(x, y); }
 		inline bool isless(half x, half y) { return functions::isless(x, y); }
 		inline bool isless(half x, expr y) { return functions::isless(x, y); }
@@ -2259,8 +2257,8 @@ namespace base
 		/// Comparison for less equal.
 		/// \param x first operand
 		/// \param y second operand
-		/// \retval true if \a x less equal \a y
-		/// \retval false else
+		/// \return true if \a x less equal \a y
+		/// \return false else
 //		template<typename T,typename U> typename enable<bool,T,U>::type islessequal(T x, U y) { return functions::islessequal(x, y); }
 		inline bool islessequal(half x, half y) { return functions::islessequal(x, y); }
 		inline bool islessequal(half x, expr y) { return functions::islessequal(x, y); }
@@ -2270,8 +2268,8 @@ namespace base
 		/// Comarison for less or greater.
 		/// \param x first operand
 		/// \param y second operand
-		/// \retval true if either less or greater
-		/// \retval false else
+		/// \return true if either less or greater
+		/// \return false else
 //		template<typename T,typename U> typename enable<bool,T,U>::type islessgreater(T x, U y) { return functions::islessgreater(x, y); }
 		inline bool islessgreater(half x, half y) { return functions::islessgreater(x, y); }
 		inline bool islessgreater(half x, expr y) { return functions::islessgreater(x, y); }
@@ -2281,8 +2279,8 @@ namespace base
 		/// Check if unordered.
 		/// \param x first operand
 		/// \param y second operand
-		/// \retval true if unordered (one or two NaN operands)
-		/// \retval false else
+		/// \return true if unordered (one or two NaN operands)
+		/// \return false else
 //		template<typename T,typename U> typename enable<bool,T,U>::type isunordered(T x, U y) { return functions::isunordered(x, y); }
 		inline bool isunordered(half x, half y) { return functions::isunordered(x, y); }
 		inline bool isunordered(half x, expr y) { return functions::isunordered(x, y); }

@@ -39,7 +39,7 @@ std::string web_base::read_line( net::tcp_socket &socket )
 	socket.read( &c, 1 );
 	if ( c != '\n' )
 		throw_runtime( "invalid HTTP line" );
-	return std::move( result );
+	return result;
 }
 
 ////////////////////////////////////////
@@ -52,12 +52,12 @@ void web_base::read_content( net::tcp_socket &socket )
 	{
 		if ( te->second == "chunked" )
 		{
-			int size = 0;
+			size_t size = 0;
 			do
 			{
 				std::string line = read_line( socket );
 				size_t pos = 0;
-				size = std::stoi( line, &pos, 16 );
+				size = std::stoul( line, &pos, 16 );
 				if ( size > 0 )
 				{
 					size_t off = _content.size();
@@ -77,7 +77,7 @@ void web_base::read_content( net::tcp_socket &socket )
 	}
 	else if ( cl != _header.end() )
 	{
-		int size = std::stoi( cl->second, nullptr, 10 );
+		size_t size = std::stoul( cl->second, nullptr, 10 );
 		size_t off = _content.size();
 		_content.resize( _content.size() + size );
 		socket.read( &_content[off], size );

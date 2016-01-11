@@ -3,18 +3,24 @@
 
 #include <script/extents.h>
 
+// meh, just disable all these warnings for this file since freetype is C based
+#pragma GCC diagnostic ignored "-Wreserved-id-macro"
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wdocumentation"
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_STROKER_H
 #include FT_LCD_FILTER_H
 #include FT_GLYPH_H
 
-namespace {
-
 #undef __FTERRORS_H__
 #define FT_ERRORDEF( e, v, s )  { e, s },
 #define FT_ERROR_START_LIST     {
 #define FT_ERROR_END_LIST       { 0, 0 } };
+
+namespace {
+
 const struct {
     int          code;
     const char*  message;
@@ -81,7 +87,7 @@ font::font( FT_Face face, std::string fam, std::string style, double pixsize )
 			_size = bestSize[0];
 
 		// otherwise we have to use FT_Set_Pixel_Sizes
-		err = FT_Set_Pixel_Sizes( _face, bestSize[0], bestSize[1] );
+		err = FT_Set_Pixel_Sizes( _face, static_cast<FT_UInt>( bestSize[0] ), static_cast<FT_UInt>( bestSize[1] ) );
 		if ( err )
 			throw std::runtime_error( "Unable to set fixed character size" );
 	}
@@ -164,14 +170,13 @@ font::get_glyph( char32_t char_code )
 
 		FT_GlyphSlot slot = _face->glyph;
 
-        int w = slot->bitmap.width;
-        int h = slot->bitmap.rows;
+        int w = static_cast<int>( slot->bitmap.width );
+        int h = static_cast<int>( slot->bitmap.rows );
 
 		if ( w > 0 && h > 0 )
 		{
 			const uint8_t *glData = slot->bitmap.buffer;
-			size_t glPitch = slot->bitmap.pitch;
-			add_glyph( char_code, glData, glPitch, w, h );
+			add_glyph( char_code, glData, slot->bitmap.pitch, w, h );
 		}
 
 		text_extents &gle = _glyph_cache[char_code];

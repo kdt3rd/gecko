@@ -136,7 +136,8 @@ public:
 	void enable_vertex_attrib_array( program::attribute attr, size_t size, data_type dt, size_t stride = 0, const void *data = nullptr )
 	{
 		glEnableVertexAttribArray( attr );
-		glVertexAttribPointer( attr, size, static_cast<GLenum>( dt ), GL_FALSE, stride, data );
+		glVertexAttribPointer( attr, static_cast<GLint>(size), static_cast<GLenum>( dt ), GL_FALSE,
+							   static_cast<GLsizei>(stride), data );
 	}
 
 	/// @brief Disable vertex array

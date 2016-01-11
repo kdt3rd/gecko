@@ -24,7 +24,7 @@ public:
 	void set_input( const std::string &in_file );
 	void set_output( const std::string &out_file );
 	void set_error( const std::string &err_file );
-	void set_ouput_error( const std::string &out_file );
+	void set_output_error( const std::string &out_file );
 
 	void set_pipe( bool in, bool out, bool err );
 

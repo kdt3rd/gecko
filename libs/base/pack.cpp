@@ -200,7 +200,7 @@ pack::add( size_t idx, const area &a )
 {
 	add_waste( idx, a.width, a.height, a.y );
 
-	_skyLine.emplace( _skyLine.begin() + idx, a.x, a.y + a.height, a.width );
+	_skyLine.emplace( _skyLine.begin() + long(idx), a.x, a.y + a.height, a.width );
 
 	for ( size_t i = idx + 1; i < _skyLine.size(); ++i )
 	{
@@ -214,7 +214,7 @@ pack::add( size_t idx, const area &a )
 
 			if ( cur.width <= 0 )
 			{
-				_skyLine.erase( _skyLine.begin() + i );
+				_skyLine.erase( _skyLine.begin() + long(i) );
 				--i;
 				continue;
 			}
@@ -239,7 +239,7 @@ pack::merge( void )
 		if ( cur.y == next.y )
 		{
 			cur.width += next.width;
-			_skyLine.erase( _skyLine.begin() + (i + 1) );
+			_skyLine.erase( _skyLine.begin() + long(i + 1) );
 			--i;
 		}
 	}
@@ -323,7 +323,7 @@ pack::waste_insert( int aw, int ah )
 		right.height = leftover.height;
 	}
 
-	_freeRects.erase( _freeRects.begin() + idx );
+	_freeRects.erase( _freeRects.begin() + long(idx) );
 	if ( bottom.width > 0 && bottom.height > 0 )
 		_freeRects.emplace_back( bottom );
 	if ( right.width > 0 && right.height > 0 )
@@ -341,13 +341,13 @@ pack::waste_insert( int aw, int ah )
 				{
 					curI.y -= curJ.height;
 					curI.height += curJ.height;
-					_freeRects.erase( _freeRects.begin() + j );
+					_freeRects.erase( _freeRects.begin() + long(j) );
 					--j;
 				}
 				else if ( curI.y + curI.height == curJ.y )
 				{
 					curI.height += curJ.height;
-					_freeRects.erase( _freeRects.begin() + j );
+					_freeRects.erase( _freeRects.begin() + long(j) );
 					--j;
 				}
 			}
@@ -357,13 +357,13 @@ pack::waste_insert( int aw, int ah )
 				{
 					curI.x -= curJ.width;
 					curI.width += curJ.width;
-					_freeRects.erase( _freeRects.begin() + j );
+					_freeRects.erase( _freeRects.begin() + long(j) );
 					--j;
 				}
 				else if ( curI.x + curI.width == curJ.x )
 				{
 					curI.width += curJ.width;
-					_freeRects.erase( _freeRects.begin() + j );
+					_freeRects.erase( _freeRects.begin() + long(j) );
 					--j;
 				}
 			}
@@ -380,7 +380,7 @@ pack::waste_insert( int aw, int ah )
 
 
 void
-pack::add_waste( size_t idx, int w, int h, int y )
+pack::add_waste( size_t idx, int w, int /*h*/, int y )
 {
 	const int rectLeft = _skyLine[idx].x;
 	const int rectRight = rectLeft + w;

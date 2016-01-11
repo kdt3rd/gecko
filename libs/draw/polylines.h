@@ -22,9 +22,12 @@ public:
 
 	/// @brief Move the cursor
 	/// Move the cursor to the given position
-	/// @param p
+	/// @param p desired position
 	void move_to( const base::point &p );
 
+	/// @brief Add a line
+	/// draw a line to the given position
+	/// @param p desired position
 	void line_to( const base::point &p );
 
 	void quadratic_to( const base::point &p1, const base::point &p2 );

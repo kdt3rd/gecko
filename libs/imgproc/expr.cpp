@@ -115,7 +115,7 @@ public:
 
 	// Compile-time check for any missing operator() implementation
 	template<typename T>
-	type operator()( T a )
+	type operator()( T /*a*/ )
 	{
 		static_assert( base::always_false<T>::value, "missing operator() for printer" );
 		return type();
@@ -183,7 +183,7 @@ public:
 		return std::make_shared<expr>( if_expr( e.condition()->clone(), e.when_true()->clone(), e.when_false()->clone() ) );
 	}
 
-	std::shared_ptr<expr> operator()( const range_expr &e )
+	std::shared_ptr<expr> operator()( const range_expr & /*e*/ )
 	{
 		throw_not_yet();
 	}
@@ -205,7 +205,7 @@ public:
 
 	// Compile-time check for any missing operator() implementation
 	template<typename T>
-	std::shared_ptr<expr> operator()( T a )
+	std::shared_ptr<expr> operator()( T /*a*/ )
 	{
 		static_assert( base::always_false<T>::value, "missing operator() for printer" );
 		return std::shared_ptr<expr>();

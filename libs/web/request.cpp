@@ -11,8 +11,14 @@ request::request( net::tcp_socket &socket )
 {
 	std::string line = read_line( socket );
 	size_t off = line.find( ' ' );
+	if ( off == std::string::npos )
+		throw_runtime( "invalid HTTP request" );
 	size_t off2 = line.find( ' ', off + 1 );
+	if ( off2 == std::string::npos )
+		throw_runtime( "invalid HTTP request" );
 	size_t off3 = line.find( '/', off2 + 1 );
+	if ( off3 == std::string::npos )
+		throw_runtime( "invalid HTTP request" );
 	_method = line.substr( 0, off );
 	std::string tmp_path = line.substr( off + 1, off2 - off - 1 );
 	_version = line.substr( off3 + 1 );
@@ -20,7 +26,9 @@ request::request( net::tcp_socket &socket )
 	line = read_line( socket );
 	while ( !line.empty() )
 	{
-		size_t off = line.find( ':' );
+		off = line.find( ':' );
+		if ( off == std::string::npos )
+			throw_runtime( "invalid HTTP request" );
 		std::string key( line.substr( 0, off ) );
 		std::string value( line.substr( off + 2 ) );
 		_header[key] = value;
@@ -38,6 +46,12 @@ request::request( net::tcp_socket &socket )
 
 request::request( std::string method, const base::uri &path, std::string version )
 	: web_base( std::move( version ) ), _method( std::move( method ) ), _path( path )
+{
+}
+
+////////////////////////////////////////
+
+request::~request( void )
 {
 }
 

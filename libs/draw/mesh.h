@@ -103,18 +103,18 @@ private:
 	template<typename ...More>
 	void append( const base::point &p, More ...args )
 	{
-		_data.push_back( p.x() );
-		_data.push_back( p.y() );
+		_data.push_back( static_cast<float>( p.x() ) );
+		_data.push_back( static_cast<float>( p.y() ) );
 		append( args... );
 	}
 
 	template<typename ...More>
 	void append( const base::color &c, More ...args )
 	{
-		_data.push_back( c.red() );
-		_data.push_back( c.green() );
-		_data.push_back( c.blue() );
-		_data.push_back( c.alpha() );
+		_data.push_back( static_cast<float>( c.red() ) );
+		_data.push_back( static_cast<float>( c.green() ) );
+		_data.push_back( static_cast<float>( c.blue() ) );
+		_data.push_back( static_cast<float>( c.alpha() ) );
 		append( args... );
 	}
 

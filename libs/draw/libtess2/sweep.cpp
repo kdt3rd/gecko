@@ -92,7 +92,8 @@ static void SweepEvent( TESStesselator *tess, TESSvertex *vEvent );
 static void WalkDirtyRegions( TESStesselator *tess, ActiveRegion *regUp );
 static int CheckForRightSplice( TESStesselator *tess, ActiveRegion *regUp );
 
-static int EdgeLeq( TESStesselator *tess, ActiveRegion *reg1, ActiveRegion *reg2 )
+//static int EdgeLeq( TESStesselator *tess, ActiveRegion *reg1, ActiveRegion *reg2 )
+static int EdgeLeq( void *tV, DictKey key1, DictKey key2 )
 /*
 * Both edges must be directed from right to left (this is the canonical
 * direction for the upper edge of each region).
@@ -105,6 +106,9 @@ static int EdgeLeq( TESStesselator *tess, ActiveRegion *reg1, ActiveRegion *reg2
 * we sort the edges by slope (they would otherwise compare equally).
 */
 {
+	TESStesselator *tess = reinterpret_cast<TESStesselator *>( tV );
+	ActiveRegion *reg1 = reinterpret_cast<ActiveRegion *>( key1 );
+	ActiveRegion *reg2 = reinterpret_cast<ActiveRegion *>( key2 );
 	TESSvertex *event = tess->event;
 	TESShalfEdge *e1, *e2;
 	TESSreal t1, t2;
@@ -271,7 +275,7 @@ static void FinishRegion( TESStesselator *tess, ActiveRegion *reg )
 	TESShalfEdge *e = reg->eUp;
 	TESSface *f = e->Lface;
 
-	f->inside = reg->inside;
+	f->inside = static_cast<char>( reg->inside );
 	f->anEdge = e;   /* optimization for tessMeshTessellateMonoRegion() */
 	DeleteRegion( tess, reg );
 }
@@ -445,15 +449,15 @@ static void VertexWeights( TESSvertex *isect, TESSvertex *org, TESSvertex *dst,
 	TESSreal t1 = VertL1dist( org, isect );
 	TESSreal t2 = VertL1dist( dst, isect );
 
-	weights[0] = ( TESSreal )0.5 * t2 / ( t1 + t2 );
-	weights[1] = ( TESSreal )0.5 * t1 / ( t1 + t2 );
+	weights[0] = TESSreal(0.5) * t2 / ( t1 + t2 );
+	weights[1] = TESSreal(0.5) * t1 / ( t1 + t2 );
 	isect->coords[0] += weights[0] * org->coords[0] + weights[1] * dst->coords[0];
 	isect->coords[1] += weights[0] * org->coords[1] + weights[1] * dst->coords[1];
 //	isect->coords[2] += weights[0]*org->coords[2] + weights[1]*dst->coords[2];
 }
 
 
-static void GetIntersectData( TESStesselator *tess, TESSvertex *isect,
+static void GetIntersectData( TESStesselator * /*tess*/, TESSvertex *isect,
                               TESSvertex *orgUp, TESSvertex *dstUp,
                               TESSvertex *orgLo, TESSvertex *dstLo )
 /*
@@ -575,7 +579,7 @@ static int CheckForLeftSplice( TESStesselator *tess, ActiveRegion *regUp )
 			throw std::runtime_error( "mesh edge split failed" );
 		if ( !tessMeshSplice( tess->mesh, eLo->Sym, e ) )
 			throw std::runtime_error( "mesh splice failed" );
-		e->Lface->inside = regUp->inside;
+		e->Lface->inside = static_cast<char>( regUp->inside );
 	}
 	else
 	{
@@ -588,7 +592,7 @@ static int CheckForLeftSplice( TESStesselator *tess, ActiveRegion *regUp )
 			throw std::runtime_error( "mesh split failed" );
 		if ( !tessMeshSplice( tess->mesh, eUp->Lnext, eLo->Sym ) )
 			throw std::runtime_error( "mesh splice failed" );
-		e->Rface->inside = regUp->inside;
+		e->Rface->inside = static_cast<char>( regUp->inside );
 	}
 	return TRUE;
 }
@@ -1068,7 +1072,7 @@ static void ConnectLeftVertex( TESStesselator *tess, TESSvertex *vEvent )
 	/* Get a pointer to the active region containing vEvent */
 	tmp.eUp = vEvent->anEdge->Sym;
 	/* __GL_DICTLISTKEY */ /* tessDictListSearch */
-	regUp = ( ActiveRegion * )dictKey( dictSearch( tess->dict, &tmp ) );
+	regUp = reinterpret_cast<ActiveRegion *>( dictKey( dictSearch( tess->dict, &tmp ) ) );
 	regLo = RegionBelow( regUp );
 	if ( !regLo )
 	{
@@ -1079,7 +1083,7 @@ static void ConnectLeftVertex( TESStesselator *tess, TESSvertex *vEvent )
 	eLo = regLo->eUp;
 
 	/* Try merging with U or L first */
-	if ( EdgeSign( eUp->Dst, vEvent, eUp->Org ) == 0 )
+	if ( std::equal_to<TESSreal>()(EdgeSign( eUp->Dst, vEvent, eUp->Org ), 0) )
 	{
 		ConnectLeftDegenerate( tess, regUp, vEvent );
 		return;
@@ -1228,7 +1232,7 @@ static void InitEdgeDict( TESStesselator *tess )
 	TESSreal w, h;
 	TESSreal smin, smax, tmin, tmax;
 
-	tess->dict = dictNewDict( &tess->alloc, tess, ( int ( * )( void *, DictKey, DictKey ) ) EdgeLeq );
+	tess->dict = dictNewDict( &tess->alloc, tess, &EdgeLeq );
 	if ( tess->dict == NULL )
 		throw std::runtime_error( "dictionary new failed" );
 
@@ -1250,7 +1254,7 @@ static void DoneEdgeDict( TESStesselator *tess )
 	ActiveRegion *reg;
 //	int fixedEdges = 0;
 
-	while ( ( reg = ( ActiveRegion * )dictKey( dictMin( tess->dict ) ) ) != NULL )
+	while ( ( reg = reinterpret_cast<ActiveRegion *>( dictKey( dictMin( tess->dict ) ) ) ) != NULL )
 	{
 		/*
 		* At the end of all processing, the dictionary should contain
@@ -1326,7 +1330,7 @@ static int InitPriorityQ( TESStesselator *tess )
 	/* Make sure there is enough space for sentinels. */
 	vertexCount += MAX( 8, tess->alloc.extraVertices );
 
-	PriorityQ *pq = tess->pq = pqNewPriorityQ( &tess->alloc, vertexCount, ( int ( * )( PQkey, PQkey ) ) tesvertLeq );
+	PriorityQ *pq = tess->pq = pqNewPriorityQ( &tess->alloc, vertexCount, &tesvertLeq );
 	if ( pq == NULL )
 		return 0;
 
@@ -1412,11 +1416,11 @@ int tessComputeInterior( TESStesselator *tess )
 	if ( !InitPriorityQ( tess ) ) return 0; /* if error */
 	InitEdgeDict( tess );
 
-	while ( ( v = ( TESSvertex * )pqExtractMin( tess->pq ) ) != NULL )
+	while ( ( v = reinterpret_cast<TESSvertex *>( pqExtractMin( tess->pq ) ) ) != NULL )
 	{
 		for ( ;; )
 		{
-			vNext = ( TESSvertex * )pqMinimum( tess->pq );
+			vNext = reinterpret_cast<TESSvertex *>( pqMinimum( tess->pq ) );
 			if ( vNext == NULL || ! VertEq( vNext, v ) )
 				break;
 
@@ -1434,14 +1438,14 @@ int tessComputeInterior( TESStesselator *tess )
 			* gap between them.  This kind of error is especially obvious
 			* when using boundary extraction (TESS_BOUNDARY_ONLY).
 			*/
-			vNext = ( TESSvertex * )pqExtractMin( tess->pq );
+			vNext = reinterpret_cast<TESSvertex *>( pqExtractMin( tess->pq ) );
 			SpliceMergeVertices( tess, v->anEdge, vNext->anEdge );
 		}
 		SweepEvent( tess, v );
 	}
 
 	/* Set tess->event for debugging purposes */
-	tess->event = ( ( ActiveRegion * ) dictKey( dictMin( tess->dict ) ) )->eUp->Org;
+	tess->event = reinterpret_cast<ActiveRegion *>( dictKey( dictMin( tess->dict ) ) )->eUp->Org;
 	DebugEvent( tess );
 	DoneEdgeDict( tess );
 	DonePriorityQ( tess );

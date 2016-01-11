@@ -57,14 +57,14 @@ int64_t base_operator::lbp( void )
 
 ////////////////////////////////////////
 
-std::shared_ptr<expr> base_operator::right( expr_parser &parser, const std::u32string &op )
+std::shared_ptr<expr> base_operator::right( expr_parser & /*parser*/, const std::u32string &op )
 {
 	throw_runtime( "expected operand, got '{0}'", op );
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<expr> base_operator::left( expr_parser &parser, const std::u32string &op, const std::shared_ptr<expr> &left )
+std::shared_ptr<expr> base_operator::left( expr_parser & /*parser*/, const std::u32string &op, const std::shared_ptr<expr> & /*left*/ )
 {
 	throw_runtime( "expected operand, got '{0}'", op );
 }
@@ -78,7 +78,7 @@ primary_operator::primary_operator( const std::shared_ptr<expr> &e )
 
 ////////////////////////////////////////
 
-std::shared_ptr<expr> primary_operator::right( expr_parser &parser, const std::u32string &op )
+std::shared_ptr<expr> primary_operator::right( expr_parser & /*parser*/, const std::u32string & /*op*/ )
 {
 	return _expr;
 }
@@ -150,7 +150,7 @@ int64_t postfix_operator::lbp( void )
 
 ////////////////////////////////////////
 
-std::shared_ptr<expr> postfix_operator::left( expr_parser &parser, const std::u32string &op, const std::shared_ptr<expr> &left )
+std::shared_ptr<expr> postfix_operator::left( expr_parser & /*parser*/, const std::u32string &op, const std::shared_ptr<expr> &left )
 {
 	return std::make_shared<expr>( postfix_expr( op, left ) );
 }

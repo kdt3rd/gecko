@@ -34,9 +34,9 @@ application::application( const std::string &p, const std::string &r )
 			if ( r.empty() || ( platforms[i].render() == r ) )
 			{
 				std::cout << p << ' ' << platforms[i].name() << std::endl;
-				const platform::platform &p = platforms[i];
-				_platform = p.name() + "+" + p.render();
-				_impl->sys = p.create();
+				const platform::platform &plat = platforms[i];
+				_platform = plat.name() + "+" + plat.render();
+				_impl->sys = plat.create();
 				_impl->dispatch = _impl->sys->get_dispatcher();
 				break;
 			}

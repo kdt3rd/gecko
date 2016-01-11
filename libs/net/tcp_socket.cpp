@@ -72,7 +72,7 @@ void tcp_socket::connect( uint32_t host, uint16_t port, double timeout )
     on_scope_exit { fcntl( _socket, F_SETFL, flags ); };
 
 	// begin connect and wait for completion.
-    if ( ::connect( _socket, (struct sockaddr *)&remote, sizeof(remote) ) == -1 )
+    if ( ::connect( _socket, reinterpret_cast<struct sockaddr *>(&remote), sizeof(remote) ) == -1 )
     {
         if ( errno != EINPROGRESS )
             throw_errno( "connecting to {0}:{1}", host, port );
@@ -83,8 +83,8 @@ void tcp_socket::connect( uint32_t host, uint16_t port, double timeout )
         fd_set writeset = readset;
 
         struct timeval tval;
-        tval.tv_sec = (int)std::floor( timeout );
-        tval.tv_usec = (int)std::floor( ( timeout - tval.tv_sec ) * 1000000 );
+        tval.tv_sec = static_cast<int>( std::floor( timeout ) );
+        tval.tv_usec = static_cast<int>( std::floor( ( timeout - static_cast<double>( tval.tv_sec ) ) * 1000000.0 ) );
 
         int count = ::select( _socket + 1, &readset, &writeset, NULL, ( timeout > 0.0 ) ? &tval : NULL );
 
@@ -112,7 +112,7 @@ std::shared_ptr<tcp_socket> tcp_socket::accept( void )
 
     int socket = -1;
     socklen_t len = sizeof(clientaddr);
-    while ( ( socket = ::accept( _socket, (struct sockaddr *)&clientaddr, &len ) ) < 0 )
+    while ( ( socket = ::accept( _socket, reinterpret_cast<struct sockaddr *>(&clientaddr), &len ) ) < 0 )
     {
         if ( errno != EINTR && errno != ECONNABORTED )
             throw_errno( "TCP socket accept failed" );
@@ -141,7 +141,7 @@ void tcp_socket::read( void *buf, size_t bytes )
         }
         if ( nread == 0 )
 			throw_location( std::system_error( ECONNABORTED, std::system_category(), base::format( "TCP socket read {0}", _socket ) ) );
-        nleft -= nread;
+        nleft -= static_cast<size_t>(nread);
         mem += nread;
     }
 }
@@ -150,7 +150,7 @@ void tcp_socket::read( void *buf, size_t bytes )
 
 void tcp_socket::write( const void *buf, size_t bytes )
 {
-    const uint8_t *mem = (const uint8_t *)buf;
+    const uint8_t *mem = reinterpret_cast<const uint8_t *>( buf );
 
     size_t nleft = bytes;
     ssize_t nwrite;
@@ -196,7 +196,7 @@ void tcp_socket::write( const void *buf, size_t bytes )
             throw_errno( "write" );
         }
 
-        nleft -= nwrite;
+        nleft -= static_cast<size_t>(nwrite);
         mem += nwrite;
     }
 }
@@ -205,10 +205,10 @@ void tcp_socket::write( const void *buf, size_t bytes )
 
 size_t tcp_socket::bytes_waiting( void )
 {
-    int n;
+    int n = 0;
     if ( ioctl( _socket, FIONREAD, &n ) != 0 )
         throw_errno( "bytes/ioctl" );
-    return n;
+    return static_cast<size_t>( n );
 }
 
 ////////////////////////////////////////

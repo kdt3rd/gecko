@@ -19,7 +19,7 @@ class window : public context
 {
 public:
 	window( const std::shared_ptr<platform::window> &w );
-	~window( void );
+	virtual ~window( void );
 
 	void set_title( const std::string &t );
 

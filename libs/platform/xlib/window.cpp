@@ -136,7 +136,7 @@ window::window( const std::shared_ptr<Display> &dpy )
 
 	// NOTE: It is not necessary to create or make current to a context before
 	// calling glXGetProcAddressARB
-	auto glXCreateContextAttribsARB = (glXCreateContextAttribsARBProc)glXGetProcAddressARB( (const GLubyte *) "glXCreateContextAttribsARB" );
+	auto glXCreateContextAttribsARB = reinterpret_cast<glXCreateContextAttribsARBProc>( glXGetProcAddressARB( reinterpret_cast<const GLubyte *>( "glXCreateContextAttribsARB" ) ) );
 
 	// If it does, try to get a GL 4.0 context!
 	int atrributes[] =
@@ -234,12 +234,12 @@ void window::move( double x, double y )
 
 void window::resize( double w, double h )
 {
-	XResizeWindow( _display.get(), _win, (unsigned int)( std::max( 0.0, w ) + 0.5 ), (unsigned int)( std::max( 0.0, h ) + 0.5 ) );
+	XResizeWindow( _display.get(), _win, static_cast<unsigned int>( std::max( 0.0, w ) + 0.5 ), static_cast<unsigned int>( std::max( 0.0, h ) + 0.5 ) );
 }
 
 ////////////////////////////////////////
 
-void window::set_minimum_size( double w, double h )
+void window::set_minimum_size( double /*w*/, double /*h*/ )
 {
 }
 
@@ -252,7 +252,7 @@ void window::set_title( const std::string &t )
 
 ////////////////////////////////////////
 
-void window::invalidate( const base::rect &r )
+void window::invalidate( const base::rect & /*r*/ )
 {
 	if ( !_invalid )
 	{
@@ -286,10 +286,12 @@ Window window::id( void ) const
 
 void window::move_event( double x, double y )
 {
-	if ( _last_x != x && _last_y != y )
+	int16_t tx = static_cast<int16_t>( x );
+	int16_t ty = static_cast<int16_t>( y );
+	if ( _last_x != tx || _last_y != ty )
 	{
-		_last_x = x;
-		_last_y = y;
+		_last_x = tx;
+		_last_y = ty;
 		moved( x, y );
 	}
 }
@@ -298,12 +300,14 @@ void window::move_event( double x, double y )
 
 void window::resize_event( double w, double h )
 {
-	if ( _last_w != h && _last_w != h )
+	uint16_t tw = static_cast<uint16_t>( w );
+	uint16_t th = static_cast<uint16_t>( h );
+	if ( _last_w != tw || _last_h != th )
 	{
-		_last_w = w;
-		_last_h = h;
+		_last_w = tw;
+		_last_h = th;
 		glXMakeCurrent( _display.get(), _win, _glc );
-		glViewport( 0, 0, w, h );
+		glViewport( 0, 0, tw, th );
 		resized( w, h );
 	}
 }

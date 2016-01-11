@@ -51,13 +51,13 @@ int safemain( void )
 	check( "http://host.com#frag" );
 	check( "http://host.com?query#frag" );
 	check( "http://host.com/path1?query#frag" );
-	check( "http://host.com/path1#frag\%3Fmorefrag" );
+	check( "http://host.com/path1#frag%3Fmorefrag" );
 
-	check( "http://host\%2ecom", false );
-	check( "http://host\%2Ecom", false );
-	check( "http://host.com/\%2fmore", false );
-	check( "http://host.com/\%2Fmore" );
-	check( "http://host.com/with\%20space", false );
+	check( "http://host%2ecom", false );
+	check( "http://host%2Ecom", false );
+	check( "http://host.com/%2fmore", false );
+	check( "http://host.com/%2Fmore" );
+	check( "http://host.com/with%20space", false );
 	check( "http://host.com/with space", true );
 
 	base::uri test( "file", "" );

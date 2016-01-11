@@ -239,7 +239,7 @@ error::error( const std::string &msg )
 
 ////////////////////////////////////////
 
-error::~error( void ) throw()
+error::~error( void ) noexcept
 {
 }
 
@@ -309,16 +309,17 @@ iterator::operator++()
 
 void write( std::ostream &out, char32_t cp )
 {
+	typedef typename std::ostream::char_type char_type;
 	std::ios::fmtflags saved = out.flags();
 
 	if ( cp <= 0x7F )
-		out << (char)cp;
+		out << static_cast<char_type>(cp);
 	else if ( cp <= 0x7FF )
-		out << (char)(0xC0|(cp>>6)) << (char)(0x80|(cp&0x3F));
+		out << static_cast<char_type>(0xC0|(cp>>6)) << static_cast<char_type>(0x80|(cp&0x3F));
 	else if ( cp <= 0xFFFF )
-		out << (char)(0xE0|(cp>>12)) << (char)(0x80|((cp>>6)&0x3F)) << (char)(0x80|(cp&0x3F));
+		out << static_cast<char_type>(0xE0|(cp>>12)) << static_cast<char_type>(0x80|((cp>>6)&0x3F)) << static_cast<char_type>(0x80|(cp&0x3F));
 	else if ( cp <= 0x10FFFF )
-		out << (char)(0xF0|(cp>>18)) << (char)(0x80|((cp>>12)&0x3F)) << (char)(0x80|((cp>>6)&0x3F)) << (char)(0x80|(cp&0x3F));
+		out << static_cast<char_type>(0xF0|(cp>>18)) << static_cast<char_type>(0x80|((cp>>12)&0x3F)) << static_cast<char_type>(0x80|((cp>>6)&0x3F)) << static_cast<char_type>(0x80|(cp&0x3F));
 	else
 		throw error( "invalid unicode code point" );
 
@@ -422,17 +423,18 @@ namespace std
 {
 std::ostream &operator<<( std::ostream &out, const std::u32string &str )
 {
+	typedef typename std::ostream::char_type char_type;
 	std::ios::fmtflags saved = out.flags();
 	for ( size_t i = 0; i < str.size(); ++i )
 	{
 		if ( str[i] <= 0x7F )
-			out << (char)str[i];
+			out << static_cast<char_type>(str[i]);
 		else if ( str[i] <= 0x7FF )
-			out << (char)(0xC0|(str[i]>>6)) << (char)(0x80|(str[i]&0x3F));
+			out << static_cast<char_type>(0xC0|(str[i]>>6)) << static_cast<char_type>(0x80|(str[i]&0x3F));
 		else if ( str[i] <= 0xFFFF )
-			out << (char)(0xE0|(str[i]>>12)) << (char)(0x80|((str[i]>>6)&0x3F)) << (char)(0x80|(str[i]&0x3F));
+			out << static_cast<char_type>(0xE0|(str[i]>>12)) << static_cast<char_type>(0x80|((str[i]>>6)&0x3F)) << static_cast<char_type>(0x80|(str[i]&0x3F));
 		else if ( str[i] <= 0x10FFFF )
-			out << (char)(0xF0|(str[i]>>18)) << (char)(0x80|((str[i]>>12)&0x3F)) << (char)(0x80|((str[i]>>6)&0x3F)) << (char)(0x80|(str[i]&0x3F));
+			out << static_cast<char_type>(0xF0|(str[i]>>18)) << static_cast<char_type>(0x80|((str[i]>>12)&0x3F)) << static_cast<char_type>(0x80|((str[i]>>6)&0x3F)) << static_cast<char_type>(0x80|(str[i]&0x3F));
 		else
 			throw utf::error( "invalid unicode code point" );
 	}

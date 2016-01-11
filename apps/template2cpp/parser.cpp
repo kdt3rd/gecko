@@ -60,12 +60,12 @@ void parser::parse_text( std::istream &in )
 						break;
 
 					default:
-						_func.add( c );
+						_func.add( static_cast<char>( c ) );
 						break;
 				}
 			}
 			else
-				_func.add( c );
+				_func.add( static_cast<char>( c ) );
 		}
 	}
 	_func.push_text();
@@ -89,21 +89,21 @@ void parser::parse_expr( std::istream &in )
 					_func.push_expr();
 					break;
 				}
-				_func.add( c );
+				_func.add( static_cast<char>( c ) );
 				--count;
 			}
 			else if ( c == '[' )
 			{
-				_func.add( c );
+				_func.add( static_cast<char>( c ) );
 				++count;
 			}
 			else if ( c == '"' )
 			{
-				_func.add( c );
+				_func.add( static_cast<char>( c ) );
 				parse_string( in );
 			}
 			else
-				_func.add( c );
+				_func.add( static_cast<char>( c ) );
 		}
 	}
 	if ( in.get() != ']' )
@@ -121,7 +121,7 @@ void parser::parse_code( std::istream &in )
 	while ( std::isspace( in.peek() ) )
 		in.get();
 	while ( std::isalpha( in.peek() ) )
-		word.push_back( in.get() );
+		word.push_back( static_cast<char>( in.get() ) );
 	while ( std::isspace( in.peek() ) )
 		in.get();
 
@@ -158,21 +158,21 @@ void parser::parse_code( std::istream &in )
 					_func.push_code();
 					break;
 				}
-				_func.add( c );
+				_func.add( static_cast<char>( c ) );
 				--count;
 			}
 			else if ( c == '[' )
 			{
-				_func.add( c );
+				_func.add( static_cast<char>( c ) );
 				++count;
 			}
 			else if ( c == '"' )
 			{
-				_func.add( c );
+				_func.add( static_cast<char>( c ) );
 				parse_string( in );
 			}
 			else
-				_func.add( c );
+				_func.add( static_cast<char>( c ) );
 		}
 	}
 
@@ -200,7 +200,7 @@ void parser::parse_directive( std::istream &in )
 	while ( std::isspace( in.peek() ) )
 		in.get();
 	while ( std::isalpha( in.peek() ) )
-		word.push_back( in.get() );
+		word.push_back( static_cast<char>( in.get() ) );
 	while ( std::isspace( in.peek() ) )
 		in.get();
 
@@ -217,34 +217,34 @@ void parser::parse_directive( std::istream &in )
 				{
 					break;
 				}
-				rest.push_back( c );
+				rest.push_back( static_cast<char>( c ) );
 				--count;
 			}
 			else if ( c == '[' )
 			{
-				rest.push_back( c );
+				rest.push_back( static_cast<char>( c ) );
 				++count;
 			}
 			else if ( c == '"' )
 			{
-				rest.push_back( c );
+				rest.push_back( static_cast<char>( c ) );
 				bool escaped = false;
 				while ( !in.eof() && in )
 				{
-					int c = in.get();
-					if ( std::char_traits<char>::not_eof( c ) )
+					int sc = in.get();
+					if ( std::char_traits<char>::not_eof( sc ) )
 					{
-						rest.push_back( c );
-						if ( c == '"' && !escaped )
+						rest.push_back( static_cast<char>( sc ) );
+						if ( sc == '"' && !escaped )
 							break;
 						escaped = false;
-						if ( c == '\\' )
+						if ( sc == '\\' )
 							escaped = true;
 					}
 				}
 			}
 			else
-				rest.push_back( c );
+				rest.push_back( static_cast<char>( c ) );
 		}
 	}
 
@@ -281,7 +281,7 @@ void parser::parse_comment( std::istream &in )
 			if ( c == ']' )
 				break;
 			else
-				_func.add( c );
+				_func.add( static_cast<char>( c ) );
 		}
 	}
 	_func.push_code();
@@ -299,7 +299,7 @@ void parser::parse_string( std::istream &in )
 		int c = in.get();
 		if ( std::char_traits<char>::not_eof( c ) )
 		{
-			_func.add( c );
+			_func.add( static_cast<char>( c ) );
 			if ( c == '"' && !escaped )
 				break;
 			escaped = false;

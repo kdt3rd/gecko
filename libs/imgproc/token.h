@@ -89,7 +89,7 @@ public:
 	bool split( const char32_t *s );
 	bool split( size_t n );
 
-	inline operator bool() const { return (bool)_utf; }
+	inline operator bool() const { return static_cast<bool>(_utf); }
 
 	void skip_comments( void );
 

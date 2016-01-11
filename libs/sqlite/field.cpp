@@ -22,7 +22,7 @@ std::string field::name( void ) const
 
 size_t field::size( void ) const
 {
-	return sqlite3_column_bytes( _stmt, _index );
+	return static_cast<size_t>( sqlite3_column_bytes( _stmt, _index ) );
 }
 
 ////////////////////////////////////////

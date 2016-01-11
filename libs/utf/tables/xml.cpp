@@ -27,7 +27,7 @@ void find_tag( std::istreambuf_iterator<char> &i, std::istreambuf_iterator<char>
 	{
 		if ( *i != '<' )
 		{
-			std::cerr << "GOT " << (char)*i << std::endl;
+			std::cerr << "GOT char '" << *i << "' (" << static_cast<int>(*i) << ")" << std::endl;
 			throw std::runtime_error( "XML parse error (expected <)" );
 		}
 		++i;
@@ -55,7 +55,7 @@ read_name( std::istreambuf_iterator<char> &i, std::istreambuf_iterator<char> &eo
 	skip_space( i, eos );
 	if ( name.empty() )
 	{
-		std::cerr << "Got " << (char)*i << std::endl;
+		std::cerr << "GOT char '" << *i << "' (" << static_cast<int>(*i) << ")" << std::endl;
 		throw std::runtime_error( "Expected XML name" );
 	}
 }
@@ -74,7 +74,7 @@ decode( std::string &val )
 			hex[1] = val[i+3];
 
 			char ch[2] = "";
-			ch[0] = (char)strtol( hex, NULL, 16 );
+			ch[0] = static_cast<char>( strtol( hex, NULL, 16 ) );
 
 			val.replace( i, 5, ch );
 			--i;

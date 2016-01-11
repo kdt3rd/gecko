@@ -99,7 +99,7 @@ private:
 	bool _allowFlipped = false;
 	int _width = 0;
 	int _height = 0;
-	uint64_t _usedSurfaceArea = 0;
+	int _usedSurfaceArea = 0;
 
 	struct node
 	{

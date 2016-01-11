@@ -58,6 +58,8 @@ public:
 	}
 
 private:
+	void emit_proto( std::ostream &os );
+
 	std::string _name;
 	std::vector<std::string> _args;
 	std::string _code;

@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include <vector>
 #include <base/scope_guard.h>
 #include <base/rect.h>
 
@@ -14,7 +13,12 @@ namespace gui
 class context
 {
 public:
-	virtual ~context( void ) {}
+	context( void ) = default;
+	virtual ~context( void );
+	context( const context & ) = delete;
+	context( context && ) = delete;
+	context &operator=( const context & ) = delete;
+	context &operator=( context && ) = delete;
 
 	virtual void invalidate( const base::rect &r ) = 0;
 
@@ -33,7 +37,6 @@ protected:
 	}
 
 private:
-	static std::vector<context *> _contexts;
 };
 
 ////////////////////////////////////////

@@ -20,10 +20,8 @@ void function::push_text( bool trim )
 	{
 		_code += _indent;
 		_code += "result.append( \"";
-		int count = _builder.size();
-		for ( size_t i = 0; i < _builder.size(); ++i )
+		for ( auto c: _builder )
 		{
-			char c = _builder[i];
 			switch ( c )
 			{
 				case '"': _code.append( "\\\"" ); break;
@@ -37,7 +35,7 @@ void function::push_text( bool trim )
 			}
 		}
 		_code += "\", ";
-		_code += base::to_string( count );
+		_code += base::to_string( _builder.size() );
 		_code += " );\n";
 	}
 	_builder.clear();
@@ -87,14 +85,26 @@ void function::push_expr( void )
 
 void function::save( std::ostream &out )
 {
+	emit_proto( out );
+	out << ";\n";
+	emit_proto( out );
+	out << "\n{\n" << _code << "\n\treturn result;\n}\n";
+}
+
+
+////////////////////////////////////////
+
+
+void function::emit_proto( std::ostream &out )
+{
 	out << "\nstd::string " << _name << "( ";
 	if ( _args.empty() )
 		out << "void";
 	else
 		out << base::infix_separated( ", ", _args );
-	out << " )\n";
-	out << "{\n" << _code << "\n\treturn result;\n}\n";
+	out << " )";
 }
+
 
 ////////////////////////////////////////
 

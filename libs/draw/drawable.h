@@ -18,7 +18,13 @@ namespace draw
 class drawable
 {
 public:
-	virtual ~drawable( void ) {}
+	virtual ~drawable( void );
+	drawable( void ) = default;
+	drawable( const drawable & ) = default;
+	drawable( drawable && ) = default;
+	drawable &operator=( const drawable & ) = delete;
+	drawable &operator=( drawable && ) = delete;
+
 	virtual void draw( gl::context &ctxt ) = 0;
 };
 

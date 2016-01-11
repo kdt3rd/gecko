@@ -418,7 +418,7 @@ void iterator::parse_decimal( void )
 
 	while ( utf::is_number_decimal( _c ) )
 	{
-		tmp.push_back( '0' + utf::integer_value( _c ) );
+		tmp.push_back( '0' + static_cast<char>( utf::integer_value( _c ) ) );
 		next_utf();
 	}
 
@@ -428,7 +428,7 @@ void iterator::parse_decimal( void )
 		next_utf();
 		while ( utf::is_number_decimal( _c ) )
 		{
-			tmp.push_back( '0' + utf::integer_value( _c ) );
+			tmp.push_back( '0' + static_cast<char>( utf::integer_value( _c ) ) );
 			next_utf();
 		}
 		_type = TOK_FLOATING;
@@ -450,7 +450,7 @@ void iterator::parse_decimal( void )
 		}
 		while ( utf::is_number_decimal( _c ) )
 		{
-			tmp.push_back( '0' + utf::integer_value( _c ) );
+			tmp.push_back( '0' + static_cast<char>( utf::integer_value( _c ) ) );
 			next_utf();
 		}
 		_type = TOK_FLOATING;
@@ -481,7 +481,7 @@ void iterator::parse_escape( void )
 	// Special processing of escape sequences
 	++_utf;
 	_c = *_utf;
-	int64_t c = 0;
+	uint64_t c = 0;
 	switch ( _c )
 	{
 		case 'a': c = '\a'; break;
@@ -501,7 +501,7 @@ void iterator::parse_escape( void )
 				_c = *(++_utf);
 				if ( !utf::is_hex_digit( _c ) )
 					throw std::runtime_error( "Not a hex digit" );
-				int64_t v = utf::integer_value( _c );
+				uint64_t v = utf::integer_value( _c );
 				c = c * 16 + v;
 			}
 			break;
@@ -512,7 +512,7 @@ void iterator::parse_escape( void )
 				_c = *(++_utf);
 				if ( !utf::is_hex_digit( _c ) )
 					throw std::runtime_error( "Not a hex digit" );
-				int64_t v = utf::integer_value( _c );
+				uint64_t v = utf::integer_value( _c );
 				c = c * 16 + v;
 			}
 			break;
@@ -523,7 +523,7 @@ void iterator::parse_escape( void )
 				_c = *(++_utf);
 				if ( !utf::is_hex_digit( _c ) )
 					throw std::runtime_error( "Not a hex digit" );
-				int64_t v = utf::integer_value( _c );
+				uint64_t v = utf::integer_value( _c );
 				c = c * 16 + v;
 			}
 			break;
@@ -534,7 +534,7 @@ void iterator::parse_escape( void )
 				_c = *(++_utf);
 				if ( !utf::is_hex_digit( _c ) )
 					throw std::runtime_error( "Not an octal digit" );
-				int64_t v = utf::integer_value( _c );
+				uint64_t v = utf::integer_value( _c );
 				if ( v > 7 )
 					throw std::runtime_error( "Not an octal digit" );
 				c = c * 8 + v;
@@ -547,7 +547,7 @@ void iterator::parse_escape( void )
 				_c = *(++_utf);
 				if ( !utf::is_decimal( _c ) )
 					throw std::runtime_error( "Not a decimal digit" );
-				int64_t v = utf::integer_value( _c );
+				uint64_t v = utf::integer_value( _c );
 				c = c * 10 + v;
 			}
 			break;
@@ -621,17 +621,20 @@ const char *token_name( token_type t )
 		case TOK_PAREN_END:      return "paren end";
 		case TOK_PAREN_START:    return "paren open";
 		case TOK_EXPRESSION_END: return "expr end";
+		case TOK_MOD_END:		 return "mod end";
+		case TOK_MOD_START:		 return "mod start";
 		case TOK_SEPARATOR:      return "separator";
 		case TOK_STRING:         return "string";
 		case TOK_OPERATOR:       return "operator";
 		case TOK_IF:
 		case TOK_ELSE:
+		case TOK_PUBLIC:
 		case TOK_FUNCTION:
 		case TOK_LAMBDA:
 		case TOK_TO:
 		case TOK_BY:
 		case TOK_FOR:            return "keyword";
-		default:		         return "unknown";
+		case TOK_UNKNOWN:		 return "unknown";
 	}
 }
 

@@ -163,16 +163,16 @@ canvas::draw_text( const std::shared_ptr<script::font> &font, const base::point 
 	if ( storeTex )
 	{
 		txt.set_wrapping( gl::wrapping::CLAMP_TO_EDGE );
-	checkgl();
+		checkgl();
 		txt.set_filters( gl::filter::LINEAR, gl::filter::LINEAR );
-	checkgl();
+		checkgl();
 
 		txt.image_2d_red( gl::format::RED,
-					  font->bitmap_width(),
-					  font->bitmap_height(),
-					  gl::image_type::UNSIGNED_BYTE,
-					  font->bitmap().data() );
-	checkgl();
+						  static_cast<size_t>(font->bitmap_width()),
+						  static_cast<size_t>(font->bitmap_height()),
+						  gl::image_type::UNSIGNED_BYTE,
+						  font->bitmap().data() );
+		checkgl();
 
 		_font_glyph_cache[font] = { font->glyph_version(), texture };
 	}

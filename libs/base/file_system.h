@@ -5,6 +5,7 @@
 #include "directory_iterator.h"
 #include "contract.h"
 #include "stream.h"
+#include "fs_watch.h"
 #include <functional>
 #include <memory>
 
@@ -27,6 +28,8 @@ public:
 
 	constexpr static std::ios_base::openmode text_write_mode = (std::ios_base::out|std::ios_base::trunc);
 	constexpr static std::ios_base::openmode file_write_mode = (std::ios_base::out|std::ios_base::trunc|std::ios_base::binary);
+
+	constexpr static mode_t default_dir_mode = mode_t(S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH);
 
 	virtual ~file_system( void );
 
@@ -79,12 +82,12 @@ public:
 	/// @brief Makes a directory with the last name in the path
 	///
 	/// Fails if directories above the last entry do not exist
-	virtual void mkdir( const uri &path, mode_t mode = mode_t(S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH) ) = 0;
+	virtual void mkdir( const uri &path, mode_t mode = default_dir_mode ) = 0;
 	/// @brief Makes a directory tree.
 	///
 	/// Behaves like the mkdir -p command where it makes all
 	/// intervening directories necessary.
-	virtual void mkdir_all( const uri &path, mode_t mode = mode_t(S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH) ) = 0;
+	virtual void mkdir_all( const uri &path, mode_t mode = default_dir_mode ) = 0;
 
 	/// @brief Removes the last entry in the path as a directory.
 	virtual void rmdir( const uri &path ) = 0;
@@ -117,6 +120,10 @@ public:
 	/// @brief Open a stream for read and write access
 	virtual iostream open( const base::uri &path,
 						   std::ios_base::openmode m = (file_read_mode|file_write_mode) ) = 0;
+
+	virtual fs_watch watch( const base::uri &path,
+							const fs_watch::event_handler &evtcb,
+							fs_event evt_mask, bool recursive ) = 0;
 
 	/// @brief Finds a reference to a filesystem for the given uri
 	static std::shared_ptr<file_system> get( const uri &path )

@@ -61,8 +61,8 @@ public:
 	/// @brief Move the window.
 	///
 	/// Move the window to the given position.
-	/// @param w New width of the window
-	/// @param h New height of the window
+	/// @param x New x position of the window
+	/// @param y New y position of the window
 	virtual void move( double x, double y ) = 0;
 	void move( const base::point &p ) { resize( p.x(), p.y() ); }
 

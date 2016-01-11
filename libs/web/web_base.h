@@ -16,6 +16,10 @@ public:
 	web_base( void );
 	web_base( std::string v );
 	virtual ~web_base( void );
+	web_base( const web_base & ) = default;
+	web_base( web_base && ) = default;
+	web_base &operator=( const web_base & ) = delete;
+	web_base &operator=( web_base && ) = delete;
 
 	/// @brief HTTP version
 	/// This should be "1.1"

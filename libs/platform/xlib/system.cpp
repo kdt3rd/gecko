@@ -28,7 +28,7 @@ xErrorCB( Display *d, XErrorEvent *e )
 }
 
 int
-xIOErrorCB( Display *d )
+xIOErrorCB( Display * )
 {
 	std::cerr << "ERROR: I/O error w/ X server (connection lost?)" << std::endl;
 	exit( -1 );
@@ -52,7 +52,7 @@ system::system( void )
 	if ( ! _display )
 		throw std::runtime_error( "no X display" );
 
-	_screens.resize( ScreenCount( _display.get() ) );
+	_screens.resize( static_cast<size_t>( ScreenCount( _display.get() ) ) );
 	for ( int i = 0; i < ScreenCount( _display.get() ); ++i )
 		_screens[0] = std::make_shared<screen>( _display, i );
 

@@ -124,9 +124,9 @@ void sha256::update( const void *m, size_t len )
 	precondition( !_finalized, "sha256 is already finalized" );
 
 	const uint8_t *msg = reinterpret_cast<const uint8_t *>( m );
-	unsigned int block_nb;
-	unsigned int new_len, rem_len, tmp_len;
-	const unsigned char *shifted_msg;
+	size_t block_nb;
+	size_t new_len, rem_len, tmp_len;
+	const uint8_t *shifted_msg;
 	tmp_len = BLOCK_SIZE - _len;
 	rem_len = len < tmp_len ? len : tmp_len;
 	memcpy( &_block[_len], msg, rem_len );
@@ -183,25 +183,24 @@ std::string sha256::hash_string( void )
 
 ////////////////////////////////////////
 
-void sha256::transform( const void *m, unsigned int block_nb )
+void sha256::transform( const void *m, size_t block_nb )
 {
 	const uint8_t *msg = reinterpret_cast<const uint8_t*>( m );
 	uint32_t w[64];
 	uint32_t wv[8];
 	uint32_t t1, t2;
 	const uint8_t *sub_block;
-	int i;
-	int j;
-	for ( i = 0; i < ( int ) block_nb; i++ )
+
+	for ( size_t i = 0; i < block_nb; i++ )
 	{
 		sub_block = msg + ( i << 6 );
-		for ( j = 0; j < 16; j++ )
+		for ( size_t j = 0; j < 16; j++ )
 			pack32( &sub_block[j << 2], w[j] );
-		for ( j = 16; j < 64; j++ )
+		for ( size_t j = 16; j < 64; j++ )
 			w[j] =  f4( w[j -  2] ) + w[j -  7] + f3( w[j - 15] ) + w[j - 16];
-		for ( j = 0; j < 8; j++ )
+		for ( size_t j = 0; j < 8; j++ )
 			wv[j] = _hash[j];
-		for ( j = 0; j < 64; j++ )
+		for ( size_t j = 0; j < 64; j++ )
 		{
 			t1 = wv[7] + f2( wv[4] ) + ch( wv[4], wv[5], wv[6] )
 			     + K[j] + w[j];
@@ -215,7 +214,7 @@ void sha256::transform( const void *m, unsigned int block_nb )
 			wv[1] = wv[0];
 			wv[0] = t1 + t2;
 		}
-		for ( j = 0; j < 8; j++ )
+		for ( size_t j = 0; j < 8; j++ )
 			_hash[j] += wv[j];
 	}
 }
@@ -224,12 +223,12 @@ void sha256::transform( const void *m, unsigned int block_nb )
 
 void sha256::finalize( void )
 {
-	uint32_t block_nb = ( 1 + ( ( BLOCK_SIZE - 9 ) < ( _len % BLOCK_SIZE ) ) );
-	uint32_t len_b = ( _tot_len + _len ) << 3;
-	uint32_t pm_len = block_nb << 6;
+	size_t block_nb = ( 1 + ( ( BLOCK_SIZE - 9 ) < ( _len % BLOCK_SIZE ) ) );
+	size_t len_b = ( _tot_len + _len ) << 3;
+	size_t pm_len = block_nb << 6;
 	memset( _block + _len, 0, pm_len - _len );
 	_block[_len] = 0x80;
-	unpack32( len_b, _block + pm_len - 4 );
+	unpack32( static_cast<uint32_t>( len_b ), _block + pm_len - 4 );
 	transform( _block, block_nb );
 	_finalized = true;
 }

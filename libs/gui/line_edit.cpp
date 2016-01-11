@@ -67,7 +67,7 @@ void line_edit::paint( const std::shared_ptr<draw::canvas> &c )
 
 		_marker->create( c, path, pen, { 0.5, 5 } );
 	}
-	float h = fex.ascent - fex.descent;
+	double h = fex.ascent - fex.descent;
 	p = p + base::point( tex.x_advance, -fex.descent );
 	base::rect tmp( p - base::point( 0, h ), 2, h );
 
@@ -89,6 +89,8 @@ void line_edit::compute_minimum( void )
 bool line_edit::key_press( platform::scancode c )
 {
 	std::cout << "Key press!" << std::endl;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch-enum"
 	switch ( c )
 	{
 		case platform::scancode::KEY_LEFT:
@@ -128,7 +130,7 @@ bool line_edit::key_press( platform::scancode c )
 			if ( _cursor > 0 )
 			{
 				std::string tmp( _text );
-				tmp.erase( tmp.begin() + _cursor - 1 );
+				tmp.erase( tmp.begin() + long(_cursor) - 1 );
 				_text = std::move( tmp );
 				--_cursor;
 				invalidate();
@@ -140,7 +142,7 @@ bool line_edit::key_press( platform::scancode c )
 			if ( _cursor < _text.size() )
 			{
 				std::string tmp( _text );
-				tmp.erase( tmp.begin() + _cursor );
+				tmp.erase( tmp.begin() + long(_cursor) );
 				_text = std::move( tmp );
 				invalidate();
 			}
@@ -149,6 +151,7 @@ bool line_edit::key_press( platform::scancode c )
 		default:
 			return false;
 	}
+#pragma GCC diagnostic pop
 
 	return true;
 }
@@ -162,7 +165,7 @@ bool line_edit::text_input( char32_t c )
 		std::string tmp( _text );
 		_cursor = std::min( _cursor, tmp.size() );
 
-		std::insert_iterator<std::string> it( tmp, tmp.begin() + _cursor );
+		std::insert_iterator<std::string> it( tmp, tmp.begin() + long(_cursor) );
 		_cursor += utf::convert_utf8( c, it );
 
 		_text = std::move( tmp );
@@ -170,7 +173,7 @@ bool line_edit::text_input( char32_t c )
 		return true;
 	}
 	else
-		std::cout << "NON GRAPHIC: " << (uint32_t)c << std::endl;
+		std::cout << "NON GRAPHIC: " << static_cast<uint32_t>(c) << std::endl;
 
 	return false;
 }

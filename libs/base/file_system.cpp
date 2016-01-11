@@ -42,9 +42,9 @@ file_system::stat( const uri &path, struct stat *buf )
 	while ( S_ISLNK( buf->st_mode ) )
 	{
 		if ( fs )
-			curpath = fs->readlink( curpath, buf->st_size + 1 );
+			curpath = fs->readlink( curpath, static_cast<size_t>( buf->st_size + 1 ) );
 		else
-			curpath = readlink( curpath, buf->st_size + 1 );
+			curpath = readlink( curpath, static_cast<size_t>( buf->st_size + 1 ) );
 		fs = get( curpath );
 		fs->lstat( curpath, buf );
 		depth++;
@@ -52,7 +52,7 @@ file_system::stat( const uri &path, struct stat *buf )
 			throw std::system_error( ELOOP, std::system_category(), path.pretty() );
 	}
 
-	return std::move( curpath );
+	return curpath;
 }
 
 ////////////////////////////////////////

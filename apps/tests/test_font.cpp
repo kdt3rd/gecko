@@ -6,7 +6,7 @@
 namespace
 {
 
-int safemain( int argc, char *argv[] )
+int safemain( int /*argc*/, char * /*argv*/ [] )
 {
 	std::shared_ptr<script::font_manager> fontmgr = script::font_manager::common();
 
@@ -23,7 +23,7 @@ int safemain( int argc, char *argv[] )
 
 		std::ofstream out( "font.raw" );
 		auto bmp = font->bitmap();
-		out.write( reinterpret_cast<const char *>( bmp.data() ), bmp.size() );
+		out.write( reinterpret_cast<const char *>( bmp.data() ), static_cast<std::streamsize>( bmp.size() ) );
 	}
 	else
 		throw std::runtime_error( "could not load font" );

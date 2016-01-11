@@ -18,20 +18,20 @@
 #include "xml.h"
 
 // All of the data from the Unicode database
-const char32_t maxcp = 0x110000;
-std::vector<std::string> names( maxcp ) ;
-std::vector<uint8_t> category( maxcp, 0 );
-std::vector<uint8_t> combining( maxcp, 0 );
-std::vector<uint32_t> property( maxcp, 0 );
-std::vector<uint16_t> decomptable( maxcp, 0 );
-std::vector<uint8_t> decomptype( maxcp, 0 );
-std::vector<uint8_t> compexcl( maxcp, 0 );
-std::vector<double> nvalue( maxcp, std::numeric_limits<double>::quiet_NaN() );
-std::u32string decompose{ 0 };
-std::vector<uint16_t> compbase( maxcp, 0xFFFF );
-std::vector<uint8_t> compcomb( maxcp, 0xFF );
+constexpr char32_t maxcp = 0x110000;
+static std::vector<std::string> names( maxcp ) ;
+static std::vector<uint8_t> category( maxcp, 0 );
+static std::vector<uint8_t> combining( maxcp, 0 );
+static std::vector<uint32_t> property( maxcp, 0 );
+static std::vector<uint16_t> decomptable( maxcp, 0 );
+static std::vector<uint8_t> decomptype( maxcp, 0 );
+static std::vector<uint8_t> compexcl( maxcp, 0 );
+static std::vector<double> nvalue( maxcp, std::numeric_limits<double>::quiet_NaN() );
+static std::u32string decompose{ 0 };
+static std::vector<uint16_t> compbase( maxcp, 0xFFFF );
+static std::vector<uint8_t> compcomb( maxcp, 0xFF );
 
-std::vector<std::tuple<std::string,char32_t,char32_t>> blocks;
+static std::vector<std::tuple<std::string,char32_t,char32_t>> blocks;
 
 ////////////////////////////////////////
 
@@ -51,7 +51,7 @@ namespace
 
 ////////////////////////////////////////
 
-std::map<std::string,uint32_t> propNames
+static std::map<std::string,uint32_t> propNames
 {
 	{ "XIDS",		1<<0 },
 	{ "XIDC",		1<<1 },
@@ -79,7 +79,7 @@ std::map<std::string,uint32_t> propNames
 
 ////////////////////////////////////////
 
-std::map<std::string,uint8_t> catNames
+static std::map<std::string,uint8_t> catNames
 {
 	{ "Cc", 1 },
 	{ "Cf", 2 },
@@ -115,7 +115,7 @@ std::map<std::string,uint8_t> catNames
 
 ////////////////////////////////////////
 
-std::map<std::string,double> numberValues
+static std::map<std::string,double> numberValues
 {
 	{ "-1/2", -1.0/2.0 },
 	{ "1/10", 1.0/10.0 },
@@ -150,7 +150,7 @@ std::map<std::string,double> numberValues
 
 ////////////////////////////////////////
 
-std::map<std::string,uint8_t> decompNames
+static std::map<std::string,uint8_t> decompNames
 {
 	{ "none", 0 },
 	{ "can", 1 },
@@ -372,7 +372,7 @@ ucd_reader::~ucd_reader( void )
 
 ////////////////////////////////////////
 
-std::map<std::string,std::string> catTypes
+static std::map<std::string,std::string> catTypes
 {
 	{ "Cc", "other_control" },
 	{ "Cf", "other_format" },
@@ -406,7 +406,7 @@ std::map<std::string,std::string> catTypes
 	{ "Zs", "separator_space" }
 };
 
-std::map<std::string,std::string> catMainTypes
+static std::map<std::string,std::string> catMainTypes
 {
 	{ "C", "other" },
 	{ "L", "letter" },
@@ -417,7 +417,7 @@ std::map<std::string,std::string> catMainTypes
 	{ "Z", "separator" },
 };
 
-std::map<std::string,std::string> propTypes
+static std::map<std::string,std::string> propTypes
 {
 	{ "XIDS",		"identifier_start" },
 	{ "XIDC",		"identifier_continue" },
@@ -443,7 +443,7 @@ std::map<std::string,std::string> propTypes
 	{ "Di",			"digit" },
 };
 
-std::map<std::string,uint8_t> bidiNames =
+static std::map<std::string,uint8_t> bidiNames =
 {
 	{ "L", 1 },
 	{ "LRE", 2 },
@@ -498,10 +498,10 @@ int safemain( int argc, char *argv[] )
 			{
 				ssize_t n = in.read( reinterpret_cast<char *>( tmpBuf ), kChunk ).gcount();
 				if ( n > 0 )
-					slurp.append( reinterpret_cast<char *>( tmpBuf ), n );
+					slurp.append( reinterpret_cast<char *>( tmpBuf ), static_cast<size_t>( n ) );
 			}
 
-			strm.avail_in = slurp.size();
+			strm.avail_in = static_cast<uInt>( slurp.size() );
 			strm.next_in = reinterpret_cast<Bytef *>( const_cast<char *>( slurp.data() ) );
 
 			int zErr = inflateInit2( &strm, 16+MAX_WBITS );
@@ -650,7 +650,7 @@ int safemain( int argc, char *argv[] )
 		{
 			out << "bool is_" << i->second << "( char32_t cp )\n";
 			out << "{\n";
-			out << "\treturn get_category( cp ) == " << (uint32_t)catNames[i->first] << ";\n";
+			out << "\treturn get_category( cp ) == " << static_cast<uint32_t>( catNames[i->first] ) << ";\n";
 			out << "}\n";
 		}
 		for ( auto i = catMainTypes.begin(); i != catMainTypes.end(); ++i )
@@ -672,7 +672,7 @@ int safemain( int argc, char *argv[] )
 			tmin--;
 			tmax++;
 			out << "\tuint8_t cat = get_category( cp );\n";
-			out << "\treturn cat > " << (uint32_t)tmin << " && cat < " << (uint32_t)tmax << ";\n";
+			out << "\treturn cat > " << static_cast<uint32_t>( tmin ) << " && cat < " << static_cast<uint32_t>( tmax ) << ";\n";
 			out << "}\n";
 		}
 		out << "bool is_unknown( char32_t cp )\n";
@@ -746,26 +746,25 @@ int safemain( int argc, char *argv[] )
 		{
 			out << "bool is_" << i->second << "( char32_t cp )\n";
 			out << "{\n";
-			out << "\treturn ( get_property( cp ) & " << (uint32_t)propNames[i->first] << " ) != 0;\n";
+			out << "\treturn ( get_property( cp ) & " << static_cast<uint32_t>( propNames[i->first] ) << " ) != 0;\n";
 			out << "}\n";
 		}
 
-		out << "double dvalues[] = { std::numeric_limits<double>::quiet_NaN()";
-		for ( size_t i = 1; i < doubleVals.size(); ++i )
-			out << ", " << doubleVals[i];
-		out << "};\n";
-		out << "uint64_t ivalues[] = { " << std::numeric_limits<uint64_t>::max() << 'U';
-		for ( size_t i = 1; i < intVals.size(); ++i )
-			out << ", " << intVals[i] << 'U';
-		out << "};\n";
-
 		out << "double number_value( char32_t cp )\n";
 		out << "{\n";
+		out << "\tstatic double dvalues[] = { std::numeric_limits<double>::quiet_NaN()";
+		for ( size_t i = 1; i < doubleVals.size(); ++i )
+			out << ", " << doubleVals[i];
+		out << "};\n\n";
 		out << "\treturn dvalues[ get_value( cp ) ];\n";
 		out << "}\n";
 
 		out << "uint64_t integer_value( char32_t cp )\n";
 		out << "{\n";
+		out << "\tstatic uint64_t ivalues[] = { " << std::numeric_limits<uint64_t>::max() << 'U';
+		for ( size_t i = 1; i < intVals.size(); ++i )
+			out << ", " << intVals[i] << 'U';
+		out << "};\n\n";
 		out << "\treturn ivalues[ get_value( cp ) ];\n";
 		out << "}\n";
 

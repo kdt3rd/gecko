@@ -8,7 +8,7 @@
 namespace
 {
 
-int safemain( int argc, char *argv[] )
+int safemain( int /*argc*/, char * /*argv*/ [] )
 {
 	std::cout << base::ratio( 10, 100 ) << std::endl;
 	std::cout << base::ratio( -35, 49 ) << std::endl;

@@ -20,9 +20,7 @@ public:
 	{
 	}
 
-	virtual ~track( void )
-	{
-	}
+	virtual ~track( void );
 
 	const std::string &name( void ) const
 	{

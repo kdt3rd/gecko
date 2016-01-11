@@ -13,7 +13,7 @@
 #include <viewer/viewer.h>
 
 //constexpr double padding = 12;
-std::shared_ptr<gui::application> app;
+static std::shared_ptr<gui::application> app;
 
 namespace {
 
@@ -53,14 +53,14 @@ int safemain( int argc, char **argv )
 
 		if ( f->has_channels( "R", "G", "B" ) )
 		{
-			std::vector<float> img( f->width() * f->height() * 3 );
+			std::vector<float> img( size_t(f->width() * f->height() * 3) );
 			float *line = img.data();
 			media::image_buffer chans[3];
 			chans[0] = f->at( "R" );
 			chans[1] = f->at( "G" );
 			chans[2] = f->at( "B" );
 
-			for ( size_t y = 0; y < f->height(); ++y )
+			for ( int64_t y = 0; y < f->height(); ++y )
 			{
 				chans[0].get_scanline( y, line+0, 3 );
 				chans[1].get_scanline( y, line+1, 3 );
@@ -71,17 +71,17 @@ int safemain( int argc, char **argv )
 			auto txt = std::make_shared<gl::texture>();
 			{
 				auto tbind = txt->bind( gl::texture::target::TEXTURE_RECTANGLE );
-				tbind.image_2d_rgb( gl::format::RGBA_FLOAT, f->width(), f->height(), gl::image_type::FLOAT, img.data() );
+				tbind.image_2d_rgb( gl::format::RGBA_FLOAT, size_t(f->width()), size_t(f->height()), gl::image_type::FLOAT, img.data() );
 			}
 			viewer->set_texture_a( txt );
 		}
 		else if ( f->has_channels( "Y" ) )
 		{
-			std::vector<float> img( f->width() * f->height() );
+			std::vector<float> img( size_t(f->width() * f->height()) );
 			float *line = img.data();
 			media::image_buffer chan = f->at( "Y" );
 
-			for ( size_t y = 0; y < f->height(); ++y )
+			for ( int64_t y = 0; y < f->height(); ++y )
 			{
 				chan.get_scanline( y, line );
 				line += f->width();
@@ -90,7 +90,7 @@ int safemain( int argc, char **argv )
 			auto txt = std::make_shared<gl::texture>();
 			{
 				auto tbind = txt->bind( gl::texture::target::TEXTURE_RECTANGLE );
-				tbind.image_2d_red( gl::format::RGBA_FLOAT, f->width(), f->height(), gl::image_type::FLOAT, img.data() );
+				tbind.image_2d_red( gl::format::RGBA_FLOAT, size_t(f->width()), size_t(f->height()), gl::image_type::FLOAT, img.data() );
 				tbind.set_swizzle( gl::swizzle::RED, gl::swizzle::RED, gl::swizzle::RED );
 			}
 			viewer->set_texture_a( txt );

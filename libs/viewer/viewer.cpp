@@ -26,8 +26,11 @@ namespace viewer
 
 viewer::viewer( void )
 {
-	set_texture_a( std::make_shared<gl::texture>( gl::png_read( "/home/iangodin/Pictures/mandril.png" ) ) );
-	set_texture_b( std::make_shared<gl::texture>( gl::png_read( "/home/iangodin/Pictures/lena.png" ) ) );
+	// seem to get GL errors / crashes if we do this here as the context
+	// is around but the window hasn't yet been shown or something
+	// this is debug anyway...
+//	set_texture_a( std::make_shared<gl::texture>( gl::png_read( "/home/kimball/Images/mandril.png" ) ) );
+//	set_texture_b( std::make_shared<gl::texture>( gl::png_read( "/home/kimball/Images/lena.png" ) ) );
 
 	_zoomA = 1;
 	_panB.set( 512, 0 );
@@ -175,7 +178,7 @@ bool viewer::mouse_move( const base::point &p )
 
 ////////////////////////////////////////
 
-bool viewer::mouse_release( const base::point &p, int button )
+bool viewer::mouse_release( const base::point & /*p*/, int button )
 {
 	if ( button == 1 )
 	{

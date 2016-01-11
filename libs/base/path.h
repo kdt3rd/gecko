@@ -36,7 +36,7 @@ public:
 
 	/// @brief Move the cursor
 	/// Move the cursor to the given position
-	/// @param p
+	/// @param p the point to move to for the path
 	void move_to( const point &p );
 	void line_to( const point &p );
 	void quadratic_to( const point &p1, const point &p2 );

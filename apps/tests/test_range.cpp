@@ -14,7 +14,7 @@
 namespace
 {
 
-int safemain( int argc, char *argv[] )
+int safemain( int /*argc*/, char * /*argv*/ [] )
 {
 	base::intervals<int> frames;
 

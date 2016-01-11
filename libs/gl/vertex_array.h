@@ -19,15 +19,23 @@ class bound_array
 {
 public:
 	bound_array( void ) = delete;
-	bound_array( const bound_array &other ) = delete;
-
-	bound_array( bound_array &&other )
+	bound_array( const bound_array & ) = delete;
+	bound_array &operator=( const bound_array & ) = delete;
+	bound_array &operator=( bound_array &&o )
 	{
+		_a = 0;
+		std::swap( _a, o._a );
+		return *this;
 	}
-
+	bound_array( bound_array &&o )
+			: _a( o._a )
+	{
+		o._a = 0;
+	}
 	~bound_array( void )
 	{
-		glBindVertexArray( 0 );
+		if ( _a )
+			glBindVertexArray( 0 );
 	}
 
 	template<typename D>
@@ -36,7 +44,7 @@ public:
 		{
 			auto bb = buf->bind( gl::buffer<D>::target::ARRAY_BUFFER );
 			glEnableVertexAttribArray( attr );
-			glVertexAttribPointer( attr, components, gl_data_type<D>::value, GL_FALSE, stride * sizeof(D), reinterpret_cast<const GLvoid *>( offset * sizeof(D) ) );
+			glVertexAttribPointer( attr, static_cast<GLint>(components), gl_data_type<D>::value, GL_FALSE, static_cast<GLsizei>( stride * sizeof(D) ), reinterpret_cast<const GLvoid *>( offset * sizeof(D) ) );
 		}
 	}
 
@@ -47,13 +55,15 @@ public:
 			auto bb = buf->bind( gl::buffer<D>::target::ARRAY_BUFFER );
 			bb.data( components, gl::usage::STATIC_DRAW );
 			glEnableVertexAttribArray( attr );
-			glVertexAttribPointer( attr, nPer, gl_data_type<D>::value, GL_FALSE, stride * sizeof(D), reinterpret_cast<const GLvoid *>( offset * sizeof(D) ) );
+			stride *= sizeof(D);
+			offset *= sizeof(D);
+			glVertexAttribPointer( attr, static_cast<GLint>(nPer), gl_data_type<D>::value, GL_FALSE, static_cast<GLsizei>( stride ), reinterpret_cast<const GLvoid *>( offset ) );
 		}
 	}
 
 	void draw( primitive prim, size_t start, size_t count )
 	{
-		glDrawArrays( static_cast<GLenum>( prim ), start, count );
+		glDrawArrays( static_cast<GLenum>( prim ), static_cast<GLint>( start ), static_cast<GLsizei>( count ) );
 	}
 
 	template <typename T>
@@ -68,7 +78,9 @@ private:
 	friend class context;
 	friend class vertex_array;
 
+	GLuint _a;
 	bound_array( GLuint arr )
+			: _a( arr )
 	{
 		glBindVertexArray( arr );
 	}

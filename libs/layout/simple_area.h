@@ -18,6 +18,11 @@ public:
 	using base::rect::rect;
 
 	virtual ~simple_area( void );
+	simple_area( void ) = default;
+	simple_area( const simple_area & ) = default;
+	simple_area( simple_area && ) = default;
+	simple_area &operator=( const simple_area & ) = default;
+	simple_area &operator=( simple_area && ) = default;
 
 	/// @brief Set minimum width.
 	///

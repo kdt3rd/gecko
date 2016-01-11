@@ -36,8 +36,6 @@
 #include "priorityq.h"
 
 
-#define INIT_SIZE	32
-
 #define TRUE 1
 #define FALSE 0
 
@@ -46,7 +44,7 @@
 #else
 /* Violates modularity, but a little faster */
 #include "geom.h"
-#define LEQ(x,y)	VertLeq((TESSvertex *)x, (TESSvertex *)y)
+#define LEQ(x,y)	VertLeq(reinterpret_cast<TESSvertex *>(x), reinterpret_cast<TESSvertex *>(y))
 #endif
 
 
@@ -85,21 +83,21 @@
 
 
 /* really pqHeapNewPriorityQHeap */
-PriorityQHeap *pqHeapNewPriorityQ( TESSalloc *alloc, int size, int ( *leq )( PQkey key1, PQkey key2 ) )
+static PriorityQHeap *pqHeapNewPriorityQ( TESSalloc *alloc, int size, int ( *leq )( PQkey key1, PQkey key2 ) )
 {
-	PriorityQHeap *pq = ( PriorityQHeap * )alloc->memalloc( alloc->userData, sizeof( PriorityQHeap ) );
+	PriorityQHeap *pq = reinterpret_cast<PriorityQHeap *>( alloc->memalloc( alloc->userData, sizeof( PriorityQHeap ) ) );
 	if ( pq == NULL ) return NULL;
 
 	pq->size = 0;
 	pq->max = size;
-	pq->nodes = ( PQnode * )alloc->memalloc( alloc->userData, ( size + 1 ) * sizeof( pq->nodes[0] ) );
+	pq->nodes = reinterpret_cast<PQnode *>( alloc->memalloc( alloc->userData, size_t( size + 1 ) * sizeof( pq->nodes[0] ) ) );
 	if ( pq->nodes == NULL )
 	{
 		alloc->memfree( alloc->userData, pq );
 		return NULL;
 	}
 
-	pq->handles = ( PQhandleElem * )alloc->memalloc( alloc->userData, ( size + 1 ) * sizeof( pq->handles[0] ) );
+	pq->handles = reinterpret_cast<PQhandleElem *>( alloc->memalloc( alloc->userData, size_t( size + 1 ) * sizeof( pq->handles[0] ) ) );
 	if ( pq->handles == NULL )
 	{
 		alloc->memfree( alloc->userData, pq->nodes );
@@ -117,7 +115,7 @@ PriorityQHeap *pqHeapNewPriorityQ( TESSalloc *alloc, int size, int ( *leq )( PQk
 }
 
 /* really pqHeapDeletePriorityQHeap */
-void pqHeapDeletePriorityQ( TESSalloc *alloc, PriorityQHeap *pq )
+static void pqHeapDeletePriorityQ( TESSalloc *alloc, PriorityQHeap *pq )
 {
 	alloc->memfree( alloc->userData, pq->handles );
 	alloc->memfree( alloc->userData, pq->nodes );
@@ -181,7 +179,7 @@ static void FloatUp( PriorityQHeap *pq, int curr )
 }
 
 /* really pqHeapInit */
-void pqHeapInit( PriorityQHeap *pq )
+static void pqHeapInit( PriorityQHeap *pq )
 {
 	int i;
 
@@ -194,7 +192,7 @@ void pqHeapInit( PriorityQHeap *pq )
 
 /* really pqHeapInsert */
 /* returns INV_HANDLE iff out of memory */
-PQhandle pqHeapInsert( TESSalloc *alloc, PriorityQHeap *pq, PQkey keyNew )
+static PQhandle pqHeapInsert( TESSalloc *alloc, PriorityQHeap *pq, PQkey keyNew )
 {
 	int curr;
 	PQhandle free;
@@ -211,15 +209,17 @@ PQhandle pqHeapInsert( TESSalloc *alloc, PriorityQHeap *pq, PQkey keyNew )
 
 			// If the heap overflows, double its size.
 			pq->max <<= 1;
-			pq->nodes = ( PQnode * )alloc->memrealloc( alloc->userData, pq->nodes,
-			            ( size_t )( ( pq->max + 1 ) * sizeof( pq->nodes[0] ) ) );
+			pq->nodes = reinterpret_cast<PQnode *>(
+				alloc->memrealloc( alloc->userData, pq->nodes,
+								   size_t( pq->max + 1 ) * sizeof( pq->nodes[0] ) ) );
 			if ( pq->nodes == NULL )
 			{
 				pq->nodes = saveNodes;	// restore ptr to free upon return
 				return INV_HANDLE;
 			}
-			pq->handles = ( PQhandleElem * )alloc->memrealloc( alloc->userData, pq->handles,
-			              ( size_t ) ( ( pq->max + 1 ) * sizeof( pq->handles[0] ) ) );
+			pq->handles = reinterpret_cast<PQhandleElem *>(
+				alloc->memrealloc( alloc->userData, pq->handles,
+								   size_t( pq->max + 1 ) * sizeof( pq->handles[0] ) ) );
 			if ( pq->handles == NULL )
 			{
 				pq->handles = saveHandles; // restore ptr to free upon return
@@ -247,7 +247,7 @@ PQhandle pqHeapInsert( TESSalloc *alloc, PriorityQHeap *pq, PQkey keyNew )
 }
 
 /* really pqHeapExtractMin */
-PQkey pqHeapExtractMin( PriorityQHeap *pq )
+static PQkey pqHeapExtractMin( PriorityQHeap *pq )
 {
 	PQnode *n = pq->nodes;
 	PQhandleElem *h = pq->handles;
@@ -270,7 +270,7 @@ PQkey pqHeapExtractMin( PriorityQHeap *pq )
 }
 
 /* really pqHeapDelete */
-void pqHeapDelete( PriorityQHeap *pq, PQhandle hCurr )
+static void pqHeapDelete( PriorityQHeap *pq, PQhandle hCurr )
 {
 	PQnode *n = pq->nodes;
 	PQhandleElem *h = pq->handles;
@@ -301,7 +301,7 @@ void pqHeapDelete( PriorityQHeap *pq, PQhandle hCurr )
 /* really tessPqSortNewPriorityQ */
 PriorityQ *pqNewPriorityQ( TESSalloc *alloc, int size, int ( *leq )( PQkey key1, PQkey key2 ) )
 {
-	PriorityQ *pq = ( PriorityQ * )alloc->memalloc( alloc->userData, sizeof( PriorityQ ) );
+	PriorityQ *pq = reinterpret_cast<PriorityQ *>( alloc->memalloc( alloc->userData, sizeof( PriorityQ ) ) );
 	if ( pq == NULL ) return NULL;
 
 	pq->heap = pqHeapNewPriorityQ( alloc, size, leq );
@@ -312,7 +312,7 @@ PriorityQ *pqNewPriorityQ( TESSalloc *alloc, int size, int ( *leq )( PQkey key1,
 	}
 
 //	pq->keys = (PQkey *)memAlloc( INIT_SIZE * sizeof(pq->keys[0]) );
-	pq->keys = ( PQkey * )alloc->memalloc( alloc->userData, size * sizeof( pq->keys[0] ) );
+	pq->keys = reinterpret_cast<PQkey *>( alloc->memalloc( alloc->userData, size_t(size) * sizeof( pq->keys[0] ) ) );
 	if ( pq->keys == NULL )
 	{
 		pqHeapDeletePriorityQ( alloc, pq->heap );
@@ -360,8 +360,9 @@ int pqInit( TESSalloc *alloc, PriorityQ *pq )
 	pq->order = (PQkey **)memAlloc( (size_t)
 	(pq->size * sizeof(pq->order[0])) );
 	*/
-	pq->order = ( PQkey ** )alloc->memalloc( alloc->userData,
-	            ( size_t )( ( pq->size + 1 ) * sizeof( pq->order[0] ) ) );
+	pq->order = reinterpret_cast<PQkey **>(
+		alloc->memalloc( alloc->userData,
+						 size_t( pq->size + 1 ) * sizeof( pq->order[0] ) ) );
 	/* the previous line is a patch to compensate for the fact that IBM */
 	/* machines return a null on a malloc of zero bytes (unlike SGI),   */
 	/* so we have to put in this defense to guard against a memory      */
@@ -464,8 +465,9 @@ PQhandle pqInsert( TESSalloc *alloc, PriorityQ *pq, PQkey keyNew )
 			PQkey *saveKey = pq->keys;
 			// If the heap overflows, double its size.
 			pq->max <<= 1;
-			pq->keys = ( PQkey * )alloc->memrealloc( alloc->userData, pq->keys,
-			           ( size_t )( pq->max * sizeof( pq->keys[0] ) ) );
+			pq->keys = reinterpret_cast<PQkey *>(
+				alloc->memrealloc( alloc->userData, pq->keys,
+								   size_t( pq->max ) * sizeof( pq->keys[0] ) ) );
 			if ( pq->keys == NULL )
 			{
 				pq->keys = saveKey;  // restore ptr to free upon return

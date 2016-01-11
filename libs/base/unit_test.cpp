@@ -101,7 +101,7 @@ void unit_test::run( cmd_line &opts )
 	}
 
 	if ( auto &q = opts["q"] )
-		_quiet = q.size();
+		_quiet = static_cast<int>( q.size() );
 
 	if ( !done )
 		run();

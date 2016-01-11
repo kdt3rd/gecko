@@ -62,18 +62,12 @@ public:
 
 	~pipe( void )
 	{
-		this->close();
+		close();
 	}
-
-	int read( void ) const
-	{
-		return _pipe[0];
-	}
-
-	int write( void ) const
-	{
-		return _pipe[1];
-	}
+	pipe( const pipe & ) = delete;
+	pipe( const pipe && ) = delete;
+	pipe &operator=( const pipe & ) = delete;
+	pipe &operator=( pipe && ) = delete;
 
 	void close( void )
 	{
@@ -174,7 +168,7 @@ void process::set_error( const std::string &err_file )
 
 ////////////////////////////////////////
 
-void process::set_ouput_error( const std::string &out_file )
+void process::set_output_error( const std::string &out_file )
 {
 	_stdout.reset();
 	_stderr.reset();

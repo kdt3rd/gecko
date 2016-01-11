@@ -189,7 +189,7 @@ std::string cpp_generator::operator()( const for_expr &e )
 
 	_cpp << base::format( "\t{0} = {1};\n", result, visit( e.result() ) );
 
-	for ( auto &range: e.ranges() )
+	for ( __attribute__((unused)) auto &range: e.ranges() )
 		_cpp << "\t}\n";
 
 	return result;
@@ -197,14 +197,14 @@ std::string cpp_generator::operator()( const for_expr &e )
 
 ////////////////////////////////////////
 
-std::string cpp_generator::operator()( const assign_expr &e )
+std::string cpp_generator::operator()( const assign_expr & /*e*/ )
 {
 	return std::string();
 }
 
 ////////////////////////////////////////
 
-std::string cpp_generator::operator()( const lambda_expr &e )
+std::string cpp_generator::operator()( const lambda_expr & /*e*/ )
 {
 	return std::string();
 }

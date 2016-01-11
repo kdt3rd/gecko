@@ -2,12 +2,26 @@
 #include "json.h"
 #include <iterator>
 
+namespace
+{
+const base::json &
+error_obj( void )
+{
+	static base::json error;
+	return error;
+}
+
+}
+
 namespace base
 {
 
 ////////////////////////////////////////
 
-json json::error;
+json::~json( void )
+{
+	clear();
+}
 
 ////////////////////////////////////////
 
@@ -51,7 +65,11 @@ size_t json::size( void ) const
 const json &json::operator[]( const std::string &name ) const
 {
 	precondition( is<json_object>(), "not a json object" );
-	return get<json_object>().at( name );
+	const json_object &o = get<json_object>();
+	auto x = o.find( name );
+	if ( x == o.end() )
+		return error_obj();
+	return x->second;
 }
 
 ////////////////////////////////////////
@@ -70,7 +88,10 @@ json &json::operator[]( const std::string &name )
 const json &json::operator[]( size_t idx ) const
 {
 	precondition( is<json_array>(), "not a json array" );
-	return get<json_array>()[idx];
+	const json_array &a = get<json_array>();
+	if ( idx < a.size() )
+		return a[idx];
+	return error_obj();
 }
 
 ////////////////////////////////////////
@@ -78,7 +99,10 @@ const json &json::operator[]( size_t idx ) const
 json &json::operator[]( size_t idx )
 {
 	precondition( is<json_array>(), "not a json array" );
-	return get<json_array>()[idx];
+	json_array &a = get<json_array>();
+	if ( idx < a.size() )
+		a.resize( idx + 1 );
+	return a[idx];
 }
 
 ////////////////////////////////////////
@@ -86,7 +110,11 @@ json &json::operator[]( size_t idx )
 const json &json::at( const std::string &name ) const
 {
 	precondition( is<json_object>(), "not a json object" );
-	return get<json_object>().at( name );
+	const auto &o = get<json_object>();
+	auto x = o.find( name );
+	if ( x == o.end() )
+		return error_obj();
+	return x->second;
 }
 
 ////////////////////////////////////////
@@ -105,7 +133,10 @@ json &json::at( const std::string &name )
 const json &json::at( size_t idx ) const
 {
 	precondition( is<json_array>(), "not a json array" );
-	return get<json_array>().at( idx );
+	const auto &a = get<json_array>();
+	if ( idx < a.size() )
+		return a.at( idx );
+	return error_obj();
 }
 
 ////////////////////////////////////////
@@ -113,7 +144,10 @@ const json &json::at( size_t idx ) const
 json &json::at( size_t idx )
 {
 	precondition( is<json_array>(), "not a json array" );
-	return get<json_array>().at( idx );
+	json_array &a = get<json_array>();
+	if ( idx < a.size() )
+		a.resize( idx + 1 );
+	return a.at( idx );
 }
 
 ////////////////////////////////////////
@@ -164,9 +198,12 @@ json &json::push_back( void )
 
 void json::append( json &&that )
 {
-	precondition( is<json_object>(), "not a json object" );
-	for ( auto i: that.get<json_object>() )
-		(*this)[i.first] = std::move( i.second );
+	precondition( is<json_object>(), "receiving object not a json object" );
+	precondition( that.is<json_object>(), "source not a json object" );
+	json_object &m = get<json_object>();
+	json_object &o = that.get<json_object>();
+	for ( auto &i: o )
+		m[i.first] = i.second;
 }
 
 ////////////////////////////////////////

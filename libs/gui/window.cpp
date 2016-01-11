@@ -11,8 +11,8 @@ namespace gui
 
 ////////////////////////////////////////
 
-window::window( const std::shared_ptr<platform::window> &w )
-	: _window( w )
+window::window( const std::shared_ptr<platform::window> &win )
+	: _window( win )
 {
 	precondition( bool(_window), "null window" );
 	_window->exposed.callback( [this] ( void ) { paint(); } );
@@ -115,7 +115,7 @@ window::bound_context window::bind( void )
 void window::paint( void )
 {
 	_window->acquire();
-	glViewport( 0, 0, _window->width(), _window->height() );
+	glViewport( 0, 0, static_cast<GLsizei>(_window->width()), static_cast<GLsizei>(_window->height()) );
 	glEnable( GL_MULTISAMPLE );
 	glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
 	glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
@@ -124,7 +124,7 @@ void window::paint( void )
 	_canvas->clear();
 
 	_canvas->save();
-	_canvas->ortho( 0, _window->width(), 0, _window->height() );
+	_canvas->ortho( 0, static_cast<float>(_window->width()), 0, static_cast<float>(_window->height()) );
 
 	if ( _widget )
 	{

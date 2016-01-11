@@ -9,7 +9,7 @@
 namespace
 {
 
-int safemain( int argc, char *argv[] )
+int safemain( int /*argc*/, char * /*argv*/ [] )
 {
 	std::cout << "std::type_info = " << sizeof(std::type_info) << std::endl;
 	std::cout << "std::type_index = " << sizeof(std::type_index) << std::endl;

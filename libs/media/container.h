@@ -12,8 +12,8 @@ namespace media
 class container
 {
 public:
-	container( void );
-	~container( void );
+//	container( void );
+//	~container( void );
 
 	size_t size( void )
 	{

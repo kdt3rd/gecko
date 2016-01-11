@@ -110,7 +110,7 @@ public:
 		{
 			if ( i % 16 == 0 )
 				out << "\n\t";
-			out << std::setw( 5 ) << (uint32_t)data[i];
+			out << std::setw( 5 ) << static_cast<uint32_t>( data[i] );
 			if ( i < data.size()-1 )
 				out << ",";
 		}
@@ -121,7 +121,7 @@ public:
 		{
 			if ( i % 16 == 0 )
 				out << "\n\t";
-			out << std::setw( 5 ) << (uint32_t)blocks[i];
+			out << std::setw( 5 ) << static_cast<uint32_t>( blocks[i] );
 			if ( i < blocks.size()-1 )
 				out << ",";
 		}

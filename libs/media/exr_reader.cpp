@@ -7,7 +7,17 @@
 #include <base/file_system.h>
 
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreserved-id-macro"
 #pragma GCC diagnostic ignored "-Wdeprecated-register"
+#pragma GCC diagnostic ignored "-Wdeprecated"
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wweak-vtables"
 #include <ImfMultiPartInputFile.h>
 #include <ImfInputPart.h>
 #include <ImfVersion.h>
@@ -53,7 +63,7 @@ public:
 	{
 		try
 		{
-			return _stream.tellg();
+			return static_cast<Imf::Int64>( _stream.tellg() );
 		}
 		catch ( ... )
 		{
@@ -65,7 +75,7 @@ public:
 	{
 		try
 		{
-			_stream.seekg( pos );
+			_stream.seekg( static_cast<std::streamoff>( pos ) );
 		}
 		catch ( ... )
 		{
@@ -97,7 +107,7 @@ private:
 class exr_track : public video_track
 {
 public:
-	exr_track( std::string n, int64_t b, int64_t e, const base::uri &files, size_t part, std::vector<std::string> &&chan )
+	exr_track( std::string n, int64_t b, int64_t e, const base::uri &files, int part, std::vector<std::string> &&chan )
 		: video_track( std::move( n ), b, e ), _files( files ), _part( part ), _channels( std::move( chan ) )
 	{
 	}
@@ -124,7 +134,7 @@ public:
 			const std::string &cname = _channels.at( c );
 			const Imf::Channel &imfchan = header.channels()[cname];
 			image_buffer imgbuf;
-			int64_t bytes = 0;
+			size_t bytes = 0;
 			switch ( imfchan.type )
 			{
 				case Imf::UINT:
@@ -142,12 +152,13 @@ public:
 					imgbuf = image_buffer::simple_buffer<float>( w, h );
 					break;
 
-				default:
+				case Imf::NUM_PIXELTYPES:
+//				default:
 					throw_logic( "unknown OpenEXR pixel type {0}", static_cast<int>( imfchan.type ) );
 			}
 
-			char *data = static_cast<char*>( imgbuf.data() ) - ( disp.min.x + disp.min.y * w ) * bytes;
-			fbuf.insert( cname, Imf::Slice( imfchan.type, data, bytes, bytes * w, 1, 1, 0.0 ) );
+			char *data = static_cast<char*>( imgbuf.data() ) - static_cast<size_t>( disp.min.x + disp.min.y * w ) * bytes;
+			fbuf.insert( cname, Imf::Slice( imfchan.type, data, bytes, bytes * static_cast<size_t>(w), 1, 1, 0.0 ) );
 			result->add_channel( cname, imgbuf );
 		}
 
@@ -159,13 +170,13 @@ public:
 
 private:
 	file_sequence _files;
-	size_t _part;
+	int _part;
 	std::vector<std::string> _channels;
 };
 
 ////////////////////////////////////////
 
-void addexrtrack( container &c, const base::uri &u, int64_t start, int64_t last, std::string track, size_t part, const Imf::ChannelList &channels )
+void addexrtrack( container &c, const base::uri &u, int64_t start, int64_t last, std::string track, int part, const Imf::ChannelList &channels )
 {
 	std::vector<std::string> chans;
 	for ( auto chan = channels.begin(); chan != channels.end(); ++chan )
@@ -208,7 +219,6 @@ container exr_reader( const base::uri &u )
 	if ( file.parts() == 1 )
 	{
 		const Imf::Header header = file.header( 0 );
-		auto *mview = header.findTypedAttribute<Imf::StringVectorAttribute>( "multiView" );
 		if ( Imf::hasMultiView( header ) )
 		{
 			const auto &mview = Imf::multiView( header );
@@ -228,7 +238,7 @@ container exr_reader( const base::uri &u )
 	}
 	else
 	{
-		for ( size_t p = 0; p < file.parts(); ++p )
+		for ( int p = 0; p < file.parts(); ++p )
 		{
 			const Imf::Header header = file.header( p );
 			if ( header.hasName() )

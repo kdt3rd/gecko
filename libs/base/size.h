@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cmath>
 #include <cstdint>
+#include <functional>
 
 namespace base
 {
@@ -56,10 +57,10 @@ public:
 		return { _w + s._w, _h + s._h };
 	}
 
-	/// @brief Add two sizes together
+	/// @brief less than operator
 	bool operator<( const size &o ) const
 	{
-		return _w < o._w || ( _w == o._w && _h < o._h );
+		return _w < o._w || ( std::equal_to<double>()( _w, o._w ) && _h < o._h );
 	}
 
 	/// @brief Round size up to nearest integer

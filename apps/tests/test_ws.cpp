@@ -25,7 +25,7 @@ int safemain( int argc, char *argv[] )
 			base::uri path( u );
 			web::socket test( path, "Test/0.0" );
 			test.send( "Hello World" );
-			test.when_message.connect( [&]( const std::string &msg, bool bin )
+			test.when_message.connect( [&]( const std::string &msg, bool )
 			{
 				std::cout << msg << std::endl;
 				test.close();

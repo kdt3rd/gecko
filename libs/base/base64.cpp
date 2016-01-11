@@ -40,9 +40,9 @@ std::string base64_encode( const void *message, size_t bytes )
 	const uint8_t *cursor = static_cast<const uint8_t *>( message );
 	for( size_t i = 0; i < bytes / 3; ++i )
 	{
-		temp  = (*cursor++) << 16;
-		temp += (*cursor++) << 8;
-		temp += (*cursor++);
+		temp  = static_cast<uint32_t>( (*cursor++) ) << 16;
+		temp += static_cast<uint32_t>( (*cursor++) ) << 8;
+		temp += static_cast<uint32_t>( (*cursor++) );
 
 		result.push_back( charset[(temp & 0x00FC0000) >> 18] );
 		result.push_back( charset[(temp & 0x0003F000) >> 12] );
@@ -53,15 +53,15 @@ std::string base64_encode( const void *message, size_t bytes )
 	switch( bytes % 3 )
 	{
 		case 1:
-			temp  = (*cursor++) << 16;
+			temp  = static_cast<uint32_t>( (*cursor++) ) << 16;
 			result.push_back( charset[(temp & 0x00FC0000) >> 18] );
 			result.push_back( charset[(temp & 0x0003F000) >> 12] );
 			result.push_back( '=' );
 			result.push_back( '=' );
 			break;
 		case 2:
-			temp  = (*cursor++) << 16;
-			temp += (*cursor++) << 8;
+			temp  = static_cast<uint32_t>( (*cursor++) ) << 16;
+			temp += static_cast<uint32_t>( (*cursor++) ) << 8;
 			result.push_back( charset[(temp & 0x00FC0000) >> 18] );
 			result.push_back( charset[(temp & 0x0003F000) >> 12] );
 			result.push_back( charset[(temp & 0x00000FC0) >> 6 ] );
@@ -108,9 +108,9 @@ std::string base64_decode( const void *data, size_t bytes )
 				// If the buffer is full, split it into bytes
 				if ( iter == 4 )
 				{
-					result.push_back( (buf >> 16) & 0xff );
-					result.push_back( (buf >> 8 ) & 0xff );
-					result.push_back( buf & 0xff );
+					result.push_back( static_cast<std::string::value_type>( (buf >> 16) & 0xff ) );
+					result.push_back( static_cast<std::string::value_type>( (buf >> 8 ) & 0xff ) );
+					result.push_back( static_cast<std::string::value_type>( buf & 0xff ) );
 					buf = 0;
 					iter = 0;
 				}
@@ -120,11 +120,11 @@ std::string base64_decode( const void *data, size_t bytes )
 
 	if ( iter == 3 )
 	{
-		result.push_back( (buf >> 10) & 0xff );
-		result.push_back( (buf >> 2 ) & 0xff );
+		result.push_back( static_cast<std::string::value_type>( (buf >> 10) & 0xff ) );
+		result.push_back( static_cast<std::string::value_type>( (buf >> 2 ) & 0xff ) );
 	}
 	else if (iter == 2)
-		result.push_back( (buf >> 4) & 0xff );
+		result.push_back( static_cast<std::string::value_type>( (buf >> 4) & 0xff ) );
 
 	return result;
 }

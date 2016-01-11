@@ -116,7 +116,8 @@ polylines polylines::stroked( double width )
 	{
 		subj.clear();
 		for ( const auto &p: line )
-			subj << IntPoint( p.x() * 100 + 0.5, p.y() * 100 + 0.5 );
+			subj << IntPoint( static_cast<int>(p.x() * 100 + 0.5),
+							  static_cast<int>(p.y() * 100 + 0.5) );
 
 		ClipperOffset co;
 		solution.clear();
@@ -157,7 +158,8 @@ polylines polylines::offset( double width )
 	{
 		subj.clear();
 		for ( const auto &p: line )
-			subj << IntPoint( p.x() * 100 + 0.5, p.y() * 100 + 0.5 );
+			subj << IntPoint( static_cast<int>(p.x() * 100 + 0.5),
+							  static_cast<int>(p.y() * 100 + 0.5) );
 
 		ClipperOffset co;
 		co.AddPath( subj, jtRound, line.closed() ? etClosedPolygon : etOpenRound );
@@ -198,12 +200,12 @@ mesh<base::point> polylines::debug( void )
 ////////////////////////////////////////
 
 namespace {
-	void *stdAlloc( void *data, unsigned int size )
+	void *stdAlloc( void *, size_t size )
 	{
 		return malloc( size );
 	}
 
-	void stdFree( void *data, void *ptr )
+	void stdFree( void *, void *ptr )
 	{
 		free( ptr );
 	}
@@ -223,7 +225,8 @@ mesh<base::point> polylines::filled( void )
 		{
 			subj.clear();
 			for ( const auto &p: line )
-				subj << IntPoint( p.x() * 100 + 0.5, p.y() * 100 + 0.5 );
+				subj << IntPoint( static_cast<int>(p.x() * 100 + 0.5),
+								  static_cast<int>(p.y() * 100 + 0.5) );
 			clip.AddPath( subj, ptSubject, line.closed() );
 		}
 	}
@@ -247,10 +250,10 @@ mesh<base::point> polylines::filled( void )
 		tmp.clear();
 		for ( size_t p = 0; p < path.size(); ++p )
 		{
-			tmp.push_back( path[p].X / 100.0 );
-			tmp.push_back( path[p].Y / 100.0 );
+			tmp.push_back( path[p].X / 100.F );
+			tmp.push_back( path[p].Y / 100.F );
 		}
-		tessAddContour( tess, 2, tmp.data(), sizeof(float)*2, tmp.size()/2 );
+		tessAddContour( tess, 2, tmp.data(), sizeof(float)*2, static_cast<int>(tmp.size()/2) );
 	}
 
 	if ( !tessTesselate( tess, TESS_WINDING_POSITIVE, TESS_POLYGONS, 3, 2, nullptr ) )

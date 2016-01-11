@@ -18,7 +18,7 @@ namespace script
 /// @brief Font
 ///
 /// Fonts can be loaded and queried at any time during the setup / drawing
-/// cycle. See the @fun glyph_version function below to know whether the
+/// cycle. See the @sa glyph_version function below to know whether the
 /// consumer needs to update it's textures
 class font
 {
@@ -33,12 +33,12 @@ public:
 	/// @brief accessor to check if triplet of values is this font
 	inline bool matches( const std::string &f, const std::string &s, double sz ) const
 	{
-		return family() == f && style() == s && size() == sz;
+		return family() == f && style() == s && std::abs( size() - sz ) < 0.000001;
 	}
 
 	/// @brief The general size of the font
+	///
 	/// The general distances needed to properly position and align text using this font.
-	/// @param font Font to measure
 	/// @return The font extents
 	inline const font_extents &extents( void ) const { return _extents; }
 
@@ -90,7 +90,7 @@ public:
 	}
 	
 protected:
-	void add_glyph( char32_t char_code, const uint8_t *glData, size_t glPitch, size_t w, size_t h );
+	void add_glyph( char32_t char_code, const uint8_t *glData, int glPitch, int w, int h );
 
 	/// @brief Retrieves a glyph given a unicode char code
 	/// Function should load all attributes about the glyph and put

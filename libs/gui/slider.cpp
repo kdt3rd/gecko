@@ -31,7 +31,8 @@ slider::~slider( void )
 void slider::set_range( double min, double max )
 {
 	precondition( min < max, "invalid range" );
-	if ( _min != min || _max != max )
+	if ( ! std::equal_to<double>()(_min, min) ||
+		 ! std::equal_to<double>()(_max, max) )
 	{
 		_min = min;
 		_max = max;
@@ -44,7 +45,7 @@ void slider::set_range( double min, double max )
 void slider::set_value( double v )
 {
 	v = std::max( _min, std::min( _max, v ) );
-	if ( v != _value )
+	if ( ! std::equal_to<double>()(v, _value) )
 	{
 		_value = v;
 		invalidate();
@@ -109,7 +110,7 @@ void slider::compute_minimum( void )
 
 ////////////////////////////////////////
 
-bool slider::mouse_press( const base::point &p, int button )
+bool slider::mouse_press( const base::point &p, int /*button*/ )
 {
 	if ( contains( p ) )
 	{
@@ -152,7 +153,7 @@ bool slider::mouse_move( const base::point &p )
 
 ////////////////////////////////////////
 
-bool slider::mouse_release( const base::point &p, int button )
+bool slider::mouse_release( const base::point &p, int /*button*/ )
 {
 	if ( _tracking )
 	{

@@ -201,19 +201,19 @@ protected:
 	}
 
 	/// @brief Perform a seek on the underlying store
-	virtual off_type seek( off_type off, std::ios_base::seekdir dir )
+	virtual off_type seek( off_type /*off*/, std::ios_base::seekdir /*dir*/ )
 	{
 		return off_type(-1);
 	}
 
 	/// @brief Perform a read from the underlying store
-	virtual std::streamsize read( void *outBuf, size_t numBytes )
+	virtual std::streamsize read( void * /*outBuf*/, size_t /*numBytes*/ )
 	{
 		return ssize_t(-1);
 	}
 
 	/// @brief Perform a write to the underlying store
-	virtual std::streamsize write( const void *outBuf, size_t numBytes )
+	virtual std::streamsize write( const void * /*outBuf*/, size_t /*numBytes*/ )
 	{
 		return ssize_t(-1);
 	}
@@ -225,7 +225,7 @@ protected:
 		if ( numBytes1 )
 			ret = this->write( outBuf1, numBytes1 );
 
-		if ( ret == numBytes1 )
+		if ( ret == static_cast<std::streamsize>(numBytes1) )
 			ret += this->write( outBuf2, numBytes2 );
 
 		return ret;
@@ -273,10 +273,10 @@ protected:
 						_conv_next = _conv_buf +
 							_codecvt_cache->length( _state_last, _conv_buf,
 													_conv_next,
-													this->gptr() - this->eback() );
+													static_cast<size_t>( this->gptr() - this->eback() ) );
 						const std::streamsize rem = _conv_end - _conv_next;
-						if ( rem )
-							std::memmove( _conv_buf, _conv_next, rem );
+						if ( rem > 0 )
+							std::memmove( _conv_buf, _conv_next, static_cast<size_t>( rem ) );
 
 						_conv_next = _conv_buf;
 						_conv_end = _conv_buf + rem;
@@ -325,7 +325,7 @@ protected:
 	}
 
 	virtual pos_type seekoff( off_type off, std::ios_base::seekdir dir,
-							  std::ios_base::openmode which = std::ios_base::in | std::ios_base::out ) override
+							  std::ios_base::openmode /*which*/ = std::ios_base::in | std::ios_base::out ) override
 	{
 		int width = 0;
 		if ( _codecvt_cache )
@@ -371,7 +371,7 @@ protected:
 		return ret;
 	}
 
-	virtual pos_type seekpos( pos_type pos, std::ios_base::openmode which = std::ios_base::in | std::ios_base::out ) override
+	virtual pos_type seekpos( pos_type pos, std::ios_base::openmode /*which*/ = std::ios_base::in | std::ios_base::out ) override
 	{
 		pos_type ret = pos_type( off_type(-1) );
 		if ( this->is_open() )
@@ -427,13 +427,13 @@ protected:
 			if ( this->gptr() < this->egptr() )
 				return traits_type::to_int_type( *this->gptr() );
 
-			const size_t buflen = _buf_sz > 1 ? _buf_sz - 1 : 1;
+			const std::streamsize buflen = _buf_sz > 1 ? _buf_sz - 1 : 1;
 			bool gotEOF = false;
 			std::streamsize ilen = 0;
 			std::codecvt_base::result r = std::codecvt_base::ok;
 			if ( check_facet( _codecvt_cache ).always_noconv() )
 			{
-				ilen = read( this->eback(), buflen * sizeof(char_type) );
+				ilen = read( this->eback(), static_cast<size_t>( buflen ) * sizeof(char_type) );
 				gotEOF = ( ilen == 0 );
 			}
 			else
@@ -458,13 +458,13 @@ protected:
 				{
 					std::unique_ptr<char[]> buf( new char[blen] );
 					if ( rem )
-						std::memcpy( buf.get(), _conv_next, rem );
+						std::memcpy( buf.get(), _conv_next, static_cast<size_t>( rem ) );
 					_conv_buf_store = std::move( buf );
 					_conv_buf = _conv_buf_store.get();
 					_conv_buf_sz = blen;
 				}
 				else if ( rem )
-					std::memmove( _conv_buf, _conv_next, rem );
+					std::memmove( _conv_buf, _conv_next, static_cast<size_t>( rem ) );
 
 				_conv_next = _conv_buf;
 				_conv_end = _conv_buf + rem;
@@ -475,7 +475,7 @@ protected:
 					{
 						precondition( ( _conv_end - _conv_buf + rlen ) <= _conv_buf_sz,
 									  "codecvt::max_length() is not valid" );
-						std::streamsize elen = read( _conv_end, rlen );
+						std::streamsize elen = read( _conv_end, static_cast<size_t>( rlen ) );
 						if ( elen == 0 )
 							gotEOF = true;
 						else if ( elen == -1 )
@@ -491,11 +491,11 @@ protected:
 												this->eback() + buflen, iend );
 					if ( r == std::codecvt_base::noconv )
 					{
-						size_t avail = _conv_end - _conv_buf;
+						std::streamsize avail = _conv_end - _conv_buf;
 						ilen = std::min( avail, buflen );
 						traits_type::copy( this->eback(),
 										   reinterpret_cast<char_type*>( _conv_buf ),
-										   ilen );
+										   static_cast<size_t>( ilen ) );
 						_conv_next = _conv_buf + ilen;
 					}
 					else
@@ -567,7 +567,7 @@ protected:
 			const std::streamsize avail = this->egptr() - this->gptr();
 			if ( avail > 0 )
 			{
-				traits_type::copy( s, this->gptr(), avail );
+				traits_type::copy( s, this->gptr(), static_cast<size_t>( avail ) );
 				s += avail;
 				this->setg( this->eback(), this->gptr() + avail, this->egptr() );
 				ret += avail;
@@ -578,7 +578,7 @@ protected:
 			// loop in case of short read from socket or pipe
 			do
 			{
-				nread = this->read( s, count * sizeof(char_type) );
+				nread = this->read( s, static_cast<size_t>(count) * sizeof(char_type) );
 				if ( nread == -1 )
 					throw std::runtime_error( "Error reading from streambuf" );
 				if ( nread == 0 )
@@ -627,9 +627,10 @@ protected:
 			const std::streamsize lim = std::min( chunkSize, bufavail );
 			if ( count >= lim )
 			{
-				const std::streamsize bufCount = (this->pptr() - this->pbase()) * sizeof(char_type);
-				const std::streamsize countOut = count * sizeof(char_type);
-				ret = this->writev( this->pbase(), bufCount, s, countOut );
+				const std::streamsize charSize = sizeof(char_type);
+				const std::streamsize bufCount = (this->pptr() - this->pbase()) * charSize;
+				const std::streamsize countOut = count * charSize;
+				ret = this->writev( this->pbase(), static_cast<size_t>(bufCount), s, static_cast<size_t>(countOut) );
 
 				if ( ret == (bufCount + countOut) )
 				{
@@ -638,7 +639,7 @@ protected:
 				}
 
 				if ( ret > bufCount )
-					ret -= (bufCount/sizeof(char_type));
+					ret -= bufCount/charSize;
 				else
 					ret = 0;
 			}
@@ -662,7 +663,7 @@ protected:
 			if ( _reading )
 			{
 				clear_pback();
-				const int gptr_off = get_ext_pos( _state_last );
+				const off_type gptr_off = get_ext_pos( _state_last );
 				if ( seek_priv( gptr_off, std::ios_base::cur, _state_last ) == pos_type( off_type(-1) ) )
 					return ret;
 			}
@@ -790,7 +791,7 @@ protected:
 		}
 	}
 
-	inline void clear_pback( void ) throw()
+	inline void clear_pback( void ) noexcept
 	{
 		if ( _pback_live )
 		{
@@ -806,7 +807,7 @@ protected:
 
 		if ( check_facet( _codecvt_cache ).always_noconv() )
 		{
-			elen = write( ibuf, ilen * sizeof(char_type) );
+			elen = write( ibuf, static_cast<size_t>(ilen) * sizeof(char_type) );
 			if ( elen >= 0 )
 				elen /= sizeof(char_type);
 			plen = ilen;
@@ -814,13 +815,16 @@ protected:
 		else
 		{
 			std::streamsize blen = ilen * _codecvt_cache->max_length();
-#ifdef _MSC_VER
-			std::unique_ptr<char[]> locbuf( new char[blen] );
-			char *buf = locbuf.get();
-#else
-			char locbuf[blen];
+			char locbuf[16];
 			char *buf = locbuf;
-#endif
+
+			std::unique_ptr<char[]> locbufa;
+			if ( blen > 16 )
+			{
+				locbufa.reset( new char[blen] );
+				buf = locbufa.get();
+			}
+
 			char *bend;
 			const char_type *iend;
 			auto r = _codecvt_cache->out( _state_cur, ibuf, ibuf + ilen,
@@ -835,7 +839,7 @@ protected:
 			else
 				throw std::runtime_error( "Conversion error in streambuf" );
 
-			elen = write( buf, blen );
+			elen = write( buf, static_cast<size_t>( blen ) );
 			plen = blen;
 
 			// try again for partial
@@ -849,7 +853,7 @@ protected:
 				if ( r != std::codecvt_base::error )
 				{
 					rlen = bend - buf;
-					elen = write( buf, rlen );
+					elen = write( buf, static_cast<size_t>( rlen ) );
 					plen = rlen;
 				}
 				else
@@ -859,13 +863,15 @@ protected:
 		return elen == plen;
 	}
 
-	int get_ext_pos( codecvt_state_type &state )
+	off_type get_ext_pos( codecvt_state_type &state )
 	{
 		if ( _codecvt_cache->always_noconv() )
 			return this->gptr() - this->egptr();
 
-		const int gptr_off = _codecvt_cache->length( state, _conv_buf, _conv_next,
-													 this->gptr() - this->eback() );
+		const int gptr_off = _codecvt_cache->length(
+			state, _conv_buf, _conv_next,
+			static_cast<size_t>( this->gptr() - this->eback() ) );
+
 		return _conv_buf + gptr_off - _conv_end;
 	}
 
@@ -911,7 +917,7 @@ protected:
 					ilen = next - buf;
 					if ( ilen > 0 )
 					{
-						const std::streamsize elen = write( buf, ilen );
+						const std::streamsize elen = write( buf, static_cast<size_t>( ilen ) );
 						if ( elen != ilen )
 							isvalid = false;
 					}

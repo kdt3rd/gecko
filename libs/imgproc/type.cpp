@@ -72,7 +72,7 @@ public:
 
 	// Compile-time check for any missing operator() implementation
 	template<typename T>
-	void operator()( T a )
+	void operator()( T )
 	{
 		static_assert( base::always_false<T>::value, "missing operator() for variant types" );
 	}

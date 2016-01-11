@@ -25,7 +25,7 @@ public:
 	virtual void recompute_minimum( container &a ) = 0;
 	virtual void recompute_layout( container &a ) = 0;
 
-	virtual void added( const std::shared_ptr<area> &a )
+	virtual void added( const std::shared_ptr<area> & )
 	{
 	}
 };

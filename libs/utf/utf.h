@@ -26,9 +26,13 @@ namespace utf
 	public:
 		/// @brief Construct error with message
 		error( const std::string &msg );
+		error( const error & ) = default;
+		error( error && ) = default;
+		error &operator=( const error & ) = default;
+		error &operator=( error && ) = default;
 
 		/// @brief Destructor
-		virtual ~error( void ) throw();
+		virtual ~error( void ) noexcept;
 	};
 
 	/// @brief Is the code point valid?
@@ -126,7 +130,7 @@ namespace utf
 		/// @return True if the underlying stream is valid.
 		inline operator bool() const
 		{
-			return (bool)_stream;
+			return static_cast<bool>( _stream );
 		}
 
 		/// @brief The current line number
@@ -172,33 +176,35 @@ namespace utf
 	template<typename Iterator>
 	size_t convert_utf8( char32_t cp, Iterator &it )
 	{
+		typedef typename Iterator::container_type::value_type value_type;
+
 		if ( cp <= 0x7F )
 		{
-			*it++ = (char)cp;
+			*it++ = static_cast<value_type>( cp );
 			return 1;
 		}
 
 		if ( cp <= 0x7FF )
 		{
-			*it++ = (char)(0xC0|(cp>>6));
-			*it++ = (char)(0x80|(cp&0x3F));
+			*it++ = static_cast<value_type>(0xC0|(cp>>6));
+			*it++ = static_cast<value_type>(0x80|(cp&0x3F));
 			return 2;
 		}
 
 		if ( cp <= 0xFFFF )
 		{
-			*it++ = (char)(0xE0|(cp>>12));
-		   	*it++ = (char)(0x80|((cp>>6)&0x3F));
-			*it++ = (char)(0x80|(cp&0x3F));
+			*it++ = static_cast<value_type>(0xE0|(cp>>12));
+		   	*it++ = static_cast<value_type>(0x80|((cp>>6)&0x3F));
+			*it++ = static_cast<value_type>(0x80|(cp&0x3F));
 			return 3;
 		}
 
 		if ( cp <= 0x10FFFF )
 		{
-			*it++ = (char)(0xF0|(cp>>18));
-			*it++ = (char)(0x80|((cp>>12)&0x3F));
-			*it++ = (char)(0x80|((cp>>6)&0x3F));
-			*it++ = (char)(0x80|(cp&0x3F));
+			*it++ = static_cast<value_type>(0xF0|(cp>>18));
+			*it++ = static_cast<value_type>(0x80|((cp>>12)&0x3F));
+			*it++ = static_cast<value_type>(0x80|((cp>>6)&0x3F));
+			*it++ = static_cast<value_type>(0x80|(cp&0x3F));
 			return 4;
 		}
 
@@ -225,7 +231,8 @@ namespace utf
 	void canonical_order( std::u32string &str );
 
 	/// @brief Sort combining characters in canonical order.
-	/// @param str String to sort.
+	/// @param first start of string to sort.
+	/// @param last end of string to sort.
 	///
 	/// Combining characters will be reordered to be in the canonical order.
 	/// The string is sorted in-place.

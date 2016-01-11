@@ -1,5 +1,6 @@
 
 #pragma once
+#include <iterator>
 
 namespace base
 {
@@ -59,85 +60,135 @@ iterator_range<It> range( It b, It e )
 ////////////////////////////////////////
 
 /// @brief Interate over column of two dimensional container
-template<typename I, typename T>
-class column_iterator : public std::iterator<std::random_access_iterator_tag,T>
+template<typename I, typename T, typename S>
+class column_iterator : public std::iterator<std::random_access_iterator_tag, T>
 {
+	typedef std::iterator_traits<I> _traits;
 public:
-	column_iterator( I b, int n )
+	typedef I iterator_type;
+
+	typedef T value_type;
+	typedef S size_type;
+	typedef typename _traits::difference_type difference_type;
+	typedef value_type &reference;
+	typedef value_type *pointer;
+
+	column_iterator( void ) : _iterator(), _n(0) {}
+	explicit column_iterator( iterator_type b, size_type n )
 		: _iterator( b ), _n( n )
 	{
 	}
+	column_iterator( const column_iterator &x ) = default;
+	// allow iterator type conversion based on
+	// underlying
+	template <typename OI>
+	column_iterator( const column_iterator<OI, value_type, size_type> &x )
+			: _iterator(x.base()), _n(x._n)
+	{}
 
-	column_iterator<I,T> &operator+=( int i )
+	iterator_type base( void ) const
+	{
+		return _iterator;
+	}
+
+	size_type offset( void ) const
+	{
+		return _n;
+	}
+
+	reference operator*( void ) const
+	{
+		return (*_iterator)[_n];
+	}
+
+	pointer operator->( void ) const
+	{
+		return &(operator*());
+	}
+
+	column_iterator &operator+=( difference_type i )
 	{
 		_iterator += i;
 		return *this;
 	}
 
-	column_iterator<I,T> &operator-=( int i )
+	column_iterator &operator-=( difference_type i )
 	{
 		_iterator -= i;
 		return *this;
 	}
 
-	column_iterator<I,T> operator+( int i ) const
+	column_iterator operator+( difference_type i ) const
 	{
-		return column_iterator<I,T>( _iterator + i, _n );
+		return column_iterator( _iterator + i, _n );
 	}
 
-	column_iterator<I,T> operator-( int i ) const
+	column_iterator operator-( difference_type i ) const
 	{
-		return column_iterator<I,T>( _iterator - i, _n );
+		return column_iterator( _iterator - i, _n );
 	}
 
-	int operator-( const column_iterator<I,T> &i ) const
+	difference_type operator-( const column_iterator &i ) const
 	{
 		return _iterator - i._iterator;
 	}
 
-	column_iterator<I,T> &operator++( void )
+	column_iterator &operator++( void )
 	{
 		_iterator++;
 		return *this;
 	}
-
-	bool operator!=( const column_iterator<I,T> &e )
+	column_iterator operator++( int )
 	{
-		return _iterator != e._iterator;
+		column_iterator t = *this;
+		++_iterator;
+		return t;
 	}
 
-	T &operator[]( int i )
+	column_iterator &operator--( void )
+	{
+		_iterator--;
+		return *this;
+	}
+	column_iterator operator--( int )
+	{
+		column_iterator t = *this;
+		--_iterator;
+		return t;
+	}
+
+	reference operator[]( difference_type i ) const
 	{
 		return (* (_iterator + i ))[_n];
 	}
 
-	/*
-	T *operator->( void )
-	{
-		return &( (*_iterator)[_n] );
-	}
-	*/
-
-	T &operator*( void )
-	{
-		return (*_iterator)[_n];
-	}
-
 private:
 	I _iterator;
-	int _n;
+	size_type _n;
 };
+
+template <typename I, typename T, typename S>
+inline bool operator==( const column_iterator<I, T, S> &a, const column_iterator<I, T, S> &b )
+{
+	return ( a.base() == b.base() && a.offset() == b.offset() );
+}
+
+template <typename I, typename T, typename S>
+inline bool operator!=( const column_iterator<I, T, S> &a, const column_iterator<I, T, S> &b )
+{
+	return !( a == b );
+}
+
 
 ////////////////////////////////////////
 
 /// @brief Construct a column iterator
 template<typename C>
-iterator_range<column_iterator<typename C::iterator, typename C::value_type::value_type>> column( C &c, int n )
+iterator_range<column_iterator<typename C::iterator, typename C::value_type::value_type, typename C::size_type>> column( C &c, typename C::size_type n )
 {
-	auto beg = column_iterator<typename C::iterator, typename C::value_type::value_type>( c.begin(), n ); 
-	auto end = column_iterator<typename C::iterator, typename C::value_type::value_type>( c.end(), n ); 
-
-	return iterator_range<column_iterator<typename C::iterator, typename C::value_type::value_type>>( beg, end );
+	typedef column_iterator<typename C::iterator, typename C::value_type::value_type, typename C::size_type> iter_type;
+	return iterator_range<iter_type>( iter_type( c.begin(), n ),
+									  iter_type( c.end(), n ) );
 }
 
 ////////////////////////////////////////
@@ -153,17 +204,18 @@ iterator_range<typename C::iterator> rows( C &c )
 
 /// @brief Construct a list of column iterators
 template<typename C>
-std::vector<iterator_range<column_iterator<typename C::iterator, typename C::value_type::value_type>>> columns( C &c )
+std::vector<iterator_range<column_iterator<typename C::iterator, typename C::value_type::value_type, typename C::size_type>>> columns( C &c )
 {
-	std::vector<iterator_range<column_iterator<typename C::iterator, typename C::value_type::value_type>>> ranges;
+	typedef column_iterator<typename C::iterator, typename C::value_type::value_type, typename C::size_type> iter_type;
+	std::vector<iterator_range<iter_type>> ranges;
 	if ( !c.empty() )
 	{
 		auto &row = c[0];
-		for ( size_t i = 0; i < row.size(); ++i )
+		for ( typename C::size_type i = 0; i < row.size(); ++i )
 		{
 			ranges.emplace_back(
-				column_iterator<typename C::iterator, typename C::value_type::value_type>( c.begin(), i ),
-				column_iterator<typename C::iterator, typename C::value_type::value_type>( c.end(), i ) );
+				iter_type( c.begin(), i ),
+				iter_type( c.end(), i ) );
 		}
 	}
 

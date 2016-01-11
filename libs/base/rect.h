@@ -259,10 +259,10 @@ public:
 	int64_t y1( void ) const { return _position.y(); }
 
 	/// @brief X coordinate of right side
-	int64_t x2( void ) const { return _position.x() + _extent.w() - 1.0; }
+	int64_t x2( void ) const { return _position.x() + _extent.w() - 1; }
 
 	/// @brief Y coordinate of bottom side
-	int64_t y2( void ) const { return _position.y() + _extent.h() - 1.0; }
+	int64_t y2( void ) const { return _position.y() + _extent.h() - 1; }
 
 	/// @brief Position of the rectangle
 	ipoint position( void ) const { return _position; }

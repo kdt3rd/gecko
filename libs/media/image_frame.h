@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <base/contract.h>
+
 #include "image_buffer.h"
 
 #include <map>

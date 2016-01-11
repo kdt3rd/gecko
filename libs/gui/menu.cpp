@@ -25,6 +25,12 @@ menu::menu( const std::shared_ptr<platform::window> &w )
 
 ////////////////////////////////////////
 
+menu::~menu( void )
+{
+}
+
+////////////////////////////////////////
+
 void menu::add_entry( const std::string &n )
 {
 	auto button = std::make_shared<gui::button>( n );

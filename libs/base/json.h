@@ -35,7 +35,7 @@ typedef std::nullptr_t json_null;
 ////////////////////////////////////////
 
 /// @brief JSON value
-class json : public variant<json_string,json_number,json_bool,json_array,json_object,json_null>
+class json
 {
 public:
 	/// @brief JSON null constructor
@@ -47,37 +47,37 @@ public:
 
 	/// @brief JSON string constructor
 	json( const json_string &x )
-		: variant( x )
+		: _storage( x )
 	{
 	}
 
 	/// @brief JSON string constructor
 	json( json_string &&x )
-		: variant( std::move( x ) )
+		: _storage( std::move( x ) )
 	{
 	}
 
 	/// @brief JSON object constructor
 	json( const json_object &x )
-		: variant( x )
+		: _storage( x )
 	{
 	}
 
 	/// @brief JSON array constructor
 	json( const json_array &x )
-		: variant( x )
+		: _storage( x )
 	{
 	}
 
 	/// @brief JSON object move constructor
 	json( json_object &&x )
-		: variant( std::move( x ) )
+		: _storage( std::move( x ) )
 	{
 	}
 
 	/// @brief JSON array move constructor
 	json( json_array &&x )
-		: variant( std::move( x ) )
+		: _storage( std::move( x ) )
 	{
 	}
 
@@ -96,7 +96,10 @@ public:
 	/// @brief JSON string constructor
 	json( const char *x )
 	{
-		set<std::string>( x );
+		if ( x )
+			set<json_string>( json_string( x ) );
+		else
+			set<json_string>( json_string() );
 	}
 
 	/// @brief JSON boolean constructor
@@ -112,8 +115,62 @@ public:
 	}
 
 	json( const json &x )
-		: variant( x )
+		: _storage( x._storage )
 	{
+	}
+
+	json( json &&x )
+		: _storage( std::move( x._storage ) )
+	{
+	}
+
+	~json( void );
+
+	/// @brief Assignment operator.
+	json &operator=( json old )
+	{
+		_storage = std::move( old._storage );
+		return *this;
+	}
+
+	/// @brief pass through check to storage
+	template <typename X>
+	inline bool is( void ) const
+	{
+		return _storage.is<X>();
+	}
+
+	inline bool valid( void ) const
+	{
+		return _storage.valid();
+	}
+
+	template <typename X, typename... Args>
+	void set( Args &&...args )
+	{
+		_storage.set<X>( std::forward<Args>( args )... );
+	}
+
+	template <typename X>
+	X &get( void )
+	{
+		return _storage.get<X>();
+	}
+
+	template <typename X>
+	const X &get( void ) const
+	{
+		return _storage.get<X>();
+	}
+
+	void clear( void )
+	{
+		return _storage.clear();
+	}
+
+	const char *type_name( void ) const
+	{
+		return _storage.type_name();
 	}
 
 	/// @brief Parse a json value from the given string.
@@ -200,7 +257,7 @@ public:
 	{
 		base::json result;
 		result.parse( s );
-		return std::move( result );
+		return result;
 	}
 
 private:
@@ -215,7 +272,7 @@ private:
 
 	void skip_whitespace( std::istream_iterator<char> &it, std::istream_iterator<char> &end, int &line );
 
-	static json error;
+	variant<json_string,json_number,json_bool,json_array,json_object,json_null> _storage;
 };
 
 ////////////////////////////////////////

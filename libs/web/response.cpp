@@ -12,8 +12,14 @@ response::response( net::tcp_socket &socket )
 	std::string line = read_line( socket );
 
 	size_t off = line.find( '/' );
+	if ( off == std::string::npos )
+		throw_runtime( "invalid HTTP response" );
 	size_t off2 = line.find( ' ', off );
+	if ( off2 == std::string::npos )
+		throw_runtime( "invalid HTTP response" );
 	size_t off3 = line.find( ' ', off2 + 1 );
+	if ( off3 == std::string::npos )
+		throw_runtime( "invalid HTTP response" );
 
 	_version = line.substr( off + 1, off2 - off - 1 );
 	_status = static_cast<status_code>( std::stoi( line.substr( off2 + 1, off2 - off3 - 1 ), nullptr, 10 ) );
@@ -22,7 +28,9 @@ response::response( net::tcp_socket &socket )
 	line = read_line( socket );
 	while ( !line.empty() )
 	{
-		size_t off = line.find( ':' );
+		off = line.find( ':' );
+		if ( off == std::string::npos )
+			throw_runtime( "invalid HTTP response" );
 		std::string key( line.substr( 0, off ) );
 		std::string value( line.substr( off + 2 ) );
 		_header[key] = value;
@@ -30,6 +38,12 @@ response::response( net::tcp_socket &socket )
 	}
 
 	read_content( socket );
+}
+
+////////////////////////////////////////
+
+response::~response( void )
+{
 }
 
 ////////////////////////////////////////
@@ -71,10 +85,10 @@ void response::send( net::tcp_socket &socket, std::istream &in )
 		while ( in )
 		{
 			in.read( buf, 2048 );
-			size_t n = in.gcount();
+			std::streamsize n = in.gcount();
 			str = base::format( "{0,b16}\r\n", n );
 			socket.write( str.c_str(), str.size() );
-			socket.write( buf, n );
+			socket.write( buf, static_cast<size_t>(n) );
 			socket.write( "\r\n", 2 );
 			if ( in.eof() )
 				break;
@@ -82,7 +96,7 @@ void response::send( net::tcp_socket &socket, std::istream &in )
 		str = "0\r\n\r\n";
 		socket.write( str.c_str(), str.size() );
 	}
-	catch ( std::exception &e )
+	catch ( std::exception & /*e*/ )
 	{
 		throw_add( "error sending HTTP chunked response" );
 	}

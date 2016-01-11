@@ -14,17 +14,17 @@ class range
 public:
 	static_assert( std::is_integral<Number>::value, "Number must be integeral type" );
 
-	range( Number f, Number l )
+	constexpr range( Number f, Number l )
 		: _first( std::min( f, l ) ), _last( std::max( f, l ) )
 	{
 	}
 
-	Number first( void ) const
+	constexpr Number first( void ) const
 	{
 		return _first;
 	}
 
-	Number last( void ) const
+	constexpr Number last( void ) const
 	{
 		return _last;
 	}
@@ -36,14 +36,15 @@ public:
 	}
 
 	/// @brief Check if this and that overlap
-	bool overlaps( const range &that ) const
+	constexpr bool overlaps( const range &that ) const
 	{
 		return _first <= that._last && that._first <= _last;
 	}
 
 	/// @brief Check if that fits inside of this.
-	bool covers( const range &that ) const
+	constexpr bool covers( const range &that ) const
 	{
+		return _first <= that._first && _last >= that._last;
 	}
 
 	/// @brief Return the overlap between this and that.
@@ -75,12 +76,12 @@ public:
 		return range( a, b );
 	}
 
-	bool can_extend( Number x ) const
+	constexpr bool can_extend( Number x ) const
 	{
 		return ( x + 1 == _first ) || ( _last + 1 == x );
 	}
 
-	bool follows( const range &that )
+	constexpr bool follows( const range &that ) const
 	{
 		return ( that._last + 1 == _first );
 	}
@@ -97,13 +98,9 @@ public:
 		_last = std::max( _last, that._last );
 	}
 
-	bool operator<( const range &that ) const
+	constexpr bool operator<( const range &that ) const
 	{
-		if ( _first < that._first )
-			return true;
-		if ( _first == that._first )
-			return _last < that._last;
-		return false;
+		return ( _first < that._first ) ? true : ( ( _first == that._first ) ? _last < that._last : false );
 	}
 
 	void clear( void )

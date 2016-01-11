@@ -33,6 +33,10 @@ public:
 	ostream open_write( const base::uri &path, std::ios_base::openmode m = file_system::file_write_mode ) override;
 	iostream open( const base::uri &path,
 				   std::ios_base::openmode m = (file_read_mode|file_write_mode) ) override;
+
+	fs_watch watch( const base::uri &path,
+					const fs_watch::event_handler &evtcb,
+					fs_event evt_mask, bool recursive ) override;
 };
 
 ////////////////////////////////////////

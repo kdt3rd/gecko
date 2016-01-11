@@ -33,7 +33,7 @@ std::string rtrim( std::string str, const std::string &ws )
 {
 	while ( !str.empty() && ws.find( str.back() ) != std::string::npos )
 		str.pop_back();
-	return std::move( str );
+	return str;
 }
 
 ////////////////////////////////////////

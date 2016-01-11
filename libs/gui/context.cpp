@@ -2,10 +2,19 @@
 #include "context.h"
 #include <base/contract.h>
 
+namespace
+{
+std::vector<gui::context *> _contexts;
+}
+
 namespace gui
 {
 
-std::vector<context *> context::_contexts;
+////////////////////////////////////////
+
+context::~context( void )
+{
+}
 
 ////////////////////////////////////////
 

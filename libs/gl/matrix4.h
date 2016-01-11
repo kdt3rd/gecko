@@ -101,7 +101,8 @@ public:
 	static matrix4 translation( float x, float y, float z = 0.0 );
 	static inline matrix4 translation( const base::point &p )
 	{
-		return translation( p.x(), p.y() );
+		return translation( static_cast<float>( p.x() ),
+							static_cast<float>( p.y() ) );
 	}
 
 	/// @brief Construct scale matrix

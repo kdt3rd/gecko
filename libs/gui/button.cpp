@@ -84,7 +84,7 @@ void button::compute_minimum( void )
 
 ////////////////////////////////////////
 
-bool button::mouse_press( const base::point &p, int button )
+bool button::mouse_press( const base::point &p, int /*button*/ )
 {
 	if ( contains( p ) )
 	{
@@ -96,7 +96,7 @@ bool button::mouse_press( const base::point &p, int button )
 
 ////////////////////////////////////////
 
-bool button::mouse_release( const base::point &p, int button )
+bool button::mouse_release( const base::point &p, int /*button*/ )
 {
 	if ( _tracking )
 	{

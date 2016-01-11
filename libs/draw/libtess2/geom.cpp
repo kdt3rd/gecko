@@ -34,11 +34,12 @@
 #include "mesh.h"
 #include "geom.h"
 
-int tesvertLeq( TESSvertex *u, TESSvertex *v )
+int tesvertLeq( PQkey u, PQkey v )
 {
 	/* Returns TRUE if u is lexicographically <= v. */
 
-	return VertLeq( u, v );
+	return VertLeq( reinterpret_cast<TESSvertex *>( u ),
+					reinterpret_cast<TESSvertex *>( v ) );
 }
 
 TESSreal tesedgeEval( TESSvertex *u, TESSvertex *v, TESSvertex *w )
@@ -165,10 +166,10 @@ int tesvertCCW( TESSvertex *u, TESSvertex *v, TESSvertex *w )
 * even when a and b differ greatly in magnitude.
 */
 #define RealInterpolate(a,x,b,y)			\
-	(a = (a < 0) ? 0 : a, b = (b < 0) ? 0 : b,		\
-	((a <= b) ? ((b == 0) ? ((x+y) / 2)			\
-	: (x + (y-x) * (a/(a+b))))	\
-	: (y + (x-y) * (b/(a+b)))))
+	(a = (a < 0) ? 0 : a, b = (b < 0) ? 0 : b,					\
+	 ((a <= b) ? (std::equal_to<TESSreal>()(b, 0) ? ((x+y) / 2)	\
+				  : (x + (y-x) * (a/(a+b))))					\
+	  : (y + (x-y) * (b/(a+b)))))
 
 #ifndef FOR_TRITE_TEST_PROGRAM
 #define Interpolate(a,x,b,y)	RealInterpolate(a,x,b,y)

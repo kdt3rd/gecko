@@ -71,7 +71,7 @@ gl::texture png_read( const char *file_name )
 	png_read_update_info(png_ptr, info_ptr);
 
 	// Row size in bytes.
-	int rowbytes = png_get_rowbytes(png_ptr, info_ptr);
+	png_size_t rowbytes = png_get_rowbytes(png_ptr, info_ptr);
 
 	// glTexImage2d requires rows to be 4-byte aligned
 	rowbytes += 3 - ((rowbytes-1) % 4);
@@ -92,10 +92,11 @@ gl::texture png_read( const char *file_name )
 	png_read_image( png_ptr, row_pointers.data() );
 
 	// Generate the OpenGL texture object
-	GLuint txt;
+	GLuint txt = 0;
+	glActiveTexture( GL_TEXTURE0 );
 	glGenTextures( 1, &txt );
 	glBindTexture( GL_TEXTURE_RECTANGLE, txt );
-	glTexImage2D( GL_TEXTURE_RECTANGLE, 0, GL_RGBA, temp_width, temp_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data.data() );
+	glTexImage2D( GL_TEXTURE_RECTANGLE, 0, GL_RGBA, static_cast<GLsizei>( temp_width ), static_cast<GLsizei>( temp_height ), 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data.data() );
 	glTexParameterf( GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 	glTexParameterf( GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 

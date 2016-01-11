@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <base/half.h>
 #include <base/pointer.h>
+#include <base/contract.h>
 
 namespace media
 {
@@ -28,10 +29,11 @@ public:
 	template<typename T>
 	image_buffer( const std::shared_ptr<T> &data, int64_t w, int64_t h )
 		: _data( data ),
-		  _bits( sizeof(T) * 8 ),
+		  _bits( static_cast<int64_t>(sizeof(T) * 8) ),
 		  _offset( 0 ),
 		  _width( w ), _height( h ),
-		  _xstride( sizeof(T)*8 ), _ystride( sizeof(T)*8*w ),
+		  _xstride( static_cast<int64_t>(sizeof(T)*8) ),
+		  _ystride( static_cast<int64_t>(sizeof(T)*8)*w ),
 		  _floating( std::is_floating_point<T>::value ),
 		  _unsigned( std::is_unsigned<T>::value )
 	{

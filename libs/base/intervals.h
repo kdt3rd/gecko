@@ -61,7 +61,7 @@ private:
 			if ( r2.follows( r1 ) )
 			{
 				r1.extend( r2 );
-				_ranges.erase( _ranges.begin() + i );
+				_ranges.erase( _ranges.begin() + long(i) );
 				--i;
 			}
 		}

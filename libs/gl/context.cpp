@@ -35,7 +35,8 @@ void context::disable( capability cap )
 
 void context::clear_color( const base::color &c )
 {
-	glClearColor( c.red(), c.green(), c.blue(), c.alpha() );
+	glClearColor( static_cast<GLfloat>( c.red() ), static_cast<GLfloat>( c.green() ),
+				  static_cast<GLfloat>( c.blue() ), static_cast<GLfloat>( c.alpha() ) );
 }
 
 ////////////////////////////////////////
@@ -49,7 +50,7 @@ void context::clear( buffer_bit bit )
 
 void context::clear( buffer_bits bits )
 {
-	glClear( bits );
+	glClear( static_cast<GLbitfield>( bits ) );
 }
 
 ////////////////////////////////////////
@@ -63,14 +64,14 @@ void context::depth_mask( bool write )
 
 void context::stencil_mask( bool write )
 {
-	glStencilMask( write ? ~0 : 0 );
+	glStencilMask( write ? GLuint(~0) : GLuint(0) );
 }
 
 ////////////////////////////////////////
 
 void context::stencil_mask( uint32_t mask )
 {
-	glStencilMask( mask );
+	glStencilMask( static_cast<GLuint>( mask ) );
 }
 
 ////////////////////////////////////////

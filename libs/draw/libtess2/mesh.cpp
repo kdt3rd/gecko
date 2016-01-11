@@ -771,7 +771,7 @@ int tessMeshMergeConvexFaces( TESSmesh *mesh, int maxVertsPerFace )
 
 /* tessMeshDeleteMesh( mesh ) will free all storage for any valid mesh.
 */
-void tessMeshDeleteMesh( TESSalloc *alloc, TESSmesh *mesh )
+void tessMeshDeleteMesh( TESSalloc * /*alloc*/, TESSmesh *mesh )
 {
 	delete mesh;
 }

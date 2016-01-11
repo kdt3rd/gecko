@@ -34,7 +34,7 @@ void address::lookup_name( const char *name )
 
         if ( res )
         {
-            struct sockaddr_in *a = (struct sockaddr_in *)( res->ai_addr );
+            struct sockaddr_in *a = reinterpret_cast<struct sockaddr_in *>( res->ai_addr );
             _addr = ntohl( a->sin_addr.s_addr );
         }
 

@@ -7,7 +7,7 @@
 namespace
 {
 
-int safemain( int argc, char *argv[] )
+int safemain( int /*argc*/, char * /*argv*/ [] )
 {
 	using namespace imgproc;
 
@@ -17,7 +17,7 @@ int safemain( int argc, char *argv[] )
 
 	function f( U"add", U"x", U"y" );
 	f.set_result( e );
-	auto args = { type_primary( pod_type::FLOAT32 ), type_primary( pod_type::FLOAT32 ) };
+//	auto args = { type_primary( pod_type::FLOAT32 ), type_primary( pod_type::FLOAT32 ) };
 //	std::cout << e << " = " << infer( f, args )->get_type() << std::endl;
 
 	/*

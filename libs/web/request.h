@@ -23,6 +23,12 @@ public:
 	/// Construct a request to send to the server.
 	request( std::string method, const base::uri &path, std::string version = "1.1" );
 
+	virtual ~request( void );
+	request( const request & ) = default;
+	request( request && ) = default;
+	request &operator=( const request & ) = default;
+	request &operator=( request && ) = default;
+
 	/// @brief HTTP method
 	/// The method (e.g GET, PUT, or POST).
 	const std::string &method( void ) const

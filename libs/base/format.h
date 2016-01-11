@@ -74,7 +74,7 @@ public:
 	}
 
 	/// @brief Convert to a string.
-	operator std::string()
+	operator std::string() const
 	{
 		std::ostringstream str;
 		write( str );
@@ -110,7 +110,7 @@ public:
 		catch ( ... )
 		{
 			std::string tmp( start, end );
-			size_t errpos = cur - start;
+			size_t errpos = static_cast<size_t>( cur - start );
 			tmp.insert( errpos + 1, ansi::reset );
 			tmp.insert( errpos, ansi::invert );
 			tmp = replace( std::move( tmp ), '\n', "\\n" );
@@ -189,7 +189,7 @@ private:
 /// @param data Data to format.
 /// @return An object that can be converted/casted to a string, or streamed to an std::stream.
 ///
-/// @example base/ex_format.cpp
+/// example base/ex_format.cpp
 template<typename ... Args>
 format_holder<Args...> format( std::string fmt, const Args &...data )
 {

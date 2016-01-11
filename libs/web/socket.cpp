@@ -45,7 +45,7 @@ socket::socket( base::uri &server, const std::string &agent, double timeout )
 	std::string nonce;
 	nonce.resize( 16 );
 	for( size_t i = 0; i < 16; ++i )
-		nonce[i] = random_byte();
+		nonce[i] = static_cast<char>( random_byte() );
 
 	request req( "GET", server.full_path() );
 	req.set_header( "User-Agent", agent );
@@ -74,7 +74,6 @@ socket::~socket( void )
 void socket::run( void )
 {
 	std::string message;
-	bool done = false;
 	bool bin = false;
 
 	while ( wait( message, bin ) )

@@ -149,10 +149,13 @@ typedef container<form_layout> form;
 typedef container<grid_layout> grid;
 typedef container<box_layout> simple_container;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wweak-template-vtables"
 extern template class container<form_layout>;
 extern template class container<grid_layout>;
 extern template class container<tree_layout>;
 extern template class container<box_layout>;
+#pragma GCC diagnostic pop
 
 ////////////////////////////////////////
 

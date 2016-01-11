@@ -81,7 +81,7 @@ std::string program::log( void )
 
 	if ( res > 0 )
 	{
-		std::string info( res, 0 );
+		std::string info( static_cast<size_t>( res ), 0 );
 		glGetProgramInfoLog( _program, res, &res, &info[0] );
 		return info;
 	}
@@ -92,42 +92,42 @@ std::string program::log( void )
 
 program::attribute program::get_attribute_location( const std::string &name )
 {
-	return glGetAttribLocation( _program, name.c_str() );
+	return static_cast<program::attribute>( glGetAttribLocation( _program, name.c_str() ) );
 }
 
 ////////////////////////////////////////
 
 program::uniform program::get_uniform_location( const std::string &name )
 {
-	return glGetUniformLocation( _program, name.c_str() );
+	return static_cast<program::uniform>( glGetUniformLocation( _program, name.c_str() ) );
 }
 
 ////////////////////////////////////////
 
 void program::set_uniform( uniform uni, int value )
 {
-	glUniform1i( uni, value );
+	glUniform1i( static_cast<GLint>( uni ), value );
 }
 
 ////////////////////////////////////////
 
 void program::set_uniform( uniform uni, float value )
 {
-	glUniform1f( uni, value );
+	glUniform1f( static_cast<GLint>( uni ), value );
 }
 
 ////////////////////////////////////////
 
 void program::set_uniform( uniform uni, double value )
 {
-	glUniform1f( uni, value );
+	glUniform1f( static_cast<GLint>( uni ), static_cast<GLfloat>( value ) );
 }
 
 ////////////////////////////////////////
 
 void program::set_uniform( uniform uni, const matrix4 &value )
 {
-	glUniformMatrix4fv( uni, 1, GL_FALSE, value.data() );
+	glUniformMatrix4fv( static_cast<GLint>( uni ), 1, GL_FALSE, value.data() );
 }
 
 ////////////////////////////////////////
@@ -135,7 +135,7 @@ void program::set_uniform( uniform uni, const matrix4 &value )
 void program::set_uniform( uniform uni, const base::color &value )
 {
 	float tmp[] = { float(value.red()), float(value.green()), float(value.blue()), float(value.alpha()) };
-	glUniform4fv( uni, 1, tmp );
+	glUniform4fv( static_cast<GLint>( uni ), 1, tmp );
 }
 
 ////////////////////////////////////////
@@ -143,7 +143,7 @@ void program::set_uniform( uniform uni, const base::color &value )
 void program::set_uniform( uniform uni, const base::point &value )
 {
 	float tmp[] = { float(value.x()), float(value.y()) };
-	glUniform2fv( uni, 1, tmp );
+	glUniform2fv( static_cast<GLint>( uni ), 1, tmp );
 }
 
 ////////////////////////////////////////
@@ -151,7 +151,7 @@ void program::set_uniform( uniform uni, const base::point &value )
 void program::set_uniform( uniform uni, const base::size &value )
 {
 	float tmp[] = { float(value.w()), float(value.h()) };
-	glUniform2fv( uni, 1, tmp );
+	glUniform2fv( static_cast<GLint>( uni ), 1, tmp );
 }
 
 ////////////////////////////////////////
@@ -170,12 +170,12 @@ std::pair<uniform_type,std::string> program::active_uniform( size_t i )
 	GLint max;
 	glGetProgramiv( _program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max );
 
-	std::string name( max, '\0' );
+	std::string name( static_cast<size_t>( max ), '\0' );
 	GLsizei len = 0;
 	GLint sz = 0;
 	GLenum type;
-	glGetActiveUniform( _program, i, max, &len, &sz, &type, &name[0] );
-	name.resize( len );
+	glGetActiveUniform( _program, static_cast<GLuint>( i ), max, &len, &sz, &type, &name[0] );
+	name.resize( static_cast<size_t>( len ) );
 
 	uniform_type t;
 	switch ( type )

@@ -15,52 +15,17 @@ namespace gui
 class widget : public layout::simple_area
 {
 public:
-	widget( void )
-	{
-	}
+	widget( void );
+	virtual ~widget( void );
 
-	~widget( void )
-	{
-	}
-
-	virtual void paint( const std::shared_ptr<draw::canvas> &canvas )
-	{
-	}
-
-	virtual bool mouse_press( const base::point &p, int button )
-	{
-		return false;
-	}
-
-	virtual bool mouse_release( const base::point &p, int button )
-	{
-		return false;
-	}
-
-	virtual bool mouse_move( const base::point &p )
-	{
-		return false;
-	}
-
-	virtual bool mouse_wheel( int a )
-	{
-		return false;
-	}
-
-	virtual bool key_press( platform::scancode c )
-	{
-		return false;
-	}
-
-	virtual bool key_release( platform::scancode c )
-	{
-		return false;
-	}
-
-	virtual bool text_input( char32_t c )
-	{
-		return false;
-	}
+	virtual void paint( const std::shared_ptr<draw::canvas> &canvas );
+	virtual bool mouse_press( const base::point &p, int button );
+	virtual bool mouse_release( const base::point &p, int button );
+	virtual bool mouse_move( const base::point &p );
+	virtual bool mouse_wheel( int a );
+	virtual bool key_press( platform::scancode c );
+	virtual bool key_release( platform::scancode c );
+	virtual bool text_input( char32_t c );
 
 	void invalidate( const base::rect &r )
 	{

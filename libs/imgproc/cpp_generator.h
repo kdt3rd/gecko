@@ -37,7 +37,7 @@ public:
 
 	// Compile-time check for any missing operator() implementation
 	template<typename T>
-	std::string operator()( T a )
+	std::string operator()( T /*a*/ )
 	{
 		static_assert( base::always_false<T>::value, "missing operator() for variant types" );
 		return std::string();

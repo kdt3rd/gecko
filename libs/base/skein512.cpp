@@ -8,8 +8,6 @@
 **
 ************************************************************************/
 
-#define  SKEIN_PORT_CODE /* instantiate any code in skein_port.h */
-
 #include <string.h>      /* get the memcpy/memset functions */
 #include "skein512.h"       /* get the Skein API definitions   */
 
@@ -17,10 +15,10 @@
 #define Skein_Get64_LSB_First(dst64,src08,wCnt) memcpy(dst64,src08,8*(wCnt))
 #define Skein_Swap64(w64)  (w64)
 
-#define SKEIN_T1_FLAG_FIRST     (((uint64_t)  1 ) << 62)
-#define SKEIN_T1_FLAG_FINAL     (((uint64_t)  1 ) << 63)
-#define SKEIN_T1_BLK_TYPE_MSG   (((uint64_t)48) << 56)
-#define SKEIN_T1_BLK_TYPE_OUT   (((uint64_t)63) << 56)
+#define SKEIN_T1_FLAG_FIRST     (uint64_t( 1) << 62)
+#define SKEIN_T1_FLAG_FINAL     (uint64_t( 1) << 63)
+#define SKEIN_T1_BLK_TYPE_MSG   (uint64_t(48) << 56)
+#define SKEIN_T1_BLK_TYPE_OUT   (uint64_t(63) << 56)
 #define SKEIN_T1_BLK_TYPE_OUT_FINAL (SKEIN_T1_BLK_TYPE_OUT | SKEIN_T1_FLAG_FINAL)
 
 
@@ -41,7 +39,6 @@ const uint64_t SKEIN_512_IV_512[] =
 };
 
 
-#define BLK_BITS        (8*64)               /* some useful definitions for code here */
 #define KW_TWK_BASE     (0)
 #define KW_KEY_BASE     (3)
 #define ks              (kw + KW_KEY_BASE)
@@ -237,7 +234,7 @@ void skein512::finalize( hash &hashVal )
     memcpy( Y, _X, sizeof(_X) );       /* keep a local copy of counter mode "key" */
     for ( size_t i = 0; i * 64 < byteCnt; i++ )
 	{
-        ((uint64_t *)_block)[0]= Skein_Swap64((uint64_t) i); /* build the counter block */
+        (reinterpret_cast<uint64_t *>(_block))[0]= Skein_Swap64( uint64_t(i) ); /* build the counter block */
         start_new_type( SKEIN_T1_BLK_TYPE_OUT_FINAL );
         process( _block, 1, sizeof(uint64_t) ); /* run "counter mode" */
         n = byteCnt - i*64;   /* number of output bytes left to go */

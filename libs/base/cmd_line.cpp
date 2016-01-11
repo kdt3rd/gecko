@@ -77,11 +77,10 @@ cmd_line::option::is_non_option( void )
 
 void cmd_line::add_help( void )
 {
-	auto helpfunc = [=]( option &opt, size_t &i, const std::vector<char *> &vals ) -> bool
+	auto helpfunc = [=]( option &, size_t &, const std::vector<char *> & ) -> bool
 	{
 		std::cout << *this << std::endl;
 		exit( 0 );
-		return true;
 	};
 	add( option( 'h', "help", std::string(), helpfunc, "Print help message and exit", false ) );
 }
@@ -208,13 +207,14 @@ cmd_line::simple_usage( void ) const
 		if ( !opt.required() )
 			result << "]";
 	}
-	return std::move( result.str() );
+	return result.str();
 }
 
 ////////////////////////////////////////
 
 bool cmd_line::flag( option &opt, size_t &idx, const std::vector<char *> &args )
 {
+	precondition( args.empty(), "flag should not have any arguments" );
 	precondition( !opt.is_non_option(), "flag should be a normal option" );
 
 	if ( opt )
@@ -271,6 +271,7 @@ cmd_line::multi( option &opt, size_t &idx, const std::vector<char *> &args )
 bool
 cmd_line::counted( option &opt, size_t &idx, const std::vector<char *> &args )
 {
+	precondition( args.empty(), "counted flag should not have any arguments" );
 	precondition( !opt.is_non_option(), "unnamed option not allowed as counted flag" );
 	opt.add_value( nullptr );
 	++idx;

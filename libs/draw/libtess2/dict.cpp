@@ -59,7 +59,7 @@ Dict *dictNewDict( TESSalloc *alloc, void *frame, int ( *leq )( void *frame, Dic
 }
 
 /* really tessDictListDeleteDict */
-void dictDeleteDict( TESSalloc *alloc, Dict *dict )
+void dictDeleteDict( TESSalloc * /*alloc*/, Dict *dict )
 {
 	delete dict;
 }

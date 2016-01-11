@@ -38,9 +38,18 @@ inline bool is_signed( pod_type t )
 		case pod_type::INT64:
 			return true;
 
-		default:
-			return false;
+		case pod_type::BOOLEAN:
+		case pod_type::UINT8:
+		case pod_type::UINT16:
+		case pod_type::UINT32:
+		case pod_type::UINT64:
+		case pod_type::FLOAT16:
+		case pod_type::FLOAT32:
+		case pod_type::FLOAT64:
+		case pod_type::UNKNOWN:
+			break;
 	}
+	return false;
 }
 
 ////////////////////////////////////////
@@ -55,10 +64,19 @@ inline bool is_unsigned( pod_type t )
 		case pod_type::UINT64:
 			return true;
 
-		default:
-			return false;
+		case pod_type::BOOLEAN:
+		case pod_type::INT8:
+		case pod_type::INT16:
+		case pod_type::INT32:
+		case pod_type::INT64:
+		case pod_type::FLOAT16:
+		case pod_type::FLOAT32:
+		case pod_type::FLOAT64:
+		case pod_type::UNKNOWN:
+			break;
 	}
 
+	return false;
 }
 
 ////////////////////////////////////////
@@ -143,10 +161,10 @@ inline std::string type_name( pod_type t )
 		case pod_type::INT16: return "int16";
 		case pod_type::INT32: return "int32";
 		case pod_type::INT64: return "int64";
+		case pod_type::FLOAT16: return "half";
 		case pod_type::FLOAT32: return "float";
 		case pod_type::FLOAT64: return "double";
 		case pod_type::UNKNOWN: return "unknown";
-		default: throw_logic( "unknown data type" );
 	}
 }
 
@@ -163,6 +181,7 @@ inline pod_type type_enum( const std::u32string &t )
 	if ( t == U"int16" ) return pod_type::INT16;
 	if ( t == U"int32" ) return pod_type::INT32;
 	if ( t == U"int64" ) return pod_type::INT64;
+	if ( t == U"half" ) return pod_type::FLOAT16;
 	if ( t == U"float" ) return pod_type::FLOAT32;
 	if ( t == U"double" ) return pod_type::FLOAT64;
 	if ( t == U"unknown" ) return pod_type::UNKNOWN;

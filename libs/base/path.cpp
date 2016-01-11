@@ -173,14 +173,14 @@ std::ostream &operator<<( std::ostream &out, const path &p )
 		{
 		}
 
-		void move_to( const point &p )
+		void move_to( const point &x )
 		{
-			out << "Move( " << p << " )\n";
+			out << "Move( " << x << " )\n";
 		}
 
-		void line_to( const point &p )
+		void line_to( const point &x )
 		{
-			out << "Line( " << p << " )\n";
+			out << "Line( " << x << " )\n";
 		}
 
 		void quadratic_to( const point &p1, const point &p2 )
