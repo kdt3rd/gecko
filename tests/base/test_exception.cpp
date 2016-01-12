@@ -8,6 +8,7 @@
 namespace
 {
 
+[[noreturn]]
 void bad_function( void )
 {
 	try
@@ -20,6 +21,7 @@ void bad_function( void )
 	}
 }
 
+[[noreturn]]
 void tryit( void )
 {
 	try
@@ -62,7 +64,10 @@ int safemain( int argc, char *argv[] )
 		try
 		{
 			tryit();
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunreachable-code"
 			test.failure( "tried and didn't failed" );
+#pragma GCC diagnostic pop
 		}
 		catch ( std::exception &e )
 		{

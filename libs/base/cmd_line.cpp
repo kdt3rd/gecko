@@ -212,9 +212,8 @@ cmd_line::simple_usage( void ) const
 
 ////////////////////////////////////////
 
-bool cmd_line::flag( option &opt, size_t &idx, const std::vector<char *> &args )
+bool cmd_line::flag( option &opt, size_t &idx, const std::vector<char *> & )
 {
-	precondition( args.empty(), "flag should not have any arguments" );
 	precondition( !opt.is_non_option(), "flag should be a normal option" );
 
 	if ( opt )
@@ -269,9 +268,8 @@ cmd_line::multi( option &opt, size_t &idx, const std::vector<char *> &args )
 ////////////////////////////////////////
 
 bool
-cmd_line::counted( option &opt, size_t &idx, const std::vector<char *> &args )
+cmd_line::counted( option &opt, size_t &idx, const std::vector<char *> & )
 {
-	precondition( args.empty(), "counted flag should not have any arguments" );
 	precondition( !opt.is_non_option(), "unnamed option not allowed as counted flag" );
 	opt.add_value( nullptr );
 	++idx;

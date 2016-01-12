@@ -23,7 +23,7 @@ int safemain( int argc, char *argv[] )
 	{
 		options.parse( argc, argv );
 	}
-	catch ( std::exception &e )
+	catch ( std::exception & )
 	{
 		std::cerr << options << std::endl;
 		throw_add( "parsing command line" );
