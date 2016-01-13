@@ -54,10 +54,10 @@ public:
 	typedef base_streambuf<CharT, TraitsT> streambuf_type;
 
 	istream_bufstore( std::unique_ptr<streambuf_type> &&sb )
-			: base_type(), _sbuf( std::move( sb ) )
+			: base_type( sb.get() ), _sbuf( std::move( sb ) )
 	{
-		this->init( _sbuf.get() );
 	}
+
 	istream_bufstore( istream_bufstore &&o )
 			: base_type( std::move( o ) ),
 			  _sbuf( std::move( o._sbuf ) )
@@ -191,9 +191,8 @@ public:
 	typedef base_streambuf<CharT, TraitsT> streambuf_type;
 
 	iostream_bufstore( std::unique_ptr<streambuf_type> &&sb )
-			: base_type(), _sbuf( std::move( sb ) )
+			: base_type( sb.get() ), _sbuf( std::move( sb ) )
 	{
-		this->init( _sbuf.get() );
 	}
 
 	iostream_bufstore( iostream_bufstore &&o )

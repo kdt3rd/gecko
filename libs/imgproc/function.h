@@ -2,6 +2,7 @@
 #pragma once
 
 #include "expr.h"
+#include <array>
 
 namespace imgproc
 {
