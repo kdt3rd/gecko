@@ -38,7 +38,7 @@ int safemain( void )
 	std::cout << object2 << std::endl;
 
 
-	std::string test( "{ \"a\": 1.5, \"b\": [ 1, null, 3, \"hello\"], \"c\": true, \"d\": false }" );
+	std::string test( "{ \"a\": 1.5, \"b\": [ 1, null, 3, \"hello\"], \"c\": true, \"d\": false, \"e\": [] }" );
 	base::json doc;
 	test >> doc;
 	std::cout << doc << std::endl;

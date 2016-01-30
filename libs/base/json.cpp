@@ -265,8 +265,11 @@ void json::parse_array( std::istream_iterator<char> &it, std::istream_iterator<c
 	while ( it != end )
 	{
 		skip_whitespace( it, end, line );
-		val.parse_value( it, end, line );
 
+		if ( *it == ']' )
+			break;
+
+		val.parse_value( it, end, line );
 		arr.push_back( val );
 
 		skip_whitespace( it, end, line );
