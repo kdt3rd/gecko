@@ -184,7 +184,7 @@ void parser::parse_code( std::istream &in )
 	else if ( word == "endfor" || word == "endif" )
 	{
 		_func.unindent();
-		_func.add( ']' );
+		_func.add( '}' );
 		_func.push_code();
 	}
 }
