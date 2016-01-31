@@ -1,5 +1,6 @@
 
 lib = Library( "media",
+	"sample_rate.cpp",
 	"image_buffer.cpp",
 	"container.cpp",
 	"file_sequence.cpp",
