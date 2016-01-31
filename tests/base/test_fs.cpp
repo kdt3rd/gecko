@@ -27,7 +27,18 @@ int safemain( int argc, char *argv[] )
 	options.parse( argc, argv );
 	errhandler.dismiss();
 
-	base::file_system::add( "file", std::make_shared<base::posix_file_system>() );
+	fstest["register"] = [&]( void )
+	{
+		try
+		{
+			base::file_system::add( "file", std::make_shared<base::posix_file_system>() );
+			fstest.failure( "registration succeeded, should have already defined automatically" );
+		}
+		catch ( std::exception &e )
+		{
+			fstest.success( "registration correctly failed for pre-registered fs: {0}", e.what() );
+		}
+	};
 
 	base::uri tmppath( "file", "", "tmp", "test_posix_fs" );
 	base::uri file1( tmppath, "test1" );
