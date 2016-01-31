@@ -75,6 +75,56 @@ int safemain( int argc, char *argv[] )
 			test.success( "ratio operator<<" );
 		else
 			test.failure( "ratio operator<< should produce 1/10, got {0}", tmp.str() );
+
+		base::ratio a( 24, 1 );
+		base::ratio b( 1, 12 );
+		base::ratio mab = a * b;
+		if ( mab.numerator() == 2 && mab.denominator() == 1 )
+			test.success( "ratio operator*" );
+		else
+			test.failure( "ratio operator* should produce 2/1, got {0}", mab );
+
+		base::ratio fr1( 24, 1 );
+		base::ratio fr2( 24000, 1001 );
+		base::ratio nfr = fr1.common( fr2 );
+		if ( nfr.numerator() == 24024 && nfr.denominator() == 1001 )
+			test.success( "ratio common denominator" );
+		else
+			test.failure( "ratio common operator should produce 24024/1001, got {0}", nfr );
+
+		base::ratio atest = fr1 + fr2;
+		if ( atest.numerator() == 48024 && atest.denominator() == 1001 )
+			test.success( "ratio addition" );
+		else
+			test.failure( "ratio addition operator should produce 48024/1001, got {0}", atest );
+		base::ratio stest = fr1 - fr2;
+		if ( stest.numerator() == 24 && stest.denominator() == 1001 )
+			test.success( "ratio subtraction" );
+		else
+			test.failure( "ratio subtraction operator should produce 24/1001, got {0}", stest );
+		base::ratio mtest = fr1*fr2;
+		if ( mtest.numerator() == 576000 && mtest.denominator() == 1001 )
+			test.success( "ratio addition" );
+		else
+			test.failure( "ratio multiplication operator should produce 576000/1001, got {0}", mtest );
+		base::ratio dtest = fr1/fr2;
+		if ( dtest.numerator() == 1001 && dtest.denominator() == 1000 )
+			test.success( "ratio division" );
+		else
+			test.failure( "ratio division operator should produce 1001/1000, got {0}", dtest );
+		if ( fr2.trunc() == 23 )
+			test.success( "ratio truncation" );
+		else
+			test.failure( "ratio trunc operator should produce 23, got {0}", fr2.trunc() );
+		if ( fr2.mod() == 977 )
+			test.success( "ratio mod" );
+		else
+			test.failure( "ratio mod operator should produce 977, got {0}", fr2.mod() );
+		base::ratio tfrc = 86400 * ( base::ratio( 24, 1 ) / base::ratio( 48, 1 ) );
+		if ( tfrc.round() == 43200 )
+			test.success( "ratio round" );
+		else
+			test.failure( "ratio round operator should produce 43200, got {0} ({1})", tfrc.round(), tfrc );
 	};
 
 	test["half"] = [&]( void )
