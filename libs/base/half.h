@@ -819,6 +819,7 @@ namespace base
 		half operator--(int) { half out(*this); --*this; return out; }
 
 		void set_bits( detail::uint16 x ) { data_ = x; }
+		detail::uint16 bits( void ) const { return data_; }
 
 	private:
 		/// Rounding mode to use (always `std::round_indeterminate`)
