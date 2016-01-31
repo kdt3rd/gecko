@@ -14,7 +14,7 @@ class ratio
 {
 public:
 	ratio( void ) = default;
-	ratio( int64_t n, int64_t d );
+	ratio( int64_t n, int64_t d, bool s = true );
 	ratio( const ratio & ) = default;
 	ratio( ratio && ) = default;
 	~ratio( void ) = default;
@@ -26,7 +26,6 @@ public:
 	inline bool valid( void ) const;
 
 	inline int64_t numerator( void ) const;
-
 	inline int64_t denominator( void ) const;
 
 	inline double value( void ) const;
@@ -45,8 +44,8 @@ public:
 	ratio &operator *=( int64_t n );
 	ratio &operator /=( int64_t n );
 
-	/// @brief Return a new pair of ratios with a common denominator
-	std::pair<ratio,ratio> common( const ratio &r ) const;
+	/// @brief Returns this rebased to a common denominator with r
+	ratio common( const ratio &r ) const;
 
 private:
 	void simplify( void );
@@ -69,7 +68,7 @@ inline int64_t ratio::numerator( void ) const
 
 inline int64_t ratio::denominator( void ) const
 {
-	return _num;
+	return _den;
 }
 
 inline double ratio::value( void ) const
@@ -96,6 +95,11 @@ inline int64_t ratio::round( void ) const
 {
 	return ( _num + ( _num < 0 ? -_den : _den ) / 2 ) / _den;
 }
+
+////////////////////////////////////////
+
+/// @brief returns 2 ratios with the denominator in common
+std::pair<ratio,ratio> rebase( const ratio &a, const ratio &b );
 
 ////////////////////////////////////////
 

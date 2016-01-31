@@ -8,10 +8,11 @@ namespace base
 
 ////////////////////////////////////////
 
-ratio::ratio( int64_t n, int64_t d )
+ratio::ratio( int64_t n, int64_t d, bool s )
 		: _num( n ), _den( d )
 {
-	simplify();
+	if ( s )
+		simplify();
 }
 
 ////////////////////////////////////////
@@ -25,18 +26,18 @@ void ratio::set( int64_t n, int64_t d )
 
 ////////////////////////////////////////
 
-std::pair<ratio,ratio> ratio::common( const ratio &r ) const
+ratio
+ratio::common( const ratio &r ) const
 {
 	precondition( valid() && r.valid(), "unable to find common denominator for invalid ratios" );
 
-	int64_t newnumA = math::gcd( numerator() * r.denominator(), r.numerator() * denominator() );
-	int64_t newnumB = math::gcd( r.numerator() * denominator(), numerator() * r.denominator() );
-	int64_t newden = denominator() * r.denominator();
+	if ( denominator() == r.denominator() )
+		return *this;
 
-	// constructor will simplify to prevent
-	// numbers growing
-	return std::make_pair( ratio( newnumA, newden ),
-						   ratio( newnumB, newden ) );
+	// find a / b ==> c / d  where d == r.denominator
+	// d == lcm( r.denominator, b )
+	int64_t d = math::lcm( denominator(), r.denominator() );
+	return ratio( numerator() * d, denominator() * d, false );
 }
 
 ////////////////////////////////////////
@@ -49,7 +50,7 @@ ratio &ratio::operator +=( const ratio &r )
 	}
 	else
 	{
-		std::pair<ratio,ratio> c = common( r );
+		std::pair<ratio,ratio> c = rebase( *this, r );
 
 		_num = c.first.numerator() + c.second.numerator();
 		_den = c.first.denominator();
@@ -68,7 +69,7 @@ ratio &ratio::operator -=( const ratio &r )
 	}
 	else
 	{
-		std::pair<ratio,ratio> c = common( r );
+		std::pair<ratio,ratio> c = rebase( *this, r );
 
 		_num = c.first.numerator() - c.second.numerator();
 		_den = c.first.denominator();
@@ -153,6 +154,31 @@ void ratio::simplify( void )
 		_num /= d;
 		_den /= d;
 	}
+}
+
+////////////////////////////////////////
+
+std::pair<ratio,ratio> rebase( const ratio &a, const ratio &b )
+{
+	precondition( a.valid() && b.valid(), "unable to find common denominator for invalid ratios" );
+
+	if ( a.denominator() == b.denominator() )
+		return std::make_pair( a, b );
+
+	if ( a.denominator() == 1 )
+		return std::make_pair( ratio( a.numerator() * b.denominator(), b.denominator(), false ),
+							   ratio( b.numerator(), b.denominator(), false ) );
+
+	if ( b.denominator() == 1 )
+		return std::make_pair( ratio( a.numerator(), a.denominator(), false ),
+							   ratio( b.numerator() * a.denominator(), a.denominator(), false ) );
+
+	int64_t d = math::lcm( a.denominator(), b.denominator() );
+
+	// constructor will simplify to prevent
+	// numbers growing
+	return std::make_pair( ratio( a.numerator() * ( d / a.denominator() ), d, false ),
+						   ratio( b.numerator() * ( d / b.denominator() ), d, false ) );
 }
 
 ////////////////////////////////////////
