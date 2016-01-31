@@ -29,8 +29,6 @@ int safemain( int argc, char **argv )
 	options.parse( argc, argv );
 	errhandler.dismiss();
 
-	base::file_system::add( "file", std::make_shared<base::posix_file_system>() );
-
 	app = std::make_shared<gui::application>();
 	app->push();
 

@@ -4,6 +4,12 @@
 #include <mutex>
 #include <system_error>
 
+#ifdef _WIN32
+#include "win32_file_system.h"
+#else
+#include "posix_file_system.h"
+#endif
+
 namespace
 {
 
@@ -12,7 +18,15 @@ std::mutex theMutex;
 std::map<std::string,std::shared_ptr<base::file_system>> &
 singleton( void )
 {
-	static std::map<std::string,std::shared_ptr<base::file_system>> theFileSystems;
+	static std::map<std::string,std::shared_ptr<base::file_system>> theFileSystems
+	{
+#ifdef _WIN32
+		{ "file", std::make_shared<base::win32_file_system>() },
+#else
+		{ "file", std::make_shared<base::posix_file_system>() },
+#endif
+	};
+	
 	return theFileSystems;
 }
 
