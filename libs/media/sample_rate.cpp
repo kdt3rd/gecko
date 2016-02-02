@@ -163,7 +163,7 @@ sample_rate
 sample_rate::common( const sample_rate &o ) const
 {
 	auto x = _ratio.common( o._ratio );
-	return sample_rate( x.first.numerator(), x.first.denominator() );
+	return sample_rate( x.numerator(), x.denominator() );
 }
 
 
