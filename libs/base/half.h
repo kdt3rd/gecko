@@ -720,7 +720,6 @@ namespace base
 		friend struct detail::unary_specialized<half>;
 		friend struct detail::binary_specialized<half,half>;
 		template<typename,typename,std::float_round_style> friend struct detail::half_caster;
-		friend class std::numeric_limits<half>;
 		friend struct std::hash<half>;
 
 	public:
@@ -821,10 +820,10 @@ namespace base
 		void set_bits( detail::uint16 x ) { data_ = x; }
 		detail::uint16 bits( void ) const { return data_; }
 
-	private:
 		/// Rounding mode to use (always `std::round_indeterminate`)
 		static const std::float_round_style round_style = static_cast<std::float_round_style>(HALF_ROUND_STYLE);
 
+	private:
 		/// Internal binary representation
 		detail::uint16 data_;
 	};
