@@ -8,8 +8,7 @@ namespace base
 
 ////////////////////////////////////////
 
-/// @brief Undefined generic action
-///
+/// @brief Undefined generic action.
 /// A callback class that must be specialized.
 template<typename> class action;
 
@@ -20,16 +19,13 @@ template<typename Result, typename ... Args>
 class action<Result(Args...)>
 {
 public:
-	/// @brief Type fo the function
+	/// @brief Type fo the function.
 	typedef std::function<Result(Args...)> Function;
 
-	/// @brief Set the function to be called
-	///
-	/// The Functor must be assignable to the Function type.
-	template<typename Functor>
-	void callback( const Functor &c )
+	/// @brief Set the function to be called.
+	Function &function( void )
 	{
-		_action = c;
+		return _action;
 	}
 
 	/// @brief Call the stored function

@@ -15,15 +15,15 @@ window::window( const std::shared_ptr<platform::window> &win )
 	: _window( win )
 {
 	precondition( bool(_window), "null window" );
-	_window->exposed.callback( [this] ( void ) { paint(); } );
-	_window->resized.callback( [this] ( double w, double h ) { resized( w, h ); } );
-	_window->mouse_pressed.callback( [this]( const std::shared_ptr<platform::mouse> &, const base::point &p, int b ) { mouse_press( p, b ); } );
-	_window->mouse_released.callback( [this]( const std::shared_ptr<platform::mouse> &, const base::point &p, int b ) { mouse_release( p, b ); } );
-	_window->mouse_moved.callback( [this]( const std::shared_ptr<platform::mouse> &, const base::point &p ) { mouse_moved( p ); } );
-	_window->mouse_wheel.callback( [this]( const std::shared_ptr<platform::mouse> &, int i ) { mouse_wheel( i ); } );
-	_window->key_pressed.callback( [this]( const std::shared_ptr<platform::keyboard> &, const platform::scancode &c ) { key_pressed( c ); } );
-	_window->key_released.callback( [this]( const std::shared_ptr<platform::keyboard> &, const platform::scancode &c ) { key_released( c ); } );
-	_window->text_entered.callback( [this]( const std::shared_ptr<platform::keyboard> &, const char32_t &c ) { text_entered( c ); } );
+	_window->exposed.function() = [this] ( void ) { paint(); };
+	_window->resized.function() = [this] ( double w, double h ) { resized( w, h ); };
+	_window->mouse_pressed.function() = [this]( const std::shared_ptr<platform::mouse> &, const base::point &p, int b ) { mouse_press( p, b ); };
+	_window->mouse_released.function() = [this]( const std::shared_ptr<platform::mouse> &, const base::point &p, int b ) { mouse_release( p, b ); };
+	_window->mouse_moved.function() = [this]( const std::shared_ptr<platform::mouse> &, const base::point &p ) { mouse_moved( p ); };
+	_window->mouse_wheel.function() = [this]( const std::shared_ptr<platform::mouse> &, int i ) { mouse_wheel( i ); };
+	_window->key_pressed.function() = [this]( const std::shared_ptr<platform::keyboard> &, const platform::scancode &c ) { key_pressed( c ); };
+	_window->key_released.function() = [this]( const std::shared_ptr<platform::keyboard> &, const platform::scancode &c ) { key_released( c ); };
+	_window->text_entered.function() = [this]( const std::shared_ptr<platform::keyboard> &, const char32_t &c ) { text_entered( c ); };
 	_canvas = std::make_shared<draw::canvas>();
 }
 

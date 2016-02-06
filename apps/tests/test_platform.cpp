@@ -19,18 +19,18 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 
 	auto win = sys->new_window();
 	win->set_title( "Hello World" );
-	win->exposed.callback( [&]( void )
+	win->exposed.function() = [&]( void )
 	{
 		win->acquire();
 		glViewport( 0, 0, static_cast<GLsizei>(win->width()), static_cast<GLsizei>(win->height()) );
 		glClearColor( 0.0, 1.0, 0.0, 1.0 );
 		glClear( GL_COLOR_BUFFER_BIT );
 		win->release();
-	} );
-	win->resized.callback( [&]( double w, double h )
+	};
+	win->resized.function() = [&]( double w, double h )
 	{
 		std::cout << "Resized to: " << w << 'x' << h << std::endl;
-	} );
+	};
 
 	win->show();
 
