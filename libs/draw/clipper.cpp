@@ -4491,7 +4491,7 @@ void OffsetPaths(const Paths &in_polys, Paths &out_polys,
   double delta, JoinType jointype, EndType_ endtype, double limit)
 {
   ClipperOffset co(limit, limit);
-  co.AddPaths(in_polys, jointype, (EndType)endtype); 
+  co.AddPaths(in_polys, jointype, (EndType)endtype);
   co.Execute(out_polys, delta);
 }
 //------------------------------------------------------------------------------
