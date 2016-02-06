@@ -17,8 +17,8 @@ int safemain( int argc, char *argv[] )
 {
 	// Parse command-line arguments
 	base::cmd_line options( argv[0],
-		base::cmd_line::option(  0,  "",  "<dir>",  base::cmd_line::arg<1>,   "Directory to serve up", false ),
-		base::cmd_line::option(  'p',  "port",  "<port>",  base::cmd_line::arg<1>,   "Port number to use", false )
+		base::cmd_line::option( 0,   "",     "<dir>",   base::cmd_line::arg<1>,   "Directory to serve up", false ),
+		base::cmd_line::option( 'p', "port", "<port>",  base::cmd_line::arg<1>,   "Port number to use",    false )
 	);
 
 	options.add_help();

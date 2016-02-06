@@ -7,15 +7,15 @@ namespace base
 
 ////////////////////////////////////////
 
-cmd_line::option::option( char s, const char *l, const char *a, const callback &c, const char *msg, bool req )
-	: _long( l ), _help( msg ), _args( a ), _callback( c ), _short( s ), _required( req )
+cmd_line::option::option( char s, const char *l, const char *a, const parser &p, const char *msg, bool req )
+	: _long( l ), _help( msg ), _args( a ), _parser( p ), _short( s ), _required( req )
 {
 }
 
 ////////////////////////////////////////
 
-cmd_line::option::option( char s, const std::string &l, const std::string &a, const callback &c, const std::string &msg, bool req )
-	: _long( l ), _help( msg ), _args( a ), _callback( c ), _short( s ), _required( req )
+cmd_line::option::option( char s, const std::string &l, const std::string &a, const parser &p, const std::string &msg, bool req )
+	: _long( l ), _help( msg ), _args( a ), _parser( p ), _short( s ), _required( req )
 {
 }
 
