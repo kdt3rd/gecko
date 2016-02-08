@@ -1,10 +1,11 @@
 
 #include <iostream>
 #include "path.h"
+#include "math_functions.h"
 
-namespace 
+namespace
 {
-	constexpr double PI = 3.14159265358979323846;
+	constexpr double PI = base::math::PI;
 }
 
 namespace base
@@ -28,6 +29,13 @@ path::path( const point &p )
 path::path( const rect &r )
 {
 	rectangle( r );
+}
+
+////////////////////////////////////////
+
+path::path( const rect &r, double rad )
+{
+	rounded_rect( r, rad );
 }
 
 ////////////////////////////////////////
@@ -103,12 +111,22 @@ void path::circle( const point &center, double radius )
 
 ////////////////////////////////////////
 
-void path::rectangle( const rect &r )
+void path::rectangle( const rect &r, bool reversed )
 {
-	move_to( r.top_left() );
-	line_to( r.top_right() );
-	line_to( r.bottom_right() );
-	line_to( r.bottom_left() );
+	if ( reversed )
+	{
+		move_to( r.top_left() );
+		line_to( r.bottom_left() );
+		line_to( r.bottom_right() );
+		line_to( r.top_right() );
+	}
+	else
+	{
+		move_to( r.top_left() );
+		line_to( r.top_right() );
+		line_to( r.bottom_right() );
+		line_to( r.bottom_left() );
+	}
 	close();
 }
 
@@ -197,7 +215,7 @@ std::ostream &operator<<( std::ostream &out, const path &p )
 		{
 			out << "Arc( " << center << ", " << radius << ", " << angle1 * 180 / PI << ", " << angle2 * 180 / PI << " )\n";
 		}
-		
+
 		void close( void )
 		{
 			out << "Close()\n";

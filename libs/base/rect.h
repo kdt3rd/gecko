@@ -38,7 +38,7 @@ public:
 	}
 
 	/// @brief Constructor from width and height
-	rect( double w, double h )
+	explicit rect( double w, double h )
 		: _extent( w, h )
 	{
 		fix_extent();

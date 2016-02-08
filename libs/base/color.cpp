@@ -1,12 +1,13 @@
 
 #include "color.h"
+#include "math_functions.h"
 #include <cmath>
 #include <algorithm>
 #include <functional>
 
-namespace 
+namespace
 {
-	constexpr double PI = 3.14159265358979323846;
+	constexpr double PI = base::math::PI;
 
 	inline double toLin( double c )
 	{
@@ -27,16 +28,16 @@ namespace
 	}
 
 	inline double labF( double t )
-	{                 
+	{
 		if ( t > std::pow( 6.0/29.0, 3.0 ) )
 			return std::pow( t, 1.0/3.0 );
-		else    
+		else
 			return 1.0/3.0 * std::pow( 29.0/6.0, 2.0 ) * t + 4.0/29.0;
 
 	}
 
 	inline double labR( double t )
-	{   
+	{
 		if ( t > 6.0/29.0 )
 			return std::pow( t, 3.0 );
 		else

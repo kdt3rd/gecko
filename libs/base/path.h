@@ -10,11 +10,11 @@ namespace base
 
 ////////////////////////////////////////
 
-/// @brief Path used to draw
+/// @brief Path used to draw.
 class path
 {
 public:
-	/// @brief Actions the path can take
+	/// @brief Actions the path can take.
 	enum class action
 	{
 		MOVE,
@@ -25,42 +25,80 @@ public:
 		CLOSE
 	};
 
-	/// @brief Constructor
+	/// @brief Default constructor.
 	path( void );
 
+	/// @brief Copy constructor.
 	path( const point &p );
+
+	/// @brief Rectangle constructor.
 	path( const rect &r );
 
-	/// @brief Destructor
+	/// @brief Rounded rectangle constructor.
+	path( const rect &r, double radius );
+
+	/// @brief Destructor.
 	~path( void );
 
-	/// @brief Move the cursor
-	/// Move the cursor to the given position
-	/// @param p the point to move to for the path
+	/// @brief Move the cursor.
+	/// Move the cursor to the given position.
+	/// @param p the point to move to for the path.
 	void move_to( const point &p );
+
+	/// @brief Line from the current position to p.
 	void line_to( const point &p );
+
+	/// @brief Quadratic curve from the current position to p2.
 	void quadratic_to( const point &p1, const point &p2 );
+
+	/// @brief Cubic curve from the current position to p3.
 	void cubic_to( const point &p1, const point &p2, const point &p3 );
+
 //	void arc_to( const point &p1, const &point &p2, double r );
+
+	/// @brief Arc from the current point sweeping through the angles.
 	void arc_to( const point &center, double radius, double angle1, double angle2 );
 
+	/// @brief Move by a delta.
 	void move_by( const point &p ) { move_to( next_point( p ) ); }
+
+	/// @brief Line by a delta.
 	void line_by( const point &p ) { line_to( next_point( p ) ); }
+
+	/// @brief Quadratic curve relative to current position.
 	void quadratic_by( const point &p1, const point &p2 ) { quadratic_to( next_point( p1 ), next_point( p2 ) ); }
+
+	/// @brief Cubic curve relative to current position.
 	void cubic_by( const point &p1, const point &p2, const point &p3 ) { cubic_to( next_point( p1 ), next_point( p2 ), next_point( p3 ) ); }
+
 //	void arc_by( const point &p1, const &point &p2, double r ) { arc_to( next_point( p1 ), next_point( p2 ), r ); }
+
+	/// @brief Arc with center relative to current position.
 	void arc_by( const point &center, double radius, double angle1, double angle2 ) { arc_to( next_point( center ), radius, angle1, angle2 ); }
 
+	/// @brief Close the current shape.
+	/// Close the current shape by drawing a line to the starting point.
 	void close( void );
 
+	/// @brief Draw a full circle.
 	void circle( const point &center, double radius );
 
-	void rectangle( const rect &r );
+	/// @brief Draw a rectangle.
+	void rectangle( const rect &r, bool reversed = false );
+
+	/// @brief Draw a rectangle.
 	void rectangle( const point &p1, const point &p2 );
+
+	/// @brief Draw a rectangle.
 	void rectangle( const point &p1, double w, double h ) { rectangle( p1, p1 + point( w, h ) ); }
 
+	/// @brief Draw a rounded rectangle.
 	void rounded_rect( const point &p1, const point &p2, double r );
+
+	/// @brief Draw a rounded rectangle.
 	void rounded_rect( const point &p1, double w, double h, double r );
+
+	/// @brief Draw a rounded rectangle.
 	void rounded_rect( const rect &r, double rad );
 
 	const std::vector<double> &get_data( void ) const { return _data; }
@@ -114,6 +152,7 @@ public:
 		}
 	}
 
+	/// @brief Clear the path.
 	void clear( void )
 	{
 		_start = 0;
