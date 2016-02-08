@@ -16,7 +16,8 @@ namespace draw
 
 ////////////////////////////////////////
 
-/// @brief Canvas to draw on
+/// @brief Canvas to draw on.
+/// A canvas is an OpenGL context, and has all of the standard OpenGL commands available.
 class canvas : public gl::context
 {
 public:
@@ -30,7 +31,6 @@ public:
 	std::shared_ptr<gl::texture> gradient( const base::gradient &g, size_t n = 128 );
 
 	std::shared_ptr<gl::program> program( const std::string &vert, const std::string &frag );
-
 
 	virtual base::point align_text( const std::shared_ptr<script::font> &font, const std::string &utf8, const base::rect &rect, base::alignment a );
 
@@ -69,8 +69,9 @@ public:
 	/// Finalize the drawing of the canvas and display it.
 	virtual void present( void );
 */
-	void save( void );
-	void restore( void );
+
+//	void save( void );
+//	void restore( void );
 
 //	virtual void screenshot_png( const char *filename ) = 0;
 private:

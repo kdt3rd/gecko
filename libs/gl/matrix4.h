@@ -4,6 +4,7 @@
 #include <iostream>
 #include "vector4.h"
 #include <base/point.h>
+#include <base/contract.h>
 
 namespace gl
 {
@@ -22,6 +23,8 @@ public:
 	/// @brief Constructor
 	matrix4( std::initializer_list<float> l )
 	{
+		// @TODO Use static_assert in C++14
+		precondition( l.size() == 16, "expected 16 initializer values" );
 		std::copy( l.begin(), l.end(), _data );
 	}
 

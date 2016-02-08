@@ -112,14 +112,13 @@ std::set<std::string> font_manager::get_styles( const std::string &family )
 ////////////////////////////////////////
 
 std::shared_ptr<script::font>
-font_manager::get_font( const std::string &family, const std::string &style,
-						double pixsize )
+font_manager::get_font( const std::string &family, const std::string &style, double pixsize )
 {
 	std::string lang = base::locale::language();
 	FcPattern *pat = FcPatternBuild( nullptr,
 		FC_FAMILY, FcTypeString, family.c_str(),
 		FC_STYLE, FcTypeString, style.c_str(),
-									 FC_LANG, FcTypeString, lang.c_str(),
+		FC_LANG, FcTypeString, lang.c_str(),
 		FC_PIXEL_SIZE, FcTypeDouble, pixsize,
 		nullptr );
 

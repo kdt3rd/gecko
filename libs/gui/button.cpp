@@ -50,7 +50,7 @@ void button::paint( const std::shared_ptr<draw::canvas> &canvas )
 		base::paint paint;
 		paint.set_fill_color( { 0.27, 0.27, 0.27 } );
 
-		_draw= std::make_shared<draw::stretchable>();
+		_draw = std::make_shared<draw::stretchable>();
 		_draw->create( canvas, path, paint, { 10, 10 } );
 	}
 

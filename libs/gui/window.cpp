@@ -123,7 +123,7 @@ void window::paint( void )
 	_canvas->clear_color( { 0.13, 0.13, 0.13, 1 } );
 	_canvas->clear();
 
-	_canvas->save();
+	_canvas->save_matrix();
 	_canvas->ortho( 0, static_cast<float>(_window->width()), 0, static_cast<float>(_window->height()) );
 
 	if ( _widget )
@@ -136,7 +136,7 @@ void window::paint( void )
 		} );
 	}
 
-	_canvas->restore();
+	_canvas->restore_matrix();
 	_window->release();
 }
 

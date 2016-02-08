@@ -28,10 +28,11 @@ public:
 		return *this;
 	}
 	bound_array( bound_array &&o )
-			: _a( o._a )
+		: _a( o._a )
 	{
 		o._a = 0;
 	}
+
 	~bound_array( void )
 	{
 		if ( _a )

@@ -17,7 +17,7 @@ class shader
 {
 public:
 	/// @brief Types of shader
-	enum class type 
+	enum class type
 	{
 		VERTEX = GL_VERTEX_SHADER,
 		FRAGMENT = GL_FRAGMENT_SHADER,
@@ -26,6 +26,12 @@ public:
 
 	/// @brief Copying not allowed
 	shader( const shader &s ) = delete;
+
+	/// @brief Construct shader
+	shader( type t );
+
+	/// @brief Construct shader with code
+	shader( type t, const std::string &code );
 
 	/// @brief Destructor
 	~shader( void );
@@ -38,12 +44,6 @@ public:
 
 	/// @brief Return the log messages
 	std::string log( void );
-
-	/// @brief Construct shader
-	shader( type t );
-
-	/// @brief Construct shader with code
-	shader( type t, const std::string &code );
 
 private:
 	friend class program;

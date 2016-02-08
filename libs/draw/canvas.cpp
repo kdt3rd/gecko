@@ -239,17 +239,21 @@ void canvas::present( void )
 
 ////////////////////////////////////////
 
+/*
 void canvas::save( void )
 {
 	save_matrix();
 }
+*/
 
 ////////////////////////////////////////
 
+/*
 void canvas::restore( void )
 {
 	restore_matrix();
 }
+*/
 
 ////////////////////////////////////////
 
