@@ -95,7 +95,7 @@ public:
 
 private:
 
-	inline size_t number_components( void ) const
+	inline constexpr size_t number_components( void ) const
 	{
 		return base::sum( static_cast<size_t>( detail::count_components<Args>::value )... );
 	}

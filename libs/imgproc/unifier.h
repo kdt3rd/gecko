@@ -22,9 +22,9 @@ public:
 	void operator()( const type_variable &x, const type_callable &y );
 	void operator()( const type_primary &x, const type_variable &y );
 	void operator()( const type_primary &x, const type_primary &y );
-	void operator()( const type_primary &x, const type_callable &y );
+	[[noreturn]] void operator()( const type_primary &x, const type_callable &y );
 	void operator()( const type_callable &x, const type_variable &y );
-	void operator()( const type_callable &x, const type_primary &y );
+	[[noreturn]] void operator()( const type_callable &x, const type_primary &y );
 	void operator()( const type_callable &x, const type_callable &y );
 
 	// Compile-time check for any missing operator() implementation

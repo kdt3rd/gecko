@@ -50,6 +50,7 @@ void unifier::operator()( const type_primary &x, const type_primary &y )
 
 ////////////////////////////////////////
 
+[[noreturn]]
 void unifier::operator()( const type_primary &x, const type_callable &y )
 {
 	throw_runtime( "assigning function to variable: {0} and {1}", x, y );
@@ -66,6 +67,7 @@ void unifier::operator()( const type_callable &x, const type_variable &y )
 
 ////////////////////////////////////////
 
+[[noreturn]]
 void unifier::operator()( const type_callable &x, const type_primary &y )
 {
 	throw_runtime( "assigning variable to function: {0} and {1}", x, y );

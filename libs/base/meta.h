@@ -48,7 +48,7 @@ auto as_integer( E const v ) -> typename std::underlying_type<E>::type
 
 /// @brief Sum several numbers together
 template<typename H, typename ...T>
-H sum( H h, T ...t )
+constexpr H sum( H h, T ...t )
 {
 	return h + sum<T...>( t... );
 }

@@ -379,12 +379,12 @@ void json::parse_string( std::istream_iterator<char> &it, std::istream_iterator<
 						++it;
 						if ( it == end )
 							throw_runtime( "unterminated unicode at end of string" );
-						c = std::toupper( *it );
+						c = static_cast<char>( std::toupper( *it ) );
 						if ( !std::isxdigit( c ) )
 							throw_runtime( "expected hex digit, got {0}", c );
 						u = ( u << 4 ) + uint32_t( (c > '9') ? (c & ~0x20) - 'A' + 10: ( c - '0' ) );
 					}
-					n.push_back( (uint8_t)u );
+					n.push_back( static_cast<uint8_t>( u ) );
 					break;
 				}
 
