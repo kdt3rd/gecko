@@ -131,7 +131,8 @@ void window::resize( double w, double h )
 void window::resize_canvas( double w, double h )
 {
 	update_canvas( w, h );
-	resized( w, h );
+	if ( resized )
+		resized( w, h );
 }
 
 ////////////////////////////////////////
@@ -151,7 +152,8 @@ void window::set_title( const std::string &t )
 
 void window::invalidate( const draw::rect &r )
 {
-	exposed();
+	if ( exposed )
+		exposed();
 	xcb_flush( _connection );
 //	xcb_clear_area( _connection, 1, _win, std::floor( r.x() ), std::floor( r.y() ), std::ceil( r.width() ), std::ceil( r.height() ) );
 }

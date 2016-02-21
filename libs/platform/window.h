@@ -4,7 +4,6 @@
 #include <string>
 #include <memory>
 #include <functional>
-#include <base/action.h>
 #include <base/rect.h>
 #include "mouse.h"
 #include "keyboard.h"
@@ -97,49 +96,49 @@ public:
 	/// @brief Action for mouse press events.
 	///
 	/// Callback action for mouse button press events.
-	base::action<void( const std::shared_ptr<mouse> &, const base::point &, int )> mouse_pressed;
+	std::function<void( const std::shared_ptr<mouse> &, const base::point &, int )> mouse_pressed;
 
 	/// @brief Action for mouse release events.
 	///
 	/// Callback action for mouse button release events.
-	base::action<void( const std::shared_ptr<mouse> &, const base::point &, int )> mouse_released;
+	std::function<void( const std::shared_ptr<mouse> &, const base::point &, int )> mouse_released;
 
 	/// @brief Actionfor mouse motion events.
 	///
 	/// Callback action for mouse motion events.
-	base::action<void( const std::shared_ptr<mouse> &, const base::point & )> mouse_moved;
+	std::function<void( const std::shared_ptr<mouse> &, const base::point & )> mouse_moved;
 
 	/// @brief Action for mouse wheel events.
 	///
 	/// Callback action for mouse wheel events.
-	base::action<void( const std::shared_ptr<mouse> &, int )> mouse_wheel;
+	std::function<void( const std::shared_ptr<mouse> &, int )> mouse_wheel;
 
 	/// @brief Action for key press events.
 	///
 	/// Callback action for key press events.
-	base::action<void( const std::shared_ptr<keyboard> &, scancode )> key_pressed;
+	std::function<void( const std::shared_ptr<keyboard> &, scancode )> key_pressed;
 
 	/// @brief Action for key release events.
 	///
 	/// Callback action for key release events.
-	base::action<void( const std::shared_ptr<keyboard> &, scancode )> key_released;
+	std::function<void( const std::shared_ptr<keyboard> &, scancode )> key_released;
 
 	/// @brief Action for text entered events.
 	///
 	/// Callback action for text entered events.
-	base::action<void( const std::shared_ptr<keyboard> &, char32_t )> text_entered;
+	std::function<void( const std::shared_ptr<keyboard> &, char32_t )> text_entered;
 
-	base::action<void( void )> closed;
-	base::action<void( void )> shown;
-	base::action<void( void )> hidden;
-	base::action<void( void )> minimized;
-	base::action<void( void )> maximized;
-	base::action<void( void )> restored;
-	base::action<void( void )> exposed;
-	base::action<void( double, double )> moved;
-	base::action<void( double, double )> resized;
-	base::action<void( void )> entered;
-	base::action<void( void )> exited;
+	std::function<void( void )> closed;
+	std::function<void( void )> shown;
+	std::function<void( void )> hidden;
+	std::function<void( void )> minimized;
+	std::function<void( void )> maximized;
+	std::function<void( void )> restored;
+	std::function<void( void )> exposed;
+	std::function<void( double, double )> moved;
+	std::function<void( double, double )> resized;
+	std::function<void( void )> entered;
+	std::function<void( void )> exited;
 
 	virtual double width( void ) = 0;
 	virtual double height( void ) = 0;

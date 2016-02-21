@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <base/action.h>
+#include <functional>
 
 namespace platform
 {
@@ -32,7 +32,7 @@ public:
 	/// @brief Callback for the timer.
 	///
 	/// The callback will be called once the timer is elapsed.
-	base::action<void( void )> elapsed;
+	std::function<void( void )> elapsed;
 };
 
 ////////////////////////////////////////

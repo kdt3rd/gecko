@@ -292,7 +292,8 @@ void window::move_event( double x, double y )
 	{
 		_last_x = tx;
 		_last_y = ty;
-		moved( x, y );
+		if ( moved )
+			moved( x, y );
 	}
 }
 
@@ -308,7 +309,8 @@ void window::resize_event( double w, double h )
 		_last_h = th;
 		glXMakeCurrent( _display.get(), _win, _glc );
 		glViewport( 0, 0, tw, th );
-		resized( w, h );
+		if ( resized )
+			resized( w, h );
 	}
 }
 
@@ -318,7 +320,8 @@ void window::expose_event( void )
 {
 	_invalid = false;
 	glXMakeCurrent( _display.get(), _win, _glc );
-	exposed();
+	if ( exposed )
+		exposed();
 	glXSwapBuffers( _display.get(), _win );
 	glFlush();
 	XFlush( _display.get() );

@@ -71,15 +71,9 @@
 
 - (void)drawRect:(NSRect)rect
 {
-	try
-	{
+	if ( win->exposed )
 		win->exposed();
-		[[self openGLContext] flushBuffer];
-	}
-	catch ( std::exception &e )
-	{
-		std::cout << "Ooops: " << e.what() << std::endl;
-	}
+	[[self openGLContext] flushBuffer];
 }
 
 ////////////////////////////////////////
@@ -87,15 +81,8 @@
 - (void)setFrameSize:(NSSize)newSize
 {
 	[super setFrameSize:newSize];
-	try
-	{
-		float scale = win->scale_factor();
-		win->resize_event( newSize.width * scale, newSize.height * scale );
-	}
-	catch ( std::exception &e )
-	{
-		std::cout << "Ooops: " << e.what() << std::endl;
-	}
+	float scale = win->scale_factor();
+	win->resize_event( newSize.width * scale, newSize.height * scale );
 }
 
 ////////////////////////////////////////
@@ -112,7 +99,8 @@
 	double scale = win->scale_factor();
 	NSPoint p = [event locationInWindow];
 	p = [self convertPoint:p fromView:nil];
-	win->mouse_pressed( mouse, { p.x * scale, p.y * scale }, 1 );
+	if ( win->mouse_pressed )
+		win->mouse_pressed( mouse, { p.x * scale, p.y * scale }, 1 );
 }
 
 ////////////////////////////////////////

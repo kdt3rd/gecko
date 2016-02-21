@@ -116,7 +116,8 @@ void window::resize_event( double w, double h )
 {
 	_last_w = w;
 	_last_h = h;
-	resized( _last_w, _last_h );
+	if ( resized )
+		resized( _last_w, _last_h );
 }
 
 ////////////////////////////////////////

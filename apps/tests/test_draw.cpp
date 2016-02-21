@@ -23,7 +23,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 
 	auto win = sys->new_window();
 	win->set_title( "Draw Test" );
-	win->exposed.function() = [&]( void )
+	win->exposed = [&]( void )
 	{
 		win->acquire();
 		glViewport( 0, 0, static_cast<GLsizei>(win->width()), static_cast<GLsizei>(win->height()) );
@@ -73,7 +73,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		}
 		win->release();
 	};
-	win->resized.function() = [&]( double w, double h )
+
+	win->resized = [&]( double w, double h )
 	{
 		std::cout << "Resized to: " << w << 'x' << h << std::endl;
 	};
