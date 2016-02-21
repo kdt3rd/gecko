@@ -34,7 +34,7 @@ class posix_watcher : public base::fs_watcher
 {
 public:
 #ifdef __APPLE__
-# error "Need to implement posix_watcher using kqueue"
+# warning "Need to implement posix_watcher using kqueue"
 #elif defined(__linux)
 	posix_watcher( void )
 			: _notify_fd( inotify_init1( IN_NONBLOCK|IN_CLOEXEC ) )
@@ -174,8 +174,10 @@ std::shared_ptr<base::fs_watcher>
 getWatcher( void )
 {
 	std::unique_lock<std::mutex> lk( theWatcherMutex );
+#ifndef __APPLE__
 	if ( ! theWatcher )
 		theWatcher = std::make_shared<posix_watcher>();
+#endif
 	return theWatcher;
 }
 

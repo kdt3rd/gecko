@@ -8,6 +8,7 @@ lib = Library( "media",
 	"riff/fourcc.cpp",
 	"riff/chunk.cpp",
 	EXR,
+	ILMBASE,
 	UseLibraries( "base" )
 )
 

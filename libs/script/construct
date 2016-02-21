@@ -16,6 +16,8 @@ elseif sys.system() == "Linux" then
 	table.insert( srcs, "fontconfig/font.cpp" )
 	table.insert( srcs, "linux.cpp" )
 	extralibs = { FREETYPE, FONTCONFIG }
+else
+	error( "Unsupported platform" );
 end
 
 lib = Library( "script", srcs, UseLibraries( "base", "utf" ), extralibs )
