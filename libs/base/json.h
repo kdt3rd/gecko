@@ -253,9 +253,17 @@ public:
 
 	void append( json &&that );
 
-	static base::json create( const std::string &s )
+	json &append( const std::string &name, json &&val )
 	{
-		base::json result;
+		this->operator[]( name ) = std::move( val );
+		return *this;
+	}
+
+	void dump( void ) const;
+
+	static json create( const std::string &s )
+	{
+		json result;
 		result.parse( s );
 		return result;
 	}
@@ -290,7 +298,7 @@ inline std::istream &operator>>( std::istream &in, json &j )
 
 ////////////////////////////////////////
 
-inline void operator>>( std::string &in, json &j )
+inline void operator>>( const std::string &in, json &j )
 {
 	j.parse( in );
 }
@@ -298,5 +306,4 @@ inline void operator>>( std::string &in, json &j )
 ////////////////////////////////////////
 
 }
-
 

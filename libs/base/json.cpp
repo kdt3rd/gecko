@@ -208,6 +208,13 @@ void json::append( json &&that )
 
 ////////////////////////////////////////
 
+void json::dump( void ) const
+{
+	std::cout << *this << std::endl;
+}
+
+////////////////////////////////////////
+
 void json::parse_value( std::istream_iterator<char> &it, std::istream_iterator<char> &end, int &line )
 {
 	skip_whitespace( it, end, line );
@@ -265,7 +272,6 @@ void json::parse_array( std::istream_iterator<char> &it, std::istream_iterator<c
 	while ( it != end )
 	{
 		skip_whitespace( it, end, line );
-
 		if ( *it == ']' )
 			break;
 
@@ -302,26 +308,29 @@ void json::parse_object( std::istream_iterator<char> &it, std::istream_iterator<
 	json_object obj;
 	json name;
 	json val;
-	while ( it != end )
+	skip_whitespace( it, end, line );
+	if ( *it != '}' )
 	{
-		skip_whitespace( it, end, line );
-		name.parse_string( it, end, line );
-		skip_whitespace( it, end, line );
-		if ( *it != ':' )
-			throw_runtime( "expected ':' in json object at line {0} (got {1})", line, *it );
-		++it;
-		skip_whitespace( it, end, line );
-		val.parse_value( it, end, line );
+		while ( it != end )
+		{
+			name.parse_string( it, end, line );
+			skip_whitespace( it, end, line );
+			if ( *it != ':' )
+				throw_runtime( "expected ':' in json object at line {0} (got {1})", line, *it );
+			++it;
+			skip_whitespace( it, end, line );
+			val.parse_value( it, end, line );
 
-		obj[name.get<std::string>()] = std::move( val );
+			obj[name.get<std::string>()] = std::move( val );
 
-		skip_whitespace( it, end, line );
-		if ( *it == '}' )
-			break;
+			skip_whitespace( it, end, line );
+			if ( *it == '}' )
+				break;
 
-		if ( *it != ',' )
-			throw_runtime( "expected ',' or '}' in json object at line {0} (got {1})", line, *it );
-		++it;
+			if ( *it != ',' )
+				throw_runtime( "expected ',' or '}' in json object at line {0} (got {1})", line, *it );
+			++it;
+		}
 	}
 
 	if ( *it != '}' )
@@ -343,23 +352,49 @@ void json::parse_string( std::istream_iterator<char> &it, std::istream_iterator<
 		throw_runtime( "invalid json value at line {0}", line );
 	++it;
 
-
 	while ( it != end )
 	{
 		char c = *it;
 		if ( c == '"' )
 			break;
-
 		if ( c == '\\' )
 		{
 			++it;
 			if ( it == end )
 				throw_runtime( "unterminated json string at line {0}", line );
+
 			c = *it;
-			if ( c == 'u' )
-				throw_not_yet();
+			switch ( c )
+			{
+				case 'b': n.push_back( '\b' ); break;
+				case 'f': n.push_back( '\f' ); break;
+				case 'n': n.push_back( '\n' ); break;
+				case 't': n.push_back( '\t' ); break;
+				case 'r': n.push_back( '\r' ); break;
+				case 'u':
+				{
+					uint32_t u = 0;
+					for ( size_t i = 0; i < 4; ++i )
+					{
+						++it;
+						if ( it == end )
+							throw_runtime( "unterminated unicode at end of string" );
+						c = std::toupper( *it );
+						if ( !std::isxdigit( c ) )
+							throw_runtime( "expected hex digit, got {0}", c );
+						u = ( u << 4 ) + uint32_t( (c > '9') ? (c & ~0x20) - 'A' + 10: ( c - '0' ) );
+					}
+					n.push_back( (uint8_t)u );
+					break;
+				}
+
+				default:
+					n.push_back( c );
+					break;
+			}
 		}
-		n.push_back( c );
+		else
+			n.push_back( c );
 		++it;
 	}
 
@@ -483,7 +518,34 @@ std::ostream &operator<<( std::ostream &out, const json &j )
 	if ( j.is<json_number>() )
 		out << j.get<json_number>();
 	else if ( j.is<json_string>() )
-		out << '\"' << j.get<json_string>() << '\"';
+	{
+		out << '\"';
+		for ( auto c: j.get<json_string>() )
+		{
+			switch ( c )
+			{
+				case '"':
+				case '\\':
+				case '/':
+					out << '\\' << c;
+					break;
+
+				case '\b': out << '\\' << 'b'; break;
+				case '\f': out << '\\' << 'f'; break;
+				case '\r': out << '\\' << 'r'; break;
+				case '\n': out << '\\' << 'n'; break;
+				case '\t': out << '\\' << 't'; break;
+
+				default:
+					if ( std::iscntrl( c ) )
+						out << format( "\\u{0,w4,b16,f0,ar}", static_cast<int>(c) );
+					else
+						out << c;
+					break;
+			}
+		}
+		out << '\"';
+	}
 	else if ( j.is<json_bool>() )
 	{
 		if ( j.get<json_bool>() )
