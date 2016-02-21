@@ -198,6 +198,9 @@ private:
 ////////////////////////////////////////
 
 /// @brief Variant type (aka tagged union).
+/// The variant can take on a value from any of the given types (or have no value at all).
+/// The visit(...) function can be used to apply any visitor class to the variant.
+/// @sa base::visit
 template<typename ...Ts>
 class variant
 {
