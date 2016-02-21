@@ -19,14 +19,8 @@ class location_exception : public std::exception
 {
 public:
 	/// @brief Constructor
-	location_exception( const char *file, int line )
-		: _line( line ), _file( file )
-	{
-		std::ostringstream str;
-		str << "file " << file << " line " << line;
-		_msg = str.str();
-	}
-		
+	location_exception( const char *file, int line );
+
 	virtual ~location_exception( void );
 	location_exception( const location_exception &e ) = default;
 	location_exception( location_exception &&e ) = default;

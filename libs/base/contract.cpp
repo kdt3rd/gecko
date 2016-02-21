@@ -5,6 +5,16 @@
 namespace base
 {
 
+location_exception::location_exception( const char *file, int line )
+	: _line( line ), _file( file )
+{
+	std::ostringstream str;
+	str << "file " << file << " line " << line;
+	_msg = str.str();
+}
+
+////////////////////////////////////////
+
 location_exception::~location_exception( void )
 {
 }
