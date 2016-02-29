@@ -29,7 +29,7 @@ unit_test::~unit_test( void )
 void unit_test::setup( cmd_line &opts )
 {
 	opts.add( cmd_line::option( 't', "test_" + _name, "<test> ...", cmd_line::args, "List of " + _name + " tests to run" ) );
-	opts.add( cmd_line::option( 'q', "", "", cmd_line::counted, "Quiet mode (can be specified multiple times" ) );
+	opts.add( cmd_line::option( 'q', "", "", cmd_line::counted, "Quiet mode (can be specified multiple times)" ) );
 }
 
 ////////////////////////////////////////

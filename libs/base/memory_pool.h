@@ -12,7 +12,7 @@ namespace base
 ////////////////////////////////////////
 
 /// @brief Memory pool allocating in blocks.
-template<typename T, size_t blocks>
+template<typename T, size_t Blocks>
 class memory_pool
 {
 public:
@@ -38,7 +38,7 @@ public:
 	typedef std::ptrdiff_t difference_type;
 
 	/// @brief Rebind to a different type.
-	template <typename U> struct rebind { typedef memory_pool<U,blocks> other; };
+	template <typename U> struct rebind { typedef memory_pool<U,Blocks> other; };
 
 	/// @brief Get address of a reference.
 	pointer address( reference x ) const
@@ -55,17 +55,11 @@ public:
 	/// @brief Allocate an object from the pool.
 	pointer allocate( size_type n = 1, const_pointer /*hint*/ = 0 )
 	{
-		precondition( n == 1, "memory pool can only allocate 1 item" );
+		precondition( n == 1, "memory pool can only allocate 1 item at a time" );
 
-		// Allocate blocks if needed
 		if ( _freelist.empty() )
-		{
-			_blocks.emplace_back();
-			pointer result = &( _blocks.back()[0] );
-			for ( size_t i = 1; i < blocks; ++i )
-				_freelist.push_back( &( _blocks.back()[i] ) );
-			return result;
-		}
+			allocate_block();
+		logic_check( !_freelist.empty(), "freelist should not be empty" );
 
 		pointer result = _freelist.back();
 		_freelist.pop_back();
@@ -75,7 +69,7 @@ public:
 	/// @brief Deallocate an object back to the pool.
 	void deallocate( pointer p, size_type n = 1 )
 	{
-		precondition( n == 1, "memory pool can only deallocate 1 item" );
+		precondition( n == 1, "memory pool can only deallocate 1 item at a time" );
 		_freelist.push_back( p );
 	}
 
@@ -108,11 +102,25 @@ public:
 	/// @brief Capacity of memory pool in bytes.
 	size_t capacity( void ) const
 	{
-		return _blocks.size() * blocks;
+		return _blocks.size() * Blocks;
+	}
+
+	void clear( void )
+	{
+		_freelist.clear();
+		_blocks.clear();
 	}
 
 private:
-	std::list<std::array<T,blocks>> _blocks;
+	// Allocate a block and add it to the free list
+	void allocate_block( void )
+	{
+		_blocks.emplace_back();
+		for ( size_t i = 0; i < Blocks; ++i )
+			_freelist.push_back( &( _blocks.back()[i] ) );
+	}
+
+	std::list<std::array<T,Blocks>> _blocks;
 	std::vector<pointer> _freelist;
 };
 
