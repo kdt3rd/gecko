@@ -77,8 +77,10 @@ int dispatcher::execute( void )
 			case MapNotify:
 			{
 				auto w = _windows[event.xmap.window];
-				w->shown();
-				w->restored();
+				if ( w->shown )
+					w->shown();
+				if ( w->restored )
+					w->restored();
 				break;
 			}
 
@@ -87,8 +89,10 @@ int dispatcher::execute( void )
 				auto w = _windows[event.xunmap.window];
 				if ( w )
 				{
-					w->hidden();
-					w->minimized();
+					if ( w->hidden )
+						w->hidden();
+					if ( w->minimized )
+						w->minimized();
 				}
 				break;
 			}
@@ -96,14 +100,16 @@ int dispatcher::execute( void )
 			case EnterNotify:
 			{
 				auto w = _windows[event.xcrossing.window];
-				w->entered();
+				if ( w->entered )
+					w->entered();
 				break;
 			}
 
 			case LeaveNotify:
 			{
 				auto w = _windows[event.xcrossing.window];
-				w->exited();
+				if ( w->exited )
+					w->exited();
 				break;
 			}
 
@@ -111,18 +117,22 @@ int dispatcher::execute( void )
 			{
 				auto w = _windows[event.xkey.window];
 				platform::scancode sc = _keyboard->get_scancode( event.xkey );
-				w->key_pressed( _keyboard, sc );
-				char keybuf[16];
-				Status status;
-				int length = Xutf8LookupString( w->input_context(), &event.xkey, keybuf, sizeof(keybuf), nullptr, &status );
-				if ( length > 0 )
+				if ( w->key_pressed )
+					w->key_pressed( _keyboard, sc );
+				if ( w->text_entered )
 				{
-					std::stringstream tmp( std::string( keybuf, size_t(length) ) );
-					utf::iterator it( tmp, utf::UTF8 );
-					while ( ++it )
+					char keybuf[16];
+					Status status;
+					int length = Xutf8LookupString( w->input_context(), &event.xkey, keybuf, sizeof(keybuf), nullptr, &status );
+					if ( length > 0 )
 					{
-						if ( utf::is_graphic( *it ) )
-							w->text_entered( _keyboard, *it );
+						std::stringstream tmp( std::string( keybuf, size_t(length) ) );
+						utf::iterator it( tmp, utf::UTF8 );
+						while ( ++it )
+						{
+							if ( utf::is_graphic( *it ) )
+								w->text_entered( _keyboard, *it );
+						}
 					}
 				}
 				break;
@@ -132,7 +142,8 @@ int dispatcher::execute( void )
 			{
 				auto w = _windows[event.xkey.window];
 				platform::scancode sc = _keyboard->get_scancode( event.xkey );
-				w->key_released( _keyboard, sc );
+				if ( w->key_released )
+					w->key_released( _keyboard, sc );
 				break;
 			}
 
@@ -151,15 +162,18 @@ int dispatcher::execute( void )
 					case 1:
 					case 2:
 					case 3:
-						w->mouse_pressed( _mouse, { double(event.xbutton.x), double(event.xbutton.y) }, int(event.xbutton.button) );
+						if ( w->mouse_pressed )
+							w->mouse_pressed( _mouse, { double(event.xbutton.x), double(event.xbutton.y) }, int(event.xbutton.button) );
 						break;
 
 					case 4:
-						w->mouse_wheel( _mouse, 1 );
+						if ( w->mouse_wheel )
+							w->mouse_wheel( _mouse, 1 );
 						break;
 
 					case 5:
-						w->mouse_wheel( _mouse, -1 );
+						if ( w->mouse_wheel )
+							w->mouse_wheel( _mouse, -1 );
 						break;
 				}
 				break;
@@ -173,7 +187,8 @@ int dispatcher::execute( void )
 					case 1:
 					case 2:
 					case 3:
-						w->mouse_released( _mouse, { double(event.xbutton.x), double(event.xbutton.y) }, int(event.xbutton.button) );
+						if ( w->mouse_released )
+							w->mouse_released( _mouse, { double(event.xbutton.x), double(event.xbutton.y) }, int(event.xbutton.button) );
 						break;
 
 					case 4: // Mouse wheel up
@@ -186,7 +201,8 @@ int dispatcher::execute( void )
 			case MotionNotify:
 			{
 				auto w = _windows[event.xmotion.window];
-				w->mouse_moved( _mouse, { double(event.xmotion.x), double(event.xmotion.y) } );
+				if ( w->mouse_moved )
+					w->mouse_moved( _mouse, { double(event.xmotion.x), double(event.xmotion.y) } );
 				break;
 			}
 
