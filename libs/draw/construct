@@ -10,15 +10,7 @@ local srcs = {
 	"object.cpp";
 	"stretchable.cpp";
 	"color_wheel.cpp";
-}
-
-local tess = {
-	"libtess2/dict.cpp";
-	"libtess2/geom.cpp";
-	"libtess2/mesh.cpp";
-	"libtess2/priorityq.cpp";
-	"libtess2/sweep.cpp";
-	"libtess2/tess.cpp";
+	"tessellator.cpp";
 }
 
 local shaders = {
@@ -69,7 +61,7 @@ shader_code = GenerateSourceDataFile{
 }
 shader_code:addDependency( "order", shader_h )
 
-local comp = Compile( srcs, tess, shader_code )
+local comp = Compile( srcs, shader_code )
 comp:includeArtifactDir()
 
 lib = Library( "draw", comp, UseLibraries( "gl", "script" ) )

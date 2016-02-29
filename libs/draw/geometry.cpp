@@ -32,7 +32,6 @@ size_t circle_precision( double r )
 	return n;
 }
 
-
 ////////////////////////////////////////
 
 void add_quadratic( const base::point &p1, const base::point &p2, const base::point &p3, polyline &line )

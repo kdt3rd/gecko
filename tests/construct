@@ -2,3 +2,4 @@
 SubDir( "httpd" )
 SubDir( "base" )
 SubDir( "web" )
+SubDir( "draw" )

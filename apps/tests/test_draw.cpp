@@ -4,6 +4,7 @@
 #include <platform/dispatcher.h>
 #include <gl/opengl.h>
 #include <base/contract.h>
+#include <base/timer.h>
 #include <base/math_functions.h>
 #include <draw/canvas.h>
 #include <draw/object.h>
@@ -14,6 +15,7 @@ namespace
 
 int safemain( int /*argc*/, char * /*argv*/ [] )
 {
+#if 1
 	auto sys = platform::platform::common().create();
 
 	auto screens = sys->screens();
@@ -33,20 +35,69 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 			canvas->clear();
 			canvas->ortho( 0, float(win->width()), 0, float(win->height()) );
 
-			base::paint paint( { 1.0, 1.0, 1.0 }, 2 );
-			paint.set_fill_color( { 0, 0, 0 } );
+			base::paint paint( { 1.0, 1.0, 1.0 }, 10 );
+//			paint.set_fill_color( { 0, 0, 0 } );
 
+#if 0
+			// Draw a simple square
+			{
+				base::point p;
+				base::path path;
+				path.rectangle( { { 10, 150 }, { 100, 100 } } );
+				draw::object obj;
+				obj.create( canvas, path, paint );
+				obj.draw( *canvas );
+			}
+#endif
+
+#if 1
 			// Draw star
 			{
 				using namespace base::math;
-				base::point p;
-				base::path path( { 50, 10 } );
-				double side = 100;
-				path.line_by( base::point::polar( side, 108_deg ) );
-				path.line_by( base::point::polar( side, -36_deg ) );
-				path.line_by( base::point::polar( side, 180_deg ) );
-				path.line_by( base::point::polar( side, 36_deg ) );
+				base::point center { 500, 500 };
+				double side = 450;
+				std::vector<base::point> points;
+				size_t p = 12;
+				size_t q = 5;
+				for ( size_t i = 0; i < p; ++i )
+					points.push_back( center + base::point::polar( side, 360_deg * double(i) / double(p) ) );
+
+				base::path path;
+				size_t i = q % points.size();
+				path.move_to( points[0] );
+				while( i != 0 )
+				{
+					path.line_to( points[i] );
+					i = ( i + q ) % points.size();
+				}
+
+//				path.line_by( base::point::polar( side, 108_deg ) );
+//				path.line_by( base::point::polar( side, -36_deg ) );
+//				path.line_by( base::point::polar( side, 180_deg ) );
+//				path.line_by( base::point::polar( side, 36_deg ) );
 				path.close();
+
+//				for ( size_t j = 0; j < 100000; ++j )
+//				{
+//					draw::object obj;
+//					obj.create( canvas, path, paint );
+//				}
+
+				draw::object obj;
+				obj.create( canvas, path, paint );
+				obj.draw( *canvas );
+			}
+#endif
+
+#if 0
+
+			// Draw a square with a hole
+			{
+				base::point p;
+				base::path path;
+				path.rectangle( { { 250, 10 }, { 100, 100 } } );
+				path.rectangle( { { 270, 30 }, { 60, 60 } } );
+				path.rectangle( { { 290, 50 }, { 20, 20 } } );
 				draw::object obj;
 				obj.create( canvas, path, paint );
 				obj.draw( *canvas );
@@ -56,33 +107,32 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 			{
 				base::point p;
 				base::path path;
-				path.rectangle( { { 200, 10 }, { 100, 100 } } );
-				path.rectangle( { { 220, 30 }, { 60, 60 } }, true );
-				path.rectangle( { { 240, 50 }, { 20, 20 } } );
+				path.rectangle( { { 130, 10 }, { 100, 100 } } );
+				path.rectangle( { { 150, 30 }, { 60, 60 } }, true );
+				path.rectangle( { { 170, 50 }, { 20, 20 } } );
 				draw::object obj;
 				obj.create( canvas, path, paint );
 				obj.draw( *canvas );
 			}
+#endif
 
 			// Draw colorwheel
 			{
+				/*
 				draw::color_wheel wheel;
 				wheel.create( canvas, base::point( win->width()/2.0, win->height()/2.0 ), 50 );
 				wheel.draw( *canvas );
+				*/
 			}
 		}
 		win->release();
-	};
-
-	win->resized = [&]( double w, double h )
-	{
-		std::cout << "Resized to: " << w << 'x' << h << std::endl;
 	};
 
 	win->show();
 
 	auto dispatch = sys->get_dispatcher();
 	return dispatch->execute();;
+#endif
 }
 
 }
