@@ -39,7 +39,6 @@ namespace detail
 	};
 }
 
-
 ////////////////////////////////////////
 
 template <typename ...Args>

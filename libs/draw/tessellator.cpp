@@ -41,6 +41,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+namespace draw
+{
+
 // START OF DICT.H
 // Search returns the node with the smallest key greater than or equal
 // to the given key.  If there is no such key, returns a node whose
@@ -435,12 +438,10 @@ inline double VertL1dist( vertex *u, vertex *v )
 // r is guaranteed to satisfy MIN(u->y(),w->y()) <= r <= MAX(u->y(),w->y()).
 double EdgeEval( vertex *u, vertex *v, vertex *w )
 {
-	double gapL, gapR;
-
 	precondition( VertLeq( u, v ) && VertLeq( v, w ), "points not ordered" );
 
-	gapL = v->x() - u->x();
-	gapR = w->x() - v->x();
+	double gapL = v->x() - u->x();
+	double gapR = w->x() - v->x();
 
 	if ( gapL + gapR > 0 )
 	{
@@ -458,12 +459,10 @@ double EdgeEval( vertex *u, vertex *v, vertex *w )
 // as v is above, on, or below the edge uw.
 double EdgeSign( vertex *u, vertex *v, vertex *w )
 {
-	double gapL, gapR;
-
 	precondition( VertLeq( u, v ) && VertLeq( v, w ), "points not ordered" );
 
-	gapL = v->x() - u->x();
-	gapR = w->x() - v->x();
+	double gapL = v->x() - u->x();
+	double gapR = w->x() - v->x();
 
 	if ( gapL + gapR > 0 )
 		return ( v->y() - w->y() ) * gapL + ( v->y() - u->y() ) * gapR;
@@ -483,19 +482,17 @@ double EdgeSign( vertex *u, vertex *v, vertex *w )
 // r is guaranteed to satisfy MIN(u->x(),w->x()) <= r <= MAX(u->x(),w->x()).
 double TransEval( vertex *u, vertex *v, vertex *w )
 {
-	double gapL, gapR;
-
 	assert( TransLeq( u, v ) && TransLeq( v, w ) );
 
-	gapL = v->y() - u->y();
-	gapR = w->y() - v->y();
+	double gapL = v->y() - u->y();
+	double gapR = w->y() - v->y();
 
 	if ( gapL + gapR > 0 )
 	{
 		if ( gapL < gapR )
-			return ( v->x() - u->x() ) + ( u->x() - w->x() ) * ( gapL / ( gapL + gapR ) );
+			return ( v->x() - u->x() ) + ( u->x() - w->x() ) * gapL / ( gapL + gapR );
 		else
-			return ( v->x() - w->x() ) + ( w->x() - u->x() ) * ( gapR / ( gapL + gapR ) );
+			return ( v->x() - w->x() ) + ( w->x() - u->x() ) * gapR / ( gapL + gapR );
 	}
 	// vertical line
 	return 0;
@@ -742,12 +739,12 @@ static size_t CountFaceVerts( face *f )
 }
 
 
-class mesh
+class tess_mesh
 {
 public:
 	// tessMeshNewMesh() creates a new mesh with no edges, no vertices,
 	// and no loops (what we usually call a "face").
-	mesh( void )
+	tess_mesh( void )
 	{
 		vertex *v = &_vertex_list;
 		face *f = &_face_list;
@@ -1687,7 +1684,7 @@ void tessellator::output_polymesh( void )
 void *tessellator::begin_contour( void )
 {
 	if ( _mesh == nullptr )
-		_mesh = new mesh();
+		_mesh = new tess_mesh();
 	return nullptr;
 }
 
@@ -2870,3 +2867,4 @@ void tessellator::get_intersect_data( vertex *isect,
 // When we merge two edges into one, we need to compute the combined
 // winding of the new edge.
 
+}

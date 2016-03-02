@@ -34,8 +34,13 @@
 #include <base/memory_pool.h>
 #include <base/priority_queue.h>
 
+namespace draw
+{
+
+////////////////////////////////////////
+
 template<typename Key> class dict;
-class mesh;
+class tess_mesh;
 class active_region;
 class half_edge;
 class vertex;
@@ -139,7 +144,7 @@ private:
 	// state needed for collecting the input data
 
 	// stores the input contours, and eventually the tessellation itself
-	mesh	*_mesh;
+	tess_mesh	*_mesh;
 
 	// state needed for projecting onto the sweep plane
 
@@ -163,4 +168,7 @@ private:
 	std::vector<size_t> _elements;
 };
 
+////////////////////////////////////////
+
+}
 /// @endcond
