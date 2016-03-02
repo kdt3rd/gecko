@@ -123,7 +123,7 @@ polylines polylines::stroked( double width )
 			subj << IntPoint( static_cast<int>(p.x() * 100 + 0.5), static_cast<int>(p.y() * 100 + 0.5) );
 
 		ClipperOffset co;
-		co.AddPath( subj, jtSquare, line.closed() ? etClosedLine : etOpenSquare );
+		co.AddPath( subj, jtRound, line.closed() ? etClosedLine : etOpenRound );
 
 		solution.clear();
 		co.Execute( solution, width * 50 );
@@ -156,7 +156,7 @@ polylines polylines::offset( double width )
 							  static_cast<int>(p.y() * 100 + 0.5) );
 
 		ClipperOffset co;
-		co.AddPath( subj, jtRound, line.closed() ? etClosedPolygon : etOpenSquare );
+		co.AddPath( subj, jtRound, line.closed() ? etClosedPolygon : etOpenRound );
 		solution.clear();
 		co.Execute( solution, width * 100 );
 
