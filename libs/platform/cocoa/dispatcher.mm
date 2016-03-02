@@ -110,7 +110,8 @@
 	double scale = win->scale_factor();
 	NSPoint p = [event locationInWindow];
 	p = [self convertPoint:p fromView:nil];
-	win->mouse_released( mouse, { p.x * scale, p.y * scale }, 1 );
+	if ( win->mouse_released )
+		win->mouse_released( mouse, { p.x * scale, p.y * scale }, 1 );
 }
 
 ////////////////////////////////////////
@@ -120,7 +121,8 @@
 	double scale = win->scale_factor();
 	NSPoint p = [event locationInWindow];
 	p = [self convertPoint:p fromView:nil];
-	win->mouse_moved( mouse, { p.x * scale, p.y * scale } );
+	if ( win->mouse_moved )
+		win->mouse_moved( mouse, { p.x * scale, p.y * scale } );
 }
 
 ////////////////////////////////////////
@@ -130,7 +132,8 @@
 	unsigned short kc = [event keyCode];
 	platform::scancode sc = keyboard->get_scancode( kc );
 
-	win->key_pressed( keyboard, sc );
+	if ( win->key_pressed )
+		win->key_pressed( keyboard, sc );
 
 	NSString *chars = [event characters];
 	char32_t c;
@@ -138,7 +141,10 @@
 	{
 		c = NSSwapLittleIntToHost( c );
 		if ( c < 0xE000 || c > 0xF8FF ) // Private area
-			win->text_entered( keyboard, c );
+		{
+			if ( win->text_entered )
+				win->text_entered( keyboard, c );
+		}
 	}
 }
 
@@ -148,7 +154,8 @@
 {
 	unsigned short kc = [event keyCode];
 	platform::scancode sc = keyboard->get_scancode( kc );
-	win->key_released( keyboard, sc );
+	if ( win->key_released )
+		win->key_released( keyboard, sc );
 }
 
 ////////////////////////////////////////
