@@ -401,7 +401,7 @@ inline bool VertEq( const vertex *u, const vertex *v )
 
 inline bool VertLeq( const vertex *u, const vertex *v )
 {
-	return ( u->x() < v->x() ) || ( std::equal_to<double>()(u->x(), v->x()) && u->y() <= v->y() );
+	return ( u->x() < v->x() ) || ( std::equal_to<double>()( u->x(), v->x() ) && ( u->y() <= v->y() ) );
 }
 
 inline bool TransLeq( const vertex *u, const vertex *v )
@@ -1585,7 +1585,7 @@ namespace {
 	bool greater_than( const vertex *a, const vertex *b )
 	{
 		// Swap a & b to get greater than
-		return VertLeq( b, a );
+		return !VertLeq( a, b );
 	}
 }
 
@@ -2806,7 +2806,6 @@ bool tessellator::compute_interior( void )
 			// intersection point.  This might leave two edges with a small
 			// gap between them.  This kind of error is especially obvious
 			// when using boundary extraction (TESS_BOUNDARY_ONLY).
-			vNext = _pq.top();
 			_pq.pop();
 			_mesh->splice( v->edge(), vNext->edge() );
 		}
