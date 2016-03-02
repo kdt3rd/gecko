@@ -221,8 +221,21 @@ mesh<base::point> polylines::filled( void )
 
 	std::vector<base::point> points;
 	mesh<base::point> m;
+	m.begin( gl::primitive::TRIANGLES );
 
-	tessellator tess;
+	auto add_point = [&]( double x, double y )
+	{
+		points.emplace_back( x, y );
+	};
+
+	auto add_tri = [&]( size_t a, size_t b, size_t c )
+	{
+		m.push_back( { points[a].x(), points[a].y() } );
+		m.push_back( { points[b].x(), points[b].y() } );
+		m.push_back( { points[c].x(), points[c].y() } );
+	};
+
+	tessellator tess( add_point, add_tri );
 	for ( auto &poly: solution )
 	{
 		auto contour = tess.begin_contour();
@@ -233,8 +246,7 @@ mesh<base::point> polylines::filled( void )
 
 	tess.tessellate();
 
-	m.begin( gl::primitive::TRIANGLES );
-
+	/*
 	auto *verts = tess.get_vertices();
 	auto *elems = tess.get_elements();
 
@@ -245,6 +257,7 @@ mesh<base::point> polylines::filled( void )
 		m.push_back( { verts[idx[1]*2], verts[idx[1]*2+1] } );
 		m.push_back( { verts[idx[2]*2], verts[idx[2]*2+1] } );
 	}
+	*/
 
 	m.end();
 

@@ -1586,8 +1586,8 @@ namespace {
 	}
 }
 
-tessellator::tessellator( void )
-	: _pq( &greater_than )
+tessellator::tessellator( const std::function<void(double,double)> &add_point, const std::function<void(size_t,size_t,size_t)> &add_tri )
+	: _pq( &greater_than ), _add_point( add_point ), _add_tri( add_tri )
 {
 	_pq.set_default( nullptr );
 
@@ -1615,7 +1615,6 @@ void tessellator::output_polymesh( void )
 {
 	size_t maxFaceCount = 0;
 	size_t maxVertexCount = 0;
-	double *vert;
 
 	// Mark unused
 	for ( vertex *v = _mesh->vertex_list()->next(); v != _mesh->vertex_list(); v = v->next() )
@@ -1648,23 +1647,23 @@ void tessellator::output_polymesh( void )
 		++maxFaceCount;
 	}
 
-	_elements.resize( maxFaceCount * 3 );
-	_vertices.resize( maxVertexCount * 2 );
+	std::vector<size_t> indexmap;
+	indexmap.resize( maxVertexCount );
 
 	// Output vertices.
+	size_t count = 0;
 	for ( vertex *v = _mesh->vertex_list()->next(); v != _mesh->vertex_list(); v = v->next() )
 	{
 		if ( v->index() != TESS_UNDEF )
 		{
 			// Store coordinate
-			vert = &_vertices[v->index() * 2];
-			vert[0] = v->x();
-			vert[1] = v->y();
+			_add_point( v->x(), v->y() );
+			indexmap[v->index()] = count;
+			++count;
 		}
 	}
 
 	// Output indices.
-	size_t *els = _elements.data();
 	for ( face *f = _mesh->face_list()->next(); f != _mesh->face_list(); f = f->next() )
 	{
 		if ( !f->inside() )
@@ -1672,12 +1671,20 @@ void tessellator::output_polymesh( void )
 
 		// Store polygon
 		half_edge *edge = f->edge();
-		do
-		{
-			vertex *v = edge->org();
-			*els++ = v->index();
-			edge = edge->lnext();
-		} while ( edge != f->edge() );
+
+		vertex *v1 = edge->org();
+		edge = edge->lnext();
+		logic_check( edge != f->edge(), "not a triangle" );
+
+		vertex *v2 = edge->org();
+		edge = edge->lnext();
+		logic_check( edge != f->edge(), "not a triangle" );
+
+		vertex *v3 = edge->org();
+		edge = edge->lnext();
+		logic_check( edge == f->edge(), "not a triangle" );
+
+		_add_tri( indexmap[v1->index()], indexmap[v2->index()], indexmap[v3->index()] );
 	}
 }
 
@@ -1728,8 +1735,6 @@ void tessellator::end_contour( void *& )
 void tessellator::tessellate( void )
 {
 	precondition( _mesh, "no contours added to tessellate" );
-	_vertices.clear();
-	_elements.clear();
 
 	// Determine the polygon normal and project vertices onto the plane of the polygon.
 	compute_bounding_box();

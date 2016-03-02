@@ -48,7 +48,7 @@ class vertex;
 class tessellator
 {
 public:
-	tessellator( void );
+	tessellator( const std::function<void(double,double)> &add_point, const std::function<void(size_t,size_t,size_t)> &add_tri );
 	~tessellator( void );
 
 	void *begin_contour( void );
@@ -56,46 +56,6 @@ public:
 	void end_contour( void *&contour );
 
 	void tessellate( void );
-
-	// tessGetVertices() - Returns pointer to first coordinate of first vertex.
-	const double *get_vertices( void )
-	{
-		return _vertices.data();
-	}
-
-	// tessGetVertexCount() - Returns number of vertices in the tessellated output.
-	size_t get_vertex_count( void )
-	{
-		return _vertices.size();
-	}
-
-	// tessGetElements() - Returns pointer to the first element.
-	// The contents of the tessGetElements()
-	//   Each element in the element array is polygon defined as 'polySize' number of vertex indices.
-	//   If a polygon has than 'polySize' vertices, the remaining indices are stored as TESS_UNDEF.
-	//   Example, drawing a polygon:
-	//     const int nelems = tessGetElementCount(tess);
-	//     const TESSindex* elems = tessGetElements(tess);
-	//     for (int i = 0; i < nelems; i++) {
-	//         const TESSindex* poly = &elems[i * polySize];
-	//         glBegin(GL_POLYGON);
-	//         for (int j = 0; j < polySize; j++) {
-	//             if (poly[j] == TESS_UNDEF) break;
-	//             glVertex2fv(&verts[poly[j]*vertexSize]);
-	//         }
-	//         glEnd();
-	//     }
-	//
-	const size_t *get_elements( void )
-	{
-		return _elements.data();
-	}
-
-	// tessGetElementCount() - Returns number of elements in the the tessellated output.
-	size_t get_element_count( void )
-	{
-		return _elements.size() / 3;
-	}
 
 private:
 	bool is_winding_inside( int n )
@@ -164,8 +124,8 @@ private:
 
 	base::memory_pool<active_region,256> _regionPool;
 
-	std::vector<double> _vertices;
-	std::vector<size_t> _elements;
+	std::function<void(double,double)> _add_point;
+	std::function<void(size_t,size_t,size_t)> _add_tri;
 };
 
 ////////////////////////////////////////
