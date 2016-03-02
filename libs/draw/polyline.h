@@ -5,6 +5,7 @@
 #include <iostream>
 #include <iterator>
 #include <base/point.h>
+#include <base/format.h>
 
 namespace draw
 {
@@ -75,6 +76,26 @@ public:
 	{
 		return _points[i];
 	}
+
+	void save_svg_polyline( std::ostream &out, float width = 1.0, const std::string &color = "black" )
+	{
+		if ( _closed )
+			out << "<polygon points = \"";
+		else
+			out << "<polyline points = \"";
+		std::copy( begin(), end(), std::ostream_iterator<base::point>( out, " " ) );
+		out << base::format( "\" stroke=\"{0}\" stroke-width=\"{1}\" fill=\"{2}\" />", color, width, "none" );
+	}
+
+	void save_svg_point_numbers( std::ostream &out, float width = 1.0, const std::string &color = "black" )
+	{
+		for ( size_t i = 0; i < _points.size(); ++i )
+		{
+			const auto &p = _points[i];
+			out << base::format( "<text x=\"{0}\" y=\"{1}\" fill=\"#00f\">{2}</text>", p.x(), p.y(), i );
+		}
+	}
+
 
 private:
 	bool _closed = false;

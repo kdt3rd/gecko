@@ -123,7 +123,7 @@ polylines polylines::stroked( double width )
 			subj << IntPoint( static_cast<int>(p.x() * 100 + 0.5), static_cast<int>(p.y() * 100 + 0.5) );
 
 		ClipperOffset co;
-		co.AddPath( subj, jtRound, line.closed() ? etClosedLine : etOpenSquare );
+		co.AddPath( subj, jtSquare, line.closed() ? etClosedLine : etOpenSquare );
 
 		solution.clear();
 		co.Execute( solution, width * 50 );
@@ -221,53 +221,6 @@ mesh<base::point> polylines::filled( void )
 
 	std::vector<base::point> points;
 	mesh<base::point> m;
-#if 0
-	auto add_point = [&]( int64_t x, int64_t y )
-	{
-		points.push_back( { x / 100.0, y / 100.0 } );
-	};
-
-	auto add_tri = [&]( size_t a, size_t b, size_t c )
-	{
-		m.push_back( points[a] );
-		m.push_back( points[b] );
-		m.push_back( points[c] );
-	};
-
-	tessellator tess( add_point, add_tri );
-	m.begin( gl::primitive::TRIANGLES );
-	std::vector<PolyNode *> polys = solution.Childs;
-	while ( !polys.empty() )
-	{
-		PolyNode *poly = polys.back();
-		polys.pop_back();
-		tess.triangulate( poly );
-		for ( auto *h: poly->Childs )
-		{
-			for ( auto *p: h->Childs )
-				polys.push_back( p );
-		}
-	}
-	m.end();
-#endif
-
-#if 0
-	base::timer timer( true );
-	for ( size_t i = 0; i < 100000; ++i )
-	{
-		tessellator tess;
-		for ( auto &poly: solution )
-		{
-			auto contour = tess.begin_contour();
-			for ( auto p: poly )
-				tess.contour_point( contour, p.X / 100.0, p.Y / 100.0 );
-			tess.end_contour( contour );
-		}
-
-		tess.tessellate();
-	}
-	std::cout << "Timer: " << double(timer.elapsed().count()) / 1000.0 << " seconds" << std::endl;
-#endif
 
 	tessellator tess;
 	for ( auto &poly: solution )
@@ -296,6 +249,21 @@ mesh<base::point> polylines::filled( void )
 	m.end();
 
 	return m;
+}
+
+////////////////////////////////////////
+
+void polylines::save_svg( std::ostream &out )
+{
+	out << "<svg>\n";
+	for ( auto &p: _lines )
+	{
+		out << "  ";
+		p.save_svg_polyline( out );
+		p.save_svg_point_numbers( out );
+		out << '\n';
+	}
+	out << "</svg>\n";
 }
 
 ////////////////////////////////////////

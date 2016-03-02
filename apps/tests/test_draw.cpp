@@ -71,17 +71,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 					i = ( i + q ) % points.size();
 				}
 
-//				path.line_by( base::point::polar( side, 108_deg ) );
-//				path.line_by( base::point::polar( side, -36_deg ) );
-//				path.line_by( base::point::polar( side, 180_deg ) );
-//				path.line_by( base::point::polar( side, 36_deg ) );
 				path.close();
-
-//				for ( size_t j = 0; j < 100000; ++j )
-//				{
-//					draw::object obj;
-//					obj.create( canvas, path, paint );
-//				}
 
 				draw::object obj;
 				obj.create( canvas, path, paint );

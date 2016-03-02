@@ -66,6 +66,8 @@ public:
 		return _lines.end();
 	}
 
+	void save_svg( std::ostream &out );
+
 private:
 	std::vector<polyline> _lines;
 };

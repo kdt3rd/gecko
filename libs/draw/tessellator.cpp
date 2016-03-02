@@ -30,8 +30,9 @@
 
 #include "tessellator.h"
 
+#include <base/contract.h>
+
 #include <stddef.h>
-#include <assert.h>
 #include <stdexcept>
 #include <cmath>
 #include <functional>
@@ -436,7 +437,7 @@ double EdgeEval( vertex *u, vertex *v, vertex *w )
 {
 	double gapL, gapR;
 
-	assert( VertLeq( u, v ) && VertLeq( v, w ) );
+	precondition( VertLeq( u, v ) && VertLeq( v, w ), "points not ordered" );
 
 	gapL = v->x() - u->x();
 	gapR = w->x() - v->x();
@@ -459,7 +460,7 @@ double EdgeSign( vertex *u, vertex *v, vertex *w )
 {
 	double gapL, gapR;
 
-	assert( VertLeq( u, v ) && VertLeq( v, w ) );
+	precondition( VertLeq( u, v ) && VertLeq( v, w ), "points not ordered" );
 
 	gapL = v->x() - u->x();
 	gapR = w->x() - v->x();
