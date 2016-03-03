@@ -50,7 +50,11 @@ int safemain( int argc, char *argv[] )
 	{
 		base::process proc;
 		proc.set_pipe( true, true, false );
+#ifdef __APPLE__
+		proc.execute( "/bin/cat", {} );
+#else
 		proc.execute( "/usr/bin/cat", {} );
+#endif
 		test.message( "pid {0}", proc.id() );
 		{
 			std::ostream &inp = proc.std_in();
