@@ -73,7 +73,7 @@ void viewer::paint( const std::shared_ptr<draw::canvas> &c )
 		float(width()), float(height())
 	};
 
-	auto buf = c->new_buffer<float>( gl::buffer<float>::target::ARRAY_BUFFER, vertices, gl::usage::STREAM_DRAW );
+	auto buf = c->new_array_buffer<float>( vertices );
 	{
 		auto va = _quad->bind();
 		va.attrib_pointer( _prog->get_attribute_location( "position" ), buf, 2, 2, 0 );

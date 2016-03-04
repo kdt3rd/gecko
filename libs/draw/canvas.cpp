@@ -178,13 +178,13 @@ canvas::draw_text( const std::shared_ptr<script::font> &font, const base::point 
 	}
 
 	if ( ! _text_texture_vertices )
-		_text_texture_vertices = new_buffer<float>();
+		_text_texture_vertices = new_array_buffer<float>();
 	checkgl();
 	if ( ! _text_output_vertices )
-		_text_output_vertices = new_buffer<float>();
+		_text_output_vertices = new_array_buffer<float>();
 	checkgl();
 	if ( ! _text_indices )
-		_text_indices = new_buffer<uint16_t>();
+		_text_indices = new_element_buffer<uint16_t>();
 	if ( ! _text_array )
 		_text_array = new_vertex_array();
 	checkgl();
@@ -209,9 +209,9 @@ canvas::draw_text( const std::shared_ptr<script::font> &font, const base::point 
 	_text_program->set_uniform( "color", c.get_fill_color() );
 	_text_program->set_uniform( "mvp_matrix", current_matrix() );
 
-	auto idc = _text_indices->bind( gl::buffer<uint16_t>::target::ELEMENT_ARRAY_BUFFER );
+	auto idc = _text_indices->bind();
 
-	idc.data( _text_idx_buf, gl::usage::STATIC_DRAW );
+	idc.data( _text_idx_buf );
 	idc.draw( gl::primitive::TRIANGLES, _text_idx_buf.size() );
 //	ta.draw_indices( gl::primitive::TRIANGLES, _text_idx_buf );
 	// is this safe in GL ES? It's fine for normal OpenGL, and is fewer indices...

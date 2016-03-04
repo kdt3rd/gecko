@@ -1,0 +1,2 @@
+
+AddUnitTest( "test_glinfo.cpp", UseLibraries( "platform", "gl", "base" ) )

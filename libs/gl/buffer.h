@@ -11,16 +11,28 @@ namespace gl
 ////////////////////////////////////////
 
 /// @brief Buffer usage
-enum class usage
+enum class buffer_usage
 {
 	STREAM_DRAW = GL_STREAM_DRAW,
 	STATIC_DRAW = GL_STATIC_DRAW,
 	DYNAMIC_DRAW = GL_DYNAMIC_DRAW,
 };
 
-template<typename D> class buffer;
+////////////////////////////////////////
+
+/// @brief Buffer target
+enum class buffer_target
+{
+	/// Buffer of vertex attributes
+	ARRAY_BUFFER = GL_ARRAY_BUFFER,
+
+	/// Buffer of vertex indices
+	ELEMENT_ARRAY_BUFFER = GL_ELEMENT_ARRAY_BUFFER,
+};
 
 ////////////////////////////////////////
+
+template<typename D> class buffer;
 
 /// @brief OpenGL bound buffer
 template<typename D>
@@ -29,6 +41,7 @@ class bound_buffer
 public:
 	bound_buffer( void ) = delete;
 	bound_buffer( const bound_buffer &other ) = delete;
+
 	bound_buffer( bound_buffer &&other )
 		: _target( other._target )
 	{
@@ -41,12 +54,12 @@ public:
 			glBindBuffer( _target, 0 );
 	}
 
-	void data( const D *data, size_t n, usage u )
+	void data( const D *data, size_t n, buffer_usage u = buffer_usage::STATIC_DRAW )
 	{
-		glBufferData( _target, n * sizeof(D), data, u );
+		glBufferData( _target, n * sizeof(D), data, static_cast<GLenum>( u ) );
 	}
 
-	void data( const std::vector<D> &data, usage u )
+	void data( const std::vector<D> &data, buffer_usage u = buffer_usage::STATIC_DRAW )
 	{
 		glBufferData( _target, static_cast<GLsizeiptr>( data.size() * sizeof(D) ), data.data(), static_cast<GLenum>( u ) );
 	}
@@ -86,30 +99,25 @@ template<typename D>
 class buffer
 {
 public:
-	enum class target
-	{
-		ARRAY_BUFFER = GL_ARRAY_BUFFER,
-		ELEMENT_ARRAY_BUFFER = GL_ELEMENT_ARRAY_BUFFER,
-	};
-
 	buffer( const buffer &b ) = delete;
 
-	buffer( void )
+	buffer( buffer_target t )
+		: _target( static_cast<GLenum>( t ) )
 	{
 		glGenBuffers( 1, &_buffer );
 	}
 
-	buffer( target targ, const D *data, size_t n, usage u )
-		: buffer()
+	buffer( buffer_target targ, const D *data, size_t n, buffer_usage u )
+		: buffer( targ )
 	{
-		auto bb = bind( targ );
+		auto bb = bind();
 		bb.data( data, n, u );
 	}
 
-	buffer( target targ, const std::vector<D> &data, usage u )
-		: buffer()
+	buffer( buffer_target targ, const std::vector<D> &data, buffer_usage u )
+		: buffer( targ )
 	{
-		auto bb = bind( targ );
+		auto bb = bind();
 		bb.data( data, u );
 	}
 
@@ -118,15 +126,16 @@ public:
 		glDeleteBuffers( 1, &_buffer );
 	}
 
-	bound_buffer<D> bind( target targ )
+	bound_buffer<D> bind( void )
 	{
-		return bound_buffer<D>( static_cast<GLenum>( targ ), _buffer );
+		return bound_buffer<D>( static_cast<GLenum>( _target ), _buffer );
 	}
 
 private:
 	friend class context;
 
 	GLuint _buffer;
+	GLenum _target;
 };
 
 ////////////////////////////////////////

@@ -43,7 +43,7 @@ public:
 	void attrib_pointer( program::attribute attr, std::shared_ptr<buffer<D>> &buf, size_t components, size_t stride = 0, size_t offset = 0 )
 	{
 		{
-			auto bb = buf->bind( gl::buffer<D>::target::ARRAY_BUFFER );
+			auto bb = buf->bind();
 			glEnableVertexAttribArray( attr );
 			glVertexAttribPointer( attr, static_cast<GLint>(components), gl_data_type<D>::value, GL_FALSE, static_cast<GLsizei>( stride * sizeof(D) ), reinterpret_cast<const GLvoid *>( offset * sizeof(D) ) );
 		}
@@ -53,8 +53,8 @@ public:
 	void attrib_pointer( program::attribute attr, std::shared_ptr<buffer<D>> &buf, const std::vector<E> &components, size_t nPer, size_t stride = 0, size_t offset = 0 )
 	{
 		{
-			auto bb = buf->bind( gl::buffer<D>::target::ARRAY_BUFFER );
-			bb.data( components, gl::usage::STATIC_DRAW );
+			auto bb = buf->bind();
+			bb.data( components );
 			glEnableVertexAttribArray( attr );
 			stride *= sizeof(D);
 			offset *= sizeof(D);

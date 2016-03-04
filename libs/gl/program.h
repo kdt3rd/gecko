@@ -38,7 +38,6 @@ public:
 	{
 		attach( s, std::forward<Shaders>( shaders )... );
 		link();
-		glUseProgram( _program );
 	}
 
 	/// @brief Destructor
@@ -57,6 +56,9 @@ public:
 
 	/// @brief Link the program
 	void link( void );
+
+	/// @brief Use the program for rendering.
+	void use( void );
 
 	/// @brief Get log messages
 	std::string log( void );

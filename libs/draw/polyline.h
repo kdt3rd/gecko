@@ -92,7 +92,7 @@ public:
 		for ( size_t i = 0; i < _points.size(); ++i )
 		{
 			const auto &p = _points[i];
-			out << base::format( "<text x=\"{0}\" y=\"{1}\" fill=\"#00f\">{2}</text>", p.x(), p.y(), i );
+			out << base::format( "<text x=\"{0}\" y=\"{1}\" stroke=\"{2}\" fill=\"{3}\">{4}</text>", p.x(), p.y(), width, color, i );
 		}
 	}
 

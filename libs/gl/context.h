@@ -32,6 +32,20 @@ public:
 	/// @brief Destructor
 	~context( void );
 
+	/// @brief Get OpenGL vendor
+	std::string get_vendor( void );
+
+	/// @brief Get OpenGL renderer
+	std::string get_renderer( void );
+
+	/// @brief Get OpenGL version
+	std::string get_version( void );
+
+	/// @brief Get OpenGL shading version
+	std::string get_shading_version( void );
+
+	size_t get_max_uniform_buffer_bindings( void );
+
 	/// @brief Enable server-side GL capabilities
 	void enable( capability cap );
 
@@ -61,6 +75,12 @@ public:
 
 	/// @brief Set the blending function
 	void blend_func( blend_style src, blend_style dst );
+
+	/// @brief Depth function to use
+	void depth_func( depth_test t );
+
+	/// @brief Set the viewport coordinates.
+	void viewport( int64_t x, int64_t y, size_t w, size_t h );
 
 	/// @brief Save the current matrix
 	void save_matrix( void );
@@ -118,11 +138,32 @@ public:
 		return std::make_shared<texture>( std::forward<Args>( args )... );
 	}
 
-	/// @brief Construct a new buffer
+	/// @brief Construct a new array buffer
 	template<typename D, typename ...Args>
-	std::shared_ptr<buffer<D>> new_buffer( Args &&...args )
+	std::shared_ptr<buffer<D>> new_array_buffer( void )
 	{
-		return std::make_shared<buffer<D>>( std::forward<Args>( args )... );
+		return std::make_shared<buffer<D>>( buffer_target::ARRAY_BUFFER );
+	}
+
+	/// @brief Construct a new array buffer
+	template<typename D, typename ...Args>
+	std::shared_ptr<buffer<D>> new_array_buffer( const D *data, size_t n, buffer_usage u = buffer_usage::STATIC_DRAW )
+	{
+		return std::make_shared<buffer<D>>( buffer_target::ARRAY_BUFFER, data, n, u );
+	}
+
+	/// @brief Construct a new array buffer
+	template<typename D, typename ...Args>
+	std::shared_ptr<buffer<D>> new_array_buffer( const std::vector<D> &data, buffer_usage u = buffer_usage::STATIC_DRAW )
+	{
+		return std::make_shared<buffer<D>>( buffer_target::ARRAY_BUFFER, data, u );
+	}
+
+	/// @brief Construct a new element buffer
+	template<typename D, typename ...Args>
+	std::shared_ptr<buffer<D>> new_element_buffer( void )
+	{
+		return std::make_shared<buffer<D>>( buffer_target::ELEMENT_ARRAY_BUFFER );
 	}
 
 	/// @brief Construct a new vertex array
@@ -132,12 +173,12 @@ public:
 		return std::make_shared<vertex_array>( std::forward<Args>( args )... );
 	}
 
+	/*
 	/// @brief Enable vertex array
 	void enable_vertex_attrib_array( program::attribute attr, size_t size, data_type dt, size_t stride = 0, const void *data = nullptr )
 	{
 		glEnableVertexAttribArray( attr );
-		glVertexAttribPointer( attr, static_cast<GLint>(size), static_cast<GLenum>( dt ), GL_FALSE,
-							   static_cast<GLsizei>(stride), data );
+		glVertexAttribPointer( attr, static_cast<GLint>(size), static_cast<GLenum>( dt ), GL_FALSE, static_cast<GLsizei>(stride), data );
 	}
 
 	/// @brief Disable vertex array
@@ -145,6 +186,7 @@ public:
 	{
 		glDisableVertexAttribArray( attr );
 	}
+	*/
 
 private:
 	std::vector<matrix4> _matrix;

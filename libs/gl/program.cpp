@@ -19,7 +19,6 @@ program::program( const std::shared_ptr<shader> &vertex )
 {
 	attach( vertex );
 	link();
-	glUseProgram( _program );
 }
 
 ////////////////////////////////////////
@@ -30,7 +29,6 @@ program::program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<s
 	attach( vertex );
 	attach( fragment );
 	link();
-	glUseProgram( _program );
 }
 
 ////////////////////////////////////////
@@ -42,7 +40,6 @@ program::program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<s
 	attach( fragment );
 	attach( geometry );
 	link();
-	glUseProgram( _program );
 }
 
 ////////////////////////////////////////
@@ -70,6 +67,13 @@ void program::link( void )
 
 	if ( res == GL_FALSE )
 		throw std::runtime_error( log() );
+}
+
+////////////////////////////////////////
+
+void program::use( void )
+{
+	glUseProgram( _program );
 }
 
 ////////////////////////////////////////

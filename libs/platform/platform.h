@@ -6,9 +6,10 @@
 #include <vector>
 #include <functional>
 
+#include "system.h"
+
 namespace platform
 {
-	class system;
 
 ////////////////////////////////////////
 

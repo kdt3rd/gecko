@@ -26,6 +26,7 @@ Executable( "test_exr", "test_exr.cpp", media, base )
 Executable( "test_tcp", "test_tcp.cpp", net )
 Executable( "test_web", "test_web.cpp", web )
 Executable( "test_ws", "test_ws.cpp", web )
+Executable( "test_triangle", "test_triangle.cpp", UseLibraries( "platform" ) )
 
 Executable( "segfault", "segfault.cpp" )
 

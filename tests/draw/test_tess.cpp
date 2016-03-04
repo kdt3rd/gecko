@@ -50,7 +50,10 @@ int safemain( int argc, char *argv[] )
 		Paths solution;
 		clip.Execute( ctUnion, solution );
 
-		tessellator tess;
+		auto add_point = []( double, double ) {};
+		auto add_tri = []( size_t, size_t, size_t ) {};
+
+		draw::tessellator tess( add_point, add_tri );
 		for ( auto &poly: solution )
 		{
 			auto contour = tess.begin_contour();
@@ -85,10 +88,6 @@ int safemain( int argc, char *argv[] )
 
 		draw::polylines lines;
 		path.replay( lines );
-
-//		lines.save_svg( std::cout );
-		draw::polylines tmp = lines.stroked( 10 );
-		tmp.save_svg( std::cout );
 
 		auto mesh = lines.stroked( 10 ).filled();
 		test.success( "successful" );
