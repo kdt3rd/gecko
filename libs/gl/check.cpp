@@ -13,7 +13,7 @@ namespace gl
 void error_check( size_t line )
 {
 	GLenum err = glGetError();
-	if ( err != GL_NO_ERROR )
+	while ( err != GL_NO_ERROR )
 	{
 		std::stringstream str;
 		str << "opengl error " << err << ": ";
@@ -28,6 +28,8 @@ void error_check( size_t line )
 		str << "at line " << line;
 		std::cerr << str.str() << std::endl;
 //		throw std::runtime_error( str.str() );
+
+		err = glGetError();
 	}
 }
 

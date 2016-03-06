@@ -4,12 +4,13 @@ if sys.system() == "Linux" then
 end
 
 lib = Library( "gl",
-			   "texture.cpp",
-			   "shader.cpp",
-			   "program.cpp",
-			   "context.cpp",
-			   "matrix4.cpp",
-			   "check.cpp",
-			   "png_reader.cpp",
-			   "gl3w.c",
-			   GL, PNG, DL )
+	"context.cpp",
+	"texture.cpp",
+	"shader.cpp",
+	"program.cpp",
+	"framebuffer.cpp",
+	"matrix4.cpp",
+	"check.cpp",
+	"png_image.cpp",
+	"gl3w.c",
+	GL, PNG, DL )

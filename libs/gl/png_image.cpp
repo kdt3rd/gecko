@@ -1,5 +1,5 @@
 
-#include "png_reader.h"
+#include "png_image.h"
 
 #include <vector>
 #include <png.h>
@@ -9,6 +9,67 @@
 
 namespace gl
 {
+
+////////////////////////////////////////
+
+void png_write( const char *file_name, size_t w, size_t h, size_t c )
+{
+	GLenum fmt;
+	int png_ctype;
+	switch ( c )
+	{
+		case 1: fmt = GL_RED; png_ctype = PNG_COLOR_TYPE_GRAY; break;
+		case 3: fmt = GL_RGB; png_ctype = PNG_COLOR_TYPE_RGB; break;
+		case 4: fmt = GL_RGBA; png_ctype = PNG_COLOR_TYPE_RGB_ALPHA; break;
+		default: throw_runtime( "invalid number of channels ({0})", c );
+	}
+
+	std::unique_ptr<uint8_t[]> img( new uint8_t[w*h*c] );
+	glReadPixels( 0, 0, static_cast<GLsizei>( w ), static_cast<GLsizei>( h ), fmt, GL_UNSIGNED_BYTE, img.get() );
+
+	FILE *fp = fopen( file_name, "wb" );
+	if ( fp == nullptr )
+		throw_errno( "error opening file {0}", file_name );
+	on_scope_exit
+	{
+		fclose( fp );
+	};
+
+	// Initialize write structure
+	auto png_ptr = png_create_write_struct( PNG_LIBPNG_VER_STRING, NULL, NULL, NULL );
+	if ( png_ptr == NULL )
+		throw_runtime( "could not allocate write structure" );
+	on_scope_exit
+	{
+		png_destroy_write_struct( &png_ptr, nullptr );
+	};
+
+	// Initialize info structure
+	auto info_ptr = png_create_info_struct( png_ptr );
+	if (info_ptr == NULL)
+		throw_runtime( "could not allocate info structure" );
+	on_scope_exit
+	{
+		png_free_data( png_ptr, info_ptr, PNG_FREE_ALL, -1 );
+	};
+
+	// Setup Exception handling
+	if ( setjmp( png_jmpbuf( png_ptr ) ) )
+		throw_runtime( "error during PNG creation" );
+
+	png_init_io( png_ptr, fp );
+
+	// Write header (8 bit colour depth)
+	png_set_IHDR( png_ptr, info_ptr, static_cast<png_uint_32>( w ), static_cast<png_uint_32>( h ), 8, png_ctype, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE );
+	png_write_info( png_ptr, info_ptr );
+
+	// Write image data
+	for ( size_t y = 0; y < h; ++y )
+		png_write_row( png_ptr, img.get() + ( h - y - 1 ) * w * c );
+
+	// End write
+	png_write_end( png_ptr, NULL );
+}
 
 ////////////////////////////////////////
 
