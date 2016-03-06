@@ -52,7 +52,7 @@ std::set<std::string> font_manager::get_families( void )
 
 	NSFontManager *fmgr = [NSFontManager sharedFontManager];
 	for ( id name in [fmgr availableFontFamilies] )
-		ret.insert( [(NSString*)name UTF8String] );
+		ret.insert( [static_cast<NSString*>(name) UTF8String] );
 	return ret;
 }
 
@@ -68,8 +68,8 @@ std::set<std::string> font_manager::get_styles( const std::string &family )
 
 	for ( id fd in [fmgr availableMembersOfFontFamily:fam] )
 	{
-		NSArray *fontdesc = (NSArray *)fd;
-		NSFontTraitMask traits = [[fontdesc objectAtIndex:3] intValue];
+		NSArray *fontdesc = static_cast<NSArray *>( fd );
+		NSFontTraitMask traits = static_cast<NSFontTraitMask>( [[fontdesc objectAtIndex:3] intValue] );
 
 		std::string style;
 		for ( auto t: fonttraits )
@@ -120,7 +120,7 @@ std::shared_ptr<script::font> font_manager::get_font( const std::string &family,
 	NSFont *nsfont = [fmgr fontWithFamily:fam traits:mask weight:5 size:pixsize];
 	if ( nsfont )
 	{
-		ret = std::make_shared<script::cocoa::font>( (void *)nsfont, family, style, pixsize );
+		ret = std::make_shared<script::cocoa::font>( static_cast<void *>(nsfont), family, style, pixsize );
 	}
 	else
 		throw std::runtime_error( "font not found" );
