@@ -109,7 +109,6 @@ private:
 	GLenum _target = 0;
 };
 
-
 ////////////////////////////////////////
 
 /// @brief OpenGL texture

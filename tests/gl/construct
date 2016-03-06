@@ -1,2 +1,3 @@
 
 AddUnitTest( "test_glinfo.cpp", UseLibraries( "platform", "gl", "base" ) )
+AddUnitTest( "test_pngwrite.cpp", UseLibraries( "platform", "gl", "base" ) )
