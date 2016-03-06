@@ -3,7 +3,7 @@
 #include <viewer/shaders.h>
 #include <draw/object.h>
 //#include <draw/image.h>
-#include <gl/png_reader.h>
+#include <gl/png_image.h>
 
 ////////////////////////////////////////
 
