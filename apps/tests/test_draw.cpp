@@ -60,7 +60,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 				size_t p = 12;
 				size_t q = 5;
 				for ( size_t i = 0; i < p; ++i )
-					points.push_back( center + base::point::polar( side, 360_deg * double(i) / double(p) ) );
+					points.push_back( center + base::point::polar( side, 360_deg * i / p ) );
 
 				base::path path;
 				size_t i = q % points.size();

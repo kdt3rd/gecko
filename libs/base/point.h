@@ -107,9 +107,12 @@ public:
 	/// @brief Create a point using polar coordinates.
 	/// @param r distance of the point from the origin (radius).
 	/// @param a angle of the point, in radians.
-	static point polar( double r, double a )
+	template<typename F1, typename F2>
+	static point polar( F1 r, F2 a )
 	{
-		return { r * std::cos( a ), r * std::sin( a ) };
+		static_assert( std::is_floating_point<F1>::value, "polar requires floating point type" );
+		static_assert( std::is_floating_point<F2>::value, "polar requires floating point type" );
+		return { static_cast<double>(r) * static_cast<double>( std::cos( a ) ), static_cast<double>(r) * static_cast<double>( std::sin( a ) ) };
 	}
 
 	/// @brief Signed area of triangle (p1, p2, p3)
