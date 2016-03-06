@@ -1,6 +1,7 @@
 
 #include <platform/platform.h>
 #include <gl/context.h>
+#include <gl/png_image.h>
 
 namespace
 {
@@ -86,6 +87,14 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		triangle.draw( gl::primitive::TRIANGLES, 0, 3 );
 
 		win->release();
+	};
+
+	win->key_pressed = [&]( const std::shared_ptr<platform::keyboard> &, platform::scancode c )
+	{
+		if ( c == platform::scancode::KEY_S )
+		{
+			gl::png_write( "/tmp/test.png", static_cast<size_t>( win->width() ), static_cast<size_t>( win->height() ), 3 );
+		}
 	};
 
 	// Display the window
