@@ -93,7 +93,9 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	{
 		if ( c == platform::scancode::KEY_S )
 		{
+			win->acquire();
 			gl::png_write( "/tmp/test.png", static_cast<size_t>( win->width() ), static_cast<size_t>( win->height() ), 3 );
+			win->release();
 		}
 	};
 
