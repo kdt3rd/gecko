@@ -58,7 +58,7 @@ public:
 
 	bound_framebuffer bind( void )
 	{
-		return bound_framebuffer();
+		return bound_framebuffer( _fb );
 	}
 
 private:
