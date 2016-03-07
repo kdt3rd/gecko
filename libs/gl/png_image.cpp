@@ -14,6 +14,8 @@ namespace gl
 
 void png_write( const char *file_name, size_t w, size_t h, size_t c )
 {
+	precondition( w > 0, "width must be larger than 0" );
+	precondition( h > 0, "height must be larger than 0" );
 	GLenum fmt;
 	int png_ctype;
 	switch ( c )
@@ -54,7 +56,7 @@ void png_write( const char *file_name, size_t w, size_t h, size_t c )
 	};
 
 	// Setup Exception handling
-	if ( setjmp( png_jmpbuf( png_ptr ) ) )
+	if ( setjmp( png_jmpbuf( png_ptr ) ) != 0 )
 		throw_runtime( "error during PNG creation" );
 
 	png_init_io( png_ptr, fp );
