@@ -54,7 +54,7 @@ int safemain( int argc, char *argv[] )
 
 	auto vao = ogl.new_vertex_array();
 	{
-		auto tmp = vao->bind();	
+		auto tmp = vao->bind();
 		tmp.attrib_pointer( 0, vbo_points, 3 );
 		tmp.attrib_pointer( 1, vbo_colors, 3 );
 	}
@@ -110,7 +110,7 @@ int safemain( int argc, char *argv[] )
 
 		checkgl();
 
-		ogl.viewport( 0, 0, static_cast<size_t>( win->width() ), static_cast<size_t>( win->height() ) );
+		ogl.viewport( 0, 0, static_cast<size_t>( 200 ), static_cast<size_t>( 200 ) );
 
 		checkgl();
 
@@ -123,7 +123,7 @@ int safemain( int argc, char *argv[] )
 
 		checkgl();
 
-		gl::png_write( "/tmp/test.png", static_cast<size_t>( win->width() ), static_cast<size_t>( win->height() ), 3 );
+		gl::png_write( "/tmp/test.png", 200, 200, 3 );
 
 		checkgl();
 
