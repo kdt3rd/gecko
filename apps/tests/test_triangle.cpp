@@ -11,7 +11,6 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	// Create a window
 	auto sys = platform::platform::common().create();
 	auto win = sys->new_window();
-
 	win->set_title( "Triangle" );
 	win->acquire();
 
@@ -22,7 +21,6 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	std::cout << "Renderer: " << ogl.get_renderer() << std::endl;
 
 	ogl.setup_debugging();
-
 	ogl.enable( gl::capability::DEPTH_TEST );
 	ogl.depth_func( gl::depth_test::LESS );
 
@@ -53,12 +51,14 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		layout(location = 0) in vec3 vertex_position;
 		layout(location = 1) in vec3 vertex_colour;
 
+		uniform mat4 matrix;
+
 		out vec3 colour;
 
 		void main()
 		{
 			colour = vertex_colour;
-			gl_Position = vec4( vertex_position, 1.0 );
+			gl_Position = matrix * vec4( vertex_position, 1.0 );
 		}
 	)SHADER" );
 
@@ -74,21 +74,30 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		}
 	)SHADER" );
 
+	gl::matrix4 matrix;
 	auto prog = ogl.new_program( vshader, fshader );
+	gl::program::uniform matrix_loc = prog->get_uniform_location( "matrix" );
+	float speed = 0.01F;
 
 	// Called to draw the window
 	win->exposed = [&]( void )
 	{
+		if ( std::abs( matrix.get( 0, 3 ) ) > 1.F )
+			speed = -speed;
+
+		matrix.translate_x( speed );
 		win->acquire();
 
 		ogl.clear();
 		ogl.viewport( 0, 0, win->width(), win->height() );
 
 		prog->use();
+		prog->set_uniform( matrix_loc, matrix );
 		auto triangle = vao->bind();
 		triangle.draw( gl::primitive::TRIANGLES, 0, 3 );
 
 		win->release();
+		win->invalidate( base::rect() );
 	};
 
 	win->key_pressed = [&]( const std::shared_ptr<platform::keyboard> &, platform::scancode c )

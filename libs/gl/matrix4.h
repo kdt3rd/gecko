@@ -97,6 +97,21 @@ public:
 		return _data[y*4+x];
 	}
 
+	void translate_x( float dx )
+	{
+		_data[12] += dx;
+	}
+
+	void translate_y( float dy )
+	{
+		_data[13] += dy;
+	}
+
+	void translate_z( float dz )
+	{
+		_data[14] += dz;
+	}
+
 	/// @brief Construct identity matrix
 	static matrix4 identity( void );
 
