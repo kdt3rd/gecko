@@ -21,7 +21,7 @@ public:
 		_parts.push_back( d );
 	}
 
-	void draw( gl::context &ctxt ) override;
+	void draw( gl::api &ogl ) override;
 
 private:
 	std::vector<std::shared_ptr<drawable>> _parts;

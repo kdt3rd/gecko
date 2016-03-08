@@ -3,7 +3,7 @@
 
 #include "drawable.h"
 #include "canvas.h"
-#include <gl/context.h>
+#include <gl/api.h>
 #include <base/point.h>
 
 namespace draw
@@ -18,7 +18,7 @@ public:
 
 	void create( const std::shared_ptr<canvas> &c, const base::point &center, double radius );
 
-	void draw( gl::context &ctxt ) override;
+	void draw( gl::api &ogl ) override;
 
 private:
 	std::shared_ptr<gl::vertex_array> _data;

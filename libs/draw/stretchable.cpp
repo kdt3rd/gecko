@@ -81,7 +81,7 @@ void stretchable::set( const std::shared_ptr<canvas> &c, const base::rect &r )
 
 ////////////////////////////////////////
 
-void stretchable::draw( gl::context &ctxt )
+void stretchable::draw( gl::api &ogl )
 {
 	using target = gl::texture::target;
 
@@ -94,8 +94,8 @@ void stretchable::draw( gl::context &ctxt )
 
 		if ( _fill_prog )
 		{
-			ctxt.use_program( _fill_prog );
-			_fill_prog->set_uniform( "mvp_matrix", ctxt.current_matrix() );
+			ogl.use_program( _fill_prog );
+			_fill_prog->set_uniform( "mvp_matrix", ogl.current_matrix() );
 		}
 
 		{
@@ -110,8 +110,8 @@ void stretchable::draw( gl::context &ctxt )
 	{
 		if ( _stroke_prog )
 		{
-			ctxt.use_program( _stroke_prog );
-			_stroke_prog->set_uniform( "mvp_matrix", ctxt.current_matrix() );
+			ogl.use_program( _stroke_prog );
+			_stroke_prog->set_uniform( "mvp_matrix", ogl.current_matrix() );
 		}
 
 		{
@@ -121,7 +121,7 @@ void stretchable::draw( gl::context &ctxt )
 		}
 	}
 
-	ctxt.use_program();
+	ogl.use_program();
 }
 
 ////////////////////////////////////////

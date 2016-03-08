@@ -10,24 +10,24 @@ namespace gl
 
 /// @brief OpenGL capability
 ///
-/// @see gl::context::enable
-/// @see gl::context::disable
+/// @see gl::api::enable
+/// @see gl::api::disable
 /// @todo Complete missing capabilities
 enum class capability
 {
 	/// If enabled, blend the computed fragment color values with the values in the color buffers.
-	/// @see gl::context::blend_func.
+	/// @see gl::api::blend_func.
 	/// @see gl::blend_style
 	BLEND = GL_BLEND,
 
 	/// If enabled, cull polygons based on their winding in window coordinates.
-	/// @see gl::context::cull_face
+	/// @see gl::api::cull_face
 	/// @todo Write cull face
 	CULL_FACE = GL_CULL_FACE,
 
 	/// If enabled, do depth comparisons and update the depth buffer. Note that even if the depth buffer exists and the depth mask is non-zero, the depth buffer is not updated if the depth test is disabled.
-	/// @see gl::context::depth_func
-	/// @see gl::context::depth_range
+	/// @see gl::api::depth_func
+	/// @see gl::api::depth_range
 	/// @todo Write depth_func and depth_range
 	DEPTH_TEST = GL_DEPTH_TEST,
 
@@ -35,7 +35,7 @@ enum class capability
 	DITHER = GL_DITHER,
 
 	/// If enabled, and if the polygon is rendered in GL_FILL mode, an offset is added to depth values of a polygon's fragments before the depth comparison is performed.
-	/// @see gl::context::polygon_offset
+	/// @see gl::api::polygon_offset
 	/// @todo Write polygon_offset
 	POLYGON_OFFSET_FILL = GL_POLYGON_OFFSET_FILL,
 

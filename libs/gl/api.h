@@ -22,15 +22,15 @@ namespace gl
 
 ////////////////////////////////////////
 
-/// @brief OpenGL context
-class context
+/// @brief OpenGL functions
+class api
 {
 public:
 	/// @brief Constructor
-	context( void );
+	api( void );
 
 	/// @brief Destructor
-	~context( void );
+	~api( void );
 
 	/// @brief Get OpenGL vendor
 	std::string get_vendor( void );
@@ -187,6 +187,8 @@ public:
 		glDisableVertexAttribArray( attr );
 	}
 	*/
+
+	void setup_debugging( void );
 
 private:
 	std::vector<matrix4> _matrix;

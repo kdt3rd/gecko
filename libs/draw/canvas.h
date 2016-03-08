@@ -7,7 +7,7 @@
 #include <base/paint.h>
 #include <base/path.h>
 #include <base/rect.h>
-#include <gl/context.h>
+#include <gl/api.h>
 #include <gl/program.h>
 #include <script/font.h>
 
@@ -17,8 +17,8 @@ namespace draw
 ////////////////////////////////////////
 
 /// @brief Canvas to draw on.
-/// A canvas is an OpenGL context, and has all of the standard OpenGL commands available.
-class canvas : public gl::context
+/// A canvas has all of the OpenGL api functions, and has all of the standard OpenGL commands available.
+class canvas : public gl::api
 {
 public:
 

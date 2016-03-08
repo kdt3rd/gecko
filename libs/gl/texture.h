@@ -10,7 +10,7 @@
 namespace gl
 {
 
-class context;
+class api;
 
 ////////////////////////////////////////
 

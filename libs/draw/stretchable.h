@@ -18,7 +18,7 @@ public:
 
 	void set( const std::shared_ptr<canvas> &c, const base::rect &r );
 
-	void draw( gl::context &ctxt ) override;
+	void draw( gl::api &ogl ) override;
 
 private:
 	std::shared_ptr<gl::vertex_array> _stroke;

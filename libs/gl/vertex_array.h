@@ -11,6 +11,7 @@ namespace gl
 {
 
 class vertex_array;
+class api;
 
 ////////////////////////////////////////
 
@@ -76,7 +77,7 @@ public:
 	}
 
 private:
-	friend class context;
+	friend class api;
 	friend class vertex_array;
 
 	GLuint _a;
@@ -111,7 +112,7 @@ public:
 	}
 
 private:
-	friend class context;
+	friend class api;
 
 	GLuint _array;
 };

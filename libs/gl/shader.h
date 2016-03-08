@@ -8,7 +8,7 @@ namespace gl
 {
 
 class program;
-class context;
+class api;
 
 ////////////////////////////////////////
 
@@ -47,7 +47,7 @@ public:
 
 private:
 	friend class program;
-	friend class context;
+	friend class api;
 
 	GLuint _shader;
 };

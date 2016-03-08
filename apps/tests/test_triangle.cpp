@@ -1,6 +1,6 @@
 
 #include <platform/platform.h>
-#include <gl/context.h>
+#include <gl/api.h>
 #include <gl/png_image.h>
 
 namespace
@@ -16,10 +16,12 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	win->acquire();
 
 	// OpenGL initialization
-	gl::context ogl;
+	gl::api ogl;
 	std::cout << "OpenGL version " << ogl.get_version() << std::endl;
 	std::cout << "Vendor: " << ogl.get_vendor() << std::endl;
 	std::cout << "Renderer: " << ogl.get_renderer() << std::endl;
+
+	ogl.setup_debugging();
 
 	ogl.enable( gl::capability::DEPTH_TEST );
 	ogl.depth_func( gl::depth_test::LESS );
@@ -39,7 +41,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 
 	auto vao = ogl.new_vertex_array();
 	{
-		auto tmp = vao->bind();	
+		auto tmp = vao->bind();
 		tmp.attrib_pointer( 0, vbo_points, 3 );
 		tmp.attrib_pointer( 1, vbo_colors, 3 );
 	}

@@ -6,7 +6,7 @@
 #include <base/meta.h>
 #include <base/point.h>
 #include <base/color.h>
-#include <gl/context.h>
+#include <gl/api.h>
 #include <gl/vertex_array.h>
 
 namespace draw
@@ -63,10 +63,10 @@ public:
 	}
 
 	template<typename ...Names>
-	void set_attrib_pointers( gl::context &GL, std::shared_ptr<gl::vertex_array> &vao, Names ...namelist ) const
+	void set_attrib_pointers( gl::api &ogl, std::shared_ptr<gl::vertex_array> &vao, Names ...namelist ) const
 	{
 		static_assert( sizeof...(Names) == sizeof...(Args), "invalid number of program attributes" );
-		auto buf = GL.new_array_buffer<float>( _data );
+		auto buf = ogl.new_array_buffer<float>( _data );
 		auto va = vao->bind();
 
 		std::array<size_t,sizeof...(Args)> components = {{ detail::count_components<Args>::value... }};

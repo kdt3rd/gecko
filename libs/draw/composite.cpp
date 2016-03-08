@@ -12,10 +12,10 @@ composite::composite( void )
 
 ////////////////////////////////////////
 
-void composite::draw( gl::context &ctxt )
+void composite::draw( gl::api &ogl )
 {
 	for ( auto d: _parts )
-		d->draw( ctxt );
+		d->draw( ogl );
 }
 
 ////////////////////////////////////////

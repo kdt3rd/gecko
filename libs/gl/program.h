@@ -12,7 +12,7 @@
 namespace gl
 {
 
-class context;
+class api;
 
 ////////////////////////////////////////
 
@@ -111,7 +111,7 @@ public:
 	std::pair<uniform_type,std::string> active_uniform( size_t i );
 
 private:
-	friend class context;
+	friend class api;
 
 	GLuint _program;
 };

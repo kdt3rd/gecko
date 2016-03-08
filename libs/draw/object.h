@@ -24,7 +24,7 @@ public:
 	}
 
 
-	void draw( gl::context &ctxt ) override;
+	void draw( gl::api &ogl ) override;
 
 private:
 	std::shared_ptr<gl::vertex_array> _stroke;

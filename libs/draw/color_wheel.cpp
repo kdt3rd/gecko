@@ -49,17 +49,17 @@ void color_wheel::create( const std::shared_ptr<canvas> &c, const base::point &c
 
 ////////////////////////////////////////
 
-void color_wheel::draw( gl::context &ctxt )
+void color_wheel::draw( gl::api &ogl )
 {
-	ctxt.use_program( _fill_prog );
-	_fill_prog->set_uniform( "mvp_matrix", ctxt.current_matrix() );
+	ogl.use_program( _fill_prog );
+	_fill_prog->set_uniform( "mvp_matrix", ogl.current_matrix() );
 
 	{
 		auto va = _data->bind();
 		va.draw( gl::primitive::TRIANGLE_FAN, 0, _data_size );
 	}
 
-	ctxt.use_program();
+	ogl.use_program();
 }
 
 ////////////////////////////////////////

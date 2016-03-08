@@ -8,6 +8,8 @@
 namespace gl
 {
 
+class api;
+
 ////////////////////////////////////////
 
 /// @brief Buffer usage
@@ -81,7 +83,7 @@ public:
 
 private:
 	friend class buffer<D>;
-	friend class context;
+	friend class api;
 
 	bound_buffer( GLenum targ, GLuint buf )
 		: _target( targ )
@@ -132,7 +134,7 @@ public:
 	}
 
 private:
-	friend class context;
+	friend class api;
 
 	GLuint _buffer;
 	GLenum _target;

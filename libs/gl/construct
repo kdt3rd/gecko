@@ -4,7 +4,7 @@ if sys.system() == "Linux" then
 end
 
 lib = Library( "gl",
-	"context.cpp",
+	"api.cpp",
 	"texture.cpp",
 	"shader.cpp",
 	"program.cpp",

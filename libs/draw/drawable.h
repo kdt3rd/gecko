@@ -25,7 +25,7 @@ public:
 	drawable &operator=( const drawable & ) = delete;
 	drawable &operator=( drawable && ) = delete;
 
-	virtual void draw( gl::context &ctxt ) = 0;
+	virtual void draw( gl::api &ogl ) = 0;
 };
 
 ////////////////////////////////////////

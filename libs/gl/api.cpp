@@ -1,25 +1,26 @@
 
-#include "context.h"
+#include "api.h"
+#include <map>
 
 namespace gl
 {
 
 ////////////////////////////////////////
 
-context::context( void )
+api::api( void )
 {
 	_matrix.emplace_back();
 }
 
 ////////////////////////////////////////
 
-context::~context( void )
+api::~api( void )
 {
 }
 
 ////////////////////////////////////////
 
-std::string context::get_vendor( void )
+std::string api::get_vendor( void )
 {
 	auto str = reinterpret_cast<const char *>( glGetString( GL_VENDOR ) );
 	if ( str == nullptr )
@@ -29,7 +30,7 @@ std::string context::get_vendor( void )
 
 ////////////////////////////////////////
 
-std::string context::get_renderer( void )
+std::string api::get_renderer( void )
 {
 	auto str = reinterpret_cast<const char *>( glGetString( GL_RENDERER ) );
 	if ( str == nullptr )
@@ -39,7 +40,7 @@ std::string context::get_renderer( void )
 
 ////////////////////////////////////////
 
-std::string context::get_version( void )
+std::string api::get_version( void )
 {
 	auto str = reinterpret_cast<const char *>( glGetString( GL_VERSION ) );
 	if ( str == nullptr )
@@ -49,7 +50,7 @@ std::string context::get_version( void )
 
 ////////////////////////////////////////
 
-std::string context::get_shading_version( void )
+std::string api::get_shading_version( void )
 {
 	auto str = reinterpret_cast<const char *>( glGetString( GL_SHADING_LANGUAGE_VERSION ) );
 	if ( str == nullptr )
@@ -59,7 +60,7 @@ std::string context::get_shading_version( void )
 
 ////////////////////////////////////////
 
-size_t context::get_max_uniform_buffer_bindings( void )
+size_t api::get_max_uniform_buffer_bindings( void )
 {
 	GLint binds;
 	glGetIntegerv( GL_MAX_UNIFORM_BUFFER_BINDINGS, &binds );
@@ -68,21 +69,21 @@ size_t context::get_max_uniform_buffer_bindings( void )
 
 ////////////////////////////////////////
 
-void context::enable( capability cap )
+void api::enable( capability cap )
 {
 	glEnable( static_cast<GLenum>( cap ) );
 }
 
 ////////////////////////////////////////
 
-void context::disable( capability cap )
+void api::disable( capability cap )
 {
 	glDisable( static_cast<GLenum>( cap ) );
 }
 
 ////////////////////////////////////////
 
-void context::clear_color( const base::color &c )
+void api::clear_color( const base::color &c )
 {
 	glClearColor( static_cast<GLfloat>( c.red() ), static_cast<GLfloat>( c.green() ),
 				  static_cast<GLfloat>( c.blue() ), static_cast<GLfloat>( c.alpha() ) );
@@ -90,108 +91,162 @@ void context::clear_color( const base::color &c )
 
 ////////////////////////////////////////
 
-void context::clear( buffer_bit bit )
+void api::clear( buffer_bit bit )
 {
 	clear( static_cast<buffer_bits>( bit ) );
 }
 
 ////////////////////////////////////////
 
-void context::clear( buffer_bits bits )
+void api::clear( buffer_bits bits )
 {
 	glClear( static_cast<GLbitfield>( bits ) );
 }
 
 ////////////////////////////////////////
 
-void context::depth_mask( bool write )
+void api::depth_mask( bool write )
 {
 	glDepthMask( write );
 }
 
 ////////////////////////////////////////
 
-void context::stencil_mask( bool write )
+void api::stencil_mask( bool write )
 {
 	glStencilMask( write ? GLuint(~0) : GLuint(0) );
 }
 
 ////////////////////////////////////////
 
-void context::stencil_mask( uint32_t mask )
+void api::stencil_mask( uint32_t mask )
 {
 	glStencilMask( static_cast<GLuint>( mask ) );
 }
 
 ////////////////////////////////////////
 
-void context::color_mask( bool r, bool g, bool b, bool a )
+void api::color_mask( bool r, bool g, bool b, bool a )
 {
 	glColorMask( r, g, b, a );
 }
 
 ////////////////////////////////////////
 
-void context::blend_func( blend_style src, blend_style dst )
+void api::blend_func( blend_style src, blend_style dst )
 {
 	glBlendFunc( static_cast<GLenum>( src ), static_cast<GLenum>( dst ) );
 }
 
 ////////////////////////////////////////
 
-void context::save_matrix( void )
+void api::save_matrix( void )
 {
 	_matrix.emplace_back( _matrix.back() );
 }
 
 ////////////////////////////////////////
 
-void context::depth_func( depth_test t )
+void api::depth_func( depth_test t )
 {
 	glDepthFunc( static_cast<GLenum>( t ) );
 }
 
 ////////////////////////////////////////
 
-void context::viewport( int64_t x, int64_t y, size_t w, size_t h )
+void api::viewport( int64_t x, int64_t y, size_t w, size_t h )
 {
 	glViewport( static_cast<GLint>( x ), static_cast<GLint>( y ), static_cast<GLsizei>( w ), static_cast<GLsizei>( h ) );
 }
 
 ////////////////////////////////////////
 
-void context::ortho( float left, float right, float top, float bottom )
+void api::ortho( float left, float right, float top, float bottom )
 {
 	multiply( gl::matrix4::ortho( left, right, top, bottom ) );
 }
 
 ////////////////////////////////////////
 
-void context::scale( float x, float y, float z )
+void api::scale( float x, float y, float z )
 {
 	multiply( gl::matrix4::scale( x, y, z ) );
 }
 
 ////////////////////////////////////////
 
-void context::translate( float dx, float dy, float dz )
+void api::translate( float dx, float dy, float dz )
 {
 	multiply( gl::matrix4::translation( dx, dy, dz ) );
 }
 
 ////////////////////////////////////////
 
-void context::multiply( const matrix4 &m )
+void api::multiply( const matrix4 &m )
 {
 	_matrix.back() *= m;
 }
 
 ////////////////////////////////////////
 
-void context::restore_matrix( void )
+void api::restore_matrix( void )
 {
 	precondition( _matrix.size() > 1, "too many restore_matrix" );
 	_matrix.pop_back();
+}
+
+////////////////////////////////////////
+
+namespace
+{
+std::map<GLenum,const char *> glsource {
+	{ GL_DEBUG_SOURCE_API, "API" },
+	{ GL_DEBUG_SOURCE_WINDOW_SYSTEM, "WINDOW_SYSTEM" },
+	{ GL_DEBUG_SOURCE_SHADER_COMPILER, "SHADER_COMILER" },
+	{ GL_DEBUG_SOURCE_THIRD_PARTY, "THIRD_PARTY" },
+	{ GL_DEBUG_SOURCE_APPLICATION, "APPLICATION" },
+	{ GL_DEBUG_SOURCE_OTHER, "OTHER" }
+};
+
+std::map<GLenum,const char *> gltype {
+	{ GL_DEBUG_TYPE_ERROR, "ERROR" },
+	{ GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR, "DEPRECATED_BEHAVIOR" },
+	{ GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR, "UNDEFINED_BEHAVIOR" },
+	{ GL_DEBUG_TYPE_PORTABILITY, "PORTABILITY" },
+	{ GL_DEBUG_TYPE_PERFORMANCE, "PERFORMANCE" },
+	{ GL_DEBUG_TYPE_OTHER, "OTHER" },
+	{ GL_DEBUG_TYPE_MARKER, "MARKER" },
+	{ GL_DEBUG_TYPE_PUSH_GROUP, "PUSH_GROUP" },
+	{ GL_DEBUG_TYPE_POP_GROUP, "POP_GROUP" }
+};
+
+std::map<GLenum,const char *> glseverity {
+	{ GL_DEBUG_SEVERITY_LOW, "LOW" },
+	{ GL_DEBUG_SEVERITY_MEDIUM, "MEDIUM" },
+	{ GL_DEBUG_SEVERITY_HIGH, "HIGH" },
+	{ GL_DEBUG_SEVERITY_NOTIFICATION, "LOW" }
+};
+
+void gldebugging( GLenum source, GLenum type, GLuint, GLenum severity, GLsizei length, const GLchar *message, const void * )
+{
+	std::clog << "Source:   " << glsource[source] << '\n';
+	std::clog << "Type:     " << gltype[type] << '\n';
+	std::clog << "Severity: " << glseverity[severity] << '\n';
+	std::clog << "Message:  " << std::string( message, static_cast<size_t>( length ) ) << '\n';
+	std::clog << std::endl;
+};
+
+}
+
+void api::setup_debugging( void )
+{
+	GLint flags;
+	glGetIntegerv( GL_CONTEXT_FLAGS, &flags );
+	if ( flags & GL_CONTEXT_FLAG_DEBUG_BIT)
+	{
+		glDebugMessageCallback( &gldebugging, nullptr );
+		std::clog << "Using OpenGL debugging" << std::endl;
+	}
 }
 
 ////////////////////////////////////////
