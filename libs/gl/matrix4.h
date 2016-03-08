@@ -113,7 +113,13 @@ public:
 	}
 
 	/// @brief Construct identity matrix
-	static matrix4 identity( void );
+	static matrix4 identity( void )
+	{
+		return matrix4();
+	}
+
+	/// @brief Construct zero matrix
+	static matrix4 zero( void );
 
 	/// @brief Construct translation matrix
 	static matrix4 translation( float x, float y, float z = 0.0 );
@@ -128,6 +134,9 @@ public:
 
 	/// @brief Construct orthographic projection matrix
 	static matrix4 ortho( float left, float right, float top, float bottom );
+
+	/// @brief Construct perspective projection matrix
+	static matrix4 perspective( float vertical_fov, float aspect, float near, float far );
 
 private:
 	float _data[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };

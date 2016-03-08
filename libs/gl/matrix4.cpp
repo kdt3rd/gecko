@@ -66,14 +66,27 @@ matrix4 &matrix4::operator*=( const matrix4 &m )
 
 ////////////////////////////////////////
 
-matrix4 matrix4::ortho( float left, float right, float top, float bottom )
+matrix4 matrix4::zero( void )
 {
 	return matrix4
 	{
-		2.F / ( right - left ), 0.F, 0.F, 0.F,
-		0.F, 2.F / ( top - bottom ), 0.F, 0.F,
-		0.F, 0.F, -1.F, 0.F,
-		- ( right + left ) / ( right - left ), - ( top + bottom ) / ( top - bottom ), 0.F, 1.F
+		0, 0, 0, 0,
+		0, 0, 0, 0,
+		0, 0, 0, 0,
+		0, 0, 0, 0
+	};
+}
+
+////////////////////////////////////////
+
+matrix4 matrix4::translation( float x, float y, float z )
+{
+	return matrix4
+	{
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		x, y, z, 1
 	};
 }
 
@@ -92,14 +105,37 @@ matrix4 matrix4::scale( float x, float y, float z )
 
 ////////////////////////////////////////
 
-matrix4 matrix4::translation( float x, float y, float z )
+matrix4 matrix4::ortho( float left, float right, float top, float bottom )
 {
 	return matrix4
 	{
-		1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 1, 0,
-		x, y, z, 1
+		2.F / ( right - left ), 0.F, 0.F, 0.F,
+		0.F, 2.F / ( top - bottom ), 0.F, 0.F,
+		0.F, 0.F, -1.F, 0.F,
+		- ( right + left ) / ( right - left ), - ( top + bottom ) / ( top - bottom ), 0.F, 1.F
+	};
+}
+
+////////////////////////////////////////
+
+matrix4 matrix4::perspective( float vertical_fov, float aspect, float near, float far )
+{
+	precondition( vertical_fov > 0.F, "invalid vertical FOV {0}", vertical_fov );
+	precondition( near < far, "invalide near/far distance ({0}/{1})", near, far );
+
+    float range = std::tan( vertical_fov / 2.F ) * near;
+    float sx = ( 2.F * near ) / ( range * aspect + range * aspect );
+    float sy = near / range;
+    float sz = -( far + near ) / ( far - near );
+    float pz = -(2.0f * far * near) / (far - near);
+	float neg = -1.F;
+
+	return matrix4
+	{
+		 sx, 0.F, 0.F, 0.F,
+		0.F,  sy, 0.F, 0.F,
+		0.F, 0.F,  sz, neg,
+		0.F, 0.F,  pz, 0.F
 	};
 }
 
