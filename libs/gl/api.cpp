@@ -197,6 +197,8 @@ void api::restore_matrix( void )
 
 ////////////////////////////////////////
 
+#ifndef __APPLE__
+
 namespace
 {
 std::map<GLenum,const char *> glsource {
@@ -238,15 +240,16 @@ void gldebugging( GLenum source, GLenum type, GLuint, GLenum severity, GLsizei l
 
 }
 
+#endif
+
 void api::setup_debugging( void )
 {
+#ifndef __APPLE__
 	GLint flags;
 	glGetIntegerv( GL_CONTEXT_FLAGS, &flags );
 	if ( flags & GL_CONTEXT_FLAG_DEBUG_BIT)
-	{
 		glDebugMessageCallback( &gldebugging, nullptr );
-		std::clog << "Using OpenGL debugging" << std::endl;
-	}
+#endif
 }
 
 ////////////////////////////////////////
