@@ -7,6 +7,10 @@ namespace gl
 
 ////////////////////////////////////////
 
+program *program::_using = nullptr;
+
+////////////////////////////////////////
+
 program::program( void )
 {
 	_program = glCreateProgram();
@@ -14,40 +18,13 @@ program::program( void )
 
 ////////////////////////////////////////
 
-/*
-program::program( const std::shared_ptr<shader> &vertex )
-	: program()
-{
-	attach( vertex );
-	link();
-}
-
-////////////////////////////////////////
-
-program::program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<shader> &fragment )
-	: program()
-{
-	attach( vertex );
-	attach( fragment );
-	link();
-}
-
-////////////////////////////////////////
-
-program::program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<shader> &fragment, const std::shared_ptr<shader> &geometry )
-	: program()
-{
-	attach( vertex );
-	attach( fragment );
-	attach( geometry );
-	link();
-}
-*/
-
-////////////////////////////////////////
-
 program::~program( void )
 {
+	if ( _using == this )
+	{
+		_using = nullptr;
+		glUseProgram( 0 );
+	}
 	glDeleteProgram( _program );
 }
 
@@ -75,6 +52,7 @@ void program::link( void )
 
 void program::use( void )
 {
+	_using = this;
 	glUseProgram( _program );
 }
 
@@ -112,6 +90,7 @@ program::uniform program::get_uniform_location( const std::string &name )
 
 void program::set_uniform( uniform uni, int value )
 {
+	precondition( _using == this, "program not in use" );
 	glUniform1i( static_cast<GLint>( uni ), value );
 }
 
@@ -119,6 +98,7 @@ void program::set_uniform( uniform uni, int value )
 
 void program::set_uniform( uniform uni, float value )
 {
+	precondition( _using == this, "program not in use" );
 	glUniform1f( static_cast<GLint>( uni ), value );
 }
 
@@ -126,6 +106,7 @@ void program::set_uniform( uniform uni, float value )
 
 void program::set_uniform( uniform uni, double value )
 {
+	precondition( _using == this, "program not in use" );
 	glUniform1f( static_cast<GLint>( uni ), static_cast<GLfloat>( value ) );
 }
 
@@ -133,6 +114,7 @@ void program::set_uniform( uniform uni, double value )
 
 void program::set_uniform( uniform uni, const matrix4 &value )
 {
+	precondition( _using == this, "program not in use" );
 	glUniformMatrix4fv( static_cast<GLint>( uni ), 1, GL_FALSE, value.data() );
 }
 
@@ -140,32 +122,32 @@ void program::set_uniform( uniform uni, const matrix4 &value )
 
 void program::set_uniform( uniform uni, const color &value )
 {
-	float tmp[] = { value.red(), value.green(), value.blue(), value.alpha() };
-	glUniform4fv( static_cast<GLint>( uni ), 1, tmp );
+	precondition( _using == this, "program not in use" );
+	glUniform4f( static_cast<GLint>( uni ), value.red(), value.green(), value.blue(), value.alpha() );
 }
 
 ////////////////////////////////////////
 
 void program::set_uniform( uniform uni, const vec4 &value )
 {
-	float tmp[] = { value[0], value[1], value[2], value[3] };
-	glUniform4fv( static_cast<GLint>( uni ), 1, tmp );
+	precondition( _using == this, "program not in use" );
+	glUniform4f( static_cast<GLint>( uni ), value[0], value[1], value[2], value[3] );
 }
 
 ////////////////////////////////////////
 
 void program::set_uniform( uniform uni, const vec3 &value )
 {
-	float tmp[] = { value[0], value[1], value[2] };
-	glUniform3fv( static_cast<GLint>( uni ), 1, tmp );
+	precondition( _using == this, "program not in use" );
+	glUniform3f( static_cast<GLint>( uni ), value[0], value[1], value[2] );
 }
 
 ////////////////////////////////////////
 
 void program::set_uniform( uniform uni, const vec2 &value )
 {
-	float tmp[] = { value[0], value[1] };
-	glUniform2fv( static_cast<GLint>( uni ), 1, tmp );
+	precondition( _using == this, "program not in use" );
+	glUniform2f( static_cast<GLint>( uni ), value[0], value[1] );
 }
 
 ////////////////////////////////////////

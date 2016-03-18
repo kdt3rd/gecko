@@ -20,7 +20,7 @@ class api;
 class program
 {
 public:
-	typedef GLuint uniform;
+	typedef GLint uniform;
 	typedef GLuint attribute;
 
 	/// @brief Copying not allowed
@@ -28,13 +28,11 @@ public:
 
 	/// @brief Default constructor
 	program( void );
-//	program( const std::shared_ptr<shader> &vertex );
-//	program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<shader> &fragment );
-//	program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<shader> &fragment, const std::shared_ptr<shader> &geometry );
 
 	/// @brief Constructor with shader(s)
 	template<typename ...Shaders>
 	program( const std::shared_ptr<shader> &s, Shaders ...shaders )
+		: program()
 	{
 		attach( s, std::forward<Shaders>( shaders )... );
 		link();
@@ -76,13 +74,6 @@ public:
 		set_uniform( get_uniform_location( name ), value );
 	}
 
-	/// @brief Set uniform array
-	template <typename T>
-	void set_uniform( const std::string &name, const T *values, size_t count )
-	{
-		set_uniform( get_uniform_location( name ), values, count );
-	}
-
 	/// @brief Set uniform integer
 	void set_uniform( uniform u, int value );
 
@@ -98,13 +89,13 @@ public:
 	/// @brief Set uniform color
 	void set_uniform( uniform u, const color &value );
 
-	/// @brief Set uniform point
+	/// @brief Set uniform vec4
 	void set_uniform( uniform u, const vec4 &value );
 
-	/// @brief Set uniform point
+	/// @brief Set uniform vec3
 	void set_uniform( uniform u, const vec3 &value );
 
-	/// @brief Set uniform point
+	/// @brief Set uniform vec2
 	void set_uniform( uniform u, const vec2 &value );
 
 	/// @brief Get number of uniforms
@@ -114,9 +105,9 @@ public:
 	std::pair<uniform_type,std::string> active_uniform( size_t i );
 
 private:
-	friend class api;
-
 	GLuint _program;
+
+	static program *_using;
 };
 
 ////////////////////////////////////////
