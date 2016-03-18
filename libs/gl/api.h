@@ -80,7 +80,7 @@ public:
 	void depth_func( depth_test t );
 
 	/// @brief Set the viewport coordinates.
-	void viewport( int64_t x, int64_t y, size_t w, size_t h );
+	void viewport( double x, double y, double w, double h );
 
 	/// @brief Save the current matrix
 	void save_matrix( void );

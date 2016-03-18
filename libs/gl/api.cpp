@@ -153,9 +153,9 @@ void api::depth_func( depth_test t )
 
 ////////////////////////////////////////
 
-void api::viewport( int64_t x, int64_t y, size_t w, size_t h )
+void api::viewport( double x, double y, double w, double h )
 {
-	glViewport( static_cast<GLint>( x ), static_cast<GLint>( y ), static_cast<GLsizei>( w ), static_cast<GLsizei>( h ) );
+	glViewport( static_cast<GLint>( std::lround( x ) ), static_cast<GLint>( std::lround( y ) ), static_cast<GLsizei>( std::lround( w ) ), static_cast<GLsizei>( std::lround( h ) ) );
 }
 
 ////////////////////////////////////////
