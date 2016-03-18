@@ -50,10 +50,18 @@ public:
 	}
 
 	template<typename ...Args>
-	void vertex_attribute( program::attribute loc, vertex_buffer_data<Args...> &data, size_t a )
+	void vertex_attribute( program::attribute loc, vertex_buffer_data<Args...> &data, size_t a = 0 )
 	{
 		precondition( _voa, "vertex array not created" );
 		_voa->bind().attrib_pointer<Args...>( loc, data, a );
+	}
+
+	template<typename ...Args>
+	void vertex_attribute( const std::string &name, vertex_buffer_data<Args...> &data, size_t a = 0 )
+	{
+		precondition( _voa, "vertex array not created" );
+		precondition( _prog, "program not created" );
+		_voa->bind().attrib_pointer<Args...>( _prog->get_attribute_location( name ), data, a );
 	}
 
 	void use( void )

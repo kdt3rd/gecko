@@ -185,7 +185,7 @@ void png_write( const char *file_name, size_t w, size_t h, size_t c )
 
 	png_init_io( png_ptr, fp );
 
-	// Write header (8 bit colour depth)
+	// Write header (8 bit color depth)
 	png_set_IHDR( png_ptr, info_ptr, static_cast<png_uint_32>( w ), static_cast<png_uint_32>( h ), 8, png_ctype, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE );
 	png_write_info( png_ptr, info_ptr );
 

@@ -33,27 +33,27 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 				#version 330
 
 				layout(location = 0) in vec3 vertex_position;
-				layout(location = 1) in vec3 vertex_colour;
+				layout(location = 1) in vec3 vertex_color;
 
 				uniform mat4 matrix;
 
-				out vec3 colour;
+				out vec3 color;
 
 				void main()
 				{
-					colour = vertex_colour;
+					color = vertex_color;
 					gl_Position = matrix * vec4( vertex_position, 1.0 );
 				}
 			)SHADER" ),
 			ogl.new_shader( gl::shader::type::FRAGMENT, R"SHADER(
 				#version 330
 
-				in vec3 colour;
-				out vec4 frag_colour;
+				in vec3 color;
+				out vec4 frag_color;
 
 				void main()
 				{
-					frag_colour = vec4( colour, 1.0 );
+					frag_color = vec4( color, 1.0 );
 				}
 			)SHADER" )
 		);
@@ -65,8 +65,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 			{ { 0.5F,-0.5F, 0.0F }, { 0.0F, 1.0F, 0.0F } },
 			{ {-0.5F,-0.5F, 0.0F }, { 0.0F, 0.0F, 1.0F } }
 		};
-		triangle.vertex_attribute( 0, data, 0 );
-		triangle.vertex_attribute( 1, data, 1 );
+		triangle.vertex_attribute( "vertex_position", data, 0 );
+		triangle.vertex_attribute( "vertex_color", data, 1 );
 	}
 
 	// Matrix for animating the triangle

@@ -7,6 +7,7 @@
 #include "vertex_buffer.h"
 #include "vertex_buffer_data.h"
 #include <vector>
+#include <list>
 
 namespace gl
 {
@@ -72,8 +73,9 @@ public:
 
 	private:
 		friend class vertex_array;
-		binding( GLuint arr );
+		binding( vertex_array *self);
 
+		vertex_array *_self;
 		static binding *_bound;
 	};
 
@@ -84,8 +86,20 @@ public:
 
 	binding bind( void );
 
+	GLuint id( void ) const
+	{
+		return _array;
+	}
+
 private:
+	void add_vbo( const std::shared_ptr<vertex_buffer> &vbo )
+	{
+		_vbos.push_back( vbo );
+	}
+
+	friend class binding;
 	GLuint _array;
+	std::list<std::shared_ptr<vertex_buffer>> _vbos;
 };
 
 ////////////////////////////////////////
