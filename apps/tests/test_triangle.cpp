@@ -15,21 +15,22 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	win->set_title( "Triangle" );
 	win->acquire();
 
-	// OpenGL initialization
+	// OpenGL information & initialization
 	gl::api ogl;
 	std::cout << "OpenGL version " << ogl.get_version() << std::endl;
 	std::cout << "Vendor: " << ogl.get_vendor() << std::endl;
 	std::cout << "Renderer: " << ogl.get_renderer() << std::endl;
-
 	ogl.setup_debugging();
 	ogl.enable( gl::capability::DEPTH_TEST );
 	ogl.depth_func( gl::depth_test::LESS );
 
+	// Create a triangle mesh
 	gl::mesh triangle;
 	{
+		// Vertex and fragment shaders
 		triangle.set_program(
 			ogl.new_shader( gl::shader::type::VERTEX, R"SHADER(
-				#version 410
+				#version 330
 
 				layout(location = 0) in vec3 vertex_position;
 				layout(location = 1) in vec3 vertex_colour;
@@ -45,7 +46,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 				}
 			)SHADER" ),
 			ogl.new_shader( gl::shader::type::FRAGMENT, R"SHADER(
-				#version 410
+				#version 330
 
 				in vec3 colour;
 				out vec4 frag_colour;
@@ -57,17 +58,18 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 			)SHADER" )
 		);
 
+		// Vertex data with 2 attributes (position and color).
 		gl::vertex_buffer_data<gl::vec3,gl::color> data
 		{
-			{ gl::vec3(  0.0F,  0.5F, 0.0F ), gl::color( 1.0F, 0.0F, 0.0F ) },
-			{ gl::vec3(  0.5F, -0.5F, 0.0F ), gl::color( 0.0F, 1.0F, 0.0F ) },
-			{ gl::vec3( -0.5F, -0.5F, 0.0F ), gl::color( 0.0F, 0.0F, 1.0F ) }
+			{ { 0.0F, 0.5F, 0.0F }, { 1.0F, 0.0F, 0.0F } },
+			{ { 0.5F,-0.5F, 0.0F }, { 0.0F, 1.0F, 0.0F } },
+			{ {-0.5F,-0.5F, 0.0F }, { 0.0F, 0.0F, 1.0F } }
 		};
-
 		triangle.vertex_attribute( 0, data, 0 );
 		triangle.vertex_attribute( 1, data, 1 );
 	}
 
+	// Matrix for animating the triangle
 	gl::matrix4 matrix;
 	gl::program::uniform matrix_loc = triangle.get_uniform_location( "matrix" );
 	float speed = 0.01F;
@@ -75,23 +77,27 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	// Called to draw the window
 	win->exposed = [&]( void )
 	{
+		// Update the animation
 		if ( std::abs( matrix.get( 0, 3 ) ) > 1.F )
 			speed = -speed;
-
 		matrix.translate_x( speed );
+
 		win->acquire();
 
+		// Clear the window
 		ogl.clear();
 		ogl.viewport( 0, 0, win->width(), win->height() );
 
+		// Draw the triangle
+		triangle.use();
 		triangle.set_uniform( matrix_loc, matrix );
-
 		triangle.draw( gl::primitive::TRIANGLES, 0, 3 );
 
 		win->release();
 		win->invalidate( base::rect() );
 	};
 
+	// Key to take a screenshot.
 	win->key_pressed = [&]( const std::shared_ptr<platform::keyboard> &, platform::scancode c )
 	{
 		if ( c == platform::scancode::KEY_S )
@@ -102,10 +108,10 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		}
 	};
 
-	// Display the window
+	// Finally, display the window.
 	win->show();
 
-	// Run the event dispatcher
+	// Run the event dispatcher until exit.
 	auto dispatch = sys->get_dispatcher();
 	return dispatch->execute();
 }

@@ -122,15 +122,6 @@ public:
 		return std::make_shared<program>( std::forward<Args>( args )... );
 	}
 
-	/// @brief Use a program
-	void use_program( const std::shared_ptr<program> &p = std::shared_ptr<program>() )
-	{
-		if ( p )
-			glUseProgram( p->_program );
-		else
-			glUseProgram( 0 );
-	}
-
 	/// @brief Construct a new texture
 	template<typename ...Args>
 	std::shared_ptr<texture> new_texture( Args &&...args )

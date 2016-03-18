@@ -90,6 +90,7 @@ vertex_buffer::vertex_buffer( void )
 ////////////////////////////////////////
 
 vertex_buffer::vertex_buffer( const float *data, size_t n, buffer_usage u )
+	: vertex_buffer()
 {
 	auto bb = bind();
 	bb.data( data, n, u );
@@ -98,6 +99,7 @@ vertex_buffer::vertex_buffer( const float *data, size_t n, buffer_usage u )
 ////////////////////////////////////////
 
 vertex_buffer::vertex_buffer( const std::vector<float> &data, buffer_usage u )
+	: vertex_buffer()
 {
 	auto bb = bind();
 	bb.data( data, u );

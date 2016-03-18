@@ -9,7 +9,7 @@ local net = libs.net.lib
 local web = libs.web.lib
 
 Executable( "test_signal", "test_signal.cpp", base )
-Executable( "test_platform", "test_platform.cpp", UseLibraries( "platform" ), GL )
+Executable( "test_platform", "test_platform.cpp", UseLibraries( "platform", "gl" ) )
 --Executable( "test_draw", "test_draw.cpp", UseLibraries( "platform", "draw" ) )
 --Executable( "test_app", "test_app.cpp", UseLibraries( "gui" ) )
 Executable( "test_font", "test_font.cpp", UseLibraries( "script" ) )

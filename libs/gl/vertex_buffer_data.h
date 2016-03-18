@@ -5,6 +5,7 @@
 #include "color.h"
 #include <base/meta.h>
 #include <base/tuple_util.h>
+#include <utility>
 
 namespace gl
 {
@@ -48,7 +49,14 @@ template <typename ...Args>
 class vertex_buffer_data
 {
 public:
-	typedef std::tuple<Args...> tuple;
+	struct tuple
+	{
+		tuple( Args ...args )
+			: data( std::forward<Args>( args )... )
+		{
+		}
+		std::tuple<Args...> data;
+	};
 
 	vertex_buffer_data( void )
 	{
@@ -70,10 +78,17 @@ public:
 	/// @brief Add attributes
 	void push_back( const tuple &t )
 	{
+		push_back( t.data );
+	}
+
+	/// @brief Add attributes
+	void push_back( const std::tuple<Args...> &t )
+	{
 		precondition( !_vbo, "cannot add attributes after creating VBO" );
 		auto func = [=]( const Args &...args ) { this->push_back( args... ); };
 		base::apply( func, t );
 	}
+
 
 	void pop_back( void )
 	{

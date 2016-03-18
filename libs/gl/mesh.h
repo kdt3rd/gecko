@@ -56,6 +56,12 @@ public:
 		_voa->bind().attrib_pointer<Args...>( loc, data, a );
 	}
 
+	void use( void )
+	{
+		precondition( _prog, "program not created" );
+		_prog->use();
+	}
+
 	/// @brief Get uniform location
 	program::uniform get_uniform_location( const std::string &name )
 	{
