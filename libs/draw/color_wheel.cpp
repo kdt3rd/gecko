@@ -40,10 +40,12 @@ void color_wheel::create( const std::shared_ptr<canvas> &c, const base::point &c
 	_fill_prog = c->program( "color_mesh.vert", "color_mesh.frag" );
 	_data = c->new_vertex_array();
 
-	auto buf = c->new_array_buffer<float>( coords );
+	auto buf = c->new_vertex_buffer( coords );
 	auto va = _data->bind();
+	/* TODO Fix this!!!
 	va.attrib_pointer( _fill_prog->get_attribute_location( "position" ), buf, 2, 5, 0 );
 	va.attrib_pointer( _fill_prog->get_attribute_location( "color" ), buf, 3, 5, 2 );
+	*/
 	_data_size += 2;
 }
 

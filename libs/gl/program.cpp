@@ -14,6 +14,7 @@ program::program( void )
 
 ////////////////////////////////////////
 
+/*
 program::program( const std::shared_ptr<shader> &vertex )
 	: program()
 {
@@ -41,6 +42,7 @@ program::program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<s
 	attach( geometry );
 	link();
 }
+*/
 
 ////////////////////////////////////////
 
@@ -136,25 +138,33 @@ void program::set_uniform( uniform uni, const matrix4 &value )
 
 ////////////////////////////////////////
 
-void program::set_uniform( uniform uni, const base::color &value )
+void program::set_uniform( uniform uni, const color &value )
 {
-	float tmp[] = { float(value.red()), float(value.green()), float(value.blue()), float(value.alpha()) };
+	float tmp[] = { value.red(), value.green(), value.blue(), value.alpha() };
 	glUniform4fv( static_cast<GLint>( uni ), 1, tmp );
 }
 
 ////////////////////////////////////////
 
-void program::set_uniform( uniform uni, const base::point &value )
+void program::set_uniform( uniform uni, const vec4 &value )
 {
-	float tmp[] = { float(value.x()), float(value.y()) };
-	glUniform2fv( static_cast<GLint>( uni ), 1, tmp );
+	float tmp[] = { value[0], value[1], value[2], value[3] };
+	glUniform4fv( static_cast<GLint>( uni ), 1, tmp );
 }
 
 ////////////////////////////////////////
 
-void program::set_uniform( uniform uni, const base::size &value )
+void program::set_uniform( uniform uni, const vec3 &value )
 {
-	float tmp[] = { float(value.w()), float(value.h()) };
+	float tmp[] = { value[0], value[1], value[2] };
+	glUniform3fv( static_cast<GLint>( uni ), 1, tmp );
+}
+
+////////////////////////////////////////
+
+void program::set_uniform( uniform uni, const vec2 &value )
+{
+	float tmp[] = { value[0], value[1] };
 	glUniform2fv( static_cast<GLint>( uni ), 1, tmp );
 }
 

@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "vector4.h"
+#include "versor.h"
 #include <base/point.h>
 #include <base/contract.h>
 
@@ -130,7 +131,9 @@ public:
 	}
 
 	/// @brief Construct scale matrix
-	static matrix4 scale( float x, float y, float z = 1.0 );
+	static matrix4 scaling( float x, float y, float z = 1.0 );
+
+	static matrix4 rotation( const versor &v );
 
 	/// @brief Construct orthographic projection matrix
 	static matrix4 ortho( float left, float right, float top, float bottom );

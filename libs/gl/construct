@@ -4,13 +4,19 @@ if sys.system() == "Linux" then
 end
 
 lib = Library( "gl",
+	"gl3w.c",
 	"api.cpp",
 	"texture.cpp",
 	"shader.cpp",
 	"program.cpp",
 	"framebuffer.cpp",
 	"matrix4.cpp",
+	"versor.cpp",
+	"color.cpp",
 	"check.cpp",
+	"vertex_buffer.cpp",
+	"vertex_array.cpp",
 	"png_image.cpp",
-	"gl3w.c",
+	"mesh.cpp",
+	UseLibraries( "base" ),
 	GL, PNG, DL )

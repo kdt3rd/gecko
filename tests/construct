@@ -1,6 +1,6 @@
 
 SubDir( "httpd" )
-SubDir( "base" )
+--SubDir( "base" )
 SubDir( "web" )
-SubDir( "draw" )
+--SubDir( "draw" )
 SubDir( "gl" )

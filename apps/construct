@@ -1,6 +1,6 @@
 
 SubDir( "tests" )
 SubDir( "imgc" )
-SubDir( "viewer" )
+--SubDir( "viewer" )
 SubDir( "template2cpp" )
 SubDir( "file_httpd" )

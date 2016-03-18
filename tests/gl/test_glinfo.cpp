@@ -4,7 +4,7 @@
 
 #include <platform/platform.h>
 #include <platform/system.h>
-#include <gl/context.h>
+#include <gl/api.h>
 
 #include <iostream>
 
@@ -34,32 +34,32 @@ int safemain( int argc, char *argv[] )
 
 	test["version"] = [&]( void )
 	{
-		gl::context ctxt;
-		test.success( "{0}", ctxt.get_version() );
+		gl::api ogl;
+		test.success( "{0}", ogl.get_version() );
 	};
 
 	test["vendor"] = [&]( void )
 	{
-		gl::context ctxt;
-		test.success( "{0}", ctxt.get_vendor() );
+		gl::api ogl;
+		test.success( "{0}", ogl.get_vendor() );
 	};
 
 	test["renderer"] = [&]( void )
 	{
-		gl::context ctxt;
-		test.success( "{0}", ctxt.get_renderer() );
+		gl::api ogl;
+		test.success( "{0}", ogl.get_renderer() );
 	};
 
 	test["shading_version"] = [&]( void )
 	{
-		gl::context ctxt;
-		test.success( "{0}", ctxt.get_shading_version() );
+		gl::api ogl;
+		test.success( "{0}", ogl.get_shading_version() );
 	};
 
 	test["uniform_buffer"] = [&]( void )
 	{
-		gl::context ctxt;
-		test.success( "{0}", ctxt.get_max_uniform_buffer_bindings() );
+		gl::api ogl;
+		test.success( "{0}", ogl.get_max_uniform_buffer_bindings() );
 	};
 
 	test.run( options );

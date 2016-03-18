@@ -19,8 +19,16 @@ public:
 
 	bound_framebuffer( const bound_framebuffer &other ) = delete;
 
-	bound_framebuffer( bound_framebuffer &&/*other*/ )
+	bound_framebuffer( bound_framebuffer &&other )
+		: _fb( other._fb )
 	{
+		other._fb = 0;
+	}
+
+	~bound_framebuffer( void )
+	{
+		if ( _fb > 0 )
+			unbind();
 	}
 
 	void attach( const texture &t )
@@ -33,9 +41,33 @@ private:
 	friend class framebuffer;
 
 	bound_framebuffer( GLuint fb )
+		: _fb( fb )
 	{
-		glBindFramebuffer( GL_FRAMEBUFFER, fb );
+		_stack.push_back( this );
+		glBindFramebuffer( GL_FRAMEBUFFER, _fb );
 	}
+
+	void rebind( void )
+	{
+		precondition( !_stack.empty(), "inconsistent stack state" );
+		precondition( _stack.back() == this, "rebind out of sequence" );
+		glBindFramebuffer( GL_FRAMEBUFFER, _fb );
+	}
+
+	void unbind( void )
+	{
+		precondition( !_stack.empty(), "inconsistent stack state" );
+		precondition( _stack.back() == this, "framebuffer destroyed out of sequence" );
+		_stack.pop_back();
+		if ( _stack.empty() )
+			glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+		else
+			_stack.back()->rebind();
+	}
+
+	GLuint _fb = 0;
+
+	static std::vector<bound_framebuffer *> _stack;
 };
 
 ////////////////////////////////////////

@@ -6,12 +6,12 @@
 #include "texture.h"
 #include "shader.h"
 #include "program.h"
-#include "buffer.h"
 #include "matrix4.h"
+#include "vertex_buffer.h"
 #include "vertex_array.h"
+#include "color.h"
 
 #include <base/contract.h>
-#include <base/color.h>
 
 #include <exception>
 #include <memory>
@@ -53,7 +53,7 @@ public:
 	void disable( capability cap );
 
 	/// @brief Set the clear color
-	void clear_color( const base::color &c );
+	void clear_color( const color &c );
 
 	/// @brief Clear a buffer
 	void clear( buffer_bit bit );
@@ -138,33 +138,31 @@ public:
 		return std::make_shared<texture>( std::forward<Args>( args )... );
 	}
 
-	/// @brief Construct a new array buffer
-	template<typename D, typename ...Args>
-	std::shared_ptr<buffer<D>> new_array_buffer( void )
+	/// @brief Construct a new vertex buffer
+	std::shared_ptr<vertex_buffer> new_vertex_buffer( void )
 	{
-		return std::make_shared<buffer<D>>( buffer_target::ARRAY_BUFFER );
+		return std::make_shared<vertex_buffer>();
 	}
 
-	/// @brief Construct a new array buffer
-	template<typename D, typename ...Args>
-	std::shared_ptr<buffer<D>> new_array_buffer( const D *data, size_t n, buffer_usage u = buffer_usage::STATIC_DRAW )
+	/// @brief Construct a new vertex buffer
+	std::shared_ptr<vertex_buffer> new_vertex_buffer( const float *data, size_t n, buffer_usage u = buffer_usage::STATIC_DRAW )
 	{
-		return std::make_shared<buffer<D>>( buffer_target::ARRAY_BUFFER, data, n, u );
+		return std::make_shared<vertex_buffer>( data, n, u );
 	}
 
-	/// @brief Construct a new array buffer
-	template<typename D, typename ...Args>
-	std::shared_ptr<buffer<D>> new_array_buffer( const std::vector<D> &data, buffer_usage u = buffer_usage::STATIC_DRAW )
+	/// @brief Construct a new vertex buffer
+	std::shared_ptr<vertex_buffer> new_vertex_buffer( const std::vector<float> &data, buffer_usage u = buffer_usage::STATIC_DRAW )
 	{
-		return std::make_shared<buffer<D>>( buffer_target::ARRAY_BUFFER, data, u );
+		return std::make_shared<vertex_buffer>( data, u );
 	}
 
 	/// @brief Construct a new element buffer
-	template<typename D, typename ...Args>
-	std::shared_ptr<buffer<D>> new_element_buffer( void )
+	/*
+	std::shared_ptr<element_buffer> new_element_buffer( void )
 	{
-		return std::make_shared<buffer<D>>( buffer_target::ELEMENT_ARRAY_BUFFER );
+		return std::make_shared<element_buffer>();
 	}
+	*/
 
 	/// @brief Construct a new vertex array
 	template<typename ...Args>

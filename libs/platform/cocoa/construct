@@ -12,5 +12,6 @@ Platform {
 		"dispatcher.mm",
 	};
 
-	libs = { "draw", "utf" };
+	libs = { "utf" };
+	syslibs = { ExternalLibrary( "Cocoa" ) };
 }

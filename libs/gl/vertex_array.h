@@ -4,55 +4,54 @@
 #include "opengl.h"
 #include "enums.h"
 #include "program.h"
-#include "buffer.h"
+#include "vertex_buffer.h"
+#include "vertex_buffer_data.h"
 #include <vector>
 
 namespace gl
 {
 
-class vertex_array;
-class api;
-
 ////////////////////////////////////////
 
-/// @brief OpenGL bound vertex array
-class bound_array
+/// @brief OpenGL vertex array
+class vertex_array
 {
 public:
-	bound_array( void ) = delete;
-	bound_array( const bound_array & ) = delete;
-	bound_array &operator=( const bound_array & ) = delete;
-	bound_array &operator=( bound_array &&o )
+	/// @brief OpenGL bound vertex array
+	class binding
 	{
-		_a = 0;
-		std::swap( _a, o._a );
-		return *this;
-	}
-	bound_array( bound_array &&o )
-		: _a( o._a )
-	{
-		o._a = 0;
-	}
+	public:
+		/// @brief No default constructor.
+		binding( void ) = delete;
 
-	~bound_array( void )
-	{
-		if ( _a )
-			glBindVertexArray( 0 );
-	}
+		/// @brief No copy constructor.
+		binding( const binding & ) = delete;
 
-	template<typename D>
-	void attrib_pointer( program::attribute attr, std::shared_ptr<buffer<D>> &buf, size_t components, size_t stride = 0, size_t offset = 0 )
-	{
+		/// @brief Move constructor.
+		binding( binding &&o );
+
+		/// @brief Destructor
+		~binding( void );
+
+		/// @brief No copy operator.
+		binding &operator=( const binding & ) = delete;
+
+		/// @brief Move operator.
+		binding &operator=( binding &&o );
+
+		template<typename ...Args>
+		void attrib_pointer( program::attribute attr, vertex_buffer_data<Args...> &data, size_t a )
 		{
-			auto bb = buf->bind();
-			glEnableVertexAttribArray( attr );
-			glVertexAttribPointer( attr, static_cast<GLint>(components), gl_data_type<D>::value, GL_FALSE, static_cast<GLsizei>( stride * sizeof(D) ), reinterpret_cast<const GLvoid *>( offset * sizeof(D) ) );
+			precondition( a < data.attributes(), "invalid attribute" );
+			auto vbo = data.vbo();
+			attrib_pointer( attr, vbo, data.attribute_size( a ), data.stride(), data.attribute_offset( a ) );
 		}
-	}
 
-	template<typename D, typename E>
-	void attrib_pointer( program::attribute attr, std::shared_ptr<buffer<D>> &buf, const std::vector<E> &components, size_t nPer, size_t stride = 0, size_t offset = 0 )
-	{
+		void attrib_pointer( program::attribute attr, std::shared_ptr<vertex_buffer> &vbo, size_t components, size_t stride = 0, size_t offset = 0 );
+
+		/*
+		template<typename D, typename E>
+		void attrib_pointer( program::attribute attr, std::shared_ptr<buffer<D>> &buf, const std::vector<E> &components, size_t nPer, size_t stride = 0, size_t offset = 0 )
 		{
 			auto bb = buf->bind();
 			bb.data( components );
@@ -61,59 +60,31 @@ public:
 			offset *= sizeof(D);
 			glVertexAttribPointer( attr, static_cast<GLint>(nPer), gl_data_type<D>::value, GL_FALSE, static_cast<GLsizei>( stride ), reinterpret_cast<const GLvoid *>( offset ) );
 		}
-	}
+		*/
 
-	void draw( primitive prim, size_t start, size_t count )
-	{
-		glDrawArrays( static_cast<GLenum>( prim ), static_cast<GLint>( start ), static_cast<GLsizei>( count ) );
-	}
+		void draw( primitive prim, size_t start, size_t count );
 
-	template <typename T>
-	void draw_indices( primitive prim, const std::vector<T> &buf )
-	{
-		glDrawElements( static_cast<GLenum>( prim ), buf.size(),
-						gl_data_type<T>::value,
-						buf.data() );
-	}
+		template <typename T>
+		void draw_indices( primitive prim, const std::vector<T> &buf )
+		{
+			glDrawElements( static_cast<GLenum>( prim ), buf.size(), gl_data_type<T>::value, buf.data() );
+		}
 
-private:
-	friend class api;
-	friend class vertex_array;
+	private:
+		friend class vertex_array;
+		binding( GLuint arr );
 
-	GLuint _a;
-	bound_array( GLuint arr )
-			: _a( arr )
-	{
-		glBindVertexArray( arr );
-	}
-};
+		static binding *_bound;
+	};
 
-////////////////////////////////////////
-
-/// @brief OpenGL vertex array
-class vertex_array
-{
-public:
 	vertex_array( const vertex_array &b ) = delete;
+	vertex_array( void );
 
-	vertex_array( void )
-	{
-		glGenVertexArrays( 1, &_array );
-	}
+	~vertex_array( void );
 
-	~vertex_array( void )
-	{
-		glDeleteVertexArrays( 1, &_array );
-	}
-
-	bound_array bind( void )
-	{
-		return bound_array( _array );
-	}
+	binding bind( void );
 
 private:
-	friend class api;
-
 	GLuint _array;
 };
 

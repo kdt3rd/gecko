@@ -12,6 +12,6 @@ Platform {
 		"dispatcher.cpp",
 	};
 
-	libs = { "draw", "utf" };
+	libs = { "utf" };
 	syslibs = { X11, GL }
 }

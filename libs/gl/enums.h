@@ -111,15 +111,27 @@ template<typename D>
 struct gl_data_type {};
 
 template<>
+struct gl_data_type<uint8_t>
+{
+	enum { value = GL_UNSIGNED_BYTE };
+};
+
+template<>
+struct gl_data_type<int8_t>
+{
+	enum { value = GL_BYTE };
+};
+
+template<>
 struct gl_data_type<uint16_t>
 {
 	enum { value = GL_UNSIGNED_SHORT };
 };
 
 template<>
-struct gl_data_type<uint8_t>
+struct gl_data_type<int16_t>
 {
-	enum { value = GL_UNSIGNED_BYTE };
+	enum { value = GL_SHORT };
 };
 
 template<>
@@ -137,6 +149,16 @@ enum class uniform_type
 	FLOAT_VEC4 = GL_FLOAT_VEC4,
 	FLOAT_MAT4 = GL_FLOAT_MAT4,
 	OTHER = 0,
+};
+
+////////////////////////////////////////
+
+/// @brief Buffer usage
+enum class buffer_usage
+{
+	STREAM_DRAW = GL_STREAM_DRAW,
+	STATIC_DRAW = GL_STATIC_DRAW,
+	DYNAMIC_DRAW = GL_DYNAMIC_DRAW,
 };
 
 ////////////////////////////////////////

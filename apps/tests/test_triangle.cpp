@@ -1,6 +1,7 @@
 
 #include <platform/platform.h>
 #include <gl/api.h>
+#include <gl/mesh.h>
 #include <gl/png_image.h>
 
 namespace
@@ -24,59 +25,51 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	ogl.enable( gl::capability::DEPTH_TEST );
 	ogl.depth_func( gl::depth_test::LESS );
 
-	// Create the geometry for the triangle
-	auto vbo_points = ogl.new_array_buffer<float>( {
-		0.0F,  0.5F,   0.0F,
-		0.5F, -0.5F,   0.0F,
-		-0.5F, -0.5F,   0.0F
-	} );
-
-	auto vbo_colors = ogl.new_array_buffer<float>( {
-		1.0F, 0.0F,  0.0F,
-		0.0F, 1.0F,  0.0F,
-		0.0F, 0.0F,  1.0F
-	} );
-
-	auto vao = ogl.new_vertex_array();
+	gl::mesh triangle;
 	{
-		auto tmp = vao->bind();
-		tmp.attrib_pointer( 0, vbo_points, 3 );
-		tmp.attrib_pointer( 1, vbo_colors, 3 );
+		triangle.set_program(
+			ogl.new_shader( gl::shader::type::VERTEX, R"SHADER(
+				#version 410
+
+				layout(location = 0) in vec3 vertex_position;
+				layout(location = 1) in vec3 vertex_colour;
+
+				uniform mat4 matrix;
+
+				out vec3 colour;
+
+				void main()
+				{
+					colour = vertex_colour;
+					gl_Position = matrix * vec4( vertex_position, 1.0 );
+				}
+			)SHADER" ),
+			ogl.new_shader( gl::shader::type::FRAGMENT, R"SHADER(
+				#version 410
+
+				in vec3 colour;
+				out vec4 frag_colour;
+
+				void main()
+				{
+					frag_colour = vec4( colour, 1.0 );
+				}
+			)SHADER" )
+		);
+
+		gl::vertex_buffer_data<gl::vec3,gl::color> data
+		{
+			{ gl::vec3(  0.0F,  0.5F, 0.0F ), gl::color( 1.0F, 0.0F, 0.0F ) },
+			{ gl::vec3(  0.5F, -0.5F, 0.0F ), gl::color( 0.0F, 1.0F, 0.0F ) },
+			{ gl::vec3( -0.5F, -0.5F, 0.0F ), gl::color( 0.0F, 0.0F, 1.0F ) }
+		};
+
+		triangle.vertex_attribute( 0, data, 0 );
+		triangle.vertex_attribute( 1, data, 1 );
 	}
 
-	// The shaders and program for the triangle
-	auto vshader = ogl.new_shader( gl::shader::type::VERTEX, R"SHADER(
-		#version 410
-
-		layout(location = 0) in vec3 vertex_position;
-		layout(location = 1) in vec3 vertex_colour;
-
-		uniform mat4 matrix;
-
-		out vec3 colour;
-
-		void main()
-		{
-			colour = vertex_colour;
-			gl_Position = matrix * vec4( vertex_position, 1.0 );
-		}
-	)SHADER" );
-
-	auto fshader = ogl.new_shader( gl::shader::type::FRAGMENT, R"SHADER(
-		#version 410
-
-		in vec3 colour;
-		out vec4 frag_colour;
-
-		void main()
-		{
-			frag_colour = vec4( colour, 1.0 );
-		}
-	)SHADER" );
-
 	gl::matrix4 matrix;
-	auto prog = ogl.new_program( vshader, fshader );
-	gl::program::uniform matrix_loc = prog->get_uniform_location( "matrix" );
+	gl::program::uniform matrix_loc = triangle.get_uniform_location( "matrix" );
 	float speed = 0.01F;
 
 	// Called to draw the window
@@ -91,9 +84,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		ogl.clear();
 		ogl.viewport( 0, 0, win->width(), win->height() );
 
-		prog->use();
-		prog->set_uniform( matrix_loc, matrix );
-		auto triangle = vao->bind();
+		triangle.set_uniform( matrix_loc, matrix );
+
 		triangle.draw( gl::primitive::TRIANGLES, 0, 3 );
 
 		win->release();

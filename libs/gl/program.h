@@ -2,9 +2,9 @@
 #pragma once
 
 #include <memory>
-#include <base/color.h>
-#include <base/point.h>
-#include <base/size.h>
+#include <utility>
+#include "color.h"
+#include "vector.h"
 #include "shader.h"
 #include "matrix4.h"
 #include "enums.h"
@@ -28,9 +28,9 @@ public:
 
 	/// @brief Default constructor
 	program( void );
-	program( const std::shared_ptr<shader> &vertex );
-	program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<shader> &fragment );
-	program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<shader> &fragment, const std::shared_ptr<shader> &geometry );
+//	program( const std::shared_ptr<shader> &vertex );
+//	program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<shader> &fragment );
+//	program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<shader> &fragment, const std::shared_ptr<shader> &geometry );
 
 	/// @brief Constructor with shader(s)
 	template<typename ...Shaders>
@@ -84,25 +84,28 @@ public:
 	}
 
 	/// @brief Set uniform integer
-	void set_uniform( uniform uniform, int value );
+	void set_uniform( uniform u, int value );
 
 	/// @brief Set uniform float
-	void set_uniform( uniform uniform, float value );
+	void set_uniform( uniform u, float value );
 
 	/// @brief Set uniform double
-	void set_uniform( uniform uniform, double value );
+	void set_uniform( uniform u, double value );
 
 	/// @brief Set uniform matrix
-	void set_uniform( uniform uniform, const matrix4 &value );
+	void set_uniform( uniform u, const matrix4 &value );
 
 	/// @brief Set uniform color
-	void set_uniform( uniform uniform, const base::color &value );
+	void set_uniform( uniform u, const color &value );
 
 	/// @brief Set uniform point
-	void set_uniform( uniform uniform, const base::point &value );
+	void set_uniform( uniform u, const vec4 &value );
 
-	/// @brief Set uniform size
-	void set_uniform( uniform uniform, const base::size &value );
+	/// @brief Set uniform point
+	void set_uniform( uniform u, const vec3 &value );
+
+	/// @brief Set uniform point
+	void set_uniform( uniform u, const vec2 &value );
 
 	/// @brief Get number of uniforms
 	size_t number_active_uniforms( void );

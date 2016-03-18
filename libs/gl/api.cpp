@@ -83,10 +83,9 @@ void api::disable( capability cap )
 
 ////////////////////////////////////////
 
-void api::clear_color( const base::color &c )
+void api::clear_color( const color &c )
 {
-	glClearColor( static_cast<GLfloat>( c.red() ), static_cast<GLfloat>( c.green() ),
-				  static_cast<GLfloat>( c.blue() ), static_cast<GLfloat>( c.alpha() ) );
+	glClearColor( c.red(), c.green(), c.blue(), c.alpha() );
 }
 
 ////////////////////////////////////////
@@ -170,7 +169,7 @@ void api::ortho( float left, float right, float top, float bottom )
 
 void api::scale( float x, float y, float z )
 {
-	multiply( gl::matrix4::scale( x, y, z ) );
+	multiply( gl::matrix4::scaling( x, y, z ) );
 }
 
 ////////////////////////////////////////
