@@ -2,14 +2,14 @@
 local srcs = {
 	"polylines.cpp";
 	"clipper.cpp";
-	"canvas.cpp";
-	"drawable.cpp";
+--	"canvas.cpp";
+--	"drawable.cpp";
 	"geometry.cpp";
 	"glyph.cpp";
-	"composite.cpp";
-	"object.cpp";
-	"stretchable.cpp";
-	"color_wheel.cpp";
+--	"composite.cpp";
+--	"object.cpp";
+--	"stretchable.cpp";
+--	"color_wheel.cpp";
 	"tessellator.cpp";
 }
 

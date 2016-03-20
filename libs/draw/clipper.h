@@ -136,7 +136,7 @@ class PolyNode
 {
 public:
     PolyNode();
-    virtual ~PolyNode(){}
+    virtual ~PolyNode();
     Path Contour;
     PolyNodes Childs;
     PolyNode* Parent;
@@ -158,7 +158,7 @@ private:
 class PolyTree: public PolyNode
 {
 public:
-    virtual ~PolyTree(){Clear();}
+    virtual ~PolyTree();
     PolyNode* GetFirst() const;
     void Clear();
     int Total() const;
@@ -381,7 +381,7 @@ class clipperException : public std::exception
 {
   public:
     clipperException(const char* description): m_descr(description) {}
-    virtual ~clipperException() noexcept {}
+    virtual ~clipperException() noexcept;
     const char* what() const noexcept {return m_descr.c_str();}
   private:
     std::string m_descr;
