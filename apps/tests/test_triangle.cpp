@@ -23,9 +23,11 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	ogl.setup_debugging();
 	ogl.enable( gl::capability::DEPTH_TEST );
 	ogl.depth_func( gl::depth_test::LESS );
+//	ogl.enable( gl::capability::CULL_FACE );
 
 	// Create a triangle mesh
 	gl::mesh triangle;
+	gl::index_buffer_data elements { 0, 1, 2 };
 	{
 		// Vertex and fragment shaders
 		triangle.set_program(
@@ -67,6 +69,9 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		};
 		triangle.vertex_attribute( "vertex_position", data, 0 );
 		triangle.vertex_attribute( "vertex_color", data, 1 );
+
+		triangle.add_elements( gl::primitive::TRIANGLES, elements );
+		triangle.add_triangles( 3 );
 	}
 
 	// Matrix for animating the triangle
@@ -89,9 +94,11 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		ogl.viewport( 0, 0, win->width(), win->height() );
 
 		// Draw the triangle
-		triangle.use();
+		triangle.begin_draw();
 		triangle.set_uniform( matrix_loc, matrix );
-		triangle.draw( gl::primitive::TRIANGLES, 0, 3 );
+		auto ibo = elements.ibo()->bind();
+		triangle.draw();
+		triangle.end_draw();
 
 		win->release();
 		win->invalidate( base::rect() );

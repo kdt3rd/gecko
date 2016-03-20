@@ -11,15 +11,13 @@ namespace gl
 
 ////////////////////////////////////////
 
-/// @brief OpenGL vertex buffer object (VBO).
-/// A VBO holds floating point data for vertices.
-/// Nultiple attributes can be stored in a VBO, or
-/// multiple VBOs can be used with one attribute each.
-/// @sa gl::vertex_array
-class vertex_buffer
+/// @brief OpenGL index buffer object (IBO).
+/// A IBO holds indices for drawing.
+/// @sa gl::mesh
+class index_buffer
 {
 public:
-	/// @brief OpenGL bound vertex buffer object
+	/// @brief OpenGL bound index buffer object
 	class binding
 	{
 	public:
@@ -36,16 +34,16 @@ public:
 		~binding( void );
 
 		/// @brief Set the data in the buffer.
-		void data( const float *data, size_t n, buffer_usage u = buffer_usage::STATIC_DRAW );
+		void data( const uint32_t *data, size_t n, buffer_usage u = buffer_usage::STATIC_DRAW );
 
 		/// @brief Set the data in the buffer.
-		void data( const std::vector<float> &data, buffer_usage u = buffer_usage::STATIC_DRAW );
+		void data( const std::vector<uint32_t> &data, buffer_usage u = buffer_usage::STATIC_DRAW );
 
 		/// @brief Change part of the data in the buffer.
-		void sub_data( const float *data, size_t offset, size_t n );
+		void sub_data( const uint32_t *data, size_t offset, size_t n );
 
 		/// @brief Change part of the data in the buffer.
-		void sub_data( const std::vector<float> &data, size_t offset );
+		void sub_data( const std::vector<uint32_t> &data, size_t offset );
 
 		/// @brief Draw the primitive.
 		void draw( primitive prim, size_t n );
@@ -54,28 +52,28 @@ public:
 		void operator=( binding &&other );
 
 	private:
-		friend class vertex_buffer;
+		friend class index_buffer;
 		binding( GLuint buf );
 
 		static binding *_bound;
 	};
 
 	/// @brief No copy constructor.
-	vertex_buffer( const vertex_buffer &b ) = delete;
+	index_buffer( const index_buffer &b ) = delete;
 
 	/// @brief Default constructor.
-	vertex_buffer( void );
+	index_buffer( void );
 
 	/// @brief Construct with data.
-	vertex_buffer( const float *data, size_t n, buffer_usage u = buffer_usage::STATIC_DRAW );
+	index_buffer( const uint32_t *data, size_t n, buffer_usage u = buffer_usage::STATIC_DRAW );
 
 	/// @brief Construct with data.
-	vertex_buffer( const std::vector<float> &data, buffer_usage u = buffer_usage::STATIC_DRAW );
+	index_buffer( const std::vector<uint32_t> &data, buffer_usage u = buffer_usage::STATIC_DRAW );
 
 	/// @brief Destructor.
-	~vertex_buffer( void );
+	~index_buffer( void );
 
-	/// @brief Bind the vertex buffer.
+	/// @brief Bind the index buffer.
 	binding bind( void );
 
 private:

@@ -33,7 +33,6 @@ public:
 
 	void attach( const texture &t )
 	{
-		std::cout << "TEXTURE ID: " << t.id() << std::endl;
 		glFramebufferTexture( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, t.id(), 0 );
 	}
 

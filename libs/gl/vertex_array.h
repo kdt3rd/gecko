@@ -5,7 +5,9 @@
 #include "enums.h"
 #include "program.h"
 #include "vertex_buffer.h"
+#include "index_buffer.h"
 #include "vertex_buffer_data.h"
+#include "index_buffer_data.h"
 #include <vector>
 #include <list>
 
@@ -50,24 +52,20 @@ public:
 
 		void attrib_pointer( program::attribute attr, std::shared_ptr<vertex_buffer> &vbo, size_t components, size_t stride = 0, size_t offset = 0 );
 
-		/*
-		template<typename D, typename E>
-		void attrib_pointer( program::attribute attr, std::shared_ptr<buffer<D>> &buf, const std::vector<E> &components, size_t nPer, size_t stride = 0, size_t offset = 0 )
+		void bind_elements( index_buffer_data &data )
 		{
-			auto bb = buf->bind();
-			bb.data( components );
-			glEnableVertexAttribArray( attr );
-			stride *= sizeof(D);
-			offset *= sizeof(D);
-			glVertexAttribPointer( attr, static_cast<GLint>(nPer), gl_data_type<D>::value, GL_FALSE, static_cast<GLsizei>( stride ), reinterpret_cast<const GLvoid *>( offset ) );
+			bind_elements( data.ibo() );
 		}
-		*/
 
-		void draw( primitive prim, size_t start, size_t count );
+		void bind_elements( const std::shared_ptr<index_buffer> &ibo );
+
+		void draw_elements( primitive prim, size_t start, size_t count );
+		void draw_arrays( primitive prim, size_t start, size_t count );
 
 		template <typename T>
-		void draw_indices( primitive prim, const std::vector<T> &buf )
+		void draw_elements( primitive prim, const std::vector<T> &buf )
 		{
+			precondition( !_self->has_index_buffer(), "can't draw from index vector with IBO" );
 			glDrawElements( static_cast<GLenum>( prim ), buf.size(), gl_data_type<T>::value, buf.data() );
 		}
 
@@ -86,6 +84,11 @@ public:
 
 	binding bind( void );
 
+	bool has_index_buffer( void ) const
+	{
+		return static_cast<bool>( _ibo );
+	}
+
 	GLuint id( void ) const
 	{
 		return _array;
@@ -99,6 +102,7 @@ private:
 
 	friend class binding;
 	GLuint _array;
+	std::shared_ptr<index_buffer> _ibo;
 	std::list<std::shared_ptr<vertex_buffer>> _vbos;
 };
 

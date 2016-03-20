@@ -28,13 +28,14 @@ public:
 		_prog = std::make_shared<gl::program>( std::forward<Args>( args )... );
 	}
 
-	void draw( primitive prim, size_t start, size_t count )
-	{
-		precondition( _prog, "program not created" );
-		precondition( _voa, "vertex array not created" );
-		_prog->use();
-		_voa->bind().draw( prim, start, count );
-	}
+	void add_triangles( size_t count, size_t start_vertex = 0 );
+	void add_triangle_strip( size_t count, size_t start_vertex = 0 );
+	void add_triangle_fan( size_t count, size_t start_vertex = 0 );
+	void add_lines( size_t count, size_t start_vertex = 0 );
+	void add_line_strip( size_t count, size_t start_vertex = 0 );
+	void add_line_loop( size_t count, size_t start_vertex = 0 );
+
+	void add_elements( primitive p, index_buffer_data &data );
 
 	std::string log( void )
 	{
@@ -52,23 +53,32 @@ public:
 	template<typename ...Args>
 	void vertex_attribute( program::attribute loc, vertex_buffer_data<Args...> &data, size_t a = 0 )
 	{
-		precondition( _voa, "vertex array not created" );
-		_voa->bind().attrib_pointer<Args...>( loc, data, a );
+		precondition( _vao, "vertex array not created" );
+		_vao->bind().attrib_pointer<Args...>( loc, data, a );
 	}
 
 	template<typename ...Args>
 	void vertex_attribute( const std::string &name, vertex_buffer_data<Args...> &data, size_t a = 0 )
 	{
-		precondition( _voa, "vertex array not created" );
+		precondition( _vao, "vertex array not created" );
 		precondition( _prog, "program not created" );
-		_voa->bind().attrib_pointer<Args...>( _prog->get_attribute_location( name ), data, a );
+		_vao->bind().attrib_pointer<Args...>( _prog->get_attribute_location( name ), data, a );
 	}
 
-	void use( void )
+	void begin_draw( void )
 	{
 		precondition( _prog, "program not created" );
 		_prog->use();
 	}
+
+	void draw( primitive prim, size_t start, size_t count )
+	{
+		precondition( _prog, "program not created" );
+		precondition( _vao, "vertex array not created" );
+		_vao->bind().draw_arrays( prim, start, count );
+	}
+
+	void draw( void );
 
 	/// @brief Get uniform location
 	program::uniform get_uniform_location( const std::string &name )
@@ -96,9 +106,16 @@ public:
 		return _prog;
 	}
 
+	void end_draw( void )
+	{
+		// TODO
+	}
+
 private:
-	std::shared_ptr<vertex_array> _voa;
+	typedef std::tuple<primitive,size_t,size_t> Primitive;
+	std::shared_ptr<vertex_array> _vao;
 	std::shared_ptr<gl::program> _prog;
+	std::vector<Primitive> _prims;
 };
 
 ////////////////////////////////////////
