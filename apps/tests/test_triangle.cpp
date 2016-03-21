@@ -23,11 +23,10 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	ogl.setup_debugging();
 	ogl.enable( gl::capability::DEPTH_TEST );
 	ogl.depth_func( gl::depth_test::LESS );
-//	ogl.enable( gl::capability::CULL_FACE );
+	ogl.enable( gl::capability::CULL_FACE );
 
 	// Create a triangle mesh
 	gl::mesh triangle;
-	gl::index_buffer_data elements { 0, 1, 2 };
 	{
 		// Vertex and fragment shaders
 		triangle.set_program(
@@ -63,14 +62,16 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		// Vertex data with 2 attributes (position and color).
 		gl::vertex_buffer_data<gl::vec3,gl::color> data
 		{
-			{ { 0.0F, 0.5F, 0.0F }, { 1.0F, 0.0F, 0.0F } },
 			{ { 0.5F,-0.5F, 0.0F }, { 0.0F, 1.0F, 0.0F } },
+			{ { 0.0F, 0.5F, 0.0F }, { 1.0F, 0.0F, 0.0F } },
 			{ {-0.5F,-0.5F, 0.0F }, { 0.0F, 0.0F, 1.0F } }
 		};
 		triangle.vertex_attribute( "vertex_position", data, 0 );
 		triangle.vertex_attribute( "vertex_color", data, 1 );
 
-		triangle.add_elements( gl::primitive::TRIANGLES, elements );
+		// Finally, create the elements to draw.
+		gl::index_buffer_data elements { 0, 1, 2 };
+		triangle.bind_elements( elements );
 		triangle.add_triangles( 3 );
 	}
 
@@ -96,11 +97,12 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		// Draw the triangle
 		triangle.begin_draw();
 		triangle.set_uniform( matrix_loc, matrix );
-		auto ibo = elements.ibo()->bind();
 		triangle.draw();
 		triangle.end_draw();
 
 		win->release();
+
+		// Cause a redraw to continue the animation
 		win->invalidate( base::rect() );
 	};
 

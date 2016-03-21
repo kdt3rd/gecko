@@ -62,32 +62,9 @@ void mesh::add_line_loop( size_t count, size_t start )
 
 ////////////////////////////////////////
 
-void mesh::add_elements( primitive p, index_buffer_data &data )
+void mesh::bind_elements( index_buffer_data &data )
 {
 	_vao->bind().bind_elements( data.ibo() );
-	switch ( p )
-	{
-		case primitive::POINTS:
-			break;
-		case primitive::TRIANGLES:
-			add_triangles( data.size() );
-			break;
-		case primitive::TRIANGLE_FAN:
-			add_triangle_fan( data.size() );
-			break;
-		case primitive::TRIANGLE_STRIP:
-			add_triangle_strip( data.size() );
-			break;
-		case primitive::LINES:
-			add_lines( data.size() );
-			break;
-		case primitive::LINE_LOOP:
-			add_line_loop( data.size() );
-			break;
-		case primitive::LINE_STRIP:
-			add_line_strip( data.size() );
-			break;
-	}
 }
 
 ////////////////////////////////////////

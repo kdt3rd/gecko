@@ -35,7 +35,7 @@ public:
 	void add_line_strip( size_t count, size_t start_vertex = 0 );
 	void add_line_loop( size_t count, size_t start_vertex = 0 );
 
-	void add_elements( primitive p, index_buffer_data &data );
+	void bind_elements( index_buffer_data &data );
 
 	std::string log( void )
 	{

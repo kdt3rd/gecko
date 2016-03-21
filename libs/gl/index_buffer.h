@@ -76,6 +76,11 @@ public:
 	/// @brief Bind the index buffer.
 	binding bind( void );
 
+	GLuint id( void ) const
+	{
+		return _buffer;
+	}
+
 private:
 	GLuint _buffer;
 };

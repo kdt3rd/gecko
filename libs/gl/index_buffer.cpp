@@ -21,7 +21,10 @@ index_buffer::binding::binding( binding &&other )
 index_buffer::binding::~binding( void )
 {
 	if ( _bound == this )
+	{
 		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+		_bound = nullptr;
+	}
 }
 
 ////////////////////////////////////////

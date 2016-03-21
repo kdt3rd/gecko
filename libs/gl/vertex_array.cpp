@@ -50,7 +50,7 @@ void vertex_array::binding::attrib_pointer( program::attribute attr, std::shared
 void vertex_array::binding::bind_elements( const std::shared_ptr<index_buffer> &ibo )
 {
 	_self->_ibo = ibo;
-	ibo->bind();
+	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ibo->id() );
 }
 
 ////////////////////////////////////////
