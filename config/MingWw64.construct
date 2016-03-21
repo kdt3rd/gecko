@@ -153,6 +153,7 @@ add_toolset "mingw-w64-gcc"
 	  tag="ld";
 	  name="x86_64-w64-mingw32-gcc_linker";
 	  exe=file.find_exe("x86_64-w64-mingw32-gcc");
+	  input_tools={"cc", "static_lib", "dynamic_lib"};
 	  options={
 		  optimization={
 			  ["debug"]={"-g"};
@@ -199,6 +200,7 @@ add_toolset "mingw-w64-gcc"
 	  tag="ld_cxx";
 	  name="x86_64-w64-mingw32-g++_linker";
 	  exe=file.find_exe("x86_64-w64-mingw32-g++");
+	  input_tools={"cc", "cxx", "static_lib", "static_lib_cxx", "dynamic_lib", "dynamic_lib_cxx"};
 	  options={
 		  optimization={
 			  ["debug"]={"-g"};

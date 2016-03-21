@@ -10,7 +10,7 @@ local web = l.web.lib
 local platform = l.platform.lib
 local draw = l.draw.lib
 local script = l.script.lib
-local gui = l.gui.lib
+--local gui = l.gui.lib
 
 executable( "test_signal", "test_signal.cpp", base )
 executable( "test_platform", "test_platform.cpp", platform )
