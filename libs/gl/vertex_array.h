@@ -54,10 +54,10 @@ public:
 
 		void bind_elements( element_buffer_data &data )
 		{
-			bind_elements( data.ibo() );
+			bind_elements( data.ebo() );
 		}
 
-		void bind_elements( const std::shared_ptr<element_buffer> &ibo );
+		void bind_elements( const std::shared_ptr<element_buffer> &ebo );
 
 		void draw_elements( primitive prim, size_t start, size_t count );
 		void draw_arrays( primitive prim, size_t start, size_t count );
@@ -65,7 +65,7 @@ public:
 		template <typename T>
 		void draw_elements( primitive prim, const std::vector<T> &buf )
 		{
-			precondition( !_self->has_index_buffer(), "can't draw from index vector with IBO" );
+			precondition( !_self->has_index_buffer(), "can't draw from index vector with EBO" );
 			glDrawElements( static_cast<GLenum>( prim ), buf.size(), gl_data_type<T>::value, buf.data() );
 		}
 
@@ -86,7 +86,7 @@ public:
 
 	bool has_index_buffer( void ) const
 	{
-		return static_cast<bool>( _ibo );
+		return static_cast<bool>( _ebo );
 	}
 
 	GLuint id( void ) const
@@ -102,7 +102,7 @@ private:
 
 	friend class binding;
 	GLuint _array;
-	std::shared_ptr<element_buffer> _ibo;
+	std::shared_ptr<element_buffer> _ebo;
 	std::list<std::shared_ptr<vertex_buffer>> _vbos;
 };
 

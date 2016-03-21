@@ -35,7 +35,7 @@ public:
 	template<typename ...Args>
 	void push_back( uint32_t i, const Args &...args )
 	{
-		precondition( !_ibo, "cannot add index after creating buffer object" );
+		precondition( !_ebo, "cannot add index after creating buffer object" );
 		_data.push_back( i );
 		append( args... );
 	}
@@ -43,7 +43,7 @@ public:
 	/// @brief Remove last index added.
 	void pop_back( void )
 	{
-		precondition( !_ibo, "cannot remove index after creating buffer object" );
+		precondition( !_ebo, "cannot remove index after creating buffer object" );
 		_data.pop_back();
 	}
 
@@ -81,19 +81,19 @@ public:
 		return _data[i];
 	}
 
-	/// @brief Index buffer object for the data.
-	/// The IBO is created as needed.
-	/// Once a IBO is created, the data cannot be modified.
-	/// @returns The index buffer object.
-	std::shared_ptr<element_buffer> ibo( buffer_usage u = buffer_usage::STATIC_DRAW )
+	/// @brief Element buffer object for the data.
+	/// The EBO is created as needed.
+	/// Once a EBO is created, the data cannot be modified.
+	/// @returns The element buffer object.
+	std::shared_ptr<element_buffer> ebo( buffer_usage u = buffer_usage::STATIC_DRAW )
 	{
-		if ( !_ibo )
-			_ibo = std::make_shared<element_buffer>( _data, u );
-		return _ibo;
+		if ( !_ebo )
+			_ebo = std::make_shared<element_buffer>( _data, u );
+		return _ebo;
 	}
 
 private:
-	std::shared_ptr<element_buffer> _ibo;
+	std::shared_ptr<element_buffer> _ebo;
 	std::vector<uint32_t> _data;
 };
 
