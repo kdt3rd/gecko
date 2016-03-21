@@ -1,6 +1,6 @@
 
-SubDir( "tests" )
-SubDir( "imgc" )
-SubDir( "viewer" )
-SubDir( "template2cpp" )
-SubDir( "file_httpd" )
+subdir "tests"
+subdir "imgc"
+subdir "viewer"
+subdir "template2cpp"
+subdir "file_httpd"

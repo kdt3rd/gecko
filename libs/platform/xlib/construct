@@ -1,8 +1,10 @@
 
-Platform {
-	name = "xlib";
-	incs = nil;
-	srcs = {
+-- technically this needs to be a different
+-- filter, like whether xlib is available or
+-- preferred
+extra_source = optional_source{
+	system="Linux",
+	source={
 		"system.cpp",
 		"screen.cpp",
 		"window.cpp",
@@ -10,8 +12,7 @@ Platform {
 		"keyboard.cpp",
 		"mouse.cpp",
 		"dispatcher.cpp",
-	};
-
-	libs = { "draw", "utf" };
-	syslibs = { X11, GL }
+	}
 }
+extra_libs = {"x11", "gl"}
+

@@ -1,4 +1,2 @@
 
-local draw = libs.draw.lib
-
-AddUnitTest( "test_tess.cpp", draw )
+AddUnitTest( "test_tess.cpp", "draw" )

@@ -1,8 +1,6 @@
-
-Platform {
-	name = "cocoa";
-	incs = nil;
-	srcs = {
+extra_source = optional_source{
+	system="Darwin",
+	source={
 		"system.mm",
 		"screen.mm",
 		"window.mm",
@@ -10,7 +8,6 @@ Platform {
 		"keyboard.mm",
 		"mouse.cpp",
 		"dispatcher.mm",
-	};
-
-	libs = { "draw", "utf" };
+	}
 }
+extra_libs = {"Cocoa"}

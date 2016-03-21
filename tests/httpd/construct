@@ -1,9 +1,9 @@
 
-local web = libs.web.lib
-
-Executable( "test_httpd",
+executable "test_httpd"
+  source{
 	"main.cpp",
 	"hello.html",
-	"socket.html",
-	web
-)
+	"socket.html"
+  }
+  libs "web"
+

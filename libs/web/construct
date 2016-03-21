@@ -1,5 +1,6 @@
 
-lib = Library( "web",
+lib = library "web"
+  source{
 	"status_code.cpp",
 	"web_base.cpp",
 	"request.cpp",
@@ -7,7 +8,7 @@ lib = Library( "web",
 	"client.cpp",
 	"server.cpp",
 	"socket.cpp",
-	"json_rpc.cpp",
-	UseLibraries( "net" )
-);
+	"json_rpc.cpp" }
+  libs "net"
+
 

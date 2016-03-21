@@ -36,16 +36,18 @@ local cpp_shaders = {
 	"	base::data_resource shaders( {";
 }
 
-shader_h = CreateFile( "shaders.h", {
-	"#pragma once";
-	"#include <base/data_resource.h>";
-	"namespace draw";
-	"{";
-	"extern base::data_resource shaders;";
-	"}";
+local shader_h = code.create(
+	"shaders.h",
+	{
+		"#pragma once";
+		"#include <base/data_resource.h>";
+		"namespace draw";
+		"{";
+		"extern base::data_resource shaders;";
+		"}";
 } )
 
-shader_code = GenerateSourceDataFile{
+local shader_code = code.generate{
 	output = "shaders.cpp",
 	input_items = shaders,
 	file_prefix = cpp_shaders,
@@ -59,9 +61,8 @@ shader_code = GenerateSourceDataFile{
 					"\t}" },
 	comma_separate = true
 }
-shader_code:addDependency( "order", shader_h )
+shader_code:add_dependency( "order", shader_h )
 
-local comp = Compile( srcs, shader_code )
-comp:includeArtifactDir()
-
-lib = Library( "draw", comp, UseLibraries( "gl", "script" ) )
+lib = library "draw"
+  source{ srcs, shader_code }:include_artifact_dir()
+  libs{ "gl", "script" }

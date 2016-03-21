@@ -1,5 +1,3 @@
 
-local web = libs.web.lib
-
-AddUnitTest( "test_json_rpc.cpp", web )
+AddUnitTest( "test_json_rpc.cpp", "web" )
 

@@ -1,35 +1,35 @@
 
 local doxygen = file.find_exe( "doxygen" )
 if doxygen then
-    AddTool{ tag="doxygen",
-             name="doxygen",
-             exe=doxygen,
-             options={
-             },
-             option_defaults={
-             },
-             cmd={file.find_exe( "env" ),
-                  "DOX_OUTPUT_DIR=$builddir/$outdir",
-                  "DOX_SOURCE_DIR=$srcdir",
-                  "$exe", "$in"},
-             description="DOC $out",
+    add_tool{ tag="doxygen",
+			  name="doxygen",
+			  exe=doxygen,
+			  options={},
+			  option_defaults={},
+			  cmd={file.find_exe( "env" ),
+				   "DOX_OUTPUT_DIR=$builddir/$outdir",
+				   "DOX_SOURCE_DIR=$srcdir",
+				   "$exe", "$in"},
+			  description="DOC $out",
     }
+end
 
-	function Doxygen( name, config )
+function Doxygen( name, config )
+	if doxygen then
 		-- by using the config file name as the item name, doxygen
 		-- will never generate that when it runs, so it should run
 		-- every time the target is invoked
-		local i = Item.new( config )
-		i:forceTool( "doxygen" )
-		i:setVariable( "outdir", name )
-		i:setVariable( "srcdir", SourceDir() )
-		i:setPseudoTarget( name )
-		i:setDefaultTarget( false )
+		local i = item.new( config )
+		i:force_tool( "doxygen" )
+		i:set_variable( "outdir", name )
+		i:set_variable( "srcdir", file.path.current() )
+		i:set_pseudo_target( name )
+		i:set_default_target( false )
 		return i
-	end
-else
-	function Doxygen( name, config )
+	else
 		print( "No doxygen executable found" );
 		return nil
 	end
 end
+
+return Doxygen;

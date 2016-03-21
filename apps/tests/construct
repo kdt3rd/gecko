@@ -1,36 +1,36 @@
 
---Executable( "test_layout", Compile( "test_layout.cpp" ), LinkLibs( "layout", platform ) )
+--executable( "test_layout", Compile( "test_layout.cpp" ), LinkLibs( "layout", platform ) )
 
-local base = libs.base.lib
-local utf = libs.utf.lib
-local sqlite = libs.sqlite.lib
-local media = libs.media.lib
-local net = libs.net.lib
-local web = libs.web.lib
+local base = l.base.lib
+local utf = l.utf.lib
+local sqlite = l.sqlite.lib
+local media = l.media.lib
+local net = l.net.lib
+local web = l.web.lib
+local platform = l.platform.lib
+local draw = l.draw.lib
+local script = l.script.lib
+local gui = l.gui.lib
 
-Executable( "test_signal", "test_signal.cpp", base )
-Executable( "test_platform", "test_platform.cpp", UseLibraries( "platform" ) )
-Executable( "test_draw", "test_draw.cpp", UseLibraries( "platform", "draw" ) )
-Executable( "test_app", "test_app.cpp", UseLibraries( "gui" ) )
-Executable( "test_font", "test_font.cpp", UseLibraries( "script" ) )
-Executable( "test_hash", "test_hash.cpp", base )
-Executable( "test_mempool", "test_mempool.cpp", base )
-Executable( "test_variant", "test_variant.cpp", base )
-Executable( "test_database", "test_database.cpp", sqlite, base )
-Executable( "test_json", "test_json.cpp", base )
-Executable( "test_uri", "test_uri.cpp", base )
-Executable( "test_range", "test_range.cpp", base )
-Executable( "test_size", "test_size.cpp", base )
-Executable( "test_riff", "test_riff.cpp", media, base )
-Executable( "test_exr", "test_exr.cpp", media, base )
-Executable( "test_tcp", "test_tcp.cpp", net )
-Executable( "test_web", "test_web.cpp", web )
-Executable( "test_ws", "test_ws.cpp", web )
-Executable( "test_triangle", "test_triangle.cpp", UseLibraries( "platform" ) )
+executable( "test_signal", "test_signal.cpp", base )
+executable( "test_platform", "test_platform.cpp", platform )
+executable( "test_draw", "test_draw.cpp", platform, draw )
+executable( "test_app", "test_app.cpp", gui )
+executable( "test_font", "test_font.cpp", script )
+executable( "test_hash", "test_hash.cpp", base )
+executable( "test_mempool", "test_mempool.cpp", base )
+executable( "test_variant", "test_variant.cpp", base )
+executable( "test_database", "test_database.cpp", sqlite, base )
+executable( "test_json", "test_json.cpp", base )
+executable( "test_uri", "test_uri.cpp", base )
+executable( "test_range", "test_range.cpp", base )
+executable( "test_size", "test_size.cpp", base )
+executable( "test_riff", "test_riff.cpp", media, base )
+executable( "test_exr", "test_exr.cpp", media, base )
+executable( "test_tcp", "test_tcp.cpp", net )
+executable( "test_web", "test_web.cpp", web )
+executable( "test_ws", "test_ws.cpp", web )
+executable( "test_triangle", "test_triangle.cpp", platform )
 
-Executable( "segfault", "segfault.cpp" )
-
---KDT-- Application( "Test Application", "test_app" )
---KDT-- Application( "Test Platform", "test_platform" )
---Application( "Test", "test" )
+executable( "segfault", "segfault.cpp" )
 

@@ -1,5 +1,6 @@
 
-lib = Library( "imgproc",
+lib = library "imgproc"
+  source{
 	"token.cpp",
 	"expr.cpp",
 	"message.cpp",
@@ -11,7 +12,8 @@ lib = Library( "imgproc",
 	"type.cpp",
 	"unifier.cpp",
 	"environment.cpp",
-	"decl.cpp",
-	UseLibraries( "utf", "base" ) )
+	"decl.cpp"
+  }
+  libs{ "utf", "base" }
 
 

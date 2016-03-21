@@ -1,14 +1,12 @@
-DL = nil
-if sys.system() == "Linux" then
-	DL = ExternalLibrary( "dl" )
-end
 
-lib = Library( "sqlite",
+lib = library "sqlite"
+  source{
 	"sqlite3.c",
 	"database.cpp",
 	"statement.cpp",
 	"field.cpp",
-	"transaction.cpp",
-	DL
-);
+	"transaction.cpp"
+  }
+  system_libs("Linux", "dl")
+
 

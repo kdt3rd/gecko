@@ -1,43 +1,43 @@
+assert( check_version and check_version( "1.0" ), "Please upgrade constructor" );
 
-AddToolModulePath( "config" )
+add_module_path "config"
 
-local doxygen = LoadToolModule( "doxygen" )
--- expose the doxygen function as a top level entity
-Doxygen = doxygen.Doxygen
+Doxygen = require "doxygen"
+AddUnitTest = require "UnitTest"
+require "MingWw64"
 
-local unit_test = LoadToolModule( "UnitTest" )
-AddUnitTest = unit_test.AddUnitTest
+configuration "release"
+  optimization "heavy"
+  warnings "most"
 
-BuildConfiguration{ name="release", optimization="heavy", warnings="most" }
-BuildConfiguration{ name="build", optimization="optdebug", warnings="most" }
-BuildConfiguration{ name="debug", optimization="debug", warnings="most" }
---BuildConfiguration{ name="Win64", opt="optimize", toolset="cross", warnings="most" }
-DefaultConfiguration( "build" )
+if toolset_active( "mingw-w64-archiver" ) and toolset_active( "mingw-w64-gcc" ) then
 
-local s = sys.system()
-if s == "Linux" then
-	X11 = assert( ExternalLibrary( "x11" ), "X11 library required" )
-	PNG = assert( ExternalLibrary( "libpng" ), "png library required" )
-	EXR = assert( ExternalLibrary( "OpenEXR" ), "OpenEXR library required" )
-	FREETYPE = assert( ExternalLibrary( "freetype2" ), "Freetype library required" )
-	FONTCONFIG = assert( ExternalLibrary( "fontconfig" ), "fontconfig library required" )
-	GL = assert( ExternalLibrary( "gl" ), "OpenGL library required" )
-	Z = assert( ExternalLibrary( "z" ), "zlib library required" )
-elseif s == "Darwin" then
-	PNG = assert( ExternalLibrary( "libpng" ), "png library required" )
-	EXR = assert( ExternalLibrary( "OpenEXR" ), "OpenEXR library required" )
-	ILMBASE = assert( ExternalLibrary( "IlmBase" ), "IlmBase library required" )
-	GL = assert( ExternalLibrary( "OpenGL" ), "OpenGL library required" )
-	Z = assert( ExternalLibrary( "zlib" ), "zlib library required" )
+	configuration "win64cross-release"
+      system "Windows"
+	  toolset "mingw-w64-archiver"
+      toolset "mingw-w64-gcc"
+	  skip_on_error( true )
+      optimization "heavy"
+      warnings "most"
+
 end
+
+configuration "build"
+  optimization "optdebug"	
+  warnings "most"
+
+configuration "debug"
+  optimization "debug"	
+  warnings "most"
+
+default_configuration "build"
+language "c++11"
+threads "on"
 
 Doxygen( "docs", "docs/doxyfile" )
 
-EnableLanguages( "c++11" )
-SetOption( "threads", "on" )
-Include( "libs" )
+includes "libs"
 
-libs = SubDir( "libs" )
-apps = SubDir( "apps" )
-tests = SubDir( "tests" )
-
+l = subdir "libs"
+subdir "apps"
+subdir "tests"

@@ -1,5 +1,6 @@
 
-lib = Library( "base",
+lib = library "base"
+  source{
 	"format.cpp",
 	"contract.cpp",
 	"rect.cpp",
@@ -28,5 +29,6 @@ lib = Library( "base",
 	"unit_test.cpp",
 	"thread_pool.cpp",
 	"process.cpp"
-);
+  }
+
 

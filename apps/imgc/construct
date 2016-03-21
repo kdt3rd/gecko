@@ -1,9 +1,16 @@
+--local img = {
+--	"integrate.imgc",
+--	"filters.img"
+--}
 
-local img = {
-	"integrate.imgc",
-	"filters.img"
-}
+executable "imgc"
+  source "main.cpp"
+  libs "imgproc"
 
-imgc = Executable( "imgc", "main.cpp", UseLibraries( "imgproc" ) )
-test_new = Executable( "test_new", "newtest.cpp", UseLibraries( "imgproc" ) )
-test_token = Executable( "test_token", "test_token.cpp", UseLibraries( "imgproc" ) )
+executable "test_new"
+  source "newtest.cpp"
+  libs "imgproc"
+
+executable "test_token"
+  source "test_token.cpp"
+  libs "imgproc"

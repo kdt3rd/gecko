@@ -1,7 +1,5 @@
 
-local web = libs.web.lib
+executable "file_httpd"
+  source "main.cpp"
+  libs "web"
 
-Executable( "file_httpd",
-	"main.cpp",
-	web
-)

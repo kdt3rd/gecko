@@ -1,2 +1,4 @@
 
-lib = Library( "layout", "simple_area.cpp", UseLibraries( "base" ) )
+lib = library "layout"
+  source "simple_area.cpp"
+  libs "base"

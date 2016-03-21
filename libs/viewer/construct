@@ -15,7 +15,7 @@ local shaders = {
 	"nowipe.frag";
 }
 
-shader_h = CreateFile( "shaders.h", {
+local shader_h = code.create( "shaders.h", {
 	"#pragma once";
 	"#include <base/data_resource.h>";
 	"namespace viewer";
@@ -24,7 +24,7 @@ shader_h = CreateFile( "shaders.h", {
 	"}";
 } )
 
-shader_code = GenerateSourceDataFile{
+local shader_code = code.generate{
 	output = "shaders.cpp",
 	input_items = shaders,
 	file_prefix = {
@@ -44,11 +44,9 @@ shader_code = GenerateSourceDataFile{
 					"\t}" },
 	comma_separate = true
 }
-shader_code:addDependency( "order", shader_h )
+shader_code:add_dependency( "order", shader_h )
 
-local comp = Compile( srcs, shader_code )
-comp:includeArtifactDir()
+lib = library "viewer"
+  source{ srcs, shader_code }:include_artifact_dir()
+  libs "gl"
 
-lib = Library( "viewer",
-			   comp,
-			   UseLibraries( "gl" ) )

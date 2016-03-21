@@ -1,14 +1,17 @@
 
-lib = Library( "media",
+lib = library "media"
+  source{
 	"sample_rate.cpp",
 	"image_buffer.cpp",
 	"container.cpp",
 	"file_sequence.cpp",
-	"exr_reader.cpp",
 	"riff/fourcc.cpp",
-	"riff/chunk.cpp",
-	EXR,
-	ILMBASE,
-	UseLibraries( "base" )
-)
-
+	"riff/chunk.cpp"
+  }
+  libs "base"
+  external_lib{
+	  lib="OpenEXR";
+	  required=false;
+	  source={"exr_reader.cpp"};
+	  extra_libs="IlmBase";
+  }

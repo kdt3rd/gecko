@@ -1,23 +1,43 @@
-
-local srcs = {
-	"font.cpp",
-	"font_manager.cpp"
-}
-
-local extralibs = nil
-
-if sys.system() == "Darwin" then
-	table.insert( srcs, "cocoa/font_manager.mm" )
-	table.insert( srcs, "cocoa/font.mm" )
-	table.insert( srcs, "darwin.cpp" )
-	extralibs = { ExternalLibrary( "AppKit" ), ExternalLibrary( "Cocoa" ) }
-elseif sys.system() == "Linux" then
-	table.insert( srcs, "fontconfig/font_manager.cpp" )
-	table.insert( srcs, "fontconfig/font.cpp" )
-	table.insert( srcs, "linux.cpp" )
-	extralibs = { FREETYPE, FONTCONFIG }
-else
-	error( "Unsupported platform" );
+-- this doesn't catch the cross compiling case
+-- but the script library will just be smaller
+-- and with some missing symbols when someone
+-- tries to use it
+if sys.system() ~= "Darwin" and sys.system() ~= "Linux" then
+	error( "NYI: Font support for system " .. sys.sytem() );
 end
 
-lib = Library( "script", srcs, UseLibraries( "base", "utf" ), extralibs )
+lib = library "script"
+  source{
+	"font.cpp",
+	"font_manager.cpp"
+  }
+  optional_source{
+	  system="Darwin",
+	  source={
+		  "cocoa/font_manager.mm",
+		  "cocoa/font.mm",
+		  "darwin.cpp",
+	  }
+  }
+  optional_source{
+	  system="Linux",
+	  source={
+		  "fontconfig/font_manager.cpp",
+		  "fontconfig/font.cpp",
+		  "linux.cpp",
+	  }
+  }
+  -- can also call optional_source all at once as on giant table
+  libs{ "base", "utf" }
+  system_libs{
+	  system="Darwin",
+	  libs={"AppKit", "Cocoa"}
+  }
+  system_libs{
+		  system="Linux",
+		  libs={"freetype2", "fontconfig"}
+  }
+  -- can also call system_libs like:
+  -- system_libs( "Darwin", "AppKit", "Cocoa" )
+  -- not sure which is preferred
+  -- or as one big table

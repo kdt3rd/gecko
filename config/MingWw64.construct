@@ -1,0 +1,243 @@
+add_toolset "mingw-w64-archiver"
+  tag "archive"
+  add_tool {
+	  tag="static_lib";
+	  name="x86_64-w64-mingw32-ar";
+	  input_tools={"cc"};
+	  output={".a"};
+	  output_prefix="lib";
+	  exe=file.find_exe("x86_64-w64-mingw32-ar");
+	  build_desc=" AR $out_short";
+	  command={ file.find_exe("rm"), "-f", "$out", "&&", "$exe", "rcs", "$out", "$in" };
+  };
+  add_tool {
+	  tag="static_lib_cxx";
+	  name="x86_64-w64-mingw32-ar";
+	  input_tools={"cc", "cxx"};
+	  output={".a"};
+	  output_prefix="lib";
+	  exe=file.find_exe("x86_64-w64-mingw32-ar");
+	  build_desc=" AR $out_short";
+	  command={ file.find_exe("rm"), "-f", "$out", "&&", "$exe", "rcs", "$out", "$in" };
+  };
+
+add_toolset "mingw-w64-gcc"
+  tag "compile"
+  lib_search_path "/usr/x86_64-w64-mingw32/lib"
+  pkg_search_path "/usr/x86_64-w64-mingw32/lib/pkgconfig"
+  add_tool {
+	  tag="cc";
+	  name="x86_64-w64-mingw32-gcc";
+	  extensions={".c"};
+	  output={".o"};
+	  exe=file.find_exe("x86_64-w64-mingw32-gcc");
+	  options={
+		  warnings={
+			  none={"-w"};
+			  default={};
+			  some={"-Wall"};
+			  strict={"-Weverything"};
+			  most={"-Weverything"};
+			  ["error"]={"-Wall", "-Werror"};
+		  };
+		  optimization={
+			  ["debug"]={"-g"};
+			  heavy={"-O3", "-flto"};
+			  opt={"-O3"};
+			  size={"-Os"};
+			  optdebug={"-g", "-Og"};
+		  };
+		  language={
+			  C={};
+			  C99={"-std=c99"};
+			  C11={"-std=c11"};
+		  };
+		  threads={
+			  on={}; -- {"-pthread"} for mingw threads?
+			  off={};
+		  };
+		  vectorize={
+			  none={};
+			  native={"-mtune=native", "-march=native"};
+			  SSE={"-msse"};
+			  SSE2={"-msse2"};
+			  SSE3={"-msse3", "-mtune=core2"};
+			  SSE4={"-msse4", "-mtune=nehalem"};
+			  AVX={"-mavx", "-mtune=intel"};
+			  AVX2={"-mavx2", "-mtune=intel"};
+			  AVX512={"-mavx512", "-mtune=intel"};
+		  };
+	  };
+	  option_defaults={
+		  warnings="default";
+		  optimization="opt";
+		  language="C99";
+		  threads="off";
+		  vectorize="none";
+	  };
+	  dependencies={
+		  file_pattern="$out.d";
+		  style="gcc";
+		  cmd={"-MMD", "-MF", "$out.d"};
+	  };
+	  flag_prefixes={
+		  includes="-I";
+		  defines="-D";
+	  };
+	  build_desc=" CC $out_short";
+	  command={"$exe", "$threads", "$language", "$optimization", "$warnings", "$vectorize", "$cflags", "$defines", "$includes", "-c", "-o", "$out", "$in"};
+  };
+  add_tool {
+	  tag="cxx";
+	  name="x86_64-w64-mingw32-g++";
+	  extensions={".cpp", ".cc"};
+	  output={".o"};
+	  exe=file.find_exe("x86_64-w64-mingw32-g++");
+	  options={
+		  warnings={
+			  none={"-w"};
+			  default={};
+			  some={"-Wall"};
+			  strict={"-Weverything"};
+			  most={"-Weverything"};
+			  ["error"]={"-Wall", "-Werror"};
+		  };
+		  optimization={
+			  ["debug"]={"-g"};
+			  heavy={"-O3", "-flto"};
+			  opt={"-O3"};
+			  size={"-Os"};
+			  optdebug={"-g", "-Og"};
+		  };
+		  language={
+			  ["c++"]={ "-x", "c++" };
+			  ["c++11"]={ "-x", "c++", "-std=c++11", "-Wno-c++98-compat", "-Wno-c++98-compat-pedantic" };
+			  ["c++14"]={ "-x", "c++", "-std=c++14", "-Wno-c++98-compat", "-Wno-c++98-compat-pedantic" };
+		  };
+		  threads={
+			  on={}; -- {"-pthread"} for mingw threads?
+			  off={};
+		  };
+		  vectorize={
+			  none={};
+			  native={"-mtune=native", "-march=native"};
+			  SSE={"-msse"};
+			  SSE2={"-msse2"};
+			  SSE3={"-msse3", "-mtune=core2"};
+			  SSE4={"-msse4", "-mtune=nehalem"};
+			  AVX={"-mavx", "-mtune=intel"};
+			  AVX2={"-mavx2", "-mtune=intel"};
+			  AVX512={"-mavx512", "-mtune=intel"};
+		  };
+	  };
+	  option_defaults={
+		  warnings="default";
+		  optimization="opt";
+		  language="c++";
+		  threads="off";
+		  vectorize="none";
+	  };
+	  dependencies={
+		  file_pattern="$out.d";
+		  style="gcc";
+		  cmd={"-MMD", "-MF", "$out.d"};
+	  };
+	  flag_prefixes={
+		  includes="-I";
+		  defines="-D";
+	  };
+	  build_desc=" CC $out_short";
+	  command={"$exe", "$threads", "$language", "$optimization", "$warnings", "$vectorize", "$cflags", "$defines", "$includes", "-c", "-o", "$out", "$in"};
+  };
+  add_tool {
+	  tag="ld";
+	  name="x86_64-w64-mingw32-gcc_linker";
+	  exe=file.find_exe("x86_64-w64-mingw32-gcc");
+	  options={
+		  optimization={
+			  ["debug"]={"-g"};
+			  heavy={"-O3", "-flto"};
+			  opt={"-O3"};
+			  size={"-Os"};
+			  optdebug={"-g", "-Og"};
+		  };
+		  language={
+			  C={};
+			  C99={"-std=c99"};
+			  C11={"-std=c11"};
+		  };
+		  threads={
+			  on={}; -- {"-pthread"} for mingw threads?
+			  off={};
+		  };
+		  vectorize={
+			  none={};
+			  native={"-mtune=native", "-march=native"};
+			  SSE={"-msse"};
+			  SSE2={"-msse2"};
+			  SSE3={"-msse3", "-mtune=core2"};
+			  SSE4={"-msse4", "-mtune=nehalem"};
+			  AVX={"-mavx", "-mtune=intel"};
+			  AVX2={"-mavx2", "-mtune=intel"};
+			  AVX512={"-mavx512", "-mtune=intel"};
+		  };
+	  };
+	  option_defaults={
+		  optimization="opt";
+		  language="C99";
+		  threads="off";
+		  vectorize="none";
+	  };
+	  flag_prefixes={
+		  libs="-l";
+		  libdirs="-L";
+	  };
+	  build_desc=" LD $out_short";
+	  command={ "$exe", "$threads", "$language", "$optimization", "$vectorize", "$cflags", "-pipe", "-o", "$out", "$in", "$ldflags", "$libdirs", "$libs" };
+  };
+  add_tool {
+	  tag="ld_cxx";
+	  name="x86_64-w64-mingw32-g++_linker";
+	  exe=file.find_exe("x86_64-w64-mingw32-g++");
+	  options={
+		  optimization={
+			  ["debug"]={"-g"};
+			  heavy={"-O3", "-flto"};
+			  opt={"-O3"};
+			  size={"-Os"};
+			  optdebug={"-g", "-Og"};
+		  };
+		  language={
+			  ["c++"]={};
+			  ["c++11"]={ "-std=c++11" };
+			  ["c++14"]={ "-std=c++14" };
+		  };
+		  threads={
+			  on={}; -- {"-pthread"} for mingw threads?
+			  off={};
+		  };
+		  vectorize={
+			  none={};
+			  native={"-mtune=native", "-march=native"};
+			  SSE={"-msse"};
+			  SSE2={"-msse2"};
+			  SSE3={"-msse3", "-mtune=core2"};
+			  SSE4={"-msse4", "-mtune=nehalem"};
+			  AVX={"-mavx", "-mtune=intel"};
+			  AVX2={"-mavx2", "-mtune=intel"};
+			  AVX512={"-mavx512", "-mtune=intel"};
+		  };
+	  };
+	  option_defaults={
+		  optimization="opt";
+		  language="c++";
+		  threads="off";
+		  vectorize="none";
+	  };
+	  flag_prefixes={
+		  libs="-l";
+		  libdirs="-L";
+	  };
+	  build_desc=" LD $out_short";
+	  command={ "$exe", "$threads", "$language", "$optimization", "$vectorize", "$cflags", "-pipe", "-o", "$out", "$in", "$ldflags", "$libdirs", "$libs" };
+  };

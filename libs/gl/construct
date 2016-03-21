@@ -1,9 +1,6 @@
-DL = nil
-if sys.system() == "Linux" then
-	DL = ExternalLibrary( "dl" )
-end
 
-lib = Library( "gl",
+lib = library "gl"
+  source{
 	"api.cpp",
 	"texture.cpp",
 	"shader.cpp",
@@ -11,6 +8,19 @@ lib = Library( "gl",
 	"framebuffer.cpp",
 	"matrix4.cpp",
 	"check.cpp",
-	"png_image.cpp",
-	"gl3w.c",
-	GL, PNG, DL )
+	"gl3w.c"
+  }
+  system_libs{
+	  system="Linux",
+	  libs={"gl", "dl"}
+  }
+  system_libs{
+	  system="Darwin",
+	  libs={"OpenGL"}
+  }
+  external_lib{
+	  lib="libpng";
+	  required=true;
+	  source={"png_image.cpp"};
+  }
+

@@ -1,8 +1,8 @@
 
-lib = Library( "net",
+lib = library "net"
+  source{
 	"address.cpp",
 	"socket.cpp",
-	"tcp_socket.cpp",
-	UseLibraries( "base" )
-);
-
+	"tcp_socket.cpp"
+  }
+  libs "base"
