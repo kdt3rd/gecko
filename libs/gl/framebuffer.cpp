@@ -6,6 +6,10 @@ namespace gl
 
 ////////////////////////////////////////
 
+std::vector<bound_framebuffer *> bound_framebuffer::_stack;
+
+////////////////////////////////////////
+
 framebuffer::framebuffer( void )
 {
 	glGenFramebuffers( 1, &_fb );

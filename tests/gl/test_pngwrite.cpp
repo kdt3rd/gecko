@@ -5,7 +5,7 @@
 #include <gl/framebuffer.h>
 #include <gl/texture.h>
 #include <gl/check.h>
-#include <gl/context.h>
+#include <gl/api.h>
 #include <gl/png_image.h>
 
 namespace
@@ -35,7 +35,7 @@ int safemain( int argc, char *argv[] )
 	win->acquire();
 
 	// OpenGL initialization
-	gl::context ogl;
+	gl::api ogl;
 //	ogl.enable( gl::capability::DEPTH_TEST );
 //	ogl.depth_func( gl::depth_test::LESS );
 
@@ -93,12 +93,15 @@ int safemain( int argc, char *argv[] )
 
 	gl::texture txt;
 	gl::framebuffer fb;
+	auto bfb = fb.bind();
 	{
 		auto bound = txt.bind( gl::texture::target::TEXTURE_RECTANGLE );
 		bound.image_2d_rgb( gl::format::RGB, 200, 200, gl::image_type::UNSIGNED_BYTE, nullptr );
 		checkgl();
 
-		fb.bind().attach( txt );
+		checkgl();
+
+		bfb.attach( txt );
 		checkgl();
 	}
 
@@ -106,7 +109,7 @@ int safemain( int argc, char *argv[] )
 	{
 		checkgl();
 
-		ogl.clear();
+		ogl.clear( gl::buffer_bit::COLOR_BUFFER_BIT );
 
 		checkgl();
 

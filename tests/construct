@@ -2,5 +2,5 @@
 subdir "httpd"
 subdir "base"
 subdir "web"
-subdir "draw"
+--subdir "draw"
 subdir "gl"

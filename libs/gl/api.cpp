@@ -83,10 +83,9 @@ void api::disable( capability cap )
 
 ////////////////////////////////////////
 
-void api::clear_color( const base::color &c )
+void api::clear_color( const color &c )
 {
-	glClearColor( static_cast<GLfloat>( c.red() ), static_cast<GLfloat>( c.green() ),
-				  static_cast<GLfloat>( c.blue() ), static_cast<GLfloat>( c.alpha() ) );
+	glClearColor( c.red(), c.green(), c.blue(), c.alpha() );
 }
 
 ////////////////////////////////////////
@@ -154,9 +153,9 @@ void api::depth_func( depth_test t )
 
 ////////////////////////////////////////
 
-void api::viewport( int64_t x, int64_t y, size_t w, size_t h )
+void api::viewport( double x, double y, double w, double h )
 {
-	glViewport( static_cast<GLint>( x ), static_cast<GLint>( y ), static_cast<GLsizei>( w ), static_cast<GLsizei>( h ) );
+	glViewport( static_cast<GLint>( std::lround( x ) ), static_cast<GLint>( std::lround( y ) ), static_cast<GLsizei>( std::lround( w ) ), static_cast<GLsizei>( std::lround( h ) ) );
 }
 
 ////////////////////////////////////////
@@ -170,7 +169,7 @@ void api::ortho( float left, float right, float top, float bottom )
 
 void api::scale( float x, float y, float z )
 {
-	multiply( gl::matrix4::scale( x, y, z ) );
+	multiply( gl::matrix4::scaling( x, y, z ) );
 }
 
 ////////////////////////////////////////
@@ -196,6 +195,8 @@ void api::restore_matrix( void )
 }
 
 ////////////////////////////////////////
+
+#ifndef __APPLE__
 
 namespace
 {
@@ -238,15 +239,16 @@ void gldebugging( GLenum source, GLenum type, GLuint, GLenum severity, GLsizei l
 
 }
 
+#endif
+
 void api::setup_debugging( void )
 {
+#ifndef __APPLE__
 	GLint flags;
 	glGetIntegerv( GL_CONTEXT_FLAGS, &flags );
 	if ( flags & GL_CONTEXT_FLAG_DEBUG_BIT)
-	{
 		glDebugMessageCallback( &gldebugging, nullptr );
-		std::clog << "Using OpenGL debugging" << std::endl;
-	}
+#endif
 }
 
 ////////////////////////////////////////

@@ -14,8 +14,8 @@ local gui = l.gui.lib
 
 executable( "test_signal", "test_signal.cpp", base )
 executable( "test_platform", "test_platform.cpp", platform )
-executable( "test_draw", "test_draw.cpp", platform, draw )
-executable( "test_app", "test_app.cpp", gui )
+--executable( "test_draw", "test_draw.cpp", platform, draw )
+--executable( "test_app", "test_app.cpp", gui )
 executable( "test_font", "test_font.cpp", script )
 executable( "test_hash", "test_hash.cpp", base )
 executable( "test_mempool", "test_mempool.cpp", base )

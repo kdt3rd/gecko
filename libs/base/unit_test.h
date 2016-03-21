@@ -15,24 +15,36 @@ namespace base
 
 /// @brief Unit test
 ///
-/// A Unit test with a name and a function.
-/// If this function throws an exception, the test will have failed.
-/// The function should use the test_false() and test_true() (below) to show results.
+/// A Unit test with a name and a list of functions.
+/// If a function throws an exception, the test will have failed.
+/// A function should use the test() to indicate the result of a test.
 /// It can also call success() and failure() explicitly.
-/// Extra messages can also be displayed with warnin() and message().
+/// Extra messages can also be displayed with warning() and message().
 class unit_test
 {
 public:
+	/// @brief Constructor.
+	/// @param n Name of the test.
 	unit_test( const std::string &n );
+
+	/// @brief Destructor.
 	~unit_test( void );
 
+	/// @brief Add testing option to the command line parser.
+	/// @param opts Command line parser to add options to.
 	void setup( cmd_line &opts );
 
+	/// @brief Create a test named 'n'
+	/// @param n Name of the new test.
 	std::function<void(void)> &operator[]( const std::string &n )
 	{
 		return _tests[n];
 	}
 
+	/// @brief Indicate the result of a test.
+	/// @param v True if the test succeeded, false otherwise.
+	/// @param args Message to display (can use formatting).
+	/// @sa base::format
 	template<typename ...Args>
 	void test( bool v, Args ...args )
 	{

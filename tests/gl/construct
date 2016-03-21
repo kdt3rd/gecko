@@ -1,3 +1,4 @@
 
 AddUnitTest( "test_glinfo.cpp", {"platform", "gl", "base"} )
 AddUnitTest( "test_pngwrite.cpp", {"platform", "gl", "base"} )
+AddUnitTest( "test_bufferdata.cpp", {"gl", "base"} )

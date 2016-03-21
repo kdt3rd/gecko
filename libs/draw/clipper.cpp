@@ -157,6 +157,11 @@ void PolyTree::Clear()
 }
 //------------------------------------------------------------------------------
 
+PolyTree::~PolyTree( void )
+{
+	Clear();
+}
+
 PolyNode* PolyTree::GetFirst() const
 {
   if (!Childs.empty())
@@ -181,6 +186,11 @@ int PolyTree::Total() const
 PolyNode::PolyNode(): Childs(), Parent(0), Index(0), m_IsOpen(false)
 {
 }
+
+PolyNode::~PolyNode()
+{
+}
+
 //------------------------------------------------------------------------------
 
 int PolyNode::ChildCount() const
@@ -357,6 +367,8 @@ class Int128
 };
 //------------------------------------------------------------------------------
 
+namespace {
+
 Int128 Int128Mul (long64 lhs, long64 rhs)
 {
   bool negate = (lhs < 0) != (rhs < 0);
@@ -382,6 +394,7 @@ Int128 Int128Mul (long64 lhs, long64 rhs)
   if (negate) tmp = -tmp;
   return tmp;
 };
+}
 #endif
 
 //------------------------------------------------------------------------------
@@ -403,13 +416,13 @@ bool Orientation(const Path &poly)
 
 double Area(const Path &poly)
 {
-  int size = (int)poly.size();
+  size_t size = poly.size();
   if (size < 3) return 0;
 
   double a = 0;
-  for (int i = 0, j = size -1; i < size; ++i)
+  for (size_t i = 0, j = size - 1; i < size; ++i)
   {
-    a += ((double)poly[j].X + poly[i].X) * ((double)poly[j].Y - poly[i].Y);
+    a += (static_cast<double>(poly[j].X + poly[i].X)) * (static_cast<double>(poly[j].Y - poly[i].Y));
     j = i;
   }
   return -a * 0.5;
@@ -422,7 +435,7 @@ double Area(const OutRec &outRec)
   if (!op) return 0;
   double a = 0;
   do {
-    a +=  (double)(op->Prev->Pt.X + op->Pt.X) * (double)(op->Prev->Pt.Y - op->Pt.Y);
+    a +=  static_cast<double>(op->Prev->Pt.X + op->Pt.X) * static_cast<double>(op->Prev->Pt.Y - op->Pt.Y);
     op = op->Next;
   } while (op != outRec.Pts);
   return a * 0.5;
@@ -466,18 +479,18 @@ int PointInPolygon (const IntPoint &pt, const Path &path)
         if (ipNext.X > pt.X) result = 1 - result;
         else
         {
-          double d = (double)(ip.X - pt.X) * (ipNext.Y - pt.Y) -
-            (double)(ipNext.X - pt.X) * (ip.Y - pt.Y);
-          if (!d) return -1;
+          double d = static_cast<double>(ip.X - pt.X) * (ipNext.Y - pt.Y) -
+            static_cast<double>(ipNext.X - pt.X) * (ip.Y - pt.Y);
+          if ( std::equal_to<double>()( d, 0.0 ) ) return -1;
           if ((d > 0) == (ipNext.Y > ip.Y)) result = 1 - result;
         }
       } else
       {
         if (ipNext.X > pt.X)
         {
-          double d = (double)(ip.X - pt.X) * (ipNext.Y - pt.Y) -
-            (double)(ipNext.X - pt.X) * (ip.Y - pt.Y);
-          if (!d) return -1;
+          double d = static_cast<double>(ip.X - pt.X) * (ipNext.Y - pt.Y) -
+            static_cast<double>(ipNext.X - pt.X) * (ip.Y - pt.Y);
+          if ( std::equal_to<double>()( d, 0.0 ) ) return -1;
           if ((d > 0) == (ipNext.Y > ip.Y)) result = 1 - result;
         }
       }
@@ -507,18 +520,18 @@ int PointInPolygon (const IntPoint &pt, OutPt *op)
         if (op->Next->Pt.X > pt.X) result = 1 - result;
         else
         {
-          double d = (double)(op->Pt.X - pt.X) * (op->Next->Pt.Y - pt.Y) -
-            (double)(op->Next->Pt.X - pt.X) * (op->Pt.Y - pt.Y);
-          if (!d) return -1;
+          double d = static_cast<double>(op->Pt.X - pt.X) * (op->Next->Pt.Y - pt.Y) -
+            static_cast<double>(op->Next->Pt.X - pt.X) * (op->Pt.Y - pt.Y);
+          if ( std::equal_to<double>()( d, 0.0 ) ) return -1;
           if ((d > 0) == (op->Next->Pt.Y > op->Pt.Y)) result = 1 - result;
         }
       } else
       {
         if (op->Next->Pt.X > pt.X)
         {
-          double d = (double)(op->Pt.X - pt.X) * (op->Next->Pt.Y - pt.Y) -
-            (double)(op->Next->Pt.X - pt.X) * (op->Pt.Y - pt.Y);
-          if (!d) return -1;
+          double d = static_cast<double>(op->Pt.X - pt.X) * (op->Next->Pt.Y - pt.Y) -
+            static_cast<double>(op->Next->Pt.X - pt.X) * (op->Pt.Y - pt.Y);
+          if ( std::equal_to<double>()( d, 0.0 ) ) return -1;
           if ((d > 0) == (op->Next->Pt.Y > op->Pt.Y)) result = 1 - result;
         }
       }
@@ -578,6 +591,7 @@ bool SlopesEqual(const IntPoint pt1, const IntPoint pt2,
 #endif
     return (pt1.Y-pt2.Y)*(pt3.X-pt4.X) == (pt1.X-pt2.X)*(pt3.Y-pt4.Y);
 }
+
 //------------------------------------------------------------------------------
 
 inline bool IsHorizontal(TEdge &e)
@@ -589,7 +603,7 @@ inline bool IsHorizontal(TEdge &e)
 inline double GetDx(const IntPoint pt1, const IntPoint pt2)
 {
   return (pt1.Y == pt2.Y) ?
-    HORIZONTAL : (double)(pt2.X - pt1.X) / (pt2.Y - pt1.Y);
+    HORIZONTAL : static_cast<double>(pt2.X - pt1.X) / (pt2.Y - pt1.Y);
 }
 //---------------------------------------------------------------------------
 
@@ -599,7 +613,7 @@ inline void SetDx(TEdge &e)
   e.Delta.Y = (e.Top.Y - e.Bot.Y);
 
   if (e.Delta.Y == 0) e.Dx = HORIZONTAL;
-  else e.Dx = (double)(e.Delta.X) / e.Delta.Y;
+  else e.Dx = static_cast<double>(e.Delta.X) / e.Delta.Y;
 }
 //---------------------------------------------------------------------------
 
@@ -626,6 +640,8 @@ inline cInt TopX(TEdge &edge, const cInt currentY)
 }
 //------------------------------------------------------------------------------
 
+namespace {
+
 void IntersectPoint(TEdge &Edge1, TEdge &Edge2, IntPoint &ip)
 {
 #ifdef use_xyz
@@ -633,7 +649,7 @@ void IntersectPoint(TEdge &Edge1, TEdge &Edge2, IntPoint &ip)
 #endif
 
   double b1, b2;
-  if (Edge1.Dx == Edge2.Dx)
+  if ( std::equal_to<double>()( Edge1.Dx, Edge2.Dx ) )
   {
     ip.Y = Edge1.Curr.Y;
     ip.X = TopX(Edge1, ip.Y);
@@ -721,6 +737,9 @@ void DisposeOutPts(OutPt*& pp)
     delete tmpPp;
   }
 }
+
+}
+
 //------------------------------------------------------------------------------
 
 inline void InitEdge(TEdge* e, TEdge* eNext, TEdge* ePrev, const IntPoint& Pt)
@@ -4059,6 +4078,10 @@ void ClipperOffset::DoRound(int j, int k)
 //------------------------------------------------------------------------------
 // Miscellaneous public functions
 //------------------------------------------------------------------------------
+
+clipperException::~clipperException() noexcept
+{
+}
 
 void Clipper::DoSimplePolygons()
 {

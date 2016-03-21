@@ -36,6 +36,13 @@
 
 ////////////////////////////////////////
 
+- (void)forceRedraw
+{
+	[super setNeedsDisplay: YES];
+}
+
+////////////////////////////////////////
+
 - (id)initWithWindow:(std::shared_ptr<::platform::cocoa::window>)w andMouse:(std::shared_ptr<::platform::cocoa::mouse>)m andKeyboard: (std::shared_ptr<::platform::cocoa::keyboard>)k
 {
 	[[self superview] setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
@@ -52,8 +59,8 @@
 		NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
 		NSOpenGLPFADoubleBuffer,
 		NSOpenGLPFAMultisample,
-		NSOpenGLPFASampleBuffers, (NSOpenGLPixelFormatAttribute)1,
-		NSOpenGLPFASamples, (NSOpenGLPixelFormatAttribute)4,
+		NSOpenGLPFASampleBuffers, static_cast<NSOpenGLPixelFormatAttribute>(1),
+		NSOpenGLPFASamples, static_cast<NSOpenGLPixelFormatAttribute>(4),
 		0
 	};
 
@@ -81,7 +88,7 @@
 - (void)setFrameSize:(NSSize)newSize
 {
 	[super setFrameSize:newSize];
-	float scale = win->scale_factor();
+	double scale = win->scale_factor();
 	win->resize_event( newSize.width * scale, newSize.height * scale );
 }
 

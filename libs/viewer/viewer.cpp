@@ -87,8 +87,8 @@ void viewer::paint( const std::shared_ptr<draw::canvas> &c )
 
 	float zA = scaling( _zoomA );
 	float zB = scaling( _zoomB );
-	auto matA = gl::matrix4::scale( zA, zA ) * gl::matrix4::translation( _panA );
-	auto matB = gl::matrix4::scale( zB, zB ) * gl::matrix4::translation( _panB ) * matA;
+	auto matA = gl::matrix4::scaling( zA, zA ) * gl::matrix4::translation( _panA );
+	auto matB = gl::matrix4::scaling( zB, zB ) * gl::matrix4::translation( _panB ) * matA;
 
 	_prog->set_uniform( "mvpMatrix", c->current_matrix() );
 	_prog->set_uniform( "winW", width() );

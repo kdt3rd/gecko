@@ -2,9 +2,9 @@
 #pragma once
 
 #include <memory>
-#include <base/color.h>
-#include <base/point.h>
-#include <base/size.h>
+#include <utility>
+#include "color.h"
+#include "vector.h"
 #include "shader.h"
 #include "matrix4.h"
 #include "enums.h"
@@ -20,7 +20,7 @@ class api;
 class program
 {
 public:
-	typedef GLuint uniform;
+	typedef GLint uniform;
 	typedef GLuint attribute;
 
 	/// @brief Copying not allowed
@@ -28,13 +28,11 @@ public:
 
 	/// @brief Default constructor
 	program( void );
-	program( const std::shared_ptr<shader> &vertex );
-	program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<shader> &fragment );
-	program( const std::shared_ptr<shader> &vertex, const std::shared_ptr<shader> &fragment, const std::shared_ptr<shader> &geometry );
 
 	/// @brief Constructor with shader(s)
 	template<typename ...Shaders>
 	program( const std::shared_ptr<shader> &s, Shaders ...shaders )
+		: program()
 	{
 		attach( s, std::forward<Shaders>( shaders )... );
 		link();
@@ -42,6 +40,14 @@ public:
 
 	/// @brief Destructor
 	~program( void );
+
+	/// @brief Attach and link shaders.
+	template<typename ...Shaders>
+	void set( Shaders ...shaders )
+	{
+		attach( shaders... );
+		link();
+	}
 
 	/// @brief Attach shaders
 	template<typename ...Shaders>
@@ -76,33 +82,29 @@ public:
 		set_uniform( get_uniform_location( name ), value );
 	}
 
-	/// @brief Set uniform array
-	template <typename T>
-	void set_uniform( const std::string &name, const T *values, size_t count )
-	{
-		set_uniform( get_uniform_location( name ), values, count );
-	}
-
 	/// @brief Set uniform integer
-	void set_uniform( uniform uniform, int value );
+	void set_uniform( uniform u, int value );
 
 	/// @brief Set uniform float
-	void set_uniform( uniform uniform, float value );
+	void set_uniform( uniform u, float value );
 
 	/// @brief Set uniform double
-	void set_uniform( uniform uniform, double value );
+	void set_uniform( uniform u, double value );
 
 	/// @brief Set uniform matrix
-	void set_uniform( uniform uniform, const matrix4 &value );
+	void set_uniform( uniform u, const matrix4 &value );
 
 	/// @brief Set uniform color
-	void set_uniform( uniform uniform, const base::color &value );
+	void set_uniform( uniform u, const color &value );
 
-	/// @brief Set uniform point
-	void set_uniform( uniform uniform, const base::point &value );
+	/// @brief Set uniform vec4
+	void set_uniform( uniform u, const vec4 &value );
 
-	/// @brief Set uniform size
-	void set_uniform( uniform uniform, const base::size &value );
+	/// @brief Set uniform vec3
+	void set_uniform( uniform u, const vec3 &value );
+
+	/// @brief Set uniform vec2
+	void set_uniform( uniform u, const vec2 &value );
 
 	/// @brief Get number of uniforms
 	size_t number_active_uniforms( void );
@@ -111,9 +113,9 @@ public:
 	std::pair<uniform_type,std::string> active_uniform( size_t i );
 
 private:
-	friend class api;
-
 	GLuint _program;
+
+	static program *_using;
 };
 
 ////////////////////////////////////////

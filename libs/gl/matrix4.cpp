@@ -92,7 +92,7 @@ matrix4 matrix4::translation( float x, float y, float z )
 
 ////////////////////////////////////////
 
-matrix4 matrix4::scale( float x, float y, float z )
+matrix4 matrix4::scaling( float x, float y, float z )
 {
 	return matrix4
 	{
@@ -105,14 +105,50 @@ matrix4 matrix4::scale( float x, float y, float z )
 
 ////////////////////////////////////////
 
-matrix4 matrix4::ortho( float left, float right, float top, float bottom )
+matrix4 matrix4::rotation( const versor &v )
 {
+	float w = v[0];
+	float x = v[1];
+	float y = v[2];
+	float z = v[3];
+	
 	return matrix4
 	{
-		2.F / ( right - left ), 0.F, 0.F, 0.F,
-		0.F, 2.F / ( top - bottom ), 0.F, 0.F,
-		0.F, 0.F, -1.F, 0.F,
-		- ( right + left ) / ( right - left ), - ( top + bottom ) / ( top - bottom ), 0.F, 1.F
+		1 - 2 * y * y - 2 * z * z,
+		2 * x * y + 2 * w * z,
+		2 * x * z - 2 * w * y,
+		0,
+		2 * x * y - 2 * w * z,
+		1 - 2 * x * x - 2 * z * z,
+		2 * y * z + 2 * w * x,
+		0,
+		2 * x * z + 2 * w * y,
+		2 * y * z - 2 * w * x,
+		1 - 2 * x * x - 2 * y * y,
+		0,
+		0,
+		0,
+		0,
+		1
+	};
+}
+
+////////////////////////////////////////
+
+matrix4 matrix4::ortho( float left, float right, float top, float bottom )
+{
+	float x = 2.F / ( right - left );
+	float y = 2.F / ( top - bottom );
+	float z = -1.F;
+	float a = - ( right + left ) / ( right - left );
+	float b = - ( top + bottom ) / ( top - bottom );
+
+	return matrix4
+	{
+		x, 0, 0, 0,
+		0, y, 0, 0,
+		0, 0, z, 0,
+		a, b, 0, 1
 	};
 }
 
@@ -124,18 +160,18 @@ matrix4 matrix4::perspective( float vertical_fov, float aspect, float near, floa
 	precondition( near < far, "invalide near/far distance ({0}/{1})", near, far );
 
     float range = std::tan( vertical_fov / 2.F ) * near;
-    float sx = ( 2.F * near ) / ( range * aspect + range * aspect );
-    float sy = near / range;
-    float sz = -( far + near ) / ( far - near );
-    float pz = -(2.0f * far * near) / (far - near);
-	float neg = -1.F;
+    float x = ( 2.F * near ) / ( range * aspect + range * aspect );
+    float y = near / range;
+    float z = -( far + near ) / ( far - near );
+    float p = -(2.0f * far * near) / (far - near);
+	float n = -1.F;
 
 	return matrix4
 	{
-		 sx, 0.F, 0.F, 0.F,
-		0.F,  sy, 0.F, 0.F,
-		0.F, 0.F,  sz, neg,
-		0.F, 0.F,  pz, 0.F
+		x, 0, 0, 0,
+		0, y, 0, 0,
+		0, 0, z, n,
+		0, 0, p, 0
 	};
 }
 

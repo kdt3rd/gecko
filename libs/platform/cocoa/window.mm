@@ -124,7 +124,7 @@ void window::resize_event( double w, double h )
 
 void window::invalidate( const base::rect &r )
 {
-	[_impl->view setNeedsDisplay:YES];
+	[_impl->view performSelector:@selector(forceRedraw) withObject:nil afterDelay:0.0];
 }
 
 ////////////////////////////////////////
@@ -160,8 +160,8 @@ void window::set_ns( void *w, void *v )
 {
 	_impl->win = (NSWindow *)w;
 	_impl->view = (NSOpenGLView *)v;
-	if ( [ _impl->view respondsToSelector:@selector(setWantsBestResolutionOpenGLSurface:) ] ) 
-		[ _impl->view setWantsBestResolutionOpenGLSurface:YES ]; 
+	if ( [_impl->view respondsToSelector:@selector(setWantsBestResolutionOpenGLSurface:)] )
+		[_impl->view setWantsBestResolutionOpenGLSurface:YES];
 
 	float scale = scale_factor();
 	NSSize size = [_impl->view bounds].size;

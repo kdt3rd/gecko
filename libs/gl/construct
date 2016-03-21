@@ -1,15 +1,23 @@
 
 lib = library "gl"
   source{
+	"gl3w.c"
 	"api.cpp",
 	"texture.cpp",
 	"shader.cpp",
 	"program.cpp",
 	"framebuffer.cpp",
 	"matrix4.cpp",
+	"versor.cpp",
+	"color.cpp",
 	"check.cpp",
-	"gl3w.c"
+	"vertex_buffer.cpp",
+	"element_buffer.cpp",
+	"vertex_array.cpp",
+	"png_image.cpp",
+	"mesh.cpp",
   }
+  libs "base"
   system_libs{
 	  system="Linux",
 	  libs={"gl", "dl"}
@@ -23,4 +31,3 @@ lib = library "gl"
 	  required=true;
 	  source={"png_image.cpp"};
   }
-

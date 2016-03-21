@@ -178,13 +178,13 @@ canvas::draw_text( const std::shared_ptr<script::font> &font, const base::point 
 	}
 
 	if ( ! _text_texture_vertices )
-		_text_texture_vertices = new_array_buffer<float>();
+		_text_texture_vertices = new_vertex_buffer();
 	checkgl();
 	if ( ! _text_output_vertices )
-		_text_output_vertices = new_array_buffer<float>();
+		_text_output_vertices = new_vertex_buffer();
 	checkgl();
 	if ( ! _text_indices )
-		_text_indices = new_element_buffer<uint16_t>();
+		_text_indices = new_element_buffer();
 	if ( ! _text_array )
 		_text_array = new_vertex_array();
 	checkgl();

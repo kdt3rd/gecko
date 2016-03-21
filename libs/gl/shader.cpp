@@ -54,7 +54,7 @@ void shader::compile( void )
 		glGetShaderiv( _shader, GL_SHADER_SOURCE_LENGTH, &len );
 		std::string source( static_cast<size_t>( len ), '\0' );
 		glGetShaderSource( _shader, len, nullptr, &source[0] );
-		std::cerr << "Compile error:\n" << source << std::endl;
+		std::cerr << "Compile error in:\n" << source << std::endl;
 		throw std::runtime_error( log() );
 	}
 	else
@@ -66,11 +66,11 @@ void shader::compile( void )
 			glGetShaderiv( _shader, GL_SHADER_SOURCE_LENGTH, &len );
 			std::string source( static_cast<size_t>( len + 1 ), '\0' );
 			glGetShaderSource( _shader, len+1, nullptr, &source[0] );
-			std::cerr << "========================================" << std::endl;
-			std::cerr << "Compile warning:\n" << source << std::endl;
-			std::cerr << "----------------------------------------" << std::endl;
-			std::cerr << l << std::endl;
-			std::cerr << "========================================" << std::endl;
+			std::clog << "========================================" << std::endl;
+			std::clog << "Compile warning:\n" << source << std::endl;
+			std::clog << "----------------------------------------" << std::endl;
+			std::clog << l << std::endl;
+			std::clog << "========================================" << std::endl;
 		}
 	}
 }

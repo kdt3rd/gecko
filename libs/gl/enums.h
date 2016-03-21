@@ -104,17 +104,14 @@ enum class data_type
 	UNSIGNED_BYTE = GL_UNSIGNED_BYTE,
 	SHORT = GL_SHORT,
 	UNSIGNED_SHORT = GL_UNSIGNED_SHORT,
+	INT = GL_INT,
+	UNSIGNED_INT = GL_UNSIGNED_INT,
 	FLOAT = GL_FLOAT,
+	DOUBLE = GL_DOUBLE,
 };
 
 template<typename D>
 struct gl_data_type {};
-
-template<>
-struct gl_data_type<uint16_t>
-{
-	enum { value = GL_UNSIGNED_SHORT };
-};
 
 template<>
 struct gl_data_type<uint8_t>
@@ -123,9 +120,45 @@ struct gl_data_type<uint8_t>
 };
 
 template<>
+struct gl_data_type<int8_t>
+{
+	enum { value = GL_BYTE };
+};
+
+template<>
+struct gl_data_type<uint16_t>
+{
+	enum { value = GL_UNSIGNED_SHORT };
+};
+
+template<>
+struct gl_data_type<int16_t>
+{
+	enum { value = GL_SHORT };
+};
+
+template<>
+struct gl_data_type<uint32_t>
+{
+	enum { value = GL_UNSIGNED_INT };
+};
+
+template<>
+struct gl_data_type<int32_t>
+{
+	enum { value = GL_INT };
+};
+
+template<>
 struct gl_data_type<float>
 {
 	enum { value = GL_FLOAT };
+};
+
+template<>
+struct gl_data_type<double>
+{
+	enum { value = GL_DOUBLE };
 };
 
 ////////////////////////////////////////
@@ -137,6 +170,16 @@ enum class uniform_type
 	FLOAT_VEC4 = GL_FLOAT_VEC4,
 	FLOAT_MAT4 = GL_FLOAT_MAT4,
 	OTHER = 0,
+};
+
+////////////////////////////////////////
+
+/// @brief Buffer usage
+enum class buffer_usage
+{
+	STREAM_DRAW = GL_STREAM_DRAW,
+	STATIC_DRAW = GL_STATIC_DRAW,
+	DYNAMIC_DRAW = GL_DYNAMIC_DRAW,
 };
 
 ////////////////////////////////////////
@@ -210,13 +253,12 @@ enum class filter
 enum class primitive
 {
 	POINTS = GL_POINTS,
+	LINES = GL_LINES,
 	LINE_STRIP = GL_LINE_STRIP,
 	LINE_LOOP = GL_LINE_LOOP,
-	LINES = GL_LINES,
+	TRIANGLES = GL_TRIANGLES,
 	TRIANGLE_STRIP = GL_TRIANGLE_STRIP,
 	TRIANGLE_FAN = GL_TRIANGLE_FAN,
-	TRIANGLES = GL_TRIANGLES,
-	QUADS = GL_QUADS,
 };
 
 ////////////////////////////////////////

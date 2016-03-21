@@ -39,5 +39,3 @@ lib = library "platform"
 	  system="Darwin";
 	  libs=cocoa.extra_libs;
   }
-  
-  
