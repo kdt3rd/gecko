@@ -23,7 +23,9 @@ namespace gui
 namespace layout
 {
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wweak-template-vtables"
+#if defined(__clang__)
+# pragma GCC diagnostic ignored "-Wweak-template-vtables"
+#endif
 	extern template class box_layout<gui::widget,gui::widget>;
 	extern template class form_layout<gui::widget,gui::widget>;
 	extern template class grid_layout<gui::widget,gui::widget>;

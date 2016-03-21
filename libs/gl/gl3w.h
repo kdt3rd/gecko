@@ -29,7 +29,10 @@
 */
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wreserved-id-macro"
+#if defined(__clang__)
+# pragma GCC diagnostic ignored "-Wreserved-id-macro"
+#endif
+
 #ifndef __gl3w_h_
 #define __gl3w_h_ 1
 

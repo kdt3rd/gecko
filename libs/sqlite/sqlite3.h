@@ -1,5 +1,7 @@
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wreserved-id-macro"
+#if defined(__clang__)
+# pragma GCC diagnostic ignored "-Wreserved-id-macro"
+#endif
 
 /*
 ** 2001 September 15

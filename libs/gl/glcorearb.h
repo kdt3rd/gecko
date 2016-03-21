@@ -1,5 +1,8 @@
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wreserved-id-macro"
+#if defined(__clang__)
+# pragma GCC diagnostic ignored "-Wreserved-id-macro"
+#endif
+
 #ifndef __glcorearb_h_
 #define __glcorearb_h_ 1
 

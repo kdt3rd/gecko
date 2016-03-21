@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015 Kimball Thurston
+// Copyright (c) 2016 Kimball Thurston
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the "Software"),
@@ -26,7 +26,14 @@
 ////////////////////////////////////////
 
 
-#if defined(__GNUC__) || ( defined(__clang__) && __has_builtin(__builtin_expect) )
+#if defined(__GNUC__)
+# define LIKELY_USE_BUILTIN
+#elif ( defined(__clang__) && __has_builtin(__builtin_expect) )
+# define LIKELY_USE_BUILTIN
+#else
+#endif
+
+#if defined(LIKELY_USE_BUILTIN)
 
 # ifndef likely
 #  define likely(condition) __builtin_expect( condition, 1 )
@@ -34,14 +41,15 @@
 # ifndef unlikely
 #  define unlikely(condition) __builtin_expect( condition, 0 )
 # endif
+# undef LIKELY_USE_BUILTIN
 
 #else
 
 # ifndef likely
-#  define likely(condition) condition
+#  define likely(condition) (condition)
 # endif
 # ifndef unlikely
-#  define unlikely(condition) condition
+#  define unlikely(condition) (condition)
 # endif
 
 #endif

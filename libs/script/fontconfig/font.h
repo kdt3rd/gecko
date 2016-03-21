@@ -4,9 +4,11 @@
 #include <script/font.h>
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wreserved-id-macro"
+#if defined(__clang__)
+# pragma GCC diagnostic ignored "-Wreserved-id-macro"
+# pragma GCC diagnostic ignored "-Wdocumentation"
+#endif
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-#pragma GCC diagnostic ignored "-Wdocumentation"
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #pragma GCC diagnostic pop

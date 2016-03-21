@@ -64,7 +64,7 @@ public:
 	void recompute_minimum( container &master ) override
 	{
 		simple_area children;
-		double minw, minh;
+		double minw = 0., minh = 0.;
 
 		switch ( _dir )
 		{

@@ -166,6 +166,7 @@ inline std::string type_name( pod_type t )
 		case pod_type::FLOAT64: return "double";
 		case pod_type::UNKNOWN: return "unknown";
 	}
+	return std::string();
 }
 
 ////////////////////////////////////////

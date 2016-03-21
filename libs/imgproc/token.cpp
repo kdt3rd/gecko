@@ -636,6 +636,7 @@ const char *token_name( token_type t )
 		case TOK_FOR:            return "keyword";
 		case TOK_UNKNOWN:		 return "unknown";
 	}
+	return "invalid";
 }
 
 ////////////////////////////////////////
