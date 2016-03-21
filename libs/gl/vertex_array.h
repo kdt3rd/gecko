@@ -5,9 +5,9 @@
 #include "enums.h"
 #include "program.h"
 #include "vertex_buffer.h"
-#include "index_buffer.h"
+#include "element_buffer.h"
 #include "vertex_buffer_data.h"
-#include "index_buffer_data.h"
+#include "element_buffer_data.h"
 #include <vector>
 #include <list>
 
@@ -52,12 +52,12 @@ public:
 
 		void attrib_pointer( program::attribute attr, std::shared_ptr<vertex_buffer> &vbo, size_t components, size_t stride = 0, size_t offset = 0 );
 
-		void bind_elements( index_buffer_data &data )
+		void bind_elements( element_buffer_data &data )
 		{
 			bind_elements( data.ibo() );
 		}
 
-		void bind_elements( const std::shared_ptr<index_buffer> &ibo );
+		void bind_elements( const std::shared_ptr<element_buffer> &ibo );
 
 		void draw_elements( primitive prim, size_t start, size_t count );
 		void draw_arrays( primitive prim, size_t start, size_t count );
@@ -102,7 +102,7 @@ private:
 
 	friend class binding;
 	GLuint _array;
-	std::shared_ptr<index_buffer> _ibo;
+	std::shared_ptr<element_buffer> _ibo;
 	std::list<std::shared_ptr<vertex_buffer>> _vbos;
 };
 

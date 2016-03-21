@@ -11,13 +11,13 @@ namespace gl
 
 ////////////////////////////////////////
 
-/// @brief OpenGL index buffer object (IBO).
-/// A IBO holds indices for drawing.
+/// @brief OpenGL element buffer object (EBO).
+/// An EBO holds indices for drawing.
 /// @sa gl::mesh
-class index_buffer
+class element_buffer
 {
 public:
-	/// @brief OpenGL bound index buffer object
+	/// @brief OpenGL bound element buffer object
 	class binding
 	{
 	public:
@@ -52,28 +52,28 @@ public:
 		void operator=( binding &&other );
 
 	private:
-		friend class index_buffer;
+		friend class element_buffer;
 		binding( GLuint buf );
 
 		static binding *_bound;
 	};
 
 	/// @brief No copy constructor.
-	index_buffer( const index_buffer &b ) = delete;
+	element_buffer( const element_buffer &b ) = delete;
 
 	/// @brief Default constructor.
-	index_buffer( void );
+	element_buffer( void );
 
 	/// @brief Construct with data.
-	index_buffer( const uint32_t *data, size_t n, buffer_usage u = buffer_usage::STATIC_DRAW );
+	element_buffer( const uint32_t *data, size_t n, buffer_usage u = buffer_usage::STATIC_DRAW );
 
 	/// @brief Construct with data.
-	index_buffer( const std::vector<uint32_t> &data, buffer_usage u = buffer_usage::STATIC_DRAW );
+	element_buffer( const std::vector<uint32_t> &data, buffer_usage u = buffer_usage::STATIC_DRAW );
 
 	/// @brief Destructor.
-	~index_buffer( void );
+	~element_buffer( void );
 
-	/// @brief Bind the index buffer.
+	/// @brief Bind the element buffer.
 	binding bind( void );
 
 	GLuint id( void ) const

@@ -62,7 +62,7 @@ void mesh::add_line_loop( size_t count, size_t start )
 
 ////////////////////////////////////////
 
-void mesh::bind_elements( index_buffer_data &data )
+void mesh::bind_elements( element_buffer_data &data )
 {
 	_vao->bind().bind_elements( data.ibo() );
 }

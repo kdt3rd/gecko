@@ -13,18 +13,18 @@ namespace gl
 ////////////////////////////////////////
 
 /// @brief Buffer data is an array of indices.
-class index_buffer_data
+class element_buffer_data
 {
 public:
 	/// @brief Default constructor.
-	index_buffer_data( void )
+	element_buffer_data( void )
 	{
 	}
 
 	/// @brief Initializer list constructor.
 	/// @param list List of tuples (one entry per vertex).
 	template<typename I>
-	index_buffer_data( std::initializer_list<I> list )
+	element_buffer_data( std::initializer_list<I> list )
 		: _data( list.begin(), list.end() )
 	{
 	}
@@ -47,7 +47,7 @@ public:
 		_data.pop_back();
 	}
 
-	/// @brief Returns the number of index.
+	/// @brief Returns the number of indices.
 	size_t size( void ) const
 	{
 		return _data.size();
@@ -66,7 +66,7 @@ public:
 	}
 
 	/// @brief The raw uint32_t data of all indices.
-	/// There will be size() uint32_t.
+	/// There will be size() uint32_t in the array.
 	/// @returns Pointer to raw data.
 	const uint32_t *data( void ) const
 	{
@@ -85,15 +85,15 @@ public:
 	/// The IBO is created as needed.
 	/// Once a IBO is created, the data cannot be modified.
 	/// @returns The index buffer object.
-	std::shared_ptr<index_buffer> ibo( buffer_usage u = buffer_usage::STATIC_DRAW )
+	std::shared_ptr<element_buffer> ibo( buffer_usage u = buffer_usage::STATIC_DRAW )
 	{
 		if ( !_ibo )
-			_ibo = std::make_shared<index_buffer>( _data, u );
+			_ibo = std::make_shared<element_buffer>( _data, u );
 		return _ibo;
 	}
 
 private:
-	std::shared_ptr<index_buffer> _ibo;
+	std::shared_ptr<element_buffer> _ibo;
 	std::vector<uint32_t> _data;
 };
 

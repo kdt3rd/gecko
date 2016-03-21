@@ -70,7 +70,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		triangle.vertex_attribute( "vertex_color", data, 1 );
 
 		// Finally, create the elements to draw.
-		gl::index_buffer_data elements { 0, 1, 2 };
+		gl::element_buffer_data elements { 0, 1, 2 };
 		triangle.bind_elements( elements );
 		triangle.add_triangles( 3 );
 	}
