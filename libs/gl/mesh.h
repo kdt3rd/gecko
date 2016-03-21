@@ -14,34 +14,107 @@ namespace gl
 
 ////////////////////////////////////////
 
-/// @brief Mesh composed of vertex attributes and a program.
+/// @brief Mesh composed of vertex attributes, elements and a program.
+/// Mesh are created by setting up a program, setting up vertex attributes,
+/// adding elements.
 class mesh
 {
 public:
+	class binding
+	{
+	public:
+		/// @brief No default constructor.
+		binding( void ) = delete;
+
+		/// @brief No copy constructor.
+		binding( const binding &other ) = delete;
+
+		/// @brief Move constructor.
+		binding( binding &&other );
+
+		/// @brief Destructor.
+		~binding( void );
+
+		/// @brief Bind vertex data to use for an attribute.
+		template<typename ...Args>
+		void vertex_attribute( program::attribute loc, vertex_buffer_data<Args...> &data, size_t a = 0 )
+		{
+			_bound.attrib_pointer<Args...>( loc, data, a );
+		}
+
+		/// @brief Bind vertex data to use for an attribute.
+		template<typename ...Args>
+		void vertex_attribute( const std::string &name, vertex_buffer_data<Args...> &data, size_t a = 0 )
+		{
+			_bound.attrib_pointer<Args...>( _prog->get_attribute_location( name ), data, a );
+		}
+
+		/// @brief Bind elements data to draw from.
+		void bind_elements( element_buffer_data &data );
+
+		/// @brief Set uniform value.
+		template<typename ...Args>
+		void set_uniform( const std::string &name, Args ...args )
+		{
+			precondition( _prog, "program not created" );
+			_prog->set_uniform( name, std::forward<Args>( args )... );
+		}
+
+		/// @brief Set uniform value.
+		template<typename ...Args>
+		void set_uniform( program::uniform u, Args ...args )
+		{
+			precondition( _prog, "program not created" );
+			_prog->set_uniform( u, std::forward<Args>( args )... );
+		}
+
+		/// @brief Draw all elements.
+		void draw( void );
+
+	private:
+		friend class mesh;
+
+		binding( mesh *m, vertex_array *vao, program *prog );
+
+		bool _elements;
+		vertex_array::binding _bound;
+		mesh *_mesh;
+		vertex_array *_vao;
+		program *_prog;
+	};
+
+	/// @brief Default constructor.
 	mesh( void );
 
+	/// @brief Destructor
 	~mesh( void );
 
-	template<typename ...Args>
-	void set_program( Args ...args )
+	/// @brief Get the program for this mesh.
+	gl::program &get_program( void );
+
+	/// @brief Set the program for this mesh.
+	void set_program( const std::shared_ptr<gl::program> &p )
 	{
-		_prog = std::make_shared<gl::program>( std::forward<Args>( args )... );
+		_prog = p;
 	}
 
+	/// @brief Add triangles to draw.
 	void add_triangles( size_t count, size_t start_vertex = 0 );
+
+	/// @brief Add a triangle strip to draw.
 	void add_triangle_strip( size_t count, size_t start_vertex = 0 );
+
+	/// @brief Add a triangle fan to draw.
 	void add_triangle_fan( size_t count, size_t start_vertex = 0 );
+
+	/// @brief Add lines to draw.
 	void add_lines( size_t count, size_t start_vertex = 0 );
+
+	/// @brief Add a line strip to draw.
 	void add_line_strip( size_t count, size_t start_vertex = 0 );
+
+	/// @brief Add a line loop to draw.
 	void add_line_loop( size_t count, size_t start_vertex = 0 );
-
-	void bind_elements( element_buffer_data &data );
-
-	std::string log( void )
-	{
-		precondition( _prog, "program not created" );
-		return _prog->log();
-	}
 
 	/// @brief Get attribute location
 	program::attribute get_attribute_location( const std::string &name )
@@ -50,36 +123,6 @@ public:
 		return _prog->get_attribute_location( name );
 	}
 
-	template<typename ...Args>
-	void vertex_attribute( program::attribute loc, vertex_buffer_data<Args...> &data, size_t a = 0 )
-	{
-		precondition( _vao, "vertex array not created" );
-		_vao->bind().attrib_pointer<Args...>( loc, data, a );
-	}
-
-	template<typename ...Args>
-	void vertex_attribute( const std::string &name, vertex_buffer_data<Args...> &data, size_t a = 0 )
-	{
-		precondition( _vao, "vertex array not created" );
-		precondition( _prog, "program not created" );
-		_vao->bind().attrib_pointer<Args...>( _prog->get_attribute_location( name ), data, a );
-	}
-
-	void begin_draw( void )
-	{
-		precondition( _prog, "program not created" );
-		_prog->use();
-	}
-
-	void draw( primitive prim, size_t start, size_t count )
-	{
-		precondition( _prog, "program not created" );
-		precondition( _vao, "vertex array not created" );
-		_vao->bind().draw_arrays( prim, start, count );
-	}
-
-	void draw( void );
-
 	/// @brief Get uniform location
 	program::uniform get_uniform_location( const std::string &name )
 	{
@@ -87,6 +130,7 @@ public:
 		return _prog->get_uniform_location( name );
 	}
 
+	/// @brief Set uniform value.
 	template<typename ...Args>
 	void set_uniform( const std::string &name, Args ...args )
 	{
@@ -94,6 +138,7 @@ public:
 		_prog->set_uniform( name, std::forward<Args>( args )... );
 	}
 
+	/// @brief Set uniform value.
 	template<typename ...Args>
 	void set_uniform( program::uniform u, Args ...args )
 	{
@@ -101,15 +146,8 @@ public:
 		_prog->set_uniform( u, std::forward<Args>( args )... );
 	}
 
-	const std::shared_ptr<gl::program> &program( void ) const
-	{
-		return _prog;
-	}
-
-	void end_draw( void )
-	{
-		// TODO
-	}
+	/// @brief Bind the mesh.
+	binding bind( void );
 
 private:
 	typedef std::tuple<primitive,size_t,size_t> Primitive;

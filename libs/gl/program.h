@@ -41,6 +41,14 @@ public:
 	/// @brief Destructor
 	~program( void );
 
+	/// @brief Attach and link shaders.
+	template<typename ...Shaders>
+	void set( Shaders ...shaders )
+	{
+		attach( shaders... );
+		link();
+	}
+
 	/// @brief Attach shaders
 	template<typename ...Shaders>
 	void attach( const std::shared_ptr<shader> &s, Shaders ...shaders )

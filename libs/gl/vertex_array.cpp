@@ -66,7 +66,7 @@ void vertex_array::binding::draw_arrays( primitive prim, size_t start, size_t co
 void vertex_array::binding::draw_elements( primitive prim, size_t start, size_t count )
 {
 	precondition( _bound == this, "vertex array not bound" );
-	precondition( _self->has_index_buffer(), "need index buffer object to draw" );
+	precondition( _self->has_element_buffer(), "need element buffer object to draw" );
 	glDrawElements( static_cast<GLenum>( prim ), static_cast<GLsizei>( count ), GL_UNSIGNED_INT, reinterpret_cast<const GLvoid *>( start * sizeof(uint32_t) ) );
 }
 

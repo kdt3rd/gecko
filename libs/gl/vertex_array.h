@@ -65,7 +65,7 @@ public:
 		template <typename T>
 		void draw_elements( primitive prim, const std::vector<T> &buf )
 		{
-			precondition( !_self->has_index_buffer(), "can't draw from index vector with EBO" );
+			precondition( !_self->has_element_buffer(), "can't draw from index vector without EBO" );
 			glDrawElements( static_cast<GLenum>( prim ), buf.size(), gl_data_type<T>::value, buf.data() );
 		}
 
@@ -84,7 +84,7 @@ public:
 
 	binding bind( void );
 
-	bool has_index_buffer( void ) const
+	bool has_element_buffer( void ) const
 	{
 		return static_cast<bool>( _ebo );
 	}

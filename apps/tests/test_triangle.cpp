@@ -28,9 +28,9 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	// Create a triangle mesh
 	gl::mesh triangle;
 	{
-		// Vertex and fragment shaders
-		triangle.set_program(
-			ogl.new_shader( gl::shader::type::VERTEX, R"SHADER(
+		// Setup program with vertex and fragment shaders
+		triangle.get_program().set(
+			ogl.new_vertex_shader( R"SHADER(
 				#version 330
 
 				layout(location = 0) in vec3 vertex_position;
@@ -46,7 +46,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 					gl_Position = matrix * vec4( vertex_position, 1.0 );
 				}
 			)SHADER" ),
-			ogl.new_shader( gl::shader::type::FRAGMENT, R"SHADER(
+			ogl.new_fragment_shader( R"SHADER(
 				#version 330
 
 				in vec3 color;
@@ -66,16 +66,23 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 			{ { 0.0F, 0.5F, 0.0F }, { 1.0F, 0.0F, 0.0F } },
 			{ {-0.5F,-0.5F, 0.0F }, { 0.0F, 0.0F, 1.0F } }
 		};
-		triangle.vertex_attribute( "vertex_position", data, 0 );
-		triangle.vertex_attribute( "vertex_color", data, 1 );
 
-		// Finally, create the elements to draw.
+		// List of indices for the triangle.
 		gl::element_buffer_data elements { 0, 1, 2 };
-		triangle.bind_elements( elements );
+
+		// Bind the elements data and vertex data to the attributes.
+		{
+			auto tbind = triangle.bind();
+			tbind.vertex_attribute( "vertex_position", data, 0 );
+			tbind.vertex_attribute( "vertex_color", data, 1 );
+			tbind.bind_elements( elements );
+		}
+
+		/// Add triangles (3 points).
 		triangle.add_triangles( 3 );
 	}
 
-	// Matrix for animating the triangle
+	// Matrix for animating the triangle.
 	gl::matrix4 matrix;
 	gl::program::uniform matrix_loc = triangle.get_uniform_location( "matrix" );
 	float speed = 0.01F;
@@ -95,10 +102,11 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		ogl.viewport( 0, 0, win->width(), win->height() );
 
 		// Draw the triangle
-		triangle.begin_draw();
-		triangle.set_uniform( matrix_loc, matrix );
-		triangle.draw();
-		triangle.end_draw();
+		{
+			auto tbind = triangle.bind();
+			tbind.set_uniform( matrix_loc, matrix );
+			tbind.draw();
+		}
 
 		win->release();
 

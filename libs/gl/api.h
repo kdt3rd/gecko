@@ -115,6 +115,20 @@ public:
 		return std::make_shared<shader>( std::forward<Args>( args )... );
 	}
 
+	/// @brief Construct a new vertex shader
+	template<typename ...Args>
+	std::shared_ptr<shader> new_vertex_shader( Args &&...args )
+	{
+		return std::make_shared<shader>( gl::shader::type::VERTEX, std::forward<Args>( args )... );
+	}
+
+	/// @brief Construct a new fragment shader
+	template<typename ...Args>
+	std::shared_ptr<shader> new_fragment_shader( Args &&...args )
+	{
+		return std::make_shared<shader>( gl::shader::type::FRAGMENT, std::forward<Args>( args )... );
+	}
+
 	/// @brief Construct a new program
 	template<typename ...Args>
 	std::shared_ptr<program> new_program( Args &&...args )
