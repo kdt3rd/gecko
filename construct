@@ -23,11 +23,11 @@ if toolset_active( "mingw-w64-archiver" ) and toolset_active( "mingw-w64-gcc" ) 
 end
 
 configuration "build"
-  optimization "optdebug"	
+  optimization "optdebug"
   warnings "most"
 
 configuration "debug"
-  optimization "debug"	
+  optimization "debug"
   warnings "most"
 
 default_configuration "build"
