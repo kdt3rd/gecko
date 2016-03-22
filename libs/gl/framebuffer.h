@@ -6,12 +6,9 @@
 namespace gl
 {
 
-class framebuffer;
-
 ////////////////////////////////////////
 
-////////////////////////////////////////
-
+/// @brief OpenGL framebuffer.
 class framebuffer
 {
 public:

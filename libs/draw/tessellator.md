@@ -1,87 +1,17 @@
-This is only a very brief overview.  There is quite a bit of
-additional documentation in the source code itself.
+Tessellator
+===========
 
-
-Goals of robust tesselation
----------------------------
-
-The tesselation algorithm is fundamentally a 2D algorithm.  We
-initially project all data into a plane; our goal is to robustly
-tesselate the projected data.  The same topological tesselation is
-then applied to the input data.
-
-Topologically, the output should always be a tesselation.  If the
-input is even slightly non-planar, then some triangles will
-necessarily be back-facing when viewed from some angles, but the goal
-is to minimize this effect.
-
-The algorithm needs some capability of cleaning up the input data as
-well as the numerical errors in its own calculations.  One way to do
-this is to specify a tolerance as defined above, and clean up the
-input and output during the line sweep process.  At the very least,
-the algorithm must handle coincident vertices, vertices incident to an
-edge, and coincident edges.
+Brief overview of the algorithm used in the tessellator.
 
 
 Phases of the algorithm
 -----------------------
 
-1. Find the polygon normal N.
-2. Project the vertex data onto a plane.  It does not need to be
-   perpendicular to the normal, eg. we can project onto the plane
-   perpendicular to the coordinate axis whose dot product with N
-   is largest.
-3. Using a line-sweep algorithm, partition the plane into x-monotone
+1. Using a line-sweep algorithm, partition the plane into x-monotone
    regions.  Any vertical line intersects an x-monotone region in
    at most one interval.
-4. Triangulate the x-monotone regions.
-5. Group the triangles into strips and fans.
-
-
-Finding the normal vector
--------------------------
-
-A common way to find a polygon normal is to compute the signed area
-when the polygon is projected along the three coordinate axes.  We
-can't do this, since contours can have zero area without being
-degenerate (eg. a bowtie).
-
-We fit a plane to the vertex data, ignoring how they are connected
-into contours.  Ideally this would be a least-squares fit; however for
-our purpose the accuracy of the normal is not important.  Instead we
-find three vertices which are widely separated, and compute the normal
-to the triangle they form.  The vertices are chosen so that the
-triangle has an area at least 1/sqrt(3) times the largest area of any
-triangle formed using the input vertices.  
-
-The contours do affect the orientation of the normal; after computing
-the normal, we check that the sum of the signed contour areas is
-non-negative, and reverse the normal if necessary.
-
-
-Projecting the vertices
------------------------
-
-We project the vertices onto a plane perpendicular to one of the three
-coordinate axes.  This helps numerical accuracy by removing a
-transformation step between the original input data and the data
-processed by the algorithm.  The projection also compresses the input
-data; the 2D distance between vertices after projection may be smaller
-than the original 2D distance.  However by choosing the coordinate
-axis whose dot product with the normal is greatest, the compression
-factor is at most 1/sqrt(3).
-
-Even though the *accuracy* of the normal is not that important (since
-we are projecting perpendicular to a coordinate axis anyway), the
-*robustness* of the computation is important.  For example, if there
-are many vertices which lie almost along a line, and one vertex V
-which is well-separated from the line, then our normal computation
-should involve V otherwise the results will be garbage.
-
-The advantage of projecting perpendicular to the polygon normal is
-that computed intersection points will be as close as possible to
-their ideal locations.  To get this behavior, define TRUE_PROJECT.
-
+2. Triangulate the x-monotone regions.
+3. Group the triangles into strips and fans.
 
 The Line Sweep
 --------------
@@ -170,7 +100,7 @@ Invariants for the Edge Dictionary.
    where "event" is the current sweep line event.
  - No edge e has zero length.
  - No two edges have identical left and right endpoints.
- 
+
 Invariants for the Mesh (the processed portion).
 
  - The portion of the mesh left of the sweep line is a planar graph,

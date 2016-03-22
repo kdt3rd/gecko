@@ -15,7 +15,7 @@ namespace base
 /// @brief Command-line parameters parser.
 /// Given a list of options, it will parse command line parameters and accumulate all values into each options.
 /// Any errors will (e.g. unknown or mal-formed parameters) will trigger an exception.
-/// @example base/ex_cmd_line.cpp
+/// @example base/cmd_line.cpp
 class cmd_line
 {
 public:

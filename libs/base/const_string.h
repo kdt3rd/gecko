@@ -56,7 +56,7 @@ typedef const_string<char32_t> u32cstring;
 inline size_t const_length( const char *s ) { return std::strlen( s ); }
 inline size_t const_length( const wchar_t *s ) { return std::wcslen( s ); }
 
-	
+
 template <class charT, typename traitsT>
 class const_string
 {
@@ -197,7 +197,7 @@ private:
 	{
 		return n == 0 ? eqret : ( traits_type::lt( *a, *b ) ? -1 : ( traits_type::lt( *b, *a ) ? 1 : compare_priv( a + 1, b + 1, n - 1, eqret ) ) );
 	}
-		
+
 	const value_type *_str;
 	size_type _sz;
 };

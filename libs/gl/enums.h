@@ -2,6 +2,7 @@
 #pragma once
 
 #include <type_traits>
+#include <base/half.h>
 
 namespace gl
 {
@@ -9,7 +10,6 @@ namespace gl
 ////////////////////////////////////////
 
 /// @brief OpenGL capability
-///
 /// @see gl::api::enable
 /// @see gl::api::disable
 /// @todo Complete missing capabilities
@@ -39,23 +39,45 @@ enum class capability
 	/// @todo Write polygon_offset
 	POLYGON_OFFSET_FILL = GL_POLYGON_OFFSET_FILL,
 
+	/// If enabled, compute a temporary coverage value where each bit is determined by the alpha value at the corresponding sample location. The temporary coverage value is then ANDed with the fragment coverage value.
 	SAMPLE_ALPHA_TO_COVERAGE = GL_SAMPLE_ALPHA_TO_COVERAGE,
+
+	/// If enabled, discard fragments that are outside the scissor rectangle.
 	SCISSOR_TEST = GL_SCISSOR_TEST,
+
+	/// If enabled, do stencil testing and update the stencil buffer.
 	STENCIL_TEST = GL_STENCIL_TEST,
 
 };
 
 ////////////////////////////////////////
 
+/// @brief OpenGL depth test
+/// @see gl::api::depth_func
 enum class depth_test
 {
+	/// Never passes.
 	NEVER = GL_NEVER,
+
+	/// Passes if the incoming depth value is less than the stored depth value.
 	LESS = GL_LESS,
+
+	/// Passes if the incoming depth value is equal to the stored depth value.
 	EQUAL = GL_EQUAL,
+
+	/// Passes if the incoming depth value is less than or equal to the stored depth value.
 	LEQUAL = GL_LEQUAL,
+
+	/// Passes if the incoming depth value is greater than the stored depth value.
 	GREATER = GL_GREATER,
+
+	/// Passes if the incoming depth value is not equal to the stored depth value.
 	NOTEQUAL = GL_NOTEQUAL,
+
+	/// Passes if the incoming depth value is greater than or equal to the stored depth value.
 	GEQUAL = GL_GEQUAL,
+
+	/// Always passes.
 	ALWAYS = GL_ALWAYS
 };
 
@@ -110,56 +132,84 @@ enum class data_type
 	DOUBLE = GL_DOUBLE,
 };
 
-template<typename D>
-struct gl_data_type {};
-
-template<>
-struct gl_data_type<uint8_t>
+/// @brief OpenGL data type based on templating.
+/// @tparam T Data type to get OpenGL enum for.
+template<typename T>
+class gl_data_type
 {
+public:
+	enum
+	{
+		/// OpenGL data type.
+		value
+	};
+};
+
+/// @cond
+template<>
+class gl_data_type<uint8_t>
+{
+public:
 	enum { value = GL_UNSIGNED_BYTE };
 };
 
 template<>
-struct gl_data_type<int8_t>
+class gl_data_type<int8_t>
 {
+public:
 	enum { value = GL_BYTE };
 };
 
 template<>
-struct gl_data_type<uint16_t>
+class gl_data_type<uint16_t>
 {
+public:
 	enum { value = GL_UNSIGNED_SHORT };
 };
 
 template<>
-struct gl_data_type<int16_t>
+class gl_data_type<int16_t>
 {
+public:
 	enum { value = GL_SHORT };
 };
 
 template<>
-struct gl_data_type<uint32_t>
+class gl_data_type<uint32_t>
 {
+public:
 	enum { value = GL_UNSIGNED_INT };
 };
 
 template<>
-struct gl_data_type<int32_t>
+class gl_data_type<int32_t>
 {
+public:
 	enum { value = GL_INT };
 };
 
 template<>
-struct gl_data_type<float>
+class gl_data_type<float>
 {
+public:
 	enum { value = GL_FLOAT };
 };
 
 template<>
-struct gl_data_type<double>
+class gl_data_type<double>
 {
+public:
 	enum { value = GL_DOUBLE };
 };
+
+template<>
+class gl_data_type<base::half>
+{
+public:
+	enum { value = GL_HALF_FLOAT };
+};
+
+/// @endcond
 
 ////////////////////////////////////////
 

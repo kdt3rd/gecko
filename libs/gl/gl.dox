@@ -1,7 +1,6 @@
 
 /// @namespace gl
-/// @brief C++ wrapper for OpenGL
-///
-/// Wrapper for OpenGL version 3/4
-/// 
+/// @brief C++ wrapper for OpenGL.
+/// Wrapper for OpenGL version 3.3 or higher.
+/// @example gl/triangle.cpp
 

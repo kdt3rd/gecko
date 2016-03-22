@@ -108,7 +108,6 @@ constexpr color red( 1, 0, 0 );
 constexpr color green( 0, 1, 0 );
 constexpr color blue( 0, 0, 1 );
 
-
 ////////////////////////////////////////
 
 /// @brief Stream out a color

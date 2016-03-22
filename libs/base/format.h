@@ -63,6 +63,7 @@ private:
 ////////////////////////////////////////
 
 /// @brief Holds a format string with attached arguments.
+/// @sa base::format
 template<typename ... Args>
 class format_holder
 {
@@ -170,7 +171,6 @@ private:
 ////////////////////////////////////////
 
 /// @brief Write data into a string with the given format.
-///
 /// Format the data into a string of the form given by fmt according to format specifiers in the fmt string.
 ///
 /// A format specifier is a decimal number enclosed in curly braces, with optional formatting commands.
@@ -185,11 +185,11 @@ private:
 ///   - a Alignment, left or right (followed by a single letter l or r).
 ///   - # Comment, can be followed by anything (except a closing curly brace).
 ///
+/// @tparam Args... Types for the arguments to print.
 /// @param fmt Format string with specifiers for the given data.
 /// @param data Data to format.
-/// @return An object that can be converted/casted to a string, or streamed to an std::stream.
-///
-/// example base/ex_format.cpp
+/// @returns An object that can be converted/casted to a string, or streamed to an std::stream.
+/// @example base/format.cpp
 template<typename ... Args>
 format_holder<Args...> format( std::string fmt, const Args &...data )
 {
@@ -199,6 +199,7 @@ format_holder<Args...> format( std::string fmt, const Args &...data )
 ////////////////////////////////////////
 
 /// @brief Stream output operator for format.
+/// @relates base::format_holder
 template<typename CharT, typename ... Args>
 std::basic_ostream<CharT> &operator<<( std::basic_ostream<CharT> &out, const format_holder<Args...> &fmt )
 {
@@ -210,6 +211,7 @@ std::basic_ostream<CharT> &operator<<( std::basic_ostream<CharT> &out, const for
 
 /// @brief Print container values with separator.
 /// Commonly used to print vector values separated by a comma.
+/// @sa base::infix_separated
 template<typename Container>
 class infix_separated_printer
 {
@@ -246,6 +248,8 @@ private:
 ////////////////////////////////////////
 
 /// @brief Print infix separated container.
+/// @relates base::infix_separated_printer
+/// @sa base::infix_separated
 template<typename C>
 std::ostream &operator<<( std::ostream &out, const infix_separated_printer<C> &tmp )
 {
@@ -257,6 +261,10 @@ std::ostream &operator<<( std::ostream &out, const infix_separated_printer<C> &t
 
 /// @brief Create an infix_separated_printer.
 /// The easy way to print a container with a separator (e.g. comma).
+/// Example of how to use:
+/// @tparam C Container type to print.
+/// @snippet base/format.cpp infix_separated
+/// @relates base::infix_separated_printer
 template<typename C>
 infix_separated_printer<C> infix_separated( std::string sep, const C &c )
 {

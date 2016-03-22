@@ -41,5 +41,10 @@ void example( void )
 	// Finally let's try something the will error out
 	std::cout << base::format( "This will throw:\n  {0,w}", "xxx" ) << std::endl;
 	return 0;
+
+	//! [infix_separated]
+	std::vector<int> list { 1, 2, 3 };
+	std::cout << base::infix_separated( ", ", list ) << std::endl;
+	//! [infix_separated]
 }
 

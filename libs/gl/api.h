@@ -44,6 +44,7 @@ public:
 	/// @brief Get OpenGL shading version
 	std::string get_shading_version( void );
 
+	/// @brief Get the number of UBOs allowed
 	size_t get_max_uniform_buffer_bindings( void );
 
 	/// @brief Enable server-side GL capabilities
@@ -97,25 +98,29 @@ public:
 	/// @brief Multiply matrix
 	void multiply( const matrix4 &m );
 
-	/// @brief Get the current matrix
+	/// @brief Get the current matrix.
 	matrix4 current_matrix( void )
 	{
 		precondition( !_matrix.empty(), "no matrix available" );;;
 		return _matrix.back();
 	}
 
-	/// @brief Restore a saved matrix
+	/// @brief Restore a saved matrix.
 	void restore_matrix( void );
 
 
-	/// @brief Construct a new shader
+	/// @brief Construct a new shader.
+	/// @tparams Args Constructor arguments for shader.
+	/// @sa gl::shader::shader
 	template<typename ...Args>
 	std::shared_ptr<shader> new_shader( Args &&...args )
 	{
 		return std::make_shared<shader>( std::forward<Args>( args )... );
 	}
 
-	/// @brief Construct a new vertex shader
+	/// @brief Construct a new vertex shader.
+	/// @tparams Args Constructor arguments for vertex shader.
+	/// @sa gl::shader::shader
 	template<typename ...Args>
 	std::shared_ptr<shader> new_vertex_shader( Args &&...args )
 	{
@@ -123,6 +128,8 @@ public:
 	}
 
 	/// @brief Construct a new fragment shader
+	/// @tparams Args Constructor arguments for fragment shader.
+	/// @sa gl::shader::shader
 	template<typename ...Args>
 	std::shared_ptr<shader> new_fragment_shader( Args &&...args )
 	{
@@ -130,6 +137,8 @@ public:
 	}
 
 	/// @brief Construct a new program
+	/// @tparams Args Constructor arguments for program.
+	/// @sa gl::program::program
 	template<typename ...Args>
 	std::shared_ptr<program> new_program( Args &&...args )
 	{
@@ -137,6 +146,8 @@ public:
 	}
 
 	/// @brief Construct a new texture
+	/// @tparams Args Constructor arguments for texture.
+	/// @sa gl::texture::texture
 	template<typename ...Args>
 	std::shared_ptr<texture> new_texture( Args &&...args )
 	{
@@ -162,12 +173,11 @@ public:
 	}
 
 	/// @brief Construct a new element buffer
-	/*
-	std::shared_ptr<element_buffer> new_element_buffer( void )
+	template<typename ...Args>
+	std::shared_ptr<element_buffer> new_element_buffer( Args &&...args )
 	{
-		return std::make_shared<element_buffer>();
+		return std::make_shared<element_buffer>( std::forward<Args>( args )... );
 	}
-	*/
 
 	/// @brief Construct a new vertex array
 	template<typename ...Args>
@@ -176,21 +186,7 @@ public:
 		return std::make_shared<vertex_array>( std::forward<Args>( args )... );
 	}
 
-	/*
-	/// @brief Enable vertex array
-	void enable_vertex_attrib_array( program::attribute attr, size_t size, data_type dt, size_t stride = 0, const void *data = nullptr )
-	{
-		glEnableVertexAttribArray( attr );
-		glVertexAttribPointer( attr, static_cast<GLint>(size), static_cast<GLenum>( dt ), GL_FALSE, static_cast<GLsizei>(stride), data );
-	}
-
-	/// @brief Disable vertex array
-	void disable_vertex_attrib_array( program::attribute attr )
-	{
-		glDisableVertexAttribArray( attr );
-	}
-	*/
-
+	/// @brief Setup debugging (if available).
 	void setup_debugging( void );
 
 private:

@@ -100,15 +100,10 @@
 	#define FP_NORMAL		4
 #endif
 
-
-/// Main namespace for half precision functionality.
-/// This namespace contains all the functionality provided by the library.
 namespace base
 {
 	class half;
 
-	/// \internal
-	/// \brief Implementation details.
 	namespace detail
 	{
 		/// Conditional type.
@@ -694,7 +689,7 @@ namespace base
 		template<typename,typename,std::float_round_style> struct half_caster;
 	}
 
-	/// Half-precision floating point type.
+	/// @brief Half-precision floating point type.
 	/// This class implements an IEEE-conformant half-precision floating point type with the usual arithmetic operators and
 	/// conversions. It is implicitly convertible to single-precision floating point, which makes artihmetic expressions and
 	/// functions with mixed-type operands to be of the most precise operand type. Additionally all arithmetic operations
@@ -828,21 +823,13 @@ namespace base
 		detail::uint16 data_;
 	};
 
-	/// Library-defined half-precision literals.
-	/// Import this namespace to enable half-precision floating point literals:
-	/// ~~~~{.cpp}
-	/// using namespace base::literal;
-	/// base::half = 4.2_h;
-	/// ~~~~
-	namespace literal
-	{
-		/// Half literal.
-		/// While this returns an actual half-precision value, half literals can unfortunately not be constant expressions due
-		/// to rather involved single-to-half conversion.
-		/// \param value literal value
-		/// \return half with given value (if representable)
-		inline half operator "" _h(long double value) { return half(static_cast<float>(value)); }
-	}
+	/// Half literal.
+	/// While this returns an actual half-precision value, half literals can unfortunately not be constant expressions due
+	/// to rather involved single-to-half conversion.
+	/// @param value literal value
+	/// @return half with given value (if representable)
+	/// @relates base::half
+	inline half operator "" _h(long double value) { return half(static_cast<float>(value)); }
 
 	namespace detail
 	{
@@ -2414,7 +2401,7 @@ namespace base
 }
 
 
-/// Extensions to the C++ standard library.
+/// @brief Extensions to the C++ standard library.
 namespace std
 {
 	/// Numeric limits for half-precision floats.
