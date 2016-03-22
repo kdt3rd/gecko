@@ -6,7 +6,7 @@ namespace gl
 
 ////////////////////////////////////////
 
-std::vector<bound_framebuffer *> bound_framebuffer::_stack;
+std::vector<framebuffer::binding *> framebuffer::binding::_stack;
 
 ////////////////////////////////////////
 
