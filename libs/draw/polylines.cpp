@@ -2,7 +2,6 @@
 #include <iostream>
 #include "polylines.h"
 #include "geometry.h"
-#include "mesh.h"
 #include "clipper.h"
 #include "tessellator.h"
 #include <base/contract.h>
@@ -174,6 +173,7 @@ polylines polylines::offset( double width )
 
 ////////////////////////////////////////
 
+/*
 mesh<base::point> polylines::debug( void )
 {
 	mesh<base::point> result;
@@ -190,9 +190,11 @@ mesh<base::point> polylines::debug( void )
 
 	return result;
 }
+*/
 
 ////////////////////////////////////////
 
+/*
 mesh<base::point> polylines::filled( void )
 {
 	precondition( !_lines.empty(), "no polylines" );
@@ -246,23 +248,11 @@ mesh<base::point> polylines::filled( void )
 
 	tess.tessellate();
 
-	/*
-	auto *verts = tess.get_vertices();
-	auto *elems = tess.get_elements();
-
-	for ( size_t i = 0; i < tess.get_element_count(); ++i )
-	{
-		auto *idx = &elems[i*3];
-		m.push_back( { verts[idx[0]*2], verts[idx[0]*2+1] } );
-		m.push_back( { verts[idx[1]*2], verts[idx[1]*2+1] } );
-		m.push_back( { verts[idx[2]*2], verts[idx[2]*2+1] } );
-	}
-	*/
-
 	m.end();
 
 	return m;
 }
+*/
 
 ////////////////////////////////////////
 

@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "polyline.h"
-#include "mesh.h"
+//#include "mesh.h"
 #include <base/point.h>
 
 namespace draw
@@ -43,8 +43,8 @@ public:
 	polylines stroked( double width );
 	polylines offset( double width );
 
-	mesh<base::point> debug( void );
-	mesh<base::point> filled( void );
+//	mesh<base::point> debug( void );
+//	mesh<base::point> filled( void );
 
 	std::vector<polyline>::iterator begin( void )
 	{

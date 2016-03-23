@@ -120,10 +120,10 @@ void texture::binding::set_filters( filter min, filter mag )
 
 ////////////////////////////////////////
 
-void texture::binding::set_border_color( const base::color &c )
+void texture::binding::set_border_color( const color &c )
 {
 
-	float color[] = { float(c.red()), float(c.green()), float(c.blue()), float(c.alpha()) };
+	float color[] = { c.red(), c.green(), c.blue(), c.alpha() };
 	glTexParameterfv( _target, GL_TEXTURE_BORDER_COLOR, color );
 }
 

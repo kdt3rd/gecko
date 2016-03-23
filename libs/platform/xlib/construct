@@ -3,16 +3,17 @@
 -- filter, like whether xlib is available or
 -- preferred
 extra_source = optional_source{
-	system="Linux",
+	system="Linux";
 	source={
-		"system.cpp",
-		"screen.cpp",
-		"window.cpp",
-		"timer.cpp",
-		"keyboard.cpp",
-		"mouse.cpp",
-		"dispatcher.cpp",
-	}
-}
-extra_libs = {"x11", "gl"}
+		"system.cpp";
+		"screen.cpp";
+		"window.cpp";
+		"timer.cpp";
+		"keyboard.cpp";
+		"mouse.cpp";
+		"dispatcher.cpp";
+	};
+};
+
+extra_libs = {"x11", "gl"};
 

@@ -4,7 +4,7 @@
 #include "opengl.h"
 #include "enums.h"
 #include <limits>
-#include <base/color.h>
+#include "color.h"
 #include <base/contract.h>
 
 namespace gl
@@ -64,7 +64,7 @@ public:
 		void set_filters( filter min, filter mag );
 
 		/// @brief Set the texture border color.
-		void set_border_color( const base::color &c );
+		void set_border_color( const color &c );
 
 		/// @brief Swizzle the channels.
 		void set_swizzle( swizzle r, swizzle g, swizzle b, swizzle a = swizzle::ONE );

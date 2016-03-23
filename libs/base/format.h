@@ -185,7 +185,7 @@ private:
 ///   - a Alignment, left or right (followed by a single letter l or r).
 ///   - # Comment, can be followed by anything (except a closing curly brace).
 ///
-/// @tparam Args... Types for the arguments to print.
+/// @tparam Args Types for the arguments to print.
 /// @param fmt Format string with specifiers for the given data.
 /// @param data Data to format.
 /// @returns An object that can be converted/casted to a string, or streamed to an std::stream.
