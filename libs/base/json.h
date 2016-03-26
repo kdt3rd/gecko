@@ -41,7 +41,7 @@ public:
 	/// @brief JSON null constructor
 	json( void )
 	{
-		json_null x;
+		json_null x = nullptr;
 		set<json_null>( x );
 	}
 
