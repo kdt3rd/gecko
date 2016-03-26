@@ -7,8 +7,8 @@ tests:set_default_target( false )
 
 function AddUnitTest( fname, l, cmdline )
 	assert(type(fname)=="string", "Expecting a single filename as a unit test")
-	testname = file.basename( fname )
-	unitname="__unit_test_"..testname
+	testname = "test_" .. file.basename( fname )
+	unitname="__unit_"..testname
 	e = executable( testname )
 	  source( fname )
 	  libs( l or {} )
