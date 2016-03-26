@@ -17,6 +17,22 @@ versor::versor( float angle, float x, float y, float z )
 
 ////////////////////////////////////////
 
+void versor::normalize( void )
+{
+	float sum = _q[0] * _q[0] + _q[1] * _q[1] + _q[2] * _q[2] + _q[3] * _q[3];
+	const float thresh = 0.0001F;
+	if ( std::abs( 1.F - sum ) >= thresh )
+	{
+		float mag = std::sqrt( sum );
+		_q[0] /= mag;
+		_q[1] /= mag;
+		_q[2] /= mag;
+		_q[3] /= mag;
+	}
+}
+
+////////////////////////////////////////
+
 versor versor::slerp( const versor &v1, const versor &v2, float t )
 {
 	// Angle between the 2 versor (cos of half angle).
