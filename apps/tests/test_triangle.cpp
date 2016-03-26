@@ -75,7 +75,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 			auto tbind = triangle.bind();
 			tbind.vertex_attribute( "vertex_position", data, 0 );
 			tbind.vertex_attribute( "vertex_color", data, 1 );
-			tbind.bind_elements( elements );
+			tbind.set_elements( elements );
 		}
 
 		/// Add triangle (3 points).

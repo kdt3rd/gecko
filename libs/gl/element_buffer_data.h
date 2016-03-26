@@ -36,8 +36,8 @@ public:
 	void push_back( uint32_t i, const Args &...args )
 	{
 		precondition( !_ebo, "cannot add index after creating buffer object" );
-		_data.push_back( i );
-		append( args... );
+		_data.push_back( static_cast<uint32_t>( i ) );
+		push_back( args... );
 	}
 
 	/// @brief Remove last index added.
@@ -93,6 +93,10 @@ public:
 	}
 
 private:
+	void push_back( void )
+	{
+	}
+
 	std::shared_ptr<element_buffer> _ebo;
 	std::vector<uint32_t> _data;
 };

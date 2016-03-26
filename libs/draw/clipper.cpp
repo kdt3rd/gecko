@@ -48,7 +48,7 @@
 #include <ostream>
 #include <functional>
 
-namespace ClipperLib {
+namespace draw { namespace detail {
 
 static double const pi = 3.141592653589793238;
 static double const two_pi = pi *2;
@@ -4490,4 +4490,4 @@ std::ostream& operator <<(std::ostream &s, const Paths &p)
 }
 //------------------------------------------------------------------------------
 
-} //ClipperLib namespace
+} }

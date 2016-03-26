@@ -32,7 +32,6 @@ versor versor::slerp( const versor &v1, const versor &v2, float t )
 
 	float sin_angle = std::sqrt( 1.F - cos_angle * cos_angle );
 
-//	versor result;
 	if ( std::abs( sin_angle ) < 0.0001F )
 		return v1 * ( 1.F - t ) + v2 * t;
 

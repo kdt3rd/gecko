@@ -22,11 +22,19 @@ namespace script
 class font
 {
 public:
+	/// @brief Construct a font.
 	font( std::string fam, std::string sty, double sz );
+
+	/// @brief Destructor.
 	virtual ~font( void );
 
+	/// @brief Family of the font.
 	inline const std::string &family( void ) const { return _family; }
+
+	/// @brief Style of the font.
 	inline const std::string &style( void ) const { return _style; }
+
+	/// @brief Size of the font.
 	inline double size( void ) const { return _size; }
 
 	/// @brief Accessor to check if triplet of values is this font.
@@ -74,12 +82,18 @@ public:
 	/// when the context may not be current.
 	uint32_t glyph_version( void ) const { return _glyph_version; }
 
+	/// @brief Width of the glyph pack.
 	int bitmap_width( void ) const { return _glyph_pack.width(); }
+
+	/// @brief Height of the glyph pack.
 	int bitmap_height( void ) const { return _glyph_pack.height(); }
 
+	/// @brief Bitmap of glyphs.
 	const std::vector<uint8_t> &bitmap( void ) const { return _glyph_bitmap; }
+
 //	const std::vector<float> &glyph_coords( void ) const { return _glyph_coords; }
 
+	/// @brief Load a glyph.
 	void load_glyph( char32_t cc )
 	{
 		(void)get_glyph( cc );
@@ -88,7 +102,7 @@ public:
 protected:
 	void add_glyph( char32_t char_code, const uint8_t *glData, int glPitch, int w, int h );
 
-	/// @brief Retrieves a glyph given a unicode char code.
+	/// Retrieves a glyph given a unicode char code.
 	/// Function should load all attributes about the glyph and put
 	/// them into the glyph cache.
 	///

@@ -1,14 +1,9 @@
 
 #include <iostream>
+#include <base/math_functions.h>
 #include "path.h"
-#include "math_functions.h"
 
-namespace
-{
-	constexpr double PI = base::math::PI;
-}
-
-namespace base
+namespace draw
 {
 
 ////////////////////////////////////////
@@ -19,24 +14,28 @@ path::path( void )
 
 ////////////////////////////////////////
 
-path::path( const point &p )
+path::path( const gl::vec2 &p )
 {
 	move_to( p );
 }
 
 ////////////////////////////////////////
 
+/*
 path::path( const rect &r )
 {
 	rectangle( r );
 }
+*/
 
 ////////////////////////////////////////
 
-path::path( const rect &r, double rad )
+/*
+path::path( const rect &r, float rad )
 {
 	rounded_rect( r, rad );
 }
+*/
 
 ////////////////////////////////////////
 
@@ -46,7 +45,7 @@ path::~path( void )
 
 ////////////////////////////////////////
 
-void path::move_to( const point &p )
+void path::move_to( const gl::vec2 &p )
 {
 	add( p );
 	_last = p;
@@ -55,7 +54,7 @@ void path::move_to( const point &p )
 
 ////////////////////////////////////////
 
-void path::line_to( const point &p )
+void path::line_to( const gl::vec2 &p )
 {
 	add( p );
 	_last = p;
@@ -64,7 +63,7 @@ void path::line_to( const point &p )
 
 ////////////////////////////////////////
 
-void path::quadratic_to( const point &p1, const point &p2 )
+void path::quadratic_to( const gl::vec2 &p1, const gl::vec2 &p2 )
 {
 	add( p1, p2 );
 	_last = p2;
@@ -73,7 +72,7 @@ void path::quadratic_to( const point &p1, const point &p2 )
 
 ////////////////////////////////////////
 
-void path::cubic_to( const point &p1, const point &p2, const point &p3 )
+void path::cubic_to( const gl::vec2 &p1, const gl::vec2 &p2, const gl::vec2 &p3 )
 {
 	add( p1, p2, p3 );
 	_last = p3;
@@ -82,10 +81,10 @@ void path::cubic_to( const point &p1, const point &p2, const point &p3 )
 
 ////////////////////////////////////////
 
-void path::arc_to( const point &center, double radius, double angle1, double angle2 )
+void path::arc_to( const gl::vec2 &center, float radius, float angle1, float angle2 )
 {
 	add( center, radius, angle1, angle2 );
-	_last = center + point::polar( radius, angle2 );
+	_last = center + gl::vec2::polar( radius, angle2 );
 	_actions.push_back( action::ARC );
 }
 
@@ -102,15 +101,18 @@ void path::close( void )
 
 ////////////////////////////////////////
 
-void path::circle( const point &center, double radius )
+void path::circle( const gl::vec2 &center, float radius )
 {
-	move_to( { center.x() + radius, center.y() } );
-	arc_to( center, radius, 0.0, PI * 2.0 );
+	using namespace base::math;
+
+	move_to( { center[0] + radius, center[1] } );
+	arc_to( center, radius, 0.0, 360_deg );
 	close();
 }
 
 ////////////////////////////////////////
 
+/*
 void path::rectangle( const rect &r, bool reversed )
 {
 	if ( reversed )
@@ -129,15 +131,16 @@ void path::rectangle( const rect &r, bool reversed )
 	}
 	close();
 }
+*/
 
 ////////////////////////////////////////
 
-void path::rectangle( const point &p1, const point &p2 )
+void path::rectangle( const gl::vec2 &p1, const gl::vec2 &p2 )
 {
-	const double x1 = std::min( p1.x(), p2.x() );
-	const double y1 = std::min( p1.y(), p2.y() );
-	const double x2 = std::max( p1.x(), p2.x() );
-	const double y2 = std::max( p1.y(), p2.y() );
+	const float x1 = std::min( p1[0], p2[0] );
+	const float y1 = std::min( p1[1], p2[1] );
+	const float x2 = std::max( p1[0], p2[0] );
+	const float y2 = std::max( p1[1], p2[1] );
 
 	move_to( { x1, y1 } );
 	line_to( { x2, y1 } );
@@ -148,36 +151,38 @@ void path::rectangle( const point &p1, const point &p2 )
 
 ////////////////////////////////////////
 
-void path::rounded_rect( const point &p1, const point &p2, double r )
+void path::rounded_rect( const gl::vec2 &p1, const gl::vec2 &p2, float r )
 {
-	const double x1 = std::min( p1.x(), p2.x() );
-	const double y1 = std::min( p1.y(), p2.y() );
-	const double x2 = std::max( p1.x(), p2.x() );
-	const double y2 = std::max( p1.y(), p2.y() );
+	const float x1 = std::min( p1[0], p2[0] );
+	const float y1 = std::min( p1[1], p2[1] );
+	const float x2 = std::max( p1[0], p2[0] );
+	const float y2 = std::max( p1[1], p2[1] );
 
-	constexpr double degrees = PI / 180.0;
+	using namespace base::math;
 
 	move_to( { x1 + r, y1 } );
-	arc_to( { x2 - r, y1 + r }, r, -90.0 * degrees, 0.0 * degrees );
-	arc_to( { x2 - r, y2 - r }, r, 0.0 * degrees, 90.0 * degrees );
-	arc_to( { x1 + r, y2 - r }, r, 90.0 * degrees, 180.0 * degrees );
-	arc_to( { x1 + r, y1 + r }, r, 180.0 * degrees, 270.0 * degrees );
+	arc_to( { x2 - r, y1 + r }, r, -90_deg, 0_deg );
+	arc_to( { x2 - r, y2 - r }, r, 0_deg, 90_deg );
+	arc_to( { x1 + r, y2 - r }, r, 90_deg, 180_deg );
+	arc_to( { x1 + r, y1 + r }, r, 180_deg, 270_deg );
 	close();
 }
 
 ////////////////////////////////////////
 
-void path::rounded_rect( const point &p1, double w, double h, double r )
+void path::rounded_rect( const gl::vec2 &p1, float w, float h, float r )
 {
-	rounded_rect( p1, { p1.x() + w, p1.y() + h }, r );
+	rounded_rect( p1, { p1[0] + w, p1[1] + h }, r );
 }
 
 ////////////////////////////////////////
 
-void path::rounded_rect( const rect &r, double rad )
+/*
+void path::rounded_rect( const rect &r, float rad )
 {
 	rounded_rect( r.top_left(), r.bottom_right(), rad );
 }
+*/
 
 ////////////////////////////////////////
 
@@ -191,29 +196,29 @@ std::ostream &operator<<( std::ostream &out, const path &p )
 		{
 		}
 
-		void move_to( const point &x )
+		void move_to( const gl::vec2 &x )
 		{
 			out << "Move( " << x << " )\n";
 		}
 
-		void line_to( const point &x )
+		void line_to( const gl::vec2 &x )
 		{
 			out << "Line( " << x << " )\n";
 		}
 
-		void quadratic_to( const point &p1, const point &p2 )
+		void quadratic_to( const gl::vec2 &p1, const gl::vec2 &p2 )
 		{
 			out << "Quadratic( " << p1 << ", " << p2 << " )\n";
 		}
 
-		void cubic_to( const point &p1, const point &p2, const point &p3 )
+		void cubic_to( const gl::vec2 &p1, const gl::vec2 &p2, const gl::vec2 &p3 )
 		{
 			out << "Cubic( " << p1 << ", " << p2 << ", " << p3 << " )\n";
 		}
 
-		void arc_to( const point &center, double radius, double angle1, double angle2 )
+		void arc_to( const gl::vec2 &center, float radius, float angle1, float angle2 )
 		{
-			out << "Arc( " << center << ", " << radius << ", " << angle1 * 180 / PI << ", " << angle2 * 180 / PI << " )\n";
+			out << "Arc( " << center << ", " << radius << ", " << angle1 << ", " << angle2 << " )\n";
 		}
 
 		void close( void )

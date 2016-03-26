@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <cstdint>
 #include "polylines.h"
 #include "geometry.h"
 #include "clipper.h"
@@ -29,7 +30,7 @@ void polylines::new_polyline( void )
 
 ////////////////////////////////////////
 
-void polylines::move_to( const base::point &p )
+void polylines::move_to( const gl::vec2 &p )
 {
 	if ( _lines.empty() )
 		_lines.emplace_back();
@@ -41,7 +42,7 @@ void polylines::move_to( const base::point &p )
 
 ////////////////////////////////////////
 
-void polylines::line_to( const base::point &p )
+void polylines::line_to( const gl::vec2 &p )
 {
 	precondition( !_lines.empty(), "no point to start from" );
 	precondition( !_lines.back().empty(), "no point to start from" );
@@ -50,7 +51,7 @@ void polylines::line_to( const base::point &p )
 
 ////////////////////////////////////////
 
-void polylines::quadratic_to( const base::point &p1, const base::point &p2 )
+void polylines::quadratic_to( const gl::vec2 &p1, const gl::vec2 &p2 )
 {
 	precondition( !_lines.empty(), "no point to start from" );
 	precondition( !_lines.back().empty(), "no point to start from" );
@@ -59,7 +60,7 @@ void polylines::quadratic_to( const base::point &p1, const base::point &p2 )
 
 ////////////////////////////////////////
 
-void polylines::cubic_to( const base::point &p1, const base::point &p2, const base::point &p3 )
+void polylines::cubic_to( const gl::vec2 &p1, const gl::vec2 &p2, const gl::vec2 &p3 )
 {
 	precondition( !_lines.empty(), "no point to start from" );
 	precondition( !_lines.back().empty(), "no point to start from" );
@@ -68,7 +69,7 @@ void polylines::cubic_to( const base::point &p1, const base::point &p2, const ba
 
 ////////////////////////////////////////
 
-void polylines::arc_to( const base::point &center, double radius, double angle1, double angle2 )
+void polylines::arc_to( const gl::vec2 &center, float radius, float angle1, float angle2 )
 {
 	precondition( !_lines.empty(), "no point to start from" );
 	add_arc( center, radius, angle1, angle2, _lines.back() );
@@ -77,7 +78,7 @@ void polylines::arc_to( const base::point &center, double radius, double angle1,
 ////////////////////////////////////////
 
 /*
-void polylines::arc_to( const point &center, const point &radius, double angle1, double angle2 )
+void polylines::arc_to( const point &center, const point &radius, float angle1, float angle2 )
 {
 	_points.push_back( center );
 	_points.push_back( radius );
@@ -88,7 +89,7 @@ void polylines::arc_to( const point &center, const point &radius, double angle1,
 
 ////////////////////////////////////////
 
-void polylines::add_point( const base::point &p )
+void polylines::add_point( const gl::vec2 &p )
 {
 	precondition( !_lines.empty(), "no point to start from" );
 	_lines.back().push_back( p );
@@ -105,9 +106,9 @@ void polylines::close( void )
 
 ////////////////////////////////////////
 
-polylines polylines::stroked( double width )
+polylines polylines::stroked( float width )
 {
-	using namespace ClipperLib;
+	using namespace draw::detail;
 	Path subj;
 	Paths solution;
 
@@ -119,7 +120,7 @@ polylines polylines::stroked( double width )
 
 		subj.clear();
 		for ( const auto &p: line )
-			subj << IntPoint( static_cast<int>(p.x() * 100 + 0.5), static_cast<int>(p.y() * 100 + 0.5) );
+			subj << IntPoint( static_cast<int>( p[0] * 100 + 0.5F ), static_cast<int>( p[1] * 100 + 0.5F ) );
 
 		ClipperOffset co;
 		co.AddPath( subj, jtRound, line.closed() ? etClosedLine : etOpenRound );
@@ -130,7 +131,7 @@ polylines polylines::stroked( double width )
 		{
 			result.new_polyline();
 			for ( const auto &p: path )
-				result.add_point( { p.X / 100.0, p.Y / 100.0 } );
+				result.add_point( { p.X / 100.F, p.Y / 100.F } );
 			result.close();
 		}
 	}
@@ -140,9 +141,9 @@ polylines polylines::stroked( double width )
 
 ////////////////////////////////////////
 
-polylines polylines::offset( double width )
+polylines polylines::offset( float width )
 {
-	using namespace ClipperLib;
+	using namespace draw::detail;
 	Path subj;
 	Paths solution;
 
@@ -151,8 +152,8 @@ polylines polylines::offset( double width )
 	{
 		subj.clear();
 		for ( const auto &p: line )
-			subj << IntPoint( static_cast<int>(p.x() * 100 + 0.5),
-							  static_cast<int>(p.y() * 100 + 0.5) );
+			subj << IntPoint( static_cast<int>( p[0] * 100 + 0.5F ),
+							  static_cast<int>( p[1] * 100 + 0.5F ) );
 
 		ClipperOffset co;
 		co.AddPath( subj, jtRound, line.closed() ? etClosedPolygon : etOpenRound );
@@ -163,7 +164,7 @@ polylines polylines::offset( double width )
 		{
 			result.new_polyline();
 			for ( const auto &p: path )
-				result.add_point( { p.X / 100.0, p.Y / 100.0 } );
+				result.add_point( { p.X / 100.F, p.Y / 100.F } );
 			result.close();
 		}
 	}
@@ -173,33 +174,11 @@ polylines polylines::offset( double width )
 
 ////////////////////////////////////////
 
-/*
-mesh<base::point> polylines::debug( void )
-{
-	mesh<base::point> result;
-	for ( const auto &line: _lines )
-	{
-		if ( line.closed() )
-			result.begin( gl::primitive::LINE_LOOP );
-		else
-			result.begin( gl::primitive::LINE_STRIP );
-		for ( const auto &p: line )
-			result.push_back( p );
-		result.end();
-	}
-
-	return result;
-}
-*/
-
-////////////////////////////////////////
-
-/*
-mesh<base::point> polylines::filled( void )
+void polylines::filled( const std::function<void(float,float)> &add_point, const std::function<void(size_t,size_t,size_t)> &add_tri )
 {
 	precondition( !_lines.empty(), "no polylines" );
 
-	using namespace ClipperLib;
+	using namespace draw::detail;
 	Paths solution;
 	{
 		Clipper clip;
@@ -212,30 +191,13 @@ mesh<base::point> polylines::filled( void )
 				{
 					subj.clear();
 					for ( const auto &p: line )
-						subj << IntPoint( static_cast<int>(p.x() * 100 + 0.5),
-										  static_cast<int>(p.y() * 100 + 0.5) );
+						subj << IntPoint( static_cast<int>( p[0] * 100 + 0.5F ), static_cast<int>( p[1] * 100 + 0.5F ) );
 					clip.AddPath( subj, ptSubject, line.closed() );
 				}
 			}
 		}
 		clip.Execute( ctUnion, solution );
 	}
-
-	std::vector<base::point> points;
-	mesh<base::point> m;
-	m.begin( gl::primitive::TRIANGLES );
-
-	auto add_point = [&]( double x, double y )
-	{
-		points.emplace_back( x, y );
-	};
-
-	auto add_tri = [&]( size_t a, size_t b, size_t c )
-	{
-		m.push_back( { points[a].x(), points[a].y() } );
-		m.push_back( { points[b].x(), points[b].y() } );
-		m.push_back( { points[c].x(), points[c].y() } );
-	};
 
 	tessellator tess( add_point, add_tri );
 	for ( auto &poly: solution )
@@ -247,12 +209,7 @@ mesh<base::point> polylines::filled( void )
 	}
 
 	tess.tessellate();
-
-	m.end();
-
-	return m;
 }
-*/
 
 ////////////////////////////////////////
 

@@ -4,7 +4,6 @@ lib = library "base"
 	"format.cpp",
 	"contract.cpp",
 	"rect.cpp",
-	"path.cpp",
 	"string_util.cpp",
 --	"gradient.cpp",
 --	"paint.cpp",

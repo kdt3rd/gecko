@@ -30,7 +30,7 @@ lib = library "platform"
 		  source={ "mswin.cpp" };
 	  },
   }
-  libs{ "draw", "utf" }
+  libs{ "utf", "base" }
   system_libs{
 	  system="Linux";
 	  libs=xlib.extra_libs;

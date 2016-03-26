@@ -5,12 +5,12 @@
 namespace
 {
 	template<int n, typename T>
-	inline const base::point &pt( const T &t )
+	inline const gl::vec2 &pt( const T &t )
 	{
 		return std::get<n>( t );
 	}
 
-	constexpr double PI = 3.14159265358979323846;
+	constexpr float PI = 3.14159265358979323846F;
 }
 
 
@@ -19,10 +19,10 @@ namespace draw
 
 ////////////////////////////////////////
 
-size_t circle_precision( double r )
+size_t circle_precision( float r )
 {
 	size_t n = 3;
-	double error = 0.0;
+	float error = 0.0;
 	do
 	{
 		n = n * 2;
@@ -34,21 +34,21 @@ size_t circle_precision( double r )
 
 ////////////////////////////////////////
 
-void add_quadratic( const base::point &p1, const base::point &p2, const base::point &p3, polyline &line )
+void add_quadratic( const gl::vec2 &p1, const gl::vec2 &p2, const gl::vec2 &p3, polyline &line )
 {
-	using base::point;
-	typedef std::tuple<point,point,point> curve;
+	using gl::vec2;
+	typedef std::tuple<vec2,vec2,vec2> curve;
 	std::vector<curve> stack;
 	stack.reserve( 16 );
 	stack.emplace_back( p1, p2, p3 );
-	point c0, c1, c2, c3;
+	vec2 c0, c1, c2, c3;
 
 	while ( !stack.empty() )
 	{
 		curve &c = stack.back();
-		point mid = ( pt<0>( c ) + pt<2>( c ) ) * 0.5;
+		vec2 mid = ( pt<0>( c ) + pt<2>( c ) ) * 0.5F;
 
-		if ( point::distance_squared( mid, pt<1>( c ) ) <= 0.01 )
+		if ( vec2::distance_squared( mid, pt<1>( c ) ) <= 0.01F )
 		{
 			line.push_back( pt<2>( c ) );
 			stack.pop_back();
@@ -56,9 +56,9 @@ void add_quadratic( const base::point &p1, const base::point &p2, const base::po
 		else
 		{
 			c0 = pt<0>( c );
-			c1 = ( c0 + pt<1>( c ) ) * 0.5;
-			c3 = ( pt<1>( c ) + pt<2>( c ) ) * 0.5;
-			c2 = ( c1 + c3 ) * 0.5;
+			c1 = ( c0 + pt<1>( c ) ) * 0.5F;
+			c3 = ( pt<1>( c ) + pt<2>( c ) ) * 0.5F;
+			c2 = ( c1 + c3 ) * 0.5F;
 
 			c = std::make_tuple( c2, c3, pt<2>( c ) ); // right side
 			stack.emplace_back( c0, c1, c2 );
@@ -68,34 +68,34 @@ void add_quadratic( const base::point &p1, const base::point &p2, const base::po
 
 ////////////////////////////////////////
 
-void add_cubic( const base::point &p1, const base::point &p2, const base::point &p3, const base::point &p4, polyline &line )
+void add_cubic( const gl::vec2 &p1, const gl::vec2 &p2, const gl::vec2 &p3, const gl::vec2 &p4, polyline &line )
 {
-	using base::point;
-	typedef std::tuple<point,point,point,point> curve;
+	using gl::vec2;
+	typedef std::tuple<vec2,vec2,vec2,vec2> curve;
 	std::vector<curve> stack;
 	stack.reserve( 16 );
 	stack.emplace_back( p1, p2, p3, p4 );
-	point p0, p01, p12, p23, p012, p123, p0123, d, d13, d23;
+	vec2 p0, p01, p12, p23, p012, p123, p0123, d, d13, d23;
 	bool first = true;
 
 	while ( !stack.empty() )
 	{
 		curve &c = stack.back();
-		p01 = ( pt<0>( c ) + pt<1>( c ) ) * 0.5;
-		p12 = ( pt<1>( c ) + pt<2>( c ) ) * 0.5;
-		p23 = ( pt<2>( c ) + pt<3>( c ) ) * 0.5;
-		p012 = ( p01 + p12 ) * 0.5;
-		p123 = ( p12 + p23 ) * 0.5;
-		p0123 = ( p012 + p123 ) * 0.5;
+		p01 = ( pt<0>( c ) + pt<1>( c ) ) * 0.5F;
+		p12 = ( pt<1>( c ) + pt<2>( c ) ) * 0.5F;
+		p23 = ( pt<2>( c ) + pt<3>( c ) ) * 0.5F;
+		p012 = ( p01 + p12 ) * 0.5F;
+		p123 = ( p12 + p23 ) * 0.5F;
+		p0123 = ( p012 + p123 ) * 0.5F;
 
 		d = pt<0>( c ) - pt<3>( c );
 		d13 = pt<1>( c ) - pt<3>( c );
 		d23 = pt<2>( c ) - pt<3>( c );
 
-		double d2 = d13.x() * d.y() - d13.y() * d.x();
-		double d3 = d23.x() * d.y() - d23.y() * d.x();
+		float d2 = d13[0] * d[1] - d13[1] * d[0];
+		float d3 = d23[0] * d[1] - d23[1] * d[0];
 
-		if ( ( d2 + d3 ) * ( d2 + d3 ) < 0.1 * ( d.x() * d.x() + d.y() * d.y() ) && !first )
+		if ( ( d2 + d3 ) * ( d2 + d3 ) < 0.1F * ( d[0] * d[0] + d[1] * d[1] ) && !first )
 		{
 			line.push_back( pt<3>( c ) );
 			stack.pop_back();
@@ -112,24 +112,24 @@ void add_cubic( const base::point &p1, const base::point &p2, const base::point 
 
 ////////////////////////////////////////
 
-void add_arc( const base::point &center, double radius, double a1, double a2, polyline &line )
+void add_arc( const gl::vec2 &center, float radius, float a1, float a2, polyline &line )
 {
-	using base::point;
+	using gl::vec2;
 
 	size_t n = circle_precision( radius );
 
-	double span = std::abs( std::fmod( ( a1 - a2 + PI ), 2.0 * PI ) - PI );
-	n = size_t( std::ceil( n * span / ( 2.0 * PI ) ) );
+	float span = std::abs( std::fmod( ( a1 - a2 + PI ), 2.0F * PI ) - PI );
+	n = size_t( std::ceil( n * span / ( 2.0F * PI ) ) );
 
-	point p = point::polar( radius, a1 ) + center;
-	if ( line.empty() || point::distance_squared( p, line.back() ) > 0.1 )
+	vec2 p = vec2::polar( radius, a1 ) + center;
+	if ( line.empty() || vec2::distance_squared( p, line.back() ) > 0.1F )
 		line.push_back( p );
 
 	for ( size_t i = 1; i <= n; ++i )
 	{
-		double m = double(i) / double(n);
-		double a = a1 * ( 1.0 - m ) + a2 * m;
-		line.push_back( point::polar( radius, a ) + center );
+		float m = float(i) / float(n);
+		float a = a1 * ( 1.0F - m ) + a2 * m;
+		line.push_back( vec2::polar( radius, a ) + center );
 	}
 }
 

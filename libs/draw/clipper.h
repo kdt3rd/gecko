@@ -31,8 +31,7 @@
 *                                                                              *
 *******************************************************************************/
 
-#ifndef clipper_hpp
-#define clipper_hpp
+#pragma once
 
 #define CLIPPER_VERSION "6.2.0"
 
@@ -58,7 +57,7 @@
 #include <functional>
 #include <queue>
 
-namespace ClipperLib {
+namespace draw { namespace detail {
 
 enum ClipType { ctIntersection, ctUnion, ctDifference, ctXor };
 enum PolyType { ptSubject, ptClip };
@@ -388,8 +387,5 @@ class clipperException : public std::exception
 };
 //------------------------------------------------------------------------------
 
-} //ClipperLib namespace
-
-#endif //clipper_hpp
-
+} }
 

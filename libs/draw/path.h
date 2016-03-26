@@ -2,10 +2,9 @@
 #pragma once
 
 #include <vector>
-#include "point.h"
-#include "rect.h"
+#include <gl/vector.h>
 
-namespace base
+namespace draw
 {
 
 ////////////////////////////////////////
@@ -29,79 +28,79 @@ public:
 	path( void );
 
 	/// @brief Copy constructor.
-	path( const point &p );
+	path( const gl::vec2 &p );
 
-	/// @brief Rectangle constructor.
-	path( const rect &r );
+//	/// @brief Rectangle constructor.
+//	path( const rect &r );
 
-	/// @brief Rounded rectangle constructor.
-	path( const rect &r, double radius );
+//	/// @brief Rounded rectangle constructor.
+//	path( const rect &r, float radius );
 
 	/// @brief Destructor.
 	~path( void );
 
 	/// @brief Move the cursor.
 	/// Move the cursor to the given position.
-	/// @param p the point to move to for the path.
-	void move_to( const point &p );
+	/// @param p the gl::vec2 to move to for the path.
+	void move_to( const gl::vec2 &p );
 
 	/// @brief Line from the current position to p.
-	void line_to( const point &p );
+	void line_to( const gl::vec2 &p );
 
 	/// @brief Quadratic curve from the current position to p2.
-	void quadratic_to( const point &p1, const point &p2 );
+	void quadratic_to( const gl::vec2 &p1, const gl::vec2 &p2 );
 
 	/// @brief Cubic curve from the current position to p3.
-	void cubic_to( const point &p1, const point &p2, const point &p3 );
+	void cubic_to( const gl::vec2 &p1, const gl::vec2 &p2, const gl::vec2 &p3 );
 
-//	void arc_to( const point &p1, const &point &p2, double r );
+//	void arc_to( const gl::vec2 &p1, const &gl::vec2 &p2, float r );
 
-	/// @brief Arc from the current point sweeping through the angles.
-	void arc_to( const point &center, double radius, double angle1, double angle2 );
+	/// @brief Arc from the current gl::vec2 sweeping through the angles.
+	void arc_to( const gl::vec2 &center, float radius, float angle1, float angle2 );
 
 	/// @brief Move by a delta.
-	void move_by( const point &p ) { move_to( next_point( p ) ); }
+	void move_by( const gl::vec2 &p ) { move_to( next_point( p ) ); }
 
 	/// @brief Line by a delta.
-	void line_by( const point &p ) { line_to( next_point( p ) ); }
+	void line_by( const gl::vec2 &p ) { line_to( next_point( p ) ); }
 
 	/// @brief Quadratic curve relative to current position.
-	void quadratic_by( const point &p1, const point &p2 ) { quadratic_to( next_point( p1 ), next_point( p2 ) ); }
+	void quadratic_by( const gl::vec2 &p1, const gl::vec2 &p2 ) { quadratic_to( next_point( p1 ), next_point( p2 ) ); }
 
 	/// @brief Cubic curve relative to current position.
-	void cubic_by( const point &p1, const point &p2, const point &p3 ) { cubic_to( next_point( p1 ), next_point( p2 ), next_point( p3 ) ); }
+	void cubic_by( const gl::vec2 &p1, const gl::vec2 &p2, const gl::vec2 &p3 ) { cubic_to( next_point( p1 ), next_point( p2 ), next_point( p3 ) ); }
 
-//	void arc_by( const point &p1, const &point &p2, double r ) { arc_to( next_point( p1 ), next_point( p2 ), r ); }
+//	void arc_by( const gl::vec2 &p1, const &gl::vec2 &p2, float r ) { arc_to( next_point( p1 ), next_point( p2 ), r ); }
 
 	/// @brief Arc with center relative to current position.
-	void arc_by( const point &center, double radius, double angle1, double angle2 ) { arc_to( next_point( center ), radius, angle1, angle2 ); }
+	void arc_by( const gl::vec2 &center, float radius, float angle1, float angle2 ) { arc_to( next_point( center ), radius, angle1, angle2 ); }
 
 	/// @brief Close the current shape.
 	/// Close the current shape by drawing a line to the starting point.
 	void close( void );
 
 	/// @brief Draw a full circle.
-	void circle( const point &center, double radius );
+	void circle( const gl::vec2 &center, float radius );
+
+//	/// @brief Draw a rectangle.
+//	void rectangle( const rect &r, bool reversed = false );
 
 	/// @brief Draw a rectangle.
-	void rectangle( const rect &r, bool reversed = false );
+	void rectangle( const gl::vec2 &p1, const gl::vec2 &p2 );
 
 	/// @brief Draw a rectangle.
-	void rectangle( const point &p1, const point &p2 );
-
-	/// @brief Draw a rectangle.
-	void rectangle( const point &p1, double w, double h ) { rectangle( p1, p1 + point( w, h ) ); }
+	void rectangle( const gl::vec2 &p1, float w, float h ) { rectangle( p1, p1 + gl::vec2( w, h ) ); }
 
 	/// @brief Draw a rounded rectangle.
-	void rounded_rect( const point &p1, const point &p2, double r );
+	void rounded_rect( const gl::vec2 &p1, const gl::vec2 &p2, float r );
 
 	/// @brief Draw a rounded rectangle.
-	void rounded_rect( const point &p1, double w, double h, double r );
+	void rounded_rect( const gl::vec2 &p1, float w, float h, float r );
 
-	/// @brief Draw a rounded rectangle.
-	void rounded_rect( const rect &r, double rad );
+//	/// @brief Draw a rounded rectangle.
+//	void rounded_rect( const rect &r, float rad );
 
-	const std::vector<double> &get_data( void ) const { return _data; }
+	const std::vector<float> &get_data( void ) const { return _data; }
 	const std::vector<action> &get_actions( void ) const { return _actions; }
 
 	template<typename P>
@@ -109,8 +108,8 @@ public:
 	{
 		auto data = _data.begin();
 
-		point p1, p2, p3;
-		double x, y, z;
+		gl::vec2 p1, p2, p3;
+		float x, y, z;
 
 		for ( auto act: _actions )
 		{
@@ -163,20 +162,20 @@ public:
 
 private:
 	template<typename Iterator>
-	point pt( Iterator &i ) const
+	gl::vec2 pt( Iterator &i ) const
 	{
-		double x = *i++;
-		double y = *i++;
-		return point( x, y );
+		float x = *i++;
+		float y = *i++;
+		return gl::vec2( x, y );
 	}
 
 	template<typename Iterator>
-	double dbl( Iterator &i ) const
+	float dbl( Iterator &i ) const
 	{
 		return *i++;
 	}
 
-	inline point next_point( const point &d )
+	inline gl::vec2 next_point( const gl::vec2 &d )
 	{
 		return d + _last;
 	}
@@ -192,20 +191,20 @@ private:
 		add( tail... );
 	}
 
-	void addit( const point &p )
+	void addit( const gl::vec2 &p )
 	{
-		addit( p.x() );
-		addit( p.y() );
+		addit( p[0] );
+		addit( p[1] );
 	}
 
-	void addit( double v )
+	void addit( float v )
 	{
 		_data.push_back( v );
 	}
 
 	std::size_t _start = 0;
-	point _last = { 0, 0 };
-	std::vector<double> _data;
+	gl::vec2 _last = { 0, 0 };
+	std::vector<float> _data;
 	std::vector<action> _actions;
 };
 

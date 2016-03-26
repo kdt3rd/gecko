@@ -20,11 +20,12 @@ mesh::binding::~binding( void )
 {
 	_prog = nullptr;
 	_vao = nullptr;
+	_mesh = nullptr;
 }
 
 ////////////////////////////////////////
 
-void mesh::binding::bind_elements( element_buffer_data &data )
+void mesh::binding::set_elements( element_buffer_data &data )
 {
 	_bound.bind_elements( data.ebo() );
 }
@@ -54,7 +55,8 @@ mesh::binding::binding( mesh *m, vertex_array *vao, program *prog )
 	_mesh = m;
 	_vao = vao;
 	_prog = prog;
-	_prog->use();
+	if ( _prog )
+		_prog->use();
 }
 
 ////////////////////////////////////////
@@ -63,12 +65,6 @@ mesh::mesh( void )
 {
 	api ogl;
 	_vao = ogl.new_vertex_array();
-}
-
-////////////////////////////////////////
-
-mesh::~mesh( void )
-{
 }
 
 ////////////////////////////////////////

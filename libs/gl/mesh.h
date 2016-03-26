@@ -50,7 +50,7 @@ public:
 		}
 
 		/// @brief Bind elements data to draw from.
-		void bind_elements( element_buffer_data &data );
+		void set_elements( element_buffer_data &data );
 
 		/// @brief Set uniform value.
 		template<typename ...Args>
@@ -85,9 +85,6 @@ public:
 
 	/// @brief Default constructor.
 	mesh( void );
-
-	/// @brief Destructor
-	~mesh( void );
 
 	/// @brief Get the program for this mesh.
 	gl::program &get_program( void );

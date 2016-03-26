@@ -1,31 +1,16 @@
 
 local srcs = {
+	"gradient.cpp";
+	"paint.cpp";
+	"path.cpp";
 	"polylines.cpp";
-	"clipper.cpp";
---	"canvas.cpp";
---	"drawable.cpp";
 	"geometry.cpp";
-	"glyph.cpp";
---	"composite.cpp";
---	"object.cpp";
---	"stretchable.cpp";
---	"color_wheel.cpp";
 	"tessellator.cpp";
+	"clipper.cpp";
 }
 
+--[====[
 local shaders = {
-	"color_mesh.vert";
-	"position_uv.vert";
-	"quadrant.vert";
-	"simple.vert";
-	"text.vert";
-	"texture.frag";
-	"color_mesh.frag";
-	"linear_gradient.frag";
-	"radial_gradient.frag";
-	"conical_gradient.frag";
-	"single_color.frag";
-	"text_bitmap.frag";
 }
 
 local cpp_shaders = {
@@ -62,7 +47,10 @@ local shader_code = code.generate{
 	comma_separate = true
 }
 shader_code:add_dependency( "order", shader_h )
+--]====]
+local shader_code;
 
 lib = library "draw"
   source{ srcs, shader_code }:include_artifact_dir()
-  libs{ "gl", "script" }
+  libs{ "gl" }
+

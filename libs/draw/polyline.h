@@ -4,8 +4,8 @@
 #include <vector>
 #include <iostream>
 #include <iterator>
-#include <base/point.h>
 #include <base/format.h>
+#include <gl/vector.h>
 
 namespace draw
 {
@@ -15,7 +15,7 @@ namespace draw
 class polyline
 {
 public:
-	using point = base::point;
+	using point = gl::vec2;
 
 	void close( void )
 	{
@@ -83,7 +83,7 @@ public:
 			out << "<polygon points = \"";
 		else
 			out << "<polyline points = \"";
-		std::copy( begin(), end(), std::ostream_iterator<base::point>( out, " " ) );
+		std::copy( begin(), end(), std::ostream_iterator<point>( out, " " ) );
 		out << base::format( "\" stroke=\"{0}\" stroke-width=\"{1}\" fill=\"{2}\" />", color, width, "none" );
 	}
 
@@ -92,7 +92,7 @@ public:
 		for ( size_t i = 0; i < _points.size(); ++i )
 		{
 			const auto &p = _points[i];
-			out << base::format( "<text x=\"{0}\" y=\"{1}\" stroke=\"{2}\" fill=\"{3}\">{4}</text>", p.x(), p.y(), width, color, i );
+			out << base::format( "<text x=\"{0}\" y=\"{1}\" stroke=\"{2}\" fill=\"{3}\">{4}</text>", p[0], p[1], width, color, i );
 		}
 	}
 
@@ -106,7 +106,7 @@ private:
 
 inline std::ostream &operator<<( std::ostream &out, const polyline &p )
 {
-	std::copy( p.begin(), p.end(), std::ostream_iterator<base::point>( out, "; " ) );
+	std::copy( p.begin(), p.end(), std::ostream_iterator<gl::vec2>( out, "; " ) );
 	return out;
 }
 
