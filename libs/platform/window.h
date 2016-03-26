@@ -63,7 +63,7 @@ public:
 	/// @param x New x position of the window
 	/// @param y New y position of the window
 	virtual void move( double x, double y ) = 0;
-	void move( const base::point &p ) { resize( p.x(), p.y() ); }
+	void move( const base::point &p ) { move( p.x(), p.y() ); }
 
 	/// @brief Resize the window.
 	///
