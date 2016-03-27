@@ -216,7 +216,7 @@ namespace base
 		/// \tparam R rounding mode to use, `std::round_indeterminate` for fastest rounding
 		/// \param value single-precision value
 		/// \return binary representation of half-precision value
-		template<std::float_round_style R> uint16 float2half_impl(float value, true_type)
+		template<std::float_round_style R> inline uint16 float2half_impl(float value, true_type)
 		{
 			static_assert(std::numeric_limits<float>::is_iec559, "float to half conversion needs IEEE 754 conformant 'float' type");
 			static_assert(sizeof(uint32)==sizeof(float), "float to half conversion needs unsigned integer type of exactly the size of a 'float'");
@@ -294,7 +294,7 @@ namespace base
 		/// Convert non-IEEE single-precision to half-precision.
 		/// \param value single-precision value
 		/// \return binary representation of half-precision value
-		template<std::float_round_style R> uint16 float2half_impl(float value, false_type)
+		template<std::float_round_style R> inline uint16 float2half_impl(float value, false_type)
 		{
 			uint16 hbits = static_cast<uint16>( builtin_signbit(value) << 15 );
 			if(value == 0.0f)
@@ -343,7 +343,7 @@ namespace base
 		/// Convert single-precision to half-precision.
 		/// \param value single-precision value
 		/// \return binary representation of half-precision value
-		template<std::float_round_style R> constexpr uint16 float2half(float value)
+		template<std::float_round_style R> inline constexpr uint16 float2half(float value)
 		{
 			return float2half_impl<R>(value, bool_type<std::numeric_limits<float>::is_iec559&&sizeof(uint32)==sizeof(float)>());
 		}
@@ -354,7 +354,7 @@ namespace base
 		/// \tparam T type to convert (builtin integer type)
 		/// \param value non-negative integral value
 		/// \return binary representation of half-precision value
-		template<std::float_round_style R,bool S,typename T> uint16 int2half_impl(T value)
+		template<std::float_round_style R,bool S,typename T> inline uint16 int2half_impl(T value)
 		{
 			if(S)
 				value = -value;
@@ -396,7 +396,7 @@ namespace base
 		/// \tparam T type to convert (builtin integer type)
 		/// \param value integral value
 		/// \return binary representation of half-precision value
-		template<std::float_round_style R,typename T> uint16 int2half(T value)
+		template<std::float_round_style R,typename T> constexpr inline uint16 int2half(T value)
 		{
 			return (value<0) ? int2half_impl<R,true>(value) : int2half_impl<R,false>(value);
 		}
@@ -587,7 +587,7 @@ namespace base
 		/// \tparam T type to convert to (buitlin integer type with at least 16 bits precision, excluding any implicit sign bits)
 		/// \param value binary representation of half-precision value
 		/// \return integral value
-		template<std::float_round_style R,bool E,typename T> T half2int_impl(uint16 value)
+		template<std::float_round_style R,bool E,typename T> inline T half2int_impl(uint16 value)
 		{
 			unsigned int e = value & 0x7FFF;
 			if(e >= 0x7C00)
@@ -629,20 +629,20 @@ namespace base
 		/// \tparam T type to convert to (buitlin integer type with at least 16 bits precision, excluding any implicit sign bits)
 		/// \param value binary representation of half-precision value
 		/// \return integral value
-		template<std::float_round_style R,typename T> T half2int(uint16 value) { return half2int_impl<R,HALF_ROUND_TIES_TO_EVEN,T>(value); }
+		template<std::float_round_style R,typename T> inline T half2int(uint16 value) { return half2int_impl<R,HALF_ROUND_TIES_TO_EVEN,T>(value); }
 
 		/// Convert half-precision floating point to integer using round-to-nearest-away-from-zero.
 		/// \tparam T type to convert to (buitlin integer type with at least 16 bits precision, excluding any implicit sign bits)
 		/// \param value binary representation of half-precision value
 		/// \return integral value
-		template<typename T> T half2int_up(uint16 value) { return half2int_impl<std::round_to_nearest,0,T>(value); }
+		template<typename T> inline T half2int_up(uint16 value) { return half2int_impl<std::round_to_nearest,0,T>(value); }
 
 		/// Round half-precision number to nearest integer value.
 		/// \tparam R rounding mode to use, `std::round_indeterminate` for fastest rounding
 		/// \tparam E `true` for round to even, `false` for round away from zero
 		/// \param value binary representation of half-precision value
 		/// \return half-precision bits for nearest integral value
-		template<std::float_round_style R,bool E> uint16 round_half_impl(uint16 value)
+		template<std::float_round_style R,bool E> inline uint16 round_half_impl(uint16 value)
 		{
 			unsigned int e = value & 0x7FFF;
 			uint16 result = value;
@@ -675,7 +675,7 @@ namespace base
 		/// \tparam R rounding mode to use, `std::round_indeterminate` for fastest rounding
 		/// \param value binary representation of half-precision value
 		/// \return half-precision bits for nearest integral value
-		template<std::float_round_style R> uint16 round_half(uint16 value) { return round_half_impl<R,HALF_ROUND_TIES_TO_EVEN>(value); }
+		template<std::float_round_style R> inline uint16 round_half(uint16 value) { return round_half_impl<R,HALF_ROUND_TIES_TO_EVEN>(value); }
 
 		/// Round half-precision number to nearest integer value using round-to-nearest-away-from-zero.
 		/// \param value binary representation of half-precision value
@@ -822,14 +822,6 @@ namespace base
 		/// Internal binary representation
 		detail::uint16 data_;
 	};
-
-	/// Half literal.
-	/// While this returns an actual half-precision value, half literals can unfortunately not be constant expressions due
-	/// to rather involved single-to-half conversion.
-	/// @param value literal value
-	/// @return half with given value (if representable)
-	/// @relates base::half
-	inline half operator "" _h(long double value) { return half(static_cast<float>(value)); }
 
 	namespace detail
 	{
@@ -2399,6 +2391,15 @@ namespace base
 
 	using detail::half_cast;
 }
+
+/// Half literal.
+/// While this returns an actual half-precision value, half literals can unfortunately not be constant expressions due
+/// to rather involved single-to-half conversion.
+/// @param value literal value
+/// @return half with given value (if representable)
+/// @relates base::half
+inline base::half operator "" _h(long double value) { return base::half(static_cast<float>(value)); }
+
 
 
 /// @brief Extensions to the C++ standard library.

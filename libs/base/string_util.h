@@ -20,7 +20,7 @@ namespace base
 
 std::string trim( const std::string &str, const std::string &ws = " \t\n\r" );
 std::string ltrim( const std::string &str, const std::string &ws = " \t\n\r" );
-std::string rtrim( std::string str, const std::string &ws = " \t\n\r" );
+std::string rtrim( const std::string &str, const std::string &ws = " \t\n\r" );
 
 
 ////////////////////////////////////////
@@ -36,12 +36,36 @@ inline std::string replace( const std::string &str, char c, const std::string &r
 ////////////////////////////////////////
 
 template<typename T>
-std::string to_string( const T &t )
+inline std::string to_string( const T &t )
 {
 	std::stringstream tmp;
 	tmp << t;
 	return tmp.str();
 }
+
+////////////////////////////////////////
+
+constexpr inline int from_hex( char v )
+{
+	return std::isalpha( int(v) ) ? 10 + (std::tolower(int(v)) - int('a')) : (int(v) - int('0'));
+}
+constexpr inline char from_hex( char p1, char p2 )
+{
+	return static_cast<char>( from_hex( p1 ) * 16 + from_hex( p2 ) );
+}
+
+////////////////////////////////////////
+
+constexpr inline char to_hex( int c )
+{
+	return static_cast<char>( (c & 0xF) >= 10 ? int('A') + ((c & 0xF)-10) : int('0') + (c & 0xF) );
+}
+inline void to_hex( char &c1, char &c2, int v )
+{
+	c1 = to_hex( (v & 0xF0) >> 4 );
+	c2 = to_hex( (v & 0x0F) );
+}
+
 
 ////////////////////////////////////////
 

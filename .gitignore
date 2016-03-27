@@ -1,6 +1,6 @@
 build
 debug
 release
-mingw
-test
-build_extra.lua
+win64cross-release
+win64cross-debug
+win64cross-build

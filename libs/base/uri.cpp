@@ -21,15 +21,36 @@ uri::uri( char *str )
 
 ////////////////////////////////////////
 
-std::string uri::escape( const std::string &str )
+std::string
+uri::full_path( void ) const
 {
-	const std::string reserved = ":/?#[]@!$&'()*+,;=";
+	if ( _path.empty() )
+		return std::string( '/', 1 );
+
+	std::string ret;
+	size_t n = 0;
+	for ( auto &p: _path )
+		n += p.size() + 1;
+	ret.reserve( n );
+	for ( auto &p: _path )
+	{
+		ret.push_back( '/' );
+		ret.append( p );
+	}
+	return ret;
+}
+
+////////////////////////////////////////
+
+std::string uri::escape( cstring str )
+{
+	const cstring reserved = ":/?#[]@!$&'()*+,;=";
 	std::string result;
 	size_t i = 0;
 	size_t n = str.find_first_of( reserved, i );
-   	while ( n < str.size() )
+   	while ( n != cstring::npos )
 	{
-		result.append( str, i, n - i );
+		result.append( str.data() + i, n - i );
 		i = n;
 		if ( i < str.size() )
 		{
@@ -38,30 +59,30 @@ std::string uri::escape( const std::string &str )
 		}
 		n = str.find_first_of( reserved, i );
 	}
-	result.append( str, i, n );
+	result.append( str.data() + i, std::min( str.size() - i, n ) );
 
 	return result;
 }
 
 ////////////////////////////////////////
 
-std::string uri::unescape( const std::string &str )
+std::string uri::unescape( cstring str )
 {
 	std::string result;
 	result.reserve( str.size() );
 	size_t i = 0;
 	size_t n = str.find( '%', i );
-   	while ( n < str.size() )
+   	while ( n != cstring::npos )
 	{
-		result.append( str, i, n - i );
+		result.append( str.data() + i, n - i );
 		i = n;
 		if ( i < str.size() )
 		{
 			++i;
 			if ( i+1 < str.size() )
 			{
-				if ( isxdigit( str[i] ) && isxdigit( str[i+1] ) )
-					result.push_back( static_cast<char>( std::stoi( str.substr( i, 2 ), nullptr, 16 ) ) );
+				if ( std::isxdigit( str[i] ) && std::isxdigit( str[i+1] ) )
+					result.push_back( from_hex( str[i], str[i+1] ) );
 				else
 					throw_runtime( "invalid percent encoding at end: '{0}'", str );
 			}
@@ -71,14 +92,14 @@ std::string uri::unescape( const std::string &str )
 		}
 		n = str.find( '%', i );
 	}
-	result.append( str, i, n );
+	result.append( str.data() + i, std::min( str.size() - i, n ) );
 
 	return result;
 }
 
 ////////////////////////////////////////
 
-void uri::add_path( const std::string &path )
+void uri::add_path( cstring path )
 {
 	split( path, '/', std::back_inserter( _path ), true );
 }
@@ -116,10 +137,9 @@ void uri::split_query( std::vector<std::pair<std::string,std::string>> &parsed )
 std::string uri::pretty( void ) const
 {
 	std::stringstream out;
-	out << scheme() << ':';
+	out << scheme() << "://";
 	if ( !host().empty() )
 	{
-		out << "//";
 		if ( !user().empty() )
 			out << user() << '@';
 		out << host();
@@ -137,12 +157,12 @@ std::string uri::pretty( void ) const
 
 ////////////////////////////////////////
 
-void uri::parse( const std::string &str )
+void uri::parse( cstring str )
 {
 	if ( str.empty() )
 		return;
 
-	std::string path;
+	cstring path;
 
 	if ( str[0] != '/' )
 	{
@@ -153,14 +173,14 @@ void uri::parse( const std::string &str )
 		size_t hash = str.find( '#', colon );
 
 		if ( hash < question )
-			question = std::string::npos;
+			question = cstring::npos;
 
 		_scheme = unescape( str.substr( 0, colon ) );
 		if ( colon < question )
 			path = str.substr( colon + 1, std::min( hash, question ) - colon - 1 );
 		if ( question < hash )
 			_query = unescape( str.substr( question + 1, hash - question - 1 ) );
-		if ( hash  < str.size() )
+		if ( hash != cstring::npos )
 			_fragment = unescape( str.substr( hash + 1 ) );
 
 		if ( path.empty() )
@@ -170,7 +190,7 @@ void uri::parse( const std::string &str )
 		{
 			size_t slash = path.find( '/', 2 );
 			auto auth = path.substr( 2, slash - 2 );
-			path.erase( 0, slash );
+			path.remove_prefix( slash );
 			parse_authority( auth );
 		}
 		else if ( path[0] != '/' )
@@ -186,13 +206,13 @@ void uri::parse( const std::string &str )
 
 ////////////////////////////////////////
 
-void uri::parse_authority( const std::string &auth )
+void uri::parse_authority( cstring auth )
 {
 	if ( auth.empty() )
 		return;
 
 	size_t at = auth.find( '@' );
-	if ( at > auth.size() )
+	if ( at == cstring::npos )
 		at = 0;
 	else
 		at = at + 1;
@@ -202,7 +222,7 @@ void uri::parse_authority( const std::string &auth )
 		_user = unescape( auth.substr( 0, at - 1 ) );
 	_host = unescape( auth.substr( at, pcolon - at ) );
 	if ( pcolon < auth.size() )
-		_port = static_cast<uint16_t>( std::stoul( auth.substr( pcolon + 1 ) ) );
+		_port = static_cast<uint16_t>( stoul( auth.substr( pcolon + 1 ) ) );
 	else
 		_port = 0;
 }

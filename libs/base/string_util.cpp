@@ -29,11 +29,13 @@ std::string ltrim( const std::string &str, const std::string &ws )
 
 ////////////////////////////////////////
 
-std::string rtrim( std::string str, const std::string &ws )
+std::string rtrim( const std::string &str, const std::string &ws )
 {
-	while ( !str.empty() && ws.find( str.back() ) != std::string::npos )
-		str.pop_back();
-	return str;
+    auto end = str.find_last_not_of( ws );
+	if ( end == std::string::npos )
+		return std::string();
+
+    return str.substr( 0, end + 1 );
 }
 
 ////////////////////////////////////////

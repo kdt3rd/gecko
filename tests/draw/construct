@@ -1,2 +1,2 @@
 
-AddUnitTest( "test_tess.cpp", "draw" )
+AddUnitTest( "tess.cpp", "draw" )

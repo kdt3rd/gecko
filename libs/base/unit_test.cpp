@@ -43,6 +43,16 @@ void unit_test::success( const std::string &msg )
 
 ////////////////////////////////////////
 
+void
+unit_test::negative_success( const std::string &msg )
+{
+	_success.insert( _running.back() );
+	if ( _quiet < 1 )
+		std::clog << ansi::green << " FAILURE " << ansi::reset << _running.back() << ": " << msg << std::endl;
+}
+
+////////////////////////////////////////
+
 void unit_test::failure( const std::string &msg )
 {
 	_failure.insert( _running.back() );
