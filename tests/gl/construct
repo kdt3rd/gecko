@@ -1,4 +1,4 @@
 
 AddUnitTest( "glinfo.cpp", {"platform", "gl", "base"} )
-AddUnitTest( "pngwrite.cpp", {"platform", "gl", "base"} )
-AddUnitTest( "bufferdata.cpp", {"gl", "base"} )
+--AddUnitTest( "pngwrite.cpp", {"platform", "gl", "base"} )
+--AddUnitTest( "bufferdata.cpp", {"gl", "base"} )
