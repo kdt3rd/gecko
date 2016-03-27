@@ -26,6 +26,18 @@
 #include <type_traits>
 #include <ostream>
 #include <cstring>
+#include <limits>
+#ifdef __has_include
+# if (__cplusplus >= 201402L)
+#  if __has_include(<string_view>)
+#   include <string_view>
+#   define ENABLE_STRING_VIEW_COMPAT
+#  elif __has_include(<experimental/string_view>)
+#   include <experimental/string_view>
+#   define ENABLE_STRING_VIEW_COMPAT
+#  endif
+# endif
+#endif
 
 
 ////////////////////////////////////////
@@ -52,11 +64,10 @@ typedef const_string<char32_t> u32cstring;
 ///     like substr just update pointers, but don't modify the underlying
 ///     values, so printing a conststr is a bit harder than a normal
 ///     string.
-
-inline size_t const_length( const char *s ) { return std::strlen( s ); }
-inline size_t const_length( const wchar_t *s ) { return std::wcslen( s ); }
-
-
+///
+/// TODO: C++17 defines string_view, need to merge this with that as
+///       c++17 becomes the norm. for now, we just
+///       provide transparent conversion to and from
 template <class charT, typename traitsT>
 class const_string
 {
@@ -75,10 +86,23 @@ public:
 	constexpr const_string( const value_type *s, size_type N ) : _str( s ), _sz( N ) {}
 	template <typename allocTs>
 	constexpr const_string( const std::basic_string<charT, traitsT, allocTs> &s ) : _str( s.data() ), _sz( s.size() ) {}
-	constexpr const_string( const value_type *s ) : _str( s ), _sz( const_length( s ) ) {}
+	constexpr const_string( const value_type *s ) : _str( s ), _sz( traits_type::length( s ) ) {}
 
 	constexpr const_string( const const_string & ) noexcept = default;
+	constexpr const_string( const_string && ) noexcept = default;
 	const_string &operator=( const const_string & ) noexcept = default;
+	const_string &operator=( const_string && ) noexcept = default;
+
+	/// @brief cast operator to std::basic_string
+	constexpr operator std::basic_string<charT, traitsT>( void ) const { return to_string(); }
+	/// @brief conversion function
+	constexpr std::basic_string<charT, traitsT> to_string( void ) const { return empty() ? std::basic_string<charT, traitsT>() : std::basic_string<charT, traitsT>( data(), size() ); }
+
+#ifdef ENABLE_STRING_VIEW_COMPAT
+	constexpr const_string( const std::basic_string_view<charT, traitsT> &sv ) : _str( sv.data() ), _sz( sv.size() ) {}
+	/// @brief cast operator to std::basic_string_view
+	constexpr operator std::basic_string_view<charT, traitsT>( void ) const { return std::basic_string_view<charT, traitsT>( data(), size() ); }
+#endif
 
 	constexpr const value_type operator[]( size_type i ) const { return _str[i]; }
 	constexpr const value_type at( size_type i ) const { return i <= _sz ? _str[i] : throw std::out_of_range( "const_string access out of range" ); }
@@ -105,15 +129,15 @@ public:
 	constexpr const value_type &back( void ) const { return *(_str + ( size() - 1 ) ); }
 	constexpr const value_type *data( void ) const noexcept { return _str; }
 
-	template <typename allocT>
-	int
-	compare( const std::basic_string<value_type, traits_type, allocT> &s ) const
+	void remove_prefix( size_type n )
 	{
-		int rval = traits_type::compare( data(), s.data(), std::min( s.size(), size() ) );
-		if ( rval != 0 )
-			return rval;
-
-		return ( size() < s.size() ) ? -1 : ( ( size() > s.size() ) ? 1 : 0 );
+		_sz -= std::min( _sz, n );
+		_str = ( (_sz == 0) ? nullptr : _str + n );
+	}
+	void remove_suffix( size_type n )
+	{
+		_sz -= std::min( _sz, n );
+		_str = ( (_sz == 0) ? nullptr : _str );
 	}
 
 	constexpr int
@@ -124,13 +148,22 @@ public:
 				 compare_priv( begin(), s.begin(), s.size(), 1 ) );
 	}
 
-	template <std::size_t N>
+	template <size_t N>
 	constexpr int
 	compare( const value_type (&s)[N] ) const
 	{
 		return ( size() <= (N-1) ?
 				 compare_priv( begin(), s, size(), size() == (N-1) ? 0 : -1 ) :
 				 compare_priv( begin(), s, (N-1), 1 ) );
+	}
+
+	template <typename allocT>
+	constexpr int
+	compare( const std::basic_string<value_type,traits_type, allocT> &s ) const
+	{
+		return ( size() <= s.size() ?
+				 compare_priv( begin(), s.data(), size(), size() == s.size() ? 0 : -1 ) :
+				 compare_priv( begin(), s.data(), s.size(), 1 ) );
 	}
 
 	constexpr int compare( size_type pos, size_type n, const const_string &s ) const
@@ -159,12 +192,28 @@ public:
 		return substr( pos1, n1 ).compare( const_string( s, n2 ) );
 	}
 
+	constexpr size_type find( value_type c, size_type pos = 0 ) const
+	{
+		return find_first_of( c, pos );
+	}
+
 	constexpr size_type find_first_of( value_type c, size_type pos = 0 ) const
 	{
 		return ( pos < size() ?
 				 ( traits_type::eq( _str[pos], c ) ? pos : find_first_of( c, pos + 1 ) ) :
 				 npos );
 	}
+	constexpr size_type find_first_of( const_string s, size_type pos = 0 ) const
+	{
+		return find_first_of( s.data(), pos, s.size() );
+	}
+	constexpr size_type find_first_of( const value_type *s, size_type pos, size_type n ) const
+	{
+		return ( pos < size() ?
+				 ( traits_type::find( s, n, _str[pos] ) != nullptr ?
+				   pos : find_first_of( s, pos + 1, n ) ) : npos );
+	}
+
 
 	constexpr size_type find_first_not_of( value_type c, size_type pos = 0 ) const
 	{
@@ -209,106 +258,202 @@ inline streamT &operator<<( streamT &os, const const_string<charT, traitsT> &s )
 	return os;
 }
 
+
+////////////////////////////////////////
+
+
 template <typename charT, typename traitsT>
-inline bool
+inline constexpr bool
 operator==( const const_string<charT, traitsT> &lhs, const const_string<charT, traitsT> &rhs )
 {
 	return lhs.compare( rhs ) == 0;
 }
 
+template <typename charT, typename traitsT>
+inline constexpr bool
+operator!=( const_string<charT, traitsT> lhs, const_string<charT, traitsT> rhs )
+{
+	return lhs.compare( rhs ) != 0;
+}
+
 template <typename charT, typename traitsT, std::size_t N>
-inline bool
+inline constexpr bool
 operator==( const const_string<charT, traitsT> &lhs, const charT (&rhs)[N] )
 {
 	return lhs.compare( rhs ) == 0;
 }
 
 template <typename charT, typename traitsT, std::size_t N>
-inline bool
+inline constexpr bool
 operator==( const charT (&lhs)[N], const const_string<charT, traitsT> &rhs )
 {
 	return rhs.compare( lhs ) == 0;
 }
 
 template <typename charT, typename traitsT, typename allocT>
-inline bool
+inline constexpr bool
 operator==( const std::basic_string<charT, traitsT, allocT> &lhs, const const_string<charT, traitsT> &rhs )
 {
-	if ( lhs.size() == rhs.size() )
-		return rhs.compare( lhs ) == 0;
-	return false;
+	return rhs.compare( lhs ) == 0;
 }
 
 template <typename charT, typename traitsT, typename allocT>
-inline bool
+inline constexpr bool
 operator==( const const_string<charT, traitsT> &lhs, const std::basic_string<charT, traitsT, allocT> &rhs )
 {
-	if ( lhs.size() == rhs.size() )
-		return lhs.compare( rhs ) == 0;
-	return false;
-}
-
-template <typename charT, typename traitsT>
-inline bool
-operator!=( const const_string<charT, traitsT> &lhs, const const_string<charT, traitsT> &rhs )
-{
-	return !( lhs == rhs );
+	return lhs.compare( rhs ) == 0;
 }
 
 template <typename charT, typename traitsT, std::size_t N>
-inline bool
+inline constexpr bool
 operator!=( const const_string<charT, traitsT> &lhs, const charT (&rhs)[N] )
 {
 	return !( lhs == rhs );
 }
 
 template <typename charT, typename traitsT, std::size_t N>
-inline bool
+inline constexpr bool
 operator!=( const charT (&lhs)[N], const const_string<charT, traitsT> &rhs )
 {
 	return !( rhs == lhs );
 }
 
 template <typename charT, typename traitsT, typename allocT>
-inline bool
+inline constexpr bool
 operator!=( const std::basic_string<charT, traitsT, allocT> &lhs, const const_string<charT, traitsT> &rhs )
 {
-	return !( lhs == rhs );
+	return !( rhs == lhs );
 }
 
 template <typename charT, typename traitsT, typename allocT>
-inline bool
+inline constexpr bool
 operator!=( const const_string<charT, traitsT> &lhs, const std::basic_string<charT, traitsT, allocT> &rhs )
 {
 	return !( lhs == rhs );
 }
 
+
+////////////////////////////////////////
+
+
 template <typename charT, typename traitsT>
-inline bool
+inline constexpr bool
 operator<( const const_string<charT, traitsT> &lhs, const const_string<charT, traitsT> &rhs )
 {
 	return lhs.compare( rhs ) < 0;
 }
 
 template <typename charT, typename traitsT>
-inline bool
+inline constexpr bool
 operator>( const const_string<charT, traitsT> &lhs, const const_string<charT, traitsT> &rhs )
 {
 	return lhs.compare( rhs ) > 0;
 }
 
 template <typename charT, typename traitsT>
-inline bool
+inline constexpr bool
 operator<=( const const_string<charT, traitsT> &lhs, const const_string<charT, traitsT> &rhs )
 {
 	return lhs.compare( rhs ) <= 0;
 }
 
 template <typename charT, typename traitsT>
-inline bool
+inline constexpr bool
 operator>=( const const_string<charT, traitsT> &lhs, const const_string<charT, traitsT> &rhs )
 {
 	return lhs.compare( rhs ) >= 0;
+}
+
+
+////////////////////////////////////////
+
+
+template <typename charT, typename traitsT, typename allocT>
+inline typename std::basic_string<charT, traitsT, allocT> operator+( const std::basic_string<charT, traitsT, allocT> &s, const_string<charT, traitsT> cs )
+{
+	std::basic_string<charT, traitsT, allocT> ret = s;
+	ret.append( cs.data(), cs.size() );
+	return ret;
+}
+
+template <typename charT, typename traitsT, typename allocT>
+inline typename std::basic_string<charT, traitsT, allocT> operator+( std::basic_string<charT, traitsT, allocT> &&s, const_string<charT, traitsT> cs )
+{
+	s.append( cs.data(), cs.size() );
+	return std::move( s );
+}
+
+template <typename charT, typename traitsT>
+inline typename std::basic_string<charT, traitsT> operator+( const_string<charT, traitsT> a, const_string<charT, traitsT> b )
+{
+	return a.to_string() + b;
+}
+
+////////////////////////////////////////
+
+namespace detail
+{
+template <typename RetT, typename Ret = RetT, typename CharT, typename... Base>
+inline Ret stoa( RetT (*convFunc)( const CharT *, CharT **, Base... ), const char *fname, const CharT *s, std::size_t *pos, Base... base )
+{
+	Ret ret;
+	CharT *endP;
+	errno = 0;
+	const RetT tmp = convFunc( s, &endP, base... );
+	if ( endP == s )
+		throw std::invalid_argument( fname );
+	else if ( errno == ERANGE ||
+			  ( std::is_same<Ret,int>::value &&
+				( tmp < static_cast<RetT>( std::numeric_limits<int>::min() ) ||
+				  tmp > static_cast<RetT>( std::numeric_limits<int>::max() ) ) ) )
+		throw std::out_of_range( fname );
+	else
+		ret = static_cast<Ret>( tmp );
+	if ( pos )
+		*pos = endP - s;
+
+	return ret;
+}
+
+} //namespace detail
+
+
+inline int stoi( cstring s, std::size_t *pos = 0, int base = 10 )
+{
+	return detail::stoa<long,int>( &std::strtol, "base::const_string::stoi", s.data(), pos, base );
+}
+
+inline long stol( cstring s, std::size_t *pos = 0, int base = 10 )
+{
+	return detail::stoa( &std::strtol, "base::const_string::stol", s.data(), pos, base );
+}
+
+inline long long stoll( cstring s, std::size_t *pos = 0, int base = 10 )
+{
+	return detail::stoa( &std::strtoll, "base::const_string::stoll", s.data(), pos, base );
+}
+
+inline unsigned long stoul( cstring s, std::size_t *pos = 0, int base = 10 )
+{
+	return detail::stoa( &std::strtoul, "base::const_string::stoul", s.data(), pos, base );
+}
+
+inline unsigned long long stoull( cstring s, std::size_t *pos = 0, int base = 10 )
+{
+	return detail::stoa( &std::strtoull, "base::const_string::stoull", s.data(), pos, base );
+}
+
+inline float stof( cstring s, std::size_t *pos = 0 )
+{
+	return detail::stoa( &std::strtof, "base::const_string::stof", s.data(), pos );
+}
+inline double stod( cstring s, std::size_t *pos = 0 )
+{
+	return detail::stoa( &std::strtod, "base::const_string::stod", s.data(), pos );
+}
+inline long double stold( cstring s, std::size_t *pos = 0 )
+{
+	return detail::stoa( &std::strtold, "base::const_string::stold", s.data(), pos );
 }
 
 } // namespace base
