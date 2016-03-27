@@ -6,7 +6,7 @@ namespace base
 
 ////////////////////////////////////////
 
-std::string get_extension( const std::string &file )
+std::string file_extension( const std::string &file )
 {
 	size_t off = file.find_last_of( '.' );
 	if ( off != std::string::npos )
