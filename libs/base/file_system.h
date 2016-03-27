@@ -10,10 +10,18 @@
 #include <memory>
 
 /// @TODO: should we add our own stat / file_info buffer?
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/statvfs.h>
-#include <unistd.h>
+# include <sys/types.h>
+# include <sys/stat.h>
+#ifdef _WIN32
+struct stat : public struct _stat64
+{
+};
+using stat64 = _stat64;
+struct statvfs;
+#else
+# include <sys/statvfs.h>
+# include <unistd.h>
+#endif
 
 namespace base
 {
