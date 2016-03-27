@@ -29,7 +29,7 @@ font::~font( void )
 ////////////////////////////////////////
 
 double
-font::kerning( char32_t c1, char32_t c2 )
+font::kerning( char32_t /*c1*/, char32_t /*c2*/ )
 {
 	/*
 	FT_Vector kerning;
@@ -53,17 +53,17 @@ font::get_glyph( char32_t char_code )
 		std::stringstream str;
 		utf::write( str, char_code );
 		NSString *string = [NSString stringWithUTF8String: str.str().c_str()];
-		NSDictionary *attribs = @{ NSFontAttributeName:(id)_font };
+		NSDictionary *attribs = @{ NSFontAttributeName:static_cast<id>( _font ) };
 		NSSize size = [string sizeWithAttributes:attribs];
-		size_t width = (size_t)ceilf(size.width);
-		size_t height = (size_t)ceilf(size.height);
+		int width = static_cast<int>( ceil(size.width) );
+		int height = static_cast<int>( ceil(size.height) );
 
 		// Create the context and fill it with white background
-		void *data = malloc(width*height);
-		memset( data, 0, width * height );
+		void *data = malloc( static_cast<size_t>( width*height ) );
+		memset( data, 0, static_cast<size_t>( width * height ) );
 		CGColorSpaceRef space = CGColorSpaceCreateDeviceGray();
 		CGBitmapInfo bitmapInfo = 0;
-		CGContextRef ctx = CGBitmapContextCreate(data, width, height, 8, width, space, bitmapInfo );
+		CGContextRef ctx = CGBitmapContextCreate(data, static_cast<size_t>( width ), static_cast<size_t>( height ), 8, static_cast<size_t>( width ), space, bitmapInfo );
 		CGColorSpaceRelease( space );
 		CGContextSetRGBFillColor( ctx, 0.0, 0.0, 0.0, 0.0 ); // white background
 		CGContextFillRect( ctx, CGRectMake( 0.0, 0.0, width, height ) );
@@ -73,7 +73,7 @@ font::get_glyph( char32_t char_code )
 
 		// Create an attributed string with string and font information
 		NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:
-									(id)_font, kCTFontAttributeName,
+									static_cast<id>( _font ), kCTFontAttributeName,
 //									(id)_font, NSFontAttributeName, 
 //									NSColor.whiteColor, NSForegroundColorAttributeName,
 									CGColorGetConstantColor( kCGColorWhite ), kCTForegroundColorAttributeName,
@@ -81,9 +81,9 @@ font::get_glyph( char32_t char_code )
 		NSAttributedString *as = [[NSAttributedString alloc] initWithString:string attributes:attributes];
 
 		// Figure out how big an image we need 
-		CTLineRef line = CTLineCreateWithAttributedString( (CFAttributedStringRef)as );
-		CGFloat ascent, descent, leading;
-		double fWidth = CTLineGetTypographicBounds( line, &ascent, &descent, &leading );
+		CTLineRef line = CTLineCreateWithAttributedString( static_cast<CFAttributedStringRef>( as ) );
+		CGFloat descent = 0.0, ascent = 0.0, leading = 0.0;
+		/*double fWidth =*/ CTLineGetTypographicBounds( line, &ascent, &descent, &leading );
 
 		// On iOS 4.0 and Mac OS X v10.6 you can pass null for data 
 //		size_t width = (size_t)ceilf(fWidth);
