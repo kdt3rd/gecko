@@ -15,4 +15,5 @@ lib = library "media"
 	  required=false;
 	  source={"exr_reader.cpp"};
 	  extra_libs="IlmBase";
+	  defines={"HAVE_OPENEXR"};
   }
