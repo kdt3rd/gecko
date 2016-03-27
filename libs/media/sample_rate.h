@@ -51,7 +51,8 @@ class sample_rate
 {
 public:
 	sample_rate( void ) = default;
-	sample_rate( int64_t n, int64_t d = 1 );
+	/// if realtime is true, enables drop frame handling
+	sample_rate( int64_t n, int64_t d = 1, bool realtime = false );
 	sample_rate( const sample_rate & ) = default;
 	sample_rate( sample_rate && ) = default;
 	~sample_rate( void ) = default;
@@ -59,6 +60,11 @@ public:
 	sample_rate &operator=( sample_rate && ) = default;
 
 	bool is_drop_frame( void ) const;
+
+	inline bool realtime( void ) const;
+	inline const base::ratio &ratio( void ) const;
+	inline int64_t numerator( void ) const;
+	inline int64_t denominator( void ) const;
 
 	/// @brief Resamples the incoming sample with it's rate at
 	/// the rate represented by this
@@ -70,7 +76,8 @@ public:
 	int64_t resample( int64_t i, const sample_rate &rate ) const;
 
 	/// @brief re-assigns the sample rate
-	void set( int64_t n, int64_t d );
+	/// if realtime is true, enables drop frame handling
+	void set( int64_t n, int64_t d, bool realtime = false );
 
 	/// @brief Sets a sample rate based on inexact non-rational
 	/// numbers.
@@ -79,15 +86,18 @@ public:
 	/// match. for example, setting a sample_rate to 23.98 as a double
 	/// would result in 24000/1001 since that is the nearest common
 	/// rate for a frame rate
+	/// if realtime is true, enables drop frame handling
 	///
-	/// if no common rate is found, will assign to the closest appropriate whole number.
-	void set_rate( double r );
+	/// if no common fractional frame rate is found, will assign to
+	/// the closest appropriate ratio to the precision of 0.005.
+	void set_rate( double r, bool realtime = false );
 
-	/// @brief utility to convert string to double and recurse to other set_rate
+	/// @brief utility to convert string to double and pass to other set_rate
+	/// if string has "DF" at the end, enables drop frame handling
 	void set_rate( const std::string &r );
 
-	double as_number( void ) const;
-	std::string as_string( void ) const;
+	double to_number( void ) const;
+	std::string to_string( void ) const;
 
 	sample_rate common( const sample_rate &o ) const;
 
@@ -98,14 +108,41 @@ public:
 
 private:
 	base::ratio _ratio;
+	bool _realtime = false;
 };
 
 inline std::ostream &operator<<( std::ostream &os, const sample_rate &r )
 {
-	os << r.as_string();
+	os << r.to_string();
 	return os;
 }
 
+
+////////////////////////////////////////
+
+
+inline bool
+sample_rate::realtime( void ) const
+{
+	return _realtime;
+}
+
+inline const base::ratio &sample_rate::ratio( void ) const
+{
+	return _ratio;
+}
+
+inline int64_t
+sample_rate::numerator( void ) const
+{
+	return _ratio.numerator();
+}
+
+inline int64_t
+sample_rate::denominator( void ) const
+{
+	return _ratio.denominator();
+}
 
 } // namespace media
 

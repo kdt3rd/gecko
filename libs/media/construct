@@ -2,6 +2,7 @@
 lib = library "media"
   source{
 	"sample_rate.cpp",
+	"time_code.cpp",
 	"image_buffer.cpp",
 	"container.cpp",
 	"file_sequence.cpp",
