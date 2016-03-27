@@ -234,7 +234,8 @@ void skein512::finalize( hash &hashVal )
     memcpy( Y, _X, sizeof(_X) );       /* keep a local copy of counter mode "key" */
     for ( size_t i = 0; i * 64 < byteCnt; i++ )
 	{
-        (reinterpret_cast<uint64_t *>(_block))[0]= Skein_Swap64( uint64_t(i) ); /* build the counter block */
+		_block64[0] = Skein_Swap64( uint64_t(i) ); /* build the counter block */
+
         start_new_type( SKEIN_T1_BLK_TYPE_OUT_FINAL );
         process( _block, 1, sizeof(uint64_t) ); /* run "counter mode" */
         n = byteCnt - i*64;   /* number of output bytes left to go */
