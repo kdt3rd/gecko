@@ -7,7 +7,7 @@
 
 namespace
 {
-	constexpr float PI = static_cast<const float>( base::math::PI );
+	constexpr float PI = 3.14159265358979F;
 
 	inline float toLin( float c )
 	{

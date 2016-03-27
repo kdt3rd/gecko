@@ -16,8 +16,6 @@ namespace
 
 int safemain( int /*argc*/, char * /*argv*/ [] )
 {
-	using namespace base::math;
-
 	auto sys = platform::platform::common().create();
 	auto win = sys->new_window();
 	win->resize( 400, 400 );
@@ -38,7 +36,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		draw::path path;
 		path.move_to( center + gl::vec2::polar( side, 0.F ) );
 		for ( size_t i = q % p; i != 0; i = ( i + q ) % p )
-			path.line_to( center + gl::vec2::polar( side, 360_deg * i / p ) );
+			path.line_to( center + gl::vec2::polar( side, base::degree( 360.F ) * i / p ) );
 		path.close();
 
 		// Setup GL vertex/element buffers.
@@ -117,7 +115,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	{
 		win->acquire();
 
-		gl::versor rotate( angle, 0.0, 0.0, 1.0 );
+		gl::versor rotate( angle, 0.F, 0.F, 1.F );
 		matrix = gl::matrix4::ortho( 0, win->width(), 0, win->height() );
 		matrix = matrix * gl::matrix4::rotation( rotate );
 
@@ -130,9 +128,9 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 			bound.draw();
 		}
 
-		angle += 1_deg;
-		while ( angle > 2 * PI )
-			angle -= 2 * PI;
+		angle += base::degree( 1.F );
+		while ( angle > base::degree( 360.F ) )
+			angle -= base::degree( 360.F );
 
 		win->release();
 

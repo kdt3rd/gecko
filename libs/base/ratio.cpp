@@ -36,7 +36,7 @@ ratio::common( const ratio &r ) const
 
 	// find a / b ==> c / d  where d == r.denominator
 	// d == lcm( r.denominator, b )
-	int64_t d = math::lcm( denominator(), r.denominator() );
+	int64_t d = lcm( denominator(), r.denominator() );
 	return ratio( numerator() * d, denominator() * d, false );
 }
 
@@ -148,7 +148,7 @@ ratio &ratio::operator /=( int64_t n )
 
 void ratio::simplify( void )
 {
-	int64_t d = math::gcd( _num, _den );
+	int64_t d = gcd( _num, _den );
 	if ( d > 1 )
 	{
 		_num /= d;
@@ -173,7 +173,7 @@ std::pair<ratio,ratio> rebase( const ratio &a, const ratio &b )
 		return std::make_pair( ratio( a.numerator(), a.denominator(), false ),
 							   ratio( b.numerator() * a.denominator(), a.denominator(), false ) );
 
-	int64_t d = math::lcm( a.denominator(), b.denominator() );
+	int64_t d = lcm( a.denominator(), b.denominator() );
 
 	// constructor will simplify to prevent
 	// numbers growing
