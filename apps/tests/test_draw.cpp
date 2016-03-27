@@ -16,93 +16,110 @@ namespace
 
 int safemain( int /*argc*/, char * /*argv*/ [] )
 {
+	using namespace base::math;
+
 	auto sys = platform::platform::common().create();
 	auto win = sys->new_window();
+	win->resize( 400, 400 );
 	win->set_title( "Draw Test" );
 	win->acquire();
 
 	gl::api ogl;
 	ogl.setup_debugging();
-	ogl.enable( gl::capability::DEPTH_TEST );
-	ogl.depth_func( gl::depth_test::LESS );
-//	ogl.enable( gl::capability::CULL_FACE );
 
 	gl::mesh star;
 	{
-		using namespace base::math;
-		gl::vec2 center { 500, 500 };
-		double side = 450;
-		std::vector<gl::vec2> points;
-		size_t p = 12;
+		// Draw a star shape (with 17 points).
+		gl::vec2 center { 200, 200 };
+		double side = 180;
+		size_t p = 17;
 		size_t q = 5;
-		for ( size_t i = 0; i < p; ++i )
-			points.push_back( center + gl::vec2::polar( side, 360_deg * i / p ) );
 
 		draw::path path;
-		size_t i = q % points.size();
-		path.move_to( points[0] );
-		while( i != 0 )
-		{
-			path.line_to( points[i] );
-			i = ( i + q ) % points.size();
-		}
+		path.move_to( center + gl::vec2::polar( side, 0.F ) );
+		for ( size_t i = q % p; i != 0; i = ( i + q ) % p )
+			path.line_to( center + gl::vec2::polar( side, 360_deg * i / p ) );
 		path.close();
 
-		draw::polylines lines;
-		path.replay( lines );
-
-		gl::vertex_buffer_data<gl::vec2> pos;
+		// Setup GL vertex/element buffers.
+		gl::color color;
+		size_t offset = 0;
+		gl::vertex_buffer_data<gl::vec2,gl::color> pos;
 		auto add_point = [&]( float x, float y )
 		{
-			pos.push_back( { x, y } );
+			pos.push_back( { x, y }, color );
 		};
 
 		gl::element_buffer_data tris;
 		auto add_tri = [&]( size_t a, size_t b, size_t c )
 		{
-			tris.push_back( static_cast<uint32_t>( a ), static_cast<uint32_t>( b ), static_cast<uint32_t>( c ) );
+			tris.push_back( static_cast<uint32_t>( offset + a ), static_cast<uint32_t>( offset + b ), static_cast<uint32_t>( offset + c ) );
 		};
 
-		lines.filled( add_point, add_tri );
+		// Fill in the buffers
+		draw::polylines lines;
+		path.replay( lines );
 
+	   	color = gl::blue;
+		lines.filled( add_point, add_tri );
+		offset = pos.size();
+
+		color = gl::red;
+		auto outline = lines.stroked( 2 );
+		outline.filled( add_point, add_tri );
+
+		// Finally setup the star mesh
 		star.get_program().set(
 			ogl.new_vertex_shader( R"SHADER(
 				#version 330
 
-				layout(location = 0) in vec3 position;
+				layout(location = 0) in vec2 vertex_position;
+				layout(location = 1) in vec3 vertex_color;
 
 				uniform mat4 matrix;
 
+				out vec3 color;
+
 				void main()
 				{
-					gl_Position = matrix * vec4( position, 1.0 );
+					color = vertex_color;
+					gl_Position = matrix * vec4( vertex_position, 0.0, 1.0 );
 				}
 			)SHADER" ),
 			ogl.new_fragment_shader( R"SHADER(
 				#version 330
 
+				in vec3 color;
 				out vec4 frag_color;
 
 				void main()
 				{
-					frag_color = vec4( 0.0, 0.0, 1.0, 1.0 );
+					frag_color = vec4( color, 1.0 );
 				}
 			)SHADER" )
 		);
 
-		{
-			auto bind = star.bind();
-			bind.vertex_attribute( "position", pos, 0 );
-			bind.set_elements( tris );
-		}
+		auto bind = star.bind();
+		bind.vertex_attribute( "vertex_position", pos, 0 );
+		bind.vertex_attribute( "vertex_color", pos, 1 );
+		bind.set_elements( tris );
+
+		star.add_triangles( tris.size() );
 	}
 
+	// View/projection Matrix
 	gl::matrix4 matrix;
+	float angle = 0.F;
 	gl::program::uniform matrix_loc = star.get_uniform_location( "matrix" );
 
+	// Render function
 	win->exposed = [&]( void )
 	{
 		win->acquire();
+
+		gl::versor rotate( angle, 0.0, 0.0, 1.0 );
+		matrix = gl::matrix4::ortho( 0, win->width(), 0, win->height() );
+		matrix = matrix * gl::matrix4::rotation( rotate );
 
 		ogl.clear();
 		ogl.viewport( 0, 0, win->width(), win->height() );
@@ -113,7 +130,14 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 			bound.draw();
 		}
 
+		angle += 1_deg;
+		while ( angle > 2 * PI )
+			angle -= 2 * PI;
+
 		win->release();
+
+		// Cause a redraw to continue the animation
+		win->invalidate( base::rect() );
 	};
 
 	win->show();
