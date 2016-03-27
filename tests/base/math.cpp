@@ -130,7 +130,6 @@ int safemain( int argc, char *argv[] )
 	test["half"] = [&]( void )
 	{
 		using base::half;
-		using namespace base::literal;
 
 		if ( sizeof(half) == sizeof(uint16_t) )
 			test.success( "sizeof(half)" );
