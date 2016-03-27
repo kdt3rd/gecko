@@ -6,13 +6,14 @@
 #include <cstdint>
 #include <vector>
 #include "contract.h"
+#include "const_string.h"
 
 namespace base
 {
 
 ////////////////////////////////////////
 
-// scheme://user@host:port/path?query#fragment
+/// scheme://user@host:port/path?query#fragment
 class uri
 {
 public:
@@ -20,13 +21,13 @@ public:
 	{
 	}
 
-	uri( const std::string &str )
+	uri( cstring str )
 	{
 		parse( str );
 	}
 
 	template<typename ... Types>
-	uri( std::string sch, std::string auth, Types ...paths )
+	uri( cstring sch, cstring auth, Types ...paths )
 	{
 		_scheme = sch;
 		parse_authority( auth );
@@ -85,18 +86,7 @@ public:
 		return _path.at( i );
 	}
 
-	std::string full_path( void ) const
-	{
-		std::string result;
-		for ( auto &p: _path )
-		{
-			result += '/';
-			result += p;
-		}
-		if ( _path.empty() )
-			result.push_back( '/' );
-		return result;
-	}
+	std::string full_path( void ) const;
 
 	const std::string &query( void ) const
 	{
@@ -108,13 +98,13 @@ public:
 		return _fragment;
 	}
 
-	uri &operator=( const std::string &str )
+	uri &operator=( cstring str )
 	{
 		parse( str );
 		return *this;
 	}
 
-	uri &operator/=( const std::string &str )
+	uri &operator/=( cstring str )
 	{
 		add_path( str );
 		return *this;
@@ -129,10 +119,10 @@ public:
 		return result;
 	}
 
-	void add_path( const std::string &str );
+	void add_path( cstring str );
 
 	template<typename ...Types>
-	void add_paths( const std::string &str, Types ...rest )
+	void add_paths( cstring str, Types ...rest )
 	{
 		add_path( str );
 		add_paths( rest... );
@@ -153,12 +143,12 @@ public:
 		return !_scheme.empty();
 	}
 
-	static std::string escape( const std::string &str );
-	static std::string unescape( const std::string &str );
+	static std::string escape( cstring str );
+	static std::string unescape( cstring str );
 
 private:
-	void parse( const std::string &str );
-	void parse_authority( const std::string &str );
+	void parse( cstring str );
+	void parse_authority( cstring str );
 
 	std::string _scheme;
 	std::string _user;
