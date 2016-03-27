@@ -47,7 +47,7 @@ socket::socket( base::uri &server, const std::string &agent, double timeout )
 	for( size_t i = 0; i < 16; ++i )
 		nonce[i] = static_cast<char>( random_byte() );
 
-	request req( "GET", server.full_path() );
+	request req( "GET", base::uri( server.full_path() ) );
 	req.set_header( "User-Agent", agent );
 	req.set_header( "Host", server.host() + ":" + base::to_string( server.port( 80 ) ) );
 	req.set_header( "Origin", server.pretty() );
