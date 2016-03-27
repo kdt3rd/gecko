@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include "string_util.h"
 
 namespace base
 {
@@ -17,7 +18,7 @@ class json;
 typedef std::string json_string;
 
 /// @brief JSON number type
-typedef double json_number;
+typedef std::pair<double, std::string> json_number;
 
 /// @brief JSON object type
 typedef std::map<std::string,json> json_object;
@@ -41,8 +42,7 @@ public:
 	/// @brief JSON null constructor
 	json( void )
 	{
-		json_null x = nullptr;
-		set<json_null>( x );
+		set<json_null>( json_null( nullptr ) );
 	}
 
 	/// @brief JSON string constructor
@@ -82,15 +82,26 @@ public:
 	}
 
 	/// @brief JSON number constructor
-	json( json_number x )
+	json( const json_number &x )
 	{
 		set<json_number>( x );
+	}
+
+	/// @brief JSON number constructor
+	json( json_number &&x )
+	{
+		set<json_number>( std::move( x ) );
+	}
+
+	json( double x )
+	{
+		set<json_number>( std::make_pair( x, to_string( x ) ) );
 	}
 
 	/// @brief JSON integer constructor
 	json( int x )
 	{
-		set<json_number>( x );
+		set<json_number>( std::make_pair( static_cast<double>( x ), to_string( x ) ) );
 	}
 
 	/// @brief JSON string constructor

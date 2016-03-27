@@ -17,12 +17,12 @@ inline void from_json( const base::json &j, std::string &v )
 
 inline void from_json( const base::json &j, int64_t &v )
 {
-	v = static_cast<int64_t>( j.get<base::json_number>() );
+	v = static_cast<int64_t>( j.get<base::json_number>().first );
 }
 
 inline void from_json( const base::json &j, uint64_t &v )
 {
-	v = static_cast<uint64_t>( j.get<base::json_number>() );
+	v = static_cast<uint64_t>( j.get<base::json_number>().first );
 }
 
 inline void from_json( const base::json &j, bool &v )
@@ -65,12 +65,12 @@ inline void to_json( const char *v, base::json &j )
 
 inline void to_json( int64_t v, base::json &j )
 {
-	j.set<base::json_number>( v );
+	j.set<base::json_number>( std::make_pair( static_cast<double>( v ), base::to_string( v ) ) );
 }
 
 inline void to_json( uint64_t v, base::json &j )
 {
-	j.set<base::json_number>( v );
+	j.set<base::json_number>( std::make_pair( static_cast<double>( v ), base::to_string( v ) ) );
 }
 
 inline void to_json( bool v, base::json &j )

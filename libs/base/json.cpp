@@ -492,7 +492,7 @@ void json::parse_number( std::istream_iterator<char> &it, std::istream_iterator<
 	if ( pos < n.size() )
 		throw_runtime( "invalid json number \"{0}\" at line {1}", n, line );
 
-	set<double>( x );
+	set<json_number>( std::make_pair( x, n ) );
 }
 
 ////////////////////////////////////////
@@ -516,7 +516,7 @@ std::ostream &operator<<( std::ostream &out, const json &j )
 	precondition( j.valid(), "invalid json value" );
 
 	if ( j.is<json_number>() )
-		out << j.get<json_number>();
+		out << j.get<json_number>().second;
 	else if ( j.is<json_string>() )
 	{
 		out << '\"';
