@@ -55,6 +55,7 @@ public:
 	}
 
 	void success( const std::string &msg );
+	void negative_success( const std::string &msg );
 	void failure( const std::string &msg );
 	void warning( const std::string &msg );
 	void message( const std::string &msg );
@@ -63,6 +64,12 @@ public:
 	void success( Args ...args )
 	{
 		success( std::string( format( std::forward<Args>( args )... ) ) );
+	}
+
+	template<typename ...Args>
+	void negative_success( Args ...args )
+	{
+		negative_success( std::string( format( std::forward<Args>( args )... ) ) );
 	}
 
 	template<typename ...Args>
