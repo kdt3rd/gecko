@@ -254,7 +254,7 @@ private:
 template <typename streamT, typename charT, typename traitsT>
 inline streamT &operator<<( streamT &os, const const_string<charT, traitsT> &s )
 {
-	os.write( s.begin(), s.size() );
+	os.write( s.begin(), static_cast<std::streamsize>( s.size() ) );
 	return os;
 }
 
@@ -410,7 +410,7 @@ inline Ret stoa( RetT (*convFunc)( const CharT *, CharT **, Base... ), const cha
 	else
 		ret = static_cast<Ret>( tmp );
 	if ( pos )
-		*pos = endP - s;
+		*pos = static_cast<std::size_t>( endP - s );
 
 	return ret;
 }
