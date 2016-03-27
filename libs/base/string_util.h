@@ -45,11 +45,11 @@ inline std::string to_string( const T &t )
 
 ////////////////////////////////////////
 
-constexpr inline int from_hex( char v )
+inline int from_hex( char v )
 {
 	return std::isalpha( int(v) ) ? 10 + (std::tolower(int(v)) - int('a')) : (int(v) - int('0'));
 }
-constexpr inline char from_hex( char p1, char p2 )
+inline char from_hex( char p1, char p2 )
 {
 	return static_cast<char>( from_hex( p1 ) * 16 + from_hex( p2 ) );
 }
