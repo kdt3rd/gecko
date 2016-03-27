@@ -45,11 +45,12 @@ void check( base::unit_test &ut, const std::string &test, bool should = true, bo
 	}
 	catch ( const std::exception &e )
 	{
+		std::stringstream msg;
+		base::print_exception( msg, e );
 		if ( except )
-			ut.negative_success( test + " -> exception " + std::string( e.what() ) );
+			ut.negative_success( test + " -> exception " + msg.str() );
 		else
-			ut.failure( test + " -> exception " + std::string( e.what() ) );
-		base::print_exception( std::cerr, e );
+			ut.failure( test + " -> exception " + msg.str() );
 	}
 }
 
@@ -81,7 +82,7 @@ int safemain( int argc, char *argv[] )
 		check( test, "http://user@host.com:1234" );
 		check( test, "http://host.com/path1" );
 		check( test, "http://host.com/path1/path2" );
-	}
+	};
 	
 	test["parse_query_frag"] = [&]( void )
 	{
@@ -89,7 +90,7 @@ int safemain( int argc, char *argv[] )
 		check( test, "http://host.com#frag" );
 		check( test, "http://host.com?query#frag" );
 		check( test, "http://host.com/path1?query#frag" );
-	}
+	};
 
 	test["parse_encoded"] = [&]( void )
 	{
@@ -100,7 +101,7 @@ int safemain( int argc, char *argv[] )
 		check( test, "http://host.com/%2Fmore" );
 		check( test, "http://host.com/with%20space", false );
 		check( test, "http://host.com/with space", true );
-	}
+	};
 
 	test["path_construction"] = [&]( void )
 	{
@@ -116,7 +117,7 @@ int safemain( int argc, char *argv[] )
 			test.success( "operator/" );
 		else
 			test.failure( "operator/ -> {0}", tf );
-	}
+	};
 
 //	test.cleanup() = [&]( void ) {};
 	test.run( options );
