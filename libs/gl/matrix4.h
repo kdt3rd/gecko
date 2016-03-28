@@ -148,9 +148,31 @@ private:
 ////////////////////////////////////////
 
 /// @brief Multiply 2 matrices
+/// @relates gl::matrix4
 matrix4 operator*( const matrix4 &a, const matrix4 &b );
 
+////////////////////////////////////////
+
+/// @brief Multiply matrix and versor
+/// @relates gl::matrix4
+inline matrix4 operator*( const matrix4 &a, const versor &b )
+{
+	return a * gl::matrix4::rotation( b );
+}
+
+////////////////////////////////////////
+
+/// @brief Multiply matrix and versor
+/// @relates gl::matrix4
+inline matrix4 operator*( const versor &a, const matrix4 &b )
+{
+	return gl::matrix4::rotation( a ) * b;
+}
+
+////////////////////////////////////////
+
 /// @brief Stream out a matrix
+/// @relates gl::matrix4
 std::ostream &operator<<( std::ostream &out, const matrix4 &m );
 
 }

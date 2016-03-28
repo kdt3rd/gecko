@@ -5,6 +5,7 @@
 #include <gl/opengl.h>
 #include <gl/api.h>
 #include <gl/mesh.h>
+#include <gl/png_image.h>
 #include <base/contract.h>
 #include <base/timer.h>
 #include <base/math_functions.h>
@@ -28,15 +29,12 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	gl::mesh star;
 	{
 		// Draw a star shape (with 17 points).
-		gl::vec2 center { 200, 200 };
-		double side = 180;
+		draw::path path;
 		size_t p = 17;
 		size_t q = 5;
-
-		draw::path path;
-		path.move_to( center + gl::vec2::polar( side, 0.F ) );
+		path.move_to( gl::vec2::polar( 200.F, 0.F ) );
 		for ( size_t i = q % p; i != 0; i = ( i + q ) % p )
-			path.line_to( center + gl::vec2::polar( side, base::degree( 360.F ) * i / p ) );
+			path.line_to( gl::vec2::polar( 200.F, base::degree( 360.F ) * i / p ) );
 		path.close();
 
 		// Setup GL vertex/element buffers.
@@ -109,6 +107,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	gl::matrix4 matrix;
 	float angle = 0.F;
 	gl::program::uniform matrix_loc = star.get_uniform_location( "matrix" );
+	gl::matrix4 local = gl::matrix4::translation( 200, 200 );
 
 	// Render function
 	win->exposed = [&]( void )
@@ -116,15 +115,14 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		win->acquire();
 
 		gl::versor rotate( angle, 0.F, 0.F, 1.F );
-		matrix = gl::matrix4::ortho( 0, win->width(), 0, win->height() );
-		matrix = matrix * gl::matrix4::rotation( rotate );
+		matrix = gl::matrix4::ortho( 0, static_cast<float>( win->width() ), 0, static_cast<float>( win->height() ) );
 
 		ogl.clear();
 		ogl.viewport( 0, 0, win->width(), win->height() );
 
 		{
 			auto bound = star.bind();
-			bound.set_uniform( matrix_loc, matrix );
+			bound.set_uniform( matrix_loc, rotate * local * matrix );
 			bound.draw();
 		}
 
@@ -136,6 +134,17 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 
 		// Cause a redraw to continue the animation
 		win->invalidate( base::rect() );
+	};
+
+	// Key to take a screenshot.
+	win->key_pressed = [&]( const std::shared_ptr<platform::keyboard> &, platform::scancode c )
+	{
+		if ( c == platform::scancode::KEY_S )
+		{
+			win->acquire();
+			gl::png_write( "/tmp/test.png", static_cast<size_t>( win->width() ), static_cast<size_t>( win->height() ), 3 );
+			win->release();
+		}
 	};
 
 	win->show();

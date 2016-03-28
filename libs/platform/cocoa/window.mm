@@ -101,6 +101,10 @@ void window::move( double x, double y )
 
 void window::resize( double w, double h )
 {
+	NSSize size;
+	size.width = w;
+	size.height = h;
+	[_impl->win setContentSize:size];
 }
 
 ////////////////////////////////////////
@@ -122,14 +126,14 @@ void window::resize_event( double w, double h )
 
 ////////////////////////////////////////
 
-void window::invalidate( const base::rect &r )
+void window::invalidate( const base::rect & )
 {
 	[_impl->view performSelector:@selector(forceRedraw) withObject:nil afterDelay:0.0];
 }
 
 ////////////////////////////////////////
 
-void window::set_minimum_size( double w, double h )
+void window::set_minimum_size( double /*w*/, double /*h*/ )
 {
 }
 
@@ -158,12 +162,12 @@ void window::release( void )
 
 void window::set_ns( void *w, void *v )
 {
-	_impl->win = (NSWindow *)w;
-	_impl->view = (NSOpenGLView *)v;
+	_impl->win = static_cast<NSWindow *>( w );
+	_impl->view = static_cast<NSOpenGLView *>( v );
 	if ( [_impl->view respondsToSelector:@selector(setWantsBestResolutionOpenGLSurface:)] )
 		[_impl->view setWantsBestResolutionOpenGLSurface:YES];
 
-	float scale = scale_factor();
+	double scale = scale_factor();
 	NSSize size = [_impl->view bounds].size;
 	_last_w = size.width * scale;
 	_last_h = size.height * scale;

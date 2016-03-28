@@ -50,6 +50,8 @@ constexpr inline int from_digit( char v )
 	return int(v) - int('0');
 }
 
+////////////////////////////////////////
+
 inline int from_hex( char v )
 {
 	return std::isalpha( int(v) ) ? 10 + (std::tolower(int(v)) - int('a')) : (int(v) - int('0'));
