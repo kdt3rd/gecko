@@ -2,16 +2,19 @@
 lib = library "media"
   source{
 	"sample_rate.cpp",
+	"time_code.cpp",
 	"image_buffer.cpp",
 	"container.cpp",
 	"file_sequence.cpp",
 	"riff/fourcc.cpp",
-	"riff/chunk.cpp"
+	"riff/chunk.cpp",
+
+	"exr_reader.cpp",
   }
   libs "base"
   external_lib{
 	  lib="OpenEXR";
 	  required=false;
-	  source={"exr_reader.cpp"};
 	  extra_libs="IlmBase";
+	  defines={"HAVE_OPENEXR"};
   }

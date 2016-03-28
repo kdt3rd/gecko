@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016 Kimball Thurston and Ian Godin
+// Copyright (c) 2016 Kimball Thurston
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the "Software"),
@@ -22,14 +22,38 @@
 
 #pragma once
 
+#include "sample_rate.h"
+
+
+////////////////////////////////////////
+
+
 namespace media
 {
 
-////////////////////////////////////////
+///
+/// @brief Class sample provides...
+///
+class sample
+{
+public:
+	inline sample( void ) = default;
+	inline sample( int64_t o, const sample_rate &sr ) : _offset( o ), _rate( sr ) {}
+	inline ~sample( void ) = default;
+	inline sample( const sample & ) = default;
+	inline sample &operator=( const sample & ) = default;
+	inline sample( sample && ) = default;
+	inline sample &operator=( sample && ) = default;
 
-void register_exr_reader( void );
+	inline int64_t offset( void ) const { return _offset; }
+	inline const sample_rate &rate( void ) const { return _rate; }
 
-////////////////////////////////////////
+private:
+	int64_t _offset = -1;
+	sample_rate _rate;
+};
 
-}
+} // namespace media
+
+
 

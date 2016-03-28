@@ -22,6 +22,7 @@
 
 #include "sample_rate.h"
 #include <base/contract.h>
+#include <base/string_util.h>
 #include <cmath>
 #include <sstream>
 
@@ -36,8 +37,8 @@ namespace media
 ////////////////////////////////////////
 
 
-sample_rate::sample_rate( int64_t n, int64_t d )
-		: _ratio( n, d )
+sample_rate::sample_rate( int64_t n, int64_t d, bool realtime )
+		: _ratio( n, d ), _realtime( realtime )
 {
 }
 
@@ -48,8 +49,10 @@ sample_rate::sample_rate( int64_t n, int64_t d )
 bool
 sample_rate::is_drop_frame( void ) const
 {
-	return ( _ratio.denominator() == 1001 &&
-			 ( _ratio.numerator() == 30000 || _ratio.numerator() == 60000 ) );
+	return ( _realtime &&
+			 _ratio.denominator() == 1001 &&
+			 ( _ratio.numerator() == 30000 ||
+			   _ratio.numerator() == 60000 ) );
 }
 
 
@@ -70,9 +73,10 @@ sample_rate::resample( int64_t i, const sample_rate &rate ) const
 
 
 void
-sample_rate::set( int64_t n, int64_t d )
+sample_rate::set( int64_t n, int64_t d, bool realtime )
 {
 	_ratio.set( n, d );
+	_realtime = realtime;
 }
 
 
@@ -80,18 +84,13 @@ sample_rate::set( int64_t n, int64_t d )
 
 
 void
-sample_rate::set_rate( double r )
+sample_rate::set_rate( double r, bool realtime )
 {
 	precondition( r > 0.0, "invalid sample rate {0}", r );
-	// we could loop over all the frame rates
-	// and audio rates, but with the exception
-	// of the frame rates that are 1001 denoms,
-	// all are whole numbers, so just check for
-	// the 1001 cases for now
 
 	// people will often pass in 23.98 for 23.976
-	// so use an epsilon of 0.01
-	static const double kRateEps = 0.01;
+	// so use an epsilon of 0.005
+	static const double kRateEps = 0.005;
 	if ( std::abs( r - (24000.0/1001.0) ) < kRateEps )
 		set( 24000, 1001 );
 	else if ( std::abs( r - (30000.0/1001.0) ) < kRateEps )
@@ -101,7 +100,22 @@ sample_rate::set_rate( double r )
 	else if ( std::abs( r - (60000.0/1001.0) ) < kRateEps )
 		set( 60000, 1001 );
 	else
-		set( static_cast<int64_t>( r + 0.5 ), 1 );
+	{
+		// EDL files and such have frame rates
+		// for speed changes that are fractional
+		int64_t num = static_cast<int64_t>( r );
+		int64_t den = 1;
+		double curRem = r - static_cast<double>( num );
+		while ( std::abs( curRem ) > kRateEps )
+		{
+			den *= 10;
+			num = static_cast<int64_t>( r * static_cast<double>( den ) );
+			curRem = r - ( static_cast<double>( num ) / static_cast<double>( den ) );
+		}
+
+		set( num, den );
+	}
+	_realtime = realtime;
 }
 
 
@@ -111,7 +125,16 @@ sample_rate::set_rate( double r )
 void
 sample_rate::set_rate( const std::string &r )
 {
-	set_rate( std::stod( r ) );
+	std::size_t ep = 0;
+	double rn = std::stod( r, &ep );
+	bool rt = false;
+	if ( ep < r.size() )
+	{
+		std::string ss = base::trim( r.substr( ep ) );
+		if ( ss == "DF" || ss == "df" )
+			rt = true;
+	}
+	set_rate( rn, rt );
 }
 
 
@@ -119,7 +142,7 @@ sample_rate::set_rate( const std::string &r )
 
 
 double
-sample_rate::as_number( void ) const
+sample_rate::to_number( void ) const
 {
 	return _ratio.value();
 }
@@ -129,7 +152,7 @@ sample_rate::as_number( void ) const
 
 
 std::string
-sample_rate::as_string( void ) const
+sample_rate::to_string( void ) const
 {
 	std::stringstream buf;
 	if ( ! _ratio.valid() )
@@ -141,9 +164,9 @@ sample_rate::as_string( void ) const
 		switch ( _ratio.numerator() )
 		{
 			case 24000: buf << "23.976"; break;
-			case 30000: buf << "29.97"; break;
+			case 30000: buf << "29.97" << ( _realtime ? "DF" : "NDF" ); break;
 			case 48000: buf << "47.95"; break;
-			case 60000: buf << "59.94"; break;
+			case 60000: buf << "59.94" << ( _realtime ? "DF" : "NDF" ); break;
 			default:
 				buf << _ratio.value();
 				break;
