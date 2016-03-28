@@ -69,6 +69,54 @@ namespace utf
 
 ////////////////////////////////////////
 
+char32_t read_8( const char *&start, const char *end )
+{
+	char32_t result = 0;
+
+	if ( start == end )
+		return 0;
+	int byte = *start++;
+
+	if( byte < 0x80 )
+		result = char32_t( byte );
+	else if ( ( byte >> 5 ) == 0x06 )
+	{
+		if ( start == end )
+			throw error( "utf8 sequence ended prematurely" );
+		result = byte1of2( byte ) + byte2of2( *start++ );
+	}
+	else if ( ( byte >> 4 ) == 0x0E )
+	{
+		if ( start == end )
+			throw error( "utf8 sequence ended prematurely" );
+		result = byte1of3( byte ) + byte2of3( *start++ );
+
+		if ( start == end )
+			throw error( "utf8 sequence ended prematurely" );
+		result += byte3of3( *start++ );
+	}
+	else if ( ( byte >> 3 ) == 0x1E )
+	{
+		if ( start == end )
+			throw error( "utf8 sequence ended prematurely" );
+		result = byte1of4( byte ) + byte2of4( *start++ );
+
+		if ( start == end )
+			throw error( "utf8 sequence ended prematurely" );
+		result += byte3of4( *start++ );
+
+		if ( start == end )
+			throw error( "utf8 sequence ended prematurely" );
+		result += byte4of4( *start++ );
+	}
+	else
+		throw error( "invalid utf8 lead byte" );
+
+	return check_code_point( result );
+}
+
+////////////////////////////////////////
+
 char32_t read_8( std::istream &in )
 {
 	char32_t result = 0;

@@ -56,6 +56,14 @@ namespace utf
 	}
 
 	/// @brief Read a code point from UTF-8
+	/// @param start Start of string.
+	/// @param end End of string.
+	/// @return The code point read from the string.
+	///
+	/// Read a UTF-8 code point from the string and return it.
+	char32_t read_8( const char *&start, const char *end );
+
+	/// @brief Read a code point from UTF-8
 	/// @param str Stream to read from.
 	/// @return The code point read from the stream.
 	///
