@@ -22,9 +22,6 @@ namespace script
 class font
 {
 public:
-	/// @brief Construct a font.
-	font( std::string fam, std::string sty, double sz );
-
 	/// @brief Destructor.
 	virtual ~font( void );
 
@@ -58,7 +55,7 @@ public:
 	/// The specific distances and dimensions of the text when drawn with the given font.
 	/// NB: This assumes a horizontal layout currently.
 	///
-	/// @param utf8 The utf8 string to measure.
+	/// @param utf8 The UTF-8 string to measure.
 	/// @return The text extents.
 	text_extents extents( const std::string &utf8 );
 
@@ -69,10 +66,10 @@ public:
 	/// Given the start as the origin for the baseline, 'renders' the
 	/// given text by filling a set of output coordinates and vertex
 	/// indices to render.
-	void render( std::vector<float> &outCoords,
-				 std::vector<float> &texCoords,
-				 std::vector<uint16_t> &renderIndices,
-				 const base::point &start, const std::string &utf8 );
+	void render(
+		const std::function<void(float,float,float,float)> &add_point,
+		const std::function<void(size_t,size_t,size_t)> &add_tri,
+		const base::point &start, const std::string &utf8 );
 
 	/// @brief Glyph version.
 	/// Increments every time a glyph is loaded into the internal
@@ -99,7 +96,12 @@ public:
 		(void)get_glyph( cc );
 	}
 
+	void load_glyphs( const std::string &utf8 );
+
 protected:
+	/// @brief Construct a font.
+	font( std::string fam, std::string sty, double sz );
+
 	void add_glyph( char32_t char_code, const uint8_t *glData, int glPitch, int w, int h );
 
 	/// Retrieves a glyph given a unicode char code.

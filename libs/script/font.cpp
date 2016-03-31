@@ -70,10 +70,10 @@ font::extents( const std::string &utf8 )
 ////////////////////////////////////////
 
 void
-font::render( std::vector<float> &outCoords,
-			  std::vector<float> &texCoords,
-			  std::vector<uint16_t> &renderIndices,
-			  const base::point &start, const std::string &utf8 )
+font::render(
+	const std::function<void(float,float,float,float)> &add_point,
+	const std::function<void(size_t,size_t,size_t)> &add_tri,
+	const base::point &start, const std::string &utf8 )
 {
 	if ( utf8.empty() )
 		return;
@@ -81,12 +81,9 @@ font::render( std::vector<float> &outCoords,
 	// In case we have to change the texture size in the
 	// middle of rendering, add this extra loop
 	uint32_t fVer = _glyph_version;
+	size_t points = 0;
 	do
 	{
-		outCoords.clear();
-		texCoords.clear();
-		renderIndices.clear();
-
 		std::mbstate_t s = std::mbstate_t();
 		size_t curpos = 0;
 		size_t nleft = utf8.size();
@@ -114,36 +111,37 @@ font::render( std::vector<float> &outCoords,
 			if ( idx_base_i != _glyph_index_offset.end() )
 			{
 				size_t coordOff = idx_base_i->second;
-				size_t idx_base = texCoords.size();
+				size_t idx_base = points;
 
 				if ( ( idx_base / 2 + 3 ) > static_cast<size_t>( std::numeric_limits<uint16_t>::max() ) )
 					throw std::runtime_error( "String too long for OpenGL ES" );
-
-
-				for ( size_t i = 0; i < 8; ++i )
-					texCoords.push_back( _glyph_coords[coordOff + i] );
-
-				uint16_t idxVal = static_cast<uint16_t>( idx_base / 2 );
-				renderIndices.push_back( idxVal );
-				renderIndices.push_back( idxVal + 1 );
-				renderIndices.push_back( idxVal + 2 );
-				renderIndices.push_back( idxVal + 2 );
-				renderIndices.push_back( idxVal + 3 );
-				renderIndices.push_back( idxVal );
 
 				double upperY = start.y() - gext.y_bearing;
 				double lowerY = upperY + gext.height;
 				double leftX = curposX + gext.x_bearing;
 				double rightX = leftX + gext.width;
 
-				outCoords.push_back( static_cast<float>( leftX ) );
-				outCoords.push_back( static_cast<float>( upperY ) );
-				outCoords.push_back( static_cast<float>( rightX ) );
-				outCoords.push_back( static_cast<float>( upperY ) );
-				outCoords.push_back( static_cast<float>( rightX ) );
-				outCoords.push_back( static_cast<float>( lowerY ) );
-				outCoords.push_back( static_cast<float>( leftX ) );
-				outCoords.push_back( static_cast<float>( lowerY ) );
+				add_point(
+					static_cast<float>( leftX ), static_cast<float>( upperY ),
+					_glyph_coords[coordOff + 0], _glyph_coords[coordOff + 1] );
+
+				add_point(
+					static_cast<float>( rightX ), static_cast<float>( upperY ),
+					_glyph_coords[coordOff + 2], _glyph_coords[coordOff + 3] );
+
+				add_point(
+					static_cast<float>( rightX ), static_cast<float>( lowerY ),
+					_glyph_coords[coordOff + 4], _glyph_coords[coordOff + 5] );
+
+				add_point(
+					static_cast<float>( leftX ), static_cast<float>( lowerY ),
+					_glyph_coords[coordOff + 6], _glyph_coords[coordOff + 7] );
+
+				points += 4;
+
+				uint16_t idxVal = static_cast<uint16_t>( idx_base / 2 );
+				add_tri( idxVal, idxVal + 1, idxVal + 2 );
+				add_tri( idxVal + 2, idxVal + 3, idxVal );
 			}
 
 			curposX += gext.x_advance;
