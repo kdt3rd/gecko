@@ -146,6 +146,10 @@ public:
 	/// @brief Bind the mesh.
 	binding bind( void );
 
+	void clear( void );
+
+	bool valid( void ) const;
+
 private:
 	typedef std::tuple<primitive,size_t,size_t> Primitive;
 	std::shared_ptr<vertex_array> _vao;

@@ -131,5 +131,21 @@ mesh::binding mesh::bind( void )
 
 ////////////////////////////////////////
 
+void mesh::clear( void )
+{
+	_vao.reset();
+	_prog.reset();
+	_prims.clear();
+}
+
+////////////////////////////////////////
+
+bool mesh::valid( void ) const
+{
+	return _vao && _prog && !_prims.empty();
+}
+
+////////////////////////////////////////
+
 }
 
