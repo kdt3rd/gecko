@@ -6,6 +6,12 @@ lib = library "media"
 	"image_buffer.cpp",
 	"container.cpp",
 	"file_sequence.cpp",
+	"reader.cpp",
+	"file_per_sample_reader.cpp",
+	"writer.cpp",
+	"parameter.cpp",
+	"track_description.cpp",
+	"video_track.cpp",
 	"riff/fourcc.cpp",
 	"riff/chunk.cpp",
 

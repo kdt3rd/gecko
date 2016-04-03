@@ -22,10 +22,10 @@
 
 #pragma once
 
-#include "sample_rate.h"
-#include "sample_data.h"
-#include <utility>
-#include <memory>
+#include <base/variant.h>
+#include <base/const_string.h>
+#include <base/any.h>
+#include <map>
 
 
 ////////////////////////////////////////
@@ -35,34 +35,29 @@ namespace media
 {
 
 ///
-/// @brief Class sample provides...
+/// @brief metadata provides a container of metadata items.
 ///
-class sample
-{
-public:
-	inline sample( void ) = default;
-	inline sample( int64_t o, const sample_rate &sr ) : _offset( o ), _rate( sr ) {}
-	inline ~sample( void ) = default;
-	inline sample( const sample & ) = default;
-	inline sample &operator=( const sample & ) = default;
-	inline sample( sample && ) = default;
-	inline sample &operator=( sample && ) = default;
-
-	inline int64_t offset( void ) const { return _offset; }
-	inline const sample_rate &rate( void ) const { return _rate; }
-
-	template <typename T>
-	typename std::shared_ptr<typename std::remove_pointer<decltype( std::declval<T>().read(int64_t(), sample_rate()) )>::type> operator()( const std::shared_ptr<T> &track ) const
-	{
-		typedef decltype( std::declval<T>().read(int64_t(), sample_rate()) ) ret_ptr;
-		typedef typename std::remove_pointer<ret_ptr>::type ret_type;
-		static_assert( std::is_base_of<sample_data, ret_type>::value, "Track object read value no derived from sample_data" );
-		return std::shared_ptr<ret_type>( track->read( _offset, _rate ) );
-	}
-private:
-	int64_t _offset = -1;
-	sample_rate _rate;
-};
+/// The basic premise of this class is to be able to store metadata
+/// such as random attributes from an OpenEXR file, or XMP data, or
+/// similar. This data takes the form of being largely a string to
+/// value map, where the value is of some set of types (including the
+/// possiblity of having a metadata chunk itself to support having
+/// structures).
+///
+/// XMP has the following types:
+/// property
+///   - have qualifiers (another property)
+/// structure (name -> property bag)
+/// arrays
+///   - unordered (bag)
+///   - ordered (sequence)
+///   - alternative (supposed to choose one of, i.e. multiple languages)
+/// 
+/// qualifiers (attached to simple property value, further describe simple property value)
+///
+/// NB: for now, let's just typedef metadata to a map to avoid
+/// implementing anything until we see what we end up with
+typedef std::map<std::string, base::any> metadata;
 
 } // namespace media
 

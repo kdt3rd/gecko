@@ -59,6 +59,8 @@ public:
 	sample_rate &operator=( const sample_rate & ) = default;
 	sample_rate &operator=( sample_rate && ) = default;
 
+	inline bool valid( void ) const;
+
 	bool is_drop_frame( void ) const;
 
 	inline bool realtime( void ) const;
@@ -120,6 +122,12 @@ inline std::ostream &operator<<( std::ostream &os, const sample_rate &r )
 
 ////////////////////////////////////////
 
+
+inline bool
+sample_rate::valid( void ) const
+{
+	return _ratio.valid();
+}
 
 inline bool
 sample_rate::realtime( void ) const

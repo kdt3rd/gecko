@@ -22,10 +22,9 @@
 
 #pragma once
 
-#include "sample_rate.h"
-#include "sample_data.h"
-#include <utility>
-#include <memory>
+#include <base/variant.h>
+#include <base/const_string.h>
+#include <vector>
 
 
 ////////////////////////////////////////
@@ -34,34 +33,45 @@
 namespace media
 {
 
-///
-/// @brief Class sample provides...
-///
-class sample
+enum parameter_type
+{
+	PARAM_INT,
+	PARAM_STRING,
+	PARAM_FLOAT
+};
+
+class parameter_definition
 {
 public:
-	inline sample( void ) = default;
-	inline sample( int64_t o, const sample_rate &sr ) : _offset( o ), _rate( sr ) {}
-	inline ~sample( void ) = default;
-	inline sample( const sample & ) = default;
-	inline sample &operator=( const sample & ) = default;
-	inline sample( sample && ) = default;
-	inline sample &operator=( sample && ) = default;
+	typedef std::pair<int64_t,int64_t> int_range;
+	typedef std::pair<double,double> float_range;
+	typedef std::vector<std::string> string_list;
 
-	inline int64_t offset( void ) const { return _offset; }
-	inline const sample_rate &rate( void ) const { return _rate; }
+	parameter_definition( base::cstring name, parameter_type pt );
+	parameter_definition( base::cstring name, int64_t minVal, int64_t maxVal );
+	parameter_definition( base::cstring name, double minVal, double maxVal );
+	parameter_definition( base::cstring name, std::vector<std::string> vals );
 
-	template <typename T>
-	typename std::shared_ptr<typename std::remove_pointer<decltype( std::declval<T>().read(int64_t(), sample_rate()) )>::type> operator()( const std::shared_ptr<T> &track ) const
-	{
-		typedef decltype( std::declval<T>().read(int64_t(), sample_rate()) ) ret_ptr;
-		typedef typename std::remove_pointer<ret_ptr>::type ret_type;
-		static_assert( std::is_base_of<sample_data, ret_type>::value, "Track object read value no derived from sample_data" );
-		return std::shared_ptr<ret_type>( track->read( _offset, _rate ) );
-	}
+	~parameter_definition( void ) = default;
+
+	const std::string &name( void ) const { return _name; }
+
+	parameter_type type( void ) const { return _type; }
+
+	void help( std::string h ) { _help = std::move( h ); }
+	const std::string &help( void ) const { return _help; }
+
+	bool has_constraint( void ) const { return _allowed_vals.valid(); }
+
+	const int_range &range_int( void ) const;
+	const std::pair<double, double> &range_float( void ) const;
+	const std::vector<std::string> &string_vals( void ) const;
+	
 private:
-	int64_t _offset = -1;
-	sample_rate _rate;
+	std::string _name;
+	parameter_type _type;
+	base::variant<int_range, float_range, string_list> _allowed_vals;
+	std::string _help;
 };
 
 } // namespace media

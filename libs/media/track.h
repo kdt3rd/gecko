@@ -3,6 +3,7 @@
 
 #include "frame.h"
 #include "sample_rate.h"
+#include "sample_data.h"
 #include "sample.h"
 
 #include <string>
@@ -40,8 +41,10 @@ public:
 	inline int64_t end( void ) const;
 	inline const sample_rate &rate( void ) const;
 
-//	virtual std::shared_ptr<sample_data> read( const sample &s ) = 0;
-//	virtual void store( const std::shared_ptr<sample_data> &s, int64_t offset ) = 0;
+protected:
+	friend class sample;
+	// we will use covariance to access the return types for sub classes of this
+	virtual sample_data *read( int64_t offset, const sample_rate &r ) = 0;
 	
 private:
 	std::string _name;

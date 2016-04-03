@@ -22,10 +22,15 @@
 
 #pragma once
 
-#include "track.h"
 #include <vector>
 #include <base/uri.h>
 #include <functional>
+#include "track.h"
+#include "video_track.h"
+#include "audio_track.h"
+#include "data_track.h"
+
+#include "metadata.h"
 
 namespace media
 {
@@ -48,9 +53,8 @@ public:
 
 	/// There is some amount of container info
 	/// such as creator and such
-	void info( void ) const
-	{
-	}
+	inline const metadata &info( void ) const;
+	inline void add_info( base::cstring n, base::any v );
 
 	std::shared_ptr<track> operator[]( size_t i )
 	{
@@ -62,23 +66,46 @@ public:
 		return _tracks.at( i );
 	}
 
-	void add_track( const std::shared_ptr<track> &t )
-	{
-		_tracks.push_back( t );
-	}
+	void add_track( const std::shared_ptr<track> &t );
 
-	static container create( const base::uri &u );
+	inline const std::vector<std::shared_ptr<video_track>> &video_tracks( void ) const;
+	inline const std::vector<std::shared_ptr<audio_track>> &audio_tracks( void ) const;
+	inline const std::vector<std::shared_ptr<data_track>> &data_tracks( void ) const;
 
-	static void register_media_type( const std::string &name,
-									 const std::function<container(const base::uri &)> &factory,
-									 const std::vector<std::string> &extlist,
-									 const std::vector<std::vector<uint8_t>> &magics = std::vector<std::vector<uint8_t>>() );
-									 
 private:
-	static container scan_header( const base::uri &u );
-
+	metadata _info;
 	std::vector<std::shared_ptr<track>> _tracks;
+	std::vector<std::shared_ptr<video_track>> _video_tracks;
+	std::vector<std::shared_ptr<audio_track>> _audio_tracks;
+	std::vector<std::shared_ptr<data_track>> _data_tracks;
 };
+
+////////////////////////////////////////
+
+inline const metadata &container::info( void ) const
+{ return _info; }
+inline void container::add_info( base::cstring n, base::any v )
+{ _info[n] = std::move( v ); }
+
+
+////////////////////////////////////////
+
+inline const std::vector<std::shared_ptr<video_track>> &container::video_tracks( void ) const
+{
+	return _video_tracks;
+}
+
+inline const std::vector<std::shared_ptr<audio_track>> &container::audio_tracks( void ) const
+{
+	return _audio_tracks;
+}
+
+inline const std::vector<std::shared_ptr<data_track>> &container::data_tracks( void ) const
+{
+	return _data_tracks;
+}
+
+
 
 ////////////////////////////////////////
 

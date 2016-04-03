@@ -22,13 +22,14 @@
 
 #include "exr_reader.h"
 
-#include "container.h"
 #if defined(HAVE_OPENEXR)
+# include "file_per_sample_reader.h"
 # include "image_frame.h"
 # include "video_track.h"
 # include "file_sequence.h"
 # include <base/string_util.h>
 # include <base/file_system.h>
+# include <thread>
 
 # pragma GCC diagnostic push
 # if defined(__clang__)
@@ -53,6 +54,7 @@
 # include <ImfChannelList.h>
 # include <ImfMultiView.h>
 # include <ImfStandardAttributes.h>
+# include <ImfThreading.h>
 # pragma GCC diagnostic pop
 
 # include <algorithm>
@@ -80,7 +82,17 @@ public:
 	{
 		try
 		{
-			return bool( _stream.read( c, n ) );
+			if ( _stream.read( c, n ) )
+			{
+				if ( static_cast<std::streamsize>( n ) == _stream.gcount() )
+					return true;
+
+				if ( _stream.eof() )
+					return false;
+			}
+			else if ( _stream.eof() )
+				return false;
+			throw std::runtime_error( "Stream failed during read" );
 		}
 		catch ( ... )
 		{
@@ -141,8 +153,10 @@ public:
 	{
 	}
 
-	virtual std::shared_ptr<image_frame> at( int64_t f ) override
+	virtual image_frame *doRead( int64_t f )
 	{
+		std::unique_ptr<image_frame> ret;
+
 		auto fs = base::file_system::get( _files.uri() );
 		base::istream stream = fs->open_read( _files.get_frame( f ) );
 		exr_istream estr( stream );
@@ -156,8 +170,7 @@ public:
 		int64_t h = disp.max.y - disp.min.y + 1;
 		Imf::FrameBuffer fbuf;
 
-		auto result = std::make_shared<image_frame>( w, h );
-
+		ret.reset( new image_frame( w, h ) );
 		for ( size_t c = 0; c < _channels.size(); ++c )
 		{
 			const std::string &cname = _channels.at( c );
@@ -188,13 +201,13 @@ public:
 
 			char *data = static_cast<char*>( imgbuf.data() ) - static_cast<size_t>( disp.min.x + disp.min.y * w ) * bytes;
 			fbuf.insert( cname, Imf::Slice( imfchan.type, data, bytes, bytes * static_cast<size_t>(w), 1, 1, 0.0 ) );
-			result->add_channel( cname, imgbuf );
+			ret->add_channel( cname, imgbuf );
 		}
 
 		input.setFrameBuffer( fbuf );
 		input.readPixels( disp.min.y, disp.max.y );
 
-		return result;
+		return ret.release();
 	}
 
 private:
@@ -228,31 +241,33 @@ media::sample_rate extract_rate( const Imf::Header &h )
 	return sr;
 }
 
-
 ////////////////////////////////////////
 
-container exr_reader( const base::uri &u )
+class OpenEXRReader : public file_per_sample_reader
+{
+public:
+	OpenEXRReader( void )
+			: file_per_sample_reader( "OpenEXR" )
+	{
+		_description = "OpenEXR Reader from ILM";
+		_extensions.emplace_back( "exr" );
+		_extensions.emplace_back( "aces" );
+		std::vector<uint8_t> m{0x76, 0x2f, 0x31, 0x01};
+		_magics.emplace_back( std::move( m ) );
+	}
+	virtual ~OpenEXRReader( void ) = default;
+
+	virtual container create( const base::uri &u, const metadata &params );
+};
+
+container
+OpenEXRReader::create( const base::uri &u, const metadata &params )
 {
 	container result;
 
-	int64_t start = std::numeric_limits<int64_t>::max();
-	int64_t last = std::numeric_limits<int64_t>::min();
-
+	int64_t start, last;
 	file_sequence fseq( u );
-	auto fs = base::file_system::get( fseq.uri() );
-	{
-		auto dir = fs->readdir( u.parent() );
-		while ( ++dir )
-		{
-			int64_t f = 0;
-			if ( fseq.extract_frame( *dir, f ) )
-			{
-				start = std::min( start, f );
-				last = std::max( last, f );
-			}
-		}
-	}
-
+	auto fs = scan_samples( start, last, fseq );
 	base::istream stream = fs->open_read( fseq.get_frame( start ) );
 	exr_istream estr( stream );
 
@@ -262,10 +277,6 @@ container exr_reader( const base::uri &u )
 		const Imf::Header header = file.header( 0 );
 		sample_rate sr = extract_rate( header );
 
-//		if ( Imf::hasTimeCode( header ) )
-//		{
-//			
-//		}
 		if ( Imf::hasMultiView( header ) )
 		{
 			const auto &mview = Imf::multiView( header );
@@ -299,7 +310,7 @@ container exr_reader( const base::uri &u )
 	return result;
 }
 
-}
+} // empty namespace
 #endif // HAVE_OPENEXR
 
 ////////////////////////////////////////
@@ -307,10 +318,13 @@ container exr_reader( const base::uri &u )
 void register_exr_reader( void )
 {
 #ifdef HAVE_OPENEXR
-	container::register_media_type( "OpenEXR",
-									&exr_reader,
-									{ "exr", "aces" },
-									{ {0x76, 0x2f, 0x31, 0x01} } );
+	int nThreads = static_cast<int>( std::thread::hardware_concurrency() );
+	if ( nThreads < 0 )
+		nThreads = 0;
+
+	Imf::setGlobalThreadCount( nThreads );
+	
+	reader::register_reader( std::make_shared<OpenEXRReader>() );
 #endif
 }
 

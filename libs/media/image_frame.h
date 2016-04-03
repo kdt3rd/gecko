@@ -3,6 +3,7 @@
 
 #include <base/contract.h>
 
+#include "sample_data.h"
 #include "image_buffer.h"
 
 #include <map>
@@ -13,13 +14,16 @@ namespace media
 
 ////////////////////////////////////////
 
-class image_frame
+class image_frame : public sample_data
 {
 public:
 	image_frame( int64_t w, int64_t h )
 		: _width( w ), _height( h )
 	{
 	}
+	virtual ~image_frame( void ) = default;
+
+	virtual size_t item_count( void ) const { return 1; }
 
 	size_t add_channel( std::string n, image_buffer &i )
 	{

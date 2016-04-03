@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016 Kimball Thurston & Ian Godin
+// Copyright (c) 2016 Kimball Thurston
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the "Software"),
@@ -20,16 +20,26 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#include "container.h"
+#include "file_per_sample_reader.h"
+#include "file_sequence.h"
+#include <base/string_util.h>
+#include <limits>
+
+////////////////////////////////////////
 
 namespace media
 {
 
+////////////////////////////////////////
+
+file_per_sample_reader::file_per_sample_reader( base::cstring n )
+	: reader( std::move( n ) )
+{
+}
 
 ////////////////////////////////////////
 
-
-track::~track( void )
+file_per_sample_reader::~file_per_sample_reader( void )
 {
 }
 
@@ -37,41 +47,32 @@ track::~track( void )
 ////////////////////////////////////////
 
 
-audio_track::~audio_track( void )
+std::shared_ptr<base::file_system>
+file_per_sample_reader::scan_samples( int64_t &first, int64_t &last, const file_sequence &fseq )
 {
-}
+	first = std::numeric_limits<int64_t>::max();
+	last = std::numeric_limits<int64_t>::min();
 
-
-////////////////////////////////////////
-
-
-data_track::~data_track( void )
-{
-}
-
-
-////////////////////////////////////////
-
-
-void
-container::add_track( const std::shared_ptr<track> &t )
-{
-	_tracks.push_back( t );
-
-	auto vtrk = std::dynamic_pointer_cast<media::video_track>( t );
-	if ( vtrk )
-		_video_tracks.push_back( vtrk );
-
-	auto atrk = std::dynamic_pointer_cast<media::audio_track>( t );
-	if ( atrk )
-		_audio_tracks.push_back( atrk );
-
-	auto dtrk = std::dynamic_pointer_cast<media::data_track>( t );
-	if ( dtrk )
-		_data_tracks.push_back( dtrk );
+	
+	auto fs = base::file_system::get( fseq.uri() );
+	{
+		auto dir = fs->readdir( fseq.parent() );
+		while ( ++dir )
+		{
+			int64_t f = 0;
+			if ( fseq.extract_frame( *dir, f ) )
+			{
+				first = std::min( first, f );
+				last = std::max( last, f );
+			}
+		}
+	}
+	return fs;
 }
 
 ////////////////////////////////////////
 
-}
+} // media
+
+
 

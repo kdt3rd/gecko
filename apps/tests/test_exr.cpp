@@ -4,8 +4,8 @@
 #include <base/contract.h>
 #include <base/cmd_line.h>
 #include <base/posix_file_system.h>
-#include <media/container.h>
-#include <media/video_track.h>
+#include <media/reader.h>
+#include <media/sample.h>
 #include <sstream>
 #include <iostream>
 #include <typeindex>
@@ -27,11 +27,20 @@ int safemain( int argc, char *argv[] )
 	{
 		for ( auto &v: opt.values() )
 		{
-			media::container c = media::container::create( base::uri( "file", base::cstring(), v ) );
-			auto t = std::dynamic_pointer_cast<media::video_track>( c.at( 0 ) );
-			std::cout << "track '" << t->name() << "' frames " << t->begin() << " - " << t->end() << " @ rate " << t->rate() << std::endl;
+			base::uri u( v );
+			if ( ! u )
+				u.set_scheme( "file" );
 
-			auto f = t->at( t->begin() );
+			media::container c = media::reader::open( u );
+			for ( auto &vt: c.video_tracks() )
+			{
+				std::cout << "track '" << vt->name() << "' frames " << vt->begin() << " - " << vt->end() << " @ rate " << vt->rate() << std::endl;
+
+				media::sample s( vt->begin(), vt->rate() );
+
+				auto f = s( vt );
+				std::cout << " size: " << f->width() << " x " << f->height() << ", " << f->size() << " channels" << std::endl;
+			}
 		}
 	}
 

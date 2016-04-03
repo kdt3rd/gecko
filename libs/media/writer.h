@@ -22,10 +22,12 @@
 
 #pragma once
 
-#include "sample_rate.h"
-#include "sample_data.h"
-#include <utility>
-#include <memory>
+#include <base/const_string.h>
+#include <base/uri.h>
+#include "metadata.h"
+#include "parameter.h"
+#include "container.h"
+#include "track_description.h"
 
 
 ////////////////////////////////////////
@@ -35,33 +37,43 @@ namespace media
 {
 
 ///
-/// @brief Class sample provides...
+/// @brief Class writer provides...
 ///
-class sample
+class writer
 {
 public:
-	inline sample( void ) = default;
-	inline sample( int64_t o, const sample_rate &sr ) : _offset( o ), _rate( sr ) {}
-	inline ~sample( void ) = default;
-	inline sample( const sample & ) = default;
-	inline sample &operator=( const sample & ) = default;
-	inline sample( sample && ) = default;
-	inline sample &operator=( sample && ) = default;
+	writer( base::cstring n );
+	virtual ~writer( void );
 
-	inline int64_t offset( void ) const { return _offset; }
-	inline const sample_rate &rate( void ) const { return _rate; }
+	const std::string &name( void ) const { return _name; }
+	const std::string &description( void ) const { return _description; }
 
-	template <typename T>
-	typename std::shared_ptr<typename std::remove_pointer<decltype( std::declval<T>().read(int64_t(), sample_rate()) )>::type> operator()( const std::shared_ptr<T> &track ) const
-	{
-		typedef decltype( std::declval<T>().read(int64_t(), sample_rate()) ) ret_ptr;
-		typedef typename std::remove_pointer<ret_ptr>::type ret_type;
-		static_assert( std::is_base_of<sample_data, ret_type>::value, "Track object read value no derived from sample_data" );
-		return std::shared_ptr<ret_type>( track->read( _offset, _rate ) );
-	}
+	virtual container create( const base::uri &u, const track_description &td, const metadata &params ) = 0;
+
+	/// Lower case extensions
+	inline const std::vector<std::string> &extensions( void ) const { return _extensions; }
+
+	inline const std::vector<parameter_definition> &parameters( void ) const { return _parms; }
+
+	static const std::string ForceWriterMetadataName;
+	static container open( const base::uri &u,
+						   const track_description &td,
+						   const metadata &openParams = metadata() );
+
+	static void register_writer( const std::shared_ptr<writer> &w );
+
+protected:
+	std::string _name;
+	std::string _description;
+	std::vector<std::string> _extensions;
+	std::vector<parameter_definition> _parms;
+
 private:
-	int64_t _offset = -1;
-	sample_rate _rate;
+	writer( const writer & ) = delete;
+	writer( writer && ) = delete;
+	writer &operator=( const writer & ) = delete;
+	writer &operator=( writer && ) = delete;
+
 };
 
 } // namespace media

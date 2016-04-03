@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016 Kimball Thurston & Ian Godin
+// Copyright (c) 2016 Kimball Thurston
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the "Software"),
@@ -20,7 +20,11 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#include "container.h"
+#include "track_description.h"
+
+
+////////////////////////////////////////
+
 
 namespace media
 {
@@ -29,7 +33,8 @@ namespace media
 ////////////////////////////////////////
 
 
-track::~track( void )
+track_description::track_description( track_type tt )
+	: _type( tt )
 {
 }
 
@@ -37,41 +42,7 @@ track::~track( void )
 ////////////////////////////////////////
 
 
-audio_track::~audio_track( void )
-{
-}
+} // media
 
 
-////////////////////////////////////////
-
-
-data_track::~data_track( void )
-{
-}
-
-
-////////////////////////////////////////
-
-
-void
-container::add_track( const std::shared_ptr<track> &t )
-{
-	_tracks.push_back( t );
-
-	auto vtrk = std::dynamic_pointer_cast<media::video_track>( t );
-	if ( vtrk )
-		_video_tracks.push_back( vtrk );
-
-	auto atrk = std::dynamic_pointer_cast<media::audio_track>( t );
-	if ( atrk )
-		_audio_tracks.push_back( atrk );
-
-	auto dtrk = std::dynamic_pointer_cast<media::data_track>( t );
-	if ( dtrk )
-		_data_tracks.push_back( dtrk );
-}
-
-////////////////////////////////////////
-
-}
 
