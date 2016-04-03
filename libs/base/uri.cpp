@@ -42,6 +42,33 @@ uri::full_path( void ) const
 
 ////////////////////////////////////////
 
+std::vector<std::pair<std::string, std::string>>
+uri::parse_query( char kv_sep, char arg_sep ) const
+{
+	std::vector<std::pair<std::string, std::string>> ret;
+	if ( _raw_query.empty() )
+		return ret;
+
+	std::vector<std::string> args;
+	base::split( _raw_query, arg_sep, std::back_inserter( args ), false );
+	for ( auto &a: args )
+	{
+		std::string::size_type kvPos = a.find_first_of( kv_sep );
+		if ( kvPos == std::string::npos )
+			throw_runtime( "invalid key/value argument '{0}' - no separator '{2}'", a, kv_sep );
+
+		std::string k = a.substr( 0, kvPos );
+		std::string v = a.substr( kvPos + 1 );
+		// NOW we unescape
+		ret.emplace_back( std::make_pair( unescape( k ), unescape( v ) ) );
+	}
+
+	return ret;
+}
+
+
+////////////////////////////////////////
+
 std::string uri::escape( cstring str )
 {
 	const cstring reserved = ":/?#[]@!$&'()*+,;=";
@@ -179,7 +206,11 @@ void uri::parse( cstring str )
 		if ( colon < question )
 			path = str.substr( colon + 1, std::min( hash, question ) - colon - 1 );
 		if ( question < hash )
-			_query = unescape( str.substr( question + 1, hash - question - 1 ) );
+		{
+			// stash the raw / unescaped to allow splitting
+			_raw_query = str.substr( question + 1, hash - question - 1 );
+			_query = unescape( _raw_query );
+		}
 		if ( hash != cstring::npos )
 			_fragment = unescape( str.substr( hash + 1 ) );
 

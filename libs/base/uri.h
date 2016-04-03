@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cstdint>
 #include <vector>
+#include <utility>
 #include "contract.h"
 #include "const_string.h"
 
@@ -13,7 +14,10 @@ namespace base
 
 ////////////////////////////////////////
 
-/// scheme://user@host:port/path?query#fragment
+/// @brief The generalization of URL, URN, etc.
+///
+/// The defined parts are the following, with [] indicating optional sections 
+/// scheme:[//[user:password@]host[:port]][/]path[?query][#fragment]
 class uri
 {
 public:
@@ -44,7 +48,14 @@ public:
 	/// @brief Construct URI and hide the password if present.
 	explicit uri( char *str );
 
-	const std::string &scheme( void ) const
+	/// Can be used to set the scheme if the user has not provided one
+	/// (i.e. with a file path).
+	inline void set_scheme( cstring s )
+	{
+		_scheme = s;
+	}
+
+	inline const std::string &scheme( void ) const
 	{
 		return _scheme;
 	}
@@ -93,6 +104,8 @@ public:
 		return _query;
 	}
 
+	std::vector<std::pair<std::string, std::string>> parse_query( char kv_sep = '=', char arg_sep = '&' ) const;
+
 	const std::string &fragment( void ) const
 	{
 		return _fragment;
@@ -128,6 +141,14 @@ public:
 		add_paths( rest... );
 	}
 
+	template<typename ...Types>
+	void add_paths( const std::vector<std::string> &paths, Types ...rest )
+	{
+		for ( auto &p: paths )
+			add_path( p );
+		add_paths( rest... );
+	}
+
 	void add_paths( void )
 	{
 	}
@@ -155,6 +176,9 @@ private:
 	std::string _host;
 	uint16_t _port = 0;
 	std::vector<std::string> _path;
+	// stash the raw query so we can later split the values prior to
+	// unescaping so if a separator is encoded, it doesn't confuse
+	std::string _raw_query;
 	std::string _query;
 	std::string _fragment;
 };
