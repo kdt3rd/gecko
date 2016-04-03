@@ -5,6 +5,8 @@ lib = library "base"
 	"contract.cpp",
 	"rect.cpp",
 	"string_util.cpp",
+	"string_variable_util.cpp",
+	"variable_set.cpp",
 --	"gradient.cpp",
 --	"paint.cpp",
 	"pack.cpp",
