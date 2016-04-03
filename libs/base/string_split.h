@@ -143,7 +143,7 @@ split( const stringT &str, const stringT &sep, bool skip_empty = false )
 
 
 template <typename stringT, std::size_t sepSz>
-std::vector<stringT>
+inline std::vector<stringT>
 split( const stringT &str, const typename stringT::value_type (&sep)[sepSz],
 	   bool skip_empty = false )
 {
@@ -160,7 +160,7 @@ split( const stringT &str, const typename stringT::value_type (&sep)[sepSz],
 
 
 template <typename stringT>
-std::vector<stringT>
+inline std::vector<stringT>
 split( const stringT &str, const typename stringT::value_type *sep,
 	   bool skip_empty = false )
 {
@@ -186,7 +186,7 @@ split( std::vector<stringT> &ret, const stringT &str,
 
 
 template <typename stringT>
-std::vector<stringT>
+inline std::vector<stringT>
 split( const stringT &str, typename stringT::value_type sep,
 	   bool skip_empty = false )
 {
