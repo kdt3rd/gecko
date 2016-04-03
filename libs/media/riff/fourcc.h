@@ -1,19 +1,17 @@
 
 #pragma once
 
-#include <base/string_util.h>
 #include <cstdint>
-#include <string>
-#include <cstring>
+#include <iostream>
 
 namespace media
-{
-namespace riff
 {
 
 ////////////////////////////////////////
 
-/// @brief Four character code
+/// @brief Four character code used in both RIFF based files and in
+/// quicktime containers.
+///
 class fourcc
 {
 public:
@@ -39,7 +37,15 @@ public:
 	void set( const char (&c)[N] )
 	{
 		static_assert( N == 5, "fourcc must be 4 characters" );
-		std::memcpy( _char, c, 4 );
+		_char[0] = c[0];
+		_char[1] = c[1];
+		_char[2] = c[2];
+		_char[3] = c[3];
+	}
+
+	void set( uint32_t v )
+	{
+		_code = v;
 	}
 
 	/// @brief Compare FourCC with literal string.
@@ -100,6 +106,5 @@ std::istream &operator>>( std::istream &out, fourcc &c );
 
 ////////////////////////////////////////
 
-}
 }
 
