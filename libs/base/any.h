@@ -120,7 +120,7 @@ private:
 	class base
 	{
 	public:
-	    virtual ~base( void ) {}
+	    virtual ~base( void );
 	    virtual std::unique_ptr<base> clone( void ) const = 0;
 	};
 

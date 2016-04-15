@@ -400,9 +400,9 @@ variable_set::lookup( const std::string &v )
 				{
 					if ( off < vals.size() )
 					{
-						vals.erase( vals.begin(), vals.begin() + off );
+						vals.erase( vals.begin(), vals.begin() + static_cast<std::string::difference_type>( off ) );
 						if ( length < vals.size() )
-							vals.erase( vals.begin() + length, vals.end() );
+							vals.erase( vals.begin() + static_cast<std::string::difference_type>( length ), vals.end() );
 					}
 					else
 						vals.clear();
@@ -429,13 +429,13 @@ variable_set::lookup( const std::string &v )
 			std::string repl;
 			if ( replP < ep )
 				repl = v.substr( replP + 1 );
-			for ( auto &v: vals )
+			for ( auto &val: vals )
 			{
-				std::string::size_type x = v.find( pat );
+				std::string::size_type x = val.find( pat );
 				while ( x != std::string::npos )
 				{
-					v.replace( x, pat.size(), repl );
-					x = v.find( pat, x + repl.size() );
+					val.replace( x, pat.size(), repl );
+					x = val.find( pat, x + repl.size() );
 				}
 			}
 		}

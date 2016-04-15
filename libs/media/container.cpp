@@ -29,25 +29,13 @@ namespace media
 ////////////////////////////////////////
 
 
-track::~track( void )
-{
-}
-
-
-////////////////////////////////////////
-
-
-audio_track::~audio_track( void )
-{
-}
-
-
-////////////////////////////////////////
-
-
-data_track::~data_track( void )
-{
-}
+// virtual destructors we avoid having in headers to
+// avoid warnings
+sample_data::~sample_data( void ) {}
+track::~track( void ) {}
+audio_track::~audio_track( void ) {}
+data_track::~data_track( void ) {}
+image_frame::~image_frame( void ) {}
 
 
 ////////////////////////////////////////

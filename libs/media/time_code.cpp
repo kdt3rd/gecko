@@ -151,7 +151,7 @@ time_code::from_smpte_rp188( uint32_t low, uint32_t high, const sample_rate &sr 
 	if ( sr.to_number() > 39.0 )
 	{
 		// extra bit for frame 10s
-		_frames = _frames * 2 + ( (low >> 27) & 0x01 );
+		_frames = _frames * 2 + static_cast<int>( (low >> 27) & 0x01 );
 	}
 }
 
@@ -317,7 +317,7 @@ std::istream &operator>>( std::istream &in, time_code &tc )
 		return in;
 	}
 
-	char x;
+	char x = 0;
 	int hrs = 0;
 	int mins = 0;
 	int secs = 0;
@@ -332,6 +332,7 @@ std::istream &operator>>( std::istream &in, time_code &tc )
 	}
 	if ( ! in )
 		return in;
+
 	if ( x == ':' || x == ';' || x == '.' )
 	{
 		char m1 = 0, m2 = 0;

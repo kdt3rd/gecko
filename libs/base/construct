@@ -1,6 +1,7 @@
 
 lib = library "base"
   source{
+	"any.cpp",
 	"format.cpp",
 	"contract.cpp",
 	"rect.cpp",

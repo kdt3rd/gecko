@@ -21,7 +21,7 @@ public:
 		: _width( w ), _height( h )
 	{
 	}
-	virtual ~image_frame( void ) = default;
+	virtual ~image_frame( void );
 
 	virtual size_t item_count( void ) const { return 1; }
 

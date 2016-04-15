@@ -158,7 +158,7 @@ reader::scan_header( const base::uri &u, const metadata &openParams )
 		auto fs = base::file_system::get( u );
 		base::istream stream = fs->open_read( u );
 
-		if ( stream.read( fheader.data(), theMaxHeaderMagicSize ) )
+		if ( stream.read( fheader.data(), static_cast<std::streamsize>( theMaxHeaderMagicSize ) ) )
 		{
 			n = stream.gcount();
 		}
@@ -170,7 +170,7 @@ reader::scan_header( const base::uri &u, const metadata &openParams )
 	{
 		for ( auto &m: r->magic_numbers() )
 		{
-			if ( n >= m.size() )
+			if ( n >= static_cast<std::streamsize>( m.size() ) )
 			{
 				if ( std::equal( m.begin(), m.end(), fheader.begin() ) )
 				{

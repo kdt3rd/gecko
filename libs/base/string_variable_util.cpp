@@ -20,7 +20,7 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#include "string_split.h"
+#include "string_variable_util.h"
 #include "contract.h"
 #include <cctype>
 
@@ -38,7 +38,6 @@ find_unix_vars( std::vector<std::string> &pieces, std::vector<std::string> &vars
 {
 	std::string curpiece;
 	std::string::size_type cur = 0;
-	std::string::size_type i = str.find_first_of( '%' );
 	std::string::size_type last = str.size();
 
 	while ( cur != last )

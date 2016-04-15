@@ -161,7 +161,7 @@ int safemain( int argc, char *argv[] )
 			test.failure( "divide half(2.0)/2, got {0}", x );
 
 		x = 3.141_h;
-		if ( std::abs( static_cast<float>(x) - 3.14062 ) < 0.00001 )
+		if ( std::abs( static_cast<float>(x) - 3.14062F ) < 0.00001F )
 			test.success( "assign half to literal" );
 		else
 			test.success( "assign half to literal 3.141_h, got {0}", x );

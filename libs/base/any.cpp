@@ -20,32 +20,22 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#pragma once
+#include "any.h"
 
 
 ////////////////////////////////////////
 
 
-
-namespace media
+namespace base
 {
 
-///
-/// @brief Class sample_data provides...
-///
-class sample_data
+
+////////////////////////////////////////
+
+
+any::base::~base( void )
 {
-public:
-	sample_data( void ) = default;
-	virtual ~sample_data( void );
+}
 
-	virtual size_t item_count( void ) const = 0;
-
-private:
-
-};
-
-} // namespace media
-
-
+} // namespace base
 
