@@ -1,0 +1,2 @@
+
+executable( "transcode", "main.cpp", l.media.lib )
