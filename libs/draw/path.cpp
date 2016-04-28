@@ -104,7 +104,7 @@ void path::close( void )
 void path::circle( const gl::vec2 &center, float radius )
 {
 	move_to( { center[0] + radius, center[1] } );
-	arc_to( center, radius, 0.F, base::degree( 360.F ) );
+	arc_to( center, radius, 0.F, 360.0_deg );
 	close();
 }
 
@@ -157,10 +157,10 @@ void path::rounded_rect( const gl::vec2 &p1, const gl::vec2 &p2, float r )
 	const float y2 = std::max( p1[1], p2[1] );
 
 	move_to( { x1 + r, y1 } );
-	arc_to( { x2 - r, y1 + r }, r, base::degree( -90.F ), base::degree( 0.F ) );
-	arc_to( { x2 - r, y2 - r }, r, base::degree( 0.F ), base::degree( 90.F ) );
-	arc_to( { x1 + r, y2 - r }, r, base::degree( 90.F ), base::degree( 180.F ) );
-	arc_to( { x1 + r, y1 + r }, r, base::degree( 180.F ), base::degree( 270.F ) );
+	arc_to( { x2 - r, y1 + r }, r, -90.0_deg, 0.0_deg );
+	arc_to( { x2 - r, y2 - r }, r, 0.0_deg, 90.0_deg );
+	arc_to( { x1 + r, y2 - r }, r, 90.0_deg, 180.0_deg );
+	arc_to( { x1 + r, y1 + r }, r, 180.0_deg, 270.0_deg );
 	close();
 }
 

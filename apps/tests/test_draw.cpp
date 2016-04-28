@@ -34,7 +34,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		size_t q = 5;
 		path.move_to( gl::vec2::polar( 200.F, 0.F ) );
 		for ( size_t i = q % p; i != 0; i = ( i + q ) % p )
-			path.line_to( gl::vec2::polar( 200.F, base::degree( 360.F ) * i / p ) );
+			path.line_to( gl::vec2::polar( 200.F, 360.0_deg * i / p ) );
 		path.close();
 
 		// Setup GL vertex/element buffers.
@@ -126,9 +126,9 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 			bound.draw();
 		}
 
-		angle += base::degree( 1.F );
-		while ( angle > base::degree( 360.F ) )
-			angle -= base::degree( 360.F );
+		angle += 1.0_deg;
+		while ( angle > 360.0_deg )
+			angle -= 360.0_deg;
 
 		win->release();
 
