@@ -2,6 +2,7 @@
 lib = library "base"
   source{
 	"any.cpp",
+	"env.cpp",
 	"format.cpp",
 	"contract.cpp",
 	"rect.cpp",
@@ -29,6 +30,7 @@ lib = library "base"
 	"posix_file_system.cpp",
 	"unit_test.cpp",
 	"thread_pool.cpp",
+	"thread_util.cpp",
 	"process.cpp"
   }
 
