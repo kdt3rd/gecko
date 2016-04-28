@@ -51,14 +51,34 @@ public:
 	{
 	}
 
-	int64_t width( void ) const
+	inline int64_t width( void ) const
 	{
 		return _width;
 	}
 
-	int64_t height( void ) const
+	inline int64_t height( void ) const
 	{
 		return _height;
+	}
+
+	inline int64_t bits( void ) const
+	{
+		return _bits;
+	}
+
+	inline bool is_floating( void ) const
+	{
+		return _floating;
+	}
+
+	inline int64_t xstride_bytes( void ) const
+	{
+		return _xstride / 8;
+	}
+
+	inline int64_t ystride_bytes( void ) const
+	{
+		return _ystride / 8;
 	}
 
 	void get_scanline( int64_t y, float *line, int64_t stride = 1 ) const;

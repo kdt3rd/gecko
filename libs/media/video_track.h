@@ -26,11 +26,20 @@ public:
 		return std::shared_ptr<image_frame>( doRead( f ) );
 	}
 
+	inline void store( int64_t f, const std::shared_ptr<image_frame> &frm )
+	{
+		if ( frm )
+			doWrite( f, *frm );
+	}
+
 protected:
 	friend class sample;
 
 	virtual image_frame *read( int64_t offset, const sample_rate &r );
 	virtual image_frame *doRead( int64_t offset ) = 0;
+
+	virtual void write( int64_t offset, const sample_rate &r, const sample_data &sd );
+	virtual void doWrite( int64_t offset, const image_frame &sd ) = 0;
 
 private:
 };

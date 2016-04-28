@@ -81,7 +81,7 @@ writer::~writer( void )
 
 container
 writer::open( const base::uri &u,
-			  const track_description &td,
+			  const std::vector<track_description> &td,
 			  const metadata &openParams )
 {
 	std::call_once( theInitWriters, &initWriters );
@@ -91,6 +91,7 @@ writer::open( const base::uri &u,
 	{
 		std::string ext = base::to_lower( base::file_extension( u.path().back() ) );
 
+		std::cout << "output extension: " << ext << std::endl;
 		std::unique_lock<std::mutex> lk( theWriterMutex );
 		auto wOverride = openParams.find( ForceWriterMetadataName );
 		if ( wOverride != openParams.end() )

@@ -16,6 +16,7 @@ lib = library "media"
 	"riff/chunk.cpp",
 
 	"exr_reader.cpp",
+	"exr_writer.cpp",
   }
   libs "base"
   external_lib{

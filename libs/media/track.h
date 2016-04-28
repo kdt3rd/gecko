@@ -45,6 +45,8 @@ protected:
 	friend class sample;
 	// we will use covariance to access the return types for sub classes of this
 	virtual sample_data *read( int64_t offset, const sample_rate &r ) = 0;
+	// we will use covariance to access the return types for sub classes of this
+	virtual void write( int64_t offset, const sample_rate &r, const sample_data &sd ) = 0;
 	
 private:
 	std::string _name;

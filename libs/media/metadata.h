@@ -59,6 +59,7 @@ namespace media
 /// implementing anything until we see what we end up with
 typedef std::map<std::string, base::any> metadata;
 
+#define media_ImageDescription "img_desc"
 } // namespace media
 
 

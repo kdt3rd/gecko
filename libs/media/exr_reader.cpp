@@ -29,6 +29,8 @@
 # include "file_sequence.h"
 # include <base/string_util.h>
 # include <base/file_system.h>
+# include <base/env.h>
+# include <base/thread_util.h>
 # include <thread>
 
 # pragma GCC diagnostic push
@@ -145,10 +147,10 @@ private:
 };
 
 
-class exr_track : public video_track
+class exr_read_track : public video_track
 {
 public:
-	exr_track( std::string n, int64_t b, int64_t e, const sample_rate &sr, const base::uri &files, int part, std::vector<std::string> &&chan )
+	exr_read_track( std::string n, int64_t b, int64_t e, const sample_rate &sr, const base::uri &files, int part, std::vector<std::string> &&chan )
 		: video_track( std::move( n ), b, e, sr ), _files( files ), _part( part ), _channels( std::move( chan ) )
 	{
 	}
@@ -160,7 +162,11 @@ public:
 		auto fs = base::file_system::get( _files.uri() );
 		base::istream stream = fs->open_read( _files.get_frame( f ) );
 		exr_istream estr( stream );
-		Imf::MultiPartInputFile file( estr );
+		int numThreads = Imf::globalThreadCount();
+		// assuming pipelining, we want to share threads with the writing, right?
+		numThreads = ( numThreads + 1 ) / 2;
+
+		Imf::MultiPartInputFile file( estr, numThreads );
 
 		Imf::InputPart input( file, _part );
 		const Imf::Header header = input.header();
@@ -210,6 +216,10 @@ public:
 		return ret.release();
 	}
 
+	virtual void doWrite( int64_t f, const image_frame &frm )
+	{
+		throw_logic( "reader asked to write a frame" );
+	}
 private:
 	file_sequence _files;
 	int _part;
@@ -225,7 +235,7 @@ void addexrtrack( container &c, const base::uri &u, int64_t start, int64_t last,
 		chans.emplace_back( chan.name() );
 	std::reverse( chans.begin(), chans.end() );
 	if ( !chans.empty() )
-		c.add_track( std::make_shared<exr_track>( std::move( track ), start, last, sr, u, part, std::move( chans ) ) );
+		c.add_track( std::make_shared<exr_read_track>( std::move( track ), start, last, sr, u, part, std::move( chans ) ) );
 }
 
 media::sample_rate extract_rate( const Imf::Header &h )
@@ -249,9 +259,19 @@ public:
 	OpenEXRReader( void )
 			: file_per_sample_reader( "OpenEXR" )
 	{
-		_description = "OpenEXR Reader from ILM";
+		_description = "OpenEXR Reader";
 		_extensions.emplace_back( "exr" );
+		_extensions.emplace_back( "sxr" ); // stereo EXR
+		_extensions.emplace_back( "mxr" ); // multi-view EXR
 		_extensions.emplace_back( "aces" );
+		// The multi-view document requests paying attention to an environment variable
+		std::string val = base::env::global().get( "MULTIVIEW_EXR_EXT" );
+		if ( ! val.empty() )
+		{
+			val = base::to_lower( val );
+			if ( val != "exr" && val != "sxr" && val != "mxr" && val != "aces" )
+				_extensions.emplace_back( std::move( val ) );
+		}
 		std::vector<uint8_t> m{0x76, 0x2f, 0x31, 0x01};
 		_magics.emplace_back( std::move( m ) );
 	}
@@ -318,11 +338,8 @@ OpenEXRReader::create( const base::uri &u, const metadata &params )
 void register_exr_reader( void )
 {
 #ifdef HAVE_OPENEXR
-	int nThreads = static_cast<int>( std::thread::hardware_concurrency() );
-	if ( nThreads < 0 )
-		nThreads = 0;
-
-	Imf::setGlobalThreadCount( nThreads );
+	if ( Imf::globalThreadCount() == 0 )
+		Imf::setGlobalThreadCount( base::thread::core_count() );
 	
 	reader::register_reader( std::make_shared<OpenEXRReader>() );
 #endif

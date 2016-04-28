@@ -59,6 +59,7 @@ public:
 		static_assert( std::is_base_of<sample_data, ret_type>::value, "Track object read value no derived from sample_data" );
 		return std::shared_ptr<ret_type>( track->read( _offset, _rate ) );
 	}
+
 private:
 	int64_t _offset = -1;
 	sample_rate _rate;

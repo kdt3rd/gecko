@@ -51,6 +51,8 @@ public:
 	track_description( track_type tt );
 	~track_description( void ) = default;
 
+	inline track_type type( void ) const { return _type; }
+
 	inline void name( base::cstring name ) { _name = name; }
 	inline const std::string &name( void ) const { return _name; }
 

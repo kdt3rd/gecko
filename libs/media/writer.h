@@ -48,7 +48,7 @@ public:
 	const std::string &name( void ) const { return _name; }
 	const std::string &description( void ) const { return _description; }
 
-	virtual container create( const base::uri &u, const track_description &td, const metadata &params ) = 0;
+	virtual container create( const base::uri &u, const std::vector<track_description> &td, const metadata &params ) = 0;
 
 	/// Lower case extensions
 	inline const std::vector<std::string> &extensions( void ) const { return _extensions; }
@@ -57,7 +57,7 @@ public:
 
 	static const std::string ForceWriterMetadataName;
 	static container open( const base::uri &u,
-						   const track_description &td,
+						   const std::vector<track_description> &td,
 						   const metadata &openParams = metadata() );
 
 	static void register_writer( const std::shared_ptr<writer> &w );
