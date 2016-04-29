@@ -5,6 +5,7 @@ lib = library "base"
 	"env.cpp",
 	"format.cpp",
 	"contract.cpp",
+	"cpu_features.cpp",
 	"rect.cpp",
 	"string_util.cpp",
 	"string_variable_util.cpp",
