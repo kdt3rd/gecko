@@ -108,7 +108,7 @@ public:
 	constexpr const value_type at( size_type i ) const { return i <= _sz ? _str[i] : throw std::out_of_range( "const_string access out of range" ); }
 	constexpr size_type size( void ) const { return _sz; }
 	constexpr size_type length( void ) const { return _sz; }
-	constexpr size_type max_size( void ) const noexcept
+	static constexpr size_type max_size( void ) noexcept
 	{
 		return ( npos - sizeof(size_type) - sizeof(void *) ) / sizeof(value_type) / 4;
 	}

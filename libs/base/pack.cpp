@@ -266,7 +266,6 @@ pack::waste_insert( int aw, int ah )
 				// exact match;
 				retval = cur;
 				idx = i;
-				bestScore = std::numeric_limits<int>::min();
 				break;
 			}
 		}

@@ -75,8 +75,8 @@ public:
 private:
 	track_type _type;
 	std::string _name;
-	int64_t _offset;
-	int64_t _duration;
+	int64_t _offset = -1;
+	int64_t _duration = -1;
 	sample_rate _sample_rate;
 
 	std::string _codec;

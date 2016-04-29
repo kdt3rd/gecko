@@ -45,7 +45,7 @@ void initGlobalEnv( base::env &e )
 		return;
 	on_scope_exit{ FreeEnvironmentStrings( envP ); };
 	std::string var, val;
-	LPTCH curP = envP
+	LPTCH curP = envP;
 	while ( *curP != TCHAR(0) )
 	{
 		var.clear();

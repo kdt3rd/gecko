@@ -16,7 +16,7 @@ class scope_guard
 {
 public:
 	/// @brief Constructor.
-	scope_guard( function f )
+	explicit scope_guard( function f )
 		: _f( std::move( f ) ), _active(true)
 	{
 	}

@@ -32,8 +32,8 @@ public:
 
 	template<typename ... Types>
 	uri( cstring sch, cstring auth, Types ...paths )
+		: _scheme( sch )
 	{
-		_scheme = sch;
 		parse_authority( auth );
 		add_paths( paths... );
 	}
