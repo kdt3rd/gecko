@@ -128,6 +128,7 @@ public:
 	constexpr const value_type &front( void ) const { return *_str; }
 	constexpr const value_type &back( void ) const { return *(_str + ( size() - 1 ) ); }
 	constexpr const value_type *data( void ) const noexcept { return _str; }
+	constexpr const value_type *c_str( void ) const noexcept { return _str; }
 
 	void remove_prefix( size_type n )
 	{
