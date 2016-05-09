@@ -16,6 +16,7 @@ lib = library "base"
 	"sha160.cpp",
 	"sha256.cpp",
 	"skein512.cpp",
+	"spooky_hash.cpp",
 	"base64.cpp",
 	"backtrace.cpp",
 	"cmd_line.cpp",
