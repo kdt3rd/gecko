@@ -63,6 +63,14 @@ inline constexpr bool equal( F a, F b, int ulp = 2 ) noexcept
 
 ////////////////////////////////////////
 
+template <typename F>
+inline F lerp( F a, F b, F perc )
+{
+	// a at 0, b at 1
+//	return a * ( 1.F - perc ) + b * perc;
+	return a + perc * ( b - a );
+}
+
 } // namespace base
 
 /// Global literal constant operator for degrees
