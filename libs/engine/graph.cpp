@@ -245,14 +245,14 @@ graph::add_node( op_id op, any value, const dimensions &d, std::initializer_list
 		return n;
 	}
 	
-	node_id r = static_cast<node_id>( _nodes.size() );
+	n = static_cast<node_id>( _nodes.size() );
 	_nodes.emplace_back( node( op, d, inputs, std::move( value ), hv ) );
-	_hash_to_node[hv] = r;
+	_hash_to_node[hv] = n;
 
-	for ( auto n: inputs )
-		_nodes[n].add_output( r );
+	for ( auto i: inputs )
+		_nodes[i].add_output( n );
 
-	return r;
+	return n;
 }
 
 ////////////////////////////////////////
@@ -271,14 +271,14 @@ graph::add_node( op_id op, any value, const dimensions &d, const std::vector<nod
 		return n;
 	}
 	
-	node_id r = static_cast<node_id>( _nodes.size() );
+	n = static_cast<node_id>( _nodes.size() );
 	_nodes.emplace_back( node( op, d, inputs, std::move( value ), hv ) );
-	_hash_to_node[hv] = r;
+	_hash_to_node[hv] = n;
 
-	for ( auto n: inputs )
-		_nodes[n].add_output( r );
+	for ( auto i: inputs )
+		_nodes[i].add_output( n );
 
-	return r;
+	return n;
 }
 
 ////////////////////////////////////////
