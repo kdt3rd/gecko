@@ -32,9 +32,11 @@
 #  if __has_include(<string_view>)
 #   include <string_view>
 #   define ENABLE_STRING_VIEW_COMPAT
+#   define STRING_VIEW_COMPAT_NS std
 #  elif __has_include(<experimental/string_view>)
 #   include <experimental/string_view>
 #   define ENABLE_STRING_VIEW_COMPAT
+#   define STRING_VIEW_COMPAT_NS std::experimental
 #  endif
 # endif
 #endif
@@ -99,9 +101,9 @@ public:
 	constexpr std::basic_string<charT, traitsT> to_string( void ) const { return empty() ? std::basic_string<charT, traitsT>() : std::basic_string<charT, traitsT>( data(), size() ); }
 
 #ifdef ENABLE_STRING_VIEW_COMPAT
-	constexpr const_string( const std::basic_string_view<charT, traitsT> &sv ) : _str( sv.data() ), _sz( sv.size() ) {}
+	constexpr const_string( const STRING_VIEW_COMPAT_NS::basic_string_view<charT, traitsT> &sv ) : _str( sv.data() ), _sz( sv.size() ) {}
 	/// @brief cast operator to std::basic_string_view
-	constexpr operator std::basic_string_view<charT, traitsT>( void ) const { return std::basic_string_view<charT, traitsT>( data(), size() ); }
+	constexpr operator STRING_VIEW_COMPAT_NS::basic_string_view<charT, traitsT>( void ) const { return STRING_VIEW_COMPAT_NS::basic_string_view<charT, traitsT>( data(), size() ); }
 #endif
 
 	constexpr const value_type operator[]( size_type i ) const { return _str[i]; }
