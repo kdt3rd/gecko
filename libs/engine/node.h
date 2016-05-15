@@ -25,7 +25,6 @@
 #include <vector>
 
 #include "types.h"
-#include "adjacencies.h"
 
 ////////////////////////////////////////
 
