@@ -24,7 +24,8 @@
 
 #include <base/variant.h>
 #include <base/const_string.h>
-#include <experimental/any>
+//#include <experimental/any>
+#include <base/any.h>
 #include <map>
 
 
@@ -57,7 +58,8 @@ namespace media
 ///
 /// NB: for now, let's just typedef metadata to a map to avoid
 /// implementing anything until we see what we end up with
-using metadata_value = std::experimental::any;
+//using metadata_value = std::experimental::any;
+using metadata_value = base::any;
 typedef std::map<std::string, metadata_value> metadata;
 
 #define media_ImageDescription "img_desc"

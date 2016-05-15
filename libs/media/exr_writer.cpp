@@ -128,6 +128,7 @@ public:
 			  _files( files ), _compression( Imf::NO_COMPRESSION )
 	{
 		using namespace std::experimental;
+		using namespace base;
 
 		auto c = parms.find( "compresion" );
 		if ( c != parms.end() )

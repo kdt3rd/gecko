@@ -25,7 +25,8 @@
 #include <cstdint>
 #include <cstddef>
 #include <base/spooky_hash.h>
-#include <experimental/any>
+//#include <experimental/any>
+#include <base/any.h>
 
 ////////////////////////////////////////
 
@@ -34,7 +35,7 @@ namespace engine
 
 typedef base::spooky_hash hash;
 
-using any = std::experimental::any;
+using any = base::any;
 
 /// Storage type for storing the dimensions of a particular processing node
 ///
