@@ -66,10 +66,10 @@ public:
 	inline void codec( base::cstring name ) { _codec = name; }
 	inline const std::string &codec( void ) const { return _codec; }
 			 
-	inline void set_option( base::cstring opt, base::any v ) { _options[opt] = std::move( v ); }
+	inline void set_option( base::cstring opt, metadata_value v ) { _options[opt] = std::move( v ); }
 	inline const metadata &options( void ) const { return _options; }
 
-	inline void set_meta( base::cstring name, base::any v ) { _metadata[name] = std::move( v ); }
+	inline void set_meta( base::cstring name, metadata_value v ) { _metadata[name] = std::move( v ); }
 	inline const metadata &meta( void ) const { return _metadata; }
 
 private:

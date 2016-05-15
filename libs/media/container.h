@@ -54,7 +54,7 @@ public:
 	/// There is some amount of container info
 	/// such as creator and such
 	inline const metadata &info( void ) const;
-	inline void add_info( base::cstring n, base::any v );
+	inline void add_info( base::cstring n, metadata_value v );
 
 	std::shared_ptr<track> operator[]( size_t i )
 	{
@@ -84,7 +84,7 @@ private:
 
 inline const metadata &container::info( void ) const
 { return _info; }
-inline void container::add_info( base::cstring n, base::any v )
+inline void container::add_info( base::cstring n, metadata_value v )
 { _info[n] = std::move( v ); }
 
 

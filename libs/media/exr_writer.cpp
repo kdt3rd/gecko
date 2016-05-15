@@ -127,10 +127,12 @@ public:
 			: video_track( std::move( n ), b, e, sr ),
 			  _files( files ), _compression( Imf::NO_COMPRESSION )
 	{
+		using namespace std::experimental;
+
 		auto c = parms.find( "compresion" );
 		if ( c != parms.end() )
 		{
-			const std::string &comp = c->second.as<std::string>();
+			const std::string &comp = any_cast<const std::string &>( c->second );
 			if ( comp == "none" )
 				_compression = Imf::NO_COMPRESSION;
 			else if ( comp == "rle" )
@@ -158,7 +160,7 @@ public:
 		auto id = parms.find( media_ImageDescription );
 		if ( id != parms.end() )
 		{
-			const color::description &desc = id->second.as<color::description>();
+			const color::description &desc = any_cast<const color::description &>( id->second );
 			const color::description::cx &chroma = desc.chroma();
 			_chroma = Imf::Chromaticities(
 				IMATH_NAMESPACE::V2f( chroma.red.x, chroma.red.y ),
@@ -188,7 +190,6 @@ public:
 			if ( ib.bits() != 16 || ! ib.is_floating() )
 				throw_not_yet();
 
-			std::cout << "adding channel " << frm.name( c ) << ": xstride " << ib.xstride_bytes() << " ystride " << ib.ystride_bytes() << std::endl;
 			fHeader.channels().insert( frm.name( c ), Imf::Channel( Imf::HALF ) );
 		}
 
