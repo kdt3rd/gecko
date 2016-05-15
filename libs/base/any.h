@@ -59,6 +59,12 @@ public:
 		return bool( _ptr );
 	}
 
+	/// @brief any value set per c++14 function name
+	inline bool empty( void ) const
+	{
+		return ! bool( _ptr );
+	}
+
 	/// @brief Is the any value of type U?
 	template<class U>
 	bool is_type( void ) const
@@ -151,6 +157,18 @@ private:
 
 	std::unique_ptr<base> _ptr;
 };
+
+template <class T>
+T any_cast( const any &a )
+{
+	return a.as<T>();
+}
+
+template <class T>
+T any_cast( any &a )
+{
+	return a.as<T>();
+}
 
 ////////////////////////////////////////
 
