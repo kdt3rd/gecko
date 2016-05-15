@@ -1,0 +1,10 @@
+
+lib = library "image"
+  source{
+	"allocator.cpp";
+	"plane.cpp";
+	"image.cpp";
+	"op_registry.cpp";
+	"plane_math.cpp";
+  }
+  libs{ "engine" }
