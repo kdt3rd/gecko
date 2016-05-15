@@ -1,0 +1,9 @@
+
+lib = library "engine"
+  source{
+	"node.cpp";
+	"graph.cpp";
+	"registry.cpp";
+	"op.cpp";
+  }
+  libs{ "base" }
