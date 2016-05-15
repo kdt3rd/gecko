@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <cfloat>
+#include <cmath>
 #include <algorithm>
 #include <limits>
 
