@@ -1,2 +1,4 @@
 
-executable( "transcode", "main.cpp", l.media.lib )
+executable "transcode"
+  source "main.cpp"
+  libs "media"
