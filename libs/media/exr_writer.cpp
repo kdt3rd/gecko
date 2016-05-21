@@ -164,10 +164,10 @@ public:
 			const color::description &desc = any_cast<const color::description &>( id->second );
 			const color::description::cx &chroma = desc.chroma();
 			_chroma = Imf::Chromaticities(
-				IMATH_NAMESPACE::V2f( chroma.red.x, chroma.red.y ),
-				IMATH_NAMESPACE::V2f( chroma.green.x, chroma.green.y ),
-				IMATH_NAMESPACE::V2f( chroma.blue.x, chroma.blue.y ),
-				IMATH_NAMESPACE::V2f( chroma.white.x, chroma.white.y ) );
+				IMATH_NAMESPACE::V2f( float(chroma.red.x), float(chroma.red.y) ),
+				IMATH_NAMESPACE::V2f( float(chroma.green.x), float(chroma.green.y) ),
+				IMATH_NAMESPACE::V2f( float(chroma.blue.x), float(chroma.blue.y) ),
+				IMATH_NAMESPACE::V2f( float(chroma.white.x), float(chroma.white.y) ) );
 		}
 	}
 

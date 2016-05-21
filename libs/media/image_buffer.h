@@ -102,7 +102,7 @@ public:
 	template<typename T>
 	static image_buffer simple_buffer( int64_t w, int64_t h )
 	{
-		auto data = std::shared_ptr<T>( new T[w*h], base::array_deleter<T>() );
+		auto data = std::shared_ptr<T>( new T[static_cast<size_t>(w*h)], base::array_deleter<T>() );
 		return image_buffer( data, w, h );
 	}
 
