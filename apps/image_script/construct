@@ -1,0 +1,4 @@
+
+executable "image_script"
+  source "main.cpp"
+  libs{ "image", "media" }
