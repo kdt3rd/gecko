@@ -316,7 +316,7 @@ protected:
 		{
 			if ( _buf_sz == 0 )
 				_buf_sz = 1;
-			_buf_store.reset( new char_type[_buf_sz] );
+			_buf_store.reset( new char_type[static_cast<size_t>(_buf_sz)] );
 			_buf = _buf_store.get();
 		}
 		update_base_buffer_pointers( -1 );
@@ -456,7 +456,7 @@ protected:
 
 				if ( _conv_buf_sz < blen )
 				{
-					std::unique_ptr<char[]> buf( new char[blen] );
+					std::unique_ptr<char[]> buf( new char[static_cast<size_t>(blen)] );
 					if ( rem )
 						std::memcpy( buf.get(), _conv_next, static_cast<size_t>( rem ) );
 					_conv_buf_store = std::move( buf );
@@ -821,7 +821,7 @@ protected:
 			std::unique_ptr<char[]> locbufa;
 			if ( blen > 16 )
 			{
-				locbufa.reset( new char[blen] );
+				locbufa.reset( new char[static_cast<size_t>(blen)] );
 				buf = locbufa.get();
 			}
 

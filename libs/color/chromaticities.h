@@ -91,7 +91,7 @@ inline matrix<V> to_lms( cone_response cr = cone_response::DEFAULT )
 					  -0.7036, 1.6975, 0.0061,
 					  0.003, 0.0136, 0.9834 );
 			break;
-		default:
+		case cone_response::NONE:
 			throw std::runtime_error( "Unhandled white point cone response method" );
 	}
 

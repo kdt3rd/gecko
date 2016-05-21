@@ -140,26 +140,26 @@ public:
 
 private:
 	// A = [a b c; d e f; g h i]
-	inline constexpr value_type a( void ) const noexcept { return _m[0]; };
-	inline value_type &a( void ) noexcept { return _m[0]; };
-	inline constexpr value_type b( void ) const noexcept { return _m[1]; };
-	inline value_type &b( void ) noexcept { return _m[1]; };
-	inline constexpr value_type c( void ) const noexcept { return _m[2]; };
-	inline value_type &c( void ) noexcept { return _m[2]; };
+	inline constexpr value_type a( void ) const noexcept { return _m[0]; }
+	inline value_type &a( void ) noexcept { return _m[0]; }
+	inline constexpr value_type b( void ) const noexcept { return _m[1]; }
+	inline value_type &b( void ) noexcept { return _m[1]; }
+	inline constexpr value_type c( void ) const noexcept { return _m[2]; }
+	inline value_type &c( void ) noexcept { return _m[2]; }
 
-	inline constexpr value_type d( void ) const noexcept { return _m[3]; };
-	inline value_type &d( void ) noexcept { return _m[3]; };
-	inline constexpr value_type e( void ) const noexcept { return _m[4]; };
-	inline value_type &e( void ) noexcept { return _m[4]; };
-	inline constexpr value_type f( void ) const noexcept { return _m[5]; };
-	inline value_type &f( void ) noexcept { return _m[5]; };
+	inline constexpr value_type d( void ) const noexcept { return _m[3]; }
+	inline value_type &d( void ) noexcept { return _m[3]; }
+	inline constexpr value_type e( void ) const noexcept { return _m[4]; }
+	inline value_type &e( void ) noexcept { return _m[4]; }
+	inline constexpr value_type f( void ) const noexcept { return _m[5]; }
+	inline value_type &f( void ) noexcept { return _m[5]; }
 
-	inline constexpr value_type g( void ) const noexcept { return _m[6]; };
-	inline value_type &g( void ) noexcept { return _m[6]; };
-	inline constexpr value_type h( void ) const noexcept { return _m[7]; };
-	inline value_type &h( void ) noexcept { return _m[7]; };
-	inline constexpr value_type i( void ) const noexcept { return _m[8]; };
-	inline value_type &i( void ) noexcept { return _m[8]; };
+	inline constexpr value_type g( void ) const noexcept { return _m[6]; }
+	inline value_type &g( void ) noexcept { return _m[6]; }
+	inline constexpr value_type h( void ) const noexcept { return _m[7]; }
+	inline value_type &h( void ) noexcept { return _m[7]; }
+	inline constexpr value_type i( void ) const noexcept { return _m[8]; }
+	inline value_type &i( void ) noexcept { return _m[8]; }
 
 	std::array<value_type, 9> _m;
 };
