@@ -54,7 +54,7 @@ plane::copy( void ) const
 {
 	plane r( width(), height() );
 
-	memcpy( r.data(), cdata(), stride() * height() * sizeof(float) );
+	memcpy( r.data(), cdata(), buffer_size() );
 
 	return r;
 }
@@ -65,6 +65,15 @@ plane
 plane::clone( void ) const
 {
 	return plane( width(), height() );
+}
+
+////////////////////////////////////////
+
+engine::hash &operator<<( engine::hash &h, const plane &p )
+{
+	h << p.width() << p.height();
+	h.add( p.cdata(), p.buffer_size() );
+	return h;
 }
 
 ////////////////////////////////////////

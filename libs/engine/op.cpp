@@ -79,7 +79,7 @@ namespace engine
 
 ////////////////////////////////////////
 
-op_function::~op_function( void )
+op_function::~op_function( void ) noexcept
 {
 }
 

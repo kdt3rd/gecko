@@ -36,7 +36,7 @@ namespace image
 ///
 /// @brief Class image_buf provides a collection of planes
 ///
-class image_buf : public engine::computed_value<image_buf>
+class image_buf : public engine::computed_value
 {
 public:
 	typedef std::vector<plane> plane_list;

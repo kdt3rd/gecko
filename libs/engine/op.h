@@ -150,12 +150,75 @@ void foo()
 class op_function
 {
 public:
-	virtual ~op_function( void );
+	virtual ~op_function( void ) noexcept;
 
 	virtual const std::type_info &result_type( void ) const = 0;
 	virtual size_t input_size( void ) const = 0;
 };
 
+template <typename R, typename ...Args>
+struct function_info
+{
+	static constexpr size_t arg_count = sizeof...(Args);
+};
+
+template <typename Functor, typename GroupFunc>
+class opfunc_one_to_one : public op_function
+{
+public:
+	typedef typename std::function<Functor> process;
+	typedef typename std::function<GroupFunc> group_dispatch;
+
+	opfunc_one_to_one( Functor f, GroupFunc g )
+			: _p( f ), _dispatch( g )
+	{
+	}
+	virtual ~opfunc_one_to_one( void ) noexcept
+	{
+	}
+
+	virtual const std::type_info &result_type( void ) const
+	{
+		return typeid(group_dispatch::result_type);
+	}
+
+	virtual size_t input_size( void ) const
+	{
+		return function_info<GroupFunc>::arg_count;
+	}
+
+private:
+	process _p;
+	group_dispatch _dispatch;
+};
+
+template <typename R, typename... Args>
+class opfunc_single : public op_function
+{
+public:
+	typedef typename std::function<R(Args...)> process_func;
+
+	opfunc_single( R (*f)(Args...) )
+			: _p( f )
+	{
+	}
+	virtual ~opfunc_single( void ) noexcept
+	{
+	}
+
+	virtual const std::type_info &result_type( void ) const
+	{
+		return typeid(R);
+	}
+
+	virtual size_t input_size( void ) const
+	{
+		return function_info<R,Args...>::arg_count;
+	}
+
+private:
+	process_func _p;
+};
 ///
 /// It is best to support multiple types of processing to minimize
 /// memory, maximize cache locality, and yet still enable global
@@ -254,7 +317,10 @@ public:
 	/// processed a one-to-one group at a time, parallelizing on the
 	/// other axes.
 	template <typename Functor, typename GroupProcessFunc>
-	op( base::cstring n, Functor f, GroupProcessFunc g, one_to_one_parallel_t );
+	inline op( base::cstring n, Functor f, GroupProcessFunc g, one_to_one_parallel_t )
+			: _name( n ), _func( new opfunc_one_to_one<Functor, GroupProcessFunc>( f, g ) ), _style( style::ONE_TO_ONE )
+	{
+	}
 	/// @brief Construct an op that does n-to-one processing.
 	///
 	/// This should be allowed to be grouped with one-to-one, at least
@@ -267,9 +333,14 @@ public:
 	/// Construct an op that is multi-threaded
 	template <typename Functor, typename DimensionDividerFunc>
 	op( base::cstring n, Functor f, DimensionDividerFunc pt, threaded_t );
+
 	/// Construct an op that is single threaded
-	template <typename Functor>
-	op( base::cstring n, Functor f, single_threaded_t );
+	template <typename R, typename... Args>
+	inline op( base::cstring n, R (*f)(Args...), single_threaded_t )
+			: _name( n ), _func( new opfunc_single<R, Args...>( f ) ), _style( style::SINGLE_THREADED )
+	{
+	}
+
 	/// Construct an op that is single threaded and solitary
 	template <typename Functor>
 	op( base::cstring n, Functor f, solitary_t );

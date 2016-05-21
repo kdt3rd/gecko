@@ -88,6 +88,7 @@ void
 registerImageOps( engine::registry &r )
 {
 	using namespace engine;
+	r.register_constant<image::image_buf>();
 	r.add( op( "img_extract_plane", extract_plane, op::single_threaded ) );
 }
 
@@ -96,6 +97,7 @@ registerImageOps( engine::registry &r )
 void
 registerPlaneOps( engine::registry &r )
 {
+	r.register_constant<image::plane>();
 }
 
 ////////////////////////////////////////

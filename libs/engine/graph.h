@@ -89,8 +89,8 @@ public:
 	node_id move_node( graph &o, node_id n );
 	void remove_node( node_id n );
 
-	size_t size( void ) const;
-	const node &operator[]( node_id n ) const;
+	inline size_t size( void ) const { return _nodes.size(); }
+	inline const node &operator[]( node_id n ) const { return _nodes[n]; }
 
 	inline iterator begin( void ) { return _nodes.begin(); }
 	inline const_iterator begin( void ) const { return _nodes.begin(); }
@@ -124,7 +124,8 @@ private:
 	node_id add_node( op_id op, any value, const dimensions &d, const std::vector<node_id> &inputs, const hash::value &hv );
 
 
-	template <typename V> friend class computed_value;
+//	template <typename V> friend class computed_value;
+	friend class computed_value;
 
 	inline void reference( node_id n )
 	{

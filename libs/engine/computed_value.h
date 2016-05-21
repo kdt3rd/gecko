@@ -60,7 +60,6 @@ namespace engine
 /// where the value can just stay a value and be processed later when
 /// the item referencing p is evaluated.
 ///
-template <typename T>
 class computed_value
 {
 public:
@@ -69,6 +68,10 @@ public:
 	{
 		clear_graph();
 	}
+	computed_value( const computed_value & ) = default;
+	computed_value( computed_value && ) = default;
+	computed_value &operator=( const computed_value & ) = default;
+	computed_value &operator=( computed_value && ) = default;
 
 	template <typename... Args>
 	explicit computed_value( const registry &r, const base::cstring &opname, const dimensions &d, Args &&... args )
@@ -99,13 +102,23 @@ public:
 		return false;
 	}
 
+#if 0
 	inline T compute( void ) const
 	{
 		if ( ! _graph )
 			throw_runtime( "No graph to compute with" );
 		const any &v = _graph->get_value( _id );
-		return std::experimental::any_cast<T>( v );
+//		return std::experimental::any_cast<T>( v );
+		return base::any_cast<T>( v );
 	}
+#else
+	inline const base::any &compute( void ) const
+	{
+		if ( ! _graph )
+			throw_runtime( "No graph to compute with" );
+		return _graph->get_value( _id );
+	}
+#endif
 
 	inline void clear_graph( void ) noexcept
 	{
@@ -124,7 +137,7 @@ protected:
 	template <typename X>
 	struct check_delegate<X, false>
 	{
-		static node_id process( graph &g, X &&v )
+		static inline node_id process( graph &g, X &&v )
 		{
 			return g.add_constant( std::forward<X>( v ) );
 		}
@@ -132,22 +145,28 @@ protected:
 	template <typename X>
 	struct check_delegate<X, true>
 	{
-		static node_id process( graph &g, X &&v )
+		static inline node_id process( graph &g, X &&v )
 		{
 			node_id r = g.move_node( *(v.graph_ptr()), v.id() );
 			g.tag_rvalue( r );
 			return r;
 		}
-		static node_id process( graph &g, const X &v )
+	};
+	template <typename X>
+	struct check_delegate<const X &, true>
+	{
+		static inline node_id process( graph &g, const X &v )
 		{
-			return g.copy_node( *(v.graph_ptr()), v.id() );
+			if ( v.graph_ptr() )
+				return g.copy_node( *(v.graph_ptr()), v.id() );
+			return g.add_constant( v );
 		}
 	};
 
 	template <typename X>
 	inline node_id check_or_add( graph &g, X &&v )
 	{
-		return check_delegate<X, std::is_base_of<computed_value<X>, X>::value>::process( g, std::forward<X>( v ) );
+		return check_delegate<X, std::is_base_of<computed_value, typename std::decay<X>::type>::value>::process( g, std::forward<X>( v ) );
 	}
 
 	template <typename X, typename... Args>
@@ -168,14 +187,14 @@ protected:
 
 	template <typename V>
 	inline std::shared_ptr<graph>
-	check( const registry &reg, const computed_value<V> &x )
+	check( const registry &reg, const computed_value &x )
 	{
-		precondition( &(x.graph().op_registry()) == &reg, "computed_values with mixed operation registries intermingled" );
-		return x.graph();
+		precondition( &(x.graph_ptr()->op_registry()) == &reg, "computed_values with mixed operation registries intermingled" );
+		return x.graph_ptr();
 	}
 	template <typename V>
 	inline std::shared_ptr<graph>
-	check( const registry &reg, const V & )
+	check( const registry &, const V & )
 	{
 		return std::shared_ptr<graph>();
 	}

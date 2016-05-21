@@ -39,7 +39,7 @@ namespace image
 ///
 /// always aligns the plane to at least 16 floats to
 /// maximize alignment with AVX512
-class plane : public engine::computed_value<plane>
+class plane : public engine::computed_value
 {
 public:
 	plane( void );
@@ -74,7 +74,7 @@ public:
 
 	inline int stride( void ) const { check_compute(); return _stride; }
 
-	inline size_t buffer_size( void ) const { return stride() * height() * sizeof(float); }
+	inline size_t buffer_size( void ) const { return static_cast<size_t>( stride() * height() ) * sizeof(float); }
 
 	inline float *data( void ) { check_compute(); return _mem.get(); }
 	inline const float *cdata( void ) const { check_compute(); return _mem.get(); }
@@ -179,7 +179,7 @@ private:
 
 		if ( pending() )
 		{
-			plane tmp = compute();
+			plane tmp = base::any_cast<plane>( compute() );
 			postcondition( _width == tmp.width() && _height == tmp.height(), "computed plane does not match dimensions provided" );
 			_mem = tmp._mem;
 			_stride = tmp._stride;
@@ -197,6 +197,8 @@ private:
 	int _height_m1 = 0;
 	mutable int _stride = 0;
 };
+
+engine::hash &operator<<( engine::hash &h, const plane &p );
 
 } // namespace image
 
