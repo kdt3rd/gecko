@@ -138,12 +138,25 @@ public:
 	    return *this;
 	}
 
+	template <class S>
+	inline void binary_stream( S &s ) const
+	{
+		if ( _ptr )
+		{
+			size_t bytes = 0;
+			const void *rawPtr = _ptr->binary_stream_ptr( bytes );
+			s.add( rawPtr, bytes );
+		}
+		else
+			s << "<any: null>";
+	}
 private:
 	class any_base
 	{
 	public:
 	    virtual ~any_base( void );
 	    virtual std::unique_ptr<any_base> clone( void ) const = 0;
+		virtual const void *binary_stream_ptr( size_t &s ) const = 0;
 	};
 
 	template<typename T>
@@ -159,6 +172,12 @@ private:
 		std::unique_ptr<any_base> clone( void ) const
 		{
 			return std::unique_ptr<any_base>( new derived<T>( _value ) );
+		}
+
+		virtual const void *binary_stream_ptr( size_t &s ) const
+		{
+			s = sizeof(_value);
+			return &_value;
 		}
 
 	private:
