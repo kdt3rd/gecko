@@ -24,11 +24,20 @@
 
 #include <base/contract.h>
 #include "plane.h"
+#include "plane_stats.h"
 
 ////////////////////////////////////////
 
 namespace image
 {
+
+inline plane create_plane( int w, int h, const engine::computed_value<float> &v )
+{
+	engine::dimensions d;
+	d.x = static_cast<uint16_t>( w );
+	d.y = static_cast<uint16_t>( h );
+	return plane( "assign_plane", d, v );
+}
 
 /// unary plane operators
 inline plane operator-( const plane &p )
