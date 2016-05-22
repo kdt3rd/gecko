@@ -58,6 +58,18 @@ image_buf::add_plane( plane &&p )
 
 ////////////////////////////////////////
 
+engine::hash &
+operator<<( engine::hash &h, const image_buf &i )
+{
+	h << i.size();
+	for ( auto &p: i )
+		h << p;
+
+	return h;
+}
+
+////////////////////////////////////////
+
 } // image
 
 

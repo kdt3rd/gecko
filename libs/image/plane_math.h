@@ -24,6 +24,8 @@
 
 #include "scanline.h"
 
+namespace engine { class registry; }
+
 ////////////////////////////////////////
 
 namespace image
@@ -33,17 +35,21 @@ void add_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB 
 void add_planenumber( scanline &dest, const scanline &srcA, float v );
 
 void sub_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB );
-void sub_planenumber( scanline &dest, const scanline &srcA, float v );
 
 void mul_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB );
 void mul_planenumber( scanline &dest, const scanline &srcA, float v );
 
+/// if srcB == 0 then out=0 else out = srcA/srcB
 void div_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB );
-void div_numberplane( scanline &dest, float v, const scanline &srcA );
+/// if src == 0 then out=0 else out = v/src
+void div_numberplane( scanline &dest, float v, const scanline &src );
 
 /// a * b + c
-void muladd_planeplaneplane( scanline &dest, const scanline &srcA, const scanline &srcB, const scanline &srcC  );
-void muladd_planenumbernumber( scanline &dest, const scanline &src, float a, float b  );
+void muladd_planeplaneplane( scanline &dest, const scanline &srcA, const scanline &srcB, const scanline &srcC );
+/// a * b + c
+void muladd_planenumbernumber( scanline &dest, const scanline &src, float a, float b );
+
+void add_plane_math( engine::registry &r );
 
 } // namespace image
 

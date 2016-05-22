@@ -24,6 +24,8 @@
 #include "image.h"
 //#include "image_ops.h"
 #include "plane_ops.h"
+#include "plane_math.h"
+#include "scanline_process.h"
 
 #include <mutex>
 
@@ -90,6 +92,10 @@ registerImageOps( engine::registry &r )
 	using namespace engine;
 	r.register_constant<image::image_buf>();
 	r.add( op( "img_extract_plane", extract_plane, op::single_threaded ) );
+	r.add( op( "combine_planes_1", combine_planes_1, op::single_threaded ) );
+	r.add( op( "combine_planes_2", combine_planes_2, op::single_threaded ) );
+	r.add( op( "combine_planes_3", combine_planes_3, op::single_threaded ) );
+	r.add( op( "combine_planes_4", combine_planes_4, op::single_threaded ) );
 }
 
 ////////////////////////////////////////
@@ -97,7 +103,10 @@ registerImageOps( engine::registry &r )
 void
 registerPlaneOps( engine::registry &r )
 {
+	using namespace engine;
 	r.register_constant<image::plane>();
+
+	image::add_plane_math( r );
 }
 
 ////////////////////////////////////////

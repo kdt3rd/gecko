@@ -101,6 +101,8 @@ private:
 	std::vector<plane> _planes;
 };
 
+engine::hash &operator<<( engine::hash &h, const image_buf &p );
+
 } // namespace image
 
 

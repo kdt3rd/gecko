@@ -4,6 +4,7 @@ lib = library "image"
 	"allocator.cpp";
 	"plane.cpp";
 	"image.cpp";
+	"scanline.cpp";
 	"op_registry.cpp";
 	"plane_math.cpp";
   }

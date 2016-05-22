@@ -138,7 +138,7 @@ inline plane operator-( const plane &p, float v )
 }
 inline plane operator-( plane &&p, float v )
 {
-	return plane( "sub_planenumber", p.dims(), std::move( p ), v );
+	return plane( "add_planenumber", p.dims(), std::move( p ), - v );
 }
 inline plane operator-( float v, const plane &p )
 {

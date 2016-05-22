@@ -20,7 +20,8 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#include "plane.h"
+#include "scanline.h"
+#include <base/pointer.h>
 
 ////////////////////////////////////////
 
@@ -29,81 +30,77 @@ namespace image
 
 ////////////////////////////////////////
 
-plane::plane( void )
+scanline::scanline( void )
 {
 }
 
 ////////////////////////////////////////
 
-plane::plane( int w, int h )
-	: _mem( allocator::get().buffer( _stride, w, h ) ),
-	  _width( w ), _width_m1( w - 1 ), _height( h ), _height_m1( h - 1 )
+scanline::scanline( const float *b, int w, int s, bool dup )
+	: _ref_ptr( b ), _width( w ), _stride( s )
+{
+	if ( dup )
+	{
+		_ptr = allocator::get().scanline( _stride, _width );
+		if ( _ref_ptr )
+			std::copy( _ref_ptr, _ref_ptr + _width, _ptr.get() );
+		_ref_ptr = _ptr.get();
+	}
+}
+
+////////////////////////////////////////
+
+scanline::scanline( float *b, int w, int s )
+	: _ptr( b, base::no_deleter() ), _ref_ptr( b ), _width( w ), _stride( s )
 {
 }
 
 ////////////////////////////////////////
 
-plane::plane( plane &&o )
-	: computed_value( std::move( o ) ),
-	  _mem( std::move( o._mem ) ),
-	  _width( std::move( o._width ) ),
-	  _width_m1( std::move( o._width_m1 ) ),
-	  _height( std::move( o._height ) ),
-	  _height_m1( std::move( o._height_m1 ) ),
-	  _stride( std::move( o._stride ) )
+scanline::scanline( const scanline &o )
+	: _ptr( o._ptr ), _ref_ptr( o._ref_ptr ),
+	  _width( o._width ), _stride( o._stride )
 {
 }
 
 ////////////////////////////////////////
 
-plane::~plane( void )
+scanline::scanline( scanline &&o )
+	: _ptr( std::move( o._ptr ) ), _ref_ptr( o._ref_ptr ),
+	  _width( o._width ), _stride( o._stride )
 {
 }
 
 ////////////////////////////////////////
 
-plane &plane::operator=( plane &&o )
+scanline &scanline::operator=( const scanline &o )
 {
-	adopt( std::move( o ) );
-	_mem = std::move( o._mem );
-	_width = std::move( o._width );
-	_width_m1 = std::move( o._width_m1 );
-	_height = std::move( o._height );
-	_height_m1 = std::move( o._height_m1 );
-	_stride = std::move( o._stride );
+	if ( this != &o )
+	{
+		_ptr = o._ptr;
+		_ref_ptr = o._ref_ptr;
+		_width = o._width;
+		_stride = o._stride;
+	}
 	return *this;
 }
 
 ////////////////////////////////////////
 
-plane
-plane::copy( void ) const
+scanline &scanline::operator=( scanline &&o )
 {
-	plane r( width(), height() );
-
-	memcpy( r.data(), cdata(), buffer_size() );
-
-	return r;
+	std::swap( _ptr, o._ptr );
+	std::swap( _ref_ptr, o._ref_ptr );
+	std::swap( _width, o._width );
+	std::swap( _stride, o._stride );
+	
+	return *this;
 }
 
 ////////////////////////////////////////
 
-plane
-plane::clone( void ) const
+scanline::~scanline( void )
 {
-	return plane( width(), height() );
-}
-
-////////////////////////////////////////
-
-engine::hash &operator<<( engine::hash &h, const plane &p )
-{
-	if ( p.compute_hash( h ) )
-		return h;
-
-	h << p.width() << p.height();
-	h.add( p.cdata(), p.buffer_size() );
-	return h;
 }
 
 ////////////////////////////////////////

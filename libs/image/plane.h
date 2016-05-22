@@ -56,9 +56,9 @@ public:
 	}
 
 	plane( const plane & ) = default;
-	plane( plane && ) = default;
+	plane( plane && );
 	plane &operator=( const plane & ) = default;
-	plane &operator=( plane && ) = default;
+	plane &operator=( plane && );
 	~plane( void );
 
 	inline engine::dimensions dims( void ) const
