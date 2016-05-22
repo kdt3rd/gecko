@@ -40,9 +40,9 @@ namespace
 int safemain( int argc, char *argv[] )
 {
 	using namespace image;
-	plane x( 1920, 1080 );
-	plane y( 1920, 1080 );
-	plane z( 1920, 1080 );
+	plane x = create_plane( 1920, 1080, 0.F );
+	plane y = create_plane( 1920, 1080, 1.F );
+	plane z = create_plane( 1920, 1080, 2.F );
 
 	std::cout << "constructed x, y, z" << std::endl;
 	plane s = x + y + z;
@@ -50,6 +50,11 @@ int safemain( int argc, char *argv[] )
 	s /= 3.0;
 	std::cout << "ave finished" << std::endl;
 
+	auto avev = sum( s );
+	std::cout << "sum created" << std::endl;
+	double ave = static_cast<double>( avev );
+	std::cout << "sum evaluated: " << ave << std::endl;
+	std::cout << "ave: " << ave / static_cast<double>( 1920 * 1080 ) << std::endl;
 #if 0
 	base::cmd_line options(
 		argv[0],
