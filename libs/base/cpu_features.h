@@ -24,6 +24,8 @@
 
 #include <cstdint>
 #include <ostream>
+#include <utility>
+#include <initializer_list>
 
 ////////////////////////////////////////
 
@@ -42,9 +44,9 @@ namespace base
 ///
 struct cpu
 {
-	enum class simd_feature
+	enum class simd_feature : uint8_t
 	{
-		NONE,
+		NONE = 0,
 		// intel SIMD features
 		// ignore MMX, MMX_EXT, 3DNow!, etc. as they are very old until
 		// someone ports this to a legacy platform
@@ -184,6 +186,36 @@ struct cpu
 	static bool has_SYSCALL( void );
 	static bool has_RDTSCP( void );
 };
+
+template <typename Functor>
+inline Functor
+choose_runtime( Functor base_func )
+{
+	return base_func;
+}
+
+template <typename Functor>
+inline Functor
+choose_runtime( Functor base_func, std::initializer_list< std::pair<cpu::simd_feature, Functor> > func_specializer )
+{
+	cpu::simd_feature active = cpu::highest_simd();
+	cpu::simd_feature best = cpu::simd_feature::NONE;
+	Functor ret = base_func;
+	for ( auto &i: func_specializer )
+	{
+		// can't have anything better than this
+		if ( i.first == active )
+			return i.second;
+
+		if ( i.first < active && i.first > best )
+		{
+			best = i.first;
+			ret = i.second;
+		}
+	}
+
+	return ret;
+}
 
 } // namespace base
 
