@@ -130,6 +130,7 @@ private:
 	extract( const std::vector<any> &inputs ) const
 	{
 		typedef typename base::function_traits<Functor>::template get_arg_type<I>::type ret_type;
+
 		return engine::any_cast<ret_type>( inputs[I] );
 	}
 

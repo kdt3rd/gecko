@@ -197,6 +197,7 @@ graph::dispatch_threads( const std::function<void(int, int)> &f, int start, int 
 const any &
 graph::start_process( node &n )
 {
+	std::cout << "start_process: " << n.hash_value() << " " << _ops[n.op()].name() << std::endl;
 	optimize();
 	apply_grouping();
 
@@ -210,6 +211,7 @@ graph::process( node &n )
 {
 	if ( n.value().empty() )
 	{
+		std::cout << "  process: " << n.hash_value() << " " << _ops[n.op()].name() << std::endl;
 		std::vector<any> inputs;
 		size_t nInputs = n.input_size();
 		inputs.resize( nInputs );
@@ -219,6 +221,8 @@ graph::process( node &n )
 		const op &o = _ops[n.op()];
 		n.value() = o.function().process( *this, n.dims(), inputs );
 	}
+	else
+		std::cout << "  process: " << n.hash_value() << _ops[n.op()].name() << " HAS VALUE" << std::endl;
 
 	return n.value();
 }
