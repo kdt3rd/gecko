@@ -64,7 +64,7 @@ inline size_t sum<size_t>( size_t h )
 
 /// @brief Return the nth variadic type
 template<size_t N,typename ...Args>
-class nth_variadic
+struct nth_variadic
 {
 	typedef typename std::tuple_element<N, std::tuple<Args...>>::type type;
 };
@@ -96,6 +96,15 @@ struct always_false : std::false_type
 
 ////////////////////////////////////////
 
+/// @defgroup used to generate a sequence of indices as a variadic
+/// thing so we can deref a tuple or vector of values as a series of
+/// arguments
+///
+/// Should be used something like:
+///
+/// gen_sequence<Args...>{}
+///
+/// @{
 template<size_t...S>
 struct sequence
 {
@@ -109,10 +118,13 @@ struct gen_sequence : gen_sequence<N-1, N-1, S...>
 };
 
 template<size_t ...S>
-struct gen_sequence<0, S...>
+struct gen_sequence<0, S...> : sequence<S...>
 {
 	typedef sequence<S...> type;
 };
+/// @}
+
+////////////////////////////////////////
 
 template<size_t Start, size_t End>
 struct range
@@ -127,8 +139,33 @@ struct range<Start,Start>
 	typedef sequence<> type;
 };
 
-
 ////////////////////////////////////////
 
-}
+/// @defgroup same as sequence, but integer type
+/// @{
+template <int ...> struct int_sequence {};
+template <int N, int... I> struct make_int_sequence
+    : make_int_sequence<N-1, N-1, I...> {};
+template<int... I> struct make_int_sequence<0, I...>
+    : int_sequence<I...>
+{
+	typedef int_sequence<I...> type;
+};
+/// @}
+
+/// @brief used for making a variadic bind
+template <int> struct placeholder_template {};
+
+} // namespace base
+
+namespace std
+{
+
+/// @brief provide partial specialization to indicate our variadic
+/// placeholder is a placeholder
+template <int N>
+struct is_placeholder< base::placeholder_template<N> > : integral_constant<int, N+1>
+{};
+
+} // namespace std
 
