@@ -9,6 +9,16 @@ namespace base
 
 ////////////////////////////////////////
 
+/// @brief do not free pointed-to-memory (BEWARE)
+struct no_deleter
+{
+	void operator()( void * )
+	{
+	}
+};
+
+////////////////////////////////////////
+
 /// @brief Delete a pointer using free
 struct free_deleter
 {
