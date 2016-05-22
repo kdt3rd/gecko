@@ -32,28 +32,63 @@
 #include <image/plane_ops.h>
 #include <sstream>
 #include <iostream>
+#include <fstream>
 #include <typeindex>
 
 namespace
 {
 
-int safemain( int argc, char *argv[] )
+using namespace image;
+
+plane test_refcount( void )
 {
-	using namespace image;
 	plane x = create_plane( 1920, 1080, 0.F );
 	plane y = create_plane( 1920, 1080, 1.F );
 	plane z = create_plane( 1920, 1080, 2.F );
 
-	std::cout << "constructed x, y, z: " << x.id() << ", " << y.id() << ", " << z.id() << std::endl;
-//	plane s = x + y + z;
-//	std::cout << "sum finished" << std::endl;
-//	s /= 3.0;
-//	std::cout << "ave finished" << std::endl;
+	// x, y, z should be in separate graphs
+//	std::cout << "constructed x, y, z: " << x.id() << ", " << y.id() << ", " << z.id() << std::endl;
 
-	auto avev = sum( ( x + y + z ) / 3.0 );
-	std::cout << "sum created: id " << avev.id() << std::endl;
+	// and now s will copy / combine them to 1
+	plane s = x + y + z;
+//	std::cout << "sum finished: " << s.id() << std::endl;
+	s /= 3.0;
+//	std::cout << "ave finished: " << s.id() << std::endl;
+
+	// make a dangling reference in the graph
+	plane t = s + 0.1F;
+
+	return s;//( x + y + z ) / 3.0;
+}
+
+int safemain( int argc, char *argv[] )
+{
+	auto avev = sum( test_refcount() );
+//	std::cout << "sum created: id " << avev.id() << std::endl;
+
+	// should only be one reference left at this point
+//	avev.graph_ptr()->dump_refs( std::cout );
+
+	std::ofstream gdot( "graph.dot" );
+	avev.graph_ptr()->dump_dot( gdot );
+	std::cout << "saved graph to graph.dot" << std::endl;
+
+	avev.graph_ptr()->clean_graph();
+
+	std::ofstream gdot2( "graph2.dot" );
+	avev.graph_ptr()->dump_dot( gdot2 );
+	std::cout << "saved cleaned graph to graph2.dot" << std::endl;
+
+	// force the graph to be processed
+	std::cout << "Initiating processing..." << std::endl;
 	double ave = static_cast<double>( avev );
-	std::cout << "sum evaluated: " << ave << std::endl;
+	std::cout << "Processing finished!" << std::endl;
+
+	avev.graph_ptr()->clean_graph();
+	std::ofstream gdot3( "graph3.dot" );
+	avev.graph_ptr()->dump_dot( gdot3 );
+	std::cout << "saved cleaned graph after process to graph3.dot" << std::endl;
+
 	std::cout << "ave: " << ave / static_cast<double>( 1920 * 1080 ) << std::endl;
 #if 0
 	base::cmd_line options(
