@@ -7,9 +7,23 @@
 #include <string>
 #include <cassert>
 #include <memory>
+#include "contract.h"
 
 namespace base
 {
+
+class bad_any_cast : public std::runtime_error
+{
+public:
+	virtual ~bad_any_cast( void );
+	bad_any_cast( const bad_any_cast & ) = default;
+	bad_any_cast( bad_any_cast && ) = default;
+	bad_any_cast &operator=( const bad_any_cast & ) = default;
+	bad_any_cast &operator=( bad_any_cast && ) = default;
+	using std::runtime_error::runtime_error;
+};
+#define throw_bad_any_cast( ... ) \
+	throw_location( base::bad_any_cast( base::format( __VA_ARGS__ ) ) )
 
 ////////////////////////////////////////
 
@@ -81,7 +95,8 @@ public:
 	    typedef decay<U> T;
 	    auto d = dynamic_cast<derived<T>*>( _ptr.get() );
 	    if ( !d )
-	        throw std::bad_cast();
+	        throw_bad_any_cast( "bad any_cast: request type {0} but ptr is type {1}", typeid(U).name(), typeid(*(_ptr.get())).name() );
+
 	    return d->_value;
 	}
 
@@ -92,8 +107,9 @@ public:
 	    typedef decay<U> T;
 	    auto d = dynamic_cast<derived<T>*>( _ptr.get() );
 	    if ( !d )
-	        throw std::bad_cast();
-	    return d->_value;
+	        throw_bad_any_cast( "bad any_cast: request type {0} but ptr is type {1}", typeid(U).name(), typeid(*(_ptr.get())).name() );
+
+		return d->_value;
 	}
 
 	/// @brief Cast operator to type U
@@ -123,15 +139,15 @@ public:
 	}
 
 private:
-	class base
+	class any_base
 	{
 	public:
-	    virtual ~base( void );
-	    virtual std::unique_ptr<base> clone( void ) const = 0;
+	    virtual ~any_base( void );
+	    virtual std::unique_ptr<any_base> clone( void ) const = 0;
 	};
 
 	template<typename T>
-	class derived : base
+	class derived : public any_base
 	{
 	public:
 	    template<typename U>
@@ -140,9 +156,9 @@ private:
 		{
 		}
 
-		std::unique_ptr<base> clone( void ) const
+		std::unique_ptr<any_base> clone( void ) const
 		{
-			return std::unique_ptr<base>( new derived<T>( _value ) );
+			return std::unique_ptr<any_base>( new derived<T>( _value ) );
 		}
 
 	private:
@@ -150,12 +166,12 @@ private:
 	    T _value;
 	};
 
-	std::unique_ptr<base> clone( void ) const
+	std::unique_ptr<any_base> clone( void ) const
 	{
 		return _ptr ? _ptr->clone() : nullptr;
 	}
 
-	std::unique_ptr<base> _ptr;
+	std::unique_ptr<any_base> _ptr;
 };
 
 template <class T>

@@ -33,7 +33,13 @@ namespace base
 ////////////////////////////////////////
 
 
-any::base::~base( void )
+any::any_base::~any_base( void )
+{
+}
+
+////////////////////////////////////////
+
+bad_any_cast::~bad_any_cast( void )
 {
 }
 
