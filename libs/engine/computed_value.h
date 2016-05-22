@@ -66,10 +66,10 @@ class computed_base
 public:
 	computed_base( void ) = default;
 	~computed_base( void );
-	computed_base( const computed_base & ) = default;
-	computed_base( computed_base && ) = default;
-	computed_base &operator=( const computed_base & ) = default;
-	computed_base &operator=( computed_base && ) = default;
+	computed_base( const computed_base & );
+	computed_base( computed_base && );
+	computed_base &operator=( const computed_base & ) = delete;
+	computed_base &operator=( computed_base && ) = delete;
 
 	template <typename... Args>
 	explicit inline computed_base( const registry &r, const base::cstring &opname, const dimensions &d, Args &&... args )
@@ -90,6 +90,7 @@ public:
 	bool compute_hash( hash &v ) const;
 
 protected:
+	static void new_id_notify( void *ud, node_id old, node_id nid );
 	void set_id( node_id i );
 
 	template <typename X, bool>
@@ -188,7 +189,6 @@ protected:
 	inline std::shared_ptr<graph>
 	find_or_create_graph( const registry &reg, X &&x, Args &&... args )
 	{
-		std::cout << " cv " << this << ": find_or_create_graph" << std::endl;
 		std::shared_ptr<graph> r = check_for_graph( reg, std::forward<X>( x ) );
 		if ( r )
 			return r;

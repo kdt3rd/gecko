@@ -24,6 +24,7 @@
 
 #include <vector>
 #include <map>
+#include <set>
 #include <deque>
 #include <base/contract.h>
 #include <iomanip>
@@ -81,7 +82,7 @@ graph::get_value( node_id n )
 	precondition( n < _nodes.size(), "invalid node id {0}", n );
 	node &node = _nodes[n];
 	any &v = node.value();
-	if ( node.value().empty() )
+	if ( v.empty() )
 		return start_process( n, node );
 
 	return v;
@@ -143,7 +144,7 @@ graph::copy_node( const graph &o, node_id n )
 				nnode = add_node( opid, cur.value(), cur.dims(), inputs, cur.hash_value() );
 
 			nodemap[tocopy.back()] = nnode;
-			std::cout << "graph " << this << ": adding op during copy: " << cur.op() << " hash " << cur.hash_value() << " --> " << nnode << " hash " << _nodes[nnode].hash_value() << std::endl;
+//			std::cout << "graph " << this << ": adding op during copy: " << cur.op() << " hash " << cur.hash_value() << " --> " << nnode << " hash " << _nodes[nnode].hash_value() << std::endl;
 			
 			tocopy.pop_back();
 		}
@@ -205,9 +206,200 @@ graph::remove_node( node_id n )
 ////////////////////////////////////////
 
 void
+graph::clean_graph( void )
+{
+	std::set<node_id> toDel;
+	bool didAdd = true;
+	while ( didAdd )
+	{
+		didAdd = false;
+		for ( size_t nid = 0, N = _nodes.size(); nid != N; ++nid )
+		{
+			if ( toDel.find( nid ) != toDel.end() )
+				continue;
+
+			node &n = _nodes[nid];
+			// cleared node
+			if ( n.op() == nullop )
+			{
+				toDel.insert( static_cast<node_id>( nid ) );
+				didAdd = true;
+				continue;
+			}
+			// dangling output
+			auto ref = _ref_counts.find( nid );
+			if ( n.output_size() == 0 && ref == _ref_counts.end()  )
+			{
+				toDel.insert( static_cast<node_id>( nid ) );
+				didAdd = true;
+				continue;
+			}
+
+			if ( ref != _ref_counts.end() )
+				continue;
+
+			size_t validOuts = 0;
+			for ( size_t o = 0, nO = n.output_size(); o != nO; ++o )
+			{
+				if ( toDel.find( n.output( o ) ) == toDel.end() )
+					++validOuts;
+			}
+			if ( validOuts == 0 )
+			{
+				toDel.insert( nid );
+				didAdd = true;
+				continue;
+			}
+		}
+	}
+
+	if ( toDel.empty() )
+		return;
+
+	std::map<node_id, node_id> newnodemap;
+	std::vector<node> nnodes;
+	nnodes.reserve( _nodes.size() );
+	for ( size_t nid = 0, N = _nodes.size(); nid != N; ++nid )
+	{
+		if ( toDel.find( nid ) == toDel.end() )
+		{
+			const node &n = _nodes[nid];
+			node newn = n;
+			for ( size_t i = 0, nI = n.input_size(); i != nI; ++i )
+			{
+				auto nn = newnodemap.find( n.input( i ) );
+				if ( nn == newnodemap.end() )
+					newn.input( i ) = nullnode;
+				else
+					newn.input( i ) = nn->second;
+			}
+			newnodemap[nid] = nnodes.size();
+			nnodes.emplace_back( std::move( newn ) );
+		}
+	}
+
+	// now that we've added everything, update the outputs and update the hash-to-node map
+	std::map<hash::value, node_id> nh2nmap;
+	for ( size_t nid = 0, N = nnodes.size(); nid != N; ++nid )
+	{
+		node &n = nnodes[nid];
+		for ( size_t o = 0; o != n.output_size(); ++o )
+		{
+			node_id oldout = n.output( o );
+			auto nn = newnodemap.find( oldout );
+			if ( nn == newnodemap.end() )
+			{
+				--o;
+				n.remove_output( oldout );
+			}
+			else
+				n.output( o ) = nn->second;
+		}
+		nh2nmap[n.hash_value()] = nid;
+	}
+
+	// notify our references of the new node ids
+	std::map<node_id, reference_list> nrc;
+	for ( auto &x: _ref_counts )
+	{
+		node_id oldid = x.first;
+		auto nn = newnodemap.find( oldid );
+		if ( nn == newnodemap.end() )
+			throw_runtime( "Killed node {0} which has a reference", oldid );
+		node_id newid = nn->second;
+		for ( auto &ref: x.second )
+			ref.first( ref.second, oldid, newid );
+		std::swap( nrc[newid], x.second );
+	}
+	// finally, update with all our changes
+	std::swap( _nodes, nnodes );
+	std::swap( _ref_counts, nrc );
+	std::swap( _hash_to_node, nh2nmap );
+}
+
+////////////////////////////////////////
+
+void
 graph::dispatch_threads( const std::function<void(int, int)> &f, int start, int N )
 {
 	f( start, N );
+}
+
+////////////////////////////////////////
+
+void
+graph::dump_dot( std::ostream &os )
+{
+	os << "digraph graph_0x" << this <<
+		" {\n"
+	    "graph [label=\"green means has value\\nblue means has reference\\nred means dangling no output\"]\n"
+	    "node [shape=record]\n"
+		"\n";
+
+	for ( size_t n = 0, N = _nodes.size(); n != N; ++n )
+	{
+		const node &curN = _nodes[n];
+		if ( curN.op() == nullop )
+			continue;
+
+		os << 'N' << n << " [label=\"";
+		if ( curN.input_size() > 0 )
+		{
+			os << "{{";
+			for ( size_t i = 0, nI = curN.input_size(); i != nI; ++i )
+			{
+				if ( i > 0 )
+					os << '|';
+				os << '<' << i << "> " << i;
+			}
+			os << "}| N" << n << "\\n" << _ops[curN.op()].name()
+			   << '}';
+		}
+		else
+			os << 'N' << n << "\\n" << _ops[curN.op()].name();
+		os << '\"';
+		if ( _ref_counts.find( n ) != _ref_counts.end() )
+			os << ", style=filled, fillcolor=blue";
+		else if ( curN.output_size() == 0 )
+			os << ", style=filled, fillcolor=red";
+		else if ( ! curN.value().empty() )
+			os << ", style=filled, fillcolor=green";
+
+		os << "]\n";
+	}
+
+	// done all the nodes, now do the edges
+	for ( size_t n = 0, N = _nodes.size(); n != N; ++n )
+	{
+		const node &curN = _nodes[n];
+		if ( curN.op() == nullop )
+			continue;
+
+		for ( size_t i = 0, nI = curN.input_size(); i != nI; ++i )
+		{
+			if ( curN.input( i ) == nullnode )
+				continue;
+
+			os << 'N' << curN.input( i ) << " -> N" << n << ":" << i << '\n';
+		}
+	}
+	
+	os << "\n}\n";
+}
+
+////////////////////////////////////////
+
+void
+graph::dump_refs( std::ostream &os )
+{
+	if ( _ref_counts.empty() )
+		return;
+
+	os << "reference counts:\n"
+	   << "  node    count\n"
+	   << "--------  -----\n";
+	for ( auto &r: _ref_counts )
+		os << std::setw( 8 ) << std::setfill( ' ' ) << r.first << "  " << std::setw( 5 ) << r.second.size() << std::endl;
 }
 
 ////////////////////////////////////////
@@ -229,7 +421,7 @@ graph::process( node_id nid, node &n )
 {
 	if ( n.value().empty() )
 	{
-		std::cout << "  process: " << n.hash_value() << " " << _ops[n.op()].name() << std::endl;
+//		std::cout << "  process: " << n.hash_value() << " " << _ops[n.op()].name() << std::endl;
 		std::vector<any> inputs;
 		size_t nInputs = n.input_size();
 		inputs.resize( nInputs );
@@ -240,7 +432,7 @@ graph::process( node_id nid, node &n )
 			inputs[i] = process( inid, curIn );
 			if ( curIn.is_rvalue() )
 			{
-				std::cout << "removing r-value input node " << inid << " now that we've processed it" << std::endl;
+//				std::cout << "removing r-value input node " << inid << " now that we've processed it" << std::endl;
 				remove_node( inid );
 			}
 			else
@@ -248,7 +440,7 @@ graph::process( node_id nid, node &n )
 				curIn.remove_output( nid );
 				if ( curIn.output_size() == 0 )
 				{
-					std::cout << "removing input node " << inid << " now that it has no more unprocessed outputs" << std::endl;
+//					std::cout << "removing input node " << inid << " now that it has no more unprocessed outputs" << std::endl;
 					remove_node( inid );
 				}
 			}
@@ -257,8 +449,8 @@ graph::process( node_id nid, node &n )
 		const op &o = _ops[n.op()];
 		n.value() = o.function().process( *this, n.dims(), inputs );
 	}
-	else
-		std::cout << "  process: " << n.hash_value() << _ops[n.op()].name() << " HAS VALUE" << std::endl;
+//	else
+//		std::cout << "  process: " << n.hash_value() << _ops[n.op()].name() << " HAS VALUE" << std::endl;
 
 	return n.value();
 }
@@ -322,7 +514,7 @@ graph::add_node( op_id op, any value, const dimensions &d, std::initializer_list
 	}
 	hash::value hv = h.final();
 
-	std::cout << "graph " << this << ": Adding op " << _ops[op].name() << ": " << hv << std::endl;
+//	std::cout << "graph " << this << ": Adding op " << _ops[op].name() << ": " << hv << std::endl;
 	return add_node( op, std::move( value ), d, inputs, hv );
 }
 
@@ -394,8 +586,42 @@ graph::add_node( op_id op, any value, const dimensions &d, const std::vector<nod
 	}
 	hash::value hv = h.final();
 
-	std::cout << "graph " << this << ": Adding op " << _ops[op].name() << ": " << hv << std::endl;
+//	std::cout << "graph " << this << ": Adding op " << _ops[op].name() << ": " << hv << std::endl;
 	return add_node( op, std::move( value ), d, inputs, hv );
+}
+
+////////////////////////////////////////
+
+void
+graph::reference( node_id n, rewrite_notify notify, void *ud )
+{
+	auto ri = _ref_counts.find( n );
+	if ( ri != _ref_counts.end() )
+		ri->second.emplace_back( notify, ud );
+	else
+		_ref_counts[n].emplace_back( notify, ud );
+}
+
+////////////////////////////////////////
+
+void
+graph::unreference( node_id n, rewrite_notify notify, void *ud ) noexcept
+{
+	auto ri = _ref_counts.find( n );
+	if ( ri != _ref_counts.end() )
+	{
+		reference_list &l = ri->second;
+		for ( auto i = l.begin(); i != l.end(); ++i )
+		{
+			if ( (*i).first == notify && (*i).second == ud )
+			{
+				l.erase( i );
+				break;
+			}
+		}
+		if ( l.empty() )
+			_ref_counts.erase( ri );
+	}
 }
 
 ////////////////////////////////////////

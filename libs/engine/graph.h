@@ -24,6 +24,7 @@
 
 #include <typeinfo>
 #include <vector>
+#include <ostream>
 #include <base/const_string.h>
 
 #include "types.h"
@@ -106,7 +107,13 @@ public:
 	inline const_reverse_iterator rend( void ) const { return _nodes.rend(); }
 	inline const_reverse_iterator crend( void ) const { return _nodes.crend(); }
 
+	// remove
+	void clean_graph( void );
+
 	void dispatch_threads( const std::function<void(int, int)> &f, int start, int N );
+
+	void dump_dot( std::ostream &os );
+	void dump_refs( std::ostream &os );
 
 private:
 	graph( void ) = delete;
@@ -132,29 +139,16 @@ private:
 //	template <typename V> friend class computed_value;
 	friend class computed_base;
 
-	inline void reference( node_id n )
-	{
-		auto ri = _ref_counts.find( n );
-		if ( ri != _ref_counts.end() )
-			++(ri->second);
-		else
-			_ref_counts.emplace( std::make_pair( n, 1 ) );
-	}
-	inline void unreference( node_id n ) noexcept
-	{
-		auto ri = _ref_counts.find( n );
-		if ( ri != _ref_counts.end() )
-		{
-			--( ri->second );
-			if ( ri->second <= 0 )
-				_ref_counts.erase( ri );
-		}
-	}
+	typedef void (*rewrite_notify)( void *, node_id, node_id );
+
+	void reference( node_id n, rewrite_notify notify, void *ud );
+	void unreference( node_id n, rewrite_notify notify, void *ud ) noexcept;
 
 	const registry &_ops;
 
 	std::vector<node> _nodes;
-	std::map<node_id, int> _ref_counts;
+	typedef std::vector< std::pair<rewrite_notify,void *> > reference_list;
+	std::map<node_id, reference_list> _ref_counts;
 	std::map<hash::value, node_id> _hash_to_node;
 };
 

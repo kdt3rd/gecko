@@ -36,6 +36,21 @@ computed_base::~computed_base( void )
 
 ////////////////////////////////////////
 
+computed_base::computed_base( const computed_base &o )
+	: _graph( o._graph )
+{
+	set_id( o._id );
+}
+
+////////////////////////////////////////
+
+computed_base::computed_base( computed_base &&o )
+{
+	adopt( std::move( o ) );
+}
+
+////////////////////////////////////////
+
 dimensions
 computed_base::node_dims( void ) const
 {
@@ -94,18 +109,29 @@ bool computed_base::compute_hash( hash &v ) const
 ////////////////////////////////////////
 
 void
+computed_base::new_id_notify( void *ud, node_id old, node_id nid )
+{
+	computed_base *cb = reinterpret_cast<computed_base *>( ud );
+//	std::cout << "new_id_notify: old " << old << " new " << nid << std::endl;
+	if ( cb->_id == old )
+		cb->_id = nid;
+}
+
+////////////////////////////////////////
+
+void
 computed_base::set_id( node_id i )
 {
 	if ( _id != nullnode )
 	{
 		if ( _graph )
-			_graph->unreference( _id );
+			_graph->unreference( _id, new_id_notify, this );
 	}
 	_id = i;
 	if ( _id != nullnode )
 	{
 		if ( _graph )
-			_graph->reference( _id );
+			_graph->reference( _id, new_id_notify, this );
 	}
 }
 
@@ -114,10 +140,11 @@ computed_base::set_id( node_id i )
 void
 computed_base::adopt( computed_base &&o )
 {
+	// need to update the ref count and leave the old one since we're
+	// passing this off to the graph
 	clear_graph();
-	// don't have to change reference count as we're adopting
-	std::swap( _graph, o._graph );
-	std::swap( _id, o._id );
+	_graph = o._graph;
+	set_id( o._id );
 }
 
 ////////////////////////////////////////
