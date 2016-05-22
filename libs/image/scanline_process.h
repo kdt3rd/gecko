@@ -24,6 +24,7 @@
 
 #include "scanline.h"
 #include "plane.h"
+//#include <iostream>
 
 ////////////////////////////////////////
 
@@ -113,23 +114,56 @@ struct scan_convert<const scanline &, const plane &>
 	}
 };
 
-template <typename... Args, typename... Inputs>
-inline void
-scan_process( plane &ret, int start, int end, void (*scanFunc)( scanline &, Args ... ), Inputs && ...in )
+template <typename T>
+struct scanline_arg_extractor
 {
-	for ( int y = start; y < end; ++y )
+	typedef T type;
+	static inline type get( int y, const engine::any &v )
 	{
-		auto dest = scan_ref( ret, y );
-		scanFunc( dest, scan_convert<Args,Inputs>::extract( y, std::forward<Inputs>( in ) )... );
+		return engine::any_cast<type>( v );
 	}
-}
+};
+
+template <>
+struct scanline_arg_extractor<scanline>
+{
+	typedef scanline type;
+	static inline type get( int y, const engine::any &v )
+	{
+		const plane &p = engine::any_cast<plane>( v );
+		return scan_ref( p, y );
+	}
+};
+
+template <>
+struct scanline_arg_extractor<const scanline &>
+{
+	typedef scanline type;
+	static inline type get( int y, const engine::any &v )
+	{
+		const plane &p = engine::any_cast<plane>( v );
+		return scan_ref( p, y );
+	}
+};
+
+template <>
+struct scanline_arg_extractor<scanline &>
+{
+	typedef scanline type;
+	static inline type get( int y, const engine::any &v )
+	{
+		const plane &p = engine::any_cast<plane>( v );
+		return scan_dup( p, y );
+	}
+};
 
 template <typename... Args>
 struct scanline_plane_operator
 {
 	typedef plane result_type;
+	typedef std::function<void ( scanline &, Args...)> function;
 
-	inline plane operator()( engine::graph &g, const engine::dimensions &d, const std::function<void (scanline &, Args...)> &f, const std::vector<engine::any> &inputs )
+	inline plane operator()( engine::graph &g, const engine::dimensions &d, const function &f, const std::vector<engine::any> &inputs )
 	{
 		plane ret( static_cast<int>( d.x ), static_cast<int>( d.y ) );
 
@@ -142,12 +176,32 @@ struct scanline_plane_operator
 		return ret;
 	}
 
-	static inline void dispatch_scans( plane &ret, int start, int end, const std::function<void ( scanline &, Args ... )> &scanFunc, const std::vector<engine::any> &in )
+	static inline void dispatch_scans( plane &ret, int start, int end, const function &scanFunc, const std::vector<engine::any> &in )
+	{
+//		std::cout << "  scanline process dispatching " << start << " - " << end << ", " << in.size() << " inputs" << std::endl;
+		process_dispatch( ret, start, end, scanFunc, in, base::gen_sequence<sizeof...(Args)>{} );
+	}
+
+private:
+	template <size_t I>
+	static inline typename scanline_arg_extractor<typename base::function_traits<function>::template get_arg_type<I+1>::type>::type
+	extract( int y, const std::vector<engine::any> &in )
+	{
+		typedef typename base::function_traits<function>::template get_arg_type<I+1>::type arg_type;
+		typedef scanline_arg_extractor<arg_type> extractor_type;
+//		if ( y == 0 )
+//			std::cout << "   extract arg " << I << " type " << typeid(arg_type).name() << " result type " << typeid(typename extractor_type::type).name() << " (" << typeid(extractor_type).name() << ")" << std::endl;
+
+		return extractor_type::get( y, in[I] );
+	}
+
+	template <size_t... S>
+	static inline void process_dispatch( plane &ret, int start, int end, const std::function<void ( scanline &, Args ... )> &scanFunc, const std::vector<engine::any> &in, const base::sequence<S...> & )
 	{
 		for ( int y = start; y < end; ++y )
 		{
 			auto dest = scan_ref( ret, y );
-//		scanFunc( dest, scan_convert<Args,Inputs>::extract( y, std::forward<Inputs>( in ) )... );
+			scanFunc( dest, extract<S>( y, in )... );
 		}
 	}
 };
