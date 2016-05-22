@@ -27,6 +27,7 @@
 #include <vector>
 #include <map>
 #include "const_string.h"
+#include <ostream>
 
 ////////////////////////////////////////
 
@@ -132,6 +133,8 @@ inline spooky_hash &operator <<( spooky_hash &h, const std::map<K, V> &v )
 	return h;
 }
 
+std::ostream &operator<<( std::ostream &os, const spooky_hash &h );
+std::ostream &operator<<( std::ostream &os, const spooky_hash::value &v );
 	
 } // namespace base
 

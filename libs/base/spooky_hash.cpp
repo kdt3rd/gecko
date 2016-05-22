@@ -21,6 +21,7 @@
 //
 
 #include "spooky_hash.h"
+#include <iomanip>
 
 ////////////////////////////////////////
 
@@ -450,6 +451,23 @@ spooky_hash &operator <<( spooky_hash &h, const spooky_hash &x )
 	return h;
 }
 
+////////////////////////////////////////
+
+std::ostream &
+operator<<( std::ostream &os, const spooky_hash &h )
+{
+	os << h.final();
+	return os;
+}
+
+////////////////////////////////////////
+
+std::ostream &
+operator<<( std::ostream &os, const spooky_hash::value &v )
+{
+	os << '{' << std::hex << std::setw(16) << std::setfill( '0' ) << v[0] << std::setw(16) << std::setfill( '0' ) << v[1] << std::dec << '}';
+	return os;
+}
 
 ////////////////////////////////////////
 
