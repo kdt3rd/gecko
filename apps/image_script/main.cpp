@@ -44,14 +44,14 @@ int safemain( int argc, char *argv[] )
 	plane y = create_plane( 1920, 1080, 1.F );
 	plane z = create_plane( 1920, 1080, 2.F );
 
-	std::cout << "constructed x, y, z" << std::endl;
-	plane s = x + y + z;
-	std::cout << "sum finished" << std::endl;
-	s /= 3.0;
-	std::cout << "ave finished" << std::endl;
+	std::cout << "constructed x, y, z: " << x.id() << ", " << y.id() << ", " << z.id() << std::endl;
+//	plane s = x + y + z;
+//	std::cout << "sum finished" << std::endl;
+//	s /= 3.0;
+//	std::cout << "ave finished" << std::endl;
 
-	auto avev = sum( s );
-	std::cout << "sum created" << std::endl;
+	auto avev = sum( ( x + y + z ) / 3.0 );
+	std::cout << "sum created: id " << avev.id() << std::endl;
 	double ave = static_cast<double>( avev );
 	std::cout << "sum evaluated: " << ave << std::endl;
 	std::cout << "ave: " << ave / static_cast<double>( 1920 * 1080 ) << std::endl;
