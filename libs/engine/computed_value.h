@@ -103,23 +103,12 @@ public:
 		return false;
 	}
 
-#if 0
-	inline T compute( void ) const
-	{
-		if ( ! _graph )
-			throw_runtime( "No graph to compute with" );
-		const any &v = _graph->get_value( _id );
-//		return std::experimental::any_cast<T>( v );
-		return any_cast<T>( v );
-	}
-#else
 	inline const any &compute( void ) const
 	{
 		if ( ! _graph )
 			throw_runtime( "No graph to compute with" );
 		return _graph->get_value( _id );
 	}
-#endif
 
 	inline void clear_graph( void ) noexcept
 	{
