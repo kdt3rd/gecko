@@ -39,7 +39,7 @@ namespace image
 ///
 /// always aligns the plane to at least 16 floats to
 /// maximize alignment with AVX512
-class plane : public engine::computed_value
+class plane : public engine::computed_base
 {
 public:
 	plane( void );
@@ -47,7 +47,7 @@ public:
 //	plane( media::image_buffer );
 	template <typename... Args>
 	inline plane( const base::cstring &opname, const engine::dimensions &d, Args &&... args )
-		: computed_value( image::op_registry(), opname, d, std::forward<Args>( args )... ),
+		: computed_base( image::op_registry(), opname, d, std::forward<Args>( args )... ),
 		  _width( static_cast<int>( d.x ) ),
 		  _width_m1( static_cast<int>( d.x ) - 1 ),
 		  _height( static_cast<int>( d.y ) ),

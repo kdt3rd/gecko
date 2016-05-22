@@ -52,6 +52,9 @@ public:
 	inline const op &get( op_id i ) const;
 	inline const op &operator[]( op_id i ) const;
 
+	/// registry for "pod" types + std::string,
+	/// for use with computed_value
+	static const registry &pod_registry( void );
 private:
 	std::vector<op> _ops;
 	std::map<std::string, op_id> _name_to_op;

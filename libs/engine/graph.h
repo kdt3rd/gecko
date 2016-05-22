@@ -129,7 +129,7 @@ private:
 
 
 //	template <typename V> friend class computed_value;
-	friend class computed_value;
+	friend class computed_base;
 
 	inline void reference( node_id n )
 	{

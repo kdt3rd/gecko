@@ -44,7 +44,7 @@ plane::plane( int w, int h )
 ////////////////////////////////////////
 
 plane::plane( plane &&o )
-	: computed_value( std::move( o ) ),
+	: computed_base( std::move( o ) ),
 	  _mem( std::move( o._mem ) ),
 	  _width( std::move( o._width ) ),
 	  _width_m1( std::move( o._width_m1 ) ),

@@ -106,6 +106,14 @@ registry::add( op &&o )
 
 ////////////////////////////////////////
 
+const registry &registry::pod_registry( void )
+{
+	static registry pods;
+	return pods;
+}
+
+////////////////////////////////////////
+
 } // engine
 
 

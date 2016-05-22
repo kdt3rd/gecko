@@ -36,7 +36,7 @@ namespace image
 ///
 /// @brief Class image_buf provides a collection of planes
 ///
-class image_buf : public engine::computed_value
+class image_buf : public engine::computed_base
 {
 public:
 	typedef std::vector<plane> plane_list;
@@ -48,7 +48,7 @@ public:
 	image_buf( void ) = default;
 	template <typename... Args>
 	inline image_buf( const base::cstring &opname, const engine::dimensions &d, Args &&... args )
-		: computed_value( image::op_registry(), opname, d, std::forward<Args>( args )... )
+		: computed_base( image::op_registry(), opname, d, std::forward<Args>( args )... )
 	{
 		engine::dimensions pd = d;
 		pd.z = 0;

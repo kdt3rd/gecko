@@ -36,7 +36,7 @@ namespace engine
 {
 
 ///
-/// @brief computed_value provides a pattern for values computed using
+/// @brief computed_base provides a pattern for values computed using
 /// an engine graph.
 ///
 /// The idea behind this is to enable transparent construction of C++
@@ -61,21 +61,21 @@ namespace engine
 /// where the value can just stay a value and be processed later when
 /// the item referencing p is evaluated.
 ///
-class computed_value
+class computed_base
 {
 public:
-	computed_value( void ) = default;
-	~computed_value( void )
+	computed_base( void ) = default;
+	~computed_base( void )
 	{
 		clear_graph();
 	}
-	computed_value( const computed_value & ) = default;
-	computed_value( computed_value && ) = default;
-	computed_value &operator=( const computed_value & ) = default;
-	computed_value &operator=( computed_value && ) = default;
+	computed_base( const computed_base & ) = default;
+	computed_base( computed_base && ) = default;
+	computed_base &operator=( const computed_base & ) = default;
+	computed_base &operator=( computed_base && ) = default;
 
 	template <typename... Args>
-	explicit computed_value( const registry &r, const base::cstring &opname, const dimensions &d, Args &&... args )
+	explicit computed_base( const registry &r, const base::cstring &opname, const dimensions &d, Args &&... args )
 	{
 		_graph = find_or_create_graph( r, std::forward<Args>( args )... );
 		_id = _graph->add_node( opname, d, { check_or_add( *_graph, std::forward<Args>( args ) )... } );
@@ -162,18 +162,32 @@ protected:
 	{
 		static inline node_id process( graph &g, X &&v )
 		{
-			node_id r = g.move_node( *(v.graph_ptr()), v.id() );
-			g.tag_rvalue( r );
-			return r;
+			const std::shared_ptr<graph> &rg = v.graph_ptr();
+
+			if ( rg )
+			{
+				node_id r;
+
+				if ( &(rg->op_registry()) == &(g.op_registry()) )
+					r = g.move_node( *(rg), v.id() );
+				else if ( &(rg->op_registry()) == &(registry::pod_registry()) )
+					r = g.move_node( *(rg), v.id() );
+				else
+					throw_runtime( "mixed graphs with different registries not allowed" );
+
+				g.tag_rvalue( r );
+				return r;
+			}
+
+			return g.add_constant( std::move( v ) );
 		}
 
 		static inline std::shared_ptr<graph> find_graph( const registry &reg, X &&v )
 		{
-			if ( v.graph_ptr() )
-			{
-				precondition( &(v.graph_ptr()->op_registry()) == &reg, "computed_values with mixed operation registries intermingled" );
-				return v.graph_ptr();
-			}
+			const std::shared_ptr<graph> &r = v.graph_ptr();
+			if ( r && &(r->op_registry()) == &reg )
+				return r;
+
 			return std::shared_ptr<graph>();
 		}
 	};
@@ -182,18 +196,27 @@ protected:
 	{
 		static inline node_id process( graph &g, const X &v )
 		{
-			if ( v.graph_ptr() )
-				return g.copy_node( *(v.graph_ptr()), v.id() );
+			const std::shared_ptr<graph> &r = v.graph_ptr();
+
+			if ( r )
+			{
+				if ( &(r->op_registry()) == &(g.op_registry()) )
+					return g.copy_node( *(r), v.id() );
+				else if ( &(r->op_registry()) == &(registry::pod_registry()) )
+					return g.copy_node( *(r), v.id() );
+				else
+					throw_runtime( "mixed graphs with different registries not allowed" );
+			}
+
 			return g.add_constant( v );
 		}
 
 		static inline std::shared_ptr<graph> find_graph( const registry &reg, const X &v )
 		{
-			if ( v.graph_ptr() )
-			{
-				precondition( &(v.graph_ptr()->op_registry()) == &reg, "computed_values with mixed operation registries intermingled" );
-				return v.graph_ptr();
-			}
+			const std::shared_ptr<graph> &r = v.graph_ptr();
+			if ( r && &(r->op_registry()) == &reg )
+				return r;
+
 			return std::shared_ptr<graph>();
 		}
 	};
@@ -201,13 +224,13 @@ protected:
 	template <typename X>
 	inline node_id check_or_add( graph &g, X &&v )
 	{
-		return check_delegate<X, std::is_base_of<computed_value, typename std::decay<X>::type>::value>::process( g, std::forward<X>( v ) );
+		return check_delegate<X, std::is_base_of<computed_base, typename std::decay<X>::type>::value>::process( g, std::forward<X>( v ) );
 	}
 
 	template <typename X>
 	inline std::shared_ptr<graph> check_for_graph( const registry &reg, X &&v )
 	{
-		return check_delegate<X, std::is_base_of<computed_value, typename std::decay<X>::type>::value>::find_graph( reg, std::forward<X>( v ) );
+		return check_delegate<X, std::is_base_of<computed_base, typename std::decay<X>::type>::value>::find_graph( reg, std::forward<X>( v ) );
 	}
 
 	template <typename X, typename... Args>
@@ -228,7 +251,7 @@ protected:
 	}
 
 	inline void
-	adopt( computed_value &&o )
+	adopt( computed_base &&o )
 	{
 		_graph = std::move( o._graph );
 		_id = std::move( o._id );
@@ -236,6 +259,55 @@ protected:
 
 	std::shared_ptr<graph> _graph;
 	node_id _id = nullnode;
+};
+
+/// @brief computed_value is a wrapper for values in the graph such
+/// that they can be computed and passed in as arguments.
+template <typename V>
+class computed_value : public computed_base
+{
+public:
+	static_assert( ! std::is_base_of<computed_base, typename std::decay<V>::type>::value, "computed_value shouldn't be created for things that are already computed" );
+
+	inline computed_value( void ) = default;
+
+	template <typename A>
+	inline computed_value( A &&v )
+	{
+		_graph = std::make_shared<graph>( registry::pod_registry() );
+		_id = _graph->add_constant( static_cast<V>( std::forward<A>( v ) ) );
+	}
+
+	template <typename... Args>
+	inline computed_value( const registry &r, const base::cstring &opname, const dimensions &d, Args &&... args )
+		: computed_base( r, opname, d, std::forward<Args>( args )... )
+	{
+	}
+
+	inline computed_value( const computed_value &v ) = default;
+	inline computed_value( computed_value &&v ) = default;
+
+	template <typename A>
+	inline computed_value &operator=( A &&v )
+	{
+		_graph = std::make_shared<graph>( registry::pod_registry() );
+		_id = _graph->add_constant( static_cast<V>( std::forward<A>( v ) ) );
+		return *this;
+	}
+
+	inline computed_value &operator=( const computed_value &v ) = default;
+	inline computed_value &operator=( computed_value &&v ) = default;
+
+	inline operator V( void ) const
+	{
+		if ( _graph )
+		{
+			return engine::any_cast<V>( _graph->get_value( _id ) );
+		}
+
+		throw_runtime( "Attempt to evaluate uninitialized computed_value" );
+	}
+
 };
 
 } // namespace engine
