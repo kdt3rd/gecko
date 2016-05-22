@@ -52,7 +52,6 @@ T any_cast( any &a )
 	return a.as<T>();
 }
 
-
 /// Storage type for storing the dimensions of a particular processing node
 ///
 /// storing 4 values so that there can be constructs such as a list of

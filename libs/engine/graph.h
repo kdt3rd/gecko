@@ -115,8 +115,8 @@ private:
 	graph &operator=( const graph & ) = delete;
 	graph &operator=( graph && ) = delete;
 
-	const any &start_process( node &n );
-	const any &process( node &n );
+	const any &start_process( node_id nid, node &n );
+	const any &process( node_id nid, node &n );
 	void optimize( void );
 	void apply_grouping( void );
 
@@ -126,6 +126,7 @@ private:
 	node_id add_node( op_id op, any value, const dimensions &d, std::initializer_list<node_id> inputs, hash &h );
 	node_id add_node( op_id op, any value, const dimensions &d, std::initializer_list<node_id> inputs, const hash::value &hv );
 	node_id add_node( op_id op, any value, const dimensions &d, const std::vector<node_id> &inputs, const hash::value &hv );
+	node_id add_node( op_id op, any value, const dimensions &d, const std::vector<node_id> &inputs, hash &h );
 
 
 //	template <typename V> friend class computed_value;

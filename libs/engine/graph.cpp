@@ -82,7 +82,7 @@ graph::get_value( node_id n )
 	node &node = _nodes[n];
 	any &v = node.value();
 	if ( node.value().empty() )
-		return start_process( node );
+		return start_process( n, node );
 
 	return v;
 }
@@ -123,7 +123,25 @@ graph::copy_node( const graph &o, node_id n )
 
 		if ( doAdd )
 		{
-			node_id nnode = add_node( cur.op(), cur.value(), cur.dims(), inputs, cur.hash_value() );
+			const registry &srcReg = o.op_registry();
+			op_id opid = cur.op();
+			node_id nnode;
+
+			// the constant pod_registry op_ids are added in all
+			// subclasses of registry in the constructor so the op_id
+			// will be the same
+			if ( &srcReg != &registry::pod_registry() && &srcReg != &_ops )
+			{
+				hash h;
+				if ( ! cur.value().empty() )
+					cur.value().binary_stream( h );
+
+				opid = _ops.find( srcReg[opid].name() );
+				nnode = add_node( opid, cur.value(), cur.dims(), inputs, h );
+			}
+			else
+				nnode = add_node( opid, cur.value(), cur.dims(), inputs, cur.hash_value() );
+
 			nodemap[tocopy.back()] = nnode;
 			std::cout << "graph " << this << ": adding op during copy: " << cur.op() << " hash " << cur.hash_value() << " --> " << nnode << " hash " << _nodes[nnode].hash_value() << std::endl;
 			
@@ -195,19 +213,19 @@ graph::dispatch_threads( const std::function<void(int, int)> &f, int start, int 
 ////////////////////////////////////////
 
 const any &
-graph::start_process( node &n )
+graph::start_process( node_id nid, node &n )
 {
 	std::cout << "start_process: " << n.hash_value() << " " << _ops[n.op()].name() << std::endl;
 	optimize();
 	apply_grouping();
 
-	return process( n );
+	return process( nid, n );
 }
 
 ////////////////////////////////////////
 
 const any &
-graph::process( node &n )
+graph::process( node_id nid, node &n )
 {
 	if ( n.value().empty() )
 	{
@@ -216,7 +234,25 @@ graph::process( node &n )
 		size_t nInputs = n.input_size();
 		inputs.resize( nInputs );
 		for ( size_t i = 0; i != nInputs; ++i )
-			inputs[i] = process( _nodes[n.input( i )] );
+		{
+			node_id inid = n.input( i );
+			node &curIn = _nodes[inid];
+			inputs[i] = process( inid, curIn );
+			if ( curIn.is_rvalue() )
+			{
+				std::cout << "removing r-value input node " << inid << " now that we've processed it" << std::endl;
+				remove_node( inid );
+			}
+			else
+			{
+				curIn.remove_output( nid );
+				if ( curIn.output_size() == 0 )
+				{
+					std::cout << "removing input node " << inid << " now that it has no more unprocessed outputs" << std::endl;
+					remove_node( inid );
+				}
+			}
+		}
 
 		const op &o = _ops[n.op()];
 		n.value() = o.function().process( *this, n.dims(), inputs );
@@ -232,6 +268,15 @@ graph::process( node &n )
 void
 graph::optimize( void )
 {
+	for ( size_t n = 0, N = _nodes.size(); n != N; ++n )
+	{
+		node &cur = _nodes[n];
+		// only 1 output and no remaining references in
+		// computed_value, we can tag as an rvalue
+		if ( cur.output_size() == 1 &&
+			 _ref_counts.find( n ) == _ref_counts.end() )
+			cur.set_rvalue();
+	}
 }
 
 ////////////////////////////////////////
@@ -331,6 +376,26 @@ graph::add_node( op_id op, any value, const dimensions &d, const std::vector<nod
 		_nodes[i].add_output( n );
 
 	return n;
+}
+
+////////////////////////////////////////
+
+node_id
+graph::add_node( op_id op, any value, const dimensions &d, const std::vector<node_id> &inputs, hash &h )
+{
+	if ( _ops[op].input_size() != inputs.size() )
+		throw_logic( "Invalid number of inputs passed to operator {0}, expect {1}, got {2}", _ops[op].name(), _ops[op].input_size(), inputs.size() );
+
+	h << op << d;
+	for ( auto n: inputs )
+	{
+		precondition( n < _nodes.size(), "Invalid input given for new node" );
+		h << _nodes[n].hash_value();
+	}
+	hash::value hv = h.final();
+
+	std::cout << "graph " << this << ": Adding op " << _ops[op].name() << ": " << hv << std::endl;
+	return add_node( op, std::move( value ), d, inputs, hv );
 }
 
 ////////////////////////////////////////
