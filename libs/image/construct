@@ -7,5 +7,6 @@ lib = library "image"
 	"scanline.cpp";
 	"op_registry.cpp";
 	"plane_math.cpp";
+	"plane_stats.cpp";
   }
   libs{ "engine" }

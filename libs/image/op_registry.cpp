@@ -25,6 +25,7 @@
 //#include "image_ops.h"
 #include "plane_ops.h"
 #include "plane_math.h"
+#include "plane_stats.h"
 #include "scanline_process.h"
 
 #include <mutex>
@@ -107,6 +108,7 @@ registerPlaneOps( engine::registry &r )
 	r.register_constant<image::plane>();
 
 	image::add_plane_math( r );
+	image::add_plane_stats( r );
 }
 
 ////////////////////////////////////////
