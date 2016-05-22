@@ -31,6 +31,8 @@ namespace engine { class registry; }
 namespace image
 {
 
+void assign_value( scanline &dest, float v );
+
 void add_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB );
 void add_planenumber( scanline &dest, const scanline &srcA, float v );
 

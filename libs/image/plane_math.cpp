@@ -23,11 +23,20 @@
 #include "plane_math.h"
 #include "scanline_process.h"
 #include <base/cpu_features.h>
+#include <iostream>
 
 ////////////////////////////////////////
 
 namespace image
 {
+
+////////////////////////////////////////
+
+void assign_value( scanline &dest, float v )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = v;
+}
 
 ////////////////////////////////////////
 
@@ -119,6 +128,8 @@ void add_plane_math( engine::registry &r )
 {
 	using namespace engine;
 //	r.add( op( "add_planeplane", base::choose_runtime( add_planeplane, { { cpu::simd_feature::AVX, avx::add_planeplane } } ), scanline_plane_operator( add_planeplane ), op::one_to_one ) );
+
+	r.add( op( "assign_plane", base::choose_runtime( assign_value ), scanline_plane_adapter<decltype(assign_value)>(), op::one_to_one ) );
 
 	r.add( op( "add_planeplane", base::choose_runtime( add_planeplane ), scanline_plane_adapter<decltype(add_planeplane)>(), op::one_to_one ) );
 	r.add( op( "add_planenumber", base::choose_runtime( add_planenumber ), scanline_plane_adapter<decltype(add_planenumber)>(), op::one_to_one ) );
