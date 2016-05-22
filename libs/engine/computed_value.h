@@ -65,71 +65,33 @@ class computed_base
 {
 public:
 	computed_base( void ) = default;
-	~computed_base( void )
-	{
-		clear_graph();
-	}
+	~computed_base( void );
 	computed_base( const computed_base & ) = default;
 	computed_base( computed_base && ) = default;
 	computed_base &operator=( const computed_base & ) = default;
 	computed_base &operator=( computed_base && ) = default;
 
 	template <typename... Args>
-	explicit computed_base( const registry &r, const base::cstring &opname, const dimensions &d, Args &&... args )
+	explicit inline computed_base( const registry &r, const base::cstring &opname, const dimensions &d, Args &&... args )
 	{
 		_graph = find_or_create_graph( r, std::forward<Args>( args )... );
-		_id = _graph->add_node( opname, d, { check_or_add( *_graph, std::forward<Args>( args ) )... } );
-		_graph->reference( _id );
+		set_id( _graph->add_node( opname, d, { check_or_add( *_graph, std::forward<Args>( args ) )... } ) );
 	}
 
 	inline const std::shared_ptr<graph> &graph_ptr( void ) const { return _graph; }
 	inline node_id id( void ) const { return _id; }
-	inline dimensions node_dims( void ) const
-	{
-		dimensions r = nulldim;
-		if ( _graph )
-			r = (*_graph)[_id].dims();
-		return r;
-	}
-	inline bool pending( void ) const
-	{
-		if ( _graph )
-		{
-			const node &n = (*_graph)[_id];
-			if ( n.value().empty() )
-				return true;
-		}
-			
-		return false;
-	}
+	dimensions node_dims( void ) const;
+	bool pending( void ) const;
 
-	inline const any &compute( void ) const
-	{
-		if ( ! _graph )
-			throw_runtime( "No graph to compute with" );
-		return _graph->get_value( _id );
-	}
+	const any &compute( void ) const;
 
-	inline void clear_graph( void ) noexcept
-	{
-		if ( _graph )
-		{
-			_graph->unreference( _id );
-			_graph.reset();
-		}
-		_id = nullnode;
-	}
+	void clear_graph( void ) noexcept;
 
-	inline bool compute_hash( hash &v ) const
-	{
-		if ( _graph )
-		{
-			v << (*_graph)[_id].hash_value();
-			return true;
-		}
-		return false;
-	}
+	bool compute_hash( hash &v ) const;
+
 protected:
+	void set_id( node_id i );
+
 	template <typename X, bool>
 	struct check_delegate;
 
@@ -239,12 +201,7 @@ protected:
 		return std::make_shared<graph>( reg );
 	}
 
-	inline void
-	adopt( computed_base &&o )
-	{
-		_graph = std::move( o._graph );
-		_id = std::move( o._id );
-	}
+	void adopt( computed_base &&o );
 
 	std::shared_ptr<graph> _graph;
 	node_id _id = nullnode;
@@ -264,7 +221,7 @@ public:
 	inline computed_value( A &&v )
 	{
 		_graph = std::make_shared<graph>( registry::pod_registry() );
-		_id = _graph->add_constant( static_cast<V>( std::forward<A>( v ) ) );
+		set_id( _graph->add_constant( static_cast<V>( std::forward<A>( v ) ) ) );
 	}
 
 	template <typename... Args>
