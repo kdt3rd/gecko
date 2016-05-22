@@ -28,6 +28,7 @@
 #include <base/contract.h>
 
 #include "graph.h"
+#include <iostream>
 
 ////////////////////////////////////////
 
@@ -109,10 +110,10 @@ public:
 			throw_runtime( "No graph to compute with" );
 		const any &v = _graph->get_value( _id );
 //		return std::experimental::any_cast<T>( v );
-		return base::any_cast<T>( v );
+		return any_cast<T>( v );
 	}
 #else
-	inline const base::any &compute( void ) const
+	inline const any &compute( void ) const
 	{
 		if ( ! _graph )
 			throw_runtime( "No graph to compute with" );
@@ -130,6 +131,15 @@ public:
 		_id = nullnode;
 	}
 
+	inline bool compute_hash( hash &v ) const
+	{
+		if ( _graph )
+		{
+			v << (*_graph)[_id].hash_value();
+			return true;
+		}
+		return false;
+	}
 protected:
 	template <typename X, bool>
 	struct check_delegate;
@@ -141,6 +151,11 @@ protected:
 		{
 			return g.add_constant( std::forward<X>( v ) );
 		}
+
+		static inline std::shared_ptr<graph> find_graph( const registry &, X && )
+		{
+			return std::shared_ptr<graph>();
+		}
 	};
 	template <typename X>
 	struct check_delegate<X, true>
@@ -150,6 +165,16 @@ protected:
 			node_id r = g.move_node( *(v.graph_ptr()), v.id() );
 			g.tag_rvalue( r );
 			return r;
+		}
+
+		static inline std::shared_ptr<graph> find_graph( const registry &reg, X &&v )
+		{
+			if ( v.graph_ptr() )
+			{
+				precondition( &(v.graph_ptr()->op_registry()) == &reg, "computed_values with mixed operation registries intermingled" );
+				return v.graph_ptr();
+			}
+			return std::shared_ptr<graph>();
 		}
 	};
 	template <typename X>
@@ -161,6 +186,16 @@ protected:
 				return g.copy_node( *(v.graph_ptr()), v.id() );
 			return g.add_constant( v );
 		}
+
+		static inline std::shared_ptr<graph> find_graph( const registry &reg, const X &v )
+		{
+			if ( v.graph_ptr() )
+			{
+				precondition( &(v.graph_ptr()->op_registry()) == &reg, "computed_values with mixed operation registries intermingled" );
+				return v.graph_ptr();
+			}
+			return std::shared_ptr<graph>();
+		}
 	};
 
 	template <typename X>
@@ -169,11 +204,18 @@ protected:
 		return check_delegate<X, std::is_base_of<computed_value, typename std::decay<X>::type>::value>::process( g, std::forward<X>( v ) );
 	}
 
+	template <typename X>
+	inline std::shared_ptr<graph> check_for_graph( const registry &reg, X &&v )
+	{
+		return check_delegate<X, std::is_base_of<computed_value, typename std::decay<X>::type>::value>::find_graph( reg, std::forward<X>( v ) );
+	}
+
 	template <typename X, typename... Args>
 	inline std::shared_ptr<graph>
 	find_or_create_graph( const registry &reg, X &&x, Args &&... args )
 	{
-		std::shared_ptr<graph> r = check( reg, std::forward<X>( x ) );
+		std::cout << " cv " << this << ": find_or_create_graph" << std::endl;
+		std::shared_ptr<graph> r = check_for_graph( reg, std::forward<X>( x ) );
 		if ( r )
 			return r;
 		return find_or_create_graph( reg, std::forward<Args>( args )... );
@@ -185,18 +227,11 @@ protected:
 		return std::make_shared<graph>( reg );
 	}
 
-	template <typename V>
-	inline std::shared_ptr<graph>
-	check( const registry &reg, const computed_value &x )
+	inline void
+	adopt( computed_value &&o )
 	{
-		precondition( &(x.graph_ptr()->op_registry()) == &reg, "computed_values with mixed operation registries intermingled" );
-		return x.graph_ptr();
-	}
-	template <typename V>
-	inline std::shared_ptr<graph>
-	check( const registry &, const V & )
-	{
-		return std::shared_ptr<graph>();
+		_graph = std::move( o._graph );
+		_id = std::move( o._id );
 	}
 
 	std::shared_ptr<graph> _graph;

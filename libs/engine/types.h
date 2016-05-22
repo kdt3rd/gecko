@@ -27,6 +27,7 @@
 #include <base/spooky_hash.h>
 //#include <experimental/any>
 #include <base/any.h>
+#include <ostream>
 
 ////////////////////////////////////////
 
@@ -34,8 +35,23 @@ namespace engine
 {
 
 typedef base::spooky_hash hash;
+inline std::ostream &operator<<( std::ostream &os, const hash::value &v )
+{
+	return base::operator<<( os, v );
+}
 
 using any = base::any;
+template <typename T>
+T any_cast( const any &a )
+{
+	return a.as<T>();
+}
+template <typename T>
+T any_cast( any &a )
+{
+	return a.as<T>();
+}
+
 
 /// Storage type for storing the dimensions of a particular processing node
 ///
@@ -60,6 +76,7 @@ inline bool operator!=( const dimensions &a, const dimensions &b )
 {
 	return !( a == b );
 }
+std::ostream &operator<<( std::ostream &os, const dimensions &d );
 
 /// @brief storage type for storing an operator id
 ///

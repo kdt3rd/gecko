@@ -23,125 +23,21 @@
 #pragma once
 
 #include <array>
+#include <vector>
 #include <memory>
 #include <functional>
 #include <typeinfo>
 #include <base/const_string.h>
 #include <base/contract.h>
+#include <base/variadic_function.h>
+#include "types.h"
 
 ////////////////////////////////////////
 
 namespace engine
 {
 
-#if 0
-plane read( const std::string &fn, int p )
-{
-}
-
-void add( scanline &dest, int y, const plane &a, const plane &b );
-
-std::vector<float> createKernel( const constant<size_t> &width, const constant<kernel_type> &type );
-
-void convolveH( scanline &dest, int y, const plane &a, const constant<std::vector<float>> &k );
-
-
-template <typename T>
-class constant
-{
-	typedef T value_type;
-	constant( value_type && a )
-	{
-		_node = dag::create_constant( std::forward<value_type>( a ) );
-	}
-
-	constant( graph &g, value_type && a )
-	{
-		_node = g.create_constant( std::forward<value_type>( a ) );
-	}
-
-	constant( const std::function<value_type(void)> &f )
-	{
-		_node = dag::defer_constant( f );
-	}
-
-	constant( graph &g, const std::function<value_type(void)> &f )
-	{
-		_node = g.defer_constant( f );
-	}	
-
-	void update_dag( dag &newdag )
-	{
-		_node = newdag.move_constant( _node );
-	}
-	
-};
-class plane
-{
-public:
-	template <typename Func, typename... Args>
-	plane( Func&& f, Args&&... args )
-	{
-		_node = dag::add_function( std::forward<Func>( f ), std::forward<Args>( args )... );
-	}
-
-	template <typename... FuncArgs, typename... Args>
-	plane( plane_info &i, void (*func)( scanline &, int, FuncArgs... ), Args &&... args )
-	{
-	}
-
-	/// Non-multithread routine
-	template <typename... FuncArgs, typename... Args>
-	plane( plane_info &i, void (*func)( buffer &, FuncArgs... ), Args &&... args )
-	{
-	}
-
-	const plane_info &info( void ) const { return _info; }
-
-	scanline scanline( int y ) const
-	{
-		std::lock_guard<dag::scanline_lock> lk( lock( y ) );
-
-		if ( ! _buf )
-		{
-			if ( _node.type() == typeid(scanline) )
-			{
-				if ( ! _node.want_cache() )
-					return _node.evaluate( y );
-
-				_buf = buffer( info() );
-				_node.fill( _buf.ref_scanline( y ), y );
-			}
-			else
-				_buf = _node.evaluate();
-		}
-		else if ( ! complete( y ) )
-		{
-			precondition( _node.type() == typeid(scanline), "Expecting a scanline op for a partial buffer" );
-			_node.fill( _buf.ref_scanline( y ), y );
-		}
-
-		return _buf.const_ref_scanline( y );
-	}
-
-	buffer data( void ) const
-	{
-		if ( ! _buf )
-			_buf = _node.evaluate();
-		return _buf;
-	}
-};
-
-void foo()
-{
-	image i = read( "foo.tiff" );
-
-	plane lum = ( i[0] + i[1] + i[2] ) / 3;
-
-	std::cout << "Average: " << ave( lum ) << std::endl;
-	write( "mono.tiff", image( lum ) );
-}
-#endif
+class graph;
 
 /// @brief base class for function storage used by op.
 ///
@@ -154,6 +50,8 @@ public:
 
 	virtual const std::type_info &result_type( void ) const = 0;
 	virtual size_t input_size( void ) const = 0;
+
+	virtual any process( graph &g, const dimensions &d, const std::vector<any> &inputs ) const = 0;
 };
 
 template <typename R, typename ...Args>
@@ -166,11 +64,11 @@ template <typename Functor, typename GroupFunc>
 class opfunc_one_to_one : public op_function
 {
 public:
-	typedef typename std::function<Functor> process;
-	typedef typename std::function<GroupFunc> group_dispatch;
+	typedef typename base::function_traits<Functor>::function process_func;
+	typedef typename base::function_traits<GroupFunc>::function group_dispatch;
 
 	opfunc_one_to_one( Functor f, GroupFunc g )
-			: _p( f ), _dispatch( g )
+		: _p( base::to_function( f ) ), _dispatch( base::to_function( g ) )
 	{
 	}
 	virtual ~opfunc_one_to_one( void ) noexcept
@@ -179,27 +77,32 @@ public:
 
 	virtual const std::type_info &result_type( void ) const
 	{
-		return typeid(group_dispatch::result_type);
+		return typeid(typename group_dispatch::result_type);
 	}
 
 	virtual size_t input_size( void ) const
 	{
-		return function_info<GroupFunc>::arg_count;
+		return base::function_traits<Functor>::arity - 1;
+	}
+
+	virtual any process( graph &g, const dimensions &d, const std::vector<any> &inputs ) const
+	{
+		return static_cast<any>( _dispatch( g, d, _p, inputs ) );
 	}
 
 private:
-	process _p;
+	process_func _p;
 	group_dispatch _dispatch;
 };
 
-template <typename R, typename... Args>
+template <typename Functor>
 class opfunc_single : public op_function
 {
 public:
-	typedef typename std::function<R(Args...)> process_func;
+	typedef typename base::function_traits<Functor>::function process_func;
 
-	opfunc_single( R (*f)(Args...) )
-			: _p( f )
+	opfunc_single( Functor f )
+		: _p( base::to_function( f ) )
 	{
 	}
 	virtual ~opfunc_single( void ) noexcept
@@ -208,17 +111,39 @@ public:
 
 	virtual const std::type_info &result_type( void ) const
 	{
-		return typeid(R);
+		return typeid(typename process_func::result_type);
 	}
 
 	virtual size_t input_size( void ) const
 	{
-		return function_info<R,Args...>::arg_count;
+		return base::function_traits<Functor>::arity;
+	}
+
+	virtual any process( graph &g, const dimensions &d, const std::vector<any> &inputs ) const
+	{
+		return dispatch( inputs, base::gen_sequence<base::function_traits<Functor>::arity>{} );
 	}
 
 private:
+	template <size_t I>
+	inline typename base::function_traits<Functor>::template get_arg_type<I>::type
+	extract( const std::vector<any> &inputs ) const
+	{
+		typedef typename base::function_traits<Functor>::template get_arg_type<I>::type ret_type;
+		return engine::any_cast<ret_type>( inputs[I] );
+	}
+
+	template <size_t... S>
+	inline any dispatch( const std::vector<any> &inputs, const base::sequence<S...> & ) const
+	{
+		return _p( extract<S>( inputs )... );
+	}
+
 	process_func _p;
 };
+
+////////////////////////////////////////
+
 ///
 /// It is best to support multiple types of processing to minimize
 /// memory, maximize cache locality, and yet still enable global
@@ -335,15 +260,19 @@ public:
 	op( base::cstring n, Functor f, DimensionDividerFunc pt, threaded_t );
 
 	/// Construct an op that is single threaded
-	template <typename R, typename... Args>
-	inline op( base::cstring n, R (*f)(Args...), single_threaded_t )
-			: _name( n ), _func( new opfunc_single<R, Args...>( f ) ), _style( style::SINGLE_THREADED )
-	{
-	}
+	template <typename Functor>
+	inline op( base::cstring n, Functor f, single_threaded_t )
+		: _name( n ), _func( new opfunc_single<Functor>( f ) ),
+		  _style( style::SINGLE_THREADED )
+	{}
 
 	/// Construct an op that is single threaded and solitary
 	template <typename Functor>
-	op( base::cstring n, Functor f, solitary_t );
+	op( base::cstring n, Functor f, solitary_t )
+		: _name( n ), _func( new opfunc_single<Functor>( f ) ),
+		  _style( style::SOLITARY )
+	{}
+
 	/// Construct an op that is a value placeholder
 	op( base::cstring n, const std::reference_wrapper<const std::type_info> &ti, value_t );
 

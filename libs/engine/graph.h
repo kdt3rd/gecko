@@ -106,15 +106,19 @@ public:
 	inline const_reverse_iterator rend( void ) const { return _nodes.rend(); }
 	inline const_reverse_iterator crend( void ) const { return _nodes.crend(); }
 
-private:
-	any process( node_id );
-	std::vector<any> process( const std::vector<node_id> &nodes );
+	void dispatch_threads( const std::function<void(int, int)> &f, int start, int N );
 
+private:
 	graph( void ) = delete;
 	graph( const graph & ) = delete;
 	graph( graph && ) = delete;
 	graph &operator=( const graph & ) = delete;
 	graph &operator=( graph && ) = delete;
+
+	const any &start_process( node &n );
+	const any &process( node &n );
+	void optimize( void );
+	void apply_grouping( void );
 
 	node_id find_node( const hash::value &hv );
 

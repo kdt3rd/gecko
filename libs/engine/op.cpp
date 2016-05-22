@@ -27,8 +27,9 @@
 
 namespace
 {
+using namespace engine;
 
-class null_func : public engine::op_function
+class null_func : public op_function
 {
 public:
 	null_func( const std::reference_wrapper<const std::type_info> &ti );
@@ -37,6 +38,8 @@ public:
 	virtual const std::type_info &result_type( void ) const;
 
 	virtual size_t input_size( void ) const;
+
+	virtual any process( graph &, const dimensions &, const std::vector<any> & ) const;
 private:
 	std::reference_wrapper<const std::type_info> _info;
 };
@@ -68,6 +71,14 @@ size_t
 null_func::input_size( void ) const
 {
 	return 0;
+}
+
+////////////////////////////////////////
+
+any
+null_func::process( graph &, const dimensions &, const std::vector<any> & ) const
+{
+	return any();
 }
 
 }

@@ -26,6 +26,7 @@
 #include <map>
 #include <deque>
 #include <base/contract.h>
+#include <iomanip>
 
 #include "registry.h"
 
@@ -33,6 +34,15 @@
 
 namespace engine
 {
+
+////////////////////////////////////////
+
+std::ostream &
+operator<<( std::ostream &os, const dimensions &d )
+{
+	os << "[ " << d.x << ", " << d.y << ", " << d.z << ", " << d.w << " ]";
+	return os;
+}
 
 ////////////////////////////////////////
 graph::graph( const registry &r )
@@ -69,9 +79,10 @@ const any &
 graph::get_value( node_id n )
 {
 	precondition( n < _nodes.size(), "invalid node id {0}", n );
-	any &v = _nodes[n].value();
-	if ( v.empty() )
-		v = process( n );
+	node &node = _nodes[n];
+	any &v = node.value();
+	if ( node.value().empty() )
+		return start_process( node );
 
 	return v;
 }
@@ -114,6 +125,8 @@ graph::copy_node( const graph &o, node_id n )
 		{
 			node_id nnode = add_node( cur.op(), cur.value(), cur.dims(), inputs, cur.hash_value() );
 			nodemap[tocopy.back()] = nnode;
+			std::cout << "graph " << this << ": adding op during copy: " << cur.op() << " hash " << cur.hash_value() << " --> " << nnode << " hash " << _nodes[nnode].hash_value() << std::endl;
+			
 			tocopy.pop_back();
 		}
 	}
@@ -173,21 +186,55 @@ graph::remove_node( node_id n )
 
 ////////////////////////////////////////
 
-any
-graph::process( node_id )
+void
+graph::dispatch_threads( const std::function<void(int, int)> &f, int start, int N )
 {
-	return any();
+	f( start, N );
 }
 
 ////////////////////////////////////////
 
-std::vector<any>
-graph::process( const std::vector<node_id> &nodes )
+const any &
+graph::start_process( node &n )
 {
-	std::vector<any> retval;
-	for ( auto n: nodes )
-		retval.push_back( process( n ) );
-	return retval;
+	optimize();
+	apply_grouping();
+
+	return process( n );
+}
+
+////////////////////////////////////////
+
+const any &
+graph::process( node &n )
+{
+	if ( n.value().empty() )
+	{
+		std::vector<any> inputs;
+		size_t nInputs = n.input_size();
+		inputs.resize( nInputs );
+		for ( size_t i = 0; i != nInputs; ++i )
+			inputs[i] = process( _nodes[n.input( i )] );
+
+		const op &o = _ops[n.op()];
+		n.value() = o.function().process( *this, n.dims(), inputs );
+	}
+
+	return n.value();
+}
+
+////////////////////////////////////////
+
+void
+graph::optimize( void )
+{
+}
+
+////////////////////////////////////////
+
+void
+graph::apply_grouping( void )
+{
 }
 
 ////////////////////////////////////////
@@ -216,8 +263,8 @@ node_id
 graph::add_node( op_id op, any value, const dimensions &d, std::initializer_list<node_id> inputs, hash &h )
 {
 	if ( _ops[op].input_size() != inputs.size() )
-		throw_logic( "Invalid number of inputs passed to operator {0}", _ops[op].name() );
-
+		throw_logic( "Invalid number of inputs passed to operator {0}, expect {1}, got {2}", _ops[op].name(), _ops[op].input_size(), inputs.size() );
+	
 	h << op << d;
 	for ( auto n: inputs )
 	{
@@ -226,6 +273,7 @@ graph::add_node( op_id op, any value, const dimensions &d, std::initializer_list
 	}
 	hash::value hv = h.final();
 
+	std::cout << "graph " << this << ": Adding op " << _ops[op].name() << ": " << hv << std::endl;
 	return add_node( op, std::move( value ), d, inputs, hv );
 }
 
@@ -266,8 +314,8 @@ graph::add_node( op_id op, any value, const dimensions &d, const std::vector<nod
 		// simple collision check
 		const node &colCheck = _nodes[n];
 		if ( colCheck.op() != op || colCheck.input_size() != inputs.size() || colCheck.dims() != d )
-			throw_logic( "Hash collision with existing node {0} adding opname '{1}'", n, _ops[op].name() );
-
+			throw_logic( "Hash collision with existing node {0} ({1}, {2}) adding opname '{3}' dims {4}: {5} vs {6}", n, _ops[colCheck.op()].name(), colCheck.dims(), _ops[op].name(), d, colCheck.hash_value(), hv );
+		
 		return n;
 	}
 	

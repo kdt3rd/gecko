@@ -58,13 +58,15 @@ node::node( op_id o, const dimensions &d, const std::vector<node_id> &inputs, an
 ////////////////////////////////////////
 
 node::node( const node &n )
-	: _dims( n._dims ),
-	_output_count( n._output_count ),
-	_storage_count( n._storage_count ),
-	_op_id( n._op_id ),
-	_input_count( n._input_count ),
-	_flags( n._flags ),
-	_exec_time( n._exec_time )
+	: _hash( n._hash ),
+	  _value( n._value ),
+	  _dims( n._dims ),
+	  _output_count( n._output_count ),
+	  _storage_count( n._storage_count ),
+	  _op_id( n._op_id ),
+	  _input_count( n._input_count ),
+	  _flags( n._flags ),
+	  _exec_time( n._exec_time )
 {
 	if ( n._edges )
 	{
@@ -79,6 +81,8 @@ node &node::operator=( const node &n )
 {
 	if ( this != &n )
 	{
+		_hash = n._hash;
+		_value = n._value;
 		_dims = n._dims;
 		_op_id = n._op_id;
 		resize_edges( n._input_count, n._output_count );
@@ -90,7 +94,9 @@ node &node::operator=( const node &n )
 ////////////////////////////////////////
 
 node::node( node &&n ) noexcept
-	: _dims( n._dims ), _edges( n._edges ),
+	: _hash( std::move( n._hash ) ),
+	_value( std::move( n._value ) ),
+	_dims( n._dims ), _edges( n._edges ),
 	_output_count( n._output_count ),
 	_storage_count( n._storage_count ),
 	_op_id( n._op_id ),
@@ -106,6 +112,8 @@ node::node( node &&n ) noexcept
 
 node &node::operator=( node &&n ) noexcept
 {
+	std::swap( _hash, n._hash );
+	_value = std::move( n._value );
 	std::swap( _dims, n._dims );
 	std::swap( _edges, n._edges );
 	std::swap( _output_count, n._output_count );
