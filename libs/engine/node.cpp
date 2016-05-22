@@ -130,7 +130,7 @@ node &node::operator=( node &&n ) noexcept
 
 node::~node( void )
 {
-	delete _edges;
+	delete [] _edges;
 }
 
 ////////////////////////////////////////
@@ -192,7 +192,7 @@ node::resize_edges( uint8_t num_in, uint32_t num_out )
 	}
 	else if ( s == 0 )
 	{
-		delete _edges;
+		delete [] _edges;
 		_edges = nullptr;
 		_storage_count = 0;
 	}
