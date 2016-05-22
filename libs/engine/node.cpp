@@ -163,7 +163,7 @@ node::remove_output( node_id o )
 		std::rotate( outs, outs + 1, endOuts );
 		--_output_count;
 	}
-	else
+	else if ( _output_count == 1 )
 	{
 		precondition( output( 0 ) == o, "node id {0} not an output of this node", o );
 		_output_count = 0;
