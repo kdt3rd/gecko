@@ -41,7 +41,7 @@ node::node( op_id o, const dimensions &d, std::initializer_list<node_id> inputs,
 	: _hash( std::move( hv ) ), _value( std::move( val ) ),
 	  _dims( d ), _op_id( o )
 {
-	resize_edges( inputs.size(), 0 );
+	resize_edges( static_cast<uint32_t>( inputs.size() ), 0 );
 	std::copy( inputs.begin(), inputs.end(), _edges );
 }
 
@@ -51,7 +51,7 @@ node::node( op_id o, const dimensions &d, const std::vector<node_id> &inputs, an
 	: _hash( std::move( hv ) ), _value( std::move( val ) ),
 	  _dims( d ), _op_id( o )
 {
-	resize_edges( inputs.size(), 0 );
+	resize_edges( static_cast<uint32_t>( inputs.size() ), 0 );
 	std::copy( inputs.begin(), inputs.end(), _edges );
 }
 
@@ -173,9 +173,9 @@ node::remove_output( node_id o )
 ////////////////////////////////////////
 
 void
-node::resize_edges( uint8_t num_in, uint32_t num_out )
+node::resize_edges( uint32_t num_in, uint32_t num_out )
 {
-	uint32_t s = static_cast<uint32_t>( num_in ) + num_out;
+	uint32_t s = num_in + num_out;
 	if ( s > _storage_count )
 	{
 		// make sure we have room for at least 1 output
@@ -183,7 +183,7 @@ node::resize_edges( uint8_t num_in, uint32_t num_out )
 		node_id *nEdges = new node_id[s];
 		if ( _edges )
 		{
-			std::copy( _edges, _edges + std::min(num_in, _input_count), nEdges );
+			std::copy( _edges, _edges + std::min(num_in, static_cast<uint32_t>(_input_count)), nEdges );
 			std::copy( _edges + _input_count, _edges + _input_count + std::min( _output_count, num_out ), nEdges + num_in );
 			delete [] _edges;
 		}
@@ -197,7 +197,7 @@ node::resize_edges( uint8_t num_in, uint32_t num_out )
 		_storage_count = 0;
 	}
 
-	_input_count = num_in;
+	_input_count = static_cast<uint8_t>( num_in );
 	_output_count = num_out;
 }
 

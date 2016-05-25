@@ -86,7 +86,7 @@ public:
 
 
 private:
-	void resize_edges( uint8_t num_in, uint32_t num_out );
+	void resize_edges( uint32_t num_in, uint32_t num_out );
 
 	// hmmm, is this any different than a node with only one output?
 	// although with a dag of all rvalues, it's obvious that it can

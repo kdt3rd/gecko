@@ -2,6 +2,7 @@
 #pragma once
 
 #include <tuple>
+#include <functional>
 
 namespace base
 {

@@ -68,7 +68,7 @@ public:
 			: _open_mode( mode ), _buf_sz( bufSz )
 	{
 		_buf_sz = std::max( std::streamsize(1), _buf_sz );
-		_buf_store.reset( new char_type[_buf_sz] );
+		_buf_store.reset( new char_type[static_cast<size_t>( _buf_sz )] );
 		_buf = _buf_store.get();
 		update_base_buffer_pointers( -1 );
 

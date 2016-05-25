@@ -81,7 +81,7 @@ struct scanline_process<void (*)( scanline &, Args... )>
 template <typename ScanArg, typename Input>
 struct scan_convert
 {
-	static inline ScanArg extract( int y, Input && v )
+	static inline ScanArg extract( int , Input && v )
 	{
 		return std::forward<Input>( v );
 	}
@@ -118,7 +118,7 @@ template <typename T>
 struct scanline_arg_extractor
 {
 	typedef T type;
-	static inline type get( int y, const engine::any &v )
+	static inline type get( int , const engine::any &v )
 	{
 		return engine::any_cast<type>( v );
 	}

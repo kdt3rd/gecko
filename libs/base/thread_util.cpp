@@ -148,13 +148,13 @@ int queryProcCount( void )
 }
 #endif
 
-static std::atomic<int> theCoreCount( 0 );
-static std::atomic<int> theOverrideCoreCount( -1 );
+static std::atomic<long> theCoreCount( 0 );
+static std::atomic<long> theOverrideCoreCount( -1 );
 std::once_flag theInitFlag;
 
 void initCount( void )
 {
-	int nThreads = static_cast<int>( std::thread::hardware_concurrency() );
+	long nThreads = static_cast<long>( std::thread::hardware_concurrency() );
 
 	// some compiler implementations return 0, in which case, use the
 	// O.S. API available
@@ -187,11 +187,11 @@ namespace base
 namespace thread
 {
 
-int
+long
 core_count( void )
 {
 	std::call_once( theInitFlag, initCount );
-	int overCnt = theOverrideCoreCount;
+	long overCnt = theOverrideCoreCount;
 	if ( overCnt >= 0 )
 		return overCnt;
 	return theCoreCount;
@@ -202,7 +202,7 @@ core_count( void )
 
 
 void
-override_core_count( int cnt )
+override_core_count( long cnt )
 {
 	theOverrideCoreCount = cnt;
 }

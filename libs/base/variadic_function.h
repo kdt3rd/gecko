@@ -92,7 +92,7 @@ callable( const std::function<R (Args...)> &f, Extractors &&... )
 
 template <typename Functor, int... I, typename... Extractors>
 inline typename function_traits<Functor>::function
-callable( Functor f, int_sequence<I...>, Extractors &&... e )
+callable( Functor f, int_sequence<I...>, Extractors &&... )
 {
 	return std::bind( f, placeholder_template<I>{}... );
 }

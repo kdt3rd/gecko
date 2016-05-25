@@ -69,7 +69,7 @@ private:
 	std::array<uint64_t, stateSize> _state;
 
 	size_t _length = 0;
-	uint8_t _remainder = 0; // data in _data
+	size_t _remainder = 0; // data in _data
 };
 
 ////////////////////////////////////////
@@ -97,14 +97,28 @@ spooky_hash &operator <<( spooky_hash &h, uint8_t v );
 spooky_hash &operator <<( spooky_hash &h, uint16_t v );
 spooky_hash &operator <<( spooky_hash &h, uint32_t v );
 spooky_hash &operator <<( spooky_hash &h, uint64_t v );
+spooky_hash &operator <<( spooky_hash &h, size_t v );
 spooky_hash &operator <<( spooky_hash &h, int8_t v );
 spooky_hash &operator <<( spooky_hash &h, int16_t v );
 spooky_hash &operator <<( spooky_hash &h, int32_t v );
 spooky_hash &operator <<( spooky_hash &h, int64_t v );
 spooky_hash &operator <<( spooky_hash &h, float v );
 spooky_hash &operator <<( spooky_hash &h, double v );
+spooky_hash &operator <<( spooky_hash &h, double v );
 spooky_hash &operator <<( spooky_hash &h, const std::string &v );
-spooky_hash &operator <<( spooky_hash &h, cstring s );
+spooky_hash &operator <<( spooky_hash &h, const cstring &s );
+inline spooky_hash &operator <<( spooky_hash &h, const char *s )
+{
+	h << cstring( s );
+	return h;
+}
+
+template <std::size_t N>
+inline spooky_hash &operator <<( spooky_hash &h, const char (&s)[N] )
+{
+	h << cstring( s, N );
+	return h;
+}
 spooky_hash &operator <<( spooky_hash &h, const spooky_hash &x );
 
 template <typename V>

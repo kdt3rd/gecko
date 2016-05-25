@@ -119,7 +119,7 @@ public:
 		return base::function_traits<Functor>::arity;
 	}
 
-	virtual any process( graph &g, const dimensions &d, const std::vector<any> &inputs ) const
+	virtual any process( graph &, const dimensions &, const std::vector<any> &inputs ) const
 	{
 		return dispatch( inputs, base::gen_sequence<base::function_traits<Functor>::arity>{} );
 	}

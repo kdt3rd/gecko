@@ -232,11 +232,11 @@ struct CPUFeatureStore
 				int count = regs[0] & 0xFF;
 				do
 				{
-					for ( int r = 0; r < 4; ++r )
+					for ( size_t r = 0; r < 4; ++r )
 					{
 						if ( (regs[r] & 0x80000000) == 0 )
 						{
-							for ( int i = ((r == 0) ? 1 : 0); i < 3; ++i )
+							for ( size_t i = ((r == 0) ? 1 : 0); i < 3; ++i )
 							{
 								uint8_t v = ( regs[r] >> (8*i) ) & 0xFF;
 								decodeCacheTLB( v, check4 );
@@ -302,8 +302,6 @@ struct CPUFeatureStore
 							}
 							break;
 
-							
-							break;
 						case 0:
 						default:
 							break;
@@ -1030,7 +1028,7 @@ cpu::simd_feature cpu::highest_simd( void )
 /// @}
 
 bool cpu::has_NEON( void ) {
-#if IS_ARM
+#if defined(IS_ARM)
 	return XXXXX;
 #else
 	return false;

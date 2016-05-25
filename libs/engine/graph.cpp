@@ -213,7 +213,7 @@ graph::clean_graph( void )
 	while ( didAdd )
 	{
 		didAdd = false;
-		for ( size_t nid = 0, N = _nodes.size(); nid != N; ++nid )
+		for ( node_id nid = 0, N = static_cast<node_id>( _nodes.size() ); nid != N; ++nid )
 		{
 			if ( toDel.find( nid ) != toDel.end() )
 				continue;
@@ -222,7 +222,7 @@ graph::clean_graph( void )
 			// cleared node
 			if ( n.op() == nullop )
 			{
-				toDel.insert( static_cast<node_id>( nid ) );
+				toDel.insert( nid );
 				didAdd = true;
 				continue;
 			}
@@ -230,7 +230,7 @@ graph::clean_graph( void )
 			auto ref = _ref_counts.find( nid );
 			if ( n.output_size() == 0 && ref == _ref_counts.end()  )
 			{
-				toDel.insert( static_cast<node_id>( nid ) );
+				toDel.insert( nid );
 				didAdd = true;
 				continue;
 			}
@@ -259,7 +259,7 @@ graph::clean_graph( void )
 	std::map<node_id, node_id> newnodemap;
 	std::vector<node> nnodes;
 	nnodes.reserve( _nodes.size() );
-	for ( size_t nid = 0, N = _nodes.size(); nid != N; ++nid )
+	for ( node_id nid = 0, N = static_cast<node_id>( _nodes.size() ); nid != N; ++nid )
 	{
 		if ( toDel.find( nid ) == toDel.end() )
 		{
@@ -273,14 +273,14 @@ graph::clean_graph( void )
 				else
 					newn.input( i ) = nn->second;
 			}
-			newnodemap[nid] = nnodes.size();
+			newnodemap[nid] = static_cast<node_id>( nnodes.size() );
 			nnodes.emplace_back( std::move( newn ) );
 		}
 	}
 
 	// now that we've added everything, update the outputs and update the hash-to-node map
 	std::map<hash::value, node_id> nh2nmap;
-	for ( size_t nid = 0, N = nnodes.size(); nid != N; ++nid )
+	for ( node_id nid = 0, N = static_cast<node_id>( nnodes.size() ); nid != N; ++nid )
 	{
 		node &n = nnodes[nid];
 		for ( size_t o = 0; o != n.output_size(); ++o )
@@ -358,7 +358,7 @@ graph::dump_dot( std::ostream &os )
 		else
 			os << 'N' << n << "\\n" << _ops[curN.op()].name();
 		os << '\"';
-		if ( _ref_counts.find( n ) != _ref_counts.end() )
+		if ( _ref_counts.find( static_cast<node_id>( n ) ) != _ref_counts.end() )
 			os << ", style=filled, fillcolor=blue";
 		else if ( curN.output_size() == 0 )
 			os << ", style=filled, fillcolor=red";
@@ -466,7 +466,7 @@ graph::optimize( void )
 		// only 1 output and no remaining references in
 		// computed_value, we can tag as an rvalue
 		if ( cur.output_size() == 1 &&
-			 _ref_counts.find( n ) == _ref_counts.end() )
+			 _ref_counts.find( static_cast<node_id>( n ) ) == _ref_counts.end() )
 			cur.set_rvalue();
 	}
 }
