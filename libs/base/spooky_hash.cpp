@@ -358,7 +358,7 @@ spooky_hash::hash128( const void *message, size_t length, const value &seed )
 	uint64_t *pBuf = buf.data();
 	uint8_t *p8buf = reinterpret_cast<uint8_t *>( pBuf );
 	memcpy( pBuf, end, remainder );
-	p8buf[blockSize-1] = remainder;
+	p8buf[blockSize-1] = static_cast<uint8_t>( remainder );
 	endMix( pBuf, h );
 	ret[0] = h[0];
 	ret[1] = h[1];

@@ -17,6 +17,11 @@
 #include <thread>
 #ifdef __linux
 #include <sys/inotify.h>
+#else
+# if defined(__APPLE__)
+#  include <sys/event.h>
+#  include <sys/time.h>
+# endif
 #endif
 
 
@@ -34,7 +39,41 @@ class posix_watcher : public base::fs_watcher
 {
 public:
 #ifdef __APPLE__
-# warning "Need to implement posix_watcher using kqueue"
+	posix_watcher( void )
+			: _notify_fd( kqueue() )
+	{
+		if ( _notify_fd == -1 )
+			throw_errno( "Unable to initialize notification watcher" );
+	}
+
+	~posix_watcher( void )
+	{
+		if ( _notify_fd != -1 )
+			::close( _notify_fd );
+	}
+
+	void registerWatch( const base::uri &path, base::fs_watch &w,
+						base::fs_event mask, bool recursive ) override
+	{
+		(void)path;
+		(void)w;
+		(void)mask;
+		(void)recursive;
+		throw_runtime( "NYI: call kevent64 to register watch on a path" );
+	}
+
+	void move( base::fs_watch &w, base::fs_watch &neww ) override
+	{
+		(void)w;
+		(void)neww;
+		throw_runtime( "NYI: call move watchers" );
+	}
+
+	void unregisterWatch( base::fs_watch &w ) override
+	{
+		(void)w;
+		throw_runtime( "NYI: remove the kevent" );
+	}
 #elif defined(__linux)
 	posix_watcher( void )
 			: _notify_fd( inotify_init1( IN_NONBLOCK|IN_CLOEXEC ) )
@@ -166,18 +205,18 @@ private:
 
 	std::thread _watch_thread;
 	std::map< int, std::tuple<base::uri, base::fs_event, base::fs_watch *> > _watches;
-	int _notify_fd;
 #endif
+	int _notify_fd;
 };
 
 std::shared_ptr<base::fs_watcher>
 getWatcher( void )
 {
 	std::unique_lock<std::mutex> lk( theWatcherMutex );
-#ifndef __APPLE__
+
 	if ( ! theWatcher )
 		theWatcher = std::make_shared<posix_watcher>();
-#endif
+
 	return theWatcher;
 }
 
