@@ -97,16 +97,19 @@ private:
 	// thousands / millions of nodes, so instead
 	// of using std::vector, we manage memory ourselves
 	hash::value _hash; // 16 bytes
-	any _value; // 16 bytes using c++14 impl
-	dimensions _dims = nulldim; // 8 bytes
+	dimensions _dims = nulldim; // 16 bytes
+	any _value; // 16 bytes using c++14 impl, 8 using base::any currently
 	node_id *_edges = nullptr; // 8 bytes
+	uint32_t _input_count = 0; // 4
 	uint32_t _output_count = 0; // 4
+
 	uint32_t _storage_count = 0; // 4
 	op_id _op_id = nullop; // 2 bytes
-	uint8_t _input_count = 0; // 1
-	uint8_t _flags = 0; // 1
-	float _exec_time = 0.F; // 4
-	// 32 bytes + 4 * edge count per node
+	// overkill for the one flag we have right now, but use uint16_t
+	// for alignment
+	uint16_t _flags = 0; // 2
+
+	// should be packed on 8-byte boundary for 64-bytes
 };
 
 ////////////////////////////////////////

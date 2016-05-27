@@ -42,28 +42,40 @@ using namespace image;
 
 plane test_refcount( void )
 {
-	plane x = create_plane( 1920, 1080, 0.F );
-	plane y = create_plane( 1920, 1080, 1.F );
-	plane z = create_plane( 1920, 1080, 2.F );
+	float v = 1.F;
+	plane x = create_plane( 1920, 1080, v );
+	std::cout << std::endl;
+	plane y = create_plane( 1920, 1080, v );
+	std::cout << std::endl;
+	plane z = create_plane( 1920, 1080, v );
+	std::cout << std::endl;
 
 	// x, y, z should be in separate graphs
-//	std::cout << "constructed x, y, z: " << x.id() << ", " << y.id() << ", " << z.id() << std::endl;
+	std::cout << std::endl;
+	std::cout << "constructed x, y, z: " << x.id() << ", " << y.id() << ", " << z.id() << std::endl;
+	std::cout << std::endl;
 
 	// and now s will copy / combine them to 1
 	plane s = x + y + z;
-//	std::cout << "sum finished: " << s.id() << std::endl;
+	std::cout << std::endl;
+	std::cout << "sum finished: " << s.id() << std::endl;
+	std::cout << std::endl;
 	s /= 3.0;
-//	std::cout << "ave finished: " << s.id() << std::endl;
+	std::cout << std::endl;
+	std::cout << "ave finished: " << s.id() << std::endl;
+	std::cout << std::endl;
 
 	// make a dangling reference in the graph
-	plane t = s + 0.1F;
+	std::cout << std::endl;
+	plane t = s + 1.F;
+	std::cout << std::endl << "function finished" << std::endl;
 
 	return s;//( x + y + z ) / 3.0;
 }
 
 int safemain( int argc, char *argv[] )
 {
-	auto avev = sum( test_refcount() );
+	auto avev = sum( test_refcount() ) / static_cast<double>( 1920 * 1080 );
 //	std::cout << "sum created: id " << avev.id() << std::endl;
 
 	// should only be one reference left at this point
@@ -89,7 +101,7 @@ int safemain( int argc, char *argv[] )
 	avev.graph_ptr()->dump_dot( gdot3 );
 	std::cout << "saved cleaned graph after process to graph3.dot" << std::endl;
 
-	std::cout << "ave: " << ave / static_cast<double>( 1920 * 1080 ) << std::endl;
+	std::cout << "ave: " << ave << std::endl;
 #if 0
 	base::cmd_line options(
 		argv[0],

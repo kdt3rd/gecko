@@ -26,7 +26,9 @@
 #include <map>
 #include <set>
 #include <deque>
+#include <stack>
 #include <base/contract.h>
+#include <base/compiler_abi.h>
 #include <iomanip>
 
 #include "registry.h"
@@ -83,7 +85,7 @@ graph::get_value( node_id n )
 	node &node = _nodes[n];
 	any &v = node.value();
 	if ( v.empty() )
-		return start_process( n, node );
+		return process( n, node );
 
 	return v;
 }
@@ -112,6 +114,12 @@ graph::copy_node( const graph &o, node_id n )
 		for ( size_t i = 0; i != nInputs; ++i )
 		{
 			node_id curIn = cur.input( i );
+			if ( curIn == nullnode )
+			{
+				inputs[i] = nullnode;
+				continue;
+			}
+
 			auto inN = nodemap.find( curIn );
 			if ( inN == nodemap.end() )
 			{
@@ -128,10 +136,8 @@ graph::copy_node( const graph &o, node_id n )
 			op_id opid = cur.op();
 			node_id nnode;
 
-			// the constant pod_registry op_ids are added in all
-			// subclasses of registry in the constructor so the op_id
-			// will be the same
-			if ( &srcReg != &registry::pod_registry() && &srcReg != &_ops )
+			// if the registries are the same, we don't have to re-look things up
+			if ( &srcReg != &_ops )
 			{
 				hash h;
 				if ( ! cur.value().empty() )
@@ -174,32 +180,41 @@ void
 graph::remove_node( node_id n )
 {
 	precondition( n < size(), "invalid node id {0}", n );
-	std::deque<node_id> toDel;
-	toDel.push_back( n );
-	while ( ! toDel.empty() )
+
+	std::deque<node_id> del;
+	while ( true )
 	{
-		node_id curDel = toDel.front();
-		toDel.pop_front();
-		node &curDelN = _nodes[curDel];
+		node &curDelN = _nodes[n];
 		const node_id *b = curDelN.begin_inputs();
 		const node_id *be = curDelN.end_inputs();
 		while ( b != be )
 		{
+			if ( *b == nullnode )
+			{
+				++b;
+				continue;
+			}
+
 			node &curIn = _nodes[*b];
 			if ( curIn.is_rvalue() )
-				toDel.push_back( *b );
+				del.push_back( *b );
 			else if ( curIn.output_size() == 1 )
 			{
 				auto rc = _ref_counts.find( *b );
 				// no more references, let's schedule it for deletion
 				if ( rc == _ref_counts.end() )
-					toDel.push_back( *b );
+					del.push_back( *b );
 			}
-
-			curIn.remove_output( curDel );
+			std::cout << "remove node " << n << " from outputs of " << *b << std::endl;
+			curIn.remove_output( n );
 			++b;
 		}
-		_nodes[curDel] = node();
+		curDelN = node();
+
+		if ( del.empty() )
+			break;
+		n = del.front();
+		del.pop_front();
 	}
 }
 
@@ -289,6 +304,7 @@ graph::clean_graph( void )
 			auto nn = newnodemap.find( oldout );
 			if ( nn == newnodemap.end() )
 			{
+				std::cout << "removing output node " << oldout << std::endl;
 				--o;
 				n.remove_output( oldout );
 			}
@@ -350,13 +366,16 @@ graph::dump_dot( std::ostream &os )
 			{
 				if ( i > 0 )
 					os << '|';
-				os << '<' << i << "> " << i;
+				if ( curN.input( i ) == nullnode )
+					os << '<' << i << "> NIL ";
+				else
+					os << '<' << i << "> " << base::demangle( _ops[curN.op()].input_type( i ) );
 			}
-			os << "}| N" << n << "\\n" << _ops[curN.op()].name()
+			os << "}| N" << n << "\\n" << _ops[curN.op()].name() << "\\n" << curN.hash_value()
 			   << '}';
 		}
 		else
-			os << 'N' << n << "\\n" << _ops[curN.op()].name();
+			os << 'N' << n << "\\n" << _ops[curN.op()].name() << "\\n" << curN.hash_value();
 		os << '\"';
 		if ( _ref_counts.find( static_cast<node_id>( n ) ) != _ref_counts.end() )
 			os << ", style=filled, fillcolor=blue";
@@ -405,52 +424,66 @@ graph::dump_refs( std::ostream &os )
 ////////////////////////////////////////
 
 const any &
-graph::start_process( node_id nid, node &n )
+graph::process( node_id nid, node &n )
 {
-	std::cout << "start_process: " << n.hash_value() << " " << _ops[n.op()].name() << std::endl;
+	std::cout << "process: " << n.hash_value() << " " << _ops[n.op()].name() << std::endl;
 	optimize();
 	apply_grouping();
 
-	return process( nid, n );
-}
+	// by construction, if a node is at node_id nid, all it's inputs
+	// appear before
+	// can we just process up to that node and not bother trying to
+	// compute which ones to process or not to process? may as well
 
-////////////////////////////////////////
+	std::vector<any> inputs;
 
-const any &
-graph::process( node_id nid, node &n )
-{
-	if ( n.value().empty() )
+	for ( node_id c = 0; c <= nid; ++c )
 	{
-//		std::cout << "  process: " << n.hash_value() << " " << _ops[n.op()].name() << std::endl;
-		std::vector<any> inputs;
-		size_t nInputs = n.input_size();
+		node &curN = _nodes[c];
+		if ( curN.op() == nullop )
+			continue;
+		if ( ! curN.value().empty() )
+			continue;
+
+		std::cout << "  computing node " << c << std::endl;
+		size_t nInputs = curN.input_size();
 		inputs.resize( nInputs );
 		for ( size_t i = 0; i != nInputs; ++i )
 		{
-			node_id inid = n.input( i );
+			node_id inid = curN.input( i );
 			node &curIn = _nodes[inid];
-			inputs[i] = process( inid, curIn );
+			inputs[i] = curIn.value();
+		}
+		std::cout << "    -> inputs assigned, calling function" << std::endl;
+
+		const op &o = _ops[curN.op()];
+		curN.value() = o.function().process( *this, curN.dims(), inputs );
+
+		std::cout << "    -> updating outputs..." << std::endl;
+		for ( size_t i = 0; i != nInputs; ++i )
+		{
+			node_id &inid = curN.input( i );
+			node &curIn = _nodes[inid];
 			if ( curIn.is_rvalue() )
 			{
-//				std::cout << "removing r-value input node " << inid << " now that we've processed it" << std::endl;
+				std::cout << "removing r-value input node " << inid << " now that we've processed it" << std::endl;
 				remove_node( inid );
 			}
 			else
 			{
-				curIn.remove_output( nid );
+				std::cout << "removing us (" << c << ") from " << inid << " now that we've processed it" << std::endl;
+				curIn.remove_output( c );
 				if ( curIn.output_size() == 0 )
 				{
-//					std::cout << "removing input node " << inid << " now that it has no more unprocessed outputs" << std::endl;
+					std::cout << "removing input node " << inid << " now that it has no more unprocessed outputs" << std::endl;
 					remove_node( inid );
 				}
 			}
+			// notify any future remove_node that
+			// we've already removed us from our input
+			inid = nullnode;
 		}
-
-		const op &o = _ops[n.op()];
-		n.value() = o.function().process( *this, n.dims(), inputs );
 	}
-//	else
-//		std::cout << "  process: " << n.hash_value() << _ops[n.op()].name() << " HAS VALUE" << std::endl;
 
 	return n.value();
 }
@@ -483,6 +516,7 @@ graph::apply_grouping( void )
 node_id
 graph::find_node( const hash::value &hv )
 {
+	std::cout << "searching for hv " << hv << std::endl;
 	auto i = _hash_to_node.find( hv );
 	if ( i != _hash_to_node.end() )
 		return i->second;
@@ -531,10 +565,13 @@ graph::add_node( op_id op, any value, const dimensions &d, std::initializer_list
 		if ( colCheck.op() != op || colCheck.input_size() != inputs.size() || colCheck.dims() != d )
 			throw_logic( "Hash collision with existing node {0} adding opname '{1}'", n, _ops[op].name() );
 
+		std::cout << "re-using existing node " << n << std::endl;
 		return n;
 	}
 	
 	n = static_cast<node_id>( _nodes.size() );
+	std::cout << "graph " << this << ": new node " << n << " op " << _ops[op].name() << ": " << hv << std::endl;
+
 	_nodes.emplace_back( node( op, d, inputs, std::move( value ), hv ) );
 	_hash_to_node[hv] = n;
 
@@ -557,10 +594,12 @@ graph::add_node( op_id op, any value, const dimensions &d, const std::vector<nod
 		if ( colCheck.op() != op || colCheck.input_size() != inputs.size() || colCheck.dims() != d )
 			throw_logic( "Hash collision with existing node {0} ({1}, {2}) adding opname '{3}' dims {4}: {5} vs {6}", n, _ops[colCheck.op()].name(), colCheck.dims(), _ops[op].name(), d, colCheck.hash_value(), hv );
 		
+		std::cout << "re-using existing node " << n << std::endl;
 		return n;
 	}
 	
 	n = static_cast<node_id>( _nodes.size() );
+	std::cout << "graph " << this << ": new node " << n << " op " << _ops[op].name() << ": " << hv << std::endl;
 	_nodes.emplace_back( node( op, d, inputs, std::move( value ), hv ) );
 	_hash_to_node[hv] = n;
 
@@ -586,7 +625,6 @@ graph::add_node( op_id op, any value, const dimensions &d, const std::vector<nod
 	}
 	hash::value hv = h.final();
 
-//	std::cout << "graph " << this << ": Adding op " << _ops[op].name() << ": " << hv << std::endl;
 	return add_node( op, std::move( value ), d, inputs, hv );
 }
 

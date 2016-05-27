@@ -25,12 +25,20 @@
 #include <base/contract.h>
 #include "plane.h"
 #include "plane_stats.h"
+#include <engine/float_ops.h>
 
 ////////////////////////////////////////
 
 namespace image
 {
 
+inline plane create_plane( int w, int h, float v )
+{
+	engine::dimensions d;
+	d.x = static_cast<uint16_t>( w );
+	d.y = static_cast<uint16_t>( h );
+	return plane( "assign_plane", d, v );
+}
 inline plane create_plane( int w, int h, const engine::computed_value<float> &v )
 {
 	engine::dimensions d;
@@ -82,13 +90,29 @@ inline plane operator+( const plane &p, float v )
 {
 	return plane( "add_planenumber", p.dims(), p, v );
 }
+inline plane operator+( const plane &p, const engine::computed_value<float> &v )
+{
+	return plane( "add_planenumber", p.dims(), p, v );
+}
 inline plane operator+( plane &&p, float v )
+{
+	return plane( "add_planenumber", p.dims(), std::move( p ), v );
+}
+inline plane operator+( plane &&p, const engine::computed_value<float> &v )
 {
 	return plane( "add_planenumber", p.dims(), std::move( p ), v );
 }
 inline plane operator+( float v, const plane &p )
 {
 	return plane( "add_planenumber", p.dims(), p, v );
+}
+inline plane operator+( const engine::computed_value<float> &v, const plane &p )
+{
+	return plane( "add_planenumber", p.dims(), p, v );
+}
+inline plane operator+( const engine::computed_value<float> &v, plane &&p )
+{
+	return plane( "add_planenumber", p.dims(), std::move( p ), v );
 }
 inline plane operator+( float v, plane &&p )
 {
@@ -106,6 +130,11 @@ inline plane &operator+=( plane &a, plane &&b )
 	return a;
 }
 inline plane &operator+=( plane &a, float b )
+{
+	a = a + b;
+	return a;
+}
+inline plane &operator+=( plane &a, const engine::computed_value<float> &b )
 {
 	a = a + b;
 	return a;
@@ -143,9 +172,17 @@ inline plane operator-( plane &&a, plane &&b )
 
 inline plane operator-( const plane &p, float v )
 {
-	return plane( "sub_planenumber", p.dims(), p, v );
+	return plane( "add_planenumber", p.dims(), p, - v );
+}
+inline plane operator-( const plane &p, const engine::computed_value<float> &v )
+{
+	return plane( "add_planenumber", p.dims(), p, - v );
 }
 inline plane operator-( plane &&p, float v )
+{
+	return plane( "add_planenumber", p.dims(), std::move( p ), - v );
+}
+inline plane operator-( plane &&p, const engine::computed_value<float> &v )
 {
 	return plane( "add_planenumber", p.dims(), std::move( p ), - v );
 }
@@ -153,7 +190,15 @@ inline plane operator-( float v, const plane &p )
 {
 	return plane( "muladd_planenumbernumber", p.dims(), p, -1.F, v );
 }
+inline plane operator-( const engine::computed_value<float> &v, const plane &p )
+{
+	return plane( "muladd_planenumbernumber", p.dims(), p, -1.F, v );
+}
 inline plane operator-( float v, plane &&p )
+{
+	return plane( "muladd_planenumbernumber", p.dims(), std::move( p ), -1.F, v );
+}
+inline plane operator-( const engine::computed_value<float> &v, plane &&p )
 {
 	return plane( "muladd_planenumbernumber", p.dims(), std::move( p ), -1.F, v );
 }
@@ -169,6 +214,11 @@ inline plane &operator-=( plane &a, plane &&b )
 	return a;
 }
 inline plane &operator-=( plane &a, float b )
+{
+	a = a - b;
+	return a;
+}
+inline plane &operator-=( plane &a, const engine::computed_value<float> &b )
 {
 	a = a - b;
 	return a;
@@ -208,7 +258,15 @@ inline plane operator*( const plane &p, float v )
 {
 	return plane( "mul_planenumber", p.dims(), p, v );
 }
+inline plane operator*( const plane &p, const engine::computed_value<float> &v )
+{
+	return plane( "mul_planenumber", p.dims(), p, v );
+}
 inline plane operator*( plane &&p, float v )
+{
+	return plane( "mul_planenumber", p.dims(), std::move( p ), v );
+}
+inline plane operator*( plane &&p, const engine::computed_value<float> &v )
 {
 	return plane( "mul_planenumber", p.dims(), std::move( p ), v );
 }
@@ -216,7 +274,15 @@ inline plane operator*( float v, const plane &p )
 {
 	return plane( "mul_planenumber", p.dims(), p, v );
 }
+inline plane operator*( const engine::computed_value<float> &v, const plane &p )
+{
+	return plane( "mul_planenumber", p.dims(), p, v );
+}
 inline plane operator*( float v, plane &&p )
+{
+	return plane( "mul_planenumber", p.dims(), std::move( p ), v );
+}
+inline plane operator*( const engine::computed_value<float> &v, plane &&p )
 {
 	return plane( "mul_planenumber", p.dims(), std::move( p ), v );
 }
@@ -232,6 +298,11 @@ inline plane &operator*=( plane &a, plane &&b )
 	return a;
 }
 inline plane &operator*=( plane &a, float b )
+{
+	a = a * b;
+	return a;
+}
+inline plane &operator*=( plane &a, const engine::computed_value<float> &b )
 {
 	a = a * b;
 	return a;
@@ -272,7 +343,15 @@ inline plane operator/( const plane &p, float v )
 {
 	return plane( "mul_planenumber", p.dims(), p, 1.F / v );
 }
+inline plane operator/( const plane &p, const engine::computed_value<float> &v )
+{
+	return plane( "mul_planenumber", p.dims(), p, 1.F / v );
+}
 inline plane operator/( plane &&p, float v )
+{
+	return plane( "mul_planenumber", p.dims(), std::move( p ), 1.F / v );
+}
+inline plane operator/( plane &&p, const engine::computed_value<float> &v )
 {
 	return plane( "mul_planenumber", p.dims(), std::move( p ), 1.F / v );
 }
@@ -280,7 +359,15 @@ inline plane operator/( float v, const plane &p )
 {
 	return plane( "div_numberplane", p.dims(), v, p );
 }
+inline plane operator/( const engine::computed_value<float> &v, const plane &p )
+{
+	return plane( "div_numberplane", p.dims(), v, p );
+}
 inline plane operator/( float v, plane &&p )
+{
+	return plane( "div_numberplane", p.dims(), v, std::move( p ) );
+}
+inline plane operator/( const engine::computed_value<float> &v, plane &&p )
 {
 	return plane( "div_numberplane", p.dims(), v, std::move( p ) );
 }
@@ -296,6 +383,11 @@ inline plane &operator/=( plane &a, plane &&b )
 	return a;
 }
 inline plane &operator/=( plane &a, float b )
+{
+	a = a / b;
+	return a;
+}
+inline plane &operator/=( plane &a, const engine::computed_value<float> &b )
 {
 	a = a / b;
 	return a;

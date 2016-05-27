@@ -114,20 +114,13 @@ registerPlaneOps( engine::registry &r )
 ////////////////////////////////////////
 
 std::once_flag initOpsFlag;
-std::unique_ptr<engine::registry> imageRegistry;
-
-void shutdown( void )
-{
-	imageRegistry.reset();
-}
 
 void initOps( void )
 {
-	imageRegistry = std::make_unique<engine::registry>();
-	std::atexit( &shutdown );
-
-	registerPlaneOps( *imageRegistry );
-	registerImageOps( *imageRegistry );
+	using namespace engine;
+	registry &r = registry::get();
+	registerPlaneOps( r );
+	registerImageOps( r );
 }
 
 }
@@ -144,7 +137,7 @@ engine::registry &
 op_registry( void )
 {
 	std::call_once( initOpsFlag, initOps );
-	return *imageRegistry;
+	return engine::registry::get();
 }
 
 ////////////////////////////////////////

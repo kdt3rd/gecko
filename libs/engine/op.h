@@ -50,14 +50,9 @@ public:
 
 	virtual const std::type_info &result_type( void ) const = 0;
 	virtual size_t input_size( void ) const = 0;
+	virtual const std::type_info &input_type( size_t I ) const = 0;
 
 	virtual any process( graph &g, const dimensions &d, const std::vector<any> &inputs ) const = 0;
-};
-
-template <typename R, typename ...Args>
-struct function_info
-{
-	static constexpr size_t arg_count = sizeof...(Args);
 };
 
 template <typename Functor, typename GroupFunc>
@@ -83,6 +78,11 @@ public:
 	virtual size_t input_size( void ) const
 	{
 		return base::function_traits<Functor>::arity - 1;
+	}
+
+	virtual const std::type_info &input_type( size_t i ) const
+	{
+		return base::function_traits<Functor>::arg_type( i + 1 );
 	}
 
 	virtual any process( graph &g, const dimensions &d, const std::vector<any> &inputs ) const
@@ -117,6 +117,11 @@ public:
 	virtual size_t input_size( void ) const
 	{
 		return base::function_traits<Functor>::arity;
+	}
+
+	virtual const std::type_info &input_type( size_t i ) const
+	{
+		return base::function_traits<Functor>::arg_type( i );
 	}
 
 	virtual any process( graph &, const dimensions &, const std::vector<any> &inputs ) const
@@ -207,6 +212,11 @@ public:
 	/// at a time, disallowing any other parallel engine tasks
 	struct solitary_t {};
 
+	/// A simple op that does computation, but no memory allocation to
+	/// optimize for, and only on (usually) pod types, so no threading
+	/// operations of this type often have nulldim dimension
+	struct simple_t {};
+
 	/// a placeholder op to store a particular value type, this has no
 	/// processing
 	struct value_t {};
@@ -223,6 +233,10 @@ public:
 	static constexpr single_threaded_t single_threaded {};
 	/// tag to specify an op is single threaded and solitary
 	static constexpr solitary_t solitary {};
+
+	/// tag to specify an op is simple (no threading, no memory allocations)
+	static constexpr simple_t simple {};
+
 	/// tag to specify an op is a value
 	static constexpr value_t value {};
 
@@ -234,6 +248,7 @@ public:
 		MULTI_THREADED,
 		SINGLE_THREADED,
 		SOLITARY,
+		SIMPLE,
 		VALUE
 	};
 
@@ -274,6 +289,13 @@ public:
 		  _style( style::SOLITARY )
 	{}
 
+	/// Construct an op that is single threaded and solitary
+	template <typename Functor>
+	op( base::cstring n, Functor f, simple_t )
+		: _name( n ), _func( new opfunc_single<Functor>( f ) ),
+		  _style( style::SIMPLE )
+	{}
+
 	/// Construct an op that is a value placeholder
 	op( base::cstring n, const std::reference_wrapper<const std::type_info> &ti, value_t );
 
@@ -289,6 +311,9 @@ public:
 	inline style processing_style( void ) const;
 
 	inline size_t input_size( void ) const;
+	const std::type_info &input_type( size_t I ) const;
+
+	inline bool can_group( const op &o ) const;
 
 	inline op_function &function( void ) const;
 
@@ -318,6 +343,24 @@ inline size_t op::input_size( void ) const
 {
 	precondition( _func, "Invalid operation function for operation {0}", _name );
 	return _func->input_size();
+}
+
+////////////////////////////////////////
+
+inline const std::type_info &op::input_type( size_t i ) const
+{
+	precondition( _func, "Invalid operation function for operation {0}", _name );
+	return _func->input_type( i );
+}
+
+////////////////////////////////////////
+
+inline bool op::can_group( const op &o ) const
+{
+	return ( processing_style() == style::ONE_TO_ONE &&
+			 ( o.processing_style() == style::ONE_TO_ONE ||
+			   o.processing_style() == style::N_TO_ONE ) &&
+			 function().result_type() == o.function().result_type() );
 }
 
 ////////////////////////////////////////

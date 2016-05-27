@@ -78,6 +78,13 @@ public:
 		set_id( _graph->add_node( opname, d, { check_or_add( *_graph, std::forward<Args>( args ) )... } ) );
 	}
 
+	template <typename... Args>
+	explicit inline computed_base( const base::cstring &opname, const dimensions &d, Args &&... args )
+	{
+		_graph = find_or_create_graph( registry::get(), std::forward<Args>( args )... );
+		set_id( _graph->add_node( opname, d, { check_or_add( *_graph, std::forward<Args>( args ) )... } ) );
+	}
+
 	inline const std::shared_ptr<graph> &graph_ptr( void ) const { return _graph; }
 	inline node_id id( void ) const { return _id; }
 	dimensions node_dims( void ) const;
@@ -115,18 +122,12 @@ protected:
 		static inline node_id process( graph &g, X &&v )
 		{
 			const std::shared_ptr<graph> &rg = v.graph_ptr();
-
 			if ( rg )
 			{
+				precondition( rg, "pending but missing graph_ptr" );
 				node_id r;
 
-				if ( &(rg->op_registry()) == &(g.op_registry()) )
-					r = g.move_node( *(rg), v.id() );
-				else if ( &(rg->op_registry()) == &(registry::pod_registry()) )
-					r = g.move_node( *(rg), v.id() );
-				else
-					throw_runtime( "mixed graphs with different registries not allowed" );
-
+				r = g.move_node( *(rg), v.id() );
 				g.tag_rvalue( r );
 				return r;
 			}
@@ -148,17 +149,9 @@ protected:
 	{
 		static inline node_id process( graph &g, const X &v )
 		{
-			const std::shared_ptr<graph> &r = v.graph_ptr();
-
-			if ( r )
-			{
-				if ( &(r->op_registry()) == &(g.op_registry()) )
-					return g.copy_node( *(r), v.id() );
-				else if ( &(r->op_registry()) == &(registry::pod_registry()) )
-					return g.copy_node( *(r), v.id() );
-				else
-					throw_runtime( "mixed graphs with different registries not allowed" );
-			}
+			const std::shared_ptr<graph> &rg = v.graph_ptr();
+			if ( rg )
+				return g.copy_node( *(rg), v.id() );
 
 			return g.add_constant( v );
 		}
@@ -218,10 +211,16 @@ public:
 	inline computed_value( void ) = default;
 
 	template <typename A>
-	inline computed_value( A &&v )
+	explicit inline computed_value( A &&v )
 	{
-		_graph = std::make_shared<graph>( registry::pod_registry() );
+		_graph = std::make_shared<graph>( registry::get() );
 		set_id( _graph->add_constant( static_cast<V>( std::forward<A>( v ) ) ) );
+	}
+
+	template <typename... Args>
+	inline computed_value( const base::cstring &opname, const dimensions &d, Args &&... args )
+		: computed_base( registry::get(), opname, d, std::forward<Args>( args )... )
+	{
 	}
 
 	template <typename... Args>
@@ -236,25 +235,34 @@ public:
 	template <typename A>
 	inline computed_value &operator=( A &&v )
 	{
-		_graph = std::make_shared<graph>( registry::pod_registry() );
-		_id = _graph->add_constant( static_cast<V>( std::forward<A>( v ) ) );
+		clear_graph();
+		_graph = std::make_shared<graph>( registry::get() );
+		set_id( _graph->add_constant( static_cast<V>( std::forward<A>( v ) ) ) );
 		return *this;
 	}
 
 	inline computed_value &operator=( const computed_value &v ) = default;
 	inline computed_value &operator=( computed_value &&v ) = default;
 
-	inline operator V( void ) const
+	explicit inline operator V( void ) const
 	{
 		if ( _graph )
-		{
 			return engine::any_cast<V>( _graph->get_value( _id ) );
-		}
 
 		throw_runtime( "Attempt to evaluate uninitialized computed_value" );
 	}
 
 };
+
+template <typename X>
+inline hash &operator<<( hash &h, const computed_value<X> &v )
+{
+	if ( v.graph_ptr() )
+		h << (*(v.graph_ptr()))[v.id()].hash_value();
+	else
+		throw_runtime( "Attempt to evaluate uninitialized computed_value" );
+	return h;
+}
 
 } // namespace engine
 

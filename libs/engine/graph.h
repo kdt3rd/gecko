@@ -122,7 +122,6 @@ private:
 	graph &operator=( const graph & ) = delete;
 	graph &operator=( graph && ) = delete;
 
-	const any &start_process( node_id nid, node &n );
 	const any &process( node_id nid, node &n );
 	void optimize( void );
 	void apply_grouping( void );

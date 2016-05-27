@@ -23,6 +23,7 @@
 #include "registry.h"
 #include <base/contract.h>
 #include <limits>
+#include "float_ops.h"
 
 ////////////////////////////////////////
 
@@ -44,6 +45,7 @@ registry::registry( void )
 	register_constant<int32_t>();
 	register_constant<int64_t>();
 	register_constant<std::string>();
+	register_float_ops( *this );
 }
 
 ////////////////////////////////////////
@@ -79,8 +81,10 @@ registry::find_constant( const std::type_info &ti ) const
 op_id
 registry::add( const op &o )
 {
+	precondition( (_ops.size() + 1) < static_cast<size_t>( std::numeric_limits<op_id>::max() ), "Too many operations registered for size of op_id" );
+
 	op_id r = static_cast<op_id>( _ops.size() );
-	precondition( (_ops.size() + 1) < std::numeric_limits<op_id>::max(), "Too many operations registered for size of op_id" );
+
 	if ( _name_to_op.find( o.name() ) != _name_to_op.end() )
 		throw_logic( "Operation by the name of {0} already registered", o.name() );
 
@@ -94,8 +98,9 @@ registry::add( const op &o )
 op_id
 registry::add( op &&o )
 {
+	precondition( (_ops.size() + 1) < static_cast<size_t>( std::numeric_limits<op_id>::max() ), "Too many operations registered for size of op_id" );
+
 	op_id r = static_cast<op_id>( _ops.size() );
-	precondition( (_ops.size() + 1) < std::numeric_limits<op_id>::max(), "Too many operations registered for size of op_id" );
 	if ( _name_to_op.find( o.name() ) != _name_to_op.end() )
 		throw_logic( "Operation by the name of {0} already registered", o.name() );
 
@@ -106,10 +111,10 @@ registry::add( op &&o )
 
 ////////////////////////////////////////
 
-const registry &registry::pod_registry( void )
+registry &registry::get( void )
 {
-	static registry pods;
-	return pods;
+	static registry base;
+	return base;
 }
 
 ////////////////////////////////////////

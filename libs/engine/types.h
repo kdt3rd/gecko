@@ -56,9 +56,12 @@ T any_cast( any &a )
 ///
 /// storing 4 values so that there can be constructs such as a list of
 /// images represented - x width, y height, z planes, w images
+///
+/// TODO: we use an int32_t - is this enough for audio applications?
+/// more than enough for imaging given the multiple dimensions
 struct dimensions
 {
-	typedef uint16_t value_type;
+	typedef int32_t value_type;
 	value_type x = 0, y = 0, z = 0, w = 0;
 };
 constexpr dimensions nulldim = { 0, 0, 0, 0 };
@@ -79,7 +82,7 @@ std::ostream &operator<<( std::ostream &os, const dimensions &d );
 
 /// @brief storage type for storing an operator id
 ///
-/// 65536 operations sounds like plenty...
+/// 65536 operations should be plenty, right?
 typedef uint16_t op_id;
 constexpr op_id nullop = op_id(-1);
 

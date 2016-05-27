@@ -52,9 +52,14 @@ public:
 	inline const op &get( op_id i ) const;
 	inline const op &operator[]( op_id i ) const;
 
-	/// registry for "pod" types + std::string,
+	/// global registry that is used by default for operators and in
+	/// scenarios where it is inconvenient to pass a registry around
 	/// for use with computed_value
-	static const registry &pod_registry( void );
+	///
+	/// this singleton does not have to be used, graph and others can
+	/// take a custom registry
+	static registry &get( void );
+
 private:
 	std::vector<op> _ops;
 	std::map<std::string, op_id> _name_to_op;

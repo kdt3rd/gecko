@@ -46,73 +46,108 @@ inline scanline scan_ref( const plane &p, int y )
 	return scanline( p.line( y ), p.width(), p.stride() );
 }
 
-template <typename T>
-struct scanline_type_convert
-{
-	typedef T type;
-};
+////////////////////////////////////////
 
-template <>
-struct scanline_type_convert<scanline>
-{
-	typedef plane type;
-};
+#if 0
 
-template <>
-struct scanline_type_convert<scanline &>
+add_node()
 {
-	typedef plane &type;
-};
 
-template <>
-struct scanline_type_convert<const scanline &>
+	// if a node has a reference, it's a terminal no matter what
+// if node == n_to_one
+//   start subgroup
+// else if node == one_to_one
+//   if input member of subgroup
+//     add to subgroup
+//   if another input member of different subgroup
+//     merge subgroups
+//   else
+//     start subgroup
+
+	// subgroup has (all) inputs
+	// subgroup has N outputs (????), at least given rules above
+}
+
+process_node()
 {
-	typedef const plane &type;
-};
-
-template <typename> struct scanline_process {};
-
-template <typename... Args>
-struct scanline_process<void (*)( scanline &, Args... )>
-{
-	typedef typename std::function<plane(typename scanline_type_convert<Args>::type...)> function;
-};
-
-template <typename ScanArg, typename Input>
-struct scan_convert
-{
-	static inline ScanArg extract( int , Input && v )
+	if ( node.in_subgroup() )
 	{
-		return std::forward<Input>( v );
+//		sub group
+		// how to make sure all inputs are computed prior to this?
+		//    ->
+		// rotate first subgroup item to after last input (or when
+		// copying / merging / adding, insert the input prior to the
+		// first subgroup item)
+
+		// how to compute this iteratively and not recursively
+		// 
+		// with a single output, possible to do the same thing for
+		// subgroup we assume for nodes, where you just process in
+		// order, and have to track a set of scanlines
+
+		// recursive would look something like:
+		for ( size_t i = 0; i < subgroup.outputs(); ++i )
+		{
+			plane p( w, h );
+			for ( int y = 0; y < h; ++y )
+			{
+				scanline dest = scan_ref( p, y );
+				function( dest, arg1, arg2, arg3... );
+			}
+		}
+
+		// iterative might be something like
+		scanline_group sg( w );
+		for ( size_t i = 0; i < subgroup.size(); ++i )
+		{
+			scanline dest = sg.checkout();
+			node &cur = subgroup[i];
+			cur.function( dest, arg1, arg2, arg3... );
+			for ( o: cur.outputs() )
+				o.set_input( i, dest );
+			o.clean_inputs();
+		}
+	}
+}
+
+struct group_process
+{
+	std::set<node_id> _members;
+	node_id _last;
+	graph &_graph;
+};
+
+struct scanline_group_process
+{
+	template <size_t I>
+	static inline typename scanline_arg_extractor<typename base::function_traits<function>::template get_arg_type<I+1>::type>::type
+	extract( std::deque<scanline> &pool, int y, const std::vector<engine::any> &in )
+	{
+		typedef typename base::function_traits<function>::template get_arg_type<I+1>::type arg_type;
+		typedef scanline_arg_extractor<arg_type> extractor_type;
+//		if ( y == 0 )
+//			std::cout << "   extract arg " << I << " type " << typeid(arg_type).name() << " result type " << typeid(typename extractor_type::type).name() << " (" << typeid(extractor_type).name() << ")" << std::endl;
+
+		return extractor_type::get( pool, y, in[I] );
+	}
+
+	inline plane operator()( const engine::dimensions &d, input_graph &i )
+	{
+		plane ret( static_cast<int>( d.x ), static_cast<int>( d.y ) );
+
+		std::deque<scanline> scanPool;
+		for ( int y = start; y < end; ++y )
+		{
+			scanline dest = scan_ref( ret, y );
+			scanPool.push_back( dest );
+			scanFunc( dest, extract<S>( scanPool, y, in )... );
+		}
+		
 	}
 };
+#endif
 
-template <>
-struct scan_convert<scanline &, plane &>
-{
-	static inline scanline extract( int y, plane &v )
-	{
-		return scan_ref( v, y );
-	}
-};
-
-template <>
-struct scan_convert<scanline &, const plane &>
-{
-	static inline scanline extract( int y, const plane &v )
-	{
-		return scan_dup( v, y );
-	}
-};
-
-template <>
-struct scan_convert<const scanline &, const plane &>
-{
-	static inline scanline extract( int y, const plane &v )
-	{
-		return scan_ref( v, y );
-	}
-};
+////////////////////////////////////////
 
 template <typename T>
 struct scanline_arg_extractor
@@ -157,6 +192,8 @@ struct scanline_arg_extractor<scanline &>
 	}
 };
 
+////////////////////////////////////////
+
 template <typename... Args>
 struct scanline_plane_operator
 {
@@ -176,13 +213,13 @@ struct scanline_plane_operator
 		return ret;
 	}
 
+private:
 	static inline void dispatch_scans( plane &ret, int start, int end, const function &scanFunc, const std::vector<engine::any> &in )
 	{
 //		std::cout << "  scanline process dispatching " << start << " - " << end << ", " << in.size() << " inputs" << std::endl;
 		process_dispatch( ret, start, end, scanFunc, in, base::gen_sequence<sizeof...(Args)>{} );
 	}
 
-private:
 	template <size_t I>
 	static inline typename scanline_arg_extractor<typename base::function_traits<function>::template get_arg_type<I+1>::type>::type
 	extract( int y, const std::vector<engine::any> &in )

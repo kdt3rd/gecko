@@ -38,6 +38,11 @@ public:
 	virtual const std::type_info &result_type( void ) const;
 
 	virtual size_t input_size( void ) const;
+	virtual const std::type_info &input_type( size_t ) const
+	{
+		return typeid(void);
+	}
+
 
 	virtual any process( graph &, const dimensions &, const std::vector<any> & ) const;
 private:

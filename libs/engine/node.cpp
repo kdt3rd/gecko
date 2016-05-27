@@ -38,8 +38,7 @@ node::node( void )
 ////////////////////////////////////////
 
 node::node( op_id o, const dimensions &d, std::initializer_list<node_id> inputs, any val, hash::value hv )
-	: _hash( std::move( hv ) ), _value( std::move( val ) ),
-	  _dims( d ), _op_id( o )
+	: _hash( std::move( hv ) ), _dims( d ), _value( std::move( val ) ), _op_id( o )
 {
 	resize_edges( static_cast<uint32_t>( inputs.size() ), 0 );
 	std::copy( inputs.begin(), inputs.end(), _edges );
@@ -48,8 +47,7 @@ node::node( op_id o, const dimensions &d, std::initializer_list<node_id> inputs,
 ////////////////////////////////////////
 
 node::node( op_id o, const dimensions &d, const std::vector<node_id> &inputs, any val, hash::value hv )
-	: _hash( std::move( hv ) ), _value( std::move( val ) ),
-	  _dims( d ), _op_id( o )
+	: _hash( std::move( hv ) ), _dims( d ), _value( std::move( val ) ), _op_id( o )
 {
 	resize_edges( static_cast<uint32_t>( inputs.size() ), 0 );
 	std::copy( inputs.begin(), inputs.end(), _edges );
@@ -59,14 +57,13 @@ node::node( op_id o, const dimensions &d, const std::vector<node_id> &inputs, an
 
 node::node( const node &n )
 	: _hash( n._hash ),
-	  _value( n._value ),
 	  _dims( n._dims ),
+	  _value( n._value ),
+	  _input_count( n._input_count ),
 	  _output_count( n._output_count ),
 	  _storage_count( n._storage_count ),
 	  _op_id( n._op_id ),
-	  _input_count( n._input_count ),
-	  _flags( n._flags ),
-	  _exec_time( n._exec_time )
+	  _flags( n._flags )
 {
 	if ( n._edges )
 	{
@@ -82,8 +79,8 @@ node &node::operator=( const node &n )
 	if ( this != &n )
 	{
 		_hash = n._hash;
-		_value = n._value;
 		_dims = n._dims;
+		_value = n._value;
 		_op_id = n._op_id;
 		resize_edges( n._input_count, n._output_count );
 		std::copy( n._edges, n._edges + _input_count + _output_count, _edges );
@@ -95,14 +92,14 @@ node &node::operator=( const node &n )
 
 node::node( node &&n ) noexcept
 	: _hash( std::move( n._hash ) ),
+	_dims( n._dims ),
 	_value( std::move( n._value ) ),
-	_dims( n._dims ), _edges( n._edges ),
+	_edges( n._edges ),
+	_input_count( n._input_count ),
 	_output_count( n._output_count ),
 	_storage_count( n._storage_count ),
 	_op_id( n._op_id ),
-	_input_count( n._input_count ),
-	_flags( n._flags ),
-	_exec_time( n._exec_time )
+	_flags( n._flags )
 {
 	n._edges = nullptr;
 	n._storage_count = 0;
@@ -113,15 +110,14 @@ node::node( node &&n ) noexcept
 node &node::operator=( node &&n ) noexcept
 {
 	std::swap( _hash, n._hash );
-	_value = std::move( n._value );
 	std::swap( _dims, n._dims );
+	_value = std::move( n._value );
 	std::swap( _edges, n._edges );
+	std::swap( _input_count, n._input_count );
 	std::swap( _output_count, n._output_count );
 	std::swap( _storage_count, n._storage_count );
 	std::swap( _op_id, n._op_id );
-	std::swap( _input_count, n._input_count );
 	std::swap( _flags, n._flags );
-	std::swap( _exec_time, n._exec_time );
 
 	return *this;
 }
@@ -159,6 +155,7 @@ node::remove_output( node_id o )
 				break;
 			++outs;
 		}
+		std::cout << this << ": searching for node " << o << " found index " << (outs-beginOuts) << std::endl;
 		postcondition( outs != endOuts, "node id {0} not an output of this node", o );
 		std::rotate( outs, outs + 1, endOuts );
 		--_output_count;
@@ -179,11 +176,11 @@ node::resize_edges( uint32_t num_in, uint32_t num_out )
 	if ( s > _storage_count )
 	{
 		// make sure we have room for at least 1 output
-		s = static_cast<uint32_t>( num_in ) + std::max( num_out * 2, uint32_t(1) );
+		s = num_in + std::max( num_out * 2, uint32_t(1) );
 		node_id *nEdges = new node_id[s];
 		if ( _edges )
 		{
-			std::copy( _edges, _edges + std::min(num_in, static_cast<uint32_t>(_input_count)), nEdges );
+			std::copy( _edges, _edges + std::min(num_in, _input_count), nEdges );
 			std::copy( _edges + _input_count, _edges + _input_count + std::min( _output_count, num_out ), nEdges + num_in );
 			delete [] _edges;
 		}
@@ -197,7 +194,7 @@ node::resize_edges( uint32_t num_in, uint32_t num_out )
 		_storage_count = 0;
 	}
 
-	_input_count = static_cast<uint8_t>( num_in );
+	_input_count = num_in;
 	_output_count = num_out;
 }
 
