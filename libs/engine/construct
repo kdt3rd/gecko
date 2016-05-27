@@ -6,5 +6,6 @@ lib = library "engine"
 	"registry.cpp";
 	"op.cpp";
 	"computed_value.cpp";
+	"float_ops.cpp";
   }
   libs{ "base" }
