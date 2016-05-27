@@ -8,6 +8,7 @@
 #include <cassert>
 #include <memory>
 #include "contract.h"
+#include "compiler_abi.h"
 
 namespace base
 {
@@ -95,7 +96,7 @@ public:
 	    typedef decay<U> T;
 	    auto d = dynamic_cast<derived<T>*>( _ptr.get() );
 	    if ( !d )
-	        throw_bad_any_cast( "bad any_cast: request type {0} but ptr is type {1}", typeid(U).name(), typeid(_ptr).name() );
+	        throw_bad_any_cast( "bad any_cast: request type {0} but ptr is type {1}", demangle( typeid(U) ), demangle( typeid(_ptr.get()) ) );
 
 	    return d->_value;
 	}
@@ -107,7 +108,7 @@ public:
 	    typedef decay<U> T;
 	    auto d = dynamic_cast<derived<T>*>( _ptr.get() );
 	    if ( !d )
-	        throw_bad_any_cast( "bad any_cast: request type {0} but ptr is type {1}", typeid(U).name(), typeid(_ptr).name() );
+	        throw_bad_any_cast( "bad any_cast: request type {0} but ptr is type {1}", demangle( typeid(U) ), demangle( typeid(_ptr) ) );
 
 		return d->_value;
 	}

@@ -4,6 +4,7 @@ lib = library "base"
 	"any.cpp",
 	"env.cpp",
 	"format.cpp",
+	"compiler_abi.cpp",
 	"contract.cpp",
 	"cpu_features.cpp",
 	"rect.cpp",
