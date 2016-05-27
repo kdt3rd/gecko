@@ -93,17 +93,17 @@ spooky_hash::hash32( const void *message, size_t length, uint32_t seed )
 ////////////////////////////////////////
 
 spooky_hash &operator <<( spooky_hash &h, bool v );
-spooky_hash &operator <<( spooky_hash &h, uint8_t v );
-spooky_hash &operator <<( spooky_hash &h, uint16_t v );
-spooky_hash &operator <<( spooky_hash &h, uint32_t v );
-spooky_hash &operator <<( spooky_hash &h, uint64_t v );
-spooky_hash &operator <<( spooky_hash &h, size_t v );
-spooky_hash &operator <<( spooky_hash &h, int8_t v );
-spooky_hash &operator <<( spooky_hash &h, int16_t v );
-spooky_hash &operator <<( spooky_hash &h, int32_t v );
-spooky_hash &operator <<( spooky_hash &h, int64_t v );
+spooky_hash &operator <<( spooky_hash &h, unsigned char v );
+spooky_hash &operator <<( spooky_hash &h, unsigned short v );
+spooky_hash &operator <<( spooky_hash &h, unsigned int v );
+spooky_hash &operator <<( spooky_hash &h, unsigned long v );
+spooky_hash &operator <<( spooky_hash &h, unsigned long long v );
+spooky_hash &operator <<( spooky_hash &h, signed char v );
+spooky_hash &operator <<( spooky_hash &h, short v );
+spooky_hash &operator <<( spooky_hash &h, int v );
+spooky_hash &operator <<( spooky_hash &h, long v );
+spooky_hash &operator <<( spooky_hash &h, long long v );
 spooky_hash &operator <<( spooky_hash &h, float v );
-spooky_hash &operator <<( spooky_hash &h, double v );
 spooky_hash &operator <<( spooky_hash &h, double v );
 spooky_hash &operator <<( spooky_hash &h, const std::string &v );
 spooky_hash &operator <<( spooky_hash &h, const cstring &s );

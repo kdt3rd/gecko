@@ -152,29 +152,29 @@ short_msg( const void *message, size_t length, base::spooky_hash::value &hash )
 	const uint32_t *p32 = reinterpret_cast<const uint32_t *>( p64 );
 	switch ( remainder )
 	{
-		case 15: d += static_cast<uint64_t>( p8[14] ) << 48; [[clang::fallthrough]];
-		case 14: d += static_cast<uint64_t>( p8[13] ) << 40; [[clang::fallthrough]];
-		case 13: d += static_cast<uint64_t>( p8[12] ) << 32; [[clang::fallthrough]];
+		case 15: d += static_cast<uint64_t>( p8[14] ) << 48; [[fallthrough]]
+		case 14: d += static_cast<uint64_t>( p8[13] ) << 40; [[fallthrough]]
+		case 13: d += static_cast<uint64_t>( p8[12] ) << 32; [[fallthrough]]
 		case 12:
 			d += static_cast<uint64_t>( p32[2] );
 			c += p64[0];
 			break;
-		case 11: d += static_cast<uint64_t>( p8[10] ) << 16; [[clang::fallthrough]];
-		case 10: d += static_cast<uint64_t>( p8[9] ) << 8; [[clang::fallthrough]];
-		case 9: d += static_cast<uint64_t>( p8[8] ); [[clang::fallthrough]];
+		case 11: d += static_cast<uint64_t>( p8[10] ) << 16; [[fallthrough]]
+		case 10: d += static_cast<uint64_t>( p8[9] ) << 8; [[fallthrough]]
+		case 9: d += static_cast<uint64_t>( p8[8] ); [[fallthrough]]
 		case 8:
 			c += p64[0];
 			break;
 
-		case 7: c += static_cast<uint64_t>( p8[6] ) << 48; [[clang::fallthrough]];
-		case 6: c += static_cast<uint64_t>( p8[5] ) << 40; [[clang::fallthrough]];
-		case 5: c += static_cast<uint64_t>( p8[4] ) << 32; [[clang::fallthrough]];
+		case 7: c += static_cast<uint64_t>( p8[6] ) << 48; [[fallthrough]]
+		case 6: c += static_cast<uint64_t>( p8[5] ) << 40; [[fallthrough]]
+		case 5: c += static_cast<uint64_t>( p8[4] ) << 32; [[fallthrough]]
 		case 4:
 			c += p32[0];
 			break;
 
-		case 3: c += static_cast<uint64_t>( p8[2] ) << 16; [[clang::fallthrough]];
-		case 2: c += static_cast<uint64_t>( p8[1] ) << 8; [[clang::fallthrough]];
+		case 3: c += static_cast<uint64_t>( p8[2] ) << 16; [[fallthrough]]
+		case 2: c += static_cast<uint64_t>( p8[1] ) << 8; [[fallthrough]]
 		case 1:
 			c += static_cast<uint64_t>( p8[0] );
 			break;
@@ -196,6 +196,8 @@ namespace base
 
 spooky_hash::spooky_hash( void )
 {
+	_state[0] = 0;
+	_state[1] = 0;
 }
 
 ////////////////////////////////////////
@@ -374,55 +376,61 @@ spooky_hash &operator <<( spooky_hash &h, bool v )
 	return h;
 }
 
-spooky_hash &operator <<( spooky_hash &h, uint8_t v )
+spooky_hash &operator <<( spooky_hash &h, unsigned char v )
 {
 	h.add( &v, sizeof(v) );
 	return h;
 }
 
-spooky_hash &operator <<( spooky_hash &h, uint16_t v )
+spooky_hash &operator <<( spooky_hash &h, unsigned short v )
 {
 	h.add( &v, sizeof(v) );
 	return h;
 }
 
-spooky_hash &operator <<( spooky_hash &h, uint32_t v )
+spooky_hash &operator <<( spooky_hash &h, unsigned int v )
 {
 	h.add( &v, sizeof(v) );
 	return h;
 }
 
-spooky_hash &operator <<( spooky_hash &h, uint64_t v )
+spooky_hash &operator <<( spooky_hash &h, unsigned long v )
 {
 	h.add( &v, sizeof(v) );
 	return h;
 }
 
-spooky_hash &operator <<( spooky_hash &h, size_t v )
+spooky_hash &operator <<( spooky_hash &h, unsigned long long v )
 {
 	h.add( &v, sizeof(v) );
 	return h;
 }
 
-spooky_hash &operator <<( spooky_hash &h, int8_t v )
+spooky_hash &operator <<( spooky_hash &h, signed char v )
 {
 	h.add( &v, sizeof(v) );
 	return h;
 }
 
-spooky_hash &operator <<( spooky_hash &h, int16_t v )
+spooky_hash &operator <<( spooky_hash &h, short v )
 {
 	h.add( &v, sizeof(v) );
 	return h;
 }
 
-spooky_hash &operator <<( spooky_hash &h, int32_t v )
+spooky_hash &operator <<( spooky_hash &h, int v )
 {
 	h.add( &v, sizeof(v) );
 	return h;
 }
 
-spooky_hash &operator <<( spooky_hash &h, int64_t v )
+spooky_hash &operator <<( spooky_hash &h, long v )
+{
+	h.add( &v, sizeof(v) );
+	return h;
+}
+
+spooky_hash &operator <<( spooky_hash &h, long long v )
 {
 	h.add( &v, sizeof(v) );
 	return h;
@@ -472,7 +480,7 @@ operator<<( std::ostream &os, const spooky_hash &h )
 std::ostream &
 operator<<( std::ostream &os, const spooky_hash::value &v )
 {
-	os << '{' << std::hex << std::setw(16) << std::setfill( '0' ) << v[0] << std::setw(16) << std::setfill( '0' ) << v[1] << std::dec << '}';
+	os << std::hex << std::setw(16) << std::setfill( '0' ) << v[0] << std::setw(16) << std::setfill( '0' ) << v[1] << std::dec;
 	return os;
 }
 
