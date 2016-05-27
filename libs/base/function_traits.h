@@ -33,6 +33,24 @@
 namespace base
 {
 
+template <typename... Args, size_t ...S>
+inline const std::type_info &
+extract_arg_type( size_t i, sequence<S...> )
+{
+	struct tref
+	{
+		constexpr inline tref( const std::type_info &r ) : _r(r) {}
+		constexpr inline operator const std::type_info &( void ) const { return _r; }
+	private:
+		const std::type_info &_r;
+	};
+	static constexpr tref type_table[] = {
+		typeid( typename base::nth_variadic<S, Args...>::type )...
+	};
+
+	return type_table[i];
+}
+
 template <typename R, typename... Args>
 struct base_traits
 {
@@ -44,6 +62,11 @@ struct base_traits
 	using get_arg_type = base::nth_variadic<N, Args...>;
 
 	typedef std::function<R ( Args... )> function;
+
+	static inline const std::type_info &arg_type( size_t i )
+	{
+		return extract_arg_type<Args...>( i, gen_sequence<sizeof...(Args)>{} );
+	}
 };
 
 template <typename... Args>
@@ -56,6 +79,11 @@ struct base_traits<void, Args...>
 	using get_arg_type = base::nth_variadic<N, Args...>;
 
 	typedef std::function<void ( Args... )> function;
+
+	static inline const std::type_info &arg_type( size_t i )
+	{
+		return extract_arg_type<Args...>( i, gen_sequence<sizeof...(Args)>{} );
+	}
 };
 
 /// @defgroup Define some traits about the provided functor
