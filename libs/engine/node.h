@@ -23,7 +23,7 @@
 #pragma once
 
 #include <vector>
-
+#include <base/contract.h>
 #include "types.h"
 
 ////////////////////////////////////////
@@ -58,8 +58,32 @@ public:
 	/// relative output dimensions for this node
 	inline const dimensions &dims( void ) const;
 
+	/// flag indicating that the node is an r-value
+	/// meaning no references and only one output
 	inline bool is_rvalue( void ) const;
+	/// set the reference flag
 	inline void set_rvalue( void );
+	/// clear the reference flag
+	inline void clear_rvalue( void );
+	/// flag indicating that the node has at least one reference to it
+
+	inline bool has_ref( void ) const;
+	/// set the reference flag
+	inline void set_ref( void );
+	/// clear the reference flag
+	inline void clear_ref( void );
+
+	/// test whether a user flag is set
+	/// (flag the node doesn't know about)
+	/// valid values are 0 - 7
+	inline bool is_user_flag_set( int f );
+	/// set a flag the node doesn't know about
+	/// valid values are 0 - 7
+	inline void set_user_flag( int f );
+	/// clear a flag the node doesn't know about
+	/// valid values are 0 - 7
+	inline void clear_user_flag( int f );
+
 
 	/// number of input nodes (nodes who have this node as an output,
 	/// and the ordering of such)
@@ -86,12 +110,26 @@ public:
 
 
 private:
+	static constexpr int flag_rvalue = 0;
+	static constexpr int flag_hasref = 1;
+
+	inline bool is_set( int f ) const
+	{
+		return ( _flags & (1 << f) ) != 0;
+	}
+	inline void set_flag( int f )
+	{
+		_flags |= (1 << f);
+	}
+	inline void clear_flag( int f )
+	{
+		_flags &= ~(1 << f);
+	}
 	void resize_edges( uint32_t num_in, uint32_t num_out );
 
 	// hmmm, is this any different than a node with only one output?
 	// although with a dag of all rvalues, it's obvious that it can
 	// trivially collapse into another dag and not share
-	static constexpr int flag_rvalue = 0;
 
 	// trying to be as compact as possible for storing hundreds of
 	// thousands / millions of nodes, so instead
@@ -130,16 +168,67 @@ inline const dimensions &node::dims( void ) const
 
 inline bool node::is_rvalue( void ) const
 {
-	return ( _flags & (1 << flag_rvalue) ) != 0;
+	return is_set( flag_rvalue );
 }
 
 ////////////////////////////////////////
 
 inline void node::set_rvalue( void )
 {
-	_flags |= (1 << flag_rvalue);
+	set_flag( flag_rvalue );
 }
 
+////////////////////////////////////////
+
+inline void node::clear_rvalue( void )
+{
+	clear_flag( flag_rvalue );
+}
+
+////////////////////////////////////////
+
+inline bool node::has_ref( void ) const
+{
+	return is_set( flag_hasref );
+}
+
+////////////////////////////////////////
+
+inline void node::set_ref( void )
+{
+	set_flag( flag_hasref );
+}
+
+////////////////////////////////////////
+
+inline void node::clear_ref( void )
+{
+	clear_flag( flag_hasref );
+}
+
+////////////////////////////////////////
+
+inline bool node::is_user_flag_set( int f )
+{
+	precondition( f >= 0 && f < 7, "invalid flag" );
+	return is_set( f + 8 );
+}
+
+////////////////////////////////////////
+
+inline void node::set_user_flag( int f )
+{
+	precondition( f >= 0 && f < 7, "invalid flag" );
+	set_flag( f + 8 );
+}
+
+////////////////////////////////////////
+
+inline void node::clear_user_flag( int f )
+{
+	precondition( f >= 0 && f < 7, "invalid flag" );
+	clear_flag( f + 8 );
+}
 
 ////////////////////////////////////////
 

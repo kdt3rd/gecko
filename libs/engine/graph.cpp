@@ -198,12 +198,10 @@ graph::remove_node( node_id n )
 			node &curIn = _nodes[*b];
 			if ( curIn.is_rvalue() )
 				del.push_back( *b );
-			else if ( curIn.output_size() == 1 )
+			else if ( curIn.output_size() == 1 && ! curIn.has_ref() )
 			{
-				auto rc = _ref_counts.find( *b );
-				// no more references, let's schedule it for deletion
-				if ( rc == _ref_counts.end() )
-					del.push_back( *b );
+				// no references, let's schedule it for deletion
+				del.push_back( *b );
 			}
 			std::cout << "remove node " << n << " from outputs of " << *b << std::endl;
 			curIn.remove_output( n );
@@ -241,17 +239,18 @@ graph::clean_graph( void )
 				didAdd = true;
 				continue;
 			}
+
+			// if there's a reference, skip
+			if ( n.has_ref() )
+				continue;
+
 			// dangling output
-			auto ref = _ref_counts.find( nid );
-			if ( n.output_size() == 0 && ref == _ref_counts.end()  )
+			if ( n.output_size() == 0 )
 			{
 				toDel.insert( nid );
 				didAdd = true;
 				continue;
 			}
-
-			if ( ref != _ref_counts.end() )
-				continue;
 
 			size_t validOuts = 0;
 			for ( size_t o = 0, nO = n.output_size(); o != nO; ++o )
@@ -377,7 +376,7 @@ graph::dump_dot( std::ostream &os )
 		else
 			os << 'N' << n << "\\n" << _ops[curN.op()].name() << "\\n" << curN.hash_value();
 		os << '\"';
-		if ( _ref_counts.find( static_cast<node_id>( n ) ) != _ref_counts.end() )
+		if ( curN.has_ref() )
 			os << ", style=filled, fillcolor=blue";
 		else if ( curN.output_size() == 0 )
 			os << ", style=filled, fillcolor=red";
@@ -498,8 +497,7 @@ graph::optimize( void )
 		node &cur = _nodes[n];
 		// only 1 output and no remaining references in
 		// computed_value, we can tag as an rvalue
-		if ( cur.output_size() == 1 &&
-			 _ref_counts.find( static_cast<node_id>( n ) ) == _ref_counts.end() )
+		if ( cur.output_size() == 1 && ! cur.has_ref() )
 			cur.set_rvalue();
 	}
 }
@@ -633,11 +631,16 @@ graph::add_node( op_id op, any value, const dimensions &d, const std::vector<nod
 void
 graph::reference( node_id n, rewrite_notify notify, void *ud )
 {
+	precondition( n < _nodes.size(), "Invalid node for reference" );
+
 	auto ri = _ref_counts.find( n );
 	if ( ri != _ref_counts.end() )
 		ri->second.emplace_back( notify, ud );
 	else
+	{
 		_ref_counts[n].emplace_back( notify, ud );
+		_nodes[n].set_ref();
+	}
 }
 
 ////////////////////////////////////////
@@ -645,6 +648,8 @@ graph::reference( node_id n, rewrite_notify notify, void *ud )
 void
 graph::unreference( node_id n, rewrite_notify notify, void *ud ) noexcept
 {
+	precondition( n < _nodes.size(), "Invalid node for reference" );
+
 	auto ri = _ref_counts.find( n );
 	if ( ri != _ref_counts.end() )
 	{
@@ -658,7 +663,10 @@ graph::unreference( node_id n, rewrite_notify notify, void *ud ) noexcept
 			}
 		}
 		if ( l.empty() )
+		{
 			_ref_counts.erase( ri );
+			_nodes[n].clear_ref();
+		}
 	}
 }
 
