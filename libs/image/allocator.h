@@ -36,6 +36,8 @@ namespace image
 
 /// @brief allocator provides a means to track memory usage
 ///
+/// TODO: Add a cached_ptr type instead of using std::shared_ptr to
+/// abstract when something is cached out of main RAM?
 class allocator
 {
 public:

@@ -86,6 +86,7 @@ allocator::set_skippiness( size_t s )
 std::shared_ptr<void>
 allocator::allocate( size_t bytes, size_t align )
 {
+	precondition( bytes != 0, "attempt to create empty buffer with 0 bytes" );
 	void *p = nullptr;
 
 	std::unique_lock<std::mutex> lk( _mutex );
@@ -140,6 +141,7 @@ allocator::allocate( size_t bytes, size_t align )
 std::shared_ptr<float>
 allocator::scanline( int &stride, int w )
 {
+	precondition( w != 0, "attempt to create empty scanline" );
 	float *p = nullptr;
 
 	std::unique_lock<std::mutex> lk( _mutex );
