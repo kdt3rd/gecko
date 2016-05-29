@@ -24,6 +24,8 @@
 
 #include "scanline.h"
 #include "plane.h"
+#include <type_traits>
+
 //#include <iostream>
 
 ////////////////////////////////////////
@@ -48,104 +50,229 @@ inline scanline scan_ref( const plane &p, int y )
 
 ////////////////////////////////////////
 
-#if 0
-
-add_node()
+struct plane_scan_binder
 {
+	plane_scan_binder( void ) = default;
+	explicit plane_scan_binder( const plane &p, scanline &s ) : _plane( &p ), _scan( &s ) {}
+	explicit plane_scan_binder( scanline &s ) : _scan( &s ) {}
 
-	// if a node has a reference, it's a terminal no matter what
-// if node == n_to_one
-//   start subgroup
-// else if node == one_to_one
-//   if input member of subgroup
-//     add to subgroup
-//   if another input member of different subgroup
-//     merge subgroups
-//   else
-//     start subgroup
+	inline void update( int y ) { if ( _plane ) (*_scan) = scan_ref( *_plane, y ); }
+	inline void set( const scanline &s ) { (*_scan) = s; }
+	inline void clear( void ) { _scan->clear(); }
 
-	// subgroup has (all) inputs
-	// subgroup has N outputs (????), at least given rules above
-}
+	operator const scanline &( void ) const { return (*_scan); }
 
-process_node()
-{
-	if ( node.in_subgroup() )
-	{
-//		sub group
-		// how to make sure all inputs are computed prior to this?
-		//    ->
-		// rotate first subgroup item to after last input (or when
-		// copying / merging / adding, insert the input prior to the
-		// first subgroup item)
-
-		// how to compute this iteratively and not recursively
-		// 
-		// with a single output, possible to do the same thing for
-		// subgroup we assume for nodes, where you just process in
-		// order, and have to track a set of scanlines
-
-		// recursive would look something like:
-		for ( size_t i = 0; i < subgroup.outputs(); ++i )
-		{
-			plane p( w, h );
-			for ( int y = 0; y < h; ++y )
-			{
-				scanline dest = scan_ref( p, y );
-				function( dest, arg1, arg2, arg3... );
-			}
-		}
-
-		// iterative might be something like
-		scanline_group sg( w );
-		for ( size_t i = 0; i < subgroup.size(); ++i )
-		{
-			scanline dest = sg.checkout();
-			node &cur = subgroup[i];
-			cur.function( dest, arg1, arg2, arg3... );
-			for ( o: cur.outputs() )
-				o.set_input( i, dest );
-			o.clean_inputs();
-		}
-	}
-}
-
-struct group_process
-{
-	std::set<node_id> _members;
-	node_id _last;
-	graph &_graph;
+private:
+	const plane *_plane = nullptr;
+	scanline *_scan;
 };
 
-struct scanline_group_process
+/// we define our own form of std::reference_wrapper that can be default
+/// constructed
+template <typename T>
+struct engine_ref
 {
-	template <size_t I>
-	static inline typename scanline_arg_extractor<typename base::function_traits<function>::template get_arg_type<I+1>::type>::type
-	extract( std::deque<scanline> &pool, int y, const std::vector<engine::any> &in )
-	{
-		typedef typename base::function_traits<function>::template get_arg_type<I+1>::type arg_type;
-		typedef scanline_arg_extractor<arg_type> extractor_type;
-//		if ( y == 0 )
-//			std::cout << "   extract arg " << I << " type " << typeid(arg_type).name() << " result type " << typeid(typename extractor_type::type).name() << " (" << typeid(extractor_type).name() << ")" << std::endl;
+	typedef T type;
+	inline engine_ref( void ) noexcept {}
+	inline engine_ref( T &x ) noexcept : _m( &x ) {}
+	engine_ref( T &&x ) = delete;
+	engine_ref( const engine_ref & ) noexcept = default;
+	engine_ref &operator=( const engine_ref & ) noexcept = default;
 
-		return extractor_type::get( pool, y, in[I] );
+	inline operator T &( void ) const noexcept { return get(); }
+	inline T &get( void ) const noexcept { return *_m; }
+
+	type *_m;
+};
+
+template <typename T>
+inline engine_ref<T> engref( T &t ) noexcept
+{
+	return engine_ref<T>( t );
+}
+
+template <typename T>
+inline engine_ref<const T> cengref( const T &t ) noexcept
+{
+	return engine_ref<const T>( t );
+}
+
+template <typename T>
+struct arg_type_adapter
+{
+	typedef typename std::decay<T>::type base_type;
+	typedef engine_ref<const base_type> type;
+
+	static inline const base_type &extract( const type &b )
+	{
+		return static_cast<const base_type &>( b );
 	}
 
-	inline plane operator()( const engine::dimensions &d, input_graph &i )
+	static inline size_t prebind( std::vector<plane_scan_binder> &, std::vector<scanline> &s )
 	{
-		plane ret( static_cast<int>( d.x ), static_cast<int>( d.y ) );
+		return size_t(-1);
+	}
+	static inline type get( std::vector<plane_scan_binder> &b, std::vector<scanline> &s, size_t i, const engine::any &v, engine::node_id , engine::subgroup &, engine::subgroup_function * )
+	{
+		precondition( i == size_t(-1), "item with no binder has index to binder list" );
+		return cengref( base::any_cast<const base_type &>( v ) );
+	}
+};
 
-		std::deque<scanline> scanPool;
-		for ( int y = start; y < end; ++y )
+template <>
+struct arg_type_adapter<scanline &>
+{
+	typedef plane_scan_binder base_type;
+	typedef engine_ref<const base_type> type;
+
+	static inline const scanline &extract( const type &b )
+	{
+		const base_type &pb = static_cast<const base_type &>( b );
+		return static_cast<const scanline &>( pb );
+	}
+
+	static inline size_t prebind( std::vector<plane_scan_binder> &b, std::vector<scanline> &s )
+	{
+		size_t i = b.size();
+		b.push_back( plane_scan_binder() );
+		s.push_back( scanline() );
+		return i;
+	}
+
+	static inline type get( std::vector<plane_scan_binder> &b, std::vector<scanline> &s, size_t i, const engine::any &v, engine::node_id n, engine::subgroup &sg, engine::subgroup_function *sgf )
+	{
+		precondition( i != size_t(-1), "item with binder has not binder" );
+		if ( ! v.empty() )
+			b[i] = plane_scan_binder( base::any_cast<const plane &>( v ), s[i] );
+		else
 		{
-			scanline dest = scan_ref( ret, y );
-			scanPool.push_back( dest );
-			scanFunc( dest, extract<S>( scanPool, y, in )... );
+			b[i] = plane_scan_binder( s[i] );
+			sg.func( n ).add_output( sgf, i );
+		}
+
+		return cengref( b[i] );
+	}
+};
+
+template <>
+struct arg_type_adapter<const scanline &>
+{
+	typedef plane_scan_binder base_type;
+	typedef engine_ref<const base_type> type;
+
+	static inline const scanline &extract( const type &b )
+	{
+		const base_type &pb = static_cast<const base_type &>( b );
+		return static_cast<const scanline &>( pb );
+	}
+
+	static inline size_t prebind( std::vector<plane_scan_binder> &b, std::vector<scanline> &s )
+	{
+		size_t i = b.size();
+		b.push_back( plane_scan_binder() );
+		s.push_back( scanline() );
+		return i;
+	}
+
+	static inline type get( std::vector<plane_scan_binder> &b, std::vector<scanline> &s, size_t i, const engine::any &v, engine::node_id n, engine::subgroup &sg, engine::subgroup_function *sgf )
+	{
+		precondition( i != size_t(-1), "item with binder has not binder" );
+		if ( ! v.empty() )
+			b[i] = plane_scan_binder( base::any_cast<const plane &>( v ), s[i] );
+		else
+		{
+			b[i] = plane_scan_binder( s[i] );
+			sg.func( n ).add_output( sgf, i );
 		}
 		
+		return cengref( b[i] );
 	}
 };
-#endif
+
+class scanline_plane_functor : public engine::subgroup_function
+{
+public:
+	using engine::subgroup_function::subgroup_function;
+
+	virtual void call( scanline &dest ) = 0;
+
+	virtual const std::vector<scanline> &inputs( void ) const = 0;
+	virtual void set_input( size_t i, const scanline &s ) = 0;
+};
+
+template <typename... Args>
+class scanline_plane_operator : public scanline_plane_functor
+{
+public:
+	typedef plane result_type;
+	typedef std::function<void ( scanline &, Args...)> function;
+	typedef std::tuple<typename arg_type_adapter<Args>::type...> scan_args;
+
+	scanline_plane_operator( void )
+	{}
+	explicit scanline_plane_operator( const function &f )
+		: _func( f )
+	{}
+	virtual ~scanline_plane_operator( void )
+	{}
+
+	virtual const std::vector<scanline> &inputs( void ) const override
+	{
+		return _inputs;
+	}
+
+	virtual void update_inputs( int d ) override
+	{
+		for ( auto &b: _binders )
+			b.update( d );
+	}
+
+	virtual void deref_inputs( void ) override
+	{
+		for ( auto &b: _binders )
+			b.clear();
+	}
+
+	virtual void bind( engine::subgroup &sg, engine::node &n ) override
+	{
+		process_bind( sg, n, base::gen_sequence<sizeof...(Args)>{} );
+	}
+
+	virtual void call( scanline &dest ) override
+	{
+		process_call( dest, base::gen_sequence<sizeof...(Args)>{} );
+	}
+
+	virtual void set_input( size_t i, const scanline &s )
+	{
+		_binders[i].set( s );
+	}
+
+private:
+	template <size_t... S>
+	inline void process_bind( engine::subgroup &sg, engine::node &n, const base::sequence<S...> & )
+	{
+		size_t b[] = { arg_type_adapter<Args>::prebind( _binders, _inputs )... };
+		_args = std::make_tuple( arg_type_adapter<Args>::get( _binders, _inputs, b[S], sg.gref()[n.input(S)].value(), n.input(S), sg, this )... );
+	}
+
+	template <size_t... S>
+	inline void process_call( scanline &dest, const base::sequence<S...> & )
+	{
+		_func( dest, arg_type_adapter<Args>::extract( std::get<S>( _args ) )... );
+	}
+
+	std::vector<scanline> _inputs;
+	std::vector<plane_scan_binder> _binders;
+	function _func;
+	scan_args _args;
+};
+
+void scanline_thread_process( int start, int end, engine::subgroup &sg, int w, int h );
+void dispatch_scan_processing( engine::subgroup &sg, const engine::dimensions &dims );
+
+
+#if 0
 
 ////////////////////////////////////////
 
@@ -165,7 +292,7 @@ struct scanline_arg_extractor<scanline>
 	typedef scanline type;
 	static inline type get( int y, const engine::any &v )
 	{
-		const plane &p = engine::any_cast<plane>( v );
+		const plane &p = engine::any_cast<const plane &>( v );
 		return scan_ref( p, y );
 	}
 };
@@ -176,7 +303,7 @@ struct scanline_arg_extractor<const scanline &>
 	typedef scanline type;
 	static inline type get( int y, const engine::any &v )
 	{
-		const plane &p = engine::any_cast<plane>( v );
+		const plane &p = engine::any_cast<const plane &>( v );
 		return scan_ref( p, y );
 	}
 };
@@ -187,7 +314,7 @@ struct scanline_arg_extractor<scanline &>
 	typedef scanline type;
 	static inline type get( int y, const engine::any &v )
 	{
-		const plane &p = engine::any_cast<plane>( v );
+		const plane &p = engine::any_cast<const plane &>( v );
 		return scan_dup( p, y );
 	}
 };
@@ -242,20 +369,30 @@ private:
 		}
 	}
 };
+#endif
 
 template <typename Functor>
-struct scanline_plane_adapter : scanline_plane_adapter<decltype(&Functor::operator())>
+struct scanline_plane_adapter : public scanline_plane_adapter<decltype(&Functor::operator())>
 {
+	using scanline_plane_adapter<decltype(&Functor::operator())>::scanline_plane_adapter;
 };
 
 template <typename... Args>
-struct scanline_plane_adapter<void (scanline &, Args...)> : scanline_plane_operator<Args...>
+struct scanline_plane_adapter<void (scanline &, Args...)> : public scanline_plane_operator<Args...>
 {
+	scanline_plane_adapter( void ) {}
+	scanline_plane_adapter( const std::function<void(scanline &, Args...)> &f )
+		: scanline_plane_operator<Args...>( f )
+	{}
 };
 
 template <typename... Args>
-struct scanline_plane_adapter<void (*)(scanline &, Args...)> : scanline_plane_operator<Args...>
+struct scanline_plane_adapter<void (*)(scanline &, Args...)> : public scanline_plane_operator<Args...>
 {
+	scanline_plane_adapter( void ) {}
+	scanline_plane_adapter( const std::function<void(scanline &, Args...)> &f )
+		: scanline_plane_operator<Args...>( f )
+	{}
 };
 
 } // namespace image

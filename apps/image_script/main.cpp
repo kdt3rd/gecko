@@ -44,31 +44,39 @@ plane test_refcount( void )
 {
 	float v = 1.F;
 	plane x = create_plane( 1920, 1080, v );
-	std::cout << std::endl;
+//	std::cout << std::endl;
 	plane y = create_plane( 1920, 1080, v );
-	std::cout << std::endl;
+//	std::cout << std::endl;
 	plane z = create_plane( 1920, 1080, v );
-	std::cout << std::endl;
+//	std::cout << std::endl;
 
 	// x, y, z should be in separate graphs
-	std::cout << std::endl;
-	std::cout << "constructed x, y, z: " << x.id() << ", " << y.id() << ", " << z.id() << std::endl;
-	std::cout << std::endl;
+//	std::cout << std::endl;
+//	std::cout << "constructed x, y, z: " << x.id() << ", " << y.id() << ", " << z.id() << std::endl;
+//	std::cout << std::endl;
 
 	// and now s will copy / combine them to 1
 	plane s = x + y + z;
-	std::cout << std::endl;
-	std::cout << "sum finished: " << s.id() << std::endl;
-	std::cout << std::endl;
+	for ( size_t n = 0; n != 10000; ++n )
+	{
+		if ( n % 2 == 0 )
+			s += s;
+		else
+			s -= s;
+	}
+
+//	std::cout << std::endl;
+//	std::cout << "sum finished: " << s.id() << std::endl;
+//	std::cout << std::endl;
 	s /= 3.0;
-	std::cout << std::endl;
-	std::cout << "ave finished: " << s.id() << std::endl;
-	std::cout << std::endl;
+//	std::cout << std::endl;
+//	std::cout << "ave finished: " << s.id() << std::endl;
+//	std::cout << std::endl;
 
 	// make a dangling reference in the graph
-	std::cout << std::endl;
+//	std::cout << std::endl;
 	plane t = s + 1.F;
-	std::cout << std::endl << "function finished" << std::endl;
+//	std::cout << std::endl << "function finished" << std::endl;
 
 	return s;//( x + y + z ) / 3.0;
 }

@@ -52,15 +52,15 @@ namespace image
 class scanline
 {
 public:
-	scanline( void );
+	scanline( void ) = default;
 	scanline( const float *b, int w, int s, bool dup = false );
 	scanline( float *b, int w, int s );
 	scanline( int w );
-	scanline( const scanline &o );
-	scanline( scanline &&o );
-	scanline &operator=( const scanline &o );
-	scanline &operator=( scanline &&o );
-	~scanline( void );
+	scanline( const scanline &o ) = default;
+	scanline( scanline &&o ) = default;
+	scanline &operator=( const scanline &o ) = default;
+	scanline &operator=( scanline &&o ) = default;
+	~scanline( void ) = default;
 
 	inline bool empty( void ) const;
 	inline bool is_reference( void ) const;
@@ -69,7 +69,7 @@ public:
 	inline int width( void ) const;
 	inline int stride( void ) const;
 
-	void clear( void );
+	inline void clear( void );
 
 	inline float *get( void );
 	inline const float *get( void ) const;
@@ -102,6 +102,7 @@ public:
 	inline const float *cend( void ) const;
 
 	void swap( scanline &o );
+
 private:
 	std::shared_ptr<float> _ptr;
 	const float *_ref_ptr = nullptr;
@@ -143,6 +144,17 @@ inline int scanline::width( void ) const
 inline int scanline::stride( void ) const
 {
 	return _stride;
+}
+
+////////////////////////////////////////
+
+inline void
+scanline::clear( void )
+{
+	_ptr.reset();
+	_ref_ptr = nullptr;
+	_width = 0;
+	_stride = 0;
 }
 
 ////////////////////////////////////////

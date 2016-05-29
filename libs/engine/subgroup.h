@@ -24,6 +24,7 @@
 #include "types.h"
 #include <vector>
 #include <set>
+#include "subgroup_function.h"
 
 ////////////////////////////////////////
 
@@ -52,7 +53,6 @@ public:
 	void clear( void );
 
 	inline bool processed( void ) const { return _processed; }
-	inline void processed( bool b ) { _processed = b; }
 
 	void add( node_id n );
 	inline const std::vector<node_id> &members( void ) const { return _nodes; }
@@ -70,11 +70,21 @@ public:
 
 	void swap( subgroup &o );
 
+	void process( void );
+	any &output_val( size_t i );
+	subgroup_function &func( size_t i );
+	subgroup_function &func( node_id n );
+
 private:
+	void bind_functions( void );
+
 	graph &_graph;
 	std::set<node_id> _inputs;
 	std::vector<node_id> _nodes;
 	std::vector<node_id> _outputs;
+
+	std::vector<std::shared_ptr<subgroup_function>> _funcs;
+	std::vector<size_t> _output_funcidx;
 	bool _processed = false;
 };
 

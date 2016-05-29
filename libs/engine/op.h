@@ -38,6 +38,8 @@ namespace engine
 {
 
 class graph;
+class subgroup;
+class subgroup_function;
 
 /// @brief base class for function storage used by op.
 ///
@@ -53,6 +55,11 @@ public:
 	virtual const std::type_info &input_type( size_t I ) const = 0;
 
 	virtual any process( graph &g, const dimensions &d, const std::vector<any> &inputs ) const = 0;
+
+	virtual any create_value( const dimensions &d ) const = 0;
+
+	virtual std::shared_ptr<subgroup_function> create_group_function( void ) const = 0;
+	virtual void dispatch_group( subgroup &s, const dimensions &d ) const = 0;
 };
 
 template <typename Functor, typename GroupFunc>
@@ -60,37 +67,58 @@ class opfunc_one_to_one : public op_function
 {
 public:
 	typedef typename base::function_traits<Functor>::function process_func;
-	typedef typename base::function_traits<GroupFunc>::function group_dispatch;
+	typedef std::function<void(subgroup &, const dimensions &)> group_dispatch;
 
-	opfunc_one_to_one( Functor f, GroupFunc g )
-		: _p( base::to_function( f ) ), _dispatch( base::to_function( g ) )
+	opfunc_one_to_one( Functor f, const group_dispatch &g )
+		: _p( base::to_function( f ) ), _dispatch( g )
 	{
 	}
 	virtual ~opfunc_one_to_one( void ) noexcept
 	{
 	}
 
-	virtual const std::type_info &result_type( void ) const
+	virtual const std::type_info &result_type( void ) const override
 	{
 		return typeid(typename group_dispatch::result_type);
 	}
 
-	virtual size_t input_size( void ) const
+	virtual size_t input_size( void ) const override
 	{
 		return base::function_traits<Functor>::arity - 1;
 	}
 
-	virtual const std::type_info &input_type( size_t i ) const
+	virtual const std::type_info &input_type( size_t i ) const override
 	{
 		return base::function_traits<Functor>::arg_type( i + 1 );
 	}
 
-	virtual any process( graph &g, const dimensions &d, const std::vector<any> &inputs ) const
+	virtual any process( graph &g, const dimensions &d, const std::vector<any> &inputs ) const override
 	{
-		return static_cast<any>( _dispatch( g, d, _p, inputs ) );
+		throw_runtime( "all calls should happen as part of a group" );
+	}
+
+	virtual any create_value( const dimensions &d ) const override
+	{
+		return create_result<typename GroupFunc::result_type>( d );
+	}
+
+	virtual std::shared_ptr<subgroup_function> create_group_function( void ) const override
+	{
+		return std::make_shared<GroupFunc>( _p );
+	}
+
+	virtual void dispatch_group( subgroup &s, const dimensions &d ) const override
+	{
+		_dispatch( s, d );
 	}
 
 private:
+	template <typename R, typename... Ctors>
+	static inline R create_result( Ctors &&... c )
+	{
+		return R( std::forward<Ctors>( c )... );
+	}
+
 	process_func _p;
 	group_dispatch _dispatch;
 };
@@ -109,24 +137,39 @@ public:
 	{
 	}
 
-	virtual const std::type_info &result_type( void ) const
+	virtual const std::type_info &result_type( void ) const override
 	{
 		return typeid(typename process_func::result_type);
 	}
 
-	virtual size_t input_size( void ) const
+	virtual size_t input_size( void ) const override
 	{
 		return base::function_traits<Functor>::arity;
 	}
 
-	virtual const std::type_info &input_type( size_t i ) const
+	virtual const std::type_info &input_type( size_t i ) const override
 	{
 		return base::function_traits<Functor>::arg_type( i );
 	}
 
-	virtual any process( graph &, const dimensions &, const std::vector<any> &inputs ) const
+	virtual any process( graph &, const dimensions &, const std::vector<any> &inputs ) const override
 	{
 		return dispatch( inputs, base::gen_sequence<base::function_traits<Functor>::arity>{} );
+	}
+
+
+	virtual any create_value( const dimensions &d ) const override
+	{
+		return any();
+	}
+
+	virtual std::shared_ptr<subgroup_function> create_group_function( void ) const override
+	{
+		throw_runtime( "attempt to create group fucntoin on a single-threaded thing" );
+	}
+	virtual void dispatch_group( subgroup &s, const dimensions &d ) const override
+	{
+		throw_runtime( "attempt to dispatch group on a single-threaded thing" );
 	}
 
 private:
@@ -258,7 +301,7 @@ public:
 	/// processed a one-to-one group at a time, parallelizing on the
 	/// other axes.
 	template <typename Functor, typename GroupProcessFunc>
-	inline op( base::cstring n, Functor f, GroupProcessFunc g, one_to_one_parallel_t )
+	inline op( base::cstring n, Functor f, GroupProcessFunc , const std::function<void(subgroup &, const dimensions &)> &g, one_to_one_parallel_t )
 			: _name( n ), _func( new opfunc_one_to_one<Functor, GroupProcessFunc>( f, g ) ), _style( style::ONE_TO_ONE )
 	{
 	}

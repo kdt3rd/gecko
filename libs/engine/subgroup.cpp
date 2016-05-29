@@ -153,6 +153,85 @@ subgroup::swap( subgroup &o )
 
 ////////////////////////////////////////
 
+void
+subgroup::process( void )
+{
+	precondition( ! _outputs.empty(), "empty subgroup being processed" );
+
+	graph &g = _graph;
+	const registry &ops = g.op_registry();
+
+	for ( auto n: _outputs )
+	{
+		node &cur = g[n];
+		cur.value() = ops[cur.op()].function().create_value( cur.dims() );
+	}
+
+	bind_functions();
+
+	node &f = g[_outputs.front()];
+
+	// how to make sure all inputs are computed prior to this?
+	//    ->
+	// rotate first subgroup item to after last input (or when
+	// copying / merging / adding, insert the input prior to the
+	// first subgroup item)
+	ops[f.op()].function().dispatch_group( *this, f.dims() );
+	_processed = true;
+}
+
+////////////////////////////////////////
+
+any &
+subgroup::output_val( size_t i )
+{
+	return _graph[_outputs[i]].value();
+}
+
+////////////////////////////////////////
+
+subgroup_function &subgroup::func( size_t i )
+{
+	return *(_funcs[i]);
+}
+
+////////////////////////////////////////
+
+subgroup_function &subgroup::func( node_id n )
+{
+	size_t idx = 0;
+	size_t N = _nodes.size();
+
+	for ( ; idx != N; ++idx )
+	{
+		if ( _nodes[idx] == n )
+			break;
+	}
+	postcondition( idx != N, "request for node that is not a member of subgroup" );
+
+	return *(_funcs[idx]);
+}
+
+////////////////////////////////////////
+
+void
+subgroup::bind_functions( void )
+{
+	_funcs.reserve( _nodes.size() );
+	graph &g = _graph;
+	const registry &ops = g.op_registry();
+	for ( auto n: _nodes )
+	{
+		if ( is_output( n ) )
+			_output_funcidx.emplace_back( _funcs.size() );
+
+		_funcs.emplace_back( ops[g[n].op()].function().create_group_function() );
+		_funcs.back()->bind( *this, g[n] );
+	}
+}
+
+////////////////////////////////////////
+
 } // engine
 
 

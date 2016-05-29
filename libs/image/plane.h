@@ -44,6 +44,7 @@ class plane : public engine::computed_base
 public:
 	plane( void );
 	plane( int w, int h );
+	plane( const engine::dimensions &d );
 //	plane( media::image_buffer );
 	template <typename... Args>
 	inline plane( const base::cstring &opname, const engine::dimensions &d, Args &&... args )

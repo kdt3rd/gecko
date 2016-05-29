@@ -129,21 +129,21 @@ void add_plane_math( engine::registry &r )
 	using namespace engine;
 //	r.add( op( "add_planeplane", base::choose_runtime( add_planeplane, { { cpu::simd_feature::AVX, avx::add_planeplane } } ), scanline_plane_operator( add_planeplane ), op::one_to_one ) );
 
-	r.add( op( "assign_plane", base::choose_runtime( assign_value ), scanline_plane_adapter<decltype(assign_value)>(), op::one_to_one ) );
+	r.add( op( "assign_plane", base::choose_runtime( assign_value ), scanline_plane_adapter<decltype(assign_value)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "add_planeplane", base::choose_runtime( add_planeplane ), scanline_plane_adapter<decltype(add_planeplane)>(), op::one_to_one ) );
-	r.add( op( "add_planenumber", base::choose_runtime( add_planenumber ), scanline_plane_adapter<decltype(add_planenumber)>(), op::one_to_one ) );
+	r.add( op( "add_planeplane", base::choose_runtime( add_planeplane ), scanline_plane_adapter<decltype(add_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "add_planenumber", base::choose_runtime( add_planenumber ), scanline_plane_adapter<decltype(add_planenumber)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "sub_planeplane", base::choose_runtime( sub_planeplane ), scanline_plane_adapter<decltype(sub_planeplane)>(), op::one_to_one ) );
+	r.add( op( "sub_planeplane", base::choose_runtime( sub_planeplane ), scanline_plane_adapter<decltype(sub_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "mul_planeplane", base::choose_runtime( mul_planeplane ), scanline_plane_adapter<decltype(mul_planeplane)>(), op::one_to_one ) );
-	r.add( op( "mul_planenumber", base::choose_runtime( mul_planenumber ), scanline_plane_adapter<decltype(mul_planenumber)>(), op::one_to_one ) );
+	r.add( op( "mul_planeplane", base::choose_runtime( mul_planeplane ), scanline_plane_adapter<decltype(mul_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "mul_planenumber", base::choose_runtime( mul_planenumber ), scanline_plane_adapter<decltype(mul_planenumber)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "div_planeplane", base::choose_runtime( div_planeplane ), scanline_plane_adapter<decltype(div_planeplane)>(), op::one_to_one ) );
-	r.add( op( "div_numberplane", base::choose_runtime( div_numberplane ), scanline_plane_adapter<decltype(div_numberplane)>(), op::one_to_one ) );
+	r.add( op( "div_planeplane", base::choose_runtime( div_planeplane ), scanline_plane_adapter<decltype(div_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "div_numberplane", base::choose_runtime( div_numberplane ), scanline_plane_adapter<decltype(div_numberplane)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "muladd_planeplaneplane", base::choose_runtime( muladd_planeplaneplane ), scanline_plane_adapter<decltype(muladd_planeplaneplane)>(), op::one_to_one ) );
-	r.add( op( "muladd_planenumbernumber", base::choose_runtime( muladd_planenumbernumber ), scanline_plane_adapter<decltype(muladd_planenumbernumber)>(), op::one_to_one ) );
+	r.add( op( "muladd_planeplaneplane", base::choose_runtime( muladd_planeplaneplane ), scanline_plane_adapter<decltype(muladd_planeplaneplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "muladd_planenumbernumber", base::choose_runtime( muladd_planenumbernumber ), scanline_plane_adapter<decltype(muladd_planenumbernumber)>(), dispatch_scan_processing, op::one_to_one ) );
 }
 
 ////////////////////////////////////////

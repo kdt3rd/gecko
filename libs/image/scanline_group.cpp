@@ -21,6 +21,7 @@
 //
 
 #include "scanline_group.h"
+#include <iostream>
 
 ////////////////////////////////////////
 
@@ -66,21 +67,31 @@ scanline_group::find_or_checkout( const std::vector<scanline> &inputs )
 	for ( auto &s: inputs )
 	{
 		if ( s.unique() )
+		{
+//			std::cout << "reusing input scanline as destinaton" << std::endl;
 			return s;
+		}
 	}
 
 	if ( _outputs.size() == 1 )
 	{
 		if ( _outputs[0].unique() )
+		{
+//			std::cout << "using output scanline as destinaton" << std::endl;
 			return _outputs[0];
+		}
 	}
 
 	for ( auto &s: _spare )
 	{
-		if ( ! s.unique() )
+		if ( s.unique() )
+		{
+//			std::cout << "using existing spare as destinaton" << std::endl;
 			return s;
+		}
 	}
 
+//	std::cout << "creating new spare as destinaton" << std::endl;
 	_spare.emplace_back( scanline( _scan_width ) );
 	return _spare.back();
 }

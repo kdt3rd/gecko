@@ -43,6 +43,13 @@ plane::plane( int w, int h )
 
 ////////////////////////////////////////
 
+plane::plane( const engine::dimensions &d )
+	: plane( static_cast<int>( d.x ), static_cast<int>( d.y ) )
+{
+}
+
+////////////////////////////////////////
+
 plane::plane( plane &&o )
 	: computed_base( std::move( o ) ),
 	  _mem( std::move( o._mem ) ),

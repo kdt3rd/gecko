@@ -35,16 +35,30 @@ public:
 	null_func( const std::reference_wrapper<const std::type_info> &ti );
 	virtual ~null_func( void );
 
-	virtual const std::type_info &result_type( void ) const;
+	virtual const std::type_info &result_type( void ) const override;
 
-	virtual size_t input_size( void ) const;
-	virtual const std::type_info &input_type( size_t ) const
+	virtual size_t input_size( void ) const override;
+	virtual const std::type_info &input_type( size_t ) const override
 	{
 		return typeid(void);
 	}
 
 
-	virtual any process( graph &, const dimensions &, const std::vector<any> & ) const;
+	virtual any process( graph &, const dimensions &, const std::vector<any> & ) const override;
+
+	virtual any create_value( const dimensions &d ) const override
+	{
+		return any();
+	}
+
+	virtual std::shared_ptr<subgroup_function> create_group_function( void ) const override
+	{
+		throw_runtime( "attempt to create group fucntoin on a null function" );
+	}
+	virtual void dispatch_group( subgroup &s, const dimensions &d ) const override
+	{
+		throw_runtime( "attempt to dispatch group on a null function" );
+	}
 private:
 	std::reference_wrapper<const std::type_info> _info;
 };

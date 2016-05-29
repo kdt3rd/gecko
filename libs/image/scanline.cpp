@@ -30,12 +30,6 @@ namespace image
 
 ////////////////////////////////////////
 
-scanline::scanline( void )
-{
-}
-
-////////////////////////////////////////
-
 scanline::scanline( const float *b, int w, int s, bool dup )
 	: _ref_ptr( b ), _width( w ), _stride( s )
 {
@@ -64,61 +58,13 @@ scanline::scanline( int w )
 
 ////////////////////////////////////////
 
-scanline::scanline( const scanline &o )
-	: _ptr( o._ptr ), _ref_ptr( o._ref_ptr ),
-	  _width( o._width ), _stride( o._stride )
-{
-}
-
-////////////////////////////////////////
-
-scanline::scanline( scanline &&o )
-	: _ptr( std::move( o._ptr ) ), _ref_ptr( o._ref_ptr ),
-	  _width( o._width ), _stride( o._stride )
-{
-}
-
-////////////////////////////////////////
-
-scanline &scanline::operator=( const scanline &o )
-{
-	if ( this != &o )
-	{
-		_ptr = o._ptr;
-		_ref_ptr = o._ref_ptr;
-		_width = o._width;
-		_stride = o._stride;
-	}
-	return *this;
-}
-
-////////////////////////////////////////
-
-scanline &scanline::operator=( scanline &&o )
+void
+scanline::swap( scanline &o )
 {
 	std::swap( _ptr, o._ptr );
 	std::swap( _ref_ptr, o._ref_ptr );
 	std::swap( _width, o._width );
 	std::swap( _stride, o._stride );
-	
-	return *this;
-}
-
-////////////////////////////////////////
-
-scanline::~scanline( void )
-{
-}
-
-////////////////////////////////////////
-
-void
-scanline::clear( void )
-{
-	_ptr.reset();
-	_ref_ptr = nullptr;
-	_width = 0;
-	_stride = 0;
 }
 
 ////////////////////////////////////////

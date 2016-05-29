@@ -207,7 +207,7 @@ graph::remove_node( node_id n )
 				// no references, let's schedule it for deletion
 				del.push_back( *b );
 			}
-			std::cout << "remove node " << n << " from outputs of " << *b << std::endl;
+//			std::cout << "remove node " << n << " from outputs of " << *b << std::endl;
 			curIn.remove_output( n );
 			++b;
 		}
@@ -502,9 +502,8 @@ graph::dump_refs( std::ostream &os ) const
 const any &
 graph::process( node_id nid, node &n )
 {
-	std::cout << "process: " << n.hash_value() << " " << _ops[n.op()].name() << std::endl;
+	std::cout << "Request to process node " << nid << " (op " << _ops[n.op()].name() << ")" << std::endl;
 	optimize();
-
 	std::cout << "optimized, start of processing: " << _start_of_processing << std::endl;
 
 	// by construction, if a node is at node_id nid, all it's inputs
@@ -522,23 +521,19 @@ graph::process( node_id nid, node &n )
 		if ( ! curN.value().empty() )
 			continue;
 
-		std::cout << "  computing node " << c << std::endl;
-		const op &o = _ops[curN.op()];
-
+//		std::cout << "  computing node " << c << std::endl;
 		if ( curN.in_subgroup() )
 		{
 			size_t sgi = _node_to_subgroup[c];
 			subgroup &sg = _subgroups[sgi];
-			std::cout << "   -> processing subgroup " << sgi << std::endl;
+//			std::cout << "   -> processing subgroup " << sgi << std::endl;
 			if ( sg.processed() )
 			{
-				std::cout << "       -> subgroup already processed" << std::endl;
+//				std::cout << "       -> subgroup already processed" << std::endl;
 				continue;
 			}
-//			precondition( o.subgroup_handler(), "op {0} in subgroup, but no subgroup_handler", o.name() );
-//			o.subgroup_handler().process( sg );
-//			sg.processed( true );
-//			continue;
+			sg.process();
+			continue;
 		}
 
 		size_t nInputs = curN.input_size();
@@ -549,27 +544,28 @@ graph::process( node_id nid, node &n )
 			node &curIn = _nodes[inid];
 			inputs[i] = curIn.value();
 		}
-		std::cout << "    -> inputs assigned, calling function" << std::endl;
+//		std::cout << "    -> inputs assigned, calling function" << std::endl;
 
+		const op &o = _ops[curN.op()];
 		curN.value() = o.function().process( *this, curN.dims(), inputs );
 
-		std::cout << "    -> updating outputs..." << std::endl;
+//		std::cout << "    -> updating outputs..." << std::endl;
 		for ( size_t i = 0; i != nInputs; ++i )
 		{
 			node_id &inid = curN.input( i );
 			node &curIn = _nodes[inid];
 			if ( curIn.is_rvalue() )
 			{
-				std::cout << "removing r-value input node " << inid << " now that we've processed it" << std::endl;
+//				std::cout << "removing r-value input node " << inid << " now that we've processed it" << std::endl;
 				remove_node( inid );
 			}
 			else
 			{
-				std::cout << "removing us (" << c << ") from " << inid << " now that we've processed it" << std::endl;
+//				std::cout << "removing us (" << c << ") from " << inid << " now that we've processed it" << std::endl;
 				curIn.remove_output( c );
 				if ( curIn.output_size() == 0 )
 				{
-					std::cout << "removing input node " << inid << " now that it has no more unprocessed outputs" << std::endl;
+//					std::cout << "removing input node " << inid << " now that it has no more unprocessed outputs" << std::endl;
 					remove_node( inid );
 				}
 			}
