@@ -65,13 +65,20 @@ public:
 	inline void set_rvalue( void );
 	/// clear the reference flag
 	inline void clear_rvalue( void );
-	/// flag indicating that the node has at least one reference to it
 
+	/// flag indicating that the node has at least one reference to it
 	inline bool has_ref( void ) const;
 	/// set the reference flag
 	inline void set_ref( void );
 	/// clear the reference flag
 	inline void clear_ref( void );
+
+	/// flag indicating that the node has at least one reference to it
+	inline bool in_subgroup( void ) const;
+	/// set the reference flag
+	inline void set_in_subgroup( void );
+	/// clear the reference flag
+	inline void clear_in_subgroup( void );
 
 	/// test whether a user flag is set
 	/// (flag the node doesn't know about)
@@ -104,14 +111,17 @@ public:
 	void add_output( node_id o );
 	void remove_output( node_id o );
 
+	void update_input( node_id oldid, node_id newid );
+	void update_output( node_id oldid, node_id newid );
 	inline const hash::value &hash_value( void ) const;
 	inline any &value( void );
 	inline const any &value( void ) const;
 
-
+	void swap( node &o );
 private:
 	static constexpr int flag_rvalue = 0;
 	static constexpr int flag_hasref = 1;
+	static constexpr int flag_insubgroup = 2;
 
 	inline bool is_set( int f ) const
 	{
@@ -204,6 +214,27 @@ inline void node::set_ref( void )
 inline void node::clear_ref( void )
 {
 	clear_flag( flag_hasref );
+}
+
+////////////////////////////////////////
+
+inline bool node::in_subgroup( void ) const
+{
+	return is_set( flag_insubgroup );
+}
+
+////////////////////////////////////////
+
+inline void node::set_in_subgroup( void )
+{
+	set_flag( flag_insubgroup );
+}
+
+////////////////////////////////////////
+
+inline void node::clear_in_subgroup( void )
+{
+	clear_flag( flag_insubgroup );
 }
 
 ////////////////////////////////////////
@@ -322,7 +353,21 @@ node::value( void ) const
 	return _value;
 }
 
+inline void
+swap( node &a, node &b )
+{
+	a.swap( b );
+}
+
 } // namespace engine
 
+namespace std
+{
 
+inline void swap( engine::node &a, engine::node &b )
+{
+	engine::swap( a, b );
+}
+
+}
 

@@ -27,9 +27,13 @@
 #include <set>
 #include <deque>
 #include <stack>
+#include <algorithm>
+#include <numeric>
 #include <base/contract.h>
 #include <base/compiler_abi.h>
 #include <iomanip>
+#include <fstream>
+#include <sstream>
 
 #include "registry.h"
 
@@ -221,6 +225,8 @@ graph::remove_node( node_id n )
 void
 graph::clean_graph( void )
 {
+	clear_grouping();
+
 	std::set<node_id> toDel;
 	bool didAdd = true;
 	while ( didAdd )
@@ -244,20 +250,13 @@ graph::clean_graph( void )
 			if ( n.has_ref() )
 				continue;
 
-			// dangling output
-			if ( n.output_size() == 0 )
-			{
-				toDel.insert( nid );
-				didAdd = true;
-				continue;
-			}
-
 			size_t validOuts = 0;
 			for ( size_t o = 0, nO = n.output_size(); o != nO; ++o )
 			{
 				if ( toDel.find( n.output( o ) ) == toDel.end() )
 					++validOuts;
 			}
+
 			if ( validOuts == 0 )
 			{
 				toDel.insert( nid );
@@ -270,6 +269,7 @@ graph::clean_graph( void )
 	if ( toDel.empty() )
 		return;
 
+//	std::cout << "removing " << toDel.size() << " nodes" << std::endl;
 	std::map<node_id, node_id> newnodemap;
 	std::vector<node> nnodes;
 	nnodes.reserve( _nodes.size() );
@@ -303,7 +303,7 @@ graph::clean_graph( void )
 			auto nn = newnodemap.find( oldout );
 			if ( nn == newnodemap.end() )
 			{
-				std::cout << "removing output node " << oldout << std::endl;
+//				std::cout << "removing output node " << oldout << " from " << nid << std::endl;
 				--o;
 				n.remove_output( oldout );
 			}
@@ -342,48 +342,122 @@ graph::dispatch_threads( const std::function<void(int, int)> &f, int start, int 
 
 ////////////////////////////////////////
 
-void
-graph::dump_dot( std::ostream &os )
+static void emit_node( std::ostream &os, int indent, const registry &ops, node_id n, const node &curN, bool incHash )
 {
-	os << "digraph graph_0x" << this <<
+	os << std::setw( indent ) << std::setfill( ' ' ) << "" << 'N' << n << " [label=\"";
+	if ( curN.input_size() > 0 )
+	{
+		os << "{{";
+		for ( size_t i = 0, nI = curN.input_size(); i != nI; ++i )
+		{
+			if ( i > 0 )
+				os << '|';
+			if ( curN.input( i ) == nullnode )
+				os << "<i" << i << ">NIL";
+			else
+				os << "<i" << i << ">" << base::demangle( ops[curN.op()].input_type( i ) );
+		}
+		os << "}|N " << n << "\\n" << ops[curN.op()].name();
+		if ( incHash )
+			os << "\\n" << curN.hash_value();
+		os << '}';
+	}
+	else
+	{
+		os << "N " << n;
+		if ( ! curN.value().empty() )
+		{
+			const engine::any &v = curN.value();
+			if ( v.is_type<float>() )
+				os << "\\nfloat " << base::any_cast<float>( v );
+			else if ( v.is_type<int>() )
+				os << "\\nint " << base::any_cast<int>( v );
+			else if ( v.is_type<int64_t>() )
+				os << "\\nint64_t " << base::any_cast<int64_t>( v );
+			else if ( v.is_type<double>() )
+				os << "\\ndouble " << base::any_cast<double>( v );
+			else
+				os << "\\n" << ops[curN.op()].name() << " (" << base::demangle( ops[curN.op()].function().result_type() );
+		}
+		else
+			os << "\\n" << ops[curN.op()].name();
+		if ( incHash )
+			os << "\\n" << curN.hash_value();
+	}
+	os << '\"';
+	if ( curN.has_ref() )
+		os << ", style=filled, fillcolor=\"#DDDDFF\"";
+	else if ( curN.output_size() == 0 )
+		os << ", style=filled, fillcolor=\"#FFDDDD\"";
+	else if ( ! curN.value().empty() )
+		os << ", style=filled, fillcolor=\"#DDFFDD\"";
+
+	os << "];\n";
+}
+
+////////////////////////////////////////
+
+void
+graph::dump_dot( const std::string &fn, bool incHash ) const
+{
+	std::ofstream gdot( fn );
+	dump_dot( gdot, incHash );
+	std::cout << "Saved graph to '" << fn << "'" << std::endl;
+}
+
+////////////////////////////////////////
+
+void
+graph::dump_dot( std::ostream &os, bool incHash ) const
+{
+	os << "digraph graph_" << this <<
 		" {\n"
-	    "graph [label=\"green means has value\\nblue means has reference\\nred means dangling no output\"]\n"
-	    "node [shape=record]\n"
+	    "  graph [label=\"green means has value\\nblue means has reference\\nred means dangling no output\"];\n"
+	    "  node [shape=record];\n"
+	    "  edge [style=solid,arrowhead=normal,arrowtail=none];\n"
 		"\n";
 
-	for ( size_t n = 0, N = _nodes.size(); n != N; ++n )
+	std::set<node_id> didEmitNode;
+	std::set<std::pair<node_id, node_id>> didEmitEdge;
+	size_t sgnum = 1;
+	for ( auto &s: _subgroups )
+	{
+		os << "  subgraph cluster_" << sgnum << "{\n";
+		for ( node_id n: s.members() )
+		{
+			emit_node( os, 4, _ops, n, _nodes[n], incHash );
+			didEmitNode.insert( n );
+		}
+
+		// emit internal edges
+		for ( node_id n: s.members() )
+		{
+			const node &curN = _nodes[n];
+			for ( size_t i = 0, nI = curN.input_size(); i != nI; ++i )
+			{
+				node_id inN = curN.input( i );
+				if ( s.is_member( inN ) )
+				{
+					os << "    N" << inN << " -> N" << n << ":i" << i << ";\n";
+					didEmitEdge.insert( std::make_pair( inN, n ) );
+				}
+			}
+		}
+
+		os << "\n    label=\"subgroup " << sgnum << " outputs " << s.outputs().size() << "\";\n    color=black\n  }\n";
+		++sgnum;
+	}
+
+	for ( node_id n = 0, N = static_cast<node_id>( _nodes.size() ); n != N; ++n )
 	{
 		const node &curN = _nodes[n];
 		if ( curN.op() == nullop )
 			continue;
 
-		os << 'N' << n << " [label=\"";
-		if ( curN.input_size() > 0 )
-		{
-			os << "{{";
-			for ( size_t i = 0, nI = curN.input_size(); i != nI; ++i )
-			{
-				if ( i > 0 )
-					os << '|';
-				if ( curN.input( i ) == nullnode )
-					os << '<' << i << "> NIL ";
-				else
-					os << '<' << i << "> " << base::demangle( _ops[curN.op()].input_type( i ) );
-			}
-			os << "}| N" << n << "\\n" << _ops[curN.op()].name() << "\\n" << curN.hash_value()
-			   << '}';
-		}
-		else
-			os << 'N' << n << "\\n" << _ops[curN.op()].name() << "\\n" << curN.hash_value();
-		os << '\"';
-		if ( curN.has_ref() )
-			os << ", style=filled, fillcolor=blue";
-		else if ( curN.output_size() == 0 )
-			os << ", style=filled, fillcolor=red";
-		else if ( ! curN.value().empty() )
-			os << ", style=filled, fillcolor=green";
+		if ( didEmitNode.find( n ) != didEmitNode.end() )
+			continue;
 
-		os << "]\n";
+		emit_node( os, 2, _ops, n, curN, incHash );
 	}
 
 	// done all the nodes, now do the edges
@@ -395,10 +469,13 @@ graph::dump_dot( std::ostream &os )
 
 		for ( size_t i = 0, nI = curN.input_size(); i != nI; ++i )
 		{
-			if ( curN.input( i ) == nullnode )
+			node_id inN = curN.input( i );
+			if ( inN == nullnode )
 				continue;
 
-			os << 'N' << curN.input( i ) << " -> N" << n << ":" << i << '\n';
+			std::pair<node_id, node_id> p = std::make_pair( inN, n );
+			if ( didEmitEdge.find( p ) == didEmitEdge.end() )
+				os << "  N" << curN.input( i ) << " -> N" << n << ":i" << i << ";\n";
 		}
 	}
 	
@@ -408,7 +485,7 @@ graph::dump_dot( std::ostream &os )
 ////////////////////////////////////////
 
 void
-graph::dump_refs( std::ostream &os )
+graph::dump_refs( std::ostream &os ) const
 {
 	if ( _ref_counts.empty() )
 		return;
@@ -427,7 +504,8 @@ graph::process( node_id nid, node &n )
 {
 	std::cout << "process: " << n.hash_value() << " " << _ops[n.op()].name() << std::endl;
 	optimize();
-	apply_grouping();
+
+	std::cout << "optimized, start of processing: " << _start_of_processing << std::endl;
 
 	// by construction, if a node is at node_id nid, all it's inputs
 	// appear before
@@ -436,7 +514,7 @@ graph::process( node_id nid, node &n )
 
 	std::vector<any> inputs;
 
-	for ( node_id c = 0; c <= nid; ++c )
+	for ( node_id c = _start_of_processing; c <= nid; ++c )
 	{
 		node &curN = _nodes[c];
 		if ( curN.op() == nullop )
@@ -445,6 +523,24 @@ graph::process( node_id nid, node &n )
 			continue;
 
 		std::cout << "  computing node " << c << std::endl;
+		const op &o = _ops[curN.op()];
+
+		if ( curN.in_subgroup() )
+		{
+			size_t sgi = _node_to_subgroup[c];
+			subgroup &sg = _subgroups[sgi];
+			std::cout << "   -> processing subgroup " << sgi << std::endl;
+			if ( sg.processed() )
+			{
+				std::cout << "       -> subgroup already processed" << std::endl;
+				continue;
+			}
+//			precondition( o.subgroup_handler(), "op {0} in subgroup, but no subgroup_handler", o.name() );
+//			o.subgroup_handler().process( sg );
+//			sg.processed( true );
+//			continue;
+		}
+
 		size_t nInputs = curN.input_size();
 		inputs.resize( nInputs );
 		for ( size_t i = 0; i != nInputs; ++i )
@@ -455,7 +551,6 @@ graph::process( node_id nid, node &n )
 		}
 		std::cout << "    -> inputs assigned, calling function" << std::endl;
 
-		const op &o = _ops[curN.op()];
 		curN.value() = o.function().process( *this, curN.dims(), inputs );
 
 		std::cout << "    -> updating outputs..." << std::endl;
@@ -484,6 +579,8 @@ graph::process( node_id nid, node &n )
 		}
 	}
 
+	clear_grouping();
+
 	return n.value();
 }
 
@@ -492,6 +589,10 @@ graph::process( node_id nid, node &n )
 void
 graph::optimize( void )
 {
+	_start_of_processing = 0;
+	clean_graph();
+	clear_grouping();
+
 	for ( size_t n = 0, N = _nodes.size(); n != N; ++n )
 	{
 		node &cur = _nodes[n];
@@ -500,6 +601,67 @@ graph::optimize( void )
 		if ( cur.output_size() == 1 && ! cur.has_ref() )
 			cur.set_rvalue();
 	}
+
+	move_constants();
+	apply_peephole();
+	apply_grouping();
+
+	if ( ! _subgroups.empty() )
+	{
+		// now need to re-order any group's inputs to before the first node in the group
+		std::vector<node_id> neworder( _nodes.size(), nullnode );
+		std::iota( neworder.begin(), neworder.end(), 0 );
+	
+		for ( auto &sg: _subgroups )
+		{
+			node_id lastIn = sg.last_input();
+			if ( lastIn == nullnode )
+				continue;
+
+			node_id firstMember = sg.first_member();
+			if ( firstMember < lastIn )
+			{
+				std::cout << "Need to move inputs around first member " << firstMember << " last input " << lastIn << std::endl;
+			}
+		}
+	}
+}
+
+////////////////////////////////////////
+
+void
+graph::move_constants( void )
+{
+	node_id curConstantPos = 0;
+	node_id curPos = 0;
+	node_id N = static_cast<node_id>( _nodes.size() );
+	for ( ; curPos != N; ++curPos )
+	{
+		if ( _nodes[curPos].value().empty() )
+			break;
+		++curConstantPos;
+	}
+	for ( ; curPos != N; ++curPos )
+	{
+		if ( _nodes[curPos].value().empty() )
+			continue;
+
+		if ( curPos != curConstantPos )
+		{
+//			std::cout << "moving constant at " << curPos << " to " << curConstantPos << std::endl;
+			rotate_node( curPos, curConstantPos );
+		}
+
+		++curConstantPos;
+	}
+	_start_of_processing = curConstantPos;
+}
+
+////////////////////////////////////////
+
+void
+graph::apply_peephole( void )
+{
 }
 
 ////////////////////////////////////////
@@ -507,6 +669,218 @@ graph::optimize( void )
 void
 graph::apply_grouping( void )
 {
+	for ( node_id n = 0, N = static_cast<node_id>( _nodes.size() ); n != N; ++n )
+	{
+		node &cur = _nodes[n];
+		// skip dead nodes
+		if ( cur.op() == nullop )
+			continue;
+		// and nodes with values
+		if ( ! cur.value().empty() )
+			continue;
+
+		const op &curOp = _ops[cur.op()];
+		switch ( curOp.processing_style() )
+		{
+			case op::style::ONE_TO_ONE:
+			{
+				size_t subI = size_t(-1);
+				for ( size_t i = 0, nI = cur.input_size(); i != nI; ++i )
+				{
+					node_id curIn = cur.input( i );
+					node &curInN = _nodes[curIn];
+
+					if ( curInN.in_subgroup() && ! curInN.has_ref() )
+					{
+						// if the result type doesn't match, don't group
+						if ( curOp.function().result_type() != _ops[curInN.op()].function().result_type() )
+						{
+							std::cout << "Skipping grouping " << n << " with " << curIn << " because function result type doesn't match" << std::endl;
+							continue;
+						}
+
+						if ( curInN.dims() != cur.dims() )
+						{
+							std::cout << "Skipping grouping " << n << " with " << curIn << " because dimensions are different" << std::endl;
+							continue;
+						}
+
+						size_t cIdx = find_subgroup( curIn );
+						if ( subI == size_t(-1) || subI == cIdx )
+						{
+							_subgroups[cIdx].add( n );
+							_node_to_subgroup[n] = cIdx;
+							cur.set_in_subgroup();
+							subI = cIdx;
+							break;
+						}
+						else
+						{
+							subI = merge_subgroups( subI, cIdx );
+							_subgroups[subI].add( n );
+							_node_to_subgroup[n] = subI;
+							cur.set_in_subgroup();
+							break;
+						}
+					}
+				}
+				if ( subI == size_t(-1) )
+				{
+					_node_to_subgroup[n] = _subgroups.size();
+					cur.set_in_subgroup();
+					_subgroups.emplace_back( subgroup( *this, n ) );
+				}
+				break;
+			}
+			case op::style::N_TO_ONE:
+				_node_to_subgroup[n] = _subgroups.size();
+				cur.set_in_subgroup();
+				_subgroups.emplace_back( subgroup( *this, n ) );
+				break;
+			case op::style::MULTI_THREADED:
+			case op::style::SINGLE_THREADED:
+			case op::style::SOLITARY:
+			case op::style::SIMPLE:
+			case op::style::VALUE:
+				for ( size_t i = 0, nI = cur.input_size(); i != nI; ++i )
+				{
+					node_id curIn = cur.input( i );
+					if ( _nodes[curIn].in_subgroup() )
+					{
+						split_subgroup( find_subgroup( curIn ), curIn );
+					}
+				}
+				break;
+		}
+	}
+}
+
+////////////////////////////////////////
+
+void
+graph::clear_grouping( void )
+{
+	_subgroups.clear();
+	_node_to_subgroup.clear();
+	for ( node_id n = 0, N = static_cast<node_id>( _nodes.size() ); n != N; ++n )
+		_nodes[n].clear_in_subgroup();
+}
+
+////////////////////////////////////////
+
+size_t
+graph::find_subgroup( node_id n ) const
+{
+	auto x = _node_to_subgroup.find( n );
+	if ( x == _node_to_subgroup.end() )
+		return size_t(-1);
+	return x->second;
+}
+
+////////////////////////////////////////
+
+size_t
+graph::merge_subgroups( size_t a, size_t b )
+{
+	size_t ret = a;
+	size_t from = b;
+	if ( _subgroups[a].size() < _subgroups[b].size() )
+	{
+		ret = b;
+		from = a;
+	}
+
+	for ( auto f: _subgroups[from].members() )
+	{
+		_subgroups[ret].add( f );
+		_node_to_subgroup[f] = ret;
+	}
+	_subgroups[from].clear();
+
+	return ret;
+}
+
+////////////////////////////////////////
+
+void
+graph::split_subgroup( size_t i, node_id n )
+{
+	subgroup &cur = _subgroups[i];
+
+	if ( cur.is_output( n ) )
+		return;
+
+	subgroup nI( *this );
+	size_t newIdx = _subgroups.size();
+	_subgroups.emplace_back( subgroup( *this ) );
+	subgroup &nAfter = _subgroups.back();
+	for ( node_id x: cur.members() )
+	{
+		if ( x <= n )
+			nI.add( x );
+		else
+		{
+			nAfter.add( x );
+			_node_to_subgroup[x] = newIdx;
+		}
+	}
+	cur.swap( nI );
+}
+
+////////////////////////////////////////
+
+void
+graph::rotate_node( node_id oldpos, node_id newpos )
+{
+	if ( oldpos == newpos )
+		return;
+
+	node tmpStore;
+	std::swap( _nodes[oldpos], tmpStore );
+
+	int dir = 1;
+	if ( newpos < oldpos )
+		dir = -1;
+
+	const node_id tmpPos = nullnode - 1;
+	// put the temporary node at a temporary position and then update
+	// after
+	for ( size_t i = 0, nC = tmpStore.output_size(); i != nC; ++i )
+	{
+		node_id &outN = tmpStore.output(i);
+		precondition( newpos < outN, "attempt to move a node {0} past a node {1} who has it as an input", oldpos, outN );
+
+		_nodes[outN].update_input( oldpos, tmpPos );
+	}
+	for ( size_t i = 0, nC = tmpStore.input_size(); i != nC; ++i )
+	{
+		node_id &inN = tmpStore.input(i);
+		precondition( newpos > inN, "attempt to move a node {0} before one of it's inputs {1}", oldpos, inN );
+
+		_nodes[inN].update_output( oldpos, tmpPos );
+	}
+
+	node_id cur = oldpos;
+	while ( cur != newpos )
+	{
+		node_id other = cur + dir;
+		std::swap( _nodes[other], _nodes[cur] );
+		node &curN = _nodes[cur];
+		for ( size_t i = 0, nC = curN.output_size(); i != nC; ++i )
+			_nodes[curN.output(i)].update_input( other, cur );
+		for ( size_t i = 0, nC = curN.input_size(); i != nC; ++i )
+			_nodes[curN.input(i)].update_output( other, cur );
+
+		cur += dir;
+	}
+
+	std::swap( _nodes[newpos], tmpStore );
+	node &nnode = _nodes[newpos];
+	// patch up final position
+	for ( size_t i = 0, nC = nnode.output_size(); i != nC; ++i )
+		_nodes[nnode.output(i)].update_input( tmpPos, newpos );
+	for ( size_t i = 0, nC = nnode.input_size(); i != nC; ++i )
+		_nodes[nnode.input(i)].update_output( tmpPos, newpos );
 }
 
 ////////////////////////////////////////
@@ -514,7 +888,7 @@ graph::apply_grouping( void )
 node_id
 graph::find_node( const hash::value &hv )
 {
-	std::cout << "searching for hv " << hv << std::endl;
+//	std::cout << "searching for hv " << hv << std::endl;
 	auto i = _hash_to_node.find( hv );
 	if ( i != _hash_to_node.end() )
 		return i->second;
@@ -563,12 +937,12 @@ graph::add_node( op_id op, any value, const dimensions &d, std::initializer_list
 		if ( colCheck.op() != op || colCheck.input_size() != inputs.size() || colCheck.dims() != d )
 			throw_logic( "Hash collision with existing node {0} adding opname '{1}'", n, _ops[op].name() );
 
-		std::cout << "re-using existing node " << n << std::endl;
+//		std::cout << "re-using existing node " << n << std::endl;
 		return n;
 	}
 	
 	n = static_cast<node_id>( _nodes.size() );
-	std::cout << "graph " << this << ": new node " << n << " op " << _ops[op].name() << ": " << hv << std::endl;
+//	std::cout << "graph " << this << ": new node " << n << " op " << _ops[op].name() << ": " << hv << std::endl;
 
 	_nodes.emplace_back( node( op, d, inputs, std::move( value ), hv ) );
 	_hash_to_node[hv] = n;
@@ -592,12 +966,12 @@ graph::add_node( op_id op, any value, const dimensions &d, const std::vector<nod
 		if ( colCheck.op() != op || colCheck.input_size() != inputs.size() || colCheck.dims() != d )
 			throw_logic( "Hash collision with existing node {0} ({1}, {2}) adding opname '{3}' dims {4}: {5} vs {6}", n, _ops[colCheck.op()].name(), colCheck.dims(), _ops[op].name(), d, colCheck.hash_value(), hv );
 		
-		std::cout << "re-using existing node " << n << std::endl;
+//		std::cout << "re-using existing node " << n << std::endl;
 		return n;
 	}
 	
 	n = static_cast<node_id>( _nodes.size() );
-	std::cout << "graph " << this << ": new node " << n << " op " << _ops[op].name() << ": " << hv << std::endl;
+//	std::cout << "graph " << this << ": new node " << n << " op " << _ops[op].name() << ": " << hv << std::endl;
 	_nodes.emplace_back( node( op, d, inputs, std::move( value ), hv ) );
 	_hash_to_node[hv] = n;
 

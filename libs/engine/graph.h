@@ -30,6 +30,7 @@
 #include "types.h"
 #include "node.h"
 #include "registry.h"
+#include "subgroup.h"
 
 ////////////////////////////////////////
 
@@ -91,6 +92,7 @@ public:
 	void remove_node( node_id n );
 
 	inline size_t size( void ) const { return _nodes.size(); }
+	inline node &operator[]( node_id n ) { return _nodes[n]; }
 	inline const node &operator[]( node_id n ) const { return _nodes[n]; }
 
 	inline iterator begin( void ) { return _nodes.begin(); }
@@ -107,13 +109,16 @@ public:
 	inline const_reverse_iterator rend( void ) const { return _nodes.rend(); }
 	inline const_reverse_iterator crend( void ) const { return _nodes.crend(); }
 
+	void optimize( void );
+
 	// remove
 	void clean_graph( void );
 
 	void dispatch_threads( const std::function<void(int, int)> &f, int start, int N );
 
-	void dump_dot( std::ostream &os );
-	void dump_refs( std::ostream &os );
+	void dump_dot( const std::string &fn, bool incHash = false ) const;
+	void dump_dot( std::ostream &os, bool incHash = false ) const;
+	void dump_refs( std::ostream &os ) const;
 
 private:
 	graph( void ) = delete;
@@ -123,9 +128,16 @@ private:
 	graph &operator=( graph && ) = delete;
 
 	const any &process( node_id nid, node &n );
-	void optimize( void );
-	void apply_grouping( void );
+	void move_constants( void );
+	void apply_peephole( void );
 
+	void apply_grouping( void );
+	void clear_grouping( void );
+	size_t find_subgroup( node_id n ) const;
+	size_t merge_subgroups( size_t a, size_t b );
+	void split_subgroup( size_t i, node_id n );
+
+	void rotate_node( node_id oldpos, node_id newpos );
 	node_id find_node( const hash::value &hv );
 
 	node_id add_node( op_id op, any value, const dimensions &d, std::initializer_list<node_id> inputs );
@@ -149,6 +161,9 @@ private:
 	typedef std::vector< std::pair<rewrite_notify,void *> > reference_list;
 	std::map<node_id, reference_list> _ref_counts;
 	std::map<hash::value, node_id> _hash_to_node;
+	std::vector<subgroup> _subgroups;
+	std::map<node_id, size_t> _node_to_subgroup;
+	node_id _start_of_processing = 0;
 };
 
 ////////////////////////////////////////

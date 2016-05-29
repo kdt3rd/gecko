@@ -109,15 +109,7 @@ node::node( node &&n ) noexcept
 
 node &node::operator=( node &&n ) noexcept
 {
-	std::swap( _hash, n._hash );
-	std::swap( _dims, n._dims );
-	_value = std::move( n._value );
-	std::swap( _edges, n._edges );
-	std::swap( _input_count, n._input_count );
-	std::swap( _output_count, n._output_count );
-	std::swap( _storage_count, n._storage_count );
-	std::swap( _op_id, n._op_id );
-	std::swap( _flags, n._flags );
+	swap( n );
 
 	return *this;
 }
@@ -155,7 +147,7 @@ node::remove_output( node_id o )
 				break;
 			++outs;
 		}
-		std::cout << this << ": searching for node " << o << " found index " << (outs-beginOuts) << std::endl;
+//		std::cout << this << ": searching for node " << o << " found index " << (outs-beginOuts) << std::endl;
 		postcondition( outs != endOuts, "node id {0} not an output of this node", o );
 		std::rotate( outs, outs + 1, endOuts );
 		--_output_count;
@@ -165,6 +157,47 @@ node::remove_output( node_id o )
 		precondition( output( 0 ) == o, "node id {0} not an output of this node", o );
 		_output_count = 0;
 	}
+}
+
+////////////////////////////////////////
+
+void
+node::update_input( node_id oldid, node_id newid )
+{
+	for ( uint32_t i = 0; i < _input_count; ++i )
+	{
+		if ( _edges[i] == oldid )
+			_edges[i] = newid;
+	}
+}
+
+////////////////////////////////////////
+
+void
+node::update_output( node_id oldid, node_id newid )
+{
+	node_id *outs = _edges + _input_count;
+	for ( uint32_t i = 0; i < _output_count; ++i )
+	{
+		if ( outs[i] == oldid )
+			outs[i] = newid;
+	}
+}
+
+////////////////////////////////////////
+
+void
+node::swap( node &o )
+{
+	std::swap( _hash, o._hash );
+	std::swap( _dims, o._dims );
+	std::swap( _value, o._value );
+	std::swap( _edges, o._edges );
+	std::swap( _input_count, o._input_count );
+	std::swap( _output_count, o._output_count );
+	std::swap( _storage_count, o._storage_count );
+	std::swap( _op_id, o._op_id );
+	std::swap( _flags, o._flags );
 }
 
 ////////////////////////////////////////
