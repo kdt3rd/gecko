@@ -7,5 +7,6 @@ lib = library "engine"
 	"op.cpp";
 	"computed_value.cpp";
 	"float_ops.cpp";
+	"subgroup.cpp";
   }
   libs{ "base" }
