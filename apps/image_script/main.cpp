@@ -80,28 +80,23 @@ int safemain( int argc, char *argv[] )
 
 	// should only be one reference left at this point
 //	avev.graph_ptr()->dump_refs( std::cout );
+	avev.graph_ptr()->dump_dot( "graphOrig.dot" );
 
-	std::ofstream gdot( "graph.dot" );
-	avev.graph_ptr()->dump_dot( gdot );
-	std::cout << "saved graph to graph.dot" << std::endl;
+//	avev.graph_ptr()->clean_graph();
+//	avev.graph_ptr()->dump_dot( "graphClean.dot" );
 
-	avev.graph_ptr()->clean_graph();
-
-	std::ofstream gdot2( "graph2.dot" );
-	avev.graph_ptr()->dump_dot( gdot2 );
-	std::cout << "saved cleaned graph to graph2.dot" << std::endl;
-
+	avev.graph_ptr()->optimize();
+	avev.graph_ptr()->dump_dot( "graphOpt.dot" );
+	
 	// force the graph to be processed
 	std::cout << "Initiating processing..." << std::endl;
 	double ave = static_cast<double>( avev );
 	std::cout << "Processing finished!" << std::endl;
-
-	avev.graph_ptr()->clean_graph();
-	std::ofstream gdot3( "graph3.dot" );
-	avev.graph_ptr()->dump_dot( gdot3 );
-	std::cout << "saved cleaned graph after process to graph3.dot" << std::endl;
-
 	std::cout << "ave: " << ave << std::endl;
+
+//	avev.graph_ptr()->clean_graph();
+//	avev.graph_ptr()->dump_dot( "graphClean.dot" );
+
 #if 0
 	base::cmd_line options(
 		argv[0],
