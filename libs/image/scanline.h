@@ -55,14 +55,21 @@ public:
 	scanline( void );
 	scanline( const float *b, int w, int s, bool dup = false );
 	scanline( float *b, int w, int s );
+	scanline( int w );
 	scanline( const scanline &o );
 	scanline( scanline &&o );
 	scanline &operator=( const scanline &o );
 	scanline &operator=( scanline &&o );
 	~scanline( void );
 
+	inline bool empty( void ) const;
+	inline bool is_reference( void ) const;
+	inline bool unique( void ) const;
+
 	inline int width( void ) const;
 	inline int stride( void ) const;
+
+	void clear( void );
 
 	inline float *get( void );
 	inline const float *get( void ) const;
@@ -93,12 +100,38 @@ public:
 	inline float *end( void );
 	inline const float *end( void ) const;
 	inline const float *cend( void ) const;
+
+	void swap( scanline &o );
 private:
 	std::shared_ptr<float> _ptr;
 	const float *_ref_ptr = nullptr;
 	int _width = 0;
 	int _stride = 0;
 };
+
+////////////////////////////////////////
+
+inline bool
+scanline::empty( void ) const
+{
+	return _width == 0;
+}
+
+////////////////////////////////////////
+
+inline bool
+scanline::is_reference( void ) const
+{
+	return !( unique() );
+}
+
+////////////////////////////////////////
+
+inline bool
+scanline::unique( void ) const
+{
+	return _ptr && _ptr.unique();
+}
 
 ////////////////////////////////////////
 
@@ -228,7 +261,22 @@ inline const float *scanline::cend( void ) const
 	return get() + _width;
 }
 
+inline void swap( scanline &a, scanline &b )
+{
+	a.swap( b );
+}
+
 } // namespace image
+
+namespace std
+{
+
+inline void swap( image::scanline &a, image::scanline &b )
+{
+	a.swap( b );
+}
+
+}
 
 
 

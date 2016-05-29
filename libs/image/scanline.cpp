@@ -57,6 +57,13 @@ scanline::scanline( float *b, int w, int s )
 
 ////////////////////////////////////////
 
+scanline::scanline( int w )
+	: _ptr( allocator::get().scanline( _stride, w ) ), _ref_ptr( _ptr.get() ), _width( w )
+{
+}
+
+////////////////////////////////////////
+
 scanline::scanline( const scanline &o )
 	: _ptr( o._ptr ), _ref_ptr( o._ref_ptr ),
 	  _width( o._width ), _stride( o._stride )
@@ -101,6 +108,17 @@ scanline &scanline::operator=( scanline &&o )
 
 scanline::~scanline( void )
 {
+}
+
+////////////////////////////////////////
+
+void
+scanline::clear( void )
+{
+	_ptr.reset();
+	_ref_ptr = nullptr;
+	_width = 0;
+	_stride = 0;
 }
 
 ////////////////////////////////////////
