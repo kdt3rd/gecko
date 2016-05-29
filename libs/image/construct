@@ -5,6 +5,7 @@ lib = library "image"
 	"plane.cpp";
 	"image.cpp";
 	"scanline.cpp";
+	"scanline_group.cpp";
 	"op_registry.cpp";
 	"plane_math.cpp";
 	"plane_stats.cpp";
