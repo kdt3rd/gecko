@@ -20,43 +20,55 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#pragma once
+#include "plane_math.h"
 
-#include "scanline.h"
-
-namespace engine { class registry; }
+#ifdef __SSE__
+# if defined(LINUX) || defined(__linux__)
+#  include <x86intrin.h>
+# else
+#  include <xmmintrin.h>
+#  include <immintrin.h>
+# endif
+#endif
 
 ////////////////////////////////////////
 
 namespace image
 {
+namespace sse4
+{
 
-/// declares the following operators:
-///
-/// void assign_value( scanline &dest, float v );
-///
-/// void add_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB );
-/// void add_planenumber( scanline &dest, const scanline &srcA, float v );
-///
-/// void sub_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB );
-///
-/// void mul_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB );
-/// void mul_planenumber( scanline &dest, const scanline &srcA, float v );
-///
-/// if srcB == 0 then out=0 else out = srcA/srcB
-/// void div_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB );
-///
-/// if src == 0 then out=0 else out = v/src
-/// void div_numberplane( scanline &dest, float v, const scanline &src );
-///
-/// a * b + c
-/// void muladd_planeplaneplane( scanline &dest, const scanline &srcA, const scanline &srcB, const scanline &srcC );
-///
-/// src * a + b
-/// void muladd_planenumbernumber( scanline &dest, const scanline &src, float a, float b );
-void add_plane_math( engine::registry &r );
+////////////////////////////////////////
 
-} // namespace image
+void div_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB )
+{
+	__m128 z = _mm_setzero_ps();
+	for ( int c = 0, C = dest.chunks4(); c != C; ++c )
+	{
+		__m128 b = srcB.load4( c );
+		__m128 zMask = _mm_cmpeq_ps( b, z );
+		dest.store4( _mm_blendv_ps( _mm_div_ps( srcA.load4( c ), b ), b, zMask ), c );
+	}
+}
+
+////////////////////////////////////////
+
+void div_numberplane( scanline &dest, float v, const scanline &src )
+{
+	__m128 z = _mm_setzero_ps();
+	__m128 vx = _mm_set1_ps( v );
+	for ( int c = 0, C = dest.chunks4(); c != C; ++c )
+	{
+		__m128 b = src.load4( c );
+		__m128 zMask = _mm_cmpeq_ps( b, z );
+		dest.store4( _mm_blendv_ps( _mm_div_ps( vx, b ), b, zMask ), c );
+	}
+}
+
+////////////////////////////////////////
+
+} // sse4
+} // image
 
 
 

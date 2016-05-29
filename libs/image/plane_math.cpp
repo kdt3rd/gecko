@@ -24,6 +24,8 @@
 #include "scanline_process.h"
 #include <base/cpu_features.h>
 #include <iostream>
+#include "sse3/plane_math.h"
+#include "sse4/plane_math.h"
 
 ////////////////////////////////////////
 
@@ -32,7 +34,7 @@ namespace image
 
 ////////////////////////////////////////
 
-void assign_value( scanline &dest, float v )
+static void assign_value( scanline &dest, float v )
 {
 	for ( int x = 0, N = dest.width(); x != N; ++x )
 		dest[x] = v;
@@ -40,7 +42,7 @@ void assign_value( scanline &dest, float v )
 
 ////////////////////////////////////////
 
-void add_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB )
+static void add_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB )
 {
 	for ( int x = 0, N = dest.width(); x != N; ++x )
 		dest[x] = srcA[x] + srcB[x];
@@ -48,7 +50,7 @@ void add_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB 
 
 ////////////////////////////////////////
 
-void add_planenumber( scanline &dest, const scanline &srcA, float v )
+static void add_planenumber( scanline &dest, const scanline &srcA, float v )
 {
 	for ( int x = 0, N = dest.width(); x != N; ++x )
 		dest[x] = srcA[x] - v;
@@ -56,7 +58,7 @@ void add_planenumber( scanline &dest, const scanline &srcA, float v )
 
 ////////////////////////////////////////
 
-void sub_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB )
+static void sub_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB )
 {
 	for ( int x = 0, N = dest.width(); x != N; ++x )
 		dest[x] = srcA[x] - srcB[x];
@@ -64,7 +66,7 @@ void sub_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB 
 
 ////////////////////////////////////////
 
-void mul_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB )
+static void mul_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB )
 {
 	for ( int x = 0, N = dest.width(); x != N; ++x )
 		dest[x] = srcA[x] * srcB[x];
@@ -72,7 +74,7 @@ void mul_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB 
 
 ////////////////////////////////////////
 
-void mul_planenumber( scanline &dest, const scanline &srcA, float v )
+static void mul_planenumber( scanline &dest, const scanline &srcA, float v )
 {
 	for ( int x = 0, N = dest.width(); x != N; ++x )
 		dest[x] = srcA[x] * v;
@@ -80,7 +82,7 @@ void mul_planenumber( scanline &dest, const scanline &srcA, float v )
 
 ////////////////////////////////////////
 
-void div_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB )
+static void div_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB )
 {
 	for ( int x = 0, N = dest.width(); x != N; ++x )
 	{
@@ -94,7 +96,7 @@ void div_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB 
 
 ////////////////////////////////////////
 
-void div_numberplane( scanline &dest, float v, const scanline &src )
+static void div_numberplane( scanline &dest, float v, const scanline &src )
 {
 	for ( int x = 0, N = dest.width(); x != N; ++x )
 	{
@@ -108,7 +110,7 @@ void div_numberplane( scanline &dest, float v, const scanline &src )
 
 ////////////////////////////////////////
 
-void muladd_planeplaneplane( scanline &dest, const scanline &srcA, const scanline &srcB, const scanline &srcC )
+static void muladd_planeplaneplane( scanline &dest, const scanline &srcA, const scanline &srcB, const scanline &srcC )
 {
 	for ( int x = 0, N = dest.width(); x != N; ++x )
 		dest[x] = srcA[x] * srcB[x] + srcC[x];
@@ -116,7 +118,7 @@ void muladd_planeplaneplane( scanline &dest, const scanline &srcA, const scanlin
 
 ////////////////////////////////////////
 
-void muladd_planenumbernumber( scanline &dest, const scanline &src, float a, float b )
+static void muladd_planenumbernumber( scanline &dest, const scanline &src, float a, float b )
 {
 	for ( int x = 0, N = dest.width(); x != N; ++x )
 		dest[x] = src[x] * a + b;
@@ -129,21 +131,21 @@ void add_plane_math( engine::registry &r )
 	using namespace engine;
 //	r.add( op( "add_planeplane", base::choose_runtime( add_planeplane, { { cpu::simd_feature::AVX, avx::add_planeplane } } ), scanline_plane_operator( add_planeplane ), op::one_to_one ) );
 
-	r.add( op( "assign_plane", base::choose_runtime( assign_value ), scanline_plane_adapter<decltype(assign_value)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "assign_plane", base::choose_runtime( assign_value, { { base::cpu::simd_feature::SSE3, sse3::assign_value } } ), scanline_plane_adapter<decltype(assign_value)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "add_planeplane", base::choose_runtime( add_planeplane ), scanline_plane_adapter<decltype(add_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
-	r.add( op( "add_planenumber", base::choose_runtime( add_planenumber ), scanline_plane_adapter<decltype(add_planenumber)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "add_planeplane", base::choose_runtime( add_planeplane, { { base::cpu::simd_feature::SSE3, sse3::add_planeplane } } ), scanline_plane_adapter<decltype(add_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "add_planenumber", base::choose_runtime( add_planenumber, { { base::cpu::simd_feature::SSE3, sse3::add_planenumber } } ), scanline_plane_adapter<decltype(add_planenumber)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "sub_planeplane", base::choose_runtime( sub_planeplane ), scanline_plane_adapter<decltype(sub_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "sub_planeplane", base::choose_runtime( sub_planeplane, { { base::cpu::simd_feature::SSE3, sse3::sub_planeplane } } ), scanline_plane_adapter<decltype(sub_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "mul_planeplane", base::choose_runtime( mul_planeplane ), scanline_plane_adapter<decltype(mul_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
-	r.add( op( "mul_planenumber", base::choose_runtime( mul_planenumber ), scanline_plane_adapter<decltype(mul_planenumber)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "mul_planeplane", base::choose_runtime( mul_planeplane, { { base::cpu::simd_feature::SSE3, sse3::mul_planeplane } } ), scanline_plane_adapter<decltype(mul_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "mul_planenumber", base::choose_runtime( mul_planenumber, { { base::cpu::simd_feature::SSE3, sse3::mul_planenumber } } ), scanline_plane_adapter<decltype(mul_planenumber)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "div_planeplane", base::choose_runtime( div_planeplane ), scanline_plane_adapter<decltype(div_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
-	r.add( op( "div_numberplane", base::choose_runtime( div_numberplane ), scanline_plane_adapter<decltype(div_numberplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "div_planeplane", base::choose_runtime( div_planeplane, { { base::cpu::simd_feature::SSE3, sse3::div_planeplane }, { base::cpu::simd_feature::SSE42, sse4::div_planeplane } } ), scanline_plane_adapter<decltype(div_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "div_numberplane", base::choose_runtime( div_numberplane, { { base::cpu::simd_feature::SSE3, sse3::div_numberplane }, { base::cpu::simd_feature::SSE42, sse4::div_numberplane } } ), scanline_plane_adapter<decltype(div_numberplane)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "muladd_planeplaneplane", base::choose_runtime( muladd_planeplaneplane ), scanline_plane_adapter<decltype(muladd_planeplaneplane)>(), dispatch_scan_processing, op::one_to_one ) );
-	r.add( op( "muladd_planenumbernumber", base::choose_runtime( muladd_planenumbernumber ), scanline_plane_adapter<decltype(muladd_planenumbernumber)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "muladd_planeplaneplane", base::choose_runtime( muladd_planeplaneplane, { { base::cpu::simd_feature::SSE3, sse3::muladd_planeplaneplane } } ), scanline_plane_adapter<decltype(muladd_planeplaneplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "muladd_planenumbernumber", base::choose_runtime( muladd_planenumbernumber, { { base::cpu::simd_feature::SSE3, sse3::muladd_planenumbernumber } } ), scanline_plane_adapter<decltype(muladd_planenumbernumber)>(), dispatch_scan_processing, op::one_to_one ) );
 }
 
 ////////////////////////////////////////

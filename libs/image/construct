@@ -1,4 +1,14 @@
 
+sse3src = source(
+	"sse3/plane_math.cpp"
+);
+sse3src:override_option( "vectorize", "SSE3" );
+
+sse4src = source(
+	"sse4/plane_math.cpp"
+);
+sse4src:override_option( "vectorize", "SSE4" );
+
 lib = library "image"
   source{
 	"allocator.cpp";
@@ -10,5 +20,7 @@ lib = library "image"
 	"op_registry.cpp";
 	"plane_math.cpp";
 	"plane_stats.cpp";
+	sse3src;
+	sse4src;
   }
   libs{ "engine" }
