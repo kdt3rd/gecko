@@ -97,9 +97,14 @@ public:
 	    typedef decay<U> T;
 	    auto d = dynamic_cast<derived<T>*>( _ptr.get() );
 	    if ( !d )
-	        throw_bad_any_cast( "bad any_cast: request type {0} but ptr is type {1}", demangle( typeid(U) ), demangle( typeid(_ptr.get()) ) );
+		{
+			if ( empty() )
+				throw_bad_any_cast( "bad any_cast: request type {0} but any is empty", demangle( typeid(U) ) );
+			else
+				throw_bad_any_cast( "bad any_cast: request type {0} but ptr is type {1}", demangle( typeid(U) ), demangle( typeid(*(_ptr.get())) ) );
+		}
 
-	    return d->_value;
+		return d->_value;
 	}
 
 	/// @brief Access the any value as type const U
@@ -109,7 +114,12 @@ public:
 	    typedef decay<U> T;
 	    auto d = dynamic_cast<derived<T>*>( _ptr.get() );
 	    if ( !d )
-	        throw_bad_any_cast( "bad any_cast: request type {0} but ptr is type {1}", demangle( typeid(U) ), demangle( typeid(_ptr) ) );
+		{
+			if ( empty() )
+				throw_bad_any_cast( "bad any_cast: request type {0} but any is empty", demangle( typeid(U) ) );
+			else
+				throw_bad_any_cast( "bad any_cast: request type {0} but ptr is type {1}", demangle( typeid(U) ), demangle( typeid(*(_ptr.get())) ) );
+		}
 
 		return d->_value;
 	}
