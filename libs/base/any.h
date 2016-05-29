@@ -3,6 +3,7 @@
 
 #include <type_traits>
 #include <utility>
+#include <algorithm>
 #include <typeinfo>
 #include <string>
 #include <cassert>
@@ -151,6 +152,12 @@ public:
 		else
 			s << "<any: null>";
 	}
+
+	inline void swap( any &o )
+	{
+		std::swap( _ptr, o._ptr );
+	}
+
 private:
 	class any_base
 	{
@@ -206,7 +213,24 @@ T any_cast( any &a )
 	return a.as<T>();
 }
 
+inline void swap( any &a, any &b )
+{
+	a.swap( b );
+}
+
 ////////////////////////////////////////
 
+} // namespace base
+
+// in case we call std::swap
+namespace std
+{
+
+inline void swap( base::any &a, base::any &b )
+{
+	base::swap( a, b );
 }
+
+} // namespace std
+
 
