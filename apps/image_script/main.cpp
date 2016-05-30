@@ -24,6 +24,7 @@
 #include <base/scope_guard.h>
 #include <base/contract.h>
 #include <base/cmd_line.h>
+#include <base/cpu_features.h>
 #include <base/posix_file_system.h>
 #include <media/reader.h>
 #include <media/writer.h>
@@ -83,6 +84,10 @@ plane test_refcount( void )
 
 int safemain( int argc, char *argv[] )
 {
+	std::cout << "CPU features:\n";
+	base::cpu::output( std::cout );
+	std::cout << "\nStarting graph generation..." << std::endl;
+
 	auto avev = sum( test_refcount() ) / static_cast<double>( 1920 * 1080 );
 //	std::cout << "sum created: id " << avev.id() << std::endl;
 
