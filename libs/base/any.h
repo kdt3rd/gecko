@@ -101,7 +101,7 @@ public:
 			if ( empty() )
 				throw_bad_any_cast( "bad any_cast: request type {0} but any is empty", demangle( typeid(U) ) );
 			else
-				throw_bad_any_cast( "bad any_cast: request type {0} but ptr is type {1}", demangle( typeid(U) ), demangle( typeid(*(_ptr.get())) ) );
+				throw_bad_any_cast( "bad any_cast: request type {0} but ptr is type {1}", demangle( typeid(U) ), demangle( typeid(_ptr.get()) ) );
 		}
 
 		return d->_value;
@@ -118,7 +118,7 @@ public:
 			if ( empty() )
 				throw_bad_any_cast( "bad any_cast: request type {0} but any is empty", demangle( typeid(U) ) );
 			else
-				throw_bad_any_cast( "bad any_cast: request type {0} but ptr is type {1}", demangle( typeid(U) ), demangle( typeid(*(_ptr.get())) ) );
+				throw_bad_any_cast( "bad any_cast: request type {0} but ptr is type {1}", demangle( typeid(U) ), demangle( typeid(_ptr.get()) ) );
 		}
 
 		return d->_value;
