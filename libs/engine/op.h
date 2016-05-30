@@ -22,174 +22,16 @@
 
 #pragma once
 
-#include <array>
-#include <vector>
-#include <memory>
-#include <functional>
-#include <typeinfo>
 #include <base/const_string.h>
-#include <base/contract.h>
-#include <base/variadic_function.h>
-#include "types.h"
+#include "op_functions.h"
 
 ////////////////////////////////////////
 
 namespace engine
 {
 
-class graph;
 class subgroup;
-class subgroup_function;
 
-/// @brief base class for function storage used by op.
-///
-/// An operator function has some attributes that will be queried in
-/// addition to the function being called.
-class op_function
-{
-public:
-	virtual ~op_function( void ) noexcept;
-
-	virtual const std::type_info &result_type( void ) const = 0;
-	virtual size_t input_size( void ) const = 0;
-	virtual const std::type_info &input_type( size_t I ) const = 0;
-
-	virtual any process( graph &g, const dimensions &d, const std::vector<any> &inputs ) const = 0;
-
-	virtual any create_value( const dimensions &d ) const = 0;
-
-	virtual std::shared_ptr<subgroup_function> create_group_function( void ) const = 0;
-	virtual void dispatch_group( subgroup &s, const dimensions &d ) const = 0;
-};
-
-template <typename Functor, typename GroupFunc>
-class opfunc_one_to_one : public op_function
-{
-public:
-	typedef typename base::function_traits<Functor>::function process_func;
-	typedef std::function<void(subgroup &, const dimensions &)> group_dispatch;
-
-	opfunc_one_to_one( Functor f, const group_dispatch &g )
-		: _p( base::to_function( f ) ), _dispatch( g )
-	{
-	}
-	virtual ~opfunc_one_to_one( void ) noexcept
-	{
-	}
-
-	virtual const std::type_info &result_type( void ) const override
-	{
-		return typeid(typename group_dispatch::result_type);
-	}
-
-	virtual size_t input_size( void ) const override
-	{
-		return base::function_traits<Functor>::arity - 1;
-	}
-
-	virtual const std::type_info &input_type( size_t i ) const override
-	{
-		return base::function_traits<Functor>::arg_type( i + 1 );
-	}
-
-	virtual any process( graph &g, const dimensions &d, const std::vector<any> &inputs ) const override
-	{
-		throw_runtime( "all calls should happen as part of a group" );
-	}
-
-	virtual any create_value( const dimensions &d ) const override
-	{
-		return create_result<typename GroupFunc::result_type>( d );
-	}
-
-	virtual std::shared_ptr<subgroup_function> create_group_function( void ) const override
-	{
-		return std::make_shared<GroupFunc>( _p );
-	}
-
-	virtual void dispatch_group( subgroup &s, const dimensions &d ) const override
-	{
-		_dispatch( s, d );
-	}
-
-private:
-	template <typename R, typename... Ctors>
-	static inline R create_result( Ctors &&... c )
-	{
-		return R( std::forward<Ctors>( c )... );
-	}
-
-	process_func _p;
-	group_dispatch _dispatch;
-};
-
-template <typename Functor>
-class opfunc_single : public op_function
-{
-public:
-	typedef typename base::function_traits<Functor>::function process_func;
-
-	opfunc_single( Functor f )
-		: _p( base::to_function( f ) )
-	{
-	}
-	virtual ~opfunc_single( void ) noexcept
-	{
-	}
-
-	virtual const std::type_info &result_type( void ) const override
-	{
-		return typeid(typename process_func::result_type);
-	}
-
-	virtual size_t input_size( void ) const override
-	{
-		return base::function_traits<Functor>::arity;
-	}
-
-	virtual const std::type_info &input_type( size_t i ) const override
-	{
-		return base::function_traits<Functor>::arg_type( i );
-	}
-
-	virtual any process( graph &, const dimensions &, const std::vector<any> &inputs ) const override
-	{
-		return dispatch( inputs, base::gen_sequence<base::function_traits<Functor>::arity>{} );
-	}
-
-
-	virtual any create_value( const dimensions &d ) const override
-	{
-		return any();
-	}
-
-	virtual std::shared_ptr<subgroup_function> create_group_function( void ) const override
-	{
-		throw_runtime( "attempt to create group fucntoin on a single-threaded thing" );
-	}
-	virtual void dispatch_group( subgroup &s, const dimensions &d ) const override
-	{
-		throw_runtime( "attempt to dispatch group on a single-threaded thing" );
-	}
-
-private:
-	template <size_t I>
-	inline typename base::function_traits<Functor>::template get_arg_type<I>::type
-	extract( const std::vector<any> &inputs ) const
-	{
-		typedef typename base::function_traits<Functor>::template get_arg_type<I>::type ret_type;
-
-		return engine::any_cast<ret_type>( inputs[I] );
-	}
-
-	template <size_t... S>
-	inline any dispatch( const std::vector<any> &inputs, const base::sequence<S...> & ) const
-	{
-		return _p( extract<S>( inputs )... );
-	}
-
-	process_func _p;
-};
 
 ////////////////////////////////////////
 
@@ -305,37 +147,46 @@ public:
 			: _name( n ), _func( new opfunc_one_to_one<Functor, GroupProcessFunc>( f, g ) ), _style( style::ONE_TO_ONE )
 	{
 	}
+
 	/// @brief Construct an op that does n-to-one processing.
 	///
 	/// This should be allowed to be grouped with one-to-one, at least
 	/// at the beginning of the group.
 	template <typename Functor, typename GroupProcessFunc>
-	op( base::cstring n, Functor f, GroupProcessFunc g, n_to_one_parallel_t );
-	/// TODO: can DimensionDividerFunc be a specific function type?
-	/// i.e. void (*)( const dim3 &opDims, std::vector<std::pair<int,int>> &threadRanges )
-	/// where threadRanges is pre-sized to have the number of threads?
+	inline op( base::cstring n, Functor f, GroupProcessFunc , const std::function<void(subgroup &, const dimensions &)> &g, n_to_one_parallel_t )
+			: _name( n ), _func( new opfunc_one_to_one<Functor, GroupProcessFunc>( f, g ) ), _style( style::N_TO_ONE )
+	{
+	}
+
+	/// TODO: should we provide some threading support here, or just
+	/// leave it up to the library?  i.e. void (*)( const dim3
+	/// &opDims, std::vector<std::pair<int,int>> &threadRanges ) where
+	/// threadRanges is pre-sized to have the number of threads?
 	/// Construct an op that is multi-threaded
-	template <typename Functor, typename DimensionDividerFunc>
-	op( base::cstring n, Functor f, DimensionDividerFunc pt, threaded_t );
+	template <typename Functor>
+	op( base::cstring n, Functor f, threaded_t )
+		: _name( n ), _func( new opfunc_simple<Functor>( f ) ),
+		  _style( style::MULTI_THREADED )
+	{}
 
 	/// Construct an op that is single threaded
 	template <typename Functor>
 	inline op( base::cstring n, Functor f, single_threaded_t )
-		: _name( n ), _func( new opfunc_single<Functor>( f ) ),
+		: _name( n ), _func( new opfunc_simple<Functor>( f ) ),
 		  _style( style::SINGLE_THREADED )
 	{}
 
 	/// Construct an op that is single threaded and solitary
 	template <typename Functor>
 	op( base::cstring n, Functor f, solitary_t )
-		: _name( n ), _func( new opfunc_single<Functor>( f ) ),
+		: _name( n ), _func( new opfunc_locked_simple<Functor>( f ) ),
 		  _style( style::SOLITARY )
 	{}
 
-	/// Construct an op that is single threaded and solitary
+	/// Construct an op that is trivial (i.e. math operation)
 	template <typename Functor>
 	op( base::cstring n, Functor f, simple_t )
-		: _name( n ), _func( new opfunc_single<Functor>( f ) ),
+		: _name( n ), _func( new opfunc_simple<Functor>( f ) ),
 		  _style( style::SIMPLE )
 	{}
 
