@@ -96,7 +96,7 @@ registerImageOps( engine::registry &r )
 	r.add( op( "i.combine_p", combine_planes_1, op::single_threaded ) );
 	r.add( op( "i.combine_pp", combine_planes_2, op::single_threaded ) );
 	r.add( op( "i.combine_ppp", combine_planes_3, op::single_threaded ) );
-	r.add( op( "i.combine_ppp", combine_planes_4, op::single_threaded ) );
+	r.add( op( "i.combine_pppp", combine_planes_4, op::single_threaded ) );
 }
 
 ////////////////////////////////////////
