@@ -26,6 +26,19 @@
 #include <typeinfo>
 #include <ostream>
 
+
+////////////////////////////////////////
+
+#if defined(__clang__)
+# define FALLTHROUGH [[clang::fallthrough]];
+#else
+# if defined(__GNUC__)
+#  define FALLTHROUGH [[fallthrough]]
+# else
+#  define FALLTHROUGH
+# endif
+#endif
+
 ////////////////////////////////////////
 
 namespace base
