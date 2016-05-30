@@ -143,7 +143,7 @@ public:
 	/// processed a one-to-one group at a time, parallelizing on the
 	/// other axes.
 	template <typename Functor, typename GroupProcessFunc>
-	inline op( base::cstring n, Functor f, GroupProcessFunc , const std::function<void(subgroup &, const dimensions &)> &g, one_to_one_parallel_t )
+	inline op( base::cstring n, Functor f, const GroupProcessFunc &, const std::function<void(subgroup &, const dimensions &)> &g, one_to_one_parallel_t )
 			: _name( n ), _func( new opfunc_one_to_one<Functor, GroupProcessFunc>( f, g ) ), _style( style::ONE_TO_ONE )
 	{
 	}
@@ -153,7 +153,7 @@ public:
 	/// This should be allowed to be grouped with one-to-one, at least
 	/// at the beginning of the group.
 	template <typename Functor, typename GroupProcessFunc>
-	inline op( base::cstring n, Functor f, GroupProcessFunc , const std::function<void(subgroup &, const dimensions &)> &g, n_to_one_parallel_t )
+	inline op( base::cstring n, Functor f, const GroupProcessFunc &, const std::function<void(subgroup &, const dimensions &)> &g, n_to_one_parallel_t )
 			: _name( n ), _func( new opfunc_one_to_one<Functor, GroupProcessFunc>( f, g ) ), _style( style::N_TO_ONE )
 	{
 	}

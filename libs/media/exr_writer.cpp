@@ -124,13 +124,13 @@ class exr_write_track : public video_track
 {
 public:
 	exr_write_track( std::string n, int64_t b, int64_t e, const sample_rate &sr, const base::uri &files, const media::track_description &td, const metadata &parms )
-			: video_track( std::move( n ), b, e, sr ),
+			: video_track( std::move( n ), b, e, sr, td ),
 			  _files( files ), _compression( Imf::NO_COMPRESSION )
 	{
 		using namespace std::experimental;
 		using namespace base;
 
-		auto c = parms.find( "compresion" );
+		auto c = parms.find( "compression" );
 		if ( c != parms.end() )
 		{
 			const std::string &comp = any_cast<const std::string &>( c->second );
@@ -171,7 +171,7 @@ public:
 		}
 	}
 
-	virtual image_frame *doRead( int64_t f )
+	virtual image_frame *doRead( int64_t )
 	{
 		throw_logic( "writer asked to read a frame" );
 	}
@@ -204,7 +204,7 @@ public:
 		{
 			const image_buffer &ib = frm.at( c );
 			fB.insert( frm.name( c ),
-					   Imf::Slice( Imf::HALF, const_cast<char *>( reinterpret_cast<const char *>( ib.data() ) ), ib.xstride_bytes(), ib.ystride_bytes() ) );
+					   Imf::Slice( Imf::HALF, const_cast<char *>( reinterpret_cast<const char *>( ib.data() ) ), static_cast<size_t>( ib.xstride_bytes() ), static_cast<size_t>( ib.ystride_bytes() ) ) );
 		}
 		file.setFrameBuffer( fB );
 		file.writePixels( static_cast<int>( frm.height() ) );
@@ -290,7 +290,7 @@ register_exr_writer( void )
 {
 #ifdef HAVE_OPENEXR
 	if ( Imf::globalThreadCount() == 0 )
-		Imf::setGlobalThreadCount( base::thread::core_count() );
+		Imf::setGlobalThreadCount( static_cast<int>( base::thread::core_count() ) );
 
 	writer::register_writer( std::make_shared<OpenEXRWriter>() );
 #endif

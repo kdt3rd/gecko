@@ -40,6 +40,10 @@ class subgroup_function
 {
 public:
 	subgroup_function( void );
+	subgroup_function( const subgroup_function & ) = delete;
+	subgroup_function( subgroup_function && ) = delete;
+	subgroup_function&operator=( const subgroup_function & ) = delete;
+	subgroup_function&operator=( subgroup_function && ) = delete;
 	virtual ~subgroup_function( void );
 
 	virtual void update_inputs( int d ) = 0;

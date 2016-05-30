@@ -52,6 +52,10 @@ public:
 	parameter_definition( base::cstring name, double minVal, double maxVal );
 	parameter_definition( base::cstring name, std::vector<std::string> vals );
 
+	parameter_definition( const parameter_definition & ) = default;
+	parameter_definition( parameter_definition && ) = default;
+	parameter_definition &operator=( const parameter_definition & ) = default;
+	parameter_definition &operator=( parameter_definition && ) = default;
 	~parameter_definition( void ) = default;
 
 	const std::string &name( void ) const { return _name; }

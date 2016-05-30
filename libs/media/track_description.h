@@ -49,6 +49,10 @@ class track_description
 {
 public:
 	track_description( track_type tt );
+	track_description( const track_description & ) = default;
+	track_description( track_description && ) = default;
+	track_description &operator=( const track_description & ) = default;
+	track_description &operator=( track_description && ) = default;
 	~track_description( void ) = default;
 
 	inline track_type type( void ) const { return _type; }

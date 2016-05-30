@@ -97,7 +97,7 @@ public:
 		return base::function_traits<Functor>::arg_type( i + 1 );
 	}
 
-	virtual any process( graph &g, const dimensions &d, const std::vector<any> &inputs ) const override
+	virtual any process( graph &, const dimensions &, const std::vector<any> & ) const override
 	{
 		throw_runtime( "all calls should happen as part of a group" );
 	}
@@ -164,7 +164,7 @@ public:
 	}
 
 
-	virtual any create_value( const dimensions &d ) const override
+	virtual any create_value( const dimensions & ) const override
 	{
 		return any();
 	}
@@ -173,7 +173,7 @@ public:
 	{
 		throw_runtime( "attempt to create group function on a simple thing" );
 	}
-	virtual void dispatch_group( subgroup &s, const dimensions &d ) const override
+	virtual void dispatch_group( subgroup &, const dimensions & ) const override
 	{
 		throw_runtime( "attempt to dispatch group on a simple thing" );
 	}

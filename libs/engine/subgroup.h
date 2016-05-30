@@ -43,6 +43,10 @@ class subgroup
 public:
 	explicit subgroup( graph &g );
 	subgroup( graph &g, node_id first );
+	subgroup( const subgroup & ) = default;
+	subgroup( subgroup && ) = default;
+	subgroup &operator=( const subgroup & ) = default;
+	subgroup &operator=( subgroup && ) = default;
 	~subgroup( void );
 
 	inline graph &gref( void ) { return _graph; }

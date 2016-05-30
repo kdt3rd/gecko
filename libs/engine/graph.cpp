@@ -852,7 +852,7 @@ graph::rotate_node( node_id oldpos, node_id newpos )
 	node_id cur = oldpos;
 	while ( cur != newpos )
 	{
-		node_id other = cur + dir;
+		node_id other = static_cast<node_id>( int64_t(cur) + dir );
 		std::swap( _nodes[other], _nodes[cur] );
 		node &curN = _nodes[cur];
 		for ( size_t i = 0, nC = curN.output_size(); i != nC; ++i )
@@ -860,7 +860,7 @@ graph::rotate_node( node_id oldpos, node_id newpos )
 		for ( size_t i = 0, nC = curN.input_size(); i != nC; ++i )
 			_nodes[curN.input(i)].update_output( other, cur );
 
-		cur += dir;
+		cur = static_cast<node_id>( int64_t(cur) + dir );
 	}
 
 	std::swap( _nodes[newpos], tmpStore );

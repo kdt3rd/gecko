@@ -108,11 +108,11 @@ struct arg_type_adapter
 		return static_cast<const base_type &>( b );
 	}
 
-	static inline size_t prebind( std::vector<plane_scan_binder> &, std::vector<scanline> &s )
+	static inline size_t prebind( std::vector<plane_scan_binder> &, std::vector<scanline> & )
 	{
 		return size_t(-1);
 	}
-	static inline type get( std::vector<plane_scan_binder> &b, std::vector<scanline> &s, size_t i, const engine::any &v, engine::node_id , engine::subgroup &, engine::subgroup_function *, std::vector<std::shared_ptr<engine::subgroup_function>> & )
+	static inline type get( std::vector<plane_scan_binder> &, std::vector<scanline> &, size_t i, const engine::any &v, engine::node_id , engine::subgroup &, engine::subgroup_function *, std::vector<std::shared_ptr<engine::subgroup_function>> & )
 	{
 		precondition( i == size_t(-1), "item with no binder has index to binder list" );
 		return cengref( base::any_cast<const base_type &>( v ) );
@@ -193,6 +193,7 @@ class scanline_plane_functor : public engine::subgroup_function
 {
 public:
 	using engine::subgroup_function::subgroup_function;
+	virtual ~scanline_plane_functor( void );
 
 	virtual void call( scanline &dest ) = 0;
 
@@ -213,6 +214,10 @@ public:
 	explicit scanline_plane_operator( const function &f )
 		: _func( f )
 	{}
+	scanline_plane_operator( const scanline_plane_operator & ) = default;
+	scanline_plane_operator( scanline_plane_operator && ) = default;
+	scanline_plane_operator&operator=( const scanline_plane_operator & ) = default;
+	scanline_plane_operator&operator=( scanline_plane_operator && ) = default;
 	virtual ~scanline_plane_operator( void )
 	{}
 
@@ -243,7 +248,7 @@ public:
 		process_call( dest, base::gen_sequence<sizeof...(Args)>{} );
 	}
 
-	virtual void set_input( size_t i, const scanline &s )
+	virtual void set_input( size_t i, const scanline &s ) override
 	{
 		_binders[i].set( s );
 	}

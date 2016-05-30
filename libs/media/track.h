@@ -5,7 +5,7 @@
 #include "sample_rate.h"
 #include "sample_data.h"
 #include "sample.h"
-
+#include "track_description.h"
 #include <string>
 #include <functional>
 #include <memory>
@@ -29,8 +29,9 @@ namespace media
 class track
 {
 public:
-	track( std::string n, int64_t b, int64_t e, const sample_rate &r )
-		: _name( std::move( n ) ), _begin( b ), _end( e ), _rate( r )
+	// TODO: b, e, r are duplicate w/ info in track_description
+	track( std::string n, int64_t b, int64_t e, const sample_rate &r, const track_description &td )
+			: _name( std::move( n ) ), _desc( td ), _begin( b ), _end( e ), _rate( r )
 	{
 	}
 
@@ -41,6 +42,8 @@ public:
 	inline int64_t end( void ) const;
 	inline const sample_rate &rate( void ) const;
 
+	inline const track_description &desc( void ) const { return _desc; }
+
 protected:
 	friend class sample;
 	// we will use covariance to access the return types for sub classes of this
@@ -50,6 +53,7 @@ protected:
 	
 private:
 	std::string _name;
+	track_description _desc;
 	int64_t _begin, _end;
 	sample_rate _rate;
 };

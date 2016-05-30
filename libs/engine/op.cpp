@@ -46,7 +46,7 @@ public:
 
 	virtual any process( graph &, const dimensions &, const std::vector<any> & ) const override;
 
-	virtual any create_value( const dimensions &d ) const override
+	virtual any create_value( const dimensions & ) const override
 	{
 		return any();
 	}
@@ -55,7 +55,7 @@ public:
 	{
 		throw_runtime( "attempt to create group fucntoin on a null function" );
 	}
-	virtual void dispatch_group( subgroup &s, const dimensions &d ) const override
+	virtual void dispatch_group( subgroup &, const dimensions & ) const override
 	{
 		throw_runtime( "attempt to dispatch group on a null function" );
 	}

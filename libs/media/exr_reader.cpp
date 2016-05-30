@@ -151,7 +151,7 @@ class exr_read_track : public video_track
 {
 public:
 	exr_read_track( std::string n, int64_t b, int64_t e, const sample_rate &sr, const base::uri &files, int part, std::vector<std::string> &&chan )
-		: video_track( std::move( n ), b, e, sr ), _files( files ), _part( part ), _channels( std::move( chan ) )
+		: video_track( std::move( n ), b, e, sr, media::track_description( media::TRACK_VIDEO ) ), _files( files ), _part( part ), _channels( std::move( chan ) )
 	{
 	}
 
@@ -216,7 +216,7 @@ public:
 		return ret.release();
 	}
 
-	virtual void doWrite( int64_t f, const image_frame &frm )
+	virtual void doWrite( int64_t , const image_frame & )
 	{
 		throw_logic( "reader asked to write a frame" );
 	}
@@ -281,7 +281,7 @@ public:
 };
 
 container
-OpenEXRReader::create( const base::uri &u, const metadata &params )
+OpenEXRReader::create( const base::uri &u, const metadata & )
 {
 	container result;
 
@@ -339,7 +339,7 @@ void register_exr_reader( void )
 {
 #ifdef HAVE_OPENEXR
 	if ( Imf::globalThreadCount() == 0 )
-		Imf::setGlobalThreadCount( base::thread::core_count() );
+		Imf::setGlobalThreadCount( static_cast<int>( base::thread::core_count() ) );
 	
 	reader::register_reader( std::make_shared<OpenEXRReader>() );
 #endif

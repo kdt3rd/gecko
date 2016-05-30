@@ -54,7 +54,7 @@ video_track::read( int64_t offset, const sample_rate &r )
 
 
 void
-video_track::write( int64_t offset, const sample_rate &r, const sample_data &sd )
+video_track::write( int64_t offset, const sample_rate &, const sample_data &sd )
 {
 	const image_frame *frm = dynamic_cast<const image_frame *>( &sd );
 	if ( frm )
