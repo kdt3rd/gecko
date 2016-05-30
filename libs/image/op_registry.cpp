@@ -92,11 +92,11 @@ registerImageOps( engine::registry &r )
 {
 	using namespace engine;
 	r.register_constant<image::image_buf>();
-	r.add( op( "img_extract_plane", extract_plane, op::single_threaded ) );
-	r.add( op( "combine_planes_1", combine_planes_1, op::single_threaded ) );
-	r.add( op( "combine_planes_2", combine_planes_2, op::single_threaded ) );
-	r.add( op( "combine_planes_3", combine_planes_3, op::single_threaded ) );
-	r.add( op( "combine_planes_4", combine_planes_4, op::single_threaded ) );
+	r.add( op( "i.extract", extract_plane, op::single_threaded ) );
+	r.add( op( "i.combine_p", combine_planes_1, op::single_threaded ) );
+	r.add( op( "i.combine_pp", combine_planes_2, op::single_threaded ) );
+	r.add( op( "i.combine_ppp", combine_planes_3, op::single_threaded ) );
+	r.add( op( "i.combine_ppp", combine_planes_4, op::single_threaded ) );
 }
 
 ////////////////////////////////////////
