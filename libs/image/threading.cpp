@@ -69,7 +69,7 @@ threading::threading( int tCount )
 		_threads.resize( n );
 		for ( size_t i = 0; i != n; ++i )
 		{
-			_threads[i] = std::thread( &threading::bee, this );
+			_threads[i] = std::thread( &threading::bee, this, i );
 		}
 	}
 }
@@ -83,7 +83,7 @@ threading::~threading( void )
 ////////////////////////////////////////
 
 void
-threading::dispatch( const std::function<void(int, int)> &f, int start, int N )
+threading::dispatch( const std::function<void(size_t, int, int)> &f, int start, int N )
 {
 	precondition( N > 0, "attempt to dispatch with no items ({0}) to process", N );
 
@@ -91,7 +91,7 @@ threading::dispatch( const std::function<void(int, int)> &f, int start, int N )
 
 	if ( nT == 0 )
 	{
-		f( start, start + N );
+		f( 0, start, start + N );
 		return;
 	}
 
@@ -145,7 +145,7 @@ threading::get( void )
 ////////////////////////////////////////
 
 void
-threading::bee( void )
+threading::bee( size_t tIdx )
 {
 	std::unique_lock<std::mutex> lk( _mutex );
 	while ( true )
@@ -164,7 +164,7 @@ threading::bee( void )
 		lk.unlock();
 		try
 		{
-			fa.f( fa.start, fa.end );
+			fa.f( tIdx, fa.start, fa.end );
 		}
 		catch ( std::exception &e )
 		{

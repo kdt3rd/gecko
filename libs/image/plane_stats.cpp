@@ -21,21 +21,36 @@
 //
 
 #include "plane_stats.h"
+#include "threading.h"
 
 ////////////////////////////////////////
 
 namespace
 {
 
+static void sum_thread( size_t tIdx, int s, int e, const image::plane &p, std::vector<double> &vals )
+{
+	double v = 0.0;
+	int w = p.width();
+	for ( int y = s; y < e; ++y )
+	{
+		const float *lineP = p.line( y );
+		for ( int x = 0; x < w; ++x )
+			v += static_cast<double>( lineP[x] );
+	}
+	vals[tIdx] += v;
+}
+
 static double sum_plane( const image::plane &p )
 {
+	std::vector<double> vals;
+	vals.resize( image::threading::get().size(), 0.0 );
+
+	image::threading::get().dispatch( std::bind( sum_thread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::cref( p ), std::ref( vals ) ), p );
+
 	double r = 0.0;
-	for ( int y = 0, H = p.height(); y != H; ++y )
-	{
-		const float *l = p.line( y );
-		for ( int x = 0, W = p.width(); x != W; ++x )
-			r += l[x];
-	}
+	for ( double d: vals )
+		r += d;
 	return r;
 }
 
@@ -53,7 +68,7 @@ add_plane_stats( engine::registry &r )
 {
 	using namespace engine;
 
-	r.add( op( "sum_plane", sum_plane, op::single_threaded ) );
+	r.add( op( "sum_plane", sum_plane, op::threaded ) );
 }
 
 } // image

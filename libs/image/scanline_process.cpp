@@ -32,7 +32,7 @@ namespace image
 ////////////////////////////////////////
 
 static void
-scanline_thread_process( int start, int end, engine::subgroup &sg, int w, int h )
+scanline_thread_process( size_t, int start, int end, engine::subgroup &sg, int w, int h )
 {
 	// the recursive process allows scanline to be re-used as
 	// source and destination, iterative trivially avoids
@@ -91,7 +91,7 @@ void dispatch_scan_processing( engine::subgroup &sg, const engine::dimensions &d
 	int w = static_cast<int>( dims.x );
 	int h = static_cast<int>( dims.y );
 
-	threading::get().dispatch( std::bind( scanline_thread_process, std::placeholders::_1, std::placeholders::_2, std::ref( sg ), w, h ), 0, h );
+	threading::get().dispatch( std::bind( scanline_thread_process, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( sg ), w, h ), 0, h );
 }
 
 

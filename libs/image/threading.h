@@ -54,11 +54,13 @@ public:
 	threading( int nThreads );
 	~threading( void );
 
+	inline size_t size( void ) const { return _threads.size(); }
+
 	/// calls function f on the range split by the number of threads
 	/// live, and does not return until they have all finished.
-	void dispatch( const std::function<void(int, int)> &f, int start, int N );
+	void dispatch( const std::function<void(size_t, int, int)> &f, int start, int N );
 
-	inline void dispatch( const std::function<void(int, int)> &f, const plane &p )
+	inline void dispatch( const std::function<void(size_t, int, int)> &f, const plane &p )
 	{
 		dispatch( f, 0, p.height() );
 	}
@@ -69,7 +71,7 @@ public:
 	/// Get the singleton threading object
 	static threading &get( void );
 private:
-	void bee( void );
+	void bee( size_t i );
 
 	std::mutex _mutex;
 	std::condition_variable _cond;
@@ -77,7 +79,7 @@ private:
 	std::vector<std::thread> _threads;
 	struct func_to_apply
 	{
-		std::function<void(int, int)> f;
+		std::function<void(size_t, int, int)> f;
 		int start;
 		int end;
 		std::atomic<int> *counter;
