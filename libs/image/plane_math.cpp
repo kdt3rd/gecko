@@ -24,6 +24,7 @@
 #include "scanline_process.h"
 #include <base/cpu_features.h>
 #include <iostream>
+// TODO: add ifdefs when compiling for alternate platforms (i.e. ARM)
 #include "sse3/plane_math.h"
 #include "sse4/plane_math.h"
 

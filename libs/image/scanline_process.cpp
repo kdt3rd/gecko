@@ -22,12 +22,17 @@
 
 #include "scanline_process.h"
 #include "scanline_group.h"
+#include "threading.h"
 
 ////////////////////////////////////////
+
 namespace image
 {
 
-void scanline_thread_process( int start, int end, engine::subgroup &sg, int w, int h )
+////////////////////////////////////////
+
+static void
+scanline_thread_process( int start, int end, engine::subgroup &sg, int w, int h )
 {
 	// the recursive process allows scanline to be re-used as
 	// source and destination, iterative trivially avoids
@@ -39,6 +44,8 @@ void scanline_thread_process( int start, int end, engine::subgroup &sg, int w, i
 	// just have to check and make sure to use the appropriate
 	// output scanline at the output node
 	// create the output planes
+	std::vector<std::shared_ptr<engine::subgroup_function>> funcs;
+	sg.bind_functions( funcs );
 	size_t nOuts = sg.outputs().size();
 	scanline_group scans( w, nOuts );
 
@@ -54,7 +61,7 @@ void scanline_thread_process( int start, int end, engine::subgroup &sg, int w, i
 
 		for ( size_t i = 0; i < sg.size(); ++i )
 		{
-			scanline_plane_functor &cur = static_cast<scanline_plane_functor &>( sg.func( i ) );
+			scanline_plane_functor &cur = static_cast<scanline_plane_functor &>( *(funcs[i]) );
 
 			cur.update_inputs( y ); // for any inputs that are a reference to a plane
 
@@ -84,7 +91,7 @@ void dispatch_scan_processing( engine::subgroup &sg, const engine::dimensions &d
 	int w = static_cast<int>( dims.x );
 	int h = static_cast<int>( dims.y );
 
-	sg.gref().dispatch_threads( std::bind( scanline_thread_process, std::placeholders::_1, std::placeholders::_2, std::ref( sg ), w, h ), 0, h );
+	threading::get().dispatch( std::bind( scanline_thread_process, std::placeholders::_1, std::placeholders::_2, std::ref( sg ), w, h ), 0, h );
 }
 
 

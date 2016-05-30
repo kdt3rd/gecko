@@ -57,13 +57,13 @@ plane test_refcount( void )
 
 	// and now s will copy / combine them to 1
 	plane s = x + y + z;
-	for ( size_t n = 0; n != 10000; ++n )
-	{
-		if ( n % 2 == 0 )
-			s += s;
-		else
-			s -= s;
-	}
+//	for ( size_t n = 0; n != 10000; ++n )
+//	{
+//		if ( n % 2 == 0 )
+//			s += s;
+//		else
+//			s -= s;
+//	}
 
 //	std::cout << std::endl;
 //	std::cout << "sum finished: " << s.id() << std::endl;

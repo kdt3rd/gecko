@@ -112,7 +112,7 @@ struct arg_type_adapter
 	{
 		return size_t(-1);
 	}
-	static inline type get( std::vector<plane_scan_binder> &b, std::vector<scanline> &s, size_t i, const engine::any &v, engine::node_id , engine::subgroup &, engine::subgroup_function * )
+	static inline type get( std::vector<plane_scan_binder> &b, std::vector<scanline> &s, size_t i, const engine::any &v, engine::node_id , engine::subgroup &, engine::subgroup_function *, std::vector<std::shared_ptr<engine::subgroup_function>> & )
 	{
 		precondition( i == size_t(-1), "item with no binder has index to binder list" );
 		return cengref( base::any_cast<const base_type &>( v ) );
@@ -139,7 +139,7 @@ struct arg_type_adapter<scanline &>
 		return i;
 	}
 
-	static inline type get( std::vector<plane_scan_binder> &b, std::vector<scanline> &s, size_t i, const engine::any &v, engine::node_id n, engine::subgroup &sg, engine::subgroup_function *sgf )
+	static inline type get( std::vector<plane_scan_binder> &b, std::vector<scanline> &s, size_t i, const engine::any &v, engine::node_id n, engine::subgroup &sg, engine::subgroup_function *sgf, std::vector<std::shared_ptr<engine::subgroup_function>> &funcs )
 	{
 		precondition( i != size_t(-1), "item with binder has not binder" );
 		if ( ! v.empty() )
@@ -147,7 +147,7 @@ struct arg_type_adapter<scanline &>
 		else
 		{
 			b[i] = plane_scan_binder( s[i] );
-			sg.func( n ).add_output( sgf, i );
+			funcs[sg.func_idx( n )]->add_output( sgf, i );
 		}
 
 		return cengref( b[i] );
@@ -174,7 +174,7 @@ struct arg_type_adapter<const scanline &>
 		return i;
 	}
 
-	static inline type get( std::vector<plane_scan_binder> &b, std::vector<scanline> &s, size_t i, const engine::any &v, engine::node_id n, engine::subgroup &sg, engine::subgroup_function *sgf )
+	static inline type get( std::vector<plane_scan_binder> &b, std::vector<scanline> &s, size_t i, const engine::any &v, engine::node_id n, engine::subgroup &sg, engine::subgroup_function *sgf, std::vector<std::shared_ptr<engine::subgroup_function>> &funcs )
 	{
 		precondition( i != size_t(-1), "item with binder has not binder" );
 		if ( ! v.empty() )
@@ -182,7 +182,7 @@ struct arg_type_adapter<const scanline &>
 		else
 		{
 			b[i] = plane_scan_binder( s[i] );
-			sg.func( n ).add_output( sgf, i );
+			funcs[sg.func_idx( n )]->add_output( sgf, i );
 		}
 		
 		return cengref( b[i] );
@@ -233,9 +233,9 @@ public:
 			b.clear();
 	}
 
-	virtual void bind( engine::subgroup &sg, engine::node &n ) override
+	virtual void bind( std::vector<std::shared_ptr<engine::subgroup_function>> &funcs, engine::subgroup &sg, engine::node &n ) override
 	{
-		process_bind( sg, n, base::gen_sequence<sizeof...(Args)>{} );
+		process_bind( funcs, sg, n, base::gen_sequence<sizeof...(Args)>{} );
 	}
 
 	virtual void call( scanline &dest ) override
@@ -250,10 +250,10 @@ public:
 
 private:
 	template <size_t... S>
-	inline void process_bind( engine::subgroup &sg, engine::node &n, const base::sequence<S...> & )
+	inline void process_bind( std::vector<std::shared_ptr<engine::subgroup_function>> &funcs, engine::subgroup &sg, engine::node &n, const base::sequence<S...> & )
 	{
 		size_t b[] = { arg_type_adapter<Args>::prebind( _binders, _inputs )... };
-		_args = std::make_tuple( arg_type_adapter<Args>::get( _binders, _inputs, b[S], sg.gref()[n.input(S)].value(), n.input(S), sg, this )... );
+		_args = std::make_tuple( arg_type_adapter<Args>::get( _binders, _inputs, b[S], sg.gref()[n.input(S)].value(), n.input(S), sg, this, funcs )... );
 	}
 
 	template <size_t... S>
@@ -267,109 +267,6 @@ private:
 	function _func;
 	scan_args _args;
 };
-
-void scanline_thread_process( int start, int end, engine::subgroup &sg, int w, int h );
-void dispatch_scan_processing( engine::subgroup &sg, const engine::dimensions &dims );
-
-
-#if 0
-
-////////////////////////////////////////
-
-template <typename T>
-struct scanline_arg_extractor
-{
-	typedef T type;
-	static inline type get( int , const engine::any &v )
-	{
-		return engine::any_cast<type>( v );
-	}
-};
-
-template <>
-struct scanline_arg_extractor<scanline>
-{
-	typedef scanline type;
-	static inline type get( int y, const engine::any &v )
-	{
-		const plane &p = engine::any_cast<const plane &>( v );
-		return scan_ref( p, y );
-	}
-};
-
-template <>
-struct scanline_arg_extractor<const scanline &>
-{
-	typedef scanline type;
-	static inline type get( int y, const engine::any &v )
-	{
-		const plane &p = engine::any_cast<const plane &>( v );
-		return scan_ref( p, y );
-	}
-};
-
-template <>
-struct scanline_arg_extractor<scanline &>
-{
-	typedef scanline type;
-	static inline type get( int y, const engine::any &v )
-	{
-		const plane &p = engine::any_cast<const plane &>( v );
-		return scan_dup( p, y );
-	}
-};
-
-////////////////////////////////////////
-
-template <typename... Args>
-struct scanline_plane_operator
-{
-	typedef plane result_type;
-	typedef std::function<void ( scanline &, Args...)> function;
-
-	inline plane operator()( engine::graph &g, const engine::dimensions &d, const function &f, const std::vector<engine::any> &inputs )
-	{
-		plane ret( static_cast<int>( d.x ), static_cast<int>( d.y ) );
-
-		std::function<void(int,int)> threadFunc = std::bind(
-			dispatch_scans, std::ref( ret ),
-			std::placeholders::_1, std::placeholders::_2,
-			std::cref( f ), std::cref( inputs ) );
-		g.dispatch_threads( threadFunc, 0, ret.height() );
-
-		return ret;
-	}
-
-private:
-	static inline void dispatch_scans( plane &ret, int start, int end, const function &scanFunc, const std::vector<engine::any> &in )
-	{
-//		std::cout << "  scanline process dispatching " << start << " - " << end << ", " << in.size() << " inputs" << std::endl;
-		process_dispatch( ret, start, end, scanFunc, in, base::gen_sequence<sizeof...(Args)>{} );
-	}
-
-	template <size_t I>
-	static inline typename scanline_arg_extractor<typename base::function_traits<function>::template get_arg_type<I+1>::type>::type
-	extract( int y, const std::vector<engine::any> &in )
-	{
-		typedef typename base::function_traits<function>::template get_arg_type<I+1>::type arg_type;
-		typedef scanline_arg_extractor<arg_type> extractor_type;
-//		if ( y == 0 )
-//			std::cout << "   extract arg " << I << " type " << typeid(arg_type).name() << " result type " << typeid(typename extractor_type::type).name() << " (" << typeid(extractor_type).name() << ")" << std::endl;
-
-		return extractor_type::get( y, in[I] );
-	}
-
-	template <size_t... S>
-	static inline void process_dispatch( plane &ret, int start, int end, const std::function<void ( scanline &, Args ... )> &scanFunc, const std::vector<engine::any> &in, const base::sequence<S...> & )
-	{
-		for ( int y = start; y < end; ++y )
-		{
-			auto dest = scan_ref( ret, y );
-			scanFunc( dest, extract<S>( y, in )... );
-		}
-	}
-};
-#endif
 
 template <typename Functor>
 struct scanline_plane_adapter : public scanline_plane_adapter<decltype(&Functor::operator())>
@@ -394,6 +291,10 @@ struct scanline_plane_adapter<void (*)(scanline &, Args...)> : public scanline_p
 		: scanline_plane_operator<Args...>( f )
 	{}
 };
+
+/// The actual dispatch routine we register, this dispatches threads
+/// to do the work.
+void dispatch_scan_processing( engine::subgroup &sg, const engine::dimensions &dims );
 
 } // namespace image
 

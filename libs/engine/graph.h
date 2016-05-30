@@ -114,8 +114,6 @@ public:
 	// remove
 	void clean_graph( void );
 
-	void dispatch_threads( const std::function<void(int, int)> &f, int start, int N );
-
 	void dump_dot( const std::string &fn, bool incHash = false ) const;
 	void dump_dot( std::ostream &os, bool incHash = false ) const;
 	void dump_refs( std::ostream &os ) const;

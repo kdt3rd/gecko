@@ -334,14 +334,6 @@ graph::clean_graph( void )
 
 ////////////////////////////////////////
 
-void
-graph::dispatch_threads( const std::function<void(int, int)> &f, int start, int N )
-{
-	f( start, N );
-}
-
-////////////////////////////////////////
-
 static void emit_node( std::ostream &os, int indent, const registry &ops, node_id n, const node &curN, bool incHash )
 {
 	os << std::setw( indent ) << std::setfill( ' ' ) << "" << 'N' << n << " [label=\"";
@@ -618,6 +610,7 @@ graph::optimize( void )
 			if ( firstMember < lastIn )
 			{
 				std::cout << "Need to move inputs around first member " << firstMember << " last input " << lastIn << std::endl;
+				throw_not_yet();
 			}
 		}
 	}

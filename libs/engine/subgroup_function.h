@@ -48,7 +48,7 @@ public:
 	inline size_t output_index( void ) const;
 	inline void output_index( size_t i );
 
-	virtual void bind( subgroup &, node & ) = 0;
+	virtual void bind( std::vector<std::shared_ptr<subgroup_function>> &, subgroup &, node & ) = 0;
 
 	virtual void deref_inputs( void ) = 0;
 

@@ -24,6 +24,7 @@
 #include "types.h"
 #include <vector>
 #include <set>
+#include <mutex>
 #include "subgroup_function.h"
 
 ////////////////////////////////////////
@@ -72,19 +73,16 @@ public:
 
 	void process( void );
 	any &output_val( size_t i );
-	subgroup_function &func( size_t i );
-	subgroup_function &func( node_id n );
+	size_t func_idx( node_id n );
+	void bind_functions( std::vector<std::shared_ptr<subgroup_function>> &funcs );
 
 private:
-	void bind_functions( void );
 
 	graph &_graph;
 	std::set<node_id> _inputs;
 	std::vector<node_id> _nodes;
 	std::vector<node_id> _outputs;
 
-	std::vector<std::shared_ptr<subgroup_function>> _funcs;
-	std::vector<size_t> _output_funcidx;
 	bool _processed = false;
 };
 

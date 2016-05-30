@@ -23,6 +23,7 @@
 #include "subgroup.h"
 #include "graph.h"
 #include <algorithm>
+#include <base/thread_util.h>
 
 ////////////////////////////////////////
 
@@ -167,8 +168,6 @@ subgroup::process( void )
 		cur.value() = ops[cur.op()].function().create_value( cur.dims() );
 	}
 
-	bind_functions();
-
 	node &f = g[_outputs.front()];
 
 	// how to make sure all inputs are computed prior to this?
@@ -177,7 +176,23 @@ subgroup::process( void )
 	// copying / merging / adding, insert the input prior to the
 	// first subgroup item)
 	ops[f.op()].function().dispatch_group( *this, f.dims() );
+	
 	_processed = true;
+}
+
+////////////////////////////////////////
+
+void
+subgroup::bind_functions( std::vector<std::shared_ptr<subgroup_function>> &funcs )
+{
+	funcs.reserve( _nodes.size() );
+	graph &g = _graph;
+	const registry &ops = g.op_registry();
+	for ( auto n: _nodes )
+	{
+		funcs.emplace_back( ops[g[n].op()].function().create_group_function() );
+		funcs.back()->bind( funcs, *this, g[n] );
+	}
 }
 
 ////////////////////////////////////////
@@ -190,14 +205,8 @@ subgroup::output_val( size_t i )
 
 ////////////////////////////////////////
 
-subgroup_function &subgroup::func( size_t i )
-{
-	return *(_funcs[i]);
-}
-
-////////////////////////////////////////
-
-subgroup_function &subgroup::func( node_id n )
+size_t
+subgroup::func_idx( node_id n )
 {
 	size_t idx = 0;
 	size_t N = _nodes.size();
@@ -209,25 +218,7 @@ subgroup_function &subgroup::func( node_id n )
 	}
 	postcondition( idx != N, "request for node that is not a member of subgroup" );
 
-	return *(_funcs[idx]);
-}
-
-////////////////////////////////////////
-
-void
-subgroup::bind_functions( void )
-{
-	_funcs.reserve( _nodes.size() );
-	graph &g = _graph;
-	const registry &ops = g.op_registry();
-	for ( auto n: _nodes )
-	{
-		if ( is_output( n ) )
-			_output_funcidx.emplace_back( _funcs.size() );
-
-		_funcs.emplace_back( ops[g[n].op()].function().create_group_function() );
-		_funcs.back()->bind( *this, g[n] );
-	}
+	return idx;
 }
 
 ////////////////////////////////////////
