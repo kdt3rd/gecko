@@ -127,26 +127,197 @@ static void muladd_planenumbernumber( scanline &dest, const scanline &src, float
 
 ////////////////////////////////////////
 
+static void plane_abs( scanline &dest, const scanline &src )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = fabsf( src[x] );
+}
+
+////////////////////////////////////////
+
+static void plane_square( scanline &dest, const scanline &src )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+	{
+		float a = src[x];
+		dest[x] = a * a;
+	}
+}
+
+////////////////////////////////////////
+
+static void plane_sqrt( scanline &dest, const scanline &src )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = sqrt( src[x] );
+}
+
+////////////////////////////////////////
+
+static void plane_mag2( scanline &dest, const scanline &srcA, const scanline &srcB )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+	{
+		float a = srcA[x];
+		float b = srcB[x];
+		dest[x] = sqrt( a*a + b*b );
+	}
+}
+
+////////////////////////////////////////
+
+static void plane_mag3( scanline &dest, const scanline &srcA, const scanline &srcB, const scanline &srcC )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+	{
+		float a = srcA[x];
+		float b = srcB[x];
+		float c = srcC[x];
+		dest[x] = sqrt( a*a + b*b + c*c );
+	}
+}
+
+////////////////////////////////////////
+
+static void plane_exp( scanline &dest, const scanline &src )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = expf( src[x] );
+}
+
+////////////////////////////////////////
+
+static void plane_log( scanline &dest, const scanline &src )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = logf( src[x] );
+}
+
+////////////////////////////////////////
+
+static void plane_exp2( scanline &dest, const scanline &src )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = exp2f( src[x] );
+}
+
+////////////////////////////////////////
+
+static void plane_log2( scanline &dest, const scanline &src )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = log2f( src[x] );
+}
+
+////////////////////////////////////////
+
+static void plane_powp( scanline &dest, const scanline &srcA, const scanline &srcB )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = powf( srcA[x], srcB[x] );
+}
+
+////////////////////////////////////////
+
+static void plane_powi( scanline &dest, const scanline &srcA, int p )
+{
+	switch ( p )
+	{
+		case -1:
+			for ( int x = 0, N = dest.width(); x != N; ++x )
+				dest[x] = 1.F / srcA[x];
+			break;
+		case 0:
+			for ( int x = 0, N = dest.width(); x != N; ++x )
+				dest[x] = 1.F;
+			break;
+		case 1:
+			if ( dest != srcA )
+			{
+				for ( int x = 0, N = dest.width(); x != N; ++x )
+					dest[x] = srcA[x];
+			}
+			break;
+		case 2:
+			plane_square( dest, srcA );
+			break;
+		case 3:
+			for ( int x = 0, N = dest.width(); x != N; ++x )
+			{
+				float a = srcA[x];
+				dest[x] = a*a*a;
+			}
+			break;
+		case 4:
+			for ( int x = 0, N = dest.width(); x != N; ++x )
+			{
+				float a = srcA[x];
+				a = a*a;
+				dest[x] = a*a;
+			}
+			break;
+		default:
+			for ( int x = 0, N = dest.width(); x != N; ++x )
+				dest[x] = powf( srcA[x], p );
+			break;
+	}
+}
+
+////////////////////////////////////////
+
+static void plane_powf( scanline &dest, const scanline &srcA, float v )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = powf( srcA[x], v );
+}
+
+////////////////////////////////////////
+
+static void plane_atan2( scanline &dest, const scanline &srcA, const scanline &srcB )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = atan2f( srcA[x], srcB[x] );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void add_plane_math( engine::registry &r )
 {
 	using namespace engine;
-//	r.add( op( "add_planeplane", base::choose_runtime( add_planeplane, { { cpu::simd_feature::AVX, avx::add_planeplane } } ), scanline_plane_operator( add_planeplane ), op::one_to_one ) );
 
-	r.add( op( "assign_plane", base::choose_runtime( assign_value, { { base::cpu::simd_feature::SSE3, sse3::assign_value } } ), scanline_plane_adapter<decltype(assign_value)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.assign", base::choose_runtime( assign_value, { { base::cpu::simd_feature::SSE3, sse3::assign_value } } ), scanline_plane_adapter<decltype(assign_value)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "add_planeplane", base::choose_runtime( add_planeplane, { { base::cpu::simd_feature::SSE3, sse3::add_planeplane } } ), scanline_plane_adapter<decltype(add_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
-	r.add( op( "add_planenumber", base::choose_runtime( add_planenumber, { { base::cpu::simd_feature::SSE3, sse3::add_planenumber } } ), scanline_plane_adapter<decltype(add_planenumber)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.add_pp", base::choose_runtime( add_planeplane, { { base::cpu::simd_feature::SSE3, sse3::add_planeplane } } ), scanline_plane_adapter<decltype(add_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.add_pn", base::choose_runtime( add_planenumber, { { base::cpu::simd_feature::SSE3, sse3::add_planenumber } } ), scanline_plane_adapter<decltype(add_planenumber)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "sub_planeplane", base::choose_runtime( sub_planeplane, { { base::cpu::simd_feature::SSE3, sse3::sub_planeplane } } ), scanline_plane_adapter<decltype(sub_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.sub_pp", base::choose_runtime( sub_planeplane, { { base::cpu::simd_feature::SSE3, sse3::sub_planeplane } } ), scanline_plane_adapter<decltype(sub_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "mul_planeplane", base::choose_runtime( mul_planeplane, { { base::cpu::simd_feature::SSE3, sse3::mul_planeplane } } ), scanline_plane_adapter<decltype(mul_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
-	r.add( op( "mul_planenumber", base::choose_runtime( mul_planenumber, { { base::cpu::simd_feature::SSE3, sse3::mul_planenumber } } ), scanline_plane_adapter<decltype(mul_planenumber)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.mul_pp", base::choose_runtime( mul_planeplane, { { base::cpu::simd_feature::SSE3, sse3::mul_planeplane } } ), scanline_plane_adapter<decltype(mul_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.mul_pn", base::choose_runtime( mul_planenumber, { { base::cpu::simd_feature::SSE3, sse3::mul_planenumber } } ), scanline_plane_adapter<decltype(mul_planenumber)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "div_planeplane", base::choose_runtime( div_planeplane, { { base::cpu::simd_feature::SSE3, sse3::div_planeplane }, { base::cpu::simd_feature::SSE42, sse4::div_planeplane } } ), scanline_plane_adapter<decltype(div_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
-	r.add( op( "div_numberplane", base::choose_runtime( div_numberplane, { { base::cpu::simd_feature::SSE3, sse3::div_numberplane }, { base::cpu::simd_feature::SSE42, sse4::div_numberplane } } ), scanline_plane_adapter<decltype(div_numberplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.div_pp", base::choose_runtime( div_planeplane, { { base::cpu::simd_feature::SSE3, sse3::div_planeplane }, { base::cpu::simd_feature::SSE42, sse4::div_planeplane } } ), scanline_plane_adapter<decltype(div_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.div_np", base::choose_runtime( div_numberplane, { { base::cpu::simd_feature::SSE3, sse3::div_numberplane }, { base::cpu::simd_feature::SSE42, sse4::div_numberplane } } ), scanline_plane_adapter<decltype(div_numberplane)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "muladd_planeplaneplane", base::choose_runtime( muladd_planeplaneplane, { { base::cpu::simd_feature::SSE3, sse3::muladd_planeplaneplane } } ), scanline_plane_adapter<decltype(muladd_planeplaneplane)>(), dispatch_scan_processing, op::one_to_one ) );
-	r.add( op( "muladd_planenumbernumber", base::choose_runtime( muladd_planenumbernumber, { { base::cpu::simd_feature::SSE3, sse3::muladd_planenumbernumber } } ), scanline_plane_adapter<decltype(muladd_planenumbernumber)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.fma_ppp", base::choose_runtime( muladd_planeplaneplane, { { base::cpu::simd_feature::SSE3, sse3::muladd_planeplaneplane } } ), scanline_plane_adapter<decltype(muladd_planeplaneplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.fma_pnn", base::choose_runtime( muladd_planenumbernumber, { { base::cpu::simd_feature::SSE3, sse3::muladd_planenumbernumber } } ), scanline_plane_adapter<decltype(muladd_planenumbernumber)>(), dispatch_scan_processing, op::one_to_one ) );
+
+	r.add( op( "p.abs", base::choose_runtime( plane_abs ), scanline_plane_adapter<decltype(plane_abs)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.square", base::choose_runtime( plane_square ), scanline_plane_adapter<decltype(plane_square)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.sqrt", base::choose_runtime( plane_sqrt ), scanline_plane_adapter<decltype(plane_sqrt)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.mag2", base::choose_runtime( plane_mag2 ), scanline_plane_adapter<decltype(plane_mag2)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.mag3", base::choose_runtime( plane_mag3 ), scanline_plane_adapter<decltype(plane_mag3)>(), dispatch_scan_processing, op::one_to_one ) );
+
+	r.add( op( "p.exp", base::choose_runtime( plane_exp ), scanline_plane_adapter<decltype(plane_exp)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.log", base::choose_runtime( plane_log ), scanline_plane_adapter<decltype(plane_log)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.exp2", base::choose_runtime( plane_exp2 ), scanline_plane_adapter<decltype(plane_exp2)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.log2", base::choose_runtime( plane_log2 ), scanline_plane_adapter<decltype(plane_log2)>(), dispatch_scan_processing, op::one_to_one ) );
+
+	r.add( op( "p.pow_pp", base::choose_runtime( plane_powp ), scanline_plane_adapter<decltype(plane_powp)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.pow_pi", base::choose_runtime( plane_powi ), scanline_plane_adapter<decltype(plane_powi)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.pow_pn", base::choose_runtime( plane_powf ), scanline_plane_adapter<decltype(plane_powf)>(), dispatch_scan_processing, op::one_to_one ) );
+
+	r.add( op( "p.atan2", base::choose_runtime( plane_atan2 ), scanline_plane_adapter<decltype(plane_atan2)>(), dispatch_scan_processing, op::one_to_one ) );
 }
 
 ////////////////////////////////////////

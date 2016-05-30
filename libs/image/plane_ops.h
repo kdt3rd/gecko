@@ -37,24 +37,70 @@ inline plane create_plane( int w, int h, float v )
 	engine::dimensions d;
 	d.x = static_cast<uint16_t>( w );
 	d.y = static_cast<uint16_t>( h );
-	return plane( "assign_plane", d, v );
+	return plane( "p.assign", d, v );
 }
 inline plane create_plane( int w, int h, const engine::computed_value<float> &v )
 {
 	engine::dimensions d;
 	d.x = static_cast<uint16_t>( w );
 	d.y = static_cast<uint16_t>( h );
-	return plane( "assign_plane", d, v );
+	return plane( "p.assign", d, v );
 }
+
+inline plane abs( const plane &p ) { return plane( "p.abs", p.dims(), p ); }
+inline plane abs( plane &&p ) { return plane( "p.abs", p.dims(), std::move( p ) ); }
+
+inline plane square( const plane &p ) { return plane( "p.square", p.dims(), p ); }
+inline plane square( plane &&p ) { return plane( "p.square", p.dims(), std::move( p ) ); }
+
+inline plane sqrt( const plane &p ) { return plane( "p.sqrt", p.dims(), p ); }
+inline plane sqrt( plane &&p ) { return plane( "p.sqrt", p.dims(), std::move( p ) ); }
+
+inline plane magnitude( const plane &p ) { return plane( "p.abs", p.dims(), p ); }
+inline plane magnitude( const plane &a, const plane &b )
+{
+	precondition( a.width() == b.width() && a.height() == b.height(), "unable to find magnitude for planes of different sizes" );
+	return plane( "p.mag2", a.dims(), a, b );
+}
+
+inline plane magnitude( const plane &a, const plane &b, const plane &c )
+{
+	precondition( a.width() == b.width() && a.height() == b.height() && a.width() == c.width() && a.height() == c.height(), "unable to find magnitude for planes of different sizes" );
+	return plane( "p.mag3", a.dims(), a, b, c );
+}
+
+// exponential functions
+inline plane exp( const plane &p ) { return plane( "p.exp", p.dims(), p ); }
+inline plane log( const plane &p ) { return plane( "p.log", p.dims(), p ); }
+inline plane exp2( const plane &p ) { return plane( "p.exp2", p.dims(), p ); }
+inline plane log2( const plane &p ) { return plane( "p.log2", p.dims(), p ); }
+inline plane pow( const plane &a, const plane &b )
+{
+	precondition( a.width() == b.width() && a.height() == b.height(), "unable to compute power for planes of different sizes" );
+	return plane( "p.pow_pp", a.dims(), a, b );
+}
+inline plane pow( const plane &p, int i ) { return plane( "p.pow_pi", p.dims(), p, i ); }
+inline plane pow( const plane &p, float v ) { return plane( "p.pow_pn", p.dims(), p, v ); }
+
+// trig functions
+inline plane atan2( const plane &a, const plane &b )
+{
+	precondition( a.width() == b.width() && a.height() == b.height(), "unable to compute atan2 for planes of different sizes" );
+	return plane( "p.atan2", a.dims(), a, b );
+}
+
+////////////////////////////////////////
+// normal operators
+////////////////////////////////////////
 
 /// unary plane operators
 inline plane operator-( const plane &p )
 {
-	return plane( "mul_planenumber", p.dims(), p, -1.F );
+	return plane( "p.mul_pn", p.dims(), p, -1.F );
 }
 inline plane operator-( plane &&p )
 {
-	return plane( "mul_planenumber", p.dims(), std::move( p ), -1.F );
+	return plane( "p.mul_pn", p.dims(), std::move( p ), -1.F );
 }
 
 /// @defgroup Add two planes together, or add a value to a plane. We
@@ -65,58 +111,58 @@ inline plane operator-( plane &&p )
 inline plane operator+( const plane &a, const plane &b )
 {
 	precondition( a.width() == b.width() && a.height() == b.height(), "unable to add planes of different sizes" );
-	return plane( "add_planeplane", a.dims(), a, b );
+	return plane( "p.add_pp", a.dims(), a, b );
 }
 
 inline plane operator+( plane &&a, const plane &b )
 {
 	precondition( a.width() == b.width() && a.height() == b.height(), "unable to add planes of different sizes" );
-	return plane( "add_planeplane", a.dims(), std::move( a ), b );
+	return plane( "p.add_pp", a.dims(), std::move( a ), b );
 }
 
 inline plane operator+( const plane &a, plane &&b )
 {
 	precondition( a.width() == b.width() && a.height() == b.height(), "unable to add planes of different sizes" );
-	return plane( "add_planeplane", a.dims(), a, std::move( b ) );
+	return plane( "p.add_pp", a.dims(), a, std::move( b ) );
 }
 
 inline plane operator+( plane &&a, plane &&b )
 {
 	precondition( a.width() == b.width() && a.height() == b.height(), "unable to add planes of different sizes" );
-	return plane( "add_planeplane", a.dims(), std::move( a ), std::move( b ) );
+	return plane( "p.add_pp", a.dims(), std::move( a ), std::move( b ) );
 }
 
 inline plane operator+( const plane &p, float v )
 {
-	return plane( "add_planenumber", p.dims(), p, v );
+	return plane( "p.add_pn", p.dims(), p, v );
 }
 inline plane operator+( const plane &p, const engine::computed_value<float> &v )
 {
-	return plane( "add_planenumber", p.dims(), p, v );
+	return plane( "p.add_pn", p.dims(), p, v );
 }
 inline plane operator+( plane &&p, float v )
 {
-	return plane( "add_planenumber", p.dims(), std::move( p ), v );
+	return plane( "p.add_pn", p.dims(), std::move( p ), v );
 }
 inline plane operator+( plane &&p, const engine::computed_value<float> &v )
 {
-	return plane( "add_planenumber", p.dims(), std::move( p ), v );
+	return plane( "p.add_pn", p.dims(), std::move( p ), v );
 }
 inline plane operator+( float v, const plane &p )
 {
-	return plane( "add_planenumber", p.dims(), p, v );
+	return plane( "p.add_pn", p.dims(), p, v );
 }
 inline plane operator+( const engine::computed_value<float> &v, const plane &p )
 {
-	return plane( "add_planenumber", p.dims(), p, v );
+	return plane( "p.add_pn", p.dims(), p, v );
 }
 inline plane operator+( const engine::computed_value<float> &v, plane &&p )
 {
-	return plane( "add_planenumber", p.dims(), std::move( p ), v );
+	return plane( "p.add_pn", p.dims(), std::move( p ), v );
 }
 inline plane operator+( float v, plane &&p )
 {
-	return plane( "add_planenumber", p.dims(), std::move( p ), v );
+	return plane( "p.add_pn", p.dims(), std::move( p ), v );
 }
 
 inline plane &operator+=( plane &a, const plane &b )
@@ -149,58 +195,58 @@ inline plane &operator+=( plane &a, const engine::computed_value<float> &b )
 inline plane operator-( const plane &a, const plane &b )
 {
 	precondition( a.width() == b.width() && a.height() == b.height(), "unable to subtract planes of different sizes" );
-	return plane( "sub_planeplane", a.dims(), a, b );
+	return plane( "p.sub_pp", a.dims(), a, b );
 }
 
 inline plane operator-( plane &&a, const plane &b )
 {
 	precondition( a.width() == b.width() && a.height() == b.height(), "unable to subtract planes of different sizes" );
-	return plane( "sub_planeplane", a.dims(), std::move( a ), b );
+	return plane( "p.sub_pp", a.dims(), std::move( a ), b );
 }
 
 inline plane operator-( const plane &a, plane &&b )
 {
 	precondition( a.width() == b.width() && a.height() == b.height(), "unable to subtract planes of different sizes" );
-	return plane( "sub_planeplane", a.dims(), a, std::move( b ) );
+	return plane( "p.sub_pp", a.dims(), a, std::move( b ) );
 }
 
 inline plane operator-( plane &&a, plane &&b )
 {
 	precondition( a.width() == b.width() && a.height() == b.height(), "unable to subtract planes of different sizes" );
-	return plane( "sub_planeplane", a.dims(), std::move( a ), std::move( b ) );
+	return plane( "p.sub_pp", a.dims(), std::move( a ), std::move( b ) );
 }
 
 inline plane operator-( const plane &p, float v )
 {
-	return plane( "add_planenumber", p.dims(), p, - v );
+	return plane( "p.add_pn", p.dims(), p, - v );
 }
 inline plane operator-( const plane &p, const engine::computed_value<float> &v )
 {
-	return plane( "add_planenumber", p.dims(), p, - v );
+	return plane( "p.add_pn", p.dims(), p, - v );
 }
 inline plane operator-( plane &&p, float v )
 {
-	return plane( "add_planenumber", p.dims(), std::move( p ), - v );
+	return plane( "p.add_pn", p.dims(), std::move( p ), - v );
 }
 inline plane operator-( plane &&p, const engine::computed_value<float> &v )
 {
-	return plane( "add_planenumber", p.dims(), std::move( p ), - v );
+	return plane( "p.add_pn", p.dims(), std::move( p ), - v );
 }
 inline plane operator-( float v, const plane &p )
 {
-	return plane( "muladd_planenumbernumber", p.dims(), p, -1.F, v );
+	return plane( "p.fma_pnn", p.dims(), p, -1.F, v );
 }
 inline plane operator-( const engine::computed_value<float> &v, const plane &p )
 {
-	return plane( "muladd_planenumbernumber", p.dims(), p, -1.F, v );
+	return plane( "p.fma_pnn", p.dims(), p, -1.F, v );
 }
 inline plane operator-( float v, plane &&p )
 {
-	return plane( "muladd_planenumbernumber", p.dims(), std::move( p ), -1.F, v );
+	return plane( "p.fma_pnn", p.dims(), std::move( p ), -1.F, v );
 }
 inline plane operator-( const engine::computed_value<float> &v, plane &&p )
 {
-	return plane( "muladd_planenumbernumber", p.dims(), std::move( p ), -1.F, v );
+	return plane( "p.fma_pnn", p.dims(), std::move( p ), -1.F, v );
 }
 
 inline plane &operator-=( plane &a, const plane &b )
@@ -233,58 +279,58 @@ inline plane &operator-=( plane &a, const engine::computed_value<float> &b )
 inline plane operator*( const plane &a, const plane &b )
 {
 	precondition( a.width() == b.width() && a.height() == b.height(), "unable to multiply planes of different sizes" );
-	return plane( "mul_planeplane", a.dims(), a, b );
+	return plane( "p.mul_pp", a.dims(), a, b );
 }
 
 inline plane operator*( plane &&a, const plane &b )
 {
 	precondition( a.width() == b.width() && a.height() == b.height(), "unable to multiply planes of different sizes" );
-	return plane( "mul_planeplane", a.dims(), std::move( a ), b );
+	return plane( "p.mul_pp", a.dims(), std::move( a ), b );
 }
 
 inline plane operator*( const plane &a, plane &&b )
 {
 	precondition( a.width() == b.width() && a.height() == b.height(), "unable to multiply planes of different sizes" );
-	return plane( "mul_planeplane", a.dims(), a, std::move( b ) );
+	return plane( "p.mul_pp", a.dims(), a, std::move( b ) );
 }
 
 inline plane operator*( plane &&a, plane &&b )
 {
 	precondition( a.width() == b.width() && a.height() == b.height(), "unable to multiply planes of different sizes" );
-	return plane( "mul_planeplane", a.dims(), std::move( a ), std::move( b ) );
+	return plane( "p.mul_pp", a.dims(), std::move( a ), std::move( b ) );
 }
 
 inline plane operator*( const plane &p, float v )
 {
-	return plane( "mul_planenumber", p.dims(), p, v );
+	return plane( "p.mul_pn", p.dims(), p, v );
 }
 inline plane operator*( const plane &p, const engine::computed_value<float> &v )
 {
-	return plane( "mul_planenumber", p.dims(), p, v );
+	return plane( "p.mul_pn", p.dims(), p, v );
 }
 inline plane operator*( plane &&p, float v )
 {
-	return plane( "mul_planenumber", p.dims(), std::move( p ), v );
+	return plane( "p.mul_pn", p.dims(), std::move( p ), v );
 }
 inline plane operator*( plane &&p, const engine::computed_value<float> &v )
 {
-	return plane( "mul_planenumber", p.dims(), std::move( p ), v );
+	return plane( "p.mul_pn", p.dims(), std::move( p ), v );
 }
 inline plane operator*( float v, const plane &p )
 {
-	return plane( "mul_planenumber", p.dims(), p, v );
+	return plane( "p.mul_pn", p.dims(), p, v );
 }
 inline plane operator*( const engine::computed_value<float> &v, const plane &p )
 {
-	return plane( "mul_planenumber", p.dims(), p, v );
+	return plane( "p.mul_pn", p.dims(), p, v );
 }
 inline plane operator*( float v, plane &&p )
 {
-	return plane( "mul_planenumber", p.dims(), std::move( p ), v );
+	return plane( "p.mul_pn", p.dims(), std::move( p ), v );
 }
 inline plane operator*( const engine::computed_value<float> &v, plane &&p )
 {
-	return plane( "mul_planenumber", p.dims(), std::move( p ), v );
+	return plane( "p.mul_pn", p.dims(), std::move( p ), v );
 }
 
 inline plane &operator*=( plane &a, const plane &b )
@@ -318,58 +364,58 @@ inline plane &operator*=( plane &a, const engine::computed_value<float> &b )
 inline plane operator/( const plane &a, const plane &b )
 {
 	precondition( a.width() == b.width() && a.height() == b.height(), "unable to divide planes of different sizes" );
-	return plane( "div_planeplane", a.dims(), a, b );
+	return plane( "p.div_pp", a.dims(), a, b );
 }
 
 inline plane operator/( plane &&a, const plane &b )
 {
 	precondition( a.width() == b.width() && a.height() == b.height(), "unable to divide planes of different sizes" );
-	return plane( "div_planeplane", a.dims(), std::move( a ), b );
+	return plane( "p.div_pp", a.dims(), std::move( a ), b );
 }
 
 inline plane operator/( const plane &a, plane &&b )
 {
 	precondition( a.width() == b.width() && a.height() == b.height(), "unable to divide planes of different sizes" );
-	return plane( "div_planeplane", a.dims(), a, std::move( b ) );
+	return plane( "p.div_pp", a.dims(), a, std::move( b ) );
 }
 
 inline plane operator/( plane &&a, plane &&b )
 {
 	precondition( a.width() == b.width() && a.height() == b.height(), "unable to divide planes of different sizes" );
-	return plane( "div_planeplane", a.dims(), std::move( a ), std::move( b ) );
+	return plane( "p.div_pp", a.dims(), std::move( a ), std::move( b ) );
 }
 
 inline plane operator/( const plane &p, float v )
 {
-	return plane( "mul_planenumber", p.dims(), p, 1.F / v );
+	return plane( "p.mul_pn", p.dims(), p, 1.F / v );
 }
 inline plane operator/( const plane &p, const engine::computed_value<float> &v )
 {
-	return plane( "mul_planenumber", p.dims(), p, 1.F / v );
+	return plane( "p.mul_pn", p.dims(), p, 1.F / v );
 }
 inline plane operator/( plane &&p, float v )
 {
-	return plane( "mul_planenumber", p.dims(), std::move( p ), 1.F / v );
+	return plane( "p.mul_pn", p.dims(), std::move( p ), 1.F / v );
 }
 inline plane operator/( plane &&p, const engine::computed_value<float> &v )
 {
-	return plane( "mul_planenumber", p.dims(), std::move( p ), 1.F / v );
+	return plane( "p.mul_pn", p.dims(), std::move( p ), 1.F / v );
 }
 inline plane operator/( float v, const plane &p )
 {
-	return plane( "div_numberplane", p.dims(), v, p );
+	return plane( "p.div_np", p.dims(), v, p );
 }
 inline plane operator/( const engine::computed_value<float> &v, const plane &p )
 {
-	return plane( "div_numberplane", p.dims(), v, p );
+	return plane( "p.div_np", p.dims(), v, p );
 }
 inline plane operator/( float v, plane &&p )
 {
-	return plane( "div_numberplane", p.dims(), v, std::move( p ) );
+	return plane( "p.div_np", p.dims(), v, std::move( p ) );
 }
 inline plane operator/( const engine::computed_value<float> &v, plane &&p )
 {
-	return plane( "div_numberplane", p.dims(), v, std::move( p ) );
+	return plane( "p.div_np", p.dims(), v, std::move( p ) );
 }
 
 inline plane &operator/=( plane &a, const plane &b )

@@ -62,6 +62,9 @@ public:
 	scanline &operator=( scanline &&o ) = default;
 	~scanline( void ) = default;
 
+	inline bool operator==( const scanline &o ) const;
+	inline bool operator!=( const scanline &o ) const;
+
 	inline bool empty( void ) const;
 	inline bool is_reference( void ) const;
 	inline bool unique( void ) const;
@@ -109,6 +112,18 @@ private:
 	int _width = 0;
 	int _stride = 0;
 };
+
+////////////////////////////////////////
+
+inline bool scanline::operator==( const scanline &o ) const
+{
+	return _ref_ptr == o._ref_ptr && _width == o._width;
+}
+
+inline bool scanline::operator!=( const scanline &o ) const
+{
+	return !( *this == o );
+}
 
 ////////////////////////////////////////
 

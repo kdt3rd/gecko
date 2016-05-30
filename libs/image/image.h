@@ -55,7 +55,7 @@ public:
 		pd.w = 0;
 		_planes.reserve( static_cast<size_t>( d.z ) );
 		for ( uint16_t p = 0; p != d.z; ++p )
-			_planes.push_back( plane( "img_extract_plane", pd, *this, size_t(p) ) );
+			_planes.push_back( plane( "i.extract", pd, *this, size_t(p) ) );
 	}
 
 	image_buf( const image_buf & ) = default;

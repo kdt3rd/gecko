@@ -31,7 +31,10 @@ namespace engine { class registry; }
 namespace image
 {
 
-/// declares the following operators:
+///
+/// See plane_ops.h for the ability to call these in normal code
+/// 
+/// declares the implementation following operators:
 ///
 /// void assign_value( scanline &dest, float v );
 ///
@@ -54,6 +57,52 @@ namespace image
 ///
 /// src * a + b
 /// void muladd_planenumbernumber( scanline &dest, const scanline &src, float a, float b );
+///
+/// abs( src )
+/// void plane_abs( scanline &dest, const scanline &src )
+///
+/// src * src 
+/// void plane_square( scanline &dest, const scanline &src )
+///
+/// sqrt( src )
+/// void plane_sqrt( scanline &dest, const scanline &src )
+///
+/// sqrt( srca*srca + srcb*srcb )
+/// void plane_mag2( scanline &dest, const scanline &srcA, const scanline &srcB )
+///
+/// sqrt( srca*srca + srcb*srcb + srcc*srcc )
+/// void plane_mag3( scanline &dest, const scanline &srcA, const scanline &srcB, const scanline &srcC )
+///
+///////// EXPONENTIAL FUNCTIONS
+///
+/// TODO: negative number handling?????
+///
+/// exp( src )
+/// void plane_exp( scanline &dest, const scanline &src )
+///
+/// log( src ) (ln)
+/// void plane_log( scanline &dest, const scanline &src )
+///
+/// exp2( src )
+/// void plane_exp2( scanline &dest, const scanline &src )
+///
+/// log2( src )
+/// void plane_log2( scanline &dest, const scanline &src )
+///
+/// pow( srcA, srcB )
+/// void plane_powp( scanline &dest, const scanline &srcA, const scanline &srcB )
+///
+/// powi( srcA, int )
+/// void plane_powi( scanline &dest, int v )
+///
+/// powf( srcA, float )
+/// void plane_powf( scanline &dest, float v )
+///
+///////// TRIG FUNCTIONS
+///
+/// atan2( srcA, srcB )
+/// void plane_atan2( scanline &dest, const scanline &srcA, const scanline &srcB )
+///
 void add_plane_math( engine::registry &r );
 
 } // namespace image
