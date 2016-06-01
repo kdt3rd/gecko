@@ -26,10 +26,10 @@
 #include "sample_data.h"
 #include <utility>
 #include <memory>
+#include <ostream>
 
 
 ////////////////////////////////////////
-
 
 namespace media
 {
@@ -64,6 +64,14 @@ private:
 	int64_t _offset = -1;
 	sample_rate _rate;
 };
+
+////////////////////////////////////////
+
+inline std::ostream &operator<<( std::ostream &os, const sample &s )
+{
+	os << s.offset() << '@' << s.rate();
+	return os;
+}
 
 } // namespace media
 
