@@ -106,14 +106,19 @@ public:
 	}
 
 	template<typename ...Channels>
-	bool has_channels( const char *c, Channels ...channels )
+	bool has_channels( const char *c, Channels ...channels ) const
 	{
 		return has_channel( c ) && has_channels( channels... );
 	}
 
-	bool has_channel( const char *c )
+	bool has_channel( const char *c ) const
 	{
 		return _names.find( c ) != _names.end();
+	}
+
+	bool has_channel( const std::string &n ) const
+	{
+		return _names.find( n ) != _names.end();
 	}
 
 private:
