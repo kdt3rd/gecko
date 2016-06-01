@@ -31,6 +31,7 @@
 #include <media/sample.h>
 #include <image/plane.h>
 #include <image/plane_ops.h>
+#include <image/media_io.h>
 #include <sstream>
 #include <iostream>
 #include <fstream>
@@ -40,47 +41,6 @@ namespace
 {
 
 using namespace image;
-
-plane test_refcount( void )
-{
-	float v = 1.F;
-	plane x = create_plane( 1920, 1080, v );
-//	std::cout << std::endl;
-	plane y = create_plane( 1920, 1080, v );
-//	std::cout << std::endl;
-	plane z = create_plane( 1920, 1080, v );
-//	std::cout << std::endl;
-
-	// x, y, z should be in separate graphs
-//	std::cout << std::endl;
-//	std::cout << "constructed x, y, z: " << x.id() << ", " << y.id() << ", " << z.id() << std::endl;
-//	std::cout << std::endl;
-
-	// and now s will copy / combine them to 1
-	plane s = x + y + z;
-//	for ( size_t n = 0; n != 10000; ++n )
-//	{
-//		if ( n % 2 == 0 )
-//			s += s;
-//		else
-//			s -= s;
-//	}
-
-//	std::cout << std::endl;
-//	std::cout << "sum finished: " << s.id() << std::endl;
-//	std::cout << std::endl;
-	s /= 3.0;
-//	std::cout << std::endl;
-//	std::cout << "ave finished: " << s.id() << std::endl;
-//	std::cout << std::endl;
-
-	// make a dangling reference in the graph
-//	std::cout << std::endl;
-	plane t = s + 1.F;
-//	std::cout << std::endl << "function finished" << std::endl;
-
-	return s;//( x + y + z ) / 3.0;
-}
 
 int safemain( int argc, char *argv[] )
 {
@@ -110,7 +70,6 @@ int safemain( int argc, char *argv[] )
 //	avev.graph_ptr()->clean_graph();
 //	avev.graph_ptr()->dump_dot( "graphClean.dot" );
 
-#if 0
 	base::cmd_line options(
 		argv[0],
 		base::cmd_line::option(
@@ -143,7 +102,7 @@ int safemain( int argc, char *argv[] )
 		std::vector<media::track_description> tds;
 		for ( auto &vt: c.video_tracks() )
 		{
-			std::cout << "Converting track '" << vt->name() << "' frames " << vt->begin() << " - " << vt->end() << " @ rate " << vt->rate() << std::endl;
+			std::cout << "Processing track '" << vt->name() << "' frames " << vt->begin() << " - " << vt->end() << " @ rate " << vt->rate() << std::endl;
 
 			media::sample s( vt->begin(), vt->rate() );
 
@@ -163,15 +122,20 @@ int safemain( int argc, char *argv[] )
 				media::sample s( f, vt->rate() );
 			
 				auto curFrm = s( vt );
-				if ( f == vt->begin() )
-					std::cout << " size: " << curFrm->width() << " x " << curFrm->height() << ", " << curFrm->size() << " channels" << std::endl;
 
-				oc.video_tracks()[ovt]->store( f, curFrm );
+				image_buf img = extract_frame( *curFrm, { "R", "G", "B" } );
+
+				for ( int c = 0; c < 3; ++c )
+					img[c] *= 0.5F;
+
+				oc.video_tracks()[ovt]->store( f, to_frame( img, { "R", "G", "B" }, "f16" ) );
+
+				std::cout << "wrote " << s.offset() << std::endl;
 			}
 			++ovt;
 		}
 	}
-#endif
+
 	return 0;
 }
 

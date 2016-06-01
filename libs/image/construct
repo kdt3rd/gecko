@@ -19,9 +19,11 @@ lib = library "image"
 	"scanline_group.cpp";
 	"scanline_process.cpp";
 	"op_registry.cpp";
+	"image_ops.cpp";
 	"plane_math.cpp";
 	"plane_stats.cpp";
+	"media_io.cpp";
 	sse3src;
 	sse4src;
   }
-  libs{ "engine" }
+  libs{ "engine", "media" }
