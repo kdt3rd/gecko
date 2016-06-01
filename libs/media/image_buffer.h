@@ -83,6 +83,8 @@ public:
 
 	void get_scanline( int64_t y, float *line, int64_t stride = 1 ) const;
 
+	void set_scanline( int64_t y, const float *line, int64_t stride = 1 );
+
 	void set_offset( int64_t offset_bits )
 	{
 		precondition( offset_bits % 8 == 0, "offset should be multiple of 8 bits" );
@@ -112,6 +114,12 @@ private:
 	void get_scanline_f16( int64_t y, float *line, int64_t stride ) const;
 	void get_scanline_f32( int64_t y, float *line, int64_t stride ) const;
 	void get_scanline_f64( int64_t y, float *line, int64_t stride ) const;
+
+	void set_scanline_u8( int64_t y, const float *line, int64_t stride );
+	void set_scanline_u16( int64_t y, const float *line, int64_t stride );
+	void set_scanline_f16( int64_t y, const float *line, int64_t stride );
+	void set_scanline_f32( int64_t y, const float *line, int64_t stride );
+	void set_scanline_f64( int64_t y, const float *line, int64_t stride );
 
 	std::shared_ptr<void> _data;
 	int64_t _bits = 8;
