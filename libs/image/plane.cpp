@@ -36,9 +36,9 @@ plane::plane( void )
 ////////////////////////////////////////
 
 plane::plane( int w, int h )
-	: _mem( allocator::get().buffer( _stride, w, h ) ),
-	  _width( w ), _width_m1( w - 1 ), _height( h ), _height_m1( h - 1 )
+	: _width( w ), _width_m1( w - 1 ), _height( h ), _height_m1( h - 1 )
 {
+	_mem = allocator::get().buffer( _stride, w, h );
 }
 
 ////////////////////////////////////////
