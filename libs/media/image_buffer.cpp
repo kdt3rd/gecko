@@ -57,7 +57,7 @@ inline float convert_pel( double x )
 
 inline void unconvert_pel( double &d, float v )
 {
-	d = v;
+	d = static_cast<double>( v );
 }
 
 }

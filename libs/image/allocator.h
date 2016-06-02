@@ -84,13 +84,17 @@ private:
 
 	std::mutex _mutex;
 	size_t _max_alloced = 0;
-	size_t _max_buffers_live = 0;
 	size_t _max_memory_live = 0;
 	size_t _max_misc_size = 0;
+	size_t _max_misc_live = 0;
 	size_t _max_scan_size = 0;
+	size_t _max_scan_live = 0;
 	size_t _max_buffer_size = 0;
+	size_t _max_buffers_live = 0;
 
 	size_t _cur_buffers_live = 0;
+	size_t _cur_scan_live = 0;
+	size_t _cur_misc_live = 0;
 	size_t _cur_memory_live = 0;
 	size_t _cur_alloced = 0;
 	size_t _cur_stash_size = 0;

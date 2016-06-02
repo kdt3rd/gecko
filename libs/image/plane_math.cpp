@@ -149,7 +149,7 @@ static void plane_square( scanline &dest, const scanline &src )
 static void plane_sqrt( scanline &dest, const scanline &src )
 {
 	for ( int x = 0, N = dest.width(); x != N; ++x )
-		dest[x] = sqrt( src[x] );
+		dest[x] = sqrtf( src[x] );
 }
 
 ////////////////////////////////////////
@@ -160,7 +160,7 @@ static void plane_mag2( scanline &dest, const scanline &srcA, const scanline &sr
 	{
 		float a = srcA[x];
 		float b = srcB[x];
-		dest[x] = sqrt( a*a + b*b );
+		dest[x] = sqrtf( a*a + b*b );
 	}
 }
 
@@ -173,7 +173,7 @@ static void plane_mag3( scanline &dest, const scanline &srcA, const scanline &sr
 		float a = srcA[x];
 		float b = srcB[x];
 		float c = srcC[x];
-		dest[x] = sqrt( a*a + b*b + c*c );
+		dest[x] = sqrtf( a*a + b*b + c*c );
 	}
 }
 

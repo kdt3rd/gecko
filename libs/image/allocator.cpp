@@ -131,8 +131,8 @@ allocator::allocate( size_t bytes, size_t align )
 		_inflight_misc.emplace_back( std::move( m ) );
 	}
 
-	++_cur_buffers_live;
-	_max_buffers_live = std::max( _max_buffers_live, _cur_buffers_live );
+	++_cur_misc_live;
+	_max_misc_live = std::max( _max_misc_live, _cur_misc_live );
 	return std::shared_ptr<void>( p, std::bind( &allocator::return_misc, this, std::placeholders::_1 ) );
 }
 
@@ -196,8 +196,8 @@ allocator::scanline( int &stride, int w )
 		_inflight_scan.emplace_back( std::move( m ) );
 	}
 
-	++_cur_buffers_live;
-	_max_buffers_live = std::max( _max_buffers_live, _cur_buffers_live );
+	++_cur_scan_live;
+	_max_scan_live = std::max( _max_scan_live, _cur_scan_live );
 	return std::shared_ptr<float>( p, std::bind( &allocator::return_scan, this, std::placeholders::_1 ) );
 }
 
@@ -280,6 +280,22 @@ allocator::clear_stash( void ) noexcept
 void
 allocator::report( std::ostream &os )
 {
+	std::lock_guard<std::mutex> lk( _mutex );
+	os << "\nAllocator report:"
+	   << "\n     Max Bytes Alloc: " << _max_alloced
+	   << "\n     Cur Bytes Alloc: " << _cur_alloced
+	   << "\n     Max Buffer Size: " << _max_buffer_size
+	   << "\n    Max Buffers Live: " << _max_buffers_live
+	   << "\n    Cur Buffers Live: " << _cur_buffers_live
+	   << "\n       Max Scan Size: " << _max_scan_size
+	   << "\n       Max Scan Live: " << _max_scan_live
+	   << "\n       Cur Scan Live: " << _cur_scan_live
+	   << "\n       Max Misc Size: " << _max_misc_size
+	   << "\n       Max Misc Live: " << _max_misc_live
+	   << "\n       Cur Misc Live: " << _cur_misc_live
+	   << "\n      Max Stash Size: " << _max_stash_size
+	   << "\n      Cur Stash Size: " << _cur_stash_size
+	   << std::endl;
 }
 
 ////////////////////////////////////////
@@ -375,7 +391,7 @@ allocator::return_misc( void *p ) noexcept
 			{
 				_cur_stash_size += (*i).size;
 				_cur_memory_live -= (*i).size;
-				--_cur_buffers_live;
+				--_cur_misc_live;
 				_stash_misc.push_back( (*i) );
 				_inflight_misc.erase( i );
 				reduce_stash( _max_stash_size );
@@ -401,7 +417,7 @@ allocator::return_scan( float *p ) noexcept
 			{
 				_cur_stash_size += (*i).size;
 				_cur_memory_live -= (*i).size;
-				--_cur_buffers_live;
+				--_cur_scan_live;
 				_stash_scan.push_back( (*i) );
 				_inflight_scan.erase( i );
 				reduce_stash( _max_stash_size );

@@ -46,29 +46,6 @@ int safemain( int argc, char *argv[] )
 {
 	std::cout << "CPU features:\n";
 	base::cpu::output( std::cout );
-	std::cout << "\nStarting graph generation..." << std::endl;
-
-	auto avev = sum( test_refcount() ) / static_cast<double>( 1920 * 1080 );
-//	std::cout << "sum created: id " << avev.id() << std::endl;
-
-	// should only be one reference left at this point
-//	avev.graph_ptr()->dump_refs( std::cout );
-	avev.graph_ptr()->dump_dot( "graphOrig.dot" );
-
-//	avev.graph_ptr()->clean_graph();
-//	avev.graph_ptr()->dump_dot( "graphClean.dot" );
-
-	avev.graph_ptr()->optimize();
-	avev.graph_ptr()->dump_dot( "graphOpt.dot" );
-	
-	// force the graph to be processed
-	std::cout << "Initiating processing..." << std::endl;
-	double ave = static_cast<double>( avev );
-	std::cout << "Processing finished!" << std::endl;
-	std::cout << "ave: " << ave << std::endl;
-
-//	avev.graph_ptr()->clean_graph();
-//	avev.graph_ptr()->dump_dot( "graphClean.dot" );
 
 	base::cmd_line options(
 		argv[0],
@@ -125,8 +102,8 @@ int safemain( int argc, char *argv[] )
 
 				image_buf img = extract_frame( *curFrm, { "R", "G", "B" } );
 
-				for ( int c = 0; c < 3; ++c )
-					img[c] *= 0.5F;
+				for ( size_t p = 0; p < 3; ++p )
+					img[p] *= 0.5F;
 
 				oc.video_tracks()[ovt]->store( f, to_frame( img, { "R", "G", "B" }, "f16" ) );
 
@@ -135,6 +112,7 @@ int safemain( int argc, char *argv[] )
 			++ovt;
 		}
 	}
+	image::allocator::get().report( std::cout );
 
 	return 0;
 }
