@@ -121,7 +121,7 @@ horiz_convolve( scanline &dest, const scanline &src, const std::vector<float> &k
 		for ( int l = - halfK; l <= n; ++l )
 		{
 			int pos = std::max( 0, std::min( w - 1, x + l ) );
-			sum += src[pos] * k[l+halfK];
+			sum += src[pos] * k[static_cast<size_t>( l + halfK )];
 		}
 		dest[x] = sum;
 	}
@@ -172,7 +172,7 @@ vert_convolve( scanline &dest, int y, const plane &src, const std::vector<float>
 
 	for ( int l = - halfK; l <= n; ++l )
 	{
-		float kVal = k[l+halfK];
+		float kVal = k[static_cast<size_t>( l + halfK )];
 		int curY = std::max( int(0), std::min( hm1, y + l ) );
 		scanline s = scan_ref( src, curY );
 		if ( l == - halfK )
@@ -237,10 +237,10 @@ median_3x3( scanline &dest, int y, const plane &p )
 
 ////////////////////////////////////////
 
-static void generic_median_thread( size_t tIdx, int s, int e, plane &r, const plane &p, int diam )
+static void generic_median_thread( size_t , int s, int e, plane &r, const plane &p, int diam )
 {
 	std::vector<float> tmpV;
-	tmpV.resize( diam * diam );
+	tmpV.resize( static_cast<size_t>( diam * diam ) );
 
 	int halfD = diam / 2;
 	bool even = halfD * 2 == diam;
@@ -275,7 +275,7 @@ static void generic_median_thread( size_t tIdx, int s, int e, plane &r, const pl
 					tmpV[i++] = lineP[readx];
 				}
 			}
-			std::partial_sort( tmpV.begin(), tmpV.begin() + middle + 1, tmpV.end() );
+			std::partial_sort( tmpV.begin(), tmpV.begin() + static_cast<long>( middle + 1 ), tmpV.end() );
 			destP[x] = tmpV[middle];
 		}
 	}

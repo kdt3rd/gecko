@@ -222,7 +222,7 @@ public:
 	virtual ~scanline_plane_operator( void )
 	{}
 
-	virtual bool in_place( void ) const { return inplace; }
+	virtual bool in_place( void ) const override { return inplace; }
 
 	virtual const std::vector<scanline> &inputs( void ) const override
 	{
@@ -323,7 +323,7 @@ public:
 	virtual ~n_scanline_plane_operator( void )
 	{}
 
-	virtual bool in_place( void ) const { return inplace; }
+	virtual bool in_place( void ) const override { return inplace; }
 
 	virtual const std::vector<scanline> &inputs( void ) const override
 	{
