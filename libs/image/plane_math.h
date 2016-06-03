@@ -61,6 +61,9 @@ namespace image
 /// abs( src )
 /// void plane_abs( scanline &dest, const scanline &src )
 ///
+/// copysign( src, v )
+/// void plane_copysign( scanline &dest, const scanline &src, const scanline &v )
+///
 /// src * src 
 /// void plane_square( scanline &dest, const scanline &src )
 ///
@@ -103,6 +106,13 @@ namespace image
 /// atan2( srcA, srcB )
 /// void plane_atan2( scanline &dest, const scanline &srcA, const scanline &srcB )
 ///
+///
+///////// CONDITIONAL FUNCTIONS
+///
+/// (a < b) ? c : d
+/// void if_less( scanline &dest, const scanline &a, float b, const scanline &c, const scanline &d )
+/// void if_greater( scanline &dest, const scanline &a, float b, const scanline &c, const scanline &d )
+
 void add_plane_math( engine::registry &r );
 
 } // namespace image

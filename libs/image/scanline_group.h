@@ -43,7 +43,7 @@ public:
 	scanline output_scan_and_clear( size_t i );
 
 	// if the number of outputs is > 1, this will never return an output scanline
-	scanline find_or_checkout( const std::vector<scanline> &inputs );
+	scanline find_or_checkout( const std::vector<scanline> &inputs, bool in_place );
 
 private:
 	std::vector<scanline> _outputs;

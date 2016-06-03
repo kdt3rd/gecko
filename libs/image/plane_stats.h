@@ -35,14 +35,14 @@ inline engine::computed_value<double> sum( const plane &p )
 {
 	engine::dimensions d;
 	d.x = 1;
-	return engine::computed_value<double>( op_registry(), "sum_plane", d, p );
+	return engine::computed_value<double>( op_registry(), "p.sum", d, p );
 }
 
 inline engine::computed_value<double> sum( plane &&p )
 {
 	engine::dimensions d;
 	d.x = 1;
-	return engine::computed_value<double>( op_registry(), "sum_plane", d, std::move( p ) );
+	return engine::computed_value<double>( op_registry(), "p.sum", d, std::move( p ) );
 }
 
 void add_plane_stats( engine::registry &r );

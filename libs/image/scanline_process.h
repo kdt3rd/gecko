@@ -195,13 +195,14 @@ public:
 	using engine::subgroup_function::subgroup_function;
 	virtual ~scanline_plane_functor( void );
 
-	virtual void call( scanline &dest ) = 0;
+	virtual bool in_place( void ) const = 0;
+	virtual void call( scanline &, int ) = 0;
 
 	virtual const std::vector<scanline> &inputs( void ) const = 0;
 	virtual void set_input( size_t i, const scanline &s ) = 0;
 };
 
-template <typename... Args>
+template <bool inplace, typename... Args>
 class scanline_plane_operator : public scanline_plane_functor
 {
 public:
@@ -220,6 +221,8 @@ public:
 	scanline_plane_operator&operator=( scanline_plane_operator && ) = default;
 	virtual ~scanline_plane_operator( void )
 	{}
+
+	virtual bool in_place( void ) const { return inplace; }
 
 	virtual const std::vector<scanline> &inputs( void ) const override
 	{
@@ -243,7 +246,7 @@ public:
 		process_bind( funcs, sg, n, base::gen_sequence<sizeof...(Args)>{} );
 	}
 
-	virtual void call( scanline &dest ) override
+	virtual void call( scanline &dest, int ) override
 	{
 		process_call( dest, base::gen_sequence<sizeof...(Args)>{} );
 	}
@@ -273,27 +276,128 @@ private:
 	scan_args _args;
 };
 
-template <typename Functor>
-struct scanline_plane_adapter : public scanline_plane_adapter<decltype(&Functor::operator())>
+template <bool inplace, typename Functor>
+struct scanline_plane_adapter : public scanline_plane_adapter<inplace, decltype(&Functor::operator())>
 {
-	using scanline_plane_adapter<decltype(&Functor::operator())>::scanline_plane_adapter;
+	using scanline_plane_adapter<inplace, decltype(&Functor::operator())>::scanline_plane_adapter;
 };
 
-template <typename... Args>
-struct scanline_plane_adapter<void (scanline &, Args...)> : public scanline_plane_operator<Args...>
+template <bool inplace, typename... Args>
+struct scanline_plane_adapter<inplace, void (scanline &, Args...)> : public scanline_plane_operator<inplace, Args...>
 {
 	scanline_plane_adapter( void ) {}
 	scanline_plane_adapter( const std::function<void(scanline &, Args...)> &f )
-		: scanline_plane_operator<Args...>( f )
+		: scanline_plane_operator<inplace, Args...>( f )
 	{}
 };
 
-template <typename... Args>
-struct scanline_plane_adapter<void (*)(scanline &, Args...)> : public scanline_plane_operator<Args...>
+template <bool inplace, typename... Args>
+struct scanline_plane_adapter<inplace, void (*)(scanline &, Args...)> : public scanline_plane_operator<inplace, Args...>
 {
 	scanline_plane_adapter( void ) {}
 	scanline_plane_adapter( const std::function<void(scanline &, Args...)> &f )
-		: scanline_plane_operator<Args...>( f )
+		: scanline_plane_operator<inplace, Args...>( f )
+	{}
+};
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+template <bool inplace, typename... Args>
+class n_scanline_plane_operator : public scanline_plane_functor
+{
+public:
+	typedef plane result_type;
+	typedef std::function<void ( scanline &, int, Args...)> function;
+	typedef std::tuple<typename arg_type_adapter<Args>::type...> scan_args;
+
+	n_scanline_plane_operator( void )
+	{}
+	explicit n_scanline_plane_operator( const function &f )
+		: _func( f )
+	{}
+	n_scanline_plane_operator( const n_scanline_plane_operator & ) = default;
+	n_scanline_plane_operator( n_scanline_plane_operator && ) = default;
+	n_scanline_plane_operator&operator=( const n_scanline_plane_operator & ) = default;
+	n_scanline_plane_operator&operator=( n_scanline_plane_operator && ) = default;
+	virtual ~n_scanline_plane_operator( void )
+	{}
+
+	virtual bool in_place( void ) const { return inplace; }
+
+	virtual const std::vector<scanline> &inputs( void ) const override
+	{
+		return _inputs;
+	}
+
+	virtual void update_inputs( int d ) override
+	{
+		for ( auto &b: _binders )
+			b.update( d );
+	}
+
+	virtual void deref_inputs( void ) override
+	{
+		for ( auto &b: _binders )
+			b.clear();
+	}
+
+	virtual void bind( std::vector<std::shared_ptr<engine::subgroup_function>> &funcs, engine::subgroup &sg, engine::node &n ) override
+	{
+		process_bind( funcs, sg, n, base::gen_sequence<sizeof...(Args)>{} );
+	}
+
+	virtual void call( scanline &dest, int y ) override
+	{
+		process_call( dest, y, base::gen_sequence<sizeof...(Args)>{} );
+	}
+
+	virtual void set_input( size_t i, const scanline &s ) override
+	{
+		_binders[i].set( s );
+	}
+
+private:
+	template <size_t... S>
+	inline void process_bind( std::vector<std::shared_ptr<engine::subgroup_function>> &funcs, engine::subgroup &sg, engine::node &n, const base::sequence<S...> & )
+	{
+		size_t b[] = { arg_type_adapter<Args>::prebind( _binders, _inputs )... };
+		_args = std::make_tuple( arg_type_adapter<Args>::get( _binders, _inputs, b[S], sg.gref()[n.input(S)].value(), n.input(S), sg, this, funcs )... );
+	}
+
+	template <size_t... S>
+	inline void process_call( scanline &dest, int y, const base::sequence<S...> & )
+	{
+		_func( dest, y, arg_type_adapter<Args>::extract( std::get<S>( _args ) )... );
+	}
+
+	std::vector<scanline> _inputs;
+	std::vector<plane_scan_binder> _binders;
+	function _func;
+	scan_args _args;
+};
+
+template <bool inplace, typename Functor>
+struct n_scanline_plane_adapter : public n_scanline_plane_adapter<inplace, decltype(&Functor::operator())>
+{
+	using n_scanline_plane_adapter<inplace, decltype(&Functor::operator())>::n_scanline_plane_adapter;
+};
+
+template <bool inplace, typename... Args>
+struct n_scanline_plane_adapter<inplace, void (scanline &, int, Args...)> : public n_scanline_plane_operator<inplace, Args...>
+{
+	n_scanline_plane_adapter( void ) {}
+	n_scanline_plane_adapter( const std::function<void(scanline &, int, Args...)> &f )
+		: n_scanline_plane_operator<inplace, Args...>( f )
+	{}
+};
+
+template <bool inplace, typename... Args>
+struct n_scanline_plane_adapter<inplace, void (*)(scanline &, int, Args...)> : public n_scanline_plane_operator<inplace, Args...>
+{
+	n_scanline_plane_adapter( void ) {}
+	n_scanline_plane_adapter( const std::function<void(scanline &, int, Args...)> &f )
+		: n_scanline_plane_operator<inplace, Args...>( f )
 	{}
 };
 

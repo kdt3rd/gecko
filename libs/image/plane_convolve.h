@@ -20,58 +20,44 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#include "plane_stats.h"
-#include "threading.h"
+#pragma once
 
-////////////////////////////////////////
-
-namespace
-{
-
-static void sum_thread( size_t tIdx, int s, int e, const image::plane &p, std::vector<double> &vals )
-{
-	double v = 0.0;
-	int w = p.width();
-	for ( int y = s; y < e; ++y )
-	{
-		const float *lineP = p.line( y );
-		for ( int x = 0; x < w; ++x )
-			v += static_cast<double>( lineP[x] );
-	}
-	vals[tIdx] += v;
-}
-
-static double sum_plane( const image::plane &p )
-{
-	std::vector<double> vals;
-	vals.resize( image::threading::get().size(), 0.0 );
-
-	image::threading::get().dispatch( std::bind( sum_thread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::cref( p ), std::ref( vals ) ), p );
-
-	double r = 0.0;
-	for ( double d: vals )
-		r += d;
-	return r;
-}
-
-}
+#include <base/contract.h>
+#include "plane.h"
+#include "op_registry.h"
 
 ////////////////////////////////////////
 
 namespace image
 {
 
-////////////////////////////////////////
+/// [-1, 0, 1] / 2
+plane central_gradient_horiz( const plane &p );
+/// [-1, 0, 1]' / 2
+plane central_gradient_vert( const plane &p );
 
-void
-add_plane_stats( engine::registry &r )
+plane convolve_horiz( const plane &p, const std::vector<float> &k );
+plane convolve_vert( const plane &p, const std::vector<float> &k );
+
+inline plane separable_convolve( const plane &p, const std::vector<float> &k )
 {
-	using namespace engine;
-
-	r.add( op( "p.sum", sum_plane, op::threaded ) );
+	// do the vert pass first so we get n:1, 1:1 group behavior
+	return convolve_horiz( convolve_vert( p, k ), k );
 }
 
-} // image
+/// NB: diameter, not radius, so 3 is a 3x3 median
+plane median( const plane &p, int diameter );
+
+/// returns the median of 3 things: median of the 5 pixels of a cross,
+/// the median of the 5 pixels of an x, and the incoming plane itself
+plane cross_x_img_median( const plane &p );
+
+/// returns the median value from three planes
+plane median3( const plane &p1, const plane &p2, const plane &p3 );
+
+void add_plane_area( engine::registry &r );
+
+} // namespace image
 
 
 

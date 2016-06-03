@@ -67,7 +67,7 @@ public:
 /// @brief subclass for one-to-one operations
 ///
 /// NB: expects to be grouped into subgroup for processing.
-template <typename Functor, typename GroupFunc>
+template <typename Functor, typename GroupFunc, size_t arg_offset = 1>
 class opfunc_one_to_one : public op_function
 {
 public:
@@ -89,12 +89,12 @@ public:
 
 	virtual size_t input_size( void ) const override
 	{
-		return base::function_traits<Functor>::arity - 1;
+		return base::function_traits<Functor>::arity - arg_offset;
 	}
 
 	virtual const std::type_info &input_type( size_t i ) const override
 	{
-		return base::function_traits<Functor>::arg_type( i + 1 );
+		return base::function_traits<Functor>::arg_type( i + arg_offset );
 	}
 
 	virtual any process( graph &, const dimensions &, const std::vector<any> & ) const override

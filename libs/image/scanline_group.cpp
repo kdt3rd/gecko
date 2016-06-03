@@ -62,23 +62,27 @@ scanline_group::output_scan_and_clear( size_t i )
 ////////////////////////////////////////
 
 scanline
-scanline_group::find_or_checkout( const std::vector<scanline> &inputs )
+scanline_group::find_or_checkout( const std::vector<scanline> &inputs, bool in_place )
 {
-	for ( auto &s: inputs )
+	if ( in_place )
 	{
-		if ( s.unique() )
+		for ( auto &s: inputs )
 		{
+			if ( s.unique() )
+			{
 //			std::cout << "reusing input scanline as destinaton" << std::endl;
-			return s;
+				return s;
+			}
 		}
-	}
+		
 
-	if ( _outputs.size() == 1 )
-	{
-		if ( _outputs[0].unique() )
+		if ( _outputs.size() == 1 )
 		{
+			if ( _outputs[0].unique() )
+			{
 //			std::cout << "using output scanline as destinaton" << std::endl;
-			return _outputs[0];
+				return _outputs[0];
+			}
 		}
 	}
 

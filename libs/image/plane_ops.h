@@ -25,6 +25,7 @@
 #include <base/contract.h>
 #include "plane.h"
 #include "plane_stats.h"
+#include "plane_convolve.h"
 #include <engine/float_ops.h>
 
 ////////////////////////////////////////
@@ -50,8 +51,16 @@ inline plane create_plane( int w, int h, const engine::computed_value<float> &v 
 inline plane abs( const plane &p ) { return plane( "p.abs", p.dims(), p ); }
 inline plane abs( plane &&p ) { return plane( "p.abs", p.dims(), std::move( p ) ); }
 
+inline plane copysign( const plane &a, const plane &b )
+{
+	precondition( a.width() == b.width() && a.height() == b.height(), "unable to copysign for planes of different sizes" );
+	return plane( "p.copysign_pp", a.dims(), a, b );
+}
+
 inline plane square( const plane &p ) { return plane( "p.square", p.dims(), p ); }
 inline plane square( plane &&p ) { return plane( "p.square", p.dims(), std::move( p ) ); }
+
+inline plane fma( const plane &p, float b, float c ) { return plane( "p.fma_pnn", p.dims(), p, b, c ); }
 
 inline plane sqrt( const plane &p ) { return plane( "p.sqrt", p.dims(), p ); }
 inline plane sqrt( plane &&p ) { return plane( "p.sqrt", p.dims(), std::move( p ) ); }
@@ -87,6 +96,24 @@ inline plane atan2( const plane &a, const plane &b )
 {
 	precondition( a.width() == b.width() && a.height() == b.height(), "unable to compute atan2 for planes of different sizes" );
 	return plane( "p.atan2", a.dims(), a, b );
+}
+
+// comparison operators
+
+/// out = (a < b) ? c : d
+inline plane if_less( const plane &a, float b, const plane &c, const plane &d )
+{
+	precondition( a.width() == c.width() && a.height() == c.height(), "unable to compute if_less for planes of different sizes" );
+	precondition( a.width() == d.width() && a.height() == d.height(), "unable to compute if_less for planes of different sizes" );
+	return plane( "p.if_less_fpp", a.dims(), a, b, c, d );
+}
+
+/// out = (a > b) ? c : d
+inline plane if_greater( const plane &a, float b, const plane &c, const plane &d )
+{
+	precondition( a.width() == c.width() && a.height() == c.height(), "unable to compute if_less for planes of different sizes" );
+	precondition( a.width() == d.width() && a.height() == d.height(), "unable to compute if_less for planes of different sizes" );
+	return plane( "p.if_greater_fpp", a.dims(), a, b, c, d );
 }
 
 ////////////////////////////////////////

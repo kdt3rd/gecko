@@ -135,6 +135,14 @@ static void plane_abs( scanline &dest, const scanline &src )
 
 ////////////////////////////////////////
 
+static void plane_copysign( scanline &dest, const scanline &src, const scanline &v )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = copysignf( src[x], v[x] );
+}
+
+////////////////////////////////////////
+
 static void plane_square( scanline &dest, const scanline &src )
 {
 	for ( int x = 0, N = dest.width(); x != N; ++x )
@@ -279,6 +287,22 @@ static void plane_atan2( scanline &dest, const scanline &srcA, const scanline &s
 		dest[x] = atan2f( srcA[x], srcB[x] );
 }
 
+////////////////////////////////////////
+
+static void plane_ifless( scanline &dest, const scanline &a, float b, const scanline &c, const scanline &d )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = a[x] < b ? c[x] : d[x];
+}
+
+////////////////////////////////////////
+
+static void plane_ifgreater( scanline &dest, const scanline &a, float b, const scanline &c, const scanline &d )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = a[x] > b ? c[x] : d[x];
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -286,38 +310,42 @@ void add_plane_math( engine::registry &r )
 {
 	using namespace engine;
 
-	r.add( op( "p.assign", base::choose_runtime( assign_value, { { base::cpu::simd_feature::SSE3, sse3::assign_value } } ), scanline_plane_adapter<decltype(assign_value)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.assign", base::choose_runtime( assign_value, { { base::cpu::simd_feature::SSE3, sse3::assign_value } } ), scanline_plane_adapter<true, decltype(assign_value)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "p.add_pp", base::choose_runtime( add_planeplane, { { base::cpu::simd_feature::SSE3, sse3::add_planeplane } } ), scanline_plane_adapter<decltype(add_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
-	r.add( op( "p.add_pn", base::choose_runtime( add_planenumber, { { base::cpu::simd_feature::SSE3, sse3::add_planenumber } } ), scanline_plane_adapter<decltype(add_planenumber)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.add_pp", base::choose_runtime( add_planeplane, { { base::cpu::simd_feature::SSE3, sse3::add_planeplane } } ), scanline_plane_adapter<true, decltype(add_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.add_pn", base::choose_runtime( add_planenumber, { { base::cpu::simd_feature::SSE3, sse3::add_planenumber } } ), scanline_plane_adapter<true, decltype(add_planenumber)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "p.sub_pp", base::choose_runtime( sub_planeplane, { { base::cpu::simd_feature::SSE3, sse3::sub_planeplane } } ), scanline_plane_adapter<decltype(sub_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.sub_pp", base::choose_runtime( sub_planeplane, { { base::cpu::simd_feature::SSE3, sse3::sub_planeplane } } ), scanline_plane_adapter<true, decltype(sub_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "p.mul_pp", base::choose_runtime( mul_planeplane, { { base::cpu::simd_feature::SSE3, sse3::mul_planeplane } } ), scanline_plane_adapter<decltype(mul_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
-	r.add( op( "p.mul_pn", base::choose_runtime( mul_planenumber, { { base::cpu::simd_feature::SSE3, sse3::mul_planenumber } } ), scanline_plane_adapter<decltype(mul_planenumber)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.mul_pp", base::choose_runtime( mul_planeplane, { { base::cpu::simd_feature::SSE3, sse3::mul_planeplane } } ), scanline_plane_adapter<true, decltype(mul_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.mul_pn", base::choose_runtime( mul_planenumber, { { base::cpu::simd_feature::SSE3, sse3::mul_planenumber } } ), scanline_plane_adapter<true, decltype(mul_planenumber)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "p.div_pp", base::choose_runtime( div_planeplane, { { base::cpu::simd_feature::SSE3, sse3::div_planeplane }, { base::cpu::simd_feature::SSE42, sse4::div_planeplane } } ), scanline_plane_adapter<decltype(div_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
-	r.add( op( "p.div_np", base::choose_runtime( div_numberplane, { { base::cpu::simd_feature::SSE3, sse3::div_numberplane }, { base::cpu::simd_feature::SSE42, sse4::div_numberplane } } ), scanline_plane_adapter<decltype(div_numberplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.div_pp", base::choose_runtime( div_planeplane, { { base::cpu::simd_feature::SSE3, sse3::div_planeplane }, { base::cpu::simd_feature::SSE42, sse4::div_planeplane } } ), scanline_plane_adapter<true, decltype(div_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.div_np", base::choose_runtime( div_numberplane, { { base::cpu::simd_feature::SSE3, sse3::div_numberplane }, { base::cpu::simd_feature::SSE42, sse4::div_numberplane } } ), scanline_plane_adapter<true, decltype(div_numberplane)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "p.fma_ppp", base::choose_runtime( muladd_planeplaneplane, { { base::cpu::simd_feature::SSE3, sse3::muladd_planeplaneplane } } ), scanline_plane_adapter<decltype(muladd_planeplaneplane)>(), dispatch_scan_processing, op::one_to_one ) );
-	r.add( op( "p.fma_pnn", base::choose_runtime( muladd_planenumbernumber, { { base::cpu::simd_feature::SSE3, sse3::muladd_planenumbernumber } } ), scanline_plane_adapter<decltype(muladd_planenumbernumber)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.fma_ppp", base::choose_runtime( muladd_planeplaneplane, { { base::cpu::simd_feature::SSE3, sse3::muladd_planeplaneplane } } ), scanline_plane_adapter<true, decltype(muladd_planeplaneplane)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.fma_pnn", base::choose_runtime( muladd_planenumbernumber, { { base::cpu::simd_feature::SSE3, sse3::muladd_planenumbernumber } } ), scanline_plane_adapter<true, decltype(muladd_planenumbernumber)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "p.abs", base::choose_runtime( plane_abs ), scanline_plane_adapter<decltype(plane_abs)>(), dispatch_scan_processing, op::one_to_one ) );
-	r.add( op( "p.square", base::choose_runtime( plane_square ), scanline_plane_adapter<decltype(plane_square)>(), dispatch_scan_processing, op::one_to_one ) );
-	r.add( op( "p.sqrt", base::choose_runtime( plane_sqrt ), scanline_plane_adapter<decltype(plane_sqrt)>(), dispatch_scan_processing, op::one_to_one ) );
-	r.add( op( "p.mag2", base::choose_runtime( plane_mag2 ), scanline_plane_adapter<decltype(plane_mag2)>(), dispatch_scan_processing, op::one_to_one ) );
-	r.add( op( "p.mag3", base::choose_runtime( plane_mag3 ), scanline_plane_adapter<decltype(plane_mag3)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.abs", base::choose_runtime( plane_abs ), scanline_plane_adapter<true, decltype(plane_abs)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.copysign_pp", base::choose_runtime( plane_copysign ), scanline_plane_adapter<true, decltype(plane_copysign)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.square", base::choose_runtime( plane_square ), scanline_plane_adapter<true, decltype(plane_square)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.sqrt", base::choose_runtime( plane_sqrt ), scanline_plane_adapter<true, decltype(plane_sqrt)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.mag2", base::choose_runtime( plane_mag2 ), scanline_plane_adapter<true, decltype(plane_mag2)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.mag3", base::choose_runtime( plane_mag3 ), scanline_plane_adapter<true, decltype(plane_mag3)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "p.exp", base::choose_runtime( plane_exp ), scanline_plane_adapter<decltype(plane_exp)>(), dispatch_scan_processing, op::one_to_one ) );
-	r.add( op( "p.log", base::choose_runtime( plane_log ), scanline_plane_adapter<decltype(plane_log)>(), dispatch_scan_processing, op::one_to_one ) );
-	r.add( op( "p.exp2", base::choose_runtime( plane_exp2 ), scanline_plane_adapter<decltype(plane_exp2)>(), dispatch_scan_processing, op::one_to_one ) );
-	r.add( op( "p.log2", base::choose_runtime( plane_log2 ), scanline_plane_adapter<decltype(plane_log2)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.exp", base::choose_runtime( plane_exp ), scanline_plane_adapter<true, decltype(plane_exp)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.log", base::choose_runtime( plane_log ), scanline_plane_adapter<true, decltype(plane_log)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.exp2", base::choose_runtime( plane_exp2 ), scanline_plane_adapter<true, decltype(plane_exp2)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.log2", base::choose_runtime( plane_log2 ), scanline_plane_adapter<true, decltype(plane_log2)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "p.pow_pp", base::choose_runtime( plane_powp ), scanline_plane_adapter<decltype(plane_powp)>(), dispatch_scan_processing, op::one_to_one ) );
-	r.add( op( "p.pow_pi", base::choose_runtime( plane_powi ), scanline_plane_adapter<decltype(plane_powi)>(), dispatch_scan_processing, op::one_to_one ) );
-	r.add( op( "p.pow_pn", base::choose_runtime( plane_powf ), scanline_plane_adapter<decltype(plane_powf)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.pow_pp", base::choose_runtime( plane_powp ), scanline_plane_adapter<true, decltype(plane_powp)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.pow_pi", base::choose_runtime( plane_powi ), scanline_plane_adapter<true, decltype(plane_powi)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.pow_pn", base::choose_runtime( plane_powf ), scanline_plane_adapter<true, decltype(plane_powf)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "p.atan2", base::choose_runtime( plane_atan2 ), scanline_plane_adapter<decltype(plane_atan2)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.atan2", base::choose_runtime( plane_atan2 ), scanline_plane_adapter<true, decltype(plane_atan2)>(), dispatch_scan_processing, op::one_to_one ) );
+
+	r.add( op( "p.if_less_fpp", base::choose_runtime( plane_ifless ), scanline_plane_adapter<true, decltype(plane_ifless)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.if_greater_fpp", base::choose_runtime( plane_ifgreater ), scanline_plane_adapter<true, decltype(plane_ifgreater)>(), dispatch_scan_processing, op::one_to_one ) );
 }
 
 ////////////////////////////////////////

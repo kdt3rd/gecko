@@ -41,12 +41,20 @@ namespace
 {
 
 using namespace image;
+plane despeckle( const plane &p, float thresh = 0.05F )
+{
+	plane mid = separable_convolve( p, { 0.25F, 0.5F, 0.25F } );
+	plane high = p - mid;
+	plane outhigh = if_less( abs( high ), thresh, high * 0.2, high );
+
+	return mid + outhigh;
+}
 
 int safemain( int argc, char *argv[] )
 {
 	std::cout << "CPU features:\n";
 	base::cpu::output( std::cout );
-
+	
 	base::cmd_line options(
 		argv[0],
 		base::cmd_line::option(
@@ -103,8 +111,11 @@ int safemain( int argc, char *argv[] )
 				image_buf img = extract_frame( *curFrm, { "R", "G", "B" } );
 
 				for ( size_t p = 0; p < 3; ++p )
-					img[p] *= 0.5F;
+					img[p] = despeckle( img[p], 0.05F );
 
+				img[0].graph_ptr()->dump_dot( "despeckleGraph.dot" );
+				img[0].graph_ptr()->optimize();
+				img[0].graph_ptr()->dump_dot( "despeckleGraphOpt.dot" );
 				oc.video_tracks()[ovt]->store( f, to_frame( img, { "R", "G", "B" }, "f16" ) );
 
 				std::cout << "wrote " << s.offset() << std::endl;

@@ -188,10 +188,13 @@ subgroup::bind_functions( std::vector<std::shared_ptr<subgroup_function>> &funcs
 	funcs.reserve( _nodes.size() );
 	graph &g = _graph;
 	const registry &ops = g.op_registry();
+	size_t outI = 0;
 	for ( auto n: _nodes )
 	{
 		funcs.emplace_back( ops[g[n].op()].function().create_group_function() );
 		funcs.back()->bind( funcs, *this, g[n] );
+		if ( is_output( n ) )
+			funcs.back()->output_index( outI++ );
 	}
 }
 
