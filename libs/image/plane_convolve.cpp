@@ -48,7 +48,7 @@ horiz_cgrad( scanline &dest, const scanline &src )
 
 	dest[0] = ( src[1] - src[0] ) / 2.F;
 	int wm1 = dest.width() - 1;
-	for ( int x = 0; x < wm1; ++x )
+	for ( int x = 1; x < wm1; ++x )
 		dest[x] = ( src[x+1] - src[x-1] ) / 2.F;
 	dest[wm1] = ( src[wm1] - src[wm1-1] ) / 2.F;
 }
@@ -80,7 +80,7 @@ horiz_convolve3_mirror( scanline &dest, const scanline &src, float outer, float 
 
 	dest[0] = ( src[0] + src[1] ) * outer + src[0] * center;
 	int wm1 = dest.width() - 1;
-	for ( int x = 0; x < wm1; ++x )
+	for ( int x = 1; x < wm1; ++x )
 		dest[x] = ( src[x+1] + src[x-1] ) * outer + src[x] * center;
 	dest[wm1] = ( src[wm1] + src[wm1-1] ) * outer + src[wm1] * center;
 }
@@ -97,7 +97,7 @@ horiz_convolve3( scanline &dest, const scanline &src, float left, float center, 
 
 	dest[0] = src[0] * ( left + center ) + src[1] * right;
 	int wm1 = dest.width() - 1;
-	for ( int x = 0; x < wm1; ++x )
+	for ( int x = 1; x < wm1; ++x )
 		dest[x] = src[x-1] * left + src[x] * center + src[x+1] * right;
 	dest[wm1] = ( src[wm1] * ( center + right ) + src[wm1-1] ) * left;
 }
