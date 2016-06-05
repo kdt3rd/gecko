@@ -70,11 +70,19 @@ public:
 		return _channels.size();
 	}
 
+	image_buffer &operator[]( size_t i )
+	{
+		return _channels.at( i );
+	}
 	const image_buffer &operator[]( size_t i ) const
 	{
 		return _channels.at( i );
 	}
 
+	image_buffer &at( size_t i )
+	{
+		return _channels.at( i );
+	}
 	const image_buffer &at( size_t i ) const
 	{
 		return _channels.at( i );
