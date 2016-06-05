@@ -17,6 +17,7 @@ lib = library "media"
 
 	"exr_reader.cpp",
 	"exr_writer.cpp",
+	"tiff_reader.cpp",
   }
   libs "base"
   external_lib{
@@ -24,4 +25,10 @@ lib = library "media"
 	  required=false;
 	  extra_libs="IlmBase";
 	  defines={"HAVE_OPENEXR"};
+  }
+  external_lib{
+	  lib="libtiff-4";
+	  required=false;
+	  extra_libs="tiffxx";
+	  defines={"HAVE_LIBTIFF"};
   }
