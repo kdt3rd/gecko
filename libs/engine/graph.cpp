@@ -598,19 +598,74 @@ graph::optimize( void )
 	{
 		// now need to re-order any group's inputs to before the first node in the group
 		std::vector<node_id> neworder( _nodes.size(), nullnode );
-		std::iota( neworder.begin(), neworder.end(), 0 );
-	
-		for ( auto &sg: _subgroups )
-		{
-			node_id lastIn = sg.last_input();
-			if ( lastIn == nullnode )
-				continue;
 
-			node_id firstMember = sg.first_member();
-			if ( firstMember < lastIn )
+		bool made_change = true;
+		while ( made_change )
+		{
+			made_change = false;
+			std::iota( neworder.begin(), neworder.end(), 0 );
+
+			for ( auto &sg: _subgroups )
 			{
-				std::cout << "Need to move inputs around first member " << firstMember << " last input " << lastIn << std::endl;
-				throw_not_yet();
+				node_id lastIn = sg.last_input();
+				if ( lastIn == nullnode )
+					continue;
+
+				node_id firstMember = sg.first_member();
+				if ( firstMember < lastIn )
+				{
+					std::cout << "Need to move inputs around first member " << firstMember << " last input " << lastIn << std::endl;
+//				throw_not_yet();
+					made_change = true;
+					node_id nnode = lastIn + 1;
+					for ( node_id member: sg.members() )
+					{
+//						std::cout << " member: " << member << " -> nnode " << nnode << std::endl;
+						neworder[member] = nnode;
+						++nnode;
+					}
+				}
+			}
+			if ( made_change )
+			{
+				clear_grouping();
+//				std::cout << "New grouping-based ordering:\n";
+//				for ( size_t i = 0, N = neworder.size(); i != N; ++i )
+//					std::cout << i << ": " << neworder[i] << '\n';
+				std::cout << std::endl;
+				made_change = false;
+				for ( size_t i = 0, N = neworder.size(); i != N; ++i )
+				{
+					if ( static_cast<size_t>( neworder[i] ) > i )
+					{
+						node_id newdest = neworder[i];
+						node_id curP = static_cast<node_id>( i );
+						for ( size_t j = i + 1; j != N; ++j )
+						{
+							if ( neworder[j] < newdest )
+							{
+//								static int rotate_in = 1;
+								made_change = true;
+//								std::stringstream fn;
+//								fn << "rotate_order_" << rotate_in << ".dot";
+//								++rotate_in;
+//								std::cout << "   -> " << j << " rotate " << neworder[j] << " to " << curP << " newdest " << newdest << std::endl;
+								rotate_node( neworder[j], curP );
+//								dump_dot( fn.str() );
+								++curP;
+							}
+							if ( j >= newdest )
+								break;
+						}
+					}
+					if ( made_change )
+						break;
+				}
+				if ( made_change )
+				{
+					apply_grouping();
+//					dump_dot( "rotate_graph.dot" );
+				}
 			}
 		}
 	}
