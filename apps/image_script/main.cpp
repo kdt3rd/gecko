@@ -45,9 +45,15 @@ plane despeckle( const plane &p, float thresh = 0.05F )
 {
 	plane mid = separable_convolve( p, { 0.25F, 0.5F, 0.25F } );
 	plane high = p - mid;
-	plane outhigh = if_less( abs( high ), thresh, high * 0.2, high );
+	plane med = cross_x_img_median( p );
+	plane highmed = p - med;
+	plane highdiff = high - highmed;
+	return abs( highdiff ) * 20;
+//	plane outhigh = if_less( abs( high ), thresh, high * 0.2, high );
+//	plane outhigh = high;
 
-	return mid + outhigh;
+//	return mid + outhigh;
+//	return cross_x_img_median( p );
 }
 
 int safemain( int argc, char *argv[] )
