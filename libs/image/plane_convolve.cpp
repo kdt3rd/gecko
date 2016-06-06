@@ -426,7 +426,7 @@ median( const plane &p, int diameter )
 plane
 cross_x_img_median( const plane &p )
 {
-	return plane( "p.three_median", p.dims(), p );
+	return plane( "p.cross_x_median", p.dims(), p );
 }
 
 ////////////////////////////////////////
