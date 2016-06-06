@@ -168,7 +168,9 @@ threading::bee( size_t tIdx )
 		}
 		catch ( std::exception &e )
 		{
+			lk.lock();
 			base::print_exception( std::cerr, e );
+			lk.unlock();
 		}
 
 		if ( fa.counter->fetch_sub( 1, std::memory_order_release ) == 1 )
