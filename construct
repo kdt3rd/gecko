@@ -31,7 +31,7 @@ configuration "debug"
   warnings "most"
 
 default_configuration "build"
-language "c++14"
+language "c++11"
 threads "on"
 
 Doxygen( "docs", "docs/doxyfile" )

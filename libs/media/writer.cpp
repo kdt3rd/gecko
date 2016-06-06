@@ -96,7 +96,6 @@ writer::open( const base::uri &u,
 		auto wOverride = openParams.find( ForceWriterMetadataName );
 		if ( wOverride != openParams.end() )
 		{
-			using namespace std::experimental;
 			using namespace base;
 			const std::string &name = any_cast<const std::string &>( wOverride->second );
 			for ( auto &w: theWriters )

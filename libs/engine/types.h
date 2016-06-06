@@ -61,10 +61,11 @@ T any_cast( any &a )
 /// more than enough for imaging given the multiple dimensions
 struct dimensions
 {
+	constexpr dimensions( void ) {}
 	typedef int32_t value_type;
 	value_type x = 0, y = 0, z = 0, w = 0;
 };
-constexpr dimensions nulldim = { 0, 0, 0, 0 };
+constexpr dimensions nulldim;
 inline hash &operator<<( hash &h, const dimensions &d )
 {
 	h << d.x << d.y << d.z << d.w;

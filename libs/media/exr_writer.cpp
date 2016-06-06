@@ -127,7 +127,6 @@ public:
 			: video_track( std::move( n ), b, e, sr, td ),
 			  _files( files ), _compression( Imf::NO_COMPRESSION )
 	{
-		using namespace std::experimental;
 		using namespace base;
 
 		auto c = parms.find( "compression" );
