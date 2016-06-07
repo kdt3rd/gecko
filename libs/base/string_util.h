@@ -79,16 +79,6 @@ inline void to_hex( char &c1, char &c2, int v )
 
 template <typename stringT>
 inline bool begins_with( const stringT &s,
-						 const stringT &start )
-{
-	if ( start.empty() )
-		return true;
-
-	return s.compare( 0, start.size(), start, 0, start.size() ) == 0;
-}
-
-template <typename stringT>
-inline bool begins_with( const stringT &s,
 						 const const_string<typename stringT::value_type, typename stringT::traits_type> &start )
 {
 	if ( start.empty() )
@@ -109,6 +99,15 @@ inline bool begins_with( const const_string<charT, traitsT> &s,
 	// template rules will pick the above version for 2 const_strings because
 	// b is more specific
 	return s.compare( 0, start.size(), start, 0, start.size() ) == 0;
+}
+
+template <typename charT, typename traitsT, template<typename X, typename Y> class stringT, std::size_t N>
+inline bool begins_with( const stringT<charT, traitsT> &s,
+						 const charT (&start)[N] )
+{
+	// define this overload since not all compiler version seem able
+	// to emit an implicit conversion to const_string :(
+	return s.compare( 0, N - 1, start, 0, N - 1 );
 }
 
 
