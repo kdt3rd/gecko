@@ -91,7 +91,7 @@ writer::open( const base::uri &u,
 	{
 		std::string ext = base::to_lower( base::file_extension( u.path().back() ) );
 
-		std::cout << "output extension: " << ext << std::endl;
+		//std::cout << "output extension: " << ext << std::endl;
 		std::unique_lock<std::mutex> lk( theWriterMutex );
 		auto wOverride = openParams.find( ForceWriterMetadataName );
 		if ( wOverride != openParams.end() )

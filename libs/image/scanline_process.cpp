@@ -63,11 +63,7 @@ scanline_thread_process( size_t, int start, int end, engine::subgroup &sg, int w
 		// reaches the current output
 		// TODO: research a way to prevent that
 		for ( size_t i = 0; i < nOuts; ++i )
-		{
-			if ( y == 1000 )
-				std::cout << "output scan update" << std::endl;
 			scans.output_scan( i, scan_ref( base::any_cast<plane &>( sg.output_val( i ) ), y ) );
-		}
 
 		for ( size_t i = 0; i < sg.size(); ++i )
 		{
@@ -77,18 +73,14 @@ scanline_thread_process( size_t, int start, int end, engine::subgroup &sg, int w
 
 			scanline dest;
 			if ( cur.is_output() )
-			{
-				if ( y == 1000 )
-					std::cout << "  -> CUR IS OUTPUT" << std::endl;
 				dest = scans.output_scan_and_clear( cur.output_index() );
-			}
 			else
 				dest = scans.find_or_checkout( cur.inputs(), cur.in_place() );
 			
-			if ( y == 0 )
-			{
-				std::cout << i << ": " << sg.gref().op_registry()[sg.gref()[sg.members()[i]].op()].name() << std::endl;
-			}
+//			if ( y == 0 )
+//			{
+//				std::cout << i << ": " << sg.gref().op_registry()[sg.gref()[sg.members()[i]].op()].name() << std::endl;
+//			}
 			cur.call( dest, y );
 
 			// release the scanlines for the next iteration

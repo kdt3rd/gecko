@@ -494,9 +494,9 @@ graph::dump_refs( std::ostream &os ) const
 const any &
 graph::process( node_id nid, node &n )
 {
-	std::cout << "Request to process node " << nid << " (op " << _ops[n.op()].name() << ")" << std::endl;
+//	std::cout << "Request to process node " << nid << " (op " << _ops[n.op()].name() << ")" << std::endl;
 	optimize();
-	std::cout << "optimized, start of processing: " << _start_of_processing << std::endl;
+//	std::cout << "optimized, start of processing: " << _start_of_processing << std::endl;
 
 	// by construction, if a node is at node_id nid, all it's inputs
 	// appear before
@@ -614,8 +614,7 @@ graph::optimize( void )
 				node_id firstMember = sg.first_member();
 				if ( firstMember < lastIn )
 				{
-					std::cout << "Need to move inputs around first member " << firstMember << " last input " << lastIn << std::endl;
-//				throw_not_yet();
+//					std::cout << "Need to move inputs around first member " << firstMember << " last input " << lastIn << std::endl;
 					made_change = true;
 					node_id nnode = lastIn + 1;
 					for ( node_id member: sg.members() )
