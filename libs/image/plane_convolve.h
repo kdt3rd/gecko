@@ -55,6 +55,10 @@ plane cross_x_img_median( const plane &p );
 /// returns the median value from three planes
 plane median3( const plane &p1, const plane &p2, const plane &p3 );
 
+/// dx and dy are radius in x and y, sigD is the sigma for distance, sigI is the sigma for image distance
+plane bilateral( const plane &p1, const engine::computed_value<int> &dx, const engine::computed_value<int> &dy, const engine::computed_value<float> &sigD, const engine::computed_value<float> &sigI );
+plane cross_bilateral( const plane &p1, const plane &ref, const engine::computed_value<int> &dx, const engine::computed_value<int> &dy, const engine::computed_value<float> &sigD, const engine::computed_value<float> &sigI );
+
 void add_plane_area( engine::registry &r );
 
 } // namespace image
