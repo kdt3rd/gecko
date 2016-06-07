@@ -51,6 +51,25 @@ computed_base::computed_base( computed_base &&o )
 
 ////////////////////////////////////////
 
+computed_base &
+computed_base::operator=( const computed_base &o )
+{
+	if ( &o != this )
+		copy( o );
+	return *this;
+}
+
+////////////////////////////////////////
+
+computed_base &
+computed_base::operator=( computed_base &&o )
+{
+	adopt( std::move( o ) );
+	return *this;
+}
+
+////////////////////////////////////////
+
 dimensions
 computed_base::node_dims( void ) const
 {
@@ -142,6 +161,16 @@ computed_base::adopt( computed_base &&o )
 {
 	// need to update the ref count and leave the old one since we're
 	// passing this off to the graph
+	clear_graph();
+	_graph = o._graph;
+	set_id( o._id );
+}
+
+////////////////////////////////////////
+
+void
+computed_base::copy( const computed_base &o )
+{
 	clear_graph();
 	_graph = o._graph;
 	set_id( o._id );

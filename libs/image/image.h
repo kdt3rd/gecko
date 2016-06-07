@@ -58,10 +58,10 @@ public:
 			_planes.push_back( plane( "i.extract", pd, *this, size_t(p) ) );
 	}
 
-	image_buf( const image_buf & ) = default;
-	image_buf( image_buf && ) = default;
-	image_buf &operator=( const image_buf & ) = default;
-	image_buf &operator=( image_buf && ) = default;
+	image_buf( const image_buf & );
+	image_buf( image_buf && );
+	image_buf &operator=( const image_buf & );
+	image_buf &operator=( image_buf && );
 	~image_buf( void );
 
 	inline engine::dimensions dims( void ) const

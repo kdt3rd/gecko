@@ -68,8 +68,8 @@ public:
 	~computed_base( void );
 	computed_base( const computed_base & );
 	computed_base( computed_base && );
-	computed_base &operator=( const computed_base & ) = delete;
-	computed_base &operator=( computed_base && ) = delete;
+	computed_base &operator=( const computed_base &o );
+	computed_base &operator=( computed_base &&o );
 
 	template <typename... Args>
 	explicit inline computed_base( const registry &r, const base::cstring &opname, const dimensions &d, Args &&... args )
@@ -195,6 +195,7 @@ protected:
 	}
 
 	void adopt( computed_base &&o );
+	void copy( const computed_base &o );
 
 	std::shared_ptr<graph> _graph;
 	node_id _id = nullnode;

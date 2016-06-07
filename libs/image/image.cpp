@@ -30,6 +30,41 @@ namespace image
 
 ////////////////////////////////////////
 
+image_buf::image_buf( const image_buf &o )
+		: computed_base( o ), _planes( o._planes )
+{
+}
+
+////////////////////////////////////////
+
+image_buf::image_buf( image_buf &&o )
+		: computed_base( std::move( o ) ), _planes( std::move( o._planes ) )
+{
+}
+
+////////////////////////////////////////
+
+image_buf &image_buf::operator=( const image_buf &o )
+{
+	if ( &o != this )
+	{
+		copy( o );
+		_planes = o._planes;
+	}
+	return *this;
+}
+
+////////////////////////////////////////
+
+image_buf &image_buf::operator=( image_buf &&o )
+{
+	adopt( std::move( o ) );
+	_planes = std::move( o._planes );
+	return *this;
+}
+
+////////////////////////////////////////
+
 image_buf::~image_buf( void )
 {
 }
