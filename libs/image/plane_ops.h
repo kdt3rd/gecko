@@ -100,6 +100,33 @@ inline plane atan2( const plane &a, const plane &b )
 
 // comparison operators
 
+inline plane min( const plane &a, const engine::computed_value<float> &b )
+{
+	return plane( "p.min_pn", a.dims(), a, b );
+}
+inline plane min( const engine::computed_value<float> &a, const plane &b ) { return min( b, a ); }
+
+inline plane min( const plane &a, const plane &b )
+{
+	precondition( a.width() == b.width() && a.height() == b.height(), "unable to compute min for planes of different sizes" );
+	return plane( "p.min_pp", a.dims(), a, b );
+}
+inline plane max( const plane &a, const engine::computed_value<float> &b )
+{
+	return plane( "p.max_pn", a.dims(), a, b );
+}
+inline plane max( const engine::computed_value<float> &a, const plane &b ) { return max( b, a ); }
+inline plane max( const plane &a, const plane &b )
+{
+	precondition( a.width() == b.width() && a.height() == b.height(), "unable to compute max for planes of different sizes" );
+	return plane( "p.max_pp", a.dims(), a, b );
+}
+
+inline plane clamp( const plane &a, const engine::computed_value<float> &minv, const engine::computed_value<float> &maxv )
+{
+	return plane( "p.clamp_pnn", a.dims(), a, minv, maxv );
+}
+
 /// out = (a < b) ? c : d
 inline plane if_less( const plane &a, float b, const plane &c, const plane &d )
 {

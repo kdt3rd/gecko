@@ -287,6 +287,44 @@ static void plane_atan2( scanline &dest, const scanline &srcA, const scanline &s
 		dest[x] = atan2f( srcA[x], srcB[x] );
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////
+
+static void plane_minpp( scanline &dest, const scanline &a, const scanline &b )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = fminf( a[x], b[x] );
+}
+
+static void plane_minpn( scanline &dest, const scanline &a, float b )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = fminf( a[x], b );
+}
+
+////////////////////////////////////////
+
+static void plane_maxpp( scanline &dest, const scanline &a, const scanline &b )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = fmaxf( a[x], b[x] );
+}
+
+static void plane_maxpn( scanline &dest, const scanline &a, float b )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = fmaxf( a[x], b );
+}
+
+////////////////////////////////////////
+
+static void plane_clamp_pnn( scanline &dest, const scanline &a, float minV, float maxV )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = fmaxf( fminf( maxV, a[x] ), minV );
+}
+
 ////////////////////////////////////////
 
 static void plane_ifless( scanline &dest, const scanline &a, float b, const scanline &c, const scanline &d )
@@ -343,6 +381,13 @@ void add_plane_math( engine::registry &r )
 	r.add( op( "p.pow_pn", base::choose_runtime( plane_powf ), scanline_plane_adapter<true, decltype(plane_powf)>(), dispatch_scan_processing, op::one_to_one ) );
 
 	r.add( op( "p.atan2", base::choose_runtime( plane_atan2 ), scanline_plane_adapter<true, decltype(plane_atan2)>(), dispatch_scan_processing, op::one_to_one ) );
+
+	r.add( op( "p.min_pn", base::choose_runtime( plane_minpn ), scanline_plane_adapter<true, decltype(plane_minpn)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.min_pp", base::choose_runtime( plane_minpp ), scanline_plane_adapter<true, decltype(plane_minpp)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.max_pn", base::choose_runtime( plane_maxpn ), scanline_plane_adapter<true, decltype(plane_maxpn)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.max_pp", base::choose_runtime( plane_maxpp ), scanline_plane_adapter<true, decltype(plane_maxpp)>(), dispatch_scan_processing, op::one_to_one ) );
+
+	r.add( op( "p.clamp_pnn", base::choose_runtime( plane_clamp_pnn ), scanline_plane_adapter<true, decltype(plane_clamp_pnn)>(), dispatch_scan_processing, op::one_to_one ) );
 
 	r.add( op( "p.if_less_fpp", base::choose_runtime( plane_ifless ), scanline_plane_adapter<true, decltype(plane_ifless)>(), dispatch_scan_processing, op::one_to_one ) );
 	r.add( op( "p.if_greater_fpp", base::choose_runtime( plane_ifgreater ), scanline_plane_adapter<true, decltype(plane_ifgreater)>(), dispatch_scan_processing, op::one_to_one ) );
