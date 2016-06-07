@@ -5,10 +5,10 @@
 #include <utility>
 #include <typeinfo>
 #include <type_traits>
-#include <base/contract.h>
 #include <string>
 #include <typeindex>
 
+#include "contract.h"
 #include "meta.h"
 #include "tuple_util.h"
 
@@ -336,7 +336,7 @@ private:
 		return std::size_t(-1);//typeid(void).hash_code();
 	}
 
-	typedef typename std::aligned_union<0, Ts...>::type DataType;
+	typedef typename aligned_union<0, Ts...>::type DataType;
 	std::size_t _type_id = invalid_type();
 	DataType _data;
 };

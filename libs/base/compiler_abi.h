@@ -34,6 +34,10 @@
 #else
 # if defined(__GNUC__)
 #  define FALLTHROUGH [[fallthrough]]
+#  if (__GNUC__ < 5)
+#   define HAS_MISSING_STREAM_MOVE_CTORS
+#   define HAS_BAD_CODECVT_HEADER
+#  endif
 # else
 #  define FALLTHROUGH
 # endif

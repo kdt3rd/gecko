@@ -28,9 +28,10 @@
 
 #if defined(__GNUC__)
 # define LIKELY_USE_BUILTIN
-#elif ( defined(__clang__) && __has_builtin(__builtin_expect) )
-# define LIKELY_USE_BUILTIN
-#else
+#elif defined(__clang__)
+# if __has_builtin(__builtin_expect) )
+#  define LIKELY_USE_BUILTIN
+# endif
 #endif
 
 #if defined(LIKELY_USE_BUILTIN)

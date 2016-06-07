@@ -59,17 +59,21 @@ public:
 	}
 
 	istream_bufstore( istream_bufstore &&o )
+#ifdef HAS_MISSING_STREAM_MOVE_CTORS
+			:
+#else
 			: base_type( std::move( o ) ),
+#endif
 			  _sbuf( std::move( o._sbuf ) )
 	{
-		base_type::set_rdbuf( _sbuf.get() );
+		set_rdbuf( _sbuf.get() );
 	}
 
 	istream_bufstore &operator=( istream_bufstore &&rhs )
 	{
 		base_type::operator=( std::move( rhs ) );
 		_sbuf = std::move( rhs._sbuf );
-		base_type::set_rdbuf( _sbuf.get() );
+		set_rdbuf( _sbuf.get() );
 		return *this;
 	}
 	void
@@ -77,8 +81,8 @@ public:
 	{
 		base_type::swap( rhs );
 		std::swap( _sbuf, rhs._sbuf );
-		base_type::set_rdbuf( _sbuf.get() );
-		rhs.base_type::set_rdbuf( rhs._sbuf.get() );
+		set_rdbuf( _sbuf.get() );
+		rhs.set_rdbuf( rhs._sbuf.get() );
 	}
 
 	virtual ~istream_bufstore( void )
@@ -95,6 +99,14 @@ public:
 	const std::string &uri( void ) const { return _sbuf->get_uri(); }
 
 protected:
+	inline void set_rdbuf( streambuf_type *p )
+	{
+#ifdef HAS_MISSING_STREAM_MOVE_CTORS
+		base_type::rdbuf( p );
+#else
+		base_type::set_rdbuf( p );
+#endif
+	}
 	istream_bufstore( const istream_bufstore & ) = delete;
 	istream_bufstore &operator=( const istream_bufstore & ) = delete;
 
@@ -128,17 +140,21 @@ public:
 	}
 
 	ostream_bufstore( ostream_bufstore &&o )
+#ifdef HAS_MISSING_STREAM_MOVE_CTORS
+			:
+#else
 			: base_type( std::move( o ) ),
+#endif
 			  _sbuf( std::move( o._sbuf ) )
 	{
-		base_type::set_rdbuf( _sbuf.get() );
+		set_rdbuf( _sbuf.get() );
 	}
 
 	ostream_bufstore &operator=( ostream_bufstore &&rhs )
 	{
 		base_type::operator=( std::move( rhs ) );
 		_sbuf = std::move( rhs._sbuf );
-		base_type::set_rdbuf( _sbuf.get() );
+		set_rdbuf( _sbuf.get() );
 		return *this;
 	}
 
@@ -146,8 +162,8 @@ public:
 	{
 		base_type::swap( rhs );
 		std::swap( _sbuf, rhs._sbuf );
-		base_type::set_rdbuf( _sbuf.get() );
-		rhs.base_type::set_rdbuf( rhs._sbuf.get() );
+		set_rdbuf( _sbuf.get() );
+		rhs.set_rdbuf( rhs._sbuf.get() );
 	}
 
 	virtual ~ostream_bufstore( void )
@@ -164,6 +180,15 @@ public:
 	const std::string &uri( void ) const { return _sbuf->get_uri(); }
 
 protected:
+	inline void set_rdbuf( streambuf_type *p )
+	{
+#ifdef HAS_MISSING_STREAM_MOVE_CTORS
+		base_type::rdbuf( p );
+#else
+		base_type::set_rdbuf( p );
+#endif
+	}
+
 	ostream_bufstore( const ostream_bufstore & ) = delete;
 	ostream_bufstore &operator=( const ostream_bufstore & ) = delete;
 
@@ -196,17 +221,21 @@ public:
 	}
 
 	iostream_bufstore( iostream_bufstore &&o )
+#ifdef HAS_MISSING_STREAM_MOVE_CTORS
+			:
+#else
 			: base_type( std::move( o ) ),
+#endif
 			  _sbuf( std::move( o._sbuf ) )
 	{
-		base_type::set_rdbuf( _sbuf.get() );
+		set_rdbuf( _sbuf.get() );
 	}
 
 	iostream_bufstore &operator=( iostream_bufstore &&rhs )
 	{
 		base_type::operator=( std::move( rhs ) );
 		_sbuf = std::move( rhs._sbuf );
-		base_type::set_rdbuf( _sbuf.get() );
+		set_rdbuf( _sbuf.get() );
 		return *this;
 	}
 
@@ -214,8 +243,8 @@ public:
 	{
 		base_type::swap( rhs );
 		std::swap( _sbuf, rhs._sbuf );
-		base_type::set_rdbuf( _sbuf.get() );
-		rhs.base_type::set_rdbuf( rhs._sbuf.get() );
+		set_rdbuf( _sbuf.get() );
+		rhs.set_rdbuf( rhs._sbuf.get() );
 	}
 
 	virtual ~iostream_bufstore( void )
@@ -232,6 +261,15 @@ public:
 	const std::string &uri( void ) const { return _sbuf->get_uri(); }
 
 protected:
+	inline void set_rdbuf( streambuf_type *p )
+	{
+#ifdef HAS_MISSING_STREAM_MOVE_CTORS
+		base_type::rdbuf( p );
+#else
+		base_type::set_rdbuf( p );
+#endif
+	}
+
 	iostream_bufstore( const iostream_bufstore & ) = delete;
 	iostream_bufstore &operator=( const iostream_bufstore & ) = delete;
 

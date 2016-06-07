@@ -27,6 +27,8 @@
 #include <ostream>
 #include <cstring>
 #include <limits>
+#include <stdexcept>
+
 #ifdef __has_include
 # if (__cplusplus >= 201402L)
 #  if __has_include(<string_view>)

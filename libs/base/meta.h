@@ -3,6 +3,8 @@
 
 #include <tuple>
 #include <functional>
+#include <type_traits>
+#include <algorithm>
 
 namespace base
 {
@@ -49,14 +51,14 @@ auto as_integer( E const v ) -> typename std::underlying_type<E>::type
 
 /// @brief Sum several numbers together
 template<typename H, typename ...T>
-constexpr H sum( H h, T ...t )
+constexpr inline H sum( H h, T ...t )
 {
 	return h + sum<T...>( t... );
 }
 
 /// @brief End of recursive sum
 template<>
-inline size_t sum<size_t>( size_t h )
+constexpr inline size_t sum<size_t>( size_t h )
 {
 	return h;
 }
@@ -79,13 +81,24 @@ struct static_max;
 template <size_t Arg>
 struct static_max<Arg>
 {
-	static const size_t value = Arg;
+	static constexpr size_t value = Arg;
 };
 
 template <size_t Arg1, size_t Arg2, size_t ...Others>
 struct static_max<Arg1, Arg2, Others...>
 {
-	static const size_t value = ( Arg1 >= Arg2 ) ? static_max<Arg1, Others...>::value : static_max<Arg2, Others...>::value;
+	static constexpr size_t value = ( Arg1 >= Arg2 ) ? static_max<Arg1, Others...>::value : static_max<Arg2, Others...>::value;
+};
+
+////////////////////////////////////////
+
+/// Older gcc (4.8) supports most of c++11 we use but doesn't implement std::aligned_union yet
+/// but does have aligned_storage
+template <size_t len, typename ...T>
+struct aligned_union
+{
+	static constexpr size_t alignment_value = static_max<0, alignof(T)...>::value;
+	typedef typename std::aligned_storage<static_max<len, sizeof(T)...>::value, alignment_value>::type type;
 };
 
 ////////////////////////////////////////

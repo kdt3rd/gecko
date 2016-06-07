@@ -22,9 +22,14 @@
 
 #pragma once
 
+#include "compiler_abi.h"
 #include <memory>
 #include <streambuf>
-#include <codecvt>
+#ifdef HAS_BAD_CODECVT_HEADER
+# include <bits/codecvt.h>
+#else
+# include <codecvt>
+#endif
 #include <cstring>
 #include <string>
 #include <stdexcept>
@@ -93,7 +98,11 @@ protected:
 	/// Sub-classes should provide this if they aren't going to be
 	/// used in a shared_ptr
 	base_streambuf( base_streambuf &&b )
+#ifdef HAS_MISSING_STREAM_MOVE_CTORS
+			:
+#else
 			: base_type( b ),
+#endif
 			  _open_mode( base::exchange( b._open_mode, std::ios_base::openmode(0) ) ),
 			  _buf_sz( base::exchange( b._buf_sz, 1 ) ),
 			  _writing( base::exchange( b._writing, false ) ),
@@ -123,7 +132,9 @@ protected:
 	base_streambuf &operator=( base_streambuf &&b )
 	{
 		this->close();
+#ifndef HAS_MISSING_STREAM_MOVE_CTORS
 		base_type::operator=( b );
+#endif
 		_open_mode = base::exchange( b._open_mode, std::ios_base::openmode(0) );
 		_buf_sz = base::exchange( b._buf_sz, 1 );
 		_writing = base::exchange( b._writing, false );
@@ -151,7 +162,9 @@ protected:
 	/// Sub-classes should provide this if appropriate
 	void swap( base_streambuf &b )
 	{
+#ifndef HAS_MISSING_STREAM_MOVE_CTORS
 		base_type::swap( b );
+#endif
 		std::swap( _open_mode, b._open_mode );
 		std::swap( _buf_sz, b._buf_sz );
 		std::swap( _reading, b._reading );
