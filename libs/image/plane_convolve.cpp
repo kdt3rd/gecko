@@ -360,64 +360,6 @@ median_planes( scanline &dest, const scanline &a, const scanline &b, const scanl
 ////////////////////////////////////////
 
 static void
-bilateral_thread( size_t , int s, int e, plane &r, const plane &p, int dx, int dy, float sigR, float sigI )
-{
-	std::vector<float> sumW;
-	sumW.resize( static_cast<size_t>( p.width() ), 0.F );
-
-	int w = p.width();
-	int hm1 = p.height() - 1;
-	int wm1 = w - 1;
-	float dsig = -1.F / ( sigR * sigR * 2.F );
-	float isig = -1.F / ( sigI * sigI * 2.F );
-	for ( int y = s; y < e; ++y )
-	{
-		float *destP = r.line( y );
-		for ( int x = 0; x < w; ++x )
-			destP[x] = 0.F;
-
-		for ( int cy = y - dy; cy <= y + dy; ++cy )
-		{
-			int rY = std::max( int(0), std::min( hm1, cy ) );
-			int distY = (cy - y) * (cy - y);
-			const float *srcP = p.line( rY );
-			for ( int x = 0; x < w; ++x )
-			{
-				float cenV = srcP[x];
-				for ( int cx = x - dx; cx <= x + dx; ++cx )
-				{
-					int rX = std::max( int(0), std::min( wm1, cx ) );
-					int distX = (cx - x) * (cx - x);
-					float oV = srcP[rX];
-					float weight = expf( static_cast<float>( distY + distX ) * dsig + ( (oV - cenV) * (oV - cenV ) ) * isig );
-					sumW[static_cast<size_t>(x)] += weight;
-					destP[x] += weight * oV;
-				}
-			}
-		}
-
-		for ( int x = 0; x < w; ++x )
-		{
-			float &weight = sumW[static_cast<size_t>(x)];
-			destP[x] /= weight;
-			weight = 0.F;
-		}
-	}
-}
-
-static plane
-apply_bilateral( const plane &p, int dx, int dy, float sigR, float sigI )
-{
-	plane r( p.width(), p.height() );
-
-	threading::get().dispatch( std::bind( bilateral_thread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( r ), std::cref( p ), dx, dy, sigR, sigI ), p );
-
-	return r;
-}
-
-////////////////////////////////////////
-
-static void
 cross_bilateral_thread( size_t , int s, int e, plane &r, const plane &p, const plane &ref, int dx, int dy, float sigR, float sigI )
 {
 	std::vector<float> sumW;
@@ -434,6 +376,7 @@ cross_bilateral_thread( size_t , int s, int e, plane &r, const plane &p, const p
 		for ( int x = 0; x < w; ++x )
 			destP[x] = 0.F;
 
+		const float *cenP = ref.line( y );
 		for ( int cy = y - dy; cy <= y + dy; ++cy )
 		{
 			int rY = std::max( int(0), std::min( hm1, cy ) );
@@ -442,7 +385,7 @@ cross_bilateral_thread( size_t , int s, int e, plane &r, const plane &p, const p
 			const float *refP = ref.line( rY );
 			for ( int x = 0; x < w; ++x )
 			{
-				float cenV = refP[x];
+				float cenV = cenP[x];
 				for ( int cx = x - dx; cx <= x + dx; ++cx )
 				{
 					int rX = std::max( int(0), std::min( wm1, cx ) );
@@ -462,6 +405,16 @@ cross_bilateral_thread( size_t , int s, int e, plane &r, const plane &p, const p
 			weight = 0.F;
 		}
 	}
+}
+
+static plane
+apply_bilateral( const plane &p, int dx, int dy, float sigR, float sigI )
+{
+	plane r( p.width(), p.height() );
+
+	threading::get().dispatch( std::bind( cross_bilateral_thread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( r ), std::cref( p ), std::cref( p ), dx, dy, sigR, sigI ), p );
+
+	return r;
 }
 
 static plane
@@ -593,7 +546,7 @@ void add_plane_area( engine::registry &r )
 	r.add( op( "p.median", base::choose_runtime( generic_median ), op::threaded ) );
 
 	r.add( op( "p.cross_x_median", base::choose_runtime( cross_x_median ), n_scanline_plane_adapter<false, decltype(cross_x_median)>(), dispatch_scan_processing, op::n_to_one ) );
-	r.add( op( "p.median3", base::choose_runtime( median_planes ), scanline_plane_adapter<true, decltype(median_planes)>(), dispatch_scan_processing, op::n_to_one ) );
+	r.add( op( "p.median3", base::choose_runtime( median_planes ), scanline_plane_adapter<true, decltype(median_planes)>(), dispatch_scan_processing, op::one_to_one ) );
 
 	// wants a temporary scanline for efficiency, so just do generic threading
 	r.add( op( "p.bilateral", base::choose_runtime( apply_bilateral ), op::threaded ) );
