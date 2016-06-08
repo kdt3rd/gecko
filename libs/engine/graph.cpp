@@ -631,7 +631,7 @@ graph::optimize( void )
 //				std::cout << "New grouping-based ordering:\n";
 //				for ( size_t i = 0, N = neworder.size(); i != N; ++i )
 //					std::cout << i << ": " << neworder[i] << '\n';
-				std::cout << std::endl;
+//				std::cout << std::endl;
 				made_change = false;
 				for ( size_t i = 0, N = neworder.size(); i != N; ++i )
 				{
