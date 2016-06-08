@@ -45,6 +45,8 @@ inline engine::computed_value<double> sum( plane &&p )
 	return engine::computed_value<double>( op_registry(), "p.sum", d, std::move( p ) );
 }
 
+plane local_variance( const plane &p, int radius );
+
 void add_plane_stats( engine::registry &r );
 
 } // namespace image
