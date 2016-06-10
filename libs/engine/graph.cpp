@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <numeric>
 #include <base/contract.h>
+#include <base/scope_guard.h>
 #include <base/compiler_abi.h>
 #include <iomanip>
 #include <fstream>
@@ -89,7 +90,7 @@ graph::get_value( node_id n )
 	node &node = _nodes[n];
 	any &v = node.value();
 	if ( v.empty() )
-		return process( n, node );
+		return process( n );
 
 	return v;
 }
@@ -246,6 +247,25 @@ graph::clean_graph( void )
 				continue;
 			}
 
+			// if we have a value, clean up any remaining inputs as a first step
+			bool hasValue = ! n.value().empty();
+			if ( hasValue )
+			{
+				size_t nInputs = n.input_size();
+				for ( size_t i = 0; i != nInputs; ++i )
+				{
+					node_id &inid = n.input( i );
+					if ( inid != nullnode )
+					{
+						node &curIn = _nodes[inid];
+						curIn.remove_output( nid );
+						if ( curIn.output_size() == 0 && ! curIn.has_ref() )
+							toDel.insert( inid );
+						inid = nullnode;
+					}
+				}
+			}
+
 			// if there's a reference, skip
 			if ( n.has_ref() )
 				continue;
@@ -253,7 +273,8 @@ graph::clean_graph( void )
 			size_t validOuts = 0;
 			for ( size_t o = 0, nO = n.output_size(); o != nO; ++o )
 			{
-				if ( toDel.find( n.output( o ) ) == toDel.end() )
+				node_id onid = n.output( o );
+				if ( _nodes[onid].value().empty() && toDel.find( onid ) == toDel.end() )
 					++validOuts;
 			}
 
@@ -334,7 +355,14 @@ graph::clean_graph( void )
 
 ////////////////////////////////////////
 
-static void emit_node( std::ostream &os, int indent, const registry &ops, node_id n, const node &curN, bool incHash )
+static inline std::string esc_dot( const std::string &x )
+{
+	return base::replace( x, { { '<', "\\<" }, { '>', "\\>" }, { '{', "\\{" }, { '}', "\\}" }, { '|', "\\|" } } );
+}
+
+////////////////////////////////////////
+
+static void emit_node( std::ostream &os, int indent, const registry &ops, node_id n, const node &curN, bool incHash, bool isSGoutput = false )
 {
 	os << std::setw( indent ) << std::setfill( ' ' ) << "" << 'N' << n << " [label=\"";
 	if ( curN.input_size() > 0 )
@@ -347,9 +375,9 @@ static void emit_node( std::ostream &os, int indent, const registry &ops, node_i
 			if ( curN.input( i ) == nullnode )
 				os << "<i" << i << ">NIL";
 			else
-				os << "<i" << i << ">" << base::demangle( ops[curN.op()].input_type( i ) );
+				os << "<i" << i << ">" << esc_dot( base::demangle( ops[curN.op()].input_type( i ) ) );
 		}
-		os << "}|N " << n << "\\n" << ops[curN.op()].name();
+		os << "}|N " << n << "\\n" << esc_dot( ops[curN.op()].name() );
 		if ( incHash )
 			os << "\\n" << curN.hash_value();
 		os << '}';
@@ -369,15 +397,17 @@ static void emit_node( std::ostream &os, int indent, const registry &ops, node_i
 			else if ( v.is_type<double>() )
 				os << "\\ndouble " << base::any_cast<double>( v );
 			else
-				os << "\\n" << ops[curN.op()].name() << " (" << base::demangle( ops[curN.op()].function().result_type() );
+				os << "\\n" << esc_dot( ops[curN.op()].name() ) << " (" << esc_dot( base::demangle( ops[curN.op()].function().result_type() ) );
 		}
 		else
-			os << "\\n" << ops[curN.op()].name();
+			os << "\\n" << esc_dot( ops[curN.op()].name() );
 		if ( incHash )
 			os << "\\n" << curN.hash_value();
 	}
 	os << '\"';
-	if ( curN.has_ref() )
+	if ( isSGoutput )
+		os << ", style=filled, fillcolor=\"#DDFFFF\"";
+	else if ( curN.has_ref() )
 		os << ", style=filled, fillcolor=\"#DDDDFF\"";
 	else if ( curN.output_size() == 0 )
 		os << ", style=filled, fillcolor=\"#FFDDDD\"";
@@ -414,10 +444,13 @@ graph::dump_dot( std::ostream &os, bool incHash ) const
 	size_t sgnum = 1;
 	for ( auto &s: _subgroups )
 	{
+		if ( s.empty() )
+			continue;
+
 		os << "  subgraph cluster_" << sgnum << "{\n";
 		for ( node_id n: s.members() )
 		{
-			emit_node( os, 4, _ops, n, _nodes[n], incHash );
+			emit_node( os, 4, _ops, n, _nodes[n], incHash, s.is_output( n ) );
 			didEmitNode.insert( n );
 		}
 
@@ -491,21 +524,54 @@ graph::dump_refs( std::ostream &os ) const
 
 ////////////////////////////////////////
 
+static void update_nid( void *ud, node_id old, node_id nid )
+{
+	node_id *nptr = reinterpret_cast<node_id *>( ud );
+	*nptr = nid;
+}
+
+////////////////////////////////////////
+
 const any &
-graph::process( node_id nid, node &n )
+graph::process( node_id nid )
 {
 //	std::cout << "Request to process node " << nid << " (op " << _ops[n.op()].name() << ")" << std::endl;
+
+	// stash a reference so we can correctly get the  value on exit
+	reference( nid, update_nid, &nid );
+	on_scope_exit{ unreference( nid, update_nid, &nid ); };
+	
 	optimize();
 //	std::cout << "optimized, start of processing: " << _start_of_processing << std::endl;
 
-	// by construction, if a node is at node_id nid, all it's inputs
-	// appear before
-	// can we just process up to that node and not bother trying to
-	// compute which ones to process or not to process? may as well
+	// build the list of unprocessed nodes connected to this node
+	_process_list.clear();
+	std::deque<node_id> check;
+	check.push_back( nid );
+	while ( ! check.empty() )
+	{
+		node_id cur = check.front();
+		check.pop_front();
+		_process_list.insert( cur );
+
+		const node &curN = _nodes[cur];
+		size_t nInputs = curN.input_size();
+		for ( size_t i = 0; i != nInputs; ++i )
+		{
+			node_id in = curN.input( i );
+			precondition( in != nullnode, "input prematurely cleaned" );
+			if ( ! _nodes[in].value().empty() )
+				continue;
+
+			if ( _process_list.find( in ) == _process_list.end() )
+				check.push_back( in );
+		}
+	}
 
 	std::vector<any> inputs;
 
-	for ( node_id c = _start_of_processing; c <= nid; ++c )
+	std::cout << "Have " << _process_list.size() << " nodes to process" << std::endl;
+	for ( node_id c: _process_list )
 	{
 		node &curN = _nodes[c];
 		if ( curN.op() == nullop )
@@ -536,40 +602,16 @@ graph::process( node_id nid, node &n )
 			node &curIn = _nodes[inid];
 			inputs[i] = curIn.value();
 		}
-//		std::cout << "    -> inputs assigned, calling function" << std::endl;
 
 		const op &o = _ops[curN.op()];
 		curN.value() = o.function().process( *this, curN.dims(), inputs );
-
-//		std::cout << "    -> updating outputs..." << std::endl;
-		for ( size_t i = 0; i != nInputs; ++i )
-		{
-			node_id &inid = curN.input( i );
-			node &curIn = _nodes[inid];
-			if ( curIn.is_rvalue() )
-			{
-//				std::cout << "removing r-value input node " << inid << " now that we've processed it" << std::endl;
-				remove_node( inid );
-			}
-			else
-			{
-//				std::cout << "removing us (" << c << ") from " << inid << " now that we've processed it" << std::endl;
-				curIn.remove_output( c );
-				if ( curIn.output_size() == 0 )
-				{
-//					std::cout << "removing input node " << inid << " now that it has no more unprocessed outputs" << std::endl;
-					remove_node( inid );
-				}
-			}
-			// notify any future remove_node that
-			// we've already removed us from our input
-			inid = nullnode;
-		}
 	}
 
 	clear_grouping();
+	clean_graph();
 
-	return n.value();
+	std::cout << "Final nid " << nid << " with " << _nodes.size() << " nodes left in graph" << std::endl;
+	return _nodes[nid].value();
 }
 
 ////////////////////////////////////////
@@ -749,15 +791,21 @@ graph::apply_grouping( void )
 						}
 
 						size_t cIdx = find_subgroup( curIn );
-						if ( subI == size_t(-1) || subI == cIdx )
+						if ( subI == size_t(-1) )
 						{
-							_subgroups[cIdx].add( n );
-							_node_to_subgroup[n] = cIdx;
-							cur.set_in_subgroup();
-							subI = cIdx;
-							break;
+							if ( curInN.output_size() == 1 )
+							{
+								_subgroups[cIdx].add( n );
+								_node_to_subgroup[n] = cIdx;
+								cur.set_in_subgroup();
+								subI = cIdx;
+							}
+							else
+							{
+								std::cout << "TODO: Need to add search such that we can pull multiple outputs into the same subgroup" << std::endl;
+							}
 						}
-						else
+						else if ( cIdx != subI )
 						{
 							subI = merge_subgroups( subI, cIdx );
 							_subgroups[subI].add( n );
@@ -875,6 +923,9 @@ graph::split_subgroup( size_t i, node_id n )
 void
 graph::rotate_node( node_id oldpos, node_id newpos )
 {
+	precondition( oldpos < _nodes.size() && newpos < _nodes.size(), "invalid positions given to rotate" );
+	precondition( _nodes[oldpos].op() != nullop, "invalid node given to rotate" );
+
 	if ( oldpos == newpos )
 		return;
 
@@ -898,6 +949,9 @@ graph::rotate_node( node_id oldpos, node_id newpos )
 	for ( size_t i = 0, nC = tmpStore.input_size(); i != nC; ++i )
 	{
 		node_id &inN = tmpStore.input(i);
+		if ( inN == nullnode )
+			continue;
+
 		precondition( newpos > inN, "attempt to move a node {0} before one of it's inputs {1}", oldpos, inN );
 
 		_nodes[inN].update_output( oldpos, tmpPos );
@@ -912,8 +966,12 @@ graph::rotate_node( node_id oldpos, node_id newpos )
 		for ( size_t i = 0, nC = curN.output_size(); i != nC; ++i )
 			_nodes[curN.output(i)].update_input( other, cur );
 		for ( size_t i = 0, nC = curN.input_size(); i != nC; ++i )
-			_nodes[curN.input(i)].update_output( other, cur );
-
+		{
+			node_id inN = curN.input( i );
+			if ( inN == nullnode )
+				continue;
+			_nodes[inN].update_output( other, cur );
+		}
 		cur = static_cast<node_id>( int64_t(cur) + dir );
 	}
 
@@ -923,7 +981,12 @@ graph::rotate_node( node_id oldpos, node_id newpos )
 	for ( size_t i = 0, nC = nnode.output_size(); i != nC; ++i )
 		_nodes[nnode.output(i)].update_input( tmpPos, newpos );
 	for ( size_t i = 0, nC = nnode.input_size(); i != nC; ++i )
-		_nodes[nnode.input(i)].update_output( tmpPos, newpos );
+	{
+		node_id inN = nnode.input( i );
+		if ( inN == nullnode )
+			continue;
+		_nodes[inN].update_output( tmpPos, newpos );
+	}
 }
 
 ////////////////////////////////////////

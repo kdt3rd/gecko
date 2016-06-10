@@ -24,6 +24,7 @@
 
 #include <typeinfo>
 #include <vector>
+#include <set>
 #include <ostream>
 #include <base/const_string.h>
 
@@ -125,7 +126,7 @@ private:
 	graph &operator=( const graph & ) = delete;
 	graph &operator=( graph && ) = delete;
 
-	const any &process( node_id nid, node &n );
+	const any &process( node_id nid );
 	void move_constants( void );
 	void apply_peephole( void );
 
@@ -156,6 +157,7 @@ private:
 	const registry &_ops;
 
 	std::vector<node> _nodes;
+	std::set<node_id> _process_list;
 	typedef std::vector< std::pair<rewrite_notify,void *> > reference_list;
 	std::map<node_id, reference_list> _ref_counts;
 	std::map<hash::value, node_id> _hash_to_node;
