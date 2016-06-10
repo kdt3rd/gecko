@@ -178,7 +178,11 @@ private:
 		if ( _mem )
 			return;
 
-		if ( pending() )
+		// pending() returns true if we need computation, but another
+		// step may have already computed us, so it won't really be
+		// pending any more. Instead, just check the graph and then
+		// ask to compute to pull the value
+		if ( _graph )
 		{
 			plane tmp = base::any_cast<plane>( compute() );
 			postcondition( _width == tmp.width() && _height == tmp.height(), "computed plane does not match dimensions provided" );
