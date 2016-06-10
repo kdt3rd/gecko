@@ -47,6 +47,8 @@ inline engine::computed_value<double> sum( plane &&p )
 
 plane local_variance( const plane &p, int radius );
 
+plane mse( const plane &p1, const plane &p2, int radius );
+
 void add_plane_stats( engine::registry &r );
 
 } // namespace image

@@ -24,6 +24,7 @@
 #include "threading.h"
 #include "scanline_process.h"
 #include <base/cpu_features.h>
+#include <base/contract.h>
 
 ////////////////////////////////////////
 
@@ -64,6 +65,7 @@ compute_variance( scanline &dest, int y, const plane &p, int radius )
 	// as an offset. if this proves unreliable, have to make two
 	// passes :(
 	int wm1 = dest.width() - 1;
+	int hm1 = p.height() - 1;
 	for ( int x = 0; x <= wm1; ++x )
 	{
 		double K = 0.0;
@@ -71,7 +73,8 @@ compute_variance( scanline &dest, int y, const plane &p, int radius )
 		double ex2 = 0.0;
 		for ( int cy = y - radius; cy <= (y+radius); ++cy )
 		{
-			const float *srcL = p.line( cy );
+			int rY = std::max( int(0), std::min( hm1, cy ) );
+			const float *srcL = p.line( rY );
 			if ( cy == (y - radius) )
 				K = static_cast<double>( srcL[std::max(int(0), x - radius)] );
 			for ( int cx = x - radius; cx <= x + radius; ++cx )
@@ -86,6 +89,37 @@ compute_variance( scanline &dest, int y, const plane &p, int radius )
 		n *= n;
 		double v = ( ex2 - (ex*ex) / n ) / ( n - 1.0 );
 		dest[x] = static_cast<float>( v );
+	}
+}
+
+////////////////////////////////////////
+
+
+static void
+compute_mse( scanline &dest, int y, const plane &p, const plane &p2, int radius )
+{
+	int wm1 = dest.width() - 1;
+	int hm1 = p.height() - 1;
+	int n2 = radius * 2 + 1;
+	n2 *= n2;
+	float norm = 1.F / static_cast<float>( n2 );
+	for ( int x = 0; x <= wm1; ++x )
+	{
+		float sum = 0.F;
+		for ( int cy = y - radius; cy <= (y+radius); ++cy )
+		{
+			int rY = std::max( int(0), std::min( hm1, cy ) );
+			const float *srcL = p.line( rY );
+			const float *srcL2 = p2.line( rY );
+
+			for ( int cx = x - radius; cx <= x + radius; ++cx )
+			{
+				int rx = std::max( int(0), std::min( wm1, cx ) );
+				float v = srcL[rx] - srcL2[rx];
+				sum += v * v;
+			}
+		}
+		dest[x] = sum * norm;
 	}
 }
 
@@ -106,6 +140,15 @@ local_variance( const plane &p, int radius )
 
 ////////////////////////////////////////
 
+plane
+mse( const plane &p, const plane &p2, int radius )
+{
+	precondition( p.width() == p2.width() && p.height() == p2.height(), "unable to compute MSE for planes of different sizes" );
+	return plane( "p.mean_square_error", p.dims(), p, p2, radius );
+}
+
+////////////////////////////////////////
+
 void
 add_plane_stats( engine::registry &r )
 {
@@ -114,6 +157,7 @@ add_plane_stats( engine::registry &r )
 	r.add( op( "p.sum", sum_plane, op::threaded ) );
 
 	r.add( op( "p.local_variance", base::choose_runtime( compute_variance ), n_scanline_plane_adapter<false, decltype(compute_variance)>(), dispatch_scan_processing, op::n_to_one ) );
+	r.add( op( "p.mean_square_error", base::choose_runtime( compute_mse ), n_scanline_plane_adapter<false, decltype(compute_mse)>(), dispatch_scan_processing, op::n_to_one ) );
 }
 
 } // image
