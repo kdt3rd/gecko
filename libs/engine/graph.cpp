@@ -314,7 +314,6 @@ graph::clean_graph( void )
 	}
 
 	// now that we've added everything, update the outputs and update the hash-to-node map
-	std::map<hash::value, node_id> nh2nmap;
 	for ( node_id nid = 0, N = static_cast<node_id>( nnodes.size() ); nid != N; ++nid )
 	{
 		node &n = nnodes[nid];
@@ -331,26 +330,12 @@ graph::clean_graph( void )
 			else
 				n.output( o ) = nn->second;
 		}
-		nh2nmap[n.hash_value()] = nid;
 	}
 
-	// notify our references of the new node ids
-	std::map<node_id, reference_list> nrc;
-	for ( auto &x: _ref_counts )
-	{
-		node_id oldid = x.first;
-		auto nn = newnodemap.find( oldid );
-		if ( nn == newnodemap.end() )
-			throw_runtime( "Killed node {0} which has a reference", oldid );
-		node_id newid = nn->second;
-		for ( auto &ref: x.second )
-			ref.first( ref.second, oldid, newid );
-		std::swap( nrc[newid], x.second );
-	}
 	// finally, update with all our changes
 	std::swap( _nodes, nnodes );
-	std::swap( _ref_counts, nrc );
-	std::swap( _hash_to_node, nh2nmap );
+	update_hash_map();
+	update_refs( newnodemap );
 }
 
 ////////////////////////////////////////
@@ -405,10 +390,17 @@ static void emit_node( std::ostream &os, int indent, const registry &ops, node_i
 			os << "\\n" << curN.hash_value();
 	}
 	os << '\"';
-	if ( isSGoutput )
-		os << ", style=filled, fillcolor=\"#DDFFFF\"";
-	else if ( curN.has_ref() )
-		os << ", style=filled, fillcolor=\"#DDDDFF\"";
+	if ( curN.has_ref() )
+	{
+		if ( isSGoutput )
+			os << ", style=filled, fillcolor=\"#BBDDFF\"";
+		else if ( ! curN.value().empty() )
+			os << ", style=filled, fillcolor=\"#DDFFFF\"";
+		else
+			os << ", style=filled, fillcolor=\"#DDDDFF\"";
+	}
+	else if ( isSGoutput )
+		os << ", style=filled, fillcolor=\"#BBDDDD\"";
 	else if ( curN.output_size() == 0 )
 		os << ", style=filled, fillcolor=\"#FFDDDD\"";
 	else if ( ! curN.value().empty() )
@@ -806,13 +798,7 @@ graph::apply_grouping( void )
 							}
 						}
 						else if ( cIdx != subI )
-						{
 							subI = merge_subgroups( subI, cIdx );
-							_subgroups[subI].add( n );
-							_node_to_subgroup[n] = subI;
-							cur.set_in_subgroup();
-							break;
-						}
 					}
 				}
 				if ( subI == size_t(-1) )
@@ -929,6 +915,24 @@ graph::rotate_node( node_id oldpos, node_id newpos )
 	if ( oldpos == newpos )
 		return;
 
+	std::map<node_id, node_id> newnodemap;
+	// leave nodes outside range in same place
+	if ( newpos < oldpos )
+	{
+		for ( node_id x = 0; x < newpos; ++x )
+			newnodemap[x] = x;
+		for ( node_id x = oldpos + 1; x < static_cast<node_id>(_nodes.size() ); ++x )
+			newnodemap[x] = x;
+	}
+	else
+	{
+		for ( node_id x = 0; x < oldpos; ++x )
+			newnodemap[x] = x;
+		for ( node_id x = newpos + 1; x < static_cast<node_id>(_nodes.size() ); ++x )
+			newnodemap[x] = x;
+	}
+	newnodemap[oldpos] = newpos;
+
 	node tmpStore;
 	std::swap( _nodes[oldpos], tmpStore );
 
@@ -962,6 +966,7 @@ graph::rotate_node( node_id oldpos, node_id newpos )
 	{
 		node_id other = static_cast<node_id>( int64_t(cur) + dir );
 		std::swap( _nodes[other], _nodes[cur] );
+		newnodemap[other] = cur;
 		node &curN = _nodes[cur];
 		for ( size_t i = 0, nC = curN.output_size(); i != nC; ++i )
 			_nodes[curN.output(i)].update_input( other, cur );
@@ -987,6 +992,9 @@ graph::rotate_node( node_id oldpos, node_id newpos )
 			continue;
 		_nodes[inN].update_output( tmpPos, newpos );
 	}
+
+	update_hash_map();
+	update_refs( newnodemap );
 }
 
 ////////////////////////////////////////
@@ -1109,6 +1117,39 @@ graph::add_node( op_id op, any value, const dimensions &d, const std::vector<nod
 ////////////////////////////////////////
 
 void
+graph::update_hash_map( void )
+{
+	std::map<hash::value, node_id> nh2nmap;
+	for ( node_id nid = 0, N = static_cast<node_id>( _nodes.size() ); nid != N; ++nid )
+		nh2nmap[_nodes[nid].hash_value()] = nid;
+	
+	std::swap( _hash_to_node, nh2nmap );
+}
+
+////////////////////////////////////////
+
+void
+graph::update_refs( const std::map<node_id, node_id> &newnodemap )
+{
+	// notify our references of the new node ids
+	std::map<node_id, reference_list> nrc;
+	for ( auto &x: _ref_counts )
+	{
+		node_id oldid = x.first;
+		auto nn = newnodemap.find( oldid );
+		if ( nn == newnodemap.end() )
+			throw_runtime( "Killed node {0} which has a reference", oldid );
+		node_id newid = nn->second;
+		for ( auto &ref: x.second )
+			ref.first( ref.second, oldid, newid );
+		std::swap( nrc[newid], x.second );
+	}
+	std::swap( _ref_counts, nrc );
+}
+
+////////////////////////////////////////
+
+void
 graph::reference( node_id n, rewrite_notify notify, void *ud )
 {
 	precondition( n < _nodes.size(), "Invalid node for reference" );
@@ -1128,7 +1169,7 @@ graph::reference( node_id n, rewrite_notify notify, void *ud )
 void
 graph::unreference( node_id n, rewrite_notify notify, void *ud ) noexcept
 {
-	precondition( n < _nodes.size(), "Invalid node for reference" );
+	precondition( n < _nodes.size(), "Invalid node for unreference" );
 
 	auto ri = _ref_counts.find( n );
 	if ( ri != _ref_counts.end() )

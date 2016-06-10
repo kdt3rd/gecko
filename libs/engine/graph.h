@@ -151,6 +151,8 @@ private:
 
 	typedef void (*rewrite_notify)( void *, node_id, node_id );
 
+	void update_hash_map( void );
+	void update_refs( const std::map<node_id, node_id> &newnodemap );
 	void reference( node_id n, rewrite_notify notify, void *ud );
 	void unreference( node_id n, rewrite_notify notify, void *ud ) noexcept;
 
