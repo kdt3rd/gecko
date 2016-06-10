@@ -50,6 +50,19 @@ plane::plane( const engine::dimensions &d )
 
 ////////////////////////////////////////
 
+plane::plane( const plane &o )
+	: computed_base( o ),
+	  _mem( o._mem ),
+	  _width( o._width ),
+	  _width_m1( o._width_m1 ),
+	  _height( o._height ),
+	  _height_m1( o._height_m1 ),
+	  _stride( o._stride )
+{
+}
+
+////////////////////////////////////////
+
 plane::plane( plane &&o )
 	: computed_base( std::move( o ) ),
 	  _mem( std::move( o._mem ) ),
@@ -78,6 +91,23 @@ plane &plane::operator=( plane &&o )
 	_height = std::move( o._height );
 	_height_m1 = std::move( o._height_m1 );
 	_stride = std::move( o._stride );
+	return *this;
+}
+
+////////////////////////////////////////
+
+plane &plane::operator=( const plane &o )
+{
+	if ( this != &o )
+	{
+		internal_copy( o );
+		_mem = o._mem;
+		_width = o._width;
+		_width_m1 = o._width_m1;
+		_height = o._height;
+		_height_m1 = o._height_m1;
+		_stride = o._stride;
+	}
 	return *this;
 }
 

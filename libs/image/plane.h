@@ -56,9 +56,9 @@ public:
 	{
 	}
 
-	plane( const plane & ) = default;
+	plane( const plane & );
 	plane( plane && );
-	plane &operator=( const plane & ) = default;
+	plane &operator=( const plane & );
 	plane &operator=( plane && );
 	~plane( void );
 
