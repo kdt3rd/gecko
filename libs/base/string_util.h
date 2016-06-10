@@ -50,9 +50,9 @@ inline std::string replace( const std::string &str, char c, const char (&repl)[N
 
 inline std::string replace( std::string &&str, std::initializer_list<std::pair<char,cstring>> r )
 {
-	std::string ret;
+	std::string ret = std::move( str );
 	for ( auto &cr: r )
-		ret = replace( std::move( str ), cr.first, cr.second );
+		ret = replace( std::move( ret ), cr.first, cr.second );
 	return ret;
 }
 inline std::string replace( const std::string &str, std::initializer_list<std::pair<char,cstring>> r )
