@@ -45,6 +45,8 @@ registry::registry( void )
 	register_constant<int32_t>();
 	register_constant<int64_t>();
 	register_constant<std::string>();
+	register_constant<std::vector<float>>();
+	register_constant<std::vector<double>>();
 	register_float_ops( *this );
 }
 
