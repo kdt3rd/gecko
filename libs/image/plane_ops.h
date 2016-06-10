@@ -48,6 +48,11 @@ inline plane create_plane( int w, int h, const engine::computed_value<float> &v 
 	return plane( "p.assign", d, v );
 }
 
+inline plane filter_nan( const plane &p, float repl = 0.F )
+{
+	return plane( "p.filter_nan", p.dims(), p, repl );
+}
+
 inline plane abs( const plane &p ) { return plane( "p.abs", p.dims(), p ); }
 inline plane abs( plane &&p ) { return plane( "p.abs", p.dims(), std::move( p ) ); }
 

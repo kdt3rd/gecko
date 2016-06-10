@@ -43,6 +43,19 @@ static void assign_value( scanline &dest, float v )
 
 ////////////////////////////////////////
 
+static void plane_filter_nan( scanline &dest, const scanline &src, float repl )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+	{
+		float v = src[x];
+		if ( isnan( v ) )
+			v = repl;
+		dest[x] = v;
+	}
+}
+
+////////////////////////////////////////
+
 static void add_planeplane( scanline &dest, const scanline &srcA, const scanline &srcB )
 {
 	for ( int x = 0, N = dest.width(); x != N; ++x )
@@ -349,6 +362,8 @@ void add_plane_math( engine::registry &r )
 	using namespace engine;
 
 	r.add( op( "p.assign", base::choose_runtime( assign_value, { { base::cpu::simd_feature::SSE3, sse3::assign_value } } ), scanline_plane_adapter<true, decltype(assign_value)>(), dispatch_scan_processing, op::one_to_one ) );
+
+	r.add( op( "p.filter_nan", base::choose_runtime( plane_filter_nan ), scanline_plane_adapter<true, decltype(plane_filter_nan)>(), dispatch_scan_processing, op::one_to_one ) );
 
 	r.add( op( "p.add_pp", base::choose_runtime( add_planeplane, { { base::cpu::simd_feature::SSE3, sse3::add_planeplane } } ), scanline_plane_adapter<true, decltype(add_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
 	r.add( op( "p.add_pn", base::choose_runtime( add_planenumber, { { base::cpu::simd_feature::SSE3, sse3::add_planenumber } } ), scanline_plane_adapter<true, decltype(add_planenumber)>(), dispatch_scan_processing, op::one_to_one ) );
