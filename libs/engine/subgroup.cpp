@@ -69,6 +69,10 @@ subgroup::add( node_id n )
 	_nodes.push_back( n );
 	std::sort( _nodes.begin(), _nodes.end() );
 
+	auto rmInTag = _inputs.find( n );
+	if ( rmInTag != _inputs.end() )
+		_inputs.erase( rmInTag );
+
 	const node &curN = _graph[n];
 	for ( size_t i = 0, nI = curN.input_size(); i != nI; ++i )
 	{
@@ -101,7 +105,18 @@ subgroup::add( node_id n )
 			_inputs.insert( inId );
 	}
 
-	_outputs.push_back( n );
+	size_t nOut = curN.output_size();
+	bool isOut = nOut == 0;
+	for ( size_t o = 0; o != nOut; ++o )
+	{
+		if ( ! is_member( curN.output( o ) ) )
+		{
+			isOut = true;
+			break;
+		}
+	}
+	if ( isOut )
+		_outputs.push_back( n );
 }
 
 ////////////////////////////////////////
