@@ -55,7 +55,7 @@ computed_base &
 computed_base::operator=( const computed_base &o )
 {
 	if ( &o != this )
-		copy( o );
+		internal_copy( o );
 	return *this;
 }
 
@@ -169,7 +169,7 @@ computed_base::adopt( computed_base &&o )
 ////////////////////////////////////////
 
 void
-computed_base::copy( const computed_base &o )
+computed_base::internal_copy( const computed_base &o )
 {
 	clear_graph();
 	_graph = o._graph;

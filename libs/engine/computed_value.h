@@ -195,7 +195,7 @@ protected:
 	}
 
 	void adopt( computed_base &&o );
-	void copy( const computed_base &o );
+	void internal_copy( const computed_base &o );
 
 	std::shared_ptr<graph> _graph;
 	node_id _id = nullnode;
@@ -263,6 +263,19 @@ inline hash &operator<<( hash &h, const computed_value<X> &v )
 	else
 		throw_runtime( "Attempt to evaluate uninitialized computed_value" );
 	return h;
+}
+
+inline computed_value<int> make_constant( int v )
+{
+	return computed_value<int>( v );
+}
+inline computed_value<float> make_constant( float v )
+{
+	return computed_value<float>( v );
+}
+inline computed_value<double> make_constant( double v )
+{
+	return computed_value<double>( v );
 }
 
 } // namespace engine
