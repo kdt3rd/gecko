@@ -427,6 +427,67 @@ apply_cross_bilateral( const plane &p, const plane &ref, int dx, int dy, float s
 	return r;
 }
 
+////////////////////////////////////////
+
+static void
+weighted_bilateral_thread( size_t , int s, int e, plane &r, const plane &p, const plane &weight, int dx, int dy, float sigR, float sigI )
+{
+	std::vector<float> sumW;
+	sumW.resize( static_cast<size_t>( p.width() ), 0.F );
+
+	int w = p.width();
+	int hm1 = p.height() - 1;
+	int wm1 = w - 1;
+	float dsig = -1.F / ( sigR * sigR * 2.F );
+	for ( int y = s; y < e; ++y )
+	{
+		float *destP = r.line( y );
+		for ( int x = 0; x < w; ++x )
+			destP[x] = 0.F;
+
+		const float *weightP = weight.line( y );
+		const float *cenP = p.line( y );
+		for ( int cy = y - dy; cy <= y + dy; ++cy )
+		{
+			int rY = std::max( int(0), std::min( hm1, cy ) );
+			int distY = (cy - y) * (cy - y);
+			const float *srcP = p.line( rY );
+			for ( int x = 0; x < w; ++x )
+			{
+				float cenV = cenP[x];
+				float tsig = sigI * weightP[x];
+				float isig = -1.F / ( tsig * tsig * 2.F );
+				for ( int cx = x - dx; cx <= x + dx; ++cx )
+				{
+					int rX = std::max( int(0), std::min( wm1, cx ) );
+					int distX = (cx - x) * (cx - x);
+					float oV = srcP[rX];
+					float weightV = expf( static_cast<float>( distY + distX ) * dsig + ( (oV - cenV) * (oV - cenV ) ) * isig );
+					sumW[static_cast<size_t>(x)] += weightV;
+					destP[x] += weightV * srcP[rX];
+				}
+			}
+		}
+
+		for ( int x = 0; x < w; ++x )
+		{
+			float &weightV = sumW[static_cast<size_t>(x)];
+			destP[x] /= weightV;
+			weightV = 0.F;
+		}
+	}
+}
+
+static plane
+apply_weighted_bilateral( const plane &p, const plane &w, int dx, int dy, float sigR, float sigI )
+{
+	plane r( p.width(), p.height() );
+
+	threading::get().dispatch( std::bind( weighted_bilateral_thread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( r ), std::cref( p ), std::cref( w ), dx, dy, sigR, sigI ), p );
+
+	return r;
+}
+
 }
 
 ////////////////////////////////////////
@@ -525,6 +586,14 @@ cross_bilateral( const plane &p1, const plane &ref, const engine::computed_value
 
 ////////////////////////////////////////
 
+plane
+weighted_bilateral( const plane &p1, const plane &w, const engine::computed_value<int> &dx, const engine::computed_value<int> &dy, const engine::computed_value<float> &sigD, const engine::computed_value<float> &sigI )
+{
+	return plane( "p.weighted_bilateral", p1.dims(), p1, w, dx, dy, sigD, sigI );
+}
+
+////////////////////////////////////////
+
 void add_plane_area( engine::registry &r )
 {
 	using namespace engine;
@@ -551,6 +620,7 @@ void add_plane_area( engine::registry &r )
 	// wants a temporary scanline for efficiency, so just do generic threading
 	r.add( op( "p.bilateral", base::choose_runtime( apply_bilateral ), op::threaded ) );
 	r.add( op( "p.cross_bilateral", base::choose_runtime( apply_cross_bilateral ), op::threaded ) );
+	r.add( op( "p.weighted_bilateral", base::choose_runtime( apply_weighted_bilateral ), op::threaded ) );
 }
 
 ////////////////////////////////////////
