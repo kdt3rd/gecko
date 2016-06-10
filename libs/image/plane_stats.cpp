@@ -79,7 +79,7 @@ compute_variance( scanline &dest, int y, const plane &p, int radius )
 				int rx = std::max( int(0), std::min( wm1, cx ) );
 				double v = static_cast<double>( srcL[rx] ) - K;
 				ex += v;
-				ex += v * v;
+				ex2 += v * v;
 			}
 		}
 		double n = static_cast<double>( radius * 2 + 1 );
