@@ -48,7 +48,7 @@ image_buf &image_buf::operator=( const image_buf &o )
 {
 	if ( &o != this )
 	{
-		copy( o );
+		internal_copy( o );
 		_planes = o._planes;
 	}
 	return *this;
