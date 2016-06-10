@@ -55,5 +55,20 @@ std::string replace( std::string &&str, char c, const std::string &replacement )
 
 ////////////////////////////////////////
 
+std::string replace( std::string &&str, char c, const cstring &replacement )
+{
+	std::string result( std::move( str ) );
+	size_t pos = 0;
+	pos = result.find( c, pos );
+	while ( pos != std::string::npos )
+	{
+		result.replace( pos, 1, replacement.c_str(), replacement.size() );
+		pos = result.find( c, pos + replacement.size() );
+	}
+	return result;
+}
+
+////////////////////////////////////////
+
 }
 

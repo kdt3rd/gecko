@@ -27,10 +27,37 @@ std::string rtrim( const std::string &str, const std::string &ws = " \t\n\r" );
 
 
 std::string replace( std::string &&str, char c, const std::string &replacement );
+std::string replace( std::string &&str, char c, const cstring &replacement );
+template <std::size_t N>
+inline std::string replace( std::string &&str, char c, const char (&repl)[N] )
+{
+	return replace( std::move( str ), c, cstring( repl ) );
+}
 
 inline std::string replace( const std::string &str, char c, const std::string &replacement )
 {
 	return replace( std::string( str ), c, replacement );
+}
+inline std::string replace( const std::string &str, char c, const cstring &replacement )
+{
+	return replace( std::string( str ), c, replacement );
+}
+template <std::size_t N>
+inline std::string replace( const std::string &str, char c, const char (&repl)[N] )
+{
+	return replace( std::string( str ), c, cstring( repl ) );
+}
+
+inline std::string replace( std::string &&str, std::initializer_list<std::pair<char,cstring>> r )
+{
+	std::string ret;
+	for ( auto &cr: r )
+		ret = replace( std::move( str ), cr.first, cr.second );
+	return ret;
+}
+inline std::string replace( const std::string &str, std::initializer_list<std::pair<char,cstring>> r )
+{
+	return replace( std::string( str ), r );
 }
 
 ////////////////////////////////////////
