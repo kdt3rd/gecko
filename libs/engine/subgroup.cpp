@@ -234,7 +234,7 @@ subgroup::func_idx( node_id n )
 		if ( _nodes[idx] == n )
 			break;
 	}
-	postcondition( idx != N, "request for node that is not a member of subgroup" );
+	postcondition( idx != N, "request for node {0} that is not a member of subgroup", n );
 
 	return idx;
 }
