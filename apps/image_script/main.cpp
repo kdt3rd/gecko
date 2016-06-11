@@ -37,14 +37,51 @@
 #include <cstdlib>
 #include <fstream>
 #include <typeindex>
+#include <tuple>
 
 namespace
 {
 
-using namespace image;
-std::pair<plane, plane> wavelet_decomp( const plane &p, const std::vector<float> &h, const std::vector<float> &g )
+std::vector<float>
+atrous_expand( const std::vector<float> &a )
 {
-	return std::make_pair( separable_convolve( p, h ), separable_convolve( p, g ) );
+	std::vector<float> ret;
+	ret.resize( ( a.size() - 1 ) * 2 + 1 );
+	for ( size_t i = 0; i != a.size(); ++i )
+	{
+		ret[i*2] = a[i];
+		if ( i+1 != a.size() )
+			ret[i*2+1] = 0.F;
+	}
+	std::cout << "atrous expand:\n";
+	for ( size_t i = 0; i != ret.size(); ++i )
+		std::cout << i << ": " << ret[i] << std::endl;
+	return ret;
+}
+
+std::vector<float>
+dirac_negate( const std::vector<float> &a )
+{
+	std::vector<float> ret = a;
+	for ( float &v: ret )
+		v = -v;
+	ret[ret.size()/2] += 1.F;
+	std::cout << "dirac negate:\n";
+	for ( size_t i = 0; i != ret.size(); ++i )
+		std::cout << i << ": " << ret[i] << std::endl;
+	return ret;
+}
+
+using namespace image;
+std::tuple<plane, plane, plane, plane> wavelet_decomp( const plane &p, const std::vector<float> &h, const std::vector<float> &g )
+{
+	plane hhc = convolve_vert( p, h );
+	plane ghc = convolve_vert( p, g );
+	plane c_j1 = convolve_horiz( hhc, h );
+	plane w1_j1 = convolve_horiz( hhc, g );
+	plane w2_j1 = convolve_horiz( ghc, h );
+	plane w3_j1 = convolve_horiz( ghc, g );
+	return std::make_tuple( c_j1, w1_j1, w2_j1, w3_j1 );
 }
 
 plane replace_high( const plane &p, const plane &filt )
@@ -155,7 +192,7 @@ int safemain( int argc, char *argv[] )
 		temporalRadius = atoi( tempR.value() );
 
 	media::metadata outputOptions;
-	outputOptions["compression"] = "piz";
+	outputOptions["compression"] = std::string( "piz" );
 
 	auto &inP = options["<input_file>"];
 	auto &outP = options["<output_file>"];
@@ -251,10 +288,21 @@ int safemain( int argc, char *argv[] )
 						for ( int p = 0; p < 3; ++p )
 							img[p] = replace_high( img[p], exp( weighted_bilateral( log( img[p] + 1.F ), weight, engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) ) ) - 1.F );
 #endif
-						auto wd = wavelet_decomp( lum, { 1.F/16.F, 4.F/16.F, 6.F/16.F, 4.F/16.F, 1.F/16.F }, { -1.F/16.F, -4.F/16.F, 10.F/16.F, -4.F/16.F, -1.F/16.F } );
-						img[0] = wd.first;
-						img[1] = wd.second;
-						img[2] = wd.first + wd.second;
+						std::vector<float> wt_h{ 1.F/16.F, 4.F/16.F, 6.F/16.F, 4.F/16.F, 1.F/16.F };
+						std::vector<float> wt_g = dirac_negate( wt_h );
+
+						auto wd1 = wavelet_decomp( lum, wt_h, wt_g );
+						std::vector<float> wt2_h = atrous_expand( wt_h );
+						std::vector<float> wt2_g = atrous_expand( wt_g );
+						auto wd2 = wavelet_decomp( std::get<0>( wd1 ), wt2_h, wt2_g );
+						plane reconst = std::get<0>( wd2 ) + std::get<1>( wd2 ) + std::get<2>( wd2 ) + std::get<3>( wd2 ) + std::get<1>( wd1 ) + std::get<2>( wd1 ) + std::get<3>( wd1 );
+						img[0] = std::get<1>( wd1 ) + std::get<2>( wd1 ) + std::get<3>( wd1 );
+						img[1] = std::get<1>( wd2 ) + std::get<2>( wd2 ) + std::get<3>( wd2 );
+						img[2] = reconst;
+//						auto wd = wavelet_decomp( lum, , { -1.F/16.F, -4.F/16.F, 10.F/16.F, -4.F/16.F, -1.F/16.F } );
+//						img[0] = wd.first;
+//						img[1] = wd.second;
+//						img[2] = wd.first + wd.second;
 #if 0
 						if ( dbgU )
 						{
