@@ -135,6 +135,7 @@ private:
 	size_t find_subgroup( node_id n ) const;
 	size_t merge_subgroups( size_t a, size_t b );
 	void split_subgroup( size_t i, node_id n );
+	bool only_output_in( size_t sg, size_t check, node_id n );
 
 	void rotate_node( node_id oldpos, node_id newpos );
 	node_id find_node( const hash::value &hv );

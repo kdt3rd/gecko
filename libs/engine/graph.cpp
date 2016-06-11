@@ -434,8 +434,9 @@ graph::dump_dot( std::ostream &os, bool incHash ) const
 	std::set<node_id> didEmitNode;
 	std::set<std::pair<node_id, node_id>> didEmitEdge;
 	size_t sgnum = 1;
-	for ( auto &s: _subgroups )
+	for ( size_t si = 0; si != _subgroups.size(); ++si )
 	{
+		auto &s = _subgroups[si];
 		if ( s.empty() )
 			continue;
 
@@ -461,7 +462,7 @@ graph::dump_dot( std::ostream &os, bool incHash ) const
 			}
 		}
 
-		os << "\n    label=\"subgroup " << sgnum << " outputs " << s.outputs().size() << "\";\n    color=black\n  }\n";
+		os << "\n    label=\"subgroup " << sgnum << " index " << si << " outputs " << s.outputs().size() << "\";\n    color=black\n  }\n";
 		++sgnum;
 	}
 
@@ -519,6 +520,7 @@ graph::dump_refs( std::ostream &os ) const
 static void update_nid( void *ud, node_id old, node_id nid )
 {
 	node_id *nptr = reinterpret_cast<node_id *>( ud );
+	precondition( *nptr == old, "Out of date reference, expect {0}, got {1}, new {2}", *nptr, old, nid );
 	*nptr = nid;
 }
 
@@ -563,6 +565,10 @@ graph::process( node_id nid )
 	std::vector<any> inputs;
 
 	std::cout << "Have " << _process_list.size() << " nodes to process" << std::endl;
+//	static int procGC = 0;
+//	std::stringstream pgcg;
+//	pgcg << "process_graph_" << procGC++ << ".dot";
+//	dump_dot( pgcg.str() );
 	for ( node_id c: _process_list )
 	{
 		node &curN = _nodes[c];
@@ -783,9 +789,11 @@ graph::apply_grouping( void )
 						}
 
 						size_t cIdx = find_subgroup( curIn );
+
 						if ( subI == size_t(-1) )
 						{
-							if ( curInN.output_size() == 1 )
+							size_t inNnOut = curInN.output_size();
+							if ( inNnOut == 1 )
 							{
 								_subgroups[cIdx].add( n );
 								_node_to_subgroup[n] = cIdx;
@@ -794,11 +802,58 @@ graph::apply_grouping( void )
 							}
 							else
 							{
-								std::cout << "TODO: Need to add search such that we can pull multiple outputs into the same subgroup" << std::endl;
+								bool same = true;
+								size_t maxIdx = cIdx;
+								for ( size_t j = i + 1; j != nI; ++j )
+								{
+									node_id curInS = cur.input( j );
+									node &curInNS = _nodes[curInS];
+
+									if ( curInNS.in_subgroup() && ! curInNS.has_ref() )
+										maxIdx = std::max( maxIdx, find_subgroup( curInS ) );
+								}
+
+								// we want to defer and add it to the group that is the latest input
+								if ( maxIdx != cIdx )
+									continue;
+
+								size_t outIdx = size_t(-1);
+								for ( size_t o = 0; o != inNnOut; ++o )
+								{
+									node_id outN = curInN.output( o );
+									if ( _nodes[outN].in_subgroup() )
+									{
+										size_t subGI = _node_to_subgroup[outN];
+										if ( outIdx == size_t(-1) )
+											outIdx = subGI;
+										else if ( outIdx != subGI )
+										{
+											same = false;
+											break;
+										}
+									}
+								}
+								if ( ! same )
+									std::cout << "TODO: Need to add better search such that we can pull multiple outputs into the same subgroup" << std::endl;
+								else
+								{
+									_subgroups[cIdx].add( n );
+									_node_to_subgroup[n] = cIdx;
+									cur.set_in_subgroup();
+									subI = cIdx;
+								}
 							}
 						}
 						else if ( cIdx != subI )
-							subI = merge_subgroups( subI, cIdx );
+						{
+							// if this input is in a subgroup that has
+							// an output that is an input of another
+							// node in this group, we can't merge - we
+							// would have considered it before, or
+							// it's an n-to-one
+							if ( only_output_in( cIdx, subI, n ) )
+								subI = merge_subgroups( subI, cIdx );
+						}
 					}
 				}
 				if ( subI == size_t(-1) )
@@ -902,6 +957,27 @@ graph::split_subgroup( size_t i, node_id n )
 		}
 	}
 	cur.swap( nI );
+}
+
+////////////////////////////////////////
+
+bool
+graph::only_output_in( size_t sg, size_t check, node_id n )
+{
+	subgroup &sub = _subgroups[sg];
+	for ( node_id outs: sub.outputs() )
+	{
+		node &curOut = _nodes[outs];
+		for ( auto o = curOut.begin_outputs(), oe = curOut.end_outputs(); o != oe; ++o )
+		{
+			if ( *o != n )
+			{
+				if ( _nodes[*o].in_subgroup() && _node_to_subgroup[*o] == check )
+					return false;
+			}
+		}
+	}
+	return true;
 }
 
 ////////////////////////////////////////
