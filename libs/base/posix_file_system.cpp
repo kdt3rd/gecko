@@ -1,6 +1,7 @@
 
 #include "posix_file_system.h"
 #include "contract.h"
+#include "scope_guard.h"
 #include "unix_streambuf.h"
 
 #include <cstring>
@@ -229,9 +230,17 @@ getWatcher( void )
 namespace base
 {
 
-
 ////////////////////////////////////////
 
+uri
+posix_file_system::current_path( void ) const
+{
+	char *tmp = ::getcwd( NULL, 0 );
+	on_scope_exit{ ::free( tmp ); };
+	return uri( tmp );
+}
+
+////////////////////////////////////////
 
 void
 posix_file_system::lstat( const uri &path, struct stat *buf )

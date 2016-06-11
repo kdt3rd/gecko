@@ -13,6 +13,8 @@ class posix_file_system : public file_system
 public:
 	constexpr static size_t page_size = 4096;
 
+	uri current_path( void ) const override;
+
 	void lstat( const uri &path, struct stat *buf ) override;
 	void statfs( const uri &path, struct statvfs *s ) override;
 	uri readlink( const uri &path, size_t sz = 0 ) override;

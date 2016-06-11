@@ -3,6 +3,7 @@
 #include "string_util.h"
 #include "contract.h"
 #include <algorithm>
+#include "file_system.h"
 
 namespace base
 {
@@ -191,11 +192,26 @@ void uri::parse( cstring str )
 
 	cstring path;
 
-	if ( str[0] != '/' )
+	size_t colon = str.find( ':' );
+	if ( colon == cstring::npos || str[0] == '/' )
 	{
-		size_t colon = str.find( ':' );
-		if ( colon >= str.size() )
-			throw_runtime( "invalid uri missing colon: '{0}'", str );
+		_scheme = "file";
+		// assume it's a file path
+		if ( str[0] != '/' )
+		{
+			// get the current directory from the default filesystem
+			uri tmp = file_system::get( _scheme )->current_path();
+			_path = tmp._path;
+		}
+		path = str;
+	}
+	else if ( str.size() > 2 && str[0] == '\\' && str[1] == '\\' )
+	{
+		// unc-like path
+		throw_not_yet();
+	}
+	else
+	{
 		size_t question = str.find( '?', colon );
 		size_t hash = str.find( '#', colon );
 
@@ -227,8 +243,6 @@ void uri::parse( cstring str )
 		else if ( path[0] != '/' )
 			throw_runtime( "expected uri path to start with slash: '{0}'", str );
 	}
-	else
-		path = str;
 
 	add_path( path );
 	for ( auto &p: _path )

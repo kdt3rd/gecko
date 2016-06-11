@@ -41,6 +41,8 @@ public:
 
 	virtual ~file_system( void );
 
+	virtual uri current_path( void ) const = 0;
+
 	/// @brief Perform a stat, retrieving information about path
 	///
 	/// if the path is a symlink, returns information about the link, otherwise
