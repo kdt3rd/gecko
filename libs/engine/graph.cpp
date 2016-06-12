@@ -565,10 +565,10 @@ graph::process( node_id nid )
 	std::vector<any> inputs;
 
 	std::cout << "Have " << _process_list.size() << " nodes to process" << std::endl;
-//	static int procGC = 0;
-//	std::stringstream pgcg;
-//	pgcg << "process_graph_" << procGC++ << ".dot";
-//	dump_dot( pgcg.str() );
+	static int procGC = 0;
+	std::stringstream pgcg;
+	pgcg << "process_graph_" << procGC++ << ".dot";
+	dump_dot( pgcg.str() );
 	for ( node_id c: _process_list )
 	{
 		node &curN = _nodes[c];
@@ -634,6 +634,11 @@ graph::optimize( void )
 	apply_peephole();
 	apply_grouping();
 
+//	static int grp = 1;
+//	std::stringstream fn;
+//	fn << "grouping_" << grp++ << ".dot";
+//	dump_dot( fn.str() );
+
 	if ( ! _subgroups.empty() )
 	{
 		// now need to re-order any group's inputs to before the first node in the group
@@ -654,12 +659,12 @@ graph::optimize( void )
 				node_id firstMember = sg.first_member();
 				if ( firstMember < lastIn )
 				{
-//					std::cout << "Need to move inputs around first member " << firstMember << " last input " << lastIn << std::endl;
+					std::cout << "Need to move inputs around first member " << firstMember << " last input " << lastIn << std::endl;
 					made_change = true;
 					node_id nnode = lastIn + 1;
 					for ( node_id member: sg.members() )
 					{
-//						std::cout << " member: " << member << " -> nnode " << nnode << std::endl;
+						std::cout << " member: " << member << " -> nnode " << nnode << std::endl;
 						neworder[member] = nnode;
 						++nnode;
 					}
@@ -688,7 +693,7 @@ graph::optimize( void )
 //								std::stringstream fn;
 //								fn << "rotate_order_" << rotate_in << ".dot";
 //								++rotate_in;
-//								std::cout << "   -> " << j << " rotate " << neworder[j] << " to " << curP << " newdest " << newdest << std::endl;
+								std::cout << "   -> " << j << " rotate " << neworder[j] << " to " << curP << " newdest " << newdest << std::endl;
 								rotate_node( neworder[j], curP );
 //								dump_dot( fn.str() );
 								++curP;
@@ -851,7 +856,7 @@ graph::apply_grouping( void )
 							// node in this group, we can't merge - we
 							// would have considered it before, or
 							// it's an n-to-one
-							if ( only_output_in( cIdx, subI, n ) )
+							if ( only_output_in( cIdx, subI, n ) && _subgroups[subI].can_merge( _subgroups[cIdx] ) )
 								subI = merge_subgroups( subI, cIdx );
 						}
 					}
@@ -972,7 +977,7 @@ graph::only_output_in( size_t sg, size_t check, node_id n )
 		{
 			if ( *o != n )
 			{
-				if ( _nodes[*o].in_subgroup() && _node_to_subgroup[*o] == check )
+				if ( _nodes[*o].in_subgroup() && find_subgroup( *o ) == check )
 					return false;
 			}
 		}

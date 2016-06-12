@@ -66,6 +66,8 @@ public:
 	bool is_output( node_id n ) const;
 	bool is_member( node_id n ) const;
 
+	bool can_merge( const subgroup &o ) const;
+
 	/// returns the last input node that needs
 	/// computation
 	node_id last_input( void ) const;
@@ -81,6 +83,7 @@ public:
 	void bind_functions( std::vector<std::shared_ptr<subgroup_function>> &funcs );
 
 private:
+	bool internal_merge_check( const subgroup &o ) const;
 
 	graph &_graph;
 	std::set<node_id> _inputs;

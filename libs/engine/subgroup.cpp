@@ -137,6 +137,39 @@ subgroup::is_member( node_id n ) const
 
 ////////////////////////////////////////
 
+bool
+subgroup::can_merge( const subgroup &o ) const
+{
+	if ( internal_merge_check( o ) )
+		return o.internal_merge_check( *this );
+	return false;
+}
+
+////////////////////////////////////////
+
+bool
+subgroup::internal_merge_check( const subgroup &o ) const
+{
+	graph &g = _graph;
+	const registry &ops = g.op_registry();
+
+	for ( auto &n: _nodes )
+	{
+		node &cur = g[n];
+		if ( ops[cur.op()].processing_style() == op::style::N_TO_ONE )
+		{
+			for ( auto i = cur.begin_inputs(), ei = cur.end_inputs(); i != ei; ++i )
+			{
+				if ( o.is_member( *i ) )
+					return false;
+			}
+		}
+	}
+	return true;
+}
+
+////////////////////////////////////////
+
 node_id
 subgroup::last_input( void ) const
 {
