@@ -66,6 +66,16 @@ inline plane square( const plane &p ) { return plane( "p.square", p.dims(), p );
 inline plane square( plane &&p ) { return plane( "p.square", p.dims(), std::move( p ) ); }
 
 inline plane fma( const plane &p, float b, float c ) { return plane( "p.fma_pnn", p.dims(), p, b, c ); }
+//inline plane lerp( const plane &a, const plane &b, float amt )
+//{
+//	// a * ( 1 - amt ) + b * amt;
+//	return a + ( b - a ) * amt;
+//}
+//inline plane lerp( const plane &a, const plane &b, plane &amt )
+//{
+//	// a * ( 1 - amt ) + b * amt;
+//	return a + ( b - a ) * amt;
+//}
 
 inline plane sqrt( const plane &p ) { return plane( "p.sqrt", p.dims(), p ); }
 inline plane sqrt( plane &&p ) { return plane( "p.sqrt", p.dims(), std::move( p ) ); }
@@ -128,6 +138,10 @@ inline plane max( const plane &a, const plane &b )
 }
 
 inline plane clamp( const plane &a, const engine::computed_value<float> &minv, const engine::computed_value<float> &maxv )
+{
+	return plane( "p.clamp_pnn", a.dims(), a, minv, maxv );
+}
+inline plane clamp( const plane &a, float minv, float maxv )
 {
 	return plane( "p.clamp_pnn", a.dims(), a, minv, maxv );
 }
