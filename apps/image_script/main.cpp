@@ -53,9 +53,9 @@ atrous_expand( const std::vector<float> &a )
 		if ( i+1 != a.size() )
 			ret[i*2+1] = 0.F;
 	}
-	std::cout << "atrous expand:\n";
-	for ( size_t i = 0; i != ret.size(); ++i )
-		std::cout << i << ": " << ret[i] << std::endl;
+//	std::cout << "atrous expand:\n";
+//	for ( size_t i = 0; i != ret.size(); ++i )
+//		std::cout << i << ": " << ret[i] << std::endl;
 	return ret;
 }
 
@@ -66,9 +66,9 @@ dirac_negate( const std::vector<float> &a )
 	for ( float &v: ret )
 		v = -v;
 	ret[ret.size()/2] += 1.F;
-	std::cout << "dirac negate:\n";
-	for ( size_t i = 0; i != ret.size(); ++i )
-		std::cout << i << ": " << ret[i] << std::endl;
+//	std::cout << "dirac negate:\n";
+//	for ( size_t i = 0; i != ret.size(); ++i )
+//		std::cout << i << ": " << ret[i] << std::endl;
 	return ret;
 }
 
@@ -82,6 +82,52 @@ std::tuple<plane, plane, plane, plane> wavelet_decomp( const plane &p, const std
 	plane w2_j1 = convolve_horiz( ghc, h );
 	plane w3_j1 = convolve_horiz( ghc, g );
 	return std::make_tuple( c_j1, w1_j1, w2_j1, w3_j1 );
+}
+
+plane wavelet_filter( const plane &p, size_t levels, float sigma )
+{
+	precondition( levels > 0, "invalid levels {0}", levels );
+	std::vector<std::tuple<plane, plane, plane>> filtLevels;
+
+	std::vector<float> wt_h{ 1.F/16.F, 4.F/16.F, 6.F/16.F, 4.F/16.F, 1.F/16.F };
+	std::vector<float> wt_g = dirac_negate( wt_h );
+
+	plane c_J = p;
+	size_t cnt = levels;
+	while ( cnt >= 0 )
+	{
+		auto wd = wavelet_decomp( c_J, wt_h, wt_g );
+		c_J = std::get<0>( wd );
+		filtLevels.push_back( std::make_tuple( std::get<1>( wd ), std::get<2>( wd ), std::get<3>( wd ) ) );
+		if ( cnt == 0 )
+			break;
+
+		--cnt;
+		wt_h = atrous_expand( wt_h );
+		wt_g = atrous_expand( wt_g );
+	}
+
+	postcondition( filtLevels.size() == (levels + 1), "Expecting {0} levels", (levels + 1) );
+
+	float levelScale = 6.F/16.F;
+	for ( size_t l = 0; l < levels; ++l )
+	{
+		auto &curL = filtLevels[l];
+		auto &nextL = filtLevels[l+1];
+		plane d_w1 = std::get<0>( curL ) * levelScale - std::get<0>( nextL );
+		plane d_w2 = std::get<1>( curL ) * levelScale - std::get<1>( nextL );
+		plane d_w3 = std::get<2>( curL ) * levelScale - std::get<2>( nextL );
+		std::get<0>( curL ) = std::get<0>( curL ) * exp( clamp( d_w1, 0.F, 1.F ) / ( -2.F * sigma ) );
+		std::get<1>( curL ) = std::get<1>( curL ) * exp( clamp( d_w2, 0.F, 1.F ) / ( -2.F * sigma ) );
+		std::get<2>( curL ) = std::get<2>( curL ) * exp( clamp( d_w3, 0.F, 1.F ) / ( -2.F * sigma ) );
+		sigma *= levelScale;
+	}
+
+	plane reconst = c_J;
+	for ( auto &l: filtLevels )
+		reconst += std::get<0>( l ) + std::get<1>( l ) + std::get<2>( l );
+
+	return reconst;
 }
 
 plane replace_high( const plane &p, const plane &filt )
@@ -279,26 +325,26 @@ int safemain( int argc, char *argv[] )
 //							weight = if_greater( weight, spatSigmaI * 2.F, weight * prefilt, weight + 0.001F );
 //							img[p] = prefilt;//weighted_bilateral( img[0], weight, engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) );
 //						}
+
 						plane lum = img[0] * 0.3F + img[1] * 0.6F + img[2] * 0.1F;
-#if 0
 						lum = log( lum + 1.F );
-						plane localvar = local-variance( lum, 5 );
+						plane localvar = local_variance( lum, 5 );
 						plane weight = filter_nan( varimg[2], 0.F ) / max( lum, engine::make_constant( 0.00001F ) ) * sqrt( max( localvar, engine::make_constant( 0.00001F ) ) );
-						weight = if_less( weight, 0.0001F, clamp( weight, engine:make_constant( 1.F ), engine::make_constant( 1.F ) ), 1.F / weight );
+						weight = if_less( weight, 0.0001F, clamp( weight, engine::make_constant( 1.F ), engine::make_constant( 1.F ) ), 1.F / weight );
 						for ( int p = 0; p < 3; ++p )
 							img[p] = replace_high( img[p], exp( weighted_bilateral( log( img[p] + 1.F ), weight, engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) ) ) - 1.F );
-#endif
-						std::vector<float> wt_h{ 1.F/16.F, 4.F/16.F, 6.F/16.F, 4.F/16.F, 1.F/16.F };
-						std::vector<float> wt_g = dirac_negate( wt_h );
 
-						auto wd1 = wavelet_decomp( lum, wt_h, wt_g );
-						std::vector<float> wt2_h = atrous_expand( wt_h );
-						std::vector<float> wt2_g = atrous_expand( wt_g );
-						auto wd2 = wavelet_decomp( std::get<0>( wd1 ), wt2_h, wt2_g );
-						plane reconst = std::get<0>( wd2 ) + std::get<1>( wd2 ) + std::get<2>( wd2 ) + std::get<3>( wd2 ) + std::get<1>( wd1 ) + std::get<2>( wd1 ) + std::get<3>( wd1 );
-						img[0] = std::get<1>( wd1 ) + std::get<2>( wd1 ) + std::get<3>( wd1 );
-						img[1] = std::get<1>( wd2 ) + std::get<2>( wd2 ) + std::get<3>( wd2 );
-						img[2] = reconst;
+//						std::vector<float> wt_h{ 1.F/16.F, 4.F/16.F, 6.F/16.F, 4.F/16.F, 1.F/16.F };
+//						std::vector<float> wt_g = dirac_negate( wt_h );
+//
+//						auto wd1 = wavelet_decomp( lum, wt_h, wt_g );
+//						std::vector<float> wt2_h = atrous_expand( wt_h );
+//						std::vector<float> wt2_g = atrous_expand( wt_g );
+//						auto wd2 = wavelet_decomp( std::get<0>( wd1 ), wt2_h, wt2_g );
+//						plane reconst = std::get<0>( wd2 ) + std::get<1>( wd2 ) + std::get<2>( wd2 ) + std::get<3>( wd2 ) + std::get<1>( wd1 ) + std::get<2>( wd1 ) + std::get<3>( wd1 );
+//						img[0] = std::get<1>( wd1 ) + std::get<2>( wd1 ) + std::get<3>( wd1 );
+//						img[1] = std::get<1>( wd2 ) + std::get<2>( wd2 ) + std::get<3>( wd2 );
+//						img[2] = reconst;
 //						auto wd = wavelet_decomp( lum, , { -1.F/16.F, -4.F/16.F, 10.F/16.F, -4.F/16.F, -1.F/16.F } );
 //						img[0] = wd.first;
 //						img[1] = wd.second;
@@ -317,7 +363,8 @@ int safemain( int argc, char *argv[] )
 					else
 					{
 						for ( int p = 0; p < 3; ++p )
-							img[p] = bilateral( img[p], engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) );
+							img[p] = wavelet_filter( img[p], 2, 0.02 );
+//							img[p] = bilateral( img[p], engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) );
 					}
 
 					if ( cnt < 1.F )
