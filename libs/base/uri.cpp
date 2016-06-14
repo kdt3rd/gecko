@@ -4,6 +4,7 @@
 #include "contract.h"
 #include <algorithm>
 #include "file_system.h"
+#include "user_info.h"
 
 namespace base
 {
@@ -193,17 +194,30 @@ void uri::parse( cstring str )
 	cstring path;
 
 	size_t colon = str.find( ':' );
-	if ( colon == cstring::npos || str[0] == '/' )
+	if ( colon == cstring::npos || str[0] == '/' || str[0] == '~' )
 	{
 		_scheme = "file";
 		// assume it's a file path
-		if ( str[0] != '/' )
+		if ( str[0] == '~' )
 		{
-			// get the current directory from the default filesystem
-			uri tmp = file_system::get( _scheme )->current_path();
-			_path = tmp._path;
+			size_t slpos = str.find( '/' );
+			cstring user = str.substr( 1, slpos );
+			user_info uinf( user );
+			add_path( uinf.home_dir() );
+			if ( slpos != cstring::npos )
+				path = str.substr( slpos + 1 );
 		}
-		path = str;
+		else
+		{
+			if ( str[0] != '/' )
+			{
+				// get the current directory from the default filesystem
+				uri tmp = file_system::get( _scheme )->current_path();
+				_path = tmp._path;
+			}
+
+			path = str;
+		}
 	}
 	else if ( str.size() > 2 && str[0] == '\\' && str[1] == '\\' )
 	{
