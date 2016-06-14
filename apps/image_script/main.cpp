@@ -94,7 +94,7 @@ plane wavelet_filter( const plane &p, size_t levels, float sigma )
 
 	plane c_J = p;
 	size_t cnt = levels;
-	while ( cnt >= 0 )
+	while ( true )
 	{
 		auto wd = wavelet_decomp( c_J, wt_h, wt_g );
 		c_J = std::get<0>( wd );
