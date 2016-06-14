@@ -24,6 +24,8 @@
 #include "scanline_process.h"
 #include <base/cpu_features.h>
 #include <iostream>
+#include <cmath>
+
 // TODO: add ifdefs when compiling for alternate platforms (i.e. ARM)
 #include "sse3/plane_math.h"
 #include "sse4/plane_math.h"
@@ -48,7 +50,7 @@ static void plane_filter_nan( scanline &dest, const scanline &src, float repl )
 	for ( int x = 0, N = dest.width(); x != N; ++x )
 	{
 		float v = src[x];
-		if ( isnan( v ) )
+		if ( std::isnan( v ) )
 			v = repl;
 		dest[x] = v;
 	}
