@@ -161,7 +161,15 @@ subgroup::internal_merge_check( const subgroup &o ) const
 			for ( auto i = cur.begin_inputs(), ei = cur.end_inputs(); i != ei; ++i )
 			{
 				if ( o.is_member( *i ) )
+				{
+					std::cout << "internal_merge_check fails because input " << i << " for node " << n << " is a member of other" << std::endl;
 					return false;
+				}
+				if ( g.has_ancestor( *i, o.members() ) )
+				{
+					std::cout << "internal_merge_check fails because input " << i << " for node " << n << " has an ancestor in other" << std::endl;
+					return false;
+				}
 			}
 		}
 	}
@@ -267,7 +275,7 @@ subgroup::func_idx( node_id n )
 		if ( _nodes[idx] == n )
 			break;
 	}
-	postcondition( idx != N, "request for node {0} that is not a member of subgroup", n );
+	postcondition( idx != N, "request for node {0} that is not a member of subgroup with first member {1}", n, first_member() );
 
 	return idx;
 }

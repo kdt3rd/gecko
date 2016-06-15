@@ -110,6 +110,12 @@ public:
 	inline const_reverse_iterator rend( void ) const { return _nodes.rend(); }
 	inline const_reverse_iterator crend( void ) const { return _nodes.crend(); }
 
+	/// returns true if one of the (recursive) inputs of node n is one
+	/// of the nodes in the vector
+	bool has_ancestor( node_id n, const std::vector<node_id> &nodes ) const;
+	/// returns true if a is an eventual ancestor of n
+	bool has_ancestor( node_id n, node_id a ) const;
+
 	void optimize( void );
 
 	// remove
@@ -135,8 +141,7 @@ private:
 	size_t find_subgroup( node_id n ) const;
 	size_t merge_subgroups( size_t a, size_t b );
 	void split_subgroup( size_t i, node_id n );
-	bool only_output_in( size_t sg, size_t check, node_id n );
-
+	bool ok_to_merge( size_t sg, size_t check, node_id n );
 	void rotate_node( node_id oldpos, node_id newpos );
 	node_id find_node( const hash::value &hv );
 

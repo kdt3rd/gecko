@@ -62,6 +62,7 @@ public:
 	void add( node_id n );
 	inline const std::vector<node_id> &members( void ) const { return _nodes; }
 	inline const std::vector<node_id> &outputs( void ) const { return _outputs; }
+	inline const std::set<node_id> &inputs( void ) const { return _inputs; }
 
 	bool is_output( node_id n ) const;
 	bool is_member( node_id n ) const;

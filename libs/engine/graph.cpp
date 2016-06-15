@@ -588,6 +588,22 @@ graph::process( node_id nid )
 //				std::cout << "       -> subgroup already processed" << std::endl;
 				continue;
 			}
+			bool haveAllValues = true;
+			for ( auto sginn: sg.inputs() )
+			{
+				if ( _nodes[sginn].value().empty() )
+				{
+					std::cout << "  subgroup " << sgi << " input node " << sginn << " missing value" << std::endl;
+					haveAllValues = false;
+					break;
+				}
+			}
+			if ( ! haveAllValues )
+			{
+				std::cout << "waiting to process subgroup " << sgi << " until later, missing values: last input " << sg.last_input() << ", current node " << c << std::endl;
+				continue;
+			}
+
 			sg.process();
 			continue;
 		}
@@ -634,11 +650,11 @@ graph::optimize( void )
 	apply_peephole();
 	apply_grouping();
 
-//	static int grp = 1;
-//	std::stringstream fn;
-//	fn << "grouping_" << grp++ << ".dot";
-//	dump_dot( fn.str() );
-
+	static int grp = 1;
+	std::stringstream fn;
+	fn << "grouping_" << grp++ << ".dot";
+	dump_dot( fn.str() );
+#if 0
 	if ( ! _subgroups.empty() )
 	{
 		// now need to re-order any group's inputs to before the first node in the group
@@ -713,6 +729,7 @@ graph::optimize( void )
 			}
 		}
 	}
+#endif
 }
 
 ////////////////////////////////////////
@@ -757,6 +774,7 @@ graph::apply_peephole( void )
 void
 graph::apply_grouping( void )
 {
+	std::map<size_t, std::set<node_id>> inputgroups;
 	for ( node_id n = 0, N = static_cast<node_id>( _nodes.size() ); n != N; ++n )
 	{
 		node &cur = _nodes[n];
@@ -773,6 +791,9 @@ graph::apply_grouping( void )
 			case op::style::ONE_TO_ONE:
 			{
 				size_t subI = size_t(-1);
+				size_t maxInputGroup = subI;
+				node_id maxInput = nullnode;
+				inputgroups.clear();
 				for ( size_t i = 0, nI = cur.input_size(); i != nI; ++i )
 				{
 					node_id curIn = cur.input( i );
@@ -780,6 +801,12 @@ graph::apply_grouping( void )
 
 					if ( curInN.in_subgroup() && ! curInN.has_ref() )
 					{
+						TODO("Add accessor to op to check for same grouping function");
+						// Add accessor to the op to check if
+						// the grouping function is the same - seems
+						// like the result type alone is not
+						// sufficient for the general case
+						// 
 						// if the result type doesn't match, don't group
 						if ( curOp.function().result_type() != _ops[curInN.op()].function().result_type() )
 						{
@@ -795,74 +822,102 @@ graph::apply_grouping( void )
 
 						size_t cIdx = find_subgroup( curIn );
 
-						if ( subI == size_t(-1) )
+						if ( maxInput == nullnode || curIn > maxInput )
 						{
-							size_t inNnOut = curInN.output_size();
-							if ( inNnOut == 1 )
+							maxInput = curIn;
+							maxInputGroup = cIdx;
+						}
+						inputgroups[cIdx].insert( curIn );
+					}
+				}
+
+				if ( maxInput != nullnode )
+				{
+					bool okToAdd = true;
+					if ( inputgroups.size() > 1 )
+					{
+						std::vector<size_t> inGrps( inputgroups.size(), 0 );
+						size_t iidx = 0;
+						for ( auto &inGrp: inputgroups )
+							inGrps[iidx++] = inGrp.first;
+
+						// if this input is in a subgroup that has
+						// an output that is an input of another
+						// node in this group, we can't merge - we
+						// would have considered it before, or
+						// it's an n-to-one
+						iidx = 0;
+						while ( iidx < inGrps.size() )
+						{
+							size_t grpI = inGrps[iidx];
+							size_t nextgrpI = inGrps[iidx + 1];
+							if ( ok_to_merge( grpI, nextgrpI, n ) )
 							{
-								_subgroups[cIdx].add( n );
-								_node_to_subgroup[n] = cIdx;
-								cur.set_in_subgroup();
-								subI = cIdx;
+								std::cout << "MERGING subgroup " << grpI << " and " << nextgrpI << std::endl;
+								inGrps[iidx] = merge_subgroups( grpI, nextgrpI );
+								if ( maxInputGroup == grpI || maxInputGroup == nextgrpI )
+									maxInputGroup = inGrps[iidx];
+
+								inGrps.erase( inGrps.begin() + iidx + 1 );
+								if ( inGrps.size() == 1 )
+									break;
+								iidx = 0;
 							}
 							else
 							{
-								bool same = true;
-								size_t maxIdx = cIdx;
-								for ( size_t j = i + 1; j != nI; ++j )
-								{
-									node_id curInS = cur.input( j );
-									node &curInNS = _nodes[curInS];
-
-									if ( curInNS.in_subgroup() && ! curInNS.has_ref() )
-										maxIdx = std::max( maxIdx, find_subgroup( curInS ) );
-								}
-
-								// we want to defer and add it to the group that is the latest input
-								if ( maxIdx != cIdx )
+								if ( ( iidx + 2 ) >= inGrps.size() )
+									break;
+								++iidx;
+							}
+						}
+						// TODO: Look for additional checks for merging?
+						if ( inGrps.size() > 1 )
+						{
+							maxInput = nullnode;
+							maxInputGroup = size_t(-1);
+							for ( size_t i = 0, nI = cur.input_size(); i != nI; ++i )
+							{
+								node_id curIn = cur.input( i );
+								size_t sgi = find_subgroup( curIn );
+								if ( sgi == size_t(-1) )
 									continue;
 
-								size_t outIdx = size_t(-1);
-								for ( size_t o = 0; o != inNnOut; ++o )
+								for ( size_t osg = 0; osg != inGrps.size(); ++osg )
 								{
-									node_id outN = curInN.output( o );
-									if ( _nodes[outN].in_subgroup() )
+									size_t osgi = inGrps[osg];
+									if ( osgi == sgi )
+										continue;
+									if ( has_ancestor( curIn, _subgroups[osgi].members() ) )
 									{
-										size_t subGI = _node_to_subgroup[outN];
-										if ( outIdx == size_t(-1) )
-											outIdx = subGI;
-										else if ( outIdx != subGI )
+										if ( maxInput == nullnode )
 										{
-											same = false;
-											break;
+											maxInput = curIn;
+											maxInputGroup = sgi;
+										}
+										else if ( curIn > maxInput )
+										{
+											maxInput = curIn;
+											maxInputGroup = sgi;
 										}
 									}
 								}
-								if ( ! same )
-									std::cout << "TODO: Need to add better search such that we can pull multiple outputs into the same subgroup" << std::endl;
-								else
-								{
-									_subgroups[cIdx].add( n );
-									_node_to_subgroup[n] = cIdx;
-									cur.set_in_subgroup();
-									subI = cIdx;
-								}
 							}
-						}
-						else if ( cIdx != subI )
-						{
-							// if this input is in a subgroup that has
-							// an output that is an input of another
-							// node in this group, we can't merge - we
-							// would have considered it before, or
-							// it's an n-to-one
-							if ( only_output_in( cIdx, subI, n ) && _subgroups[subI].can_merge( _subgroups[cIdx] ) )
-								subI = merge_subgroups( subI, cIdx );
+							okToAdd = ( maxInput != nullnode );
 						}
 					}
+					if ( okToAdd )
+					{
+						std::cout << "ADDING node " << n << " to subgroup " << maxInputGroup << std::endl;
+						_subgroups[maxInputGroup].add( n );
+						_node_to_subgroup[n] = maxInputGroup;
+						cur.set_in_subgroup();
+						subI = maxInputGroup;
+					}
 				}
+
 				if ( subI == size_t(-1) )
 				{
+					std::cout << "CREATING subgroup " << _subgroups.size() << " for node " << n << std::endl;
 					_node_to_subgroup[n] = _subgroups.size();
 					cur.set_in_subgroup();
 					_subgroups.emplace_back( subgroup( *this, n ) );
@@ -870,6 +925,7 @@ graph::apply_grouping( void )
 				break;
 			}
 			case op::style::N_TO_ONE:
+				std::cout << "CREATING subgroup " << _subgroups.size() << " for N_TO_ONE node " << n << std::endl;
 				_node_to_subgroup[n] = _subgroups.size();
 				cur.set_in_subgroup();
 				_subgroups.emplace_back( subgroup( *this, n ) );
@@ -967,7 +1023,7 @@ graph::split_subgroup( size_t i, node_id n )
 ////////////////////////////////////////
 
 bool
-graph::only_output_in( size_t sg, size_t check, node_id n )
+graph::ok_to_merge( size_t sg, size_t check, node_id n )
 {
 	subgroup &sub = _subgroups[sg];
 	for ( node_id outs: sub.outputs() )
@@ -978,11 +1034,50 @@ graph::only_output_in( size_t sg, size_t check, node_id n )
 			if ( *o != n )
 			{
 				if ( _nodes[*o].in_subgroup() && find_subgroup( *o ) == check )
+				{
+					std::cout << "Not merging subgroup " << sg << " and " << check << " because node " << outs << " output is " << *o << " which is in " << check << std::endl;
 					return false;
+				}
 			}
 		}
 	}
-	return true;
+	return _subgroups[check].can_merge( sub );
+}
+
+////////////////////////////////////////
+
+bool
+graph::has_ancestor( node_id n, const std::vector<node_id> &nodes ) const
+{
+	precondition( n < _nodes.size(), "invalid node id" );
+	const node &node = _nodes[n];
+	for ( size_t i = 0, N = node.input_size(); i != N; ++i )
+	{
+		node_id inN = node.input( i );
+		if ( std::find( nodes.begin(), nodes.end(), inN ) != nodes.end() )
+			return true;
+
+		bool recF = has_ancestor( inN, nodes );
+		if ( recF )
+			return true;
+	}
+	return false;
+}
+
+////////////////////////////////////////
+
+bool
+graph::has_ancestor( node_id n, node_id a ) const
+{
+	precondition( n < _nodes.size(), "invalid node id" );
+	const node &node = _nodes[n];
+	for ( size_t i = 0, N = node.input_size(); i != N; ++i )
+	{
+		node_id inN = node.input( i );
+		if ( inN == a || has_ancestor( inN, a ) )
+			return true;
+	}
+	return false;
 }
 
 ////////////////////////////////////////
@@ -1027,7 +1122,7 @@ graph::rotate_node( node_id oldpos, node_id newpos )
 	for ( size_t i = 0, nC = tmpStore.output_size(); i != nC; ++i )
 	{
 		node_id &outN = tmpStore.output(i);
-		precondition( newpos < outN, "attempt to move a node {0} past a node {1} who has it as an input", oldpos, outN );
+		precondition( newpos < outN, "attempt to move a node from {0} to {1}, past a node {1} who has it as an input", oldpos, newpos, outN );
 
 		_nodes[outN].update_input( oldpos, tmpPos );
 	}
@@ -1037,7 +1132,7 @@ graph::rotate_node( node_id oldpos, node_id newpos )
 		if ( inN == nullnode )
 			continue;
 
-		precondition( newpos > inN, "attempt to move a node {0} before one of it's inputs {1}", oldpos, inN );
+		precondition( newpos > inN, "attempt to move a node from {0} to {1}, before one of it's inputs: {2}", oldpos, newpos, inN );
 
 		_nodes[inN].update_output( oldpos, tmpPos );
 	}
