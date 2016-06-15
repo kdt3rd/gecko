@@ -1054,6 +1054,9 @@ graph::has_ancestor( node_id n, const std::vector<node_id> &nodes ) const
 	for ( size_t i = 0, N = node.input_size(); i != N; ++i )
 	{
 		node_id inN = node.input( i );
+		if ( inN == nullnode )
+			continue;
+
 		if ( std::find( nodes.begin(), nodes.end(), inN ) != nodes.end() )
 			return true;
 
@@ -1074,6 +1077,9 @@ graph::has_ancestor( node_id n, node_id a ) const
 	for ( size_t i = 0, N = node.input_size(); i != N; ++i )
 	{
 		node_id inN = node.input( i );
+		if ( inN == nullnode )
+			continue;
+
 		if ( inN == a || has_ancestor( inN, a ) )
 			return true;
 	}
