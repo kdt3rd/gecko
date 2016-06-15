@@ -130,7 +130,8 @@ struct CPUFeatureStore
 
 		if ( maxFeat >= 7 )
 		{
-			pullID( 7, regs );
+			// this feature needs count (ECX) of 0 to pull
+			pullID( 7, 0, regs );
 			_feat7_EBX = regs[1];
 			_feat7_ECX = regs[2];
 		}
