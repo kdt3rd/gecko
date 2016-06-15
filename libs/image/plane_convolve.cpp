@@ -113,14 +113,13 @@ horiz_convolve( scanline &dest, const scanline &src, const std::vector<float> &k
 	precondition( dest.get() != src.get(), "Need not-in-place flag to op" );
 
 	int halfK = static_cast<int>( k.size() / 2 );
-	int n = - halfK + static_cast<int>( k.size() );
-	int w = dest.width();
-	for ( int x = 0; x < w; ++x )
+	int wm1 = dest.width() - 1;
+	for ( int x = 0; x <= wm1; ++x )
 	{
 		float sum = 0.F;
-		for ( int l = - halfK; l <= n; ++l )
+		for ( int l = - halfK; l <= halfK; ++l )
 		{
-			int pos = std::max( 0, std::min( w - 1, x + l ) );
+			int pos = std::max( 0, std::min( wm1, x + l ) );
 			sum += src[pos] * k[static_cast<size_t>( l + halfK )];
 		}
 		dest[x] = sum;
@@ -167,10 +166,9 @@ vert_convolve( scanline &dest, int y, const plane &src, const std::vector<float>
 	precondition( dest.get() != src.line( y ), "Need not-in-place flag to op" );
 
 	int halfK = static_cast<int>( k.size() / 2 );
-	int n = - halfK + static_cast<int>( k.size() );
 	int hm1 = src.height() - 1;
 
-	for ( int l = - halfK; l <= n; ++l )
+	for ( int l = - halfK; l <= halfK; ++l )
 	{
 		float kVal = k[static_cast<size_t>( l + halfK )];
 		int curY = std::max( int(0), std::min( hm1, y + l ) );
@@ -520,7 +518,8 @@ plane convolve_horiz( const plane &p, const std::vector<float> &k )
 
 		return plane( "p.sep_conv3_h", p.dims(), p, k[0], k[1], k[2] );
 	}
-	
+
+	precondition( k.size() % 2 != 0, "non-odd-sized kernel {0}", k.size() );
 	return plane( "p.sep_conv_h", p.dims(), p, k );
 }
 
@@ -535,7 +534,9 @@ plane convolve_vert( const plane &p, const std::vector<float> &k )
 
 		return plane( "p.sep_conv3_v", p.dims(), p, k[0], k[1], k[2] );
 	}
-	
+
+	std::cout << "convolve_vert: " << k.size() << ", " << int(k.size()/2) << " " << std::endl;
+	precondition( k.size() % 2 != 0, "non-odd-sized kernel {0}", k.size() );
 	return plane( "p.sep_conv_v", p.dims(), p, k );
 }
 
