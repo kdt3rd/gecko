@@ -22,25 +22,27 @@
 
 #pragma once
 
-#include <string>
-#include <typeinfo>
-#include <ostream>
-
-#include "compiler_support.h"
-
 ////////////////////////////////////////
 
-namespace base
-{
+# define STRINGIZE(x) #x
+# define DEFER(FUNC,...) FUNC(__VA_ARGS__)
 
-std::string demangle( const char *sym );
-inline std::string demangle( const std::string &sym )
-{
-	return demangle( sym.c_str() );
-}
-inline std::string demangle( const std::type_info &t )
-{
-	return demangle( t.name() );
-}
+#if defined(__clang__)
+# define FALLTHROUGH [[clang::fallthrough]];
+# define TODO(x) _Pragma(STRINGIZE(GCC warning x " at line " DEFER(STRINGIZE,__LINE__)))
+#else
+# if defined(__GNUC__)
+#  define FALLTHROUGH [[fallthrough]]
+#  if (__GNUC__ < 5)
+#   define HAS_MISSING_STREAM_MOVE_CTORS
+#   define HAS_BAD_CODECVT_HEADER
+#  endif
+#  define TODO(x) _Pragma(STRINGIZE(GCC warning x " at line " DEFER(STRINGIZE,__LINE__)))
+# else
+#  if defined(_MSC_VER)
+#   define TODO(x) __pragma(STRINGIZE(message(x " at line " DEFER(STRINGIZE,__LINE__))))
+#  endif
+#  define FALLTHROUGH
+# endif
+#endif
 
-} // namespace base
