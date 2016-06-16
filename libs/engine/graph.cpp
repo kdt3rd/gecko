@@ -175,6 +175,7 @@ graph::move_node( graph &o, node_id n )
 	precondition( o[n].output_size() == 0, "Attempt to move a node with outputs in graph" );
 
 	node_id nnode = copy_node( o, n );
+//	std::cout << "move_node " << n << " from graph " << &(o) << " to " << this << ": " << nnode << std::endl;
 	o.remove_node( n );
 	return nnode;
 }
@@ -186,39 +187,19 @@ graph::remove_node( node_id n )
 {
 	precondition( n < size(), "invalid node id {0}", n );
 
-	std::deque<node_id> del;
-	while ( true )
+//	std::cout << "remove_node " << n << std::endl;
+	node &delN = _nodes[n];
+	const node_id *b = delN.begin_inputs();
+	const node_id *be = delN.end_inputs();
+	while ( b != be )
 	{
-		node &curDelN = _nodes[n];
-		const node_id *b = curDelN.begin_inputs();
-		const node_id *be = curDelN.end_inputs();
-		while ( b != be )
-		{
-			if ( *b == nullnode )
-			{
-				++b;
-				continue;
-			}
-
-			node &curIn = _nodes[*b];
-			if ( curIn.is_rvalue() )
-				del.push_back( *b );
-			else if ( curIn.output_size() == 1 && ! curIn.has_ref() )
-			{
-				// no references, let's schedule it for deletion
-				del.push_back( *b );
-			}
-//			std::cout << "remove node " << n << " from outputs of " << *b << std::endl;
-			curIn.remove_output( n );
-			++b;
-		}
-		curDelN = node();
-
-		if ( del.empty() )
-			break;
-		n = del.front();
-		del.pop_front();
+		if ( *b != nullnode )
+			_nodes[*b].remove_output( n );
+		++b;
 	}
+	delN = node();
+
+//	clean_graph();
 }
 
 ////////////////////////////////////////
@@ -853,7 +834,7 @@ graph::apply_grouping( void )
 							size_t nextgrpI = inGrps[iidx + 1];
 							if ( ok_to_merge( grpI, nextgrpI, n ) )
 							{
-								std::cout << "MERGING subgroup " << grpI << " and " << nextgrpI << std::endl;
+//								std::cout << "MERGING subgroup " << grpI << " and " << nextgrpI << std::endl;
 								inGrps[iidx] = merge_subgroups( grpI, nextgrpI );
 								if ( maxInputGroup == grpI || maxInputGroup == nextgrpI )
 									maxInputGroup = inGrps[iidx];
@@ -907,7 +888,7 @@ graph::apply_grouping( void )
 					}
 					if ( okToAdd )
 					{
-						std::cout << "ADDING node " << n << " to subgroup " << maxInputGroup << std::endl;
+//						std::cout << "ADDING node " << n << " to subgroup " << maxInputGroup << std::endl;
 						_subgroups[maxInputGroup].add( n );
 						_node_to_subgroup[n] = maxInputGroup;
 						cur.set_in_subgroup();
@@ -917,7 +898,7 @@ graph::apply_grouping( void )
 
 				if ( subI == size_t(-1) )
 				{
-					std::cout << "CREATING subgroup " << _subgroups.size() << " for node " << n << std::endl;
+//					std::cout << "CREATING subgroup " << _subgroups.size() << " for node " << n << std::endl;
 					_node_to_subgroup[n] = _subgroups.size();
 					cur.set_in_subgroup();
 					_subgroups.emplace_back( subgroup( *this, n ) );
@@ -925,7 +906,7 @@ graph::apply_grouping( void )
 				break;
 			}
 			case op::style::N_TO_ONE:
-				std::cout << "CREATING subgroup " << _subgroups.size() << " for N_TO_ONE node " << n << std::endl;
+//				std::cout << "CREATING subgroup " << _subgroups.size() << " for N_TO_ONE node " << n << std::endl;
 				_node_to_subgroup[n] = _subgroups.size();
 				cur.set_in_subgroup();
 				_subgroups.emplace_back( subgroup( *this, n ) );
@@ -1254,13 +1235,16 @@ graph::add_node( op_id op, any value, const dimensions &d, std::initializer_list
 node_id
 graph::add_node( op_id op, any value, const dimensions &d, const std::vector<node_id> &inputs, const hash::value &hv )
 {
+	precondition( op != nullop, "attempt to add a nullop" );
 	node_id n = find_node( hv );
 	if ( n != nullnode )
 	{
 		// simple collision check
 		const node &colCheck = _nodes[n];
-		if ( colCheck.op() != op || colCheck.input_size() != inputs.size() || colCheck.dims() != d )
-			throw_logic( "Hash collision with existing node {0} ({1}, {2}) adding opname '{3}' dims {4}: {5} vs {6}", n, _ops[colCheck.op()].name(), colCheck.dims(), _ops[op].name(), d, colCheck.hash_value(), hv );
+		if ( colCheck.op() == nullop )
+			throw_logic( "Graph {6}, Hash collision with existing NULL node {0}/{5} adding opname '{1}' dims {2}: {3} vs {4}", n, _ops[op].name(), d, colCheck.hash_value(), hv, _nodes.size(), this );
+		else if ( colCheck.op() != op || colCheck.input_size() != inputs.size() || colCheck.dims() != d )
+			throw_logic( "Hash collision with existing node {0} ({1}, {2}) adding opname '{3}' {7}/{8} dims {4}: {5} vs {6}", n, _ops[colCheck.op()].name(), colCheck.dims(), _ops[op].name(), d, colCheck.hash_value(), hv, op, colCheck.op() );
 		
 //		std::cout << "re-using existing node " << n << std::endl;
 		return n;
@@ -1303,7 +1287,15 @@ graph::update_hash_map( void )
 {
 	std::map<hash::value, node_id> nh2nmap;
 	for ( node_id nid = 0, N = static_cast<node_id>( _nodes.size() ); nid != N; ++nid )
+	{
+		if ( _nodes[nid].op() == nullop && _nodes[nid].value().empty() )
+		{
+//			std::cout << "ignoring null op " << nid << " in update_hash_map" << std::endl;
+			continue;
+		}
+//		std::cout << "updating hash mapping " << nid << " hv " << _nodes[nid].hash_value() << std::endl;
 		nh2nmap[_nodes[nid].hash_value()] = nid;
+	}
 	
 	std::swap( _hash_to_node, nh2nmap );
 }
@@ -1334,7 +1326,7 @@ graph::update_refs( const std::map<node_id, node_id> &newnodemap )
 void
 graph::reference( node_id n, rewrite_notify notify, void *ud )
 {
-	precondition( n < _nodes.size(), "Invalid node for reference" );
+	precondition( n < _nodes.size(), "Invalid node {0} for reference", n );
 
 	auto ri = _ref_counts.find( n );
 	if ( ri != _ref_counts.end() )
@@ -1351,7 +1343,7 @@ graph::reference( node_id n, rewrite_notify notify, void *ud )
 void
 graph::unreference( node_id n, rewrite_notify notify, void *ud ) noexcept
 {
-	precondition( n < _nodes.size(), "Invalid node for unreference" );
+	precondition( n < _nodes.size(), "Invalid node {0} for unreference", n );
 
 	auto ri = _ref_counts.find( n );
 	if ( ri != _ref_counts.end() )
