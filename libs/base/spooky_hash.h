@@ -149,6 +149,22 @@ inline spooky_hash &operator <<( spooky_hash &h, const std::map<K, V> &v )
 
 std::ostream &operator<<( std::ostream &os, const spooky_hash &h );
 std::ostream &operator<<( std::ostream &os, const spooky_hash::value &v );
+
+
+////////////////////////////////////////
+
+inline bool operator==( const spooky_hash::value &a, const spooky_hash::value &b )
+{
+	return a[0] == b[0] && a[1] == b[1];
+}
+inline bool operator!=( const spooky_hash::value &a, const spooky_hash::value &b )
+{
+	return !( a == b );
+}
+inline bool operator<( const spooky_hash::value &a, const spooky_hash::value &b )
+{
+	return a[0] < b[0] || ( a[0] == b[0] && a[1] < b[1] );
+}
 	
 } // namespace base
 
