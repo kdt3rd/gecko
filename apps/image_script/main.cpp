@@ -84,6 +84,16 @@ std::tuple<plane, plane, plane, plane> wavelet_decomp( const plane &p, const std
 	return std::make_tuple( c_j1, w1_j1, w2_j1, w3_j1 );
 }
 
+plane logistic( const plane &x, float x0, float k = 1.F, float L = 1.F )
+{
+	return L / ( 1.F + exp( (-k) * ( x - x0 ) ) );
+}
+
+plane gaussian( const plane &x, float a, float b, float c )
+{
+	return a * exp( abs( x - b ) / ( -2.F * c * c ) );
+}
+
 plane wavelet_filter( const plane &p, size_t levels, float sigma )
 {
 	precondition( levels > 0, "invalid levels {0}", levels );
@@ -114,12 +124,26 @@ plane wavelet_filter( const plane &p, size_t levels, float sigma )
 	{
 		auto &curL = filtLevels[l];
 		auto &nextL = filtLevels[l+1];
-		plane d_w1 = std::get<0>( curL ) * levelScale - std::get<0>( nextL );
-		plane d_w2 = std::get<1>( curL ) * levelScale - std::get<1>( nextL );
-		plane d_w3 = std::get<2>( curL ) * levelScale - std::get<2>( nextL );
-		std::get<0>( curL ) = std::get<0>( curL ) * exp( clamp( d_w1, 0.F, 1.F ) / ( -2.F * sigma ) );
-		std::get<1>( curL ) = std::get<1>( curL ) * exp( clamp( d_w2, 0.F, 1.F ) / ( -2.F * sigma ) );
-		std::get<2>( curL ) = std::get<2>( curL ) * exp( clamp( d_w3, 0.F, 1.F ) / ( -2.F * sigma ) );
+		plane &curPh = std::get<0>( curL );
+		plane &curPv = std::get<1>( curL );
+		plane &curPc = std::get<2>( curL );
+		const plane &nextPh = std::get<0>( nextL );
+		const plane &nextPv = std::get<1>( nextL );
+		const plane &nextPc = std::get<2>( nextL );
+//		plane d_w1 = nextPh / levelScale - curPh;
+//		plane d_w2 = nextPv / levelScale - curPv;
+//		plane d_w3 = nextPc / levelScale - curPc;
+//		plane s1 = ( 1.F - gaussian( d_w1, 1.F, 0.F, sigma ) );
+//		plane s2 = ( 1.F - gaussian( d_w2, 1.F, 0.F, sigma ) );
+//		plane s3 = ( 1.F - gaussian( d_w3, 1.F, 0.F, sigma ) );
+		plane s1 = ( 1.F - gaussian( curPh, 1.F, 0.F, sigma ) );
+		plane s2 = ( 1.F - gaussian( curPv, 1.F, 0.F, sigma ) );
+		plane s3 = ( 1.F - gaussian( curPc, 1.F, 0.F, sigma ) );
+		plane w = max( s1, max( s2, s3 ) );
+		curPh = curPh * w;
+		curPv = curPv * w;
+		curPc = curPc * w;
+
 		sigma *= levelScale;
 	}
 
@@ -310,8 +334,8 @@ int safemain( int argc, char *argv[] )
 					image_buf img = extract_frame( *curFrm, { "R", "G", "B" } );
 					if ( varU )
 					{
-						auto curVarFrm = sCur( v.video_tracks()[ci] );
-						image_buf varimg = extract_frame( *curVarFrm, { "R", "G", "B" } );
+//						auto curVarFrm = sCur( v.video_tracks()[ci] );
+//						image_buf varimg = extract_frame( *curVarFrm, { "R", "G", "B" } );
 //						plane varP = varimg[0];
 //						float varRng = ( varThreshHigh - varThreshLow );
 //						for ( int p = 0; p < 3; ++p )
@@ -327,24 +351,26 @@ int safemain( int argc, char *argv[] )
 //						}
 
 						plane lum = img[0] * 0.3F + img[1] * 0.6F + img[2] * 0.1F;
-						lum = log( lum + 1.F );
+//						lum = log( lum + 1.F );
+#if 0
 						plane localvar = local_variance( lum, 5 );
 						plane weight = filter_nan( varimg[2], 0.F ) / max( lum, engine::make_constant( 0.00001F ) ) * sqrt( max( localvar, engine::make_constant( 0.00001F ) ) );
 						weight = if_less( weight, 0.0001F, clamp( weight, engine::make_constant( 1.F ), engine::make_constant( 1.F ) ), 1.F / weight );
 						for ( int p = 0; p < 3; ++p )
 							img[p] = replace_high( img[p], exp( weighted_bilateral( log( img[p] + 1.F ), weight, engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) ) ) - 1.F );
+#endif
+						std::vector<float> wt_h{ 1.F/16.F, 4.F/16.F, 6.F/16.F, 4.F/16.F, 1.F/16.F };
+						std::vector<float> wt_g = dirac_negate( wt_h );
 
-//						std::vector<float> wt_h{ 1.F/16.F, 4.F/16.F, 6.F/16.F, 4.F/16.F, 1.F/16.F };
-//						std::vector<float> wt_g = dirac_negate( wt_h );
-//
-//						auto wd1 = wavelet_decomp( lum, wt_h, wt_g );
-//						std::vector<float> wt2_h = atrous_expand( wt_h );
-//						std::vector<float> wt2_g = atrous_expand( wt_g );
-//						auto wd2 = wavelet_decomp( std::get<0>( wd1 ), wt2_h, wt2_g );
+						auto wd1 = wavelet_decomp( lum, wt_h, wt_g );
+						std::vector<float> wt2_h = atrous_expand( wt_h );
+						std::vector<float> wt2_g = atrous_expand( wt_g );
+						auto wd2 = wavelet_decomp( std::get<0>( wd1 ), wt2_h, wt2_g );
 //						plane reconst = std::get<0>( wd2 ) + std::get<1>( wd2 ) + std::get<2>( wd2 ) + std::get<3>( wd2 ) + std::get<1>( wd1 ) + std::get<2>( wd1 ) + std::get<3>( wd1 );
-//						img[0] = std::get<1>( wd1 ) + std::get<2>( wd1 ) + std::get<3>( wd1 );
-//						img[1] = std::get<1>( wd2 ) + std::get<2>( wd2 ) + std::get<3>( wd2 );
-//						img[2] = reconst;
+						float sigma = 0.05F;
+						img[0] = 1.F - gaussian( std::get<3>( wd1 ), 1.F, 0.F, sigma );
+						img[1] = 1.F - gaussian( std::get<3>( wd1 ) * (16.F/6.F) - std::get<3>( wd1 ), 1.F, 0.F, sigma );
+						img[2] = abs( std::get<3>( wd1 ) ) * 10.F;//abs( std::get<1>( wd1 ) * (6.F/16.F) - std::get<1>( wd2 ) ) * 10.F;
 //						auto wd = wavelet_decomp( lum, , { -1.F/16.F, -4.F/16.F, 10.F/16.F, -4.F/16.F, -1.F/16.F } );
 //						img[0] = wd.first;
 //						img[1] = wd.second;
@@ -363,7 +389,7 @@ int safemain( int argc, char *argv[] )
 					else
 					{
 						for ( int p = 0; p < 3; ++p )
-							img[p] = wavelet_filter( img[p], 2, 0.02 );
+							img[p] = wavelet_filter( img[p], 1, 0.1F );
 //							img[p] = bilateral( img[p], engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) );
 					}
 
