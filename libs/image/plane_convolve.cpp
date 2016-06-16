@@ -535,7 +535,6 @@ plane convolve_vert( const plane &p, const std::vector<float> &k )
 		return plane( "p.sep_conv3_v", p.dims(), p, k[0], k[1], k[2] );
 	}
 
-	std::cout << "convolve_vert: " << k.size() << ", " << int(k.size()/2) << " " << std::endl;
 	precondition( k.size() % 2 != 0, "non-odd-sized kernel {0}", k.size() );
 	return plane( "p.sep_conv_v", p.dims(), p, k );
 }
