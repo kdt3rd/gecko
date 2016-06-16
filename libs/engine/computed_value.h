@@ -127,7 +127,8 @@ protected:
 				precondition( rg, "pending but missing graph_ptr" );
 				node_id r;
 
-				r = g.move_node( *(rg), v.id() );
+//				r = g.move_node( *(rg), v.id() );
+				r = g.copy_node( *(rg), v.id() );
 				g.tag_rvalue( r );
 				return r;
 			}
