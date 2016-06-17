@@ -82,7 +82,7 @@ int safemain( int argc, char *argv[] )
 		strtest.test( x.compare( base::cstring( ":foo" ) ) == 0, "base::cstring::compare" );
 		strtest.test( x.compare( std::string( ":foo" ) ) == 0, "base::cstring::compare" );
 	};
-	
+
 	strtest["begins_with"] = [&]( void )
 	{
 		strtest.test( base::begins_with( base::cstring( "foobar" ), "foo" ), "base::begins_with" );

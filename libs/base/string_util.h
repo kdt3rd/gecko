@@ -134,7 +134,7 @@ inline bool begins_with( const stringT<charT, traitsT> &s,
 {
 	// define this overload since not all compiler version seem able
 	// to emit an implicit conversion to const_string :(
-	return s.compare( 0, N - 1, start, 0, N - 1 );
+	return s.compare( 0, N - 1, start, 0, N - 1 ) == 0;
 }
 
 
