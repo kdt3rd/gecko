@@ -113,7 +113,7 @@ tiff_read_track::doRead( int64_t f )
 	TIFF *t = TIFFStreamOpen( p.c_str(), &stream );
 	if ( t )
 	{
-		on_scope_exit{ TIFFFlushData( t ); TIFFClose( t ); };
+		on_scope_exit{ TIFFClose( t ); };
 		uint16_t bps, sf;
 		float offX, offY;
 		uint32_t sizeY, sizeX;
