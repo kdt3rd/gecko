@@ -73,6 +73,7 @@ void
 font::render(
 	const std::function<void(float,float,float,float)> &add_point,
 	const std::function<void(size_t,size_t,size_t)> &add_tri,
+	const std::function<void(void)> &reset,
 	const base::point &start, const std::string &utf8 )
 {
 	if ( utf8.empty() )
@@ -80,10 +81,11 @@ font::render(
 
 	// In case we have to change the texture size in the
 	// middle of rendering, add this extra loop
-	uint32_t fVer = _glyph_version;
-	size_t points = 0;
+	uint32_t fVer;
 	do
 	{
+		fVer = _glyph_version;
+		size_t points = 0;
 		std::mbstate_t s = std::mbstate_t();
 		size_t curpos = 0;
 		size_t nleft = utf8.size();
@@ -104,6 +106,13 @@ font::render(
 				break;
 
 			const text_extents &gext = get_glyph( static_cast<char32_t>( ccode ) );
+//			std::cout << "char code: '" << char(ccode) << "' (" << ccode << ") gext.x_advance: " << gext.x_advance << std::endl;
+			if ( fVer != _glyph_version )
+			{
+				reset();
+				// kill the inner loop and start over
+				break;
+			}
 			double k = kerning( static_cast<char32_t>( prev ), static_cast<char32_t>( ccode ) );
 			curposX -= k;
 
@@ -121,6 +130,14 @@ font::render(
 				double leftX = curposX + gext.x_bearing;
 				double rightX = leftX + gext.width;
 
+//				std::cout << "char code: '" << char(ccode) << "' (" << ccode << ") coordOff: " << coordOff << " upperY: " << upperY << " lowerY: " << lowerY << " leftX: " << leftX << " rightX: " << rightX << '\n'
+//						  << " coords: "
+//						  << _glyph_coords[coordOff + 0] << ", " << _glyph_coords[coordOff + 1]
+//						  << ", " << _glyph_coords[coordOff + 2] << ", " << _glyph_coords[coordOff + 3]
+//						  << ", " << _glyph_coords[coordOff + 4] << ", " << _glyph_coords[coordOff + 5]
+//						  << ", " << _glyph_coords[coordOff + 6] << ", " << _glyph_coords[coordOff + 7]
+//						  << " idx_base: " << idx_base << " (" << idx_base/2 << ")"
+//						  << std::endl;
 				add_point(
 					static_cast<float>( leftX ), static_cast<float>( upperY ),
 					_glyph_coords[coordOff + 0], _glyph_coords[coordOff + 1] );
@@ -139,7 +156,7 @@ font::render(
 
 				points += 4;
 
-				uint16_t idxVal = static_cast<uint16_t>( idx_base / 2 );
+				uint16_t idxVal = static_cast<uint16_t>( idx_base );
 				add_tri( idxVal, idxVal + 1, idxVal + 2 );
 				add_tri( idxVal + 2, idxVal + 3, idxVal );
 			}
@@ -178,24 +195,14 @@ font::add_glyph( char32_t char_code, const uint8_t *glData, int glPitch, int w, 
 		// lower left is at x + h, y + w
 		// lower right is at x + h, y
 		uint8_t *bmData = _glyph_bitmap.data();
-		for ( int y = 0; y <= w; ++y )
+
+		for ( int y = 0; y < w; ++y )
 		{
 			int destY = gA.y + y;
-			if ( y == w )
-			{
-				for ( int x = 0, destX = gA.x; x <= h; ++x, ++destX )
-					bmData[destY*bmW + destX] = 0;
-			}
-			else
-			{
-				int srcX = w - y - 1;
-				int destX = gA.x;
-				for ( int x = 0; x < h; ++x, ++destX )
-				{
-					bmData[destY*bmW + destX] = glData[x*glPitch + srcX];
-				}
-				bmData[destY*bmW + destX] = 0;
-			}
+			int srcX = w - y - 1;
+			int destX = gA.x;
+			for ( int x = 0; x < h; ++x, ++destX )
+				bmData[destY*bmW + destX] = glData[x*glPitch + srcX];
 		}
 
 		float leftX = static_cast<float>( static_cast<double>(gA.x) / texNormW );
@@ -214,22 +221,12 @@ font::add_glyph( char32_t char_code, const uint8_t *glData, int glPitch, int w, 
 	}
 	else
 	{
-		for ( int y = 0; y <= h; ++y )
+		for ( int y = 0; y < h; ++y )
 		{
-			uint8_t *bmLine = _glyph_bitmap.data() + bmW * ( gA.y + y );
-			if ( y == h )
-			{
-				for ( int x = 0; x <= w; ++x )
-					bmLine[x] = 0;
-			}
-			else
-			{
-				bmLine += gA.x;
-				const uint8_t *glLine = glData + y * glPitch;
-				for ( int x = 0; x < w; ++x )
-					bmLine[x] = glLine[x];
-				bmLine[w] = 0;
-			}
+			uint8_t *bmLine = _glyph_bitmap.data() + bmW * ( gA.y + y ) + gA.x;
+			const uint8_t *glLine = glData + y * glPitch;
+			for ( int x = 0; x < w; ++x )
+				bmLine[x] = glLine[x];
 		}
 
 		// things go in naturally, upper left of bitmap is at x, y
@@ -267,13 +264,16 @@ font::bump_glyph_store_size( void )
 	else if ( nPackH <= nPackW )
 		nPackH *= 2;
 
-	std::cout << "Need to know the max texture size at some point, using 1024 for now..." << std::endl;
+	std::cout << "Need to know the max texture size at some point, using 1024 for now as max, cur size: " << nPackW << ", " << nPackH << std::endl;
 	if ( nPackW > 1024 || nPackH > 1024 )
 		throw std::runtime_error( "Max font cache size reached" );
 
 	_glyph_pack.reset( nPackW, nPackH, true );
 
-	_glyph_bitmap.resize( static_cast<size_t>( nPackW * nPackH ) );
+	// if we ever stop using a vector for storing the bitmap data,
+	// re-add the zero initialization for the spare line / column we
+	// put between glyphs
+	_glyph_bitmap.resize( static_cast<size_t>( nPackW * nPackH ), uint8_t(0) );
 	_glyph_cache.clear();
 	_glyph_coords.clear();
 	_glyph_index_offset.clear();

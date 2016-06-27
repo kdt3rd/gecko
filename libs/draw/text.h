@@ -19,7 +19,7 @@ public:
 	void set_position( const gl::vec2 &p );
 	void set_color( const gl::color &c );
 
-	void render( void );
+	void render( const gl::matrix4 &ortho );
 
 private:
 	void update( void );
@@ -32,7 +32,9 @@ private:
 	gl::color _color;
 
 	gl::mesh _mesh;
-
+	gl::program::uniform _col_pos;
+	gl::program::uniform _tex_pos;
+	gl::program::uniform _mat_pos;
 	struct GlyphPack
 	{
 		uint32_t version;

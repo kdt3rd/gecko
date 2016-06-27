@@ -163,7 +163,7 @@ font::get_glyph( char32_t char_code )
 		// also, we could switch to the signed distance field stuff
 		// fairly easily if we added the computation here and used
 		// the appropriate shader...
-		FT_Int32 flags = FT_LOAD_TARGET_NORMAL | FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT;
+		FT_Int32 flags = FT_LOAD_TARGET_NORMAL | FT_LOAD_RENDER;// | FT_LOAD_FORCE_AUTOHINT;
 		FT_UInt index = FT_Get_Char_Index( _face, char_code );
 
 		auto err = FT_Load_Glyph( _face, index, flags );

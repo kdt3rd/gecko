@@ -11,6 +11,8 @@
 #include <base/math_functions.h>
 #include <draw/path.h>
 #include <draw/polylines.h>
+#include <draw/text.h>
+#include <script/font_manager.h>
 
 namespace
 {
@@ -25,6 +27,15 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 
 	gl::api ogl;
 	ogl.setup_debugging();
+
+	auto fm = script::font_manager::common();
+	if ( ! fm )
+		throw std::runtime_error( "no font manager enrolled" );
+
+	draw::text samptext( fm->get_font( "Lucida Grande", "Regular", 28.0 ) );
+	samptext.set_text( "Hello, world!" );
+	samptext.set_position( gl::vec2( 100.F, 200.F ) );
+	samptext.set_color( gl::color( 1.0, 1.0, 1.0, 1.0 ) );
 
 	gl::mesh star;
 	{
@@ -129,6 +140,9 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		angle += 1.0_deg;
 		while ( angle > 360.0_deg )
 			angle -= 360.0_deg;
+
+		// draw the text
+		samptext.render( matrix );
 
 		win->release();
 

@@ -16,7 +16,7 @@ local script = l.script.lib
 executable( "test_signal", "test_signal.cpp", base )
 executable( "test_platform", "test_platform.cpp", platform, gl )
 executable( "test_draw", "test_draw.cpp", platform, draw )
-executable( "test_uidraw", "test_uidraw.cpp", platform, draw )
+executable( "test_uidraw", "test_uidraw.cpp", platform, draw, script )
 --executable( "test_app", "test_app.cpp", gui )
 executable( "test_font", "test_font.cpp", script )
 executable( "test_hash", "test_hash.cpp", base )
