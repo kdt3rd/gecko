@@ -141,17 +141,33 @@ void png_write( const char *file_name, size_t w, size_t h, size_t c )
 	precondition( w > 0, "width must be larger than 0" );
 	precondition( h > 0, "height must be larger than 0" );
 	GLenum fmt;
-	int png_ctype;
 	switch ( c )
 	{
-		case 1: fmt = GL_RED; png_ctype = PNG_COLOR_TYPE_GRAY; break;
-		case 3: fmt = GL_RGB; png_ctype = PNG_COLOR_TYPE_RGB; break;
-		case 4: fmt = GL_RGBA; png_ctype = PNG_COLOR_TYPE_RGB_ALPHA; break;
+		case 1: fmt = GL_RED; break;
+		case 3: fmt = GL_RGB; break;
+		case 4: fmt = GL_RGBA; break;
 		default: throw_runtime( "invalid number of channels ({0})", c );
 	}
 
 	std::unique_ptr<uint8_t[]> img( new uint8_t[w*h*c] );
 	glReadPixels( 0, 0, static_cast<GLsizei>( w ), static_cast<GLsizei>( h ), fmt, GL_UNSIGNED_BYTE, img.get() );
+
+	png_write_data( file_name, w, h, c, img.get(), true );
+}
+
+////////////////////////////////////////
+
+void
+png_write_data( const char *file_name, size_t w, size_t h, size_t c, const uint8_t *img, bool flip )
+{
+	int png_ctype;
+	switch ( c )
+	{
+		case 1: png_ctype = PNG_COLOR_TYPE_GRAY; break;
+		case 3: png_ctype = PNG_COLOR_TYPE_RGB; break;
+		case 4: png_ctype = PNG_COLOR_TYPE_RGB_ALPHA; break;
+		default: throw_runtime( "invalid number of channels ({0})", c );
+	}
 
 	FILE *fp = fopen( file_name, "wb" );
 	if ( fp == nullptr )
@@ -190,11 +206,20 @@ void png_write( const char *file_name, size_t w, size_t h, size_t c )
 	png_write_info( png_ptr, info_ptr );
 
 	// Write image data
-	for ( size_t y = 0; y < h; ++y )
-		png_write_row( png_ptr, img.get() + ( h - y - 1 ) * w * c );
+	if ( flip )
+	{
+		for ( size_t y = 0; y < h; ++y )
+			png_write_row( png_ptr, img + ( h - y - 1 ) * w * c );
+	}
+	else
+	{
+		for ( size_t y = 0; y < h; ++y )
+			png_write_row( png_ptr, img + y * w * c );
+	}
 
 	// End write
 	png_write_end( png_ptr, NULL );
+	std::cout << "Saved png image to '" << file_name << "'" << std::endl;
 }
 
 ////////////////////////////////////////
