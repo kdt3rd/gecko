@@ -138,9 +138,11 @@ public:
 	}
 
 	/// Computes the adaptation matrix from o to this
-	inline mat adaptation( const chromaticities &o, cone_response m = cone_response::DEFAULT )
+	inline mat adaptation( const chromaticities &o, value_type amount = value_type(1.0), cone_response m = cone_response::DEFAULT )
 	{
-		if ( m == cone_response::NONE || white == o.white )
+		amount = std::max( value_type(0.0), std::min( value_type(1.0), amount ) );
+
+		if ( m == cone_response::NONE || white == o.white || amount <= value_type(0.0) )
 			return mat();
 
 		mat Ma = to_lms<value_type>( m );
@@ -148,14 +150,16 @@ public:
 		xyz rhoWsrc = Ma * o.white.toXYZ();
 		xyz rhoWdst = Ma * white.toXYZ();
 
-		mat scale = mat::diag( rhoWdst.x / rhoWsrc.x,
-							   rhoWdst.y / rhoWsrc.y,
-							   rhoWdst.z / rhoWsrc.z );
+		mat scale = mat::diag( ( rhoWdst.x / rhoWsrc.x ) * amount + value_type(1.0) - amount,
+							   ( rhoWdst.y / rhoWsrc.y ) * amount + value_type(1.0) - amount,
+							   ( rhoWdst.z / rhoWsrc.z ) * amount + value_type(1.0) - amount );
+
 		return MaInv * scale * Ma;
 	}
 
 	/// Computes the conversion matrix from o to this
 	inline mat conversion( const chromaticities &o,
+						   value_type adapt_amount = value_type(0.0),
 						   cone_response m = cone_response::DEFAULT )
 	{
 		return XYZtoRGB() * adaptation( o, m ) * o.RGBtoXYZ();

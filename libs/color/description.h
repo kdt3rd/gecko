@@ -37,18 +37,50 @@ namespace color
 enum class range
 {
 	FULL, ///< normal 0 - 2^bits - 1 integer encoding 0.0 - 1.0
-	ITU_FULL, ///< 0 - 2^bits ITU-defined scaling
-	LEGAL,  ///< for luma: 16-235 (scaled based on bits)
+	ITU_FULL, ///< 0 - 2^bits ITU-BT.HDR defined scaling
+	SMPTE,  ///< also called legal or video range
+			///< for luma: 16-235 (scaled based on bits)
 			///< for chroma: 16-240 (scaled based on bits)
-			///< reserved values: 0-255 for 8 bits, 4-1019 for 10, etc.
-	SIGNAL, ///< same reserved values as LEGAL, but
+			///< reserved values: 0,255 for 8 bits, 0-3,1020-1023 for 10, etc.
+	SIGNAL, ///< same reserved values as SMPTE, but
 			///< scales the non-reserved values 0-1 with
 			///< no extra gap range
-	LEGAL_EXTENDED  ///< sometimes called SMPTE+, this is
-					///< a combination of LEGAL and SIGNAL
-					///< where the reference black is the same
-					///< as legal, but the reference white is
-					///< the same as signal
+	SMPTE_PLUS  ///< A combination of SMPTE and SIGNAL
+		///< where the black level is the same
+		///< as legal, but the peak is the same as signal
+};
+
+enum class space
+{
+	RGB, ///< RGB, where chromaticities describe how to convert to XYZ
+	XYZ, ///< CIE XYZ, chromaticies record what RGB the XYZ came from
+	LMS_CAM02, ///< LMS space, as defined in CIECAM02
+	LMS_ICTCP, ///< LMS space, as defined in BT.HDR
+	CHONG, ///< perceptually uniform, illuminant invariant, per Chong et al. siggraph 2008
+
+	/// @defgroup Color opponent spaces attempting to separate
+	/// intensity / luminance / brightness from chroma / saturation / hue
+	/// @{
+	LAB, ///< CIE L*a*b*, chromaticies record what RGB it came from,
+		 ///< white point for normalization
+	HUNTER_LAB, ///< Hunter Lab, chromaticies record what RGB it came from,
+				///< white point for normalization
+	LCH, ///< CIE LCh, similar to Lab, but cylindrical coordinates for
+		 ///< chroma (relative saturation) and hue
+	LUV, ///< CIE L*u*v*, from CIE 1976
+	YCBCR_BT601, ///< YCbCr as defined in BT.601
+	YCBCR_BT709, ///< YCbCr as defined in BT.709
+	YCBCR_BT2020, ///< YCbCr as defined in BT.2020
+	YCBCR_CUSTOM, ///< YCbCr computed using chromaticities
+	ICTCP_BTHDR, ///< ICtCp, as defined in BT.HDR
+	IPT, ///< Ebner & Fairchild, 1998
+	HSV_HEX, ///< HSV, using hexagonal approximation
+	HSV_CYL, ///< HSV, using cylindrical (polar) math
+	HSI_HEX, ///< HSI, using hexagonal approximation
+	HSI_CYL, ///< HSI, using cylindrical (polar) math
+	HSL_HEX, ///< HSL, using hexagonal approximation
+	HSL_CYL, ///< HSL, using cylindrical (polar) math
+	/// @}
 };
 
 enum class transfer
@@ -58,14 +90,22 @@ enum class transfer
 	GAMMA_BT709, ///< BT.709 OETF
 	GAMMA_BT2020, ///< BT.2020 OETF
 	GAMMA_BT1886, ///< computes a, b using Lb, Lw from BT.1886 EOTF
+	GAMMA_DCI, ///< gamma EOTF for digital cinema, gamma = 2.6
+	GAMMA_CUSTOM, ///< custom gamma EOTF, no linear breakpoint
 	SONY_SLOG1, ///< Sony S-Log v1
 	SONY_SLOG2, ///< Sony S-Log v2
-	SONY_SLOG3, ///< Sony S-Log v3
-	ARRI_LOGC, ///< ARRI Log-C (need to know EI and version to know
-			   ///< parameters for function)
+	SONY_SLOG3, ///< Sony S-Log v3 encoding of linear scene reflection
+	ARRI_LOGC_NORMSENS_SUP2, ///< ARRI Log-C SUP 2.X or earlier normalized
+							 ///< sensor signal (need to know EI)
+	ARRI_LOGC_SCENELIN_SUP2, ///< ARRI Log-C SUP 2.X or earlier linear scene
+							 ///< exposure (need to know EI)
+	ARRI_LOGC_NORMSENS_SUP3, ///< ARRI Log-C SUP 3.X or newer normalized
+							 ///< sensor signal (need to know EI)
+	ARRI_LOGC_SCENELIN_SUP3, ///< ARRI Log-C SUP 3.X or newer linear scene
+							 ///< exposure (need to know EI)
 	CINEON, ///< Cineon printing density
 	ST_2084, ///< ST.2084 Perceptual Quantizer (PQ)
-	BBC_HLG, ///< BBC Hybrid Log Gamma
+	BBC_HLG, ///< BBC Hybrid Log Gamma (need to know the system gamma)
 };
 
 /// @brief Class description provides a basic description of attributes
@@ -77,12 +117,13 @@ enum class transfer
 ///
 /// There are a few basic attributes that determine this:
 /// - the underlying chromaticities of the volume involved
-///   (describing the RGB<->XYZ tranformation)
+///   (for describing the RGB<->XYZ tranformation)
 /// - diffuse / reference white scale value.
 ///   NB: This is NOT the maximal white, but rather how to scale.
 ///   commonly 1.0, some systems like L*a*b* use other values (100)
 /// - luminance range (Lb (luminance black) to Lw (luminance white) for
 ///   transfer curves like BT.1886)
+/// - gamma value for tunable transfer curves
 /// - what non-linear transfer curve is employed to encode linear
 ///   light (or not) into an integer representation
 /// - normalization range of values in integer space
@@ -97,27 +138,77 @@ public:
 	typedef double value_type;
 	typedef chromaticities<value_type> cx;
 
+	/// The chromaticities which, when used with the luminance scale
+	/// (@sa luminance_scale), can define color transformations
+	/// between RGB and XYZ (and on to another RGB)
 	inline const cx &chroma( void ) const { return _chroma; }
+	/// Set the chromaticity coordinates
 	inline void chroma( const cx &c ) { _chroma = c; }
 
+	/// This is the scaling of 1.0 to nits (candela / m^2)
+	inline value_type luminance_scale( void ) const { return _lum_scale; }
+	/// This defines the scaling of 1.0 to nits (candela / m^2).
+	/// 
+	/// A common value for this is 100, meaning a value of 1.0
+	/// corresponds to 100 nits, meaning 18% gray (0.18) is 18 nits
+	inline void luminance_scale( value_type s ) { _lum_scale = s; }
+
+	/// The black offset for a display referred image.
+	inline value_type black_offset( void ) const { return _black_offset; }
+	/// Set the black offset value
+	///
+	/// This can be used as a sort of PLUGE type definition - it
+	/// defines the luminance value that corresponds to the minimum
+	/// luminance in nits, or candela / m^2, a particular display can
+	/// display.
+	inline void black_offset( value_type b ) { _black_offset = b; }
+
+	/// return the corresponding scaling of the non-linear data
 	inline range signal( void ) const { return _range; }
+	/// Define any scaling of the non-linear data
+	///
+	/// Defines the scaling of the data (really only applies to
+	/// non-linear data). This is the parameter for the dreaded smpte
+	/// / legal vs. full range.
 	inline void signal( range r ) { _range = r; }
 
+	/// The transfer curve (OETF or EOTF, depending) that has been
+	/// applied to the data corresponding to this description
 	inline transfer curve( void ) const { return _curve; }
-	inline void curve( transfer c ) { _curve = c; }
+	inline value_type curve_gamma( void ) const { return _curve_gamma; }
+	inline value_type curve_black( void ) const { return _curve_black; }
+	inline value_type curve_white( void ) const { return _curve_white; }
 
-	inline std::pair<value_type,value_type> luminance( void ) const { return _lum; }
-	inline void luminance( value_type black, value_type white ) { _lum = std::make_pair( black, white ); }
+	/// Define the transfer curve applied to the data
+	inline void curve( transfer c,
+					   value_type Lb,
+					   value_type Lw,
+					   value_type gamma )
+	{
+		_curve = c;
+		_curve_black = Lb;
+		_curve_white = Lw;
+		_curve_gamma = gamma;
+	}
 
-	inline value_type reference_scale( void ) { return _ref_scale; }
-	inline void reference_scale( value_type s ) { _ref_scale = s; }
+	/// encoding bits
+	inline int bits( void ) const { return _bits; }
+	/// Defines the bits used in encoding
+	///
+	/// This is used to adjust the precision used in some of the tone
+	/// curve computations as well as the range conversions.
+	inline void bits( int b ) { _bits = b; }
 
 private:
 	cx _chroma;
-	std::pair<value_type, value_type> _lum;
-	value_type _ref_scale;
-	range _range;
-	transfer _curve;
+	value_type _lum_scale = value_type(100.0);
+	value_type _black_offset = value_type(0.0);
+	range _range = range::FULL;
+	transfer _curve = transfer::LINEAR;
+	value_type _curve_gamma = value_type(1.0);
+	value_type _curve_black = value_type(0.0);
+	value_type _curve_white = value_type(1.0);
+	int _bits = 10;
 };
 
 } // namespace color
