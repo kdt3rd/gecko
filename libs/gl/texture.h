@@ -72,11 +72,10 @@ public:
 		/// @brief Move operator.
 		void operator=( binding &&other );
 
+		inline size_t unit( void ) const { return _unit; }
 	private:
 		size_t _unit;
 		GLenum _target;
-
-		static std::vector<binding*> _bound;
 	};
 
 	/// @brief Copying not allowed.

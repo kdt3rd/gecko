@@ -4,7 +4,10 @@
 
 namespace
 {
-	const constexpr size_t invalid_unit = std::numeric_limits<size_t>::max();
+const constexpr size_t invalid_unit = std::numeric_limits<size_t>::max();
+
+// TODO: thread safety???
+static std::vector<gl::texture::binding*> theBound;
 }
 
 namespace gl
@@ -22,9 +25,9 @@ texture::binding::binding( void )
 texture::binding::binding( binding &&other )
 	: _unit( other._unit ), _target( other._target )
 {
-	precondition( _bound[_unit] == &other, "bound texture lost unit" );
+	precondition( theBound[_unit] == &other, "bound texture lost unit" );
 	other._unit = invalid_unit;
-	_bound[_unit] = this;
+	theBound[_unit] = this;
 }
 
 ////////////////////////////////////////
@@ -33,15 +36,15 @@ texture::binding::binding( GLuint txt, size_t unit, GLenum target )
 	: _unit( unit ), _target( target )
 {
 	precondition( _unit != invalid_unit, "invalid unit" );
-	if ( _unit >= _bound.size() )
-		_bound.resize( _unit + 1 );
+	if ( _unit >= theBound.size() )
+		theBound.resize( _unit + 1 );
 
 	glActiveTexture( GL_TEXTURE0 + static_cast<GLenum>( unit ) );
 	glBindTexture( _target, txt );
 
-	if ( _bound[_unit] != nullptr )
-		_bound[_unit]->_unit = invalid_unit;
-	_bound[_unit] = this;
+	if ( theBound[_unit] != nullptr )
+		theBound[_unit]->_unit = invalid_unit;
+	theBound[_unit] = this;
 }
 
 ////////////////////////////////////////
@@ -50,14 +53,14 @@ texture::binding::~binding( void )
 {
 	if ( _unit != invalid_unit )
 	{
-		if ( _bound[_unit] == this )
+		if ( theBound[_unit] == this )
 		{
 			glActiveTexture( GL_TEXTURE0 + static_cast<GLenum>( _unit ) );
 			glBindTexture( _target, 0 );
-			_bound[_unit] = nullptr;
+			theBound[_unit] = nullptr;
 		}
 		else
-			std::cerr << "bound texture lost unit" << std::endl;
+			std::cerr << "bound texture lost texture unit " << _unit << std::endl;
 	}
 }
 
@@ -140,9 +143,9 @@ void texture::binding::set_swizzle( swizzle r, swizzle g, swizzle b, swizzle a )
 void texture::binding::operator=( binding &&other )
 {
 	precondition( _unit != invalid_unit, "invalid texture unit" );
-	precondition( _bound[_unit] == &other, "bound texture lost unit" );
+	precondition( theBound[_unit] == &other, "bound texture lost unit" );
 	other._unit = invalid_unit;
-	_bound[_unit] = this;
+	theBound[_unit] = this;
 }
 
 ////////////////////////////////////////
