@@ -123,7 +123,7 @@ window::window( const std::shared_ptr<Display> &dpy )
 	swa.event_mask =
 		ExposureMask | StructureNotifyMask | VisibilityChangeMask |
 		EnterWindowMask | LeaveWindowMask |
-		KeyPressMask | KeyReleaseMask |
+		KeyPressMask | KeyReleaseMask | KeymapStateMask |
 		ButtonPressMask | ButtonReleaseMask |
 		PointerMotionMask | ButtonMotionMask;
 

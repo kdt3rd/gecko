@@ -52,6 +52,12 @@ system::system( void )
 	if ( ! _display )
 		throw std::runtime_error( "no X display" );
 
+	if ( ! XSupportsLocale() )
+		throw std::runtime_error( "Current locale not supported by X" );
+
+	if ( XSetLocaleModifiers( "@im=none" ) == nullptr )
+		throw std::runtime_error( "Unable to set locale modifiers for Xlib" );
+
 	_screens.resize( static_cast<size_t>( ScreenCount( _display.get() ) ) );
 	for ( int i = 0; i < ScreenCount( _display.get() ); ++i )
 		_screens[0] = std::make_shared<screen>( _display, i );

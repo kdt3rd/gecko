@@ -147,9 +147,15 @@ int dispatcher::execute( void )
 				break;
 			}
 
+			case KeymapNotify:
+			{
+				// TODO: fill in currently depressed state as appropriate
+				break;
+			}
+
 			case MappingNotify:
 			{
-				if ( event.xmapping.request == MappingKeyboard )
+				if ( event.xmapping.request == MappingKeyboard || event.xmapping.request == MappingModifier )
 					XRefreshKeyboardMapping( &event.xmapping );
 				break;
 			}
