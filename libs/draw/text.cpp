@@ -2,7 +2,6 @@
 #include "text.h"
 #include <gl/vertex_buffer_data.h>
 #include <gl/element_buffer_data.h>
-#include <gl/png_image.h>
 
 namespace draw
 {
@@ -133,7 +132,6 @@ void text::update( void )
 						  _font->bitmap_height(),
 						  gl::image_type::UNSIGNED_BYTE,
 						  _font->bitmap().data() );
-		gl::png_write_data( "/tmp/font_splat.png", _font->bitmap_width(), _font->bitmap_height(), 1, _font->bitmap().data(), false );
 		_font_glyph_cache[_font] = { _font->glyph_version(), texture };
 	}
 
