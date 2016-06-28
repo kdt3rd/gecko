@@ -35,3 +35,23 @@ Unit Testing
 
 tests houses unit test wrappers that can be run by typing "make test"
 
+Compiling
+---------
+
+gecko uses constructor (https://github.com/kdt3rd/constructor) as a makefile
+generator, much like cmake, only simpler.
+
+gecko uses C++11, although refrains from using all features of C++11, although
+that may change in teh future. It has been confirmed to compile on gcc 4.8 and
+newer gcc, as well as the recent versions of Xcode on the Mac.
+
+Windows support: constructor provides support for cross compiling, and a brief
+  pass was made to compile under Windows. While the intent is to have gecko
+  be a fully cross-platform toolset, at this stage, little is being done for
+  windows.
+
+Installing
+----------
+
+No attempt at installing the resulting libraries or binaries has been made.
+
