@@ -59,6 +59,31 @@ static double sum_plane( const plane &p )
 }
 
 static void
+compute_mean( scanline &dest, int y, const plane &p, int radius )
+{
+	double scale = static_cast<double>( ( radius * 2 + 1 ) * ( radius * 2 + 1 ) );
+	int wm1 = dest.width() - 1;
+	int hm1 = p.height() - 1;
+	for ( int x = 0; x <= wm1; ++x )
+	{
+		double sum = 0.0;
+		for ( int cy = y - radius; cy <= (y+radius); ++cy )
+		{
+			int rY = std::max( int(0), std::min( hm1, cy ) );
+			const float *srcL = p.line( rY );
+			for ( int cx = x - radius; cx <= x + radius; ++cx )
+			{
+				int rx = std::max( int(0), std::min( wm1, cx ) );
+				sum += static_cast<double>( srcL[rx] );
+			}
+		}
+		dest[x] = static_cast<float>( sum / scale );
+	}
+}
+
+////////////////////////////////////////
+
+static void
 compute_variance( scanline &dest, int y, const plane &p, int radius )
 {
 	// avoid the cancellation problem by using the first input value
@@ -133,6 +158,14 @@ namespace image
 ////////////////////////////////////////
 
 plane
+local_mean( const plane &p, int radius )
+{
+	return plane( "p.local_mean", p.dims(), p, radius );
+}
+
+////////////////////////////////////////
+
+plane
 local_variance( const plane &p, int radius )
 {
 	return plane( "p.local_variance", p.dims(), p, radius );
@@ -156,6 +189,7 @@ add_plane_stats( engine::registry &r )
 
 	r.add( op( "p.sum", sum_plane, op::threaded ) );
 
+	r.add( op( "p.local_mean", base::choose_runtime( compute_mean ), n_scanline_plane_adapter<false, decltype(compute_mean)>(), dispatch_scan_processing, op::n_to_one ) );
 	r.add( op( "p.local_variance", base::choose_runtime( compute_variance ), n_scanline_plane_adapter<false, decltype(compute_variance)>(), dispatch_scan_processing, op::n_to_one ) );
 	r.add( op( "p.mean_square_error", base::choose_runtime( compute_mse ), n_scanline_plane_adapter<false, decltype(compute_mse)>(), dispatch_scan_processing, op::n_to_one ) );
 }

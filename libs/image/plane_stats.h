@@ -45,6 +45,8 @@ inline engine::computed_value<double> sum( plane &&p )
 	return engine::computed_value<double>( op_registry(), "p.sum", d, std::move( p ) );
 }
 
+// TODO: combine these
+plane local_mean( const plane &p, int radius );
 plane local_variance( const plane &p, int radius );
 
 plane mse( const plane &p1, const plane &p2, int radius );
