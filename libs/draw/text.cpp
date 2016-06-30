@@ -156,7 +156,7 @@ uniform vec4 color;
 uniform sampler2D textTex;
 void main()
 {
-	vec4 texColor = texture2D( textTex, tex_pos );
+	vec4 texColor = texture( textTex, tex_pos );
 	frag_color = vec4( color.r, color.g, color.b, color.a * texColor.r );
 }
 )SHADER" )
