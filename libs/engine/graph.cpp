@@ -771,6 +771,7 @@ graph::apply_grouping( void )
 		{
 			case op::style::ONE_TO_ONE:
 			{
+#if 0
 				size_t subI = size_t(-1);
 				size_t maxInputGroup = subI;
 				node_id maxInput = nullnode;
@@ -897,6 +898,7 @@ graph::apply_grouping( void )
 				}
 
 				if ( subI == size_t(-1) )
+#endif
 				{
 //					std::cout << "CREATING subgroup " << _subgroups.size() << " for node " << n << std::endl;
 					_node_to_subgroup[n] = _subgroups.size();
