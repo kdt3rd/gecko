@@ -22,9 +22,9 @@
 
 #pragma once
 
+#include "compiler_support.h"
 
 ////////////////////////////////////////
-
 
 #if defined(__GNUC__)
 # define LIKELY_USE_BUILTIN
