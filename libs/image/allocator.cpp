@@ -213,7 +213,7 @@ allocator::buffer( int &stride, int w, int h )
 	{
 		for ( auto i = _stash_buf.begin(); i != _stash_buf.end(); )
 		{
-			if ( (*i).w < w || (*i).w > (w * 2) )
+			if ( (*i).bpe != sizeof(float) || (*i).w < w || (*i).w > (w * 2) )
 			{
 				++((*i).skip_count);
 				if ( (*i).skip_count > _stash_skippiness )
@@ -229,7 +229,7 @@ allocator::buffer( int &stride, int w, int h )
 			}
 			else
 			{
-				p = (*i).ptr;
+				p = reinterpret_cast<float *>( (*i).ptr );
 				stride = (*i).stride;
 				(*i).skip_count = 0;
 				_cur_stash_size -= (*i).size;
@@ -256,6 +256,7 @@ allocator::buffer( int &stride, int w, int h )
 		m.w = w;
 		m.h = h;
 		m.stride = s;
+		m.bpe = sizeof(float);
 		m.size = bytes;
 		m.skip_count = 0;
 		_inflight_buf.emplace_back( std::move( m ) );
@@ -264,6 +265,72 @@ allocator::buffer( int &stride, int w, int h )
 	++_cur_buffers_live;
 	_max_buffers_live = std::max( _max_buffers_live, _cur_buffers_live );
 	return std::shared_ptr<float>( p, std::bind( &allocator::return_buffer, this, std::placeholders::_1 ) );
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<double>
+allocator::dbl_buffer( int &stride, int w, int h )
+{
+	double *p = nullptr;
+
+	std::unique_lock<std::mutex> lk( _mutex );
+	if ( ! _stash_buf.empty() )
+	{
+		for ( auto i = _stash_buf.begin(); i != _stash_buf.end(); )
+		{
+			if ( (*i).bpe != sizeof(double) || (*i).w < w || (*i).w > (w * 2) )
+			{
+				++((*i).skip_count);
+				if ( (*i).skip_count > _stash_skippiness )
+				{
+					destroy( (*i).ptr, (*i).size );
+					_cur_stash_size -= (*i).size;
+					i = _stash_buf.erase( i );
+				}
+				else
+				{
+					++i;
+				}
+			}
+			else
+			{
+				p = reinterpret_cast<double *>( (*i).ptr );
+				stride = (*i).stride;
+				(*i).skip_count = 0;
+				_cur_stash_size -= (*i).size;
+				_cur_memory_live += (*i).size;
+				_inflight_buf.push_front( (*i) );
+				_stash_buf.erase( i );
+				break;
+			}
+		}
+	}
+
+	if ( ! p )
+	{
+		int s = w;
+		if ( ( s % doubleAlignCount ) != 0 )
+			s = s + ( doubleAlignCount - ( s % doubleAlignCount ) );
+		size_t bytes = static_cast<size_t>( s * h ) * sizeof(double);
+		p = reinterpret_cast<double *>( create( lk, bytes, defaultAlign, _max_buffer_size ) );
+
+		stride = s;
+
+		memBuf m;
+		m.ptr = p;
+		m.w = w;
+		m.h = h;
+		m.stride = s;
+		m.bpe = sizeof(double);
+		m.size = bytes;
+		m.skip_count = 0;
+		_inflight_buf.emplace_back( std::move( m ) );
+	}
+
+	++_cur_buffers_live;
+	_max_buffers_live = std::max( _max_buffers_live, _cur_buffers_live );
+	return std::shared_ptr<double>( p, std::bind( &allocator::return_dbl_buffer, this, std::placeholders::_1 ) );
 }
 
 ////////////////////////////////////////
@@ -452,6 +519,32 @@ allocator::return_buffer( float *p ) noexcept
 		}
 
 		std::cout << "ERROR: invalid pointer passed to return_buffer" << std::endl;
+	}
+}
+
+////////////////////////////////////////
+
+void
+allocator::return_dbl_buffer( double *p ) noexcept
+{
+	if ( p )
+	{
+		std::lock_guard<std::mutex> lk( _mutex );
+		for ( auto i = _inflight_buf.begin(); i != _inflight_buf.end(); ++i )
+		{
+			if ( (*i).ptr == p )
+			{
+				_cur_stash_size += (*i).size;
+				_cur_memory_live -= (*i).size;
+				--_cur_buffers_live;
+				_stash_buf.push_back( (*i) );
+				_inflight_buf.erase( i );
+				reduce_stash( _max_stash_size );
+				return;
+			}
+		}
+
+		std::cout << "ERROR: invalid pointer passed to return_dbl_buffer" << std::endl;
 	}
 }
 

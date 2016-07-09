@@ -41,6 +41,7 @@ namespace image
 class allocator
 {
 public:
+	static constexpr int doubleAlignCount = 8;
 	static constexpr int floatAlignCount = 16;
 	static constexpr size_t defaultAlign = 64;
 	allocator( void );
@@ -69,6 +70,10 @@ public:
 	/// AVX512 (stride) (well, whatever defaultAlign is set to)
 	std::shared_ptr<float> buffer( int &stride, int w, int h );
 
+	/// allocates a 2D double buffer, stretching the width to support
+	/// AVX512 (stride) (well, whatever defaultAlign is set to)
+	std::shared_ptr<double> dbl_buffer( int &stride, int w, int h );
+
 	void clear_stash( void ) noexcept;
 
 	void report( std::ostream &os );
@@ -81,6 +86,7 @@ private:
 	void return_misc( void * ) noexcept;
 	void return_scan( float * ) noexcept;
 	void return_buffer( float * ) noexcept;
+	void return_dbl_buffer( double * ) noexcept;
 
 	std::mutex _mutex;
 	size_t _max_alloced = 0;
@@ -125,10 +131,11 @@ private:
 
 	struct memBuf
 	{
-		float *ptr;
+		void *ptr;
 		int w;
 		int h;
 		int stride;
+		size_t bpe;
 		size_t size;
 		size_t skip_count;
 	};
