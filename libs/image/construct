@@ -14,6 +14,7 @@ lib = library "image"
 	"allocator.cpp";
 	"plane.cpp";
 	"image.cpp";
+	"accum_buf.cpp";
 	"threading.cpp";
 	"scanline.cpp";
 	"scanline_group.cpp";
@@ -24,6 +25,7 @@ lib = library "image"
 	"plane_stats.cpp";
 	"plane_convolve.cpp";
 	"media_io.cpp";
+	"spatial_filter.cpp";
 	sse3src;
 	sse4src;
   }

@@ -26,6 +26,7 @@
 #include "plane.h"
 #include "plane_stats.h"
 #include "plane_convolve.h"
+#include "spatial_filter.h"
 #include <engine/float_ops.h>
 
 ////////////////////////////////////////
