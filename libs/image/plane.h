@@ -78,6 +78,7 @@ public:
 	inline size_t buffer_size( void ) const { return static_cast<size_t>( stride() * height() ) * sizeof(float); }
 
 	inline float *data( void ) { check_compute(); return _mem.get(); }
+	inline const float *data( void ) const { check_compute(); return _mem.get(); }
 	inline const float *cdata( void ) const { check_compute(); return _mem.get(); }
 	inline float *line( int y ) { return data() + y * stride(); }
 	inline const float *line( int y ) const { return cdata() + y * stride(); }
