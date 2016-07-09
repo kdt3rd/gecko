@@ -6,6 +6,7 @@
 #include <cmath>
 #include <algorithm>
 #include <limits>
+#include <vector>
 
 namespace base
 {
@@ -70,6 +71,32 @@ inline F lerp( F a, F b, F perc )
 	// a at 0, b at 1
 //	return a * ( 1.F - perc ) + b * perc;
 	return a + perc * ( b - a );
+}
+
+////////////////////////////////////////
+
+inline std::vector<float>
+atrous_expand( const std::vector<float> &a )
+{
+	std::vector<float> ret;
+	ret.resize( ( a.size() - 1 ) * 2 + 1 );
+	for ( size_t i = 0; i != a.size(); ++i )
+	{
+		ret[i*2] = a[i];
+		if ( i+1 != a.size() )
+			ret[i*2+1] = 0.F;
+	}
+	return ret;
+}
+
+inline std::vector<float>
+dirac_negate( const std::vector<float> &a )
+{
+	std::vector<float> ret = a;
+	for ( float &v: ret )
+		v = -v;
+	ret[ret.size()/2] += 1.F;
+	return ret;
 }
 
 } // namespace base
