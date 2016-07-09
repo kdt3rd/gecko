@@ -54,7 +54,7 @@ public:
 	threading( int nThreads );
 	~threading( void );
 
-	inline size_t size( void ) const { return _threads.size(); }
+	inline size_t size( void ) const { std::lock_guard<std::mutex> lk( _mutex ); return _threads.empty() ? size_t(1) : _threads.size(); }
 
 	/// calls function f on the range split by the number of threads
 	/// live, and does not return until they have all finished.
@@ -73,7 +73,7 @@ public:
 private:
 	void bee( size_t i );
 
-	std::mutex _mutex;
+	mutable std::mutex _mutex;
 	std::condition_variable _cond;
 	std::condition_variable _wait_cond;
 	std::vector<std::thread> _threads;
