@@ -10,15 +10,17 @@
 
 @interface MyView : NSOpenGLView
 {
-	std::shared_ptr<::platform::cocoa::window> win;
-	std::shared_ptr<::platform::cocoa::mouse> mouse;
-	std::shared_ptr<::platform::cocoa::keyboard> keyboard;
 }
 @end
 
 ////////////////////////////////////////
 
 @implementation MyView
+{
+	std::shared_ptr<::platform::cocoa::window> win;
+	std::shared_ptr<::platform::cocoa::mouse> mouse;
+	std::shared_ptr<::platform::cocoa::keyboard> keyboard;
+}
 
 ////////////////////////////////////////
 
