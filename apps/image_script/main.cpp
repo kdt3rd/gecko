@@ -41,224 +41,13 @@
 
 namespace
 {
-
-std::vector<float>
-atrous_expand( const std::vector<float> &a )
-{
-	std::vector<float> ret;
-	ret.resize( ( a.size() - 1 ) * 2 + 1 );
-	for ( size_t i = 0; i != a.size(); ++i )
-	{
-		ret[i*2] = a[i];
-		if ( i+1 != a.size() )
-			ret[i*2+1] = 0.F;
-	}
-//	std::cout << "atrous expand:\n";
-//	for ( size_t i = 0; i != ret.size(); ++i )
-//		std::cout << i << ": " << ret[i] << std::endl;
-	return ret;
-}
-
-std::vector<float>
-dirac_negate( const std::vector<float> &a )
-{
-	std::vector<float> ret = a;
-	for ( float &v: ret )
-		v = -v;
-	ret[ret.size()/2] += 1.F;
-//	std::cout << "dirac negate:\n";
-//	for ( size_t i = 0; i != ret.size(); ++i )
-//		std::cout << i << ": " << ret[i] << std::endl;
-	return ret;
-}
-
 using namespace image;
-std::tuple<plane, plane, plane, plane> wavelet_decomp( const plane &p, const std::vector<float> &h, const std::vector<float> &g )
-{
-	plane hhc = convolve_vert( p, h );
-	plane ghc = convolve_vert( p, g );
-	plane c_j1 = convolve_horiz( hhc, h );
-	plane w1_j1 = convolve_horiz( hhc, g );
-	plane w2_j1 = convolve_horiz( ghc, h );
-	plane w3_j1 = convolve_horiz( ghc, g );
-	return std::make_tuple( c_j1, w1_j1, w2_j1, w3_j1 );
-}
-
-plane logistic( const plane &x, float x0, float k = 1.F, float L = 1.F )
-{
-	return L / ( 1.F + exp( (-k) * ( x - x0 ) ) );
-}
-
-plane gaussian( const plane &x, float a, float b, float c )
-{
-	return a * exp( abs( x - b ) / ( -2.F * c * c ) );
-}
-
-plane wavelet_filter( const plane &p, size_t levels, float sigma )
-{
-	precondition( levels > 0, "invalid levels {0}", levels );
-	std::vector<std::tuple<plane, plane, plane>> filtLevels;
-
-	std::vector<float> wt_h{ 1.F/16.F, 4.F/16.F, 6.F/16.F, 4.F/16.F, 1.F/16.F };
-	std::vector<float> wt_g = dirac_negate( wt_h );
-
-	plane c_J = p;
-	size_t cnt = levels;
-	while ( true )
-	{
-		auto wd = wavelet_decomp( c_J, wt_h, wt_g );
-		c_J = std::get<0>( wd );
-		filtLevels.push_back( std::make_tuple( std::get<1>( wd ), std::get<2>( wd ), std::get<3>( wd ) ) );
-		if ( cnt == 0 )
-			break;
-
-		--cnt;
-		wt_h = atrous_expand( wt_h );
-		wt_g = atrous_expand( wt_g );
-	}
-
-	postcondition( filtLevels.size() == (levels + 1), "Expecting {0} levels", (levels + 1) );
-
-	float levelScale = 6.F/16.F;
-	for ( size_t l = 0; l < levels; ++l )
-	{
-		auto &curL = filtLevels[l];
-		auto &nextL = filtLevels[l+1];
-		plane &curPh = std::get<0>( curL );
-		plane &curPv = std::get<1>( curL );
-		plane &curPc = std::get<2>( curL );
-//		const plane &nextPh = std::get<0>( nextL );
-//		const plane &nextPv = std::get<1>( nextL );
-//		const plane &nextPc = std::get<2>( nextL );
-
-//		plane d_w1 = nextPh / levelScale - curPh;
-//		plane d_w2 = nextPv / levelScale - curPv;
-//		plane d_w3 = nextPc / levelScale - curPc;
-//		plane s1 = ( 1.F - gaussian( d_w1, 1.F, 0.F, sigma ) );
-//		plane s2 = ( 1.F - gaussian( d_w2, 1.F, 0.F, sigma ) );
-//		plane s3 = ( 1.F - gaussian( d_w3, 1.F, 0.F, sigma ) );
-		plane s1 = ( 1.F - gaussian( curPh, 1.F, 0.F, sigma ) );
-		plane s2 = ( 1.F - gaussian( curPv, 1.F, 0.F, sigma ) );
-		plane s3 = ( 1.F - gaussian( curPc, 1.F, 0.F, sigma ) );
-		plane w = max( s1, max( s2, s3 ) );
-		curPh = curPh * w;
-		curPv = curPv * w;
-		curPc = curPc * w;
-
-		sigma *= levelScale;
-	}
-
-	plane reconst = c_J;
-	for ( auto &l: filtLevels )
-		reconst += std::get<0>( l ) + std::get<1>( l ) + std::get<2>( l );
-
-	return reconst;
-}
-
 plane replace_high( const plane &p, const plane &filt )
 {
 	plane lowP = separable_convolve( p, { 0.023F, 0.067F, 0.124F, 0.179F, 0.204F, 0.179F, 0.124F, 0.067F, 0.028F } );
 	plane lowF = separable_convolve( filt, { 0.023F, 0.067F, 0.124F, 0.179F, 0.204F, 0.179F, 0.124F, 0.067F, 0.028F } );
 	plane highF = filt - lowF;
 	return lowP + highF;
-}
-
-plane guided_filter_mono( const plane &I, const plane &p, int r, float eps )
-{
-	plane mean_I = local_mean( I, r );
-	plane mean_II = local_mean( square( I ), r );
-	plane var_I = mean_II - square( mean_I );
-
-	plane mean_p = local_mean( p, r );
-	plane mean_Ip = local_mean( I * p, r );
-	plane cov_Ip = mean_Ip - mean_I * mean_p;
-
-	plane a = cov_Ip / ( var_I + eps );
-	plane b = mean_p - a * mean_I;
-
-	plane mean_a = local_mean( a, r );
-	plane mean_b = local_mean( b, r );
-	return mean_a * I + mean_b;
-}
-
-plane guided_filter_mono( const plane &I, const plane &p, int r, const plane &eps )
-{
-	plane mean_I = local_mean( I, r );
-	plane mean_II = local_mean( square( I ), r );
-	plane var_I = mean_II - square( mean_I );
-
-	plane mean_p = local_mean( p, r );
-	plane mean_Ip = local_mean( I * p, r );
-	plane cov_Ip = mean_Ip - mean_I * mean_p;
-
-	plane a = cov_Ip / ( var_I + eps );
-	plane b = mean_p - a * mean_I;
-
-	plane mean_a = local_mean( a, r );
-	plane mean_b = local_mean( b, r );
-	return mean_a * I + mean_b;
-}
-
-image_buf guided_filter_color( const image_buf &I, const image_buf &p, int r, float eps )
-{
-	image_buf ret = p;
-	if ( I.size() >= 3 && p.size() >= 3 )
-	{
-		plane mean_I_r = I[0];
-		plane mean_I_g = I[1];
-		plane mean_I_b = I[2];
-
-		// variance becomes a matrix
-		// [ rr rg rb
-		//   rg gg gb
-		//   rb gb bb ]
-		plane var_I_rr = local_mean( I[0] * I[0], r ) - mean_I_r * mean_I_r + eps;
-		plane var_I_rg = local_mean( I[0] * I[1], r ) - mean_I_r * mean_I_g;
-		plane var_I_rb = local_mean( I[0] * I[2], r ) - mean_I_r * mean_I_b;
-		plane var_I_gg = local_mean( I[1] * I[1], r ) - mean_I_g * mean_I_g + eps;
-		plane var_I_gb = local_mean( I[1] * I[2], r ) - mean_I_g * mean_I_b;
-		plane var_I_bb = local_mean( I[2] * I[2], r ) - mean_I_b * mean_I_b + eps;
-
-		plane invrr = var_I_gg * var_I_bb - var_I_gb * var_I_gb;
-		plane invrg = var_I_gb * var_I_rb - var_I_rg * var_I_bb;
-		plane invrb = var_I_rg * var_I_gb - var_I_gg * var_I_rb;
-		plane invgg = var_I_rr * var_I_bb - var_I_rb * var_I_rb;
-		plane invgb = var_I_rb * var_I_rg - var_I_rr * var_I_gb;
-		plane invbb = var_I_rr * var_I_gg - var_I_rg * var_I_rg;
-
-		plane det = invrr * var_I_rr + invrg * var_I_rg + invrb * var_I_rb;
-		det = copysign( max( engine::make_constant(0.000001F), abs( det ) ), det );
-		invrr /= det;
-		invrg /= det;
-		invrb /= det;
-		invgg /= det;
-		invgb /= det;
-		invbb /= det;
-
-		for ( size_t i = 0, N = ret.size(); i != N; ++i )
-		{
-			plane mean_p = local_mean( ret[i], r );
-			plane mean_Ip_r = local_mean( I[0] * ret[i], r );
-			plane mean_Ip_g = local_mean( I[1] * ret[i], r );
-			plane mean_Ip_b = local_mean( I[2] * ret[i], r );
-			plane cov_Ip_r = mean_Ip_r - mean_I_r * mean_p;
-			plane cov_Ip_g = mean_Ip_g - mean_I_g * mean_p;
-			plane cov_Ip_b = mean_Ip_b - mean_I_b * mean_p;
-			plane a_r = invrr * cov_Ip_r + invrg * cov_Ip_g + invrb * cov_Ip_b;
-			plane a_g = invrg * cov_Ip_r + invgg * cov_Ip_g + invgb * cov_Ip_b;
-			plane a_b = invrb * cov_Ip_r + invgb * cov_Ip_g + invbb * cov_Ip_b;
-			plane b = mean_p - a_r * mean_I_r - a_g * mean_I_g - a_b * mean_I_b;;
-
-			ret[i] = local_mean( a_r, r ) * I[0] + local_mean( a_g, r ) * I[1] + local_mean( a_b, r ) * I[2] + local_mean( b, r );
-		}
-	}
-	else
-	{
-		precondition( I.size() >= p.size(), "mismatch in plane count" );
-		for ( size_t i = 0, N = ret.size(); i != N; ++i )
-			ret[i] = guided_filter_mono( I[i], p[i], r, eps );
-	}
-	return ret;
 }
 
 plane despeckle( const plane &p, float thresh = 0.05F )
@@ -458,18 +247,7 @@ int safemain( int argc, char *argv[] )
 						for ( int p = 0; p < 3; ++p )
 							img[p] = replace_high( img[p], exp( weighted_bilateral( log( img[p] + 1.F ), weight, engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) ) ) - 1.F );
 #endif
-						std::vector<float> wt_h{ 1.F/16.F, 4.F/16.F, 6.F/16.F, 4.F/16.F, 1.F/16.F };
-						std::vector<float> wt_g = dirac_negate( wt_h );
 
-						auto wd1 = wavelet_decomp( lum, wt_h, wt_g );
-						std::vector<float> wt2_h = atrous_expand( wt_h );
-						std::vector<float> wt2_g = atrous_expand( wt_g );
-						auto wd2 = wavelet_decomp( std::get<0>( wd1 ), wt2_h, wt2_g );
-//						plane reconst = std::get<0>( wd2 ) + std::get<1>( wd2 ) + std::get<2>( wd2 ) + std::get<3>( wd2 ) + std::get<1>( wd1 ) + std::get<2>( wd1 ) + std::get<3>( wd1 );
-						float sigma = 0.05F;
-						img[0] = 1.F - gaussian( std::get<3>( wd1 ), 1.F, 0.F, sigma );
-						img[1] = 1.F - gaussian( std::get<3>( wd1 ) * (16.F/6.F) - std::get<3>( wd1 ), 1.F, 0.F, sigma );
-						img[2] = abs( std::get<3>( wd1 ) ) * 10.F;//abs( std::get<1>( wd1 ) * (6.F/16.F) - std::get<1>( wd2 ) ) * 10.F;
 //						auto wd = wavelet_decomp( lum, , { -1.F/16.F, -4.F/16.F, 10.F/16.F, -4.F/16.F, -1.F/16.F } );
 //						img[0] = wd.first;
 //						img[1] = wd.second;
@@ -497,8 +275,22 @@ int safemain( int argc, char *argv[] )
 //						img[2] = max( engine::make_constant(0.F), 1.F - sqrt( sqrt( var ) ) );
 						plane scale = lum;//max( engine::make_constant(0.F), 1.F - pow( var, 0.125F ) ) * lum;
 						scale = separable_convolve( scale, { 0.023F, 0.067F, 0.124F, 0.179F, 0.204F, 0.179F, 0.124F, 0.067F, 0.028F } );
+
+//						scale = 1.F - min( engine::make_constant( 1.F ), max( engine::make_constant( 0.F ), scale ) );
+						auto fimg = guided_filter_color( img, img, 5, 0.01F );
+//						img = ( img - fimg ) * 10;
+//						img = guided_filter_color( img, img, 5, 0.01F );
+						plane detailmask = max( abs( img[0] - fimg[0] ), max( abs( img[1] - fimg[1] ), abs( img[2] - fimg[2] ) ) );
+//						detailmask = exp( detailmask / ( -2.F * 0.01F ) );
 						for ( int p = 0; p < 3; ++p )
-							img[p] = guided_filter_mono( img[p], img[p], 5, scale * .0005F );
+						{
+							plane detail = img[p] - fimg[p];
+//							plane noise = detail * exp( abs( detail ) / ( -2.F * 0.0001F ) );
+							plane noise = detailmask;
+//							img[p] = img[p] - noise;
+							img[p] = noise;
+						}
+//							img[p] = guided_filter_mono( img[p], img[p], 5, scale * .0005F );
 //							img[p] = guided_filter_mono( img[p], img[p], 11, lum * 0.0005F );
 //							img[p] = wavelet_filter( img[p], 1, 0.1F );
 //							img[p] = bilateral( img[p], engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) );
