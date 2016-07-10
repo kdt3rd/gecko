@@ -69,7 +69,8 @@ public:
 	void shutdown( void );
 
 	/// Get the singleton threading object
-	static threading &get( void );
+	static threading &get( int count = -1 );
+	static void init( int count = -1 );
 private:
 	void bee( size_t i );
 
@@ -86,6 +87,7 @@ private:
 	};
 	std::deque<func_to_apply> _funcs;
 	std::atomic<bool> _shutdown;
+	std::atomic<int> _count;
 };
 
 } // namespace image

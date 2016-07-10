@@ -42,9 +42,12 @@ static void shutdownThreading( void )
 	}
 }
 
-static void initThreading( void )
+static void initThreading( int count )
 {
-	theThreadObj = std::make_shared<image::threading>( base::thread::core_count() );
+	if ( count >= 0 )
+		theThreadObj = std::make_shared<image::threading>( count );
+	else
+		theThreadObj = std::make_shared<image::threading>( base::thread::core_count() );
 	std::atexit( shutdownThreading );
 }
 
@@ -58,7 +61,7 @@ namespace image
 ////////////////////////////////////////
 
 threading::threading( int tCount )
-	: _shutdown( false )
+	: _shutdown( false ), _count( tCount )
 {
 	size_t n = 0;
 	if ( tCount > 0 )
@@ -87,8 +90,7 @@ threading::dispatch( const std::function<void(size_t, int, int)> &f, int start, 
 {
 	precondition( N > 0, "attempt to dispatch with no items ({0}) to process", N );
 
-	int nT = static_cast<int>( _threads.size() );
-
+	int nT = _count.load();
 	if ( nT == 0 )
 	{
 		f( 0, start, start + N );
@@ -135,11 +137,19 @@ threading::shutdown( void )
 ////////////////////////////////////////
 
 threading &
-threading::get( void )
+threading::get( int count )
 {
-	std::call_once( initThreadingFlag, initThreading );
+	std::call_once( initThreadingFlag, initThreading, count );
 
 	return *(theThreadObj);
+}
+
+////////////////////////////////////////
+
+void
+threading::init( int count )
+{
+	std::call_once( initThreadingFlag, initThreading, count );
 }
 
 ////////////////////////////////////////
