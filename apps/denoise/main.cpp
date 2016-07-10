@@ -43,28 +43,14 @@
 namespace
 {
 using namespace image;
-plane replace_high( const plane &p, const plane &filt )
-{
-	plane lowP = separable_convolve( p, { 0.023F, 0.067F, 0.124F, 0.179F, 0.204F, 0.179F, 0.124F, 0.067F, 0.028F } );
-	plane lowF = separable_convolve( filt, { 0.023F, 0.067F, 0.124F, 0.179F, 0.204F, 0.179F, 0.124F, 0.067F, 0.028F } );
-	plane highF = filt - lowF;
-	return lowP + highF;
-}
 
-plane despeckle( const plane &p, float thresh = 0.05F )
-{
-	plane mid = separable_convolve( p, { 0.25F, 0.5F, 0.25F } );
-	plane high = p - mid;
-	plane med = cross_x_img_median( p );
-	plane highmed = p - med;
-	plane highdiff = high - highmed;
-	return abs( highdiff ) * 20;
-//	plane outhigh = if_less( abs( high ), thresh, high * 0.2, high );
-//	plane outhigh = high;
-
-//	return mid + outhigh;
-//	return cross_x_img_median( p );
-}
+//plane replace_high( const plane &p, const plane &filt )
+//{
+//	plane lowP = separable_convolve( p, { 0.023F, 0.067F, 0.124F, 0.179F, 0.204F, 0.179F, 0.124F, 0.067F, 0.028F } );
+//	plane lowF = separable_convolve( filt, { 0.023F, 0.067F, 0.124F, 0.179F, 0.204F, 0.179F, 0.124F, 0.067F, 0.028F } );
+//	plane highF = filt - lowF;
+//	return lowP + highF;
+//}
 
 int safemain( int argc, char *argv[] )
 {
@@ -75,6 +61,7 @@ int safemain( int argc, char *argv[] )
 	float spatSigmaI = 0.025F;
 	int temporalRadius = 0;
 	bool estimateNoise = false;
+	bool useLog = false;
 	std::string method = "guided_color";
 	int64_t frameStart = std::numeric_limits<int64_t>::min();
 	int64_t frameEnd = std::numeric_limits<int64_t>::min();
@@ -92,6 +79,10 @@ int safemain( int argc, char *argv[] )
 			0, std::string( "estimate-noise" ),
 			std::string(), base::cmd_line::flag,
 			"Runs a routine to estimate noise in a local area", false ),
+		base::cmd_line::option(
+			0, std::string( "use-log" ),
+			std::string(), base::cmd_line::flag,
+			"Processes the image in log space instead of linear", false ),
 		base::cmd_line::option(
 			0, std::string( "spatial-method" ),
 			"<guided_color|guided_mono|wavelet|bilateral|despeckle>", base::cmd_line::arg<1>,
@@ -197,6 +188,7 @@ int safemain( int argc, char *argv[] )
 		temporalRadius = atoi( tempR.value() );
 
 	estimateNoise = static_cast<bool>( options["estimate-noise"] );
+	useLog = static_cast<bool>( options["use-log"] );
 
 	media::metadata outputOptions;
 	outputOptions["compression"] = std::string( "piz" );
@@ -279,7 +271,7 @@ int safemain( int argc, char *argv[] )
 					media::sample sCur( curF, vt->rate() );
 					auto curFrm = sCur( vt );
 					image_buf img = extract_frame( *curFrm, { "R", "G", "B" } );
-					plane weight;
+					image_buf weight;
 					if ( varU )
 					{
 						auto curVarFrm = sCur( v.video_tracks()[ci] );
@@ -302,33 +294,44 @@ int safemain( int argc, char *argv[] )
 //						lum = log( lum + 1.F );
 
 						plane localvar = local_variance( lum, 5 );
-						plane weight = filter_nan( varimg[2], 0.F ) / max( lum, engine::make_constant( 0.00001F ) ) * sqrt( max( localvar, engine::make_constant( 0.00001F ) ) );
-						weight = if_less( weight, 0.0001F, clamp( weight, engine::make_constant( 1.F ), engine::make_constant( 1.F ) ), 1.F / weight );
-						for ( int p = 0; p < 3; ++p )
-							img[p] = replace_high( img[p], expm1( weighted_bilateral( log1p( img[p] ), weight, engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) ) ) );
+						plane vweight = filter_nan( varimg[2], 0.F ) / max( lum, engine::make_constant( 0.00001F ) ) * sqrt( max( localvar, engine::make_constant( 0.00001F ) ) );
+						vweight = if_less( vweight, 0.0001F, clamp( vweight, engine::make_constant( 1.F ), engine::make_constant( 1.F ) ), 1.F / vweight );
+
+						weight = img;
+						for ( auto &p: weight )
+							p = vweight;
 					}
 					else if ( estimateNoise )
 					{
+						std::cout << "TODO: Insert finised noise estimate" << std::endl;
+					}
+
+					if ( useLog )
+					{
+						for ( int p = 0; p < 3; ++p )
+							img[p] = log1p( img[p] );
 					}
 
 					image_buf fimg;
-
 					if ( method == "guided_color" )
 					{
-						if ( weight.valid() )
-							fimg = guided_filter_color( img, img, std::max( spatX, spatY ), weight * spatSigmaI * spatSigmaI );
-						else
+						if ( weight.empty() )
 							fimg = guided_filter_color( img, img, std::max( spatX, spatY ), spatSigmaI * spatSigmaI );
+						else
+						{
+							plane lumw = weight[0] * 0.3F + weight[1] * 0.6F + weight[2] * 0.1F;
+							fimg = guided_filter_color( img, img, std::max( spatX, spatY ), lumw * spatSigmaI * spatSigmaI );
+						}
 					}
 					else if ( method == "guided_mono" )
 					{
 						fimg = img;
 						for ( int p = 0; p < 3; ++p )
 						{
-							if ( weight.valid() )
-								fimg[p] = guided_filter_mono( img[p], img[p], std::max( spatX, spatY ), weight * spatSigmaI * spatSigmaI );
-							else
+							if ( weight.empty() )
 								fimg[p] = guided_filter_mono( img[p], img[p], std::max( spatX, spatY ), spatSigmaI * spatSigmaI );
+							else
+								fimg[p] = guided_filter_mono( img[p], img[p], std::max( spatX, spatY ), weight[p] * spatSigmaI * spatSigmaI );
 						}
 					}
 					else if ( method == "bilateral" )
@@ -336,10 +339,10 @@ int safemain( int argc, char *argv[] )
 						fimg = img;
 						for ( int p = 0; p < 3; ++p )
 						{
-							if ( weight.valid() )
-								fimg[p] = weighted_bilateral( img[p], weight, engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) );
-							else
+							if ( weight.empty() )
 								fimg[p] = bilateral( img[p], engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) );
+							else
+								fimg[p] = weighted_bilateral( img[p], weight[p], engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) );
 						}
 					}
 					else if ( method == "wavelet" )
@@ -347,20 +350,26 @@ int safemain( int argc, char *argv[] )
 						fimg = img;
 						for ( int p = 0; p < 3; ++p )
 						{
-							if ( weight.valid() )
-								img[p] = wavelet_filter( img[p], waveletLevels, spatSigmaI );
+							if ( weight.empty() )
+								fimg[p] = wavelet_filter( img[p], waveletLevels, spatSigmaI );
 							else
-								img[p] = wavelet_filter( img[p], waveletLevels, weight * spatSigmaI );
+								fimg[p] = wavelet_filter( img[p], waveletLevels, weight[p] * spatSigmaI );
 						}
 					}
 					else if ( method == "despeckle" )
 					{
 						fimg = img;
 						for ( int p = 0; p < 3; ++p )
-							img[p] = despeckle( img[p], spatSigmaI );
+							fimg[p] = despeckle( img[p], spatSigmaI );
 					}
 
-					img = fimg;
+					if ( useLog )
+					{
+						for ( int p = 0; p < 3; ++p )
+							img[p] = expm1( fimg[p] );
+					}
+					else
+						img = fimg;
 #if 0
 					const float sigma2 = 0.00005;
 
