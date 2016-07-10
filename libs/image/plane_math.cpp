@@ -218,6 +218,22 @@ static void plane_log( scanline &dest, const scanline &src )
 
 ////////////////////////////////////////
 
+static void plane_expm1( scanline &dest, const scanline &src )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = expm1f( src[x] );
+}
+
+////////////////////////////////////////
+
+static void plane_log1p( scanline &dest, const scanline &src )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = log1pf( src[x] );
+}
+
+////////////////////////////////////////
+
 static void plane_exp2( scanline &dest, const scanline &src )
 {
 	for ( int x = 0, N = dest.width(); x != N; ++x )
@@ -403,6 +419,8 @@ void add_plane_math( engine::registry &r )
 
 	r.add( op( "p.exp", base::choose_runtime( plane_exp ), scanline_plane_adapter<true, decltype(plane_exp)>(), dispatch_scan_processing, op::one_to_one ) );
 	r.add( op( "p.log", base::choose_runtime( plane_log ), scanline_plane_adapter<true, decltype(plane_log)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.expm1", base::choose_runtime( plane_expm1 ), scanline_plane_adapter<true, decltype(plane_expm1)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.log1p", base::choose_runtime( plane_log1p ), scanline_plane_adapter<true, decltype(plane_log1p)>(), dispatch_scan_processing, op::one_to_one ) );
 	r.add( op( "p.exp2", base::choose_runtime( plane_exp2 ), scanline_plane_adapter<true, decltype(plane_exp2)>(), dispatch_scan_processing, op::one_to_one ) );
 	r.add( op( "p.log2", base::choose_runtime( plane_log2 ), scanline_plane_adapter<true, decltype(plane_log2)>(), dispatch_scan_processing, op::one_to_one ) );
 

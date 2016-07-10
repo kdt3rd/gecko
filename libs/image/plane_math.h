@@ -86,6 +86,11 @@ namespace image
 /// log( src ) (ln)
 /// void plane_log( scanline &dest, const scanline &src )
 ///
+/// log1p( src ) (ln(1+src))
+/// void plane_log1p( scanline &dest, const scanline &src )
+/// expm1( src ) (exp(src)-1)
+/// void plane_log1p( scanline &dest, const scanline &src )
+///
 /// exp2( src )
 /// void plane_exp2( scanline &dest, const scanline &src )
 ///

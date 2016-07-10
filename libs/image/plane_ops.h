@@ -97,8 +97,13 @@ inline plane magnitude( const plane &a, const plane &b, const plane &c )
 // exponential functions
 inline plane exp( const plane &p ) { return plane( "p.exp", p.dims(), p ); }
 inline plane log( const plane &p ) { return plane( "p.log", p.dims(), p ); }
+
+inline plane expm1( const plane &p ) { return plane( "p.expm1", p.dims(), p ); }
+inline plane log1p( const plane &p ) { return plane( "p.log1p", p.dims(), p ); }
+
 inline plane exp2( const plane &p ) { return plane( "p.exp2", p.dims(), p ); }
 inline plane log2( const plane &p ) { return plane( "p.log2", p.dims(), p ); }
+
 inline plane pow( const plane &a, const plane &b )
 {
 	precondition( a.width() == b.width() && a.height() == b.height(), "unable to compute power for planes of different sizes" );
