@@ -550,6 +550,19 @@ median3( const plane &p1, const plane &p2, const plane &p3 )
 ////////////////////////////////////////
 
 plane
+despeckle( const plane &p, float thresh )
+{
+	plane mid = separable_convolve( p, { 0.25F, 0.5F, 0.25F } );
+	plane high = p - mid;
+	plane med = cross_x_img_median( p );
+	plane highmed = p - med;
+	plane highdiff = high - highmed;
+	return mid + high * ( 1.F - exp( square( highdiff ) / ( -2.F * thresh * thresh ) ) );
+}
+
+////////////////////////////////////////
+
+plane
 bilateral( const plane &p1, const engine::computed_value<int> &dx, const engine::computed_value<int> &dy, const engine::computed_value<float> &sigD, const engine::computed_value<float> &sigI )
 {
 	return plane( "p.bilateral", p1.dims(), p1, dx, dy, sigD, sigI );
