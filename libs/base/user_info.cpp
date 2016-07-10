@@ -110,7 +110,13 @@ user_info::user_info( uid_t id )
 user_info::user_info( cstring usr )
 {
 #ifndef _WIN32
-	fill_info( usr, _id, _def_gid, _user, _display, _home );
+	if ( usr.empty() )
+	{
+		_id = geteuid();
+		fill_info( usr, _id, _def_gid, _user, _display, _home );
+	}
+	else
+		fill_info( usr, _id, _def_gid, _user, _display, _home );
 #endif
 }
 
