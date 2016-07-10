@@ -62,6 +62,8 @@ public:
 	plane &operator=( plane && );
 	~plane( void );
 
+	inline bool valid( void ) const { return _width > 0 && _height > 0; }
+
 	inline engine::dimensions dims( void ) const
 	{
 		engine::dimensions r;
