@@ -1,0 +1,4 @@
+
+executable "denoise"
+  source "main.cpp"
+  libs{ "image", "media" }
