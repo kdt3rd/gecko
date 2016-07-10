@@ -545,11 +545,11 @@ graph::process( node_id nid )
 
 	std::vector<any> inputs;
 
-	std::cout << "Have " << _process_list.size() << " nodes to process" << std::endl;
-	static int procGC = 0;
-	std::stringstream pgcg;
-	pgcg << "process_graph_" << procGC++ << ".dot";
-	dump_dot( pgcg.str() );
+//	std::cout << "Have " << _process_list.size() << " nodes to process" << std::endl;
+//	static int procGC = 0;
+//	std::stringstream pgcg;
+//	pgcg << "process_graph_" << procGC++ << ".dot";
+//	dump_dot( pgcg.str() );
 	for ( node_id c: _process_list )
 	{
 		node &curN = _nodes[c];
@@ -605,7 +605,7 @@ graph::process( node_id nid )
 	clear_grouping();
 	clean_graph();
 
-	std::cout << "Final nid " << nid << " with " << _nodes.size() << " nodes left in graph" << std::endl;
+//	std::cout << "Final nid " << nid << " with " << _nodes.size() << " nodes left in graph" << std::endl;
 	return _nodes[nid].value();
 }
 
@@ -631,10 +631,10 @@ graph::optimize( void )
 	apply_peephole();
 	apply_grouping();
 
-	static int grp = 1;
-	std::stringstream fn;
-	fn << "grouping_" << grp++ << ".dot";
-	dump_dot( fn.str() );
+//	static int grp = 1;
+//	std::stringstream fn;
+//	fn << "grouping_" << grp++ << ".dot";
+//	dump_dot( fn.str() );
 #if 0
 	if ( ! _subgroups.empty() )
 	{
