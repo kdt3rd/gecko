@@ -26,6 +26,8 @@
 #include <base/cpu_features.h>
 #include <base/contract.h>
 
+#include "sse3/plane_stats.h"
+
 ////////////////////////////////////////
 
 namespace
@@ -64,25 +66,49 @@ compute_mean_sat( scanline &dest, int y, const accum_buf &sat, int radius )
 	int wm1 = sat.width() - 1;
 	int hm1 = sat.height() - 1;
 	int y0 = y - radius - 1;
-	int y1 = std::max( 0, std::min( hm1, y + radius ) );
-	int nY = y1 - y0;
-	for ( int x = 0; x <= wm1; ++x )
+	int y1 = std::max( int(0), std::min( hm1, y + radius ) );
+	int nY = y1 - (y0 < 0 ? -1 : y0 );
+	const double *y1line = sat.line( y1 );
+	if ( y0 < 0 )
 	{
-		int x0 = x - radius - 1;
-		int x1 = std::max( int(0), std::min( wm1, x + radius ) );
-		int nX = x1 - x0;
-		double A = 0.0, B = 0.0, C = 0.0;
-		if ( y0 >= 0 )
+		for ( int x = 0; x <= wm1; ++x )
 		{
-			B = sat.get( x1, y0 );
+			int x0 = x - radius - 1;
+			int x1 = std::max( int(0), std::min( wm1, x + radius ) );
+			int nX = x1 - (x0 < 0 ? -1 : x0);
+			double C = 0.0;
 			if ( x0 >= 0 )
-				A = sat.get( x0, y0 );
+				C = y1line[x0];
+			double D = y1line[x1];
+			double sum = D - C;
+			dest[x] = static_cast<float>( sum / static_cast<double>( nX * nY ) );
 		}
-		if ( x0 >= 0 )
-			C = sat.get( x0, y1 );
-		double D = sat.get( x1, y1 );
-		double sum = A + D - B - C;
-		dest[x] = static_cast<float>( sum / static_cast<double>( nX * nY ) );
+	}
+	else
+	{
+		const double *y0line = sat.line( y0 );
+		int x1 = std::min( wm1, radius );
+		for ( int x = 0; x <= radius; ++x )
+		{
+			int nX = x1 + 1;
+			double B = y0line[x1];
+			double D = y1line[x1];
+			double sum = D - B;
+			dest[x] = static_cast<float>( sum / static_cast<double>( nX * nY ) );
+			x1 = std::min( wm1, x1 + 1 );
+		}
+		int x0 = 0;
+		for ( int x = (radius + 1); x <= wm1; ++x, ++x0 )
+		{
+			int nX = x1 - x0;
+			double A = y0line[x0];
+			double B = y0line[x1];
+			double C = y1line[x0];
+			double D = y1line[x1];
+			double sum = A + D - B - C;
+			dest[x] = static_cast<float>( sum / static_cast<double>( nX * nY ) );
+			x1 = std::min( wm1, x1 + 1 );
+		}
 	}
 }
 
@@ -118,12 +144,12 @@ compute_variance_sat( scanline &dest, int y, const accum_buf &sat, const accum_b
 	int hm1 = sat.height() - 1;
 	int y0 = y - radius - 1;
 	int y1 = std::max( 0, std::min( hm1, y + radius ) );
-	int nY = y1 - y0;
+	int nY = y1 - (y0 < 0 ? -1 : y0 );
 	for ( int x = 0; x <= wm1; ++x )
 	{
 		int x0 = x - radius - 1;
 		int x1 = std::max( int(0), std::min( wm1, x + radius ) );
-		int nX = x1 - x0;
+		int nX = x1 - (x0 < 0 ? -1 : x0);
 		double Am = 0.0, Bm = 0.0, Cm = 0.0;
 		double As = 0.0, Bs = 0.0, Cs = 0.0;
 		if ( y0 >= 0 )
@@ -436,7 +462,7 @@ add_plane_stats( engine::registry &r )
 	using namespace engine;
 
 	r.add( op( "p.sum", sum_plane, op::threaded ) );
-	r.add( op( "p.sum_area_table", compute_SAT, op::threaded ) );
+	r.add( op( "p.sum_area_table", base::choose_runtime( compute_SAT, { { base::cpu::simd_feature::SSE3, sse3::compute_SAT } } ), op::threaded ) );
 	r.add( op( "p.histogram", compute_histogram, op::threaded ) );
 
 	// methods using the summed area table

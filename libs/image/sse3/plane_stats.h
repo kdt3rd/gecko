@@ -22,30 +22,20 @@
 
 #pragma once
 
-#include <base/contract.h>
-#include "plane.h"
-#include "op_registry.h"
+#include <image/plane.h>
+#include <image/accum_buf.h>
 
 ////////////////////////////////////////
 
 namespace image
 {
 
-/// [-1, 0, 1] / 2
-plane central_gradient_horiz( const plane &p );
-/// [-1, 0, 1]' / 2
-plane central_gradient_vert( const plane &p );
-
-plane convolve_horiz( const plane &p, const std::vector<float> &k );
-plane convolve_vert( const plane &p, const std::vector<float> &k );
-
-inline plane separable_convolve( const plane &p, const std::vector<float> &k )
+namespace sse3
 {
-	// do the vert pass first so we get n:1, 1:1 group behavior
-	return convolve_horiz( convolve_vert( p, k ), k );
-}
 
-void add_convolve( engine::registry &r );
+accum_buf compute_SAT( const plane &p, int power );
+
+} // namespace sse3
 
 } // namespace image
 
