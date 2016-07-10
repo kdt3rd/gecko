@@ -201,7 +201,9 @@ void uri::parse( cstring str )
 		if ( str[0] == '~' )
 		{
 			size_t slpos = str.find( '/' );
-			cstring user = str.substr( 1, slpos );
+			cstring user;
+			if ( slpos != 1 )
+				user = str.substr( 1, slpos );
 			user_info uinf( user );
 			add_path( uinf.home_dir() );
 			if ( slpos != cstring::npos )
