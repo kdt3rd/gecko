@@ -356,6 +356,19 @@ static void plane_ifgreater( scanline &dest, const scanline &a, float b, const s
 		dest[x] = a[x] > b ? c[x] : d[x];
 }
 
+////////////////////////////////////////
+
+static void plane_thresholdf( scanline &dest, const scanline &a, float t )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = a[x] > t ? 1.F : 0.F;
+}
+static void plane_thresholdp( scanline &dest, const scanline &a, const scanline &t )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = a[x] > t[x] ? 1.F : 0.F;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -408,6 +421,9 @@ void add_plane_math( engine::registry &r )
 
 	r.add( op( "p.if_less_fpp", base::choose_runtime( plane_ifless ), scanline_plane_adapter<true, decltype(plane_ifless)>(), dispatch_scan_processing, op::one_to_one ) );
 	r.add( op( "p.if_greater_fpp", base::choose_runtime( plane_ifgreater ), scanline_plane_adapter<true, decltype(plane_ifgreater)>(), dispatch_scan_processing, op::one_to_one ) );
+
+	r.add( op( "p.threshold_f", base::choose_runtime( plane_thresholdf ), scanline_plane_adapter<true, decltype(plane_thresholdf)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.threshold_p", base::choose_runtime( plane_thresholdp ), scanline_plane_adapter<true, decltype(plane_thresholdp)>(), dispatch_scan_processing, op::one_to_one ) );
 }
 
 ////////////////////////////////////////

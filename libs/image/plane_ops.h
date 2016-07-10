@@ -163,6 +163,18 @@ inline plane if_greater( const plane &a, float b, const plane &c, const plane &d
 	return plane( "p.if_greater_fpp", a.dims(), a, b, c, d );
 }
 
+/// out = ( a > t ) ? 1.F : 0.F;
+inline plane threshold( const plane &a, float t )
+{
+	return plane( "p.threshold_f", a.dims(), a, t );
+}
+/// out = ( a > t ) ? 1.F : 0.F;
+inline plane threshold( const plane &a, const plane &t )
+{
+	precondition( a.width() == t.width() && a.height() == t.height(), "unable to compute threshold for planes of different sizes" );
+	return plane( "p.threshold_p", a.dims(), a, t );
+}
+
 ////////////////////////////////////////
 // normal operators
 ////////////////////////////////////////

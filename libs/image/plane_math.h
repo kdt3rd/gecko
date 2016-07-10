@@ -112,6 +112,10 @@ namespace image
 /// (a < b) ? c : d
 /// void if_less( scanline &dest, const scanline &a, float b, const scanline &c, const scanline &d )
 /// void if_greater( scanline &dest, const scanline &a, float b, const scanline &c, const scanline &d )
+///
+/// (a > t) ? 1 : 0
+/// void threshold( scanline &dest, const scanline &a, float t )
+/// void threshold( scanline &dest, const scanline &a, const scanline &t )
 
 void add_plane_math( engine::registry &r );
 
