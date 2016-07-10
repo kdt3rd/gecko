@@ -180,7 +180,6 @@ tiff_read_track::doRead( int64_t f )
 						imgbuf = image_buffer::simple_buffer<uint8_t>( w, h );
 					break;
 				case 16:
-					std::cout << "initializing " << w << 'x' << h << " 16-bit image" << std::endl;
 					if ( sf == SAMPLEFORMAT_INT )
 						imgbuf = image_buffer::simple_buffer<int16_t>( w, h );
 					else
@@ -233,7 +232,6 @@ tiff_read_track::doRead( int64_t f )
 			tmsize_t ssize = TIFFScanlineSize( t );
 			if ( PLANARCONFIG_SEPARATE == isP )
 			{
-				std::cout << "reading planar TIFF straight to image" << std::endl;
 				// need to read it in order of samples to prevent random access
 				for ( uint16_t s = 0; s < samps; ++s )
 				{
@@ -249,17 +247,12 @@ tiff_read_track::doRead( int64_t f )
 			else
 			{
 				std::unique_ptr<uint8_t[]> tmpbuf = std::unique_ptr<uint8_t[]>( new uint8_t[TIFFScanlineSize( t )] );
-				std::cout << "reading interleaved TIFF to temporary buffer then copying to image" << std::endl;
 				for ( uint32_t row = 0; row < sizeY; ++row )
 				{
 					TIFFReadScanline( t, tmpbuf.get(), row );
 					for ( uint16_t s = 0; s < samps; ++s )
 					{
 						image_buffer &ib = ret->at( s );
-						if ( row == 0 )
-						{
-							std::cout << " ---> ib " << s << " xstride " << ib.xstride_bytes() << " ystride " << ib.ystride_bytes() << std::endl;
-						}
 						uint8_t *dptr = reinterpret_cast<uint8_t *>( ib.data() );
 						dptr += ib.ystride_bytes() * row;
 						const uint8_t *sptr = tmpbuf.get();
