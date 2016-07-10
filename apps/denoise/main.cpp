@@ -32,6 +32,7 @@
 #include <image/plane.h>
 #include <image/plane_ops.h>
 #include <image/media_io.h>
+#include <image/threading.h>
 #include <sstream>
 #include <iostream>
 #include <cstdlib>
@@ -69,13 +70,14 @@ int safemain( int argc, char *argv[] )
 {
 	int spatX = 7;
 	int spatY = -1;
+	int waveletLevels = 1;
 	float spatSigmaD = 1.5F;
 	float spatSigmaI = 0.025F;
-	float varThreshLow = 0.4F;
-	float varThreshHigh = 6.0F;
 	int temporalRadius = 0;
+	bool estimateNoise = false;
 	std::string method = "guided_color";
-
+	int64_t frameStart = std::numeric_limits<int64_t>::min();
+	int64_t frameEnd = std::numeric_limits<int64_t>::min();
 	base::cmd_line options(
 		argv[0],
 		base::cmd_line::option(
@@ -85,18 +87,14 @@ int safemain( int argc, char *argv[] )
 		base::cmd_line::option(
 			0, std::string( "variance" ),
 			"<file>", base::cmd_line::arg<1>,
-			"Input file pattern holding variance", false ),
+			"Input file pattern holding variance to compute weight", false ),
 		base::cmd_line::option(
-			0, std::string( "dbgweight" ),
-			"file", base::cmd_line::arg<1>,
-			"Output file pattern holding derived weight", false ),
-		base::cmd_line::option(
-			0, std::string( "varthresh" ),
-			"<float float>", base::cmd_line::arg<2>,
-			"When variance image is between this range, filtering happens (0.4 6)", false ),
+			0, std::string( "estimate-noise" ),
+			std::string(), base::cmd_line::flag,
+			"Runs a routine to estimate noise in a local area", false ),
 		base::cmd_line::option(
 			0, std::string( "spatial-method" ),
-			"<guided_color|guided_mono|bilateral>", base::cmd_line::arg<1>,
+			"<guided_color|guided_mono|wavelet|bilateral|despeckle>", base::cmd_line::arg<1>,
 			"Specifies the spatial method used", false ),
 		base::cmd_line::option(
 			0, std::string( "spatial-weight" ),
@@ -111,18 +109,38 @@ int safemain( int argc, char *argv[] )
 			"<float>", base::cmd_line::arg<1>,
 			"Spatial distance weight", false ),
 		base::cmd_line::option(
+			0, std::string( "wavelet-levels" ),
+			"<int>", base::cmd_line::arg<1>,
+			"for wavelet filter, how many levels to apply", false ),
+		base::cmd_line::option(
 			0, std::string( "temporal-radius" ),
 			"<int>", base::cmd_line::arg<1>,
 			"specifies radius for temporal filtering", false ),
+		base::cmd_line::option(
+			'f', std::string( "frames" ),
+			"[<frame>|<start end>]", base::cmd_line::arg<1,2>,
+			"Frame range to process", false ),
+		base::cmd_line::option(
+			'T', std::string( "threads" ),
+			"<int>", base::cmd_line::arg<1>,
+			"Number of threads to use for processing", false ),
 		base::cmd_line::option(
 			0, std::string(),
 			"<output_file>", base::cmd_line::arg<1>,
 			"Output file pattern to create", true )
 	);
+	options.add_help();
 
 	auto errhandler = base::make_guard( [&]() { std::cerr << options << std::endl; } );
 	options.parse( argc, argv );
 	errhandler.dismiss();
+
+	auto &threads = options["threads"];
+	if ( threads )
+	{
+		int tCount = atoi( threads.value() );
+		threading::init( tCount );
+	}
 
 	std::cout << "CPU features:\n";
 	base::cpu::output( std::cout );
@@ -137,6 +155,10 @@ int safemain( int argc, char *argv[] )
 		else if ( m == "guided_color" )
 			method = m;
 		else if ( m == "bilateral" )
+			method = m;
+		else if ( m == "wavelet" )
+			method = m;
+		else if ( m == "despeckle" )
 			method = m;
 		else
 			throw_runtime( "Invalid spatial method requested: {0}", m );
@@ -155,30 +177,46 @@ int safemain( int argc, char *argv[] )
 	}
 	if ( spatY < 0 )
 		spatY = spatX;
-
 	auto &spatRW = options["spatial-radius-weight"];
 	if ( spatRW )
 		spatSigmaD = atof( spatRW.value() );
 	auto &spatIW = options["spatial-weight"];
 	if ( spatIW )
 		spatSigmaI = atof( spatIW.value() );
-	auto &varT = options["varthresh"];
-	if ( varT )
+
+	auto &waveL = options["wavelet-levels"];
+	if ( waveL )
 	{
-		varThreshLow = atof( varT.values()[0] );
-		varThreshHigh = atof( varT.values()[1] );
+		waveletLevels = atoi( spatW.value() );
+		if ( waveletLevels <= 0 )
+			throw_runtime( "wavelet levels must be a positive integer (1-N), got {0}", spatW.value() );
 	}
+
 	auto &tempR = options["temporal-radius"];
 	if ( tempR )
 		temporalRadius = atoi( tempR.value() );
 
+	estimateNoise = static_cast<bool>( options["estimate-noise"] );
+
 	media::metadata outputOptions;
 	outputOptions["compression"] = std::string( "piz" );
+	auto &frames = options["frames"];
+	if ( frames )
+	{
+		if ( frames.values().size() == 1 )
+			frameStart = frameEnd = atoll( frames.value() );
+		else
+		{
+			frameStart = atoll( frames.values()[0] );
+			frameEnd = atoll( frames.values()[1] );
+		}
+		if ( frameStart > frameEnd )
+			throw_runtime( "Invalid frame range {0} - {1} entered: start past end", frameStart, frameEnd );
+	}
 
 	auto &inP = options["<input_file>"];
 	auto &outP = options["<output_file>"];
 	auto &varP = options["variance"];
-	auto &dbgP = options["dbgweight"];
 	if ( inP && outP )
 	{
 		base::uri inputU( inP.value() );
@@ -191,13 +229,6 @@ int safemain( int argc, char *argv[] )
 			if ( ! varU )
 				varU.set_scheme( "file" );
 		}
-		base::uri dbgU;
-		if ( dbgP )
-		{
-			dbgU = dbgP.value();
-			if ( ! dbgU )
-				dbgU.set_scheme( "file" );
-		}
 		base::uri outputU( outP.value() );
 		if ( ! outputU )
 			outputU.set_scheme( "file" );
@@ -206,8 +237,6 @@ int safemain( int argc, char *argv[] )
 		std::vector<media::track_description> tds;
 		for ( auto &vt: c.video_tracks() )
 		{
-			std::cout << "Processing track '" << vt->name() << "' frames " << vt->begin() << " - " << vt->end() << " @ rate " << vt->rate() << std::endl;
-
 			media::sample s( vt->begin(), vt->rate() );
 
 			tds.push_back( media::TRACK_VIDEO );
@@ -223,15 +252,22 @@ int safemain( int argc, char *argv[] )
 			v = media::reader::open( varU );
 			precondition( v.video_tracks().size() == c.video_tracks().size(), "mismatch in video tracks for image and variance image" );
 		}
-		media::container dbg;
-		if ( dbgU )
-			dbg = media::writer::open( dbgU, tds, outputOptions );
 
 		media::container oc = media::writer::open( outputU, tds, outputOptions );
 		for ( size_t ci = 0; ci != c.video_tracks().size(); ++ci )
 		{
 			auto &vt = c.video_tracks()[ci];
-			for ( int64_t f = vt->begin(); f <= vt->end(); ++f )
+			int64_t fs = vt->begin();
+			int64_t fe = vt->end();
+			if ( frameStart != std::numeric_limits<int64_t>::min() )
+				fs = frameStart;
+			if ( frameEnd != std::numeric_limits<int64_t>::min() )
+				fe = frameEnd;
+
+			std::cout << "Processing track '" << vt->name() << "' of '" << inputU.pretty() << "': frames " << fs << " - " << fe << " of " << vt->begin() << " - " << vt->end() << " @ rate " << vt->rate() << std::endl;
+
+
+			for ( int64_t f = fs; f <= fe; ++f )
 			{
 				float cnt = 0.F;
 				image_buf accumImg;
@@ -243,10 +279,11 @@ int safemain( int argc, char *argv[] )
 					media::sample sCur( curF, vt->rate() );
 					auto curFrm = sCur( vt );
 					image_buf img = extract_frame( *curFrm, { "R", "G", "B" } );
+					plane weight;
 					if ( varU )
 					{
-//						auto curVarFrm = sCur( v.video_tracks()[ci] );
-//						image_buf varimg = extract_frame( *curVarFrm, { "R", "G", "B" } );
+						auto curVarFrm = sCur( v.video_tracks()[ci] );
+						image_buf varimg = extract_frame( *curVarFrm, { "R", "G", "B" } );
 //						plane varP = varimg[0];
 //						float varRng = ( varThreshHigh - varThreshLow );
 //						for ( int p = 0; p < 3; ++p )
@@ -263,76 +300,86 @@ int safemain( int argc, char *argv[] )
 
 						plane lum = img[0] * 0.3F + img[1] * 0.6F + img[2] * 0.1F;
 //						lum = log( lum + 1.F );
-#if 0
+
 						plane localvar = local_variance( lum, 5 );
 						plane weight = filter_nan( varimg[2], 0.F ) / max( lum, engine::make_constant( 0.00001F ) ) * sqrt( max( localvar, engine::make_constant( 0.00001F ) ) );
 						weight = if_less( weight, 0.0001F, clamp( weight, engine::make_constant( 1.F ), engine::make_constant( 1.F ) ), 1.F / weight );
 						for ( int p = 0; p < 3; ++p )
-							img[p] = replace_high( img[p], exp( weighted_bilateral( log( img[p] + 1.F ), weight, engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) ) ) - 1.F );
-#endif
-
-//						auto wd = wavelet_decomp( lum, , { -1.F/16.F, -4.F/16.F, 10.F/16.F, -4.F/16.F, -1.F/16.F } );
-//						img[0] = wd.first;
-//						img[1] = wd.second;
-//						img[2] = wd.first + wd.second;
-#if 0
-						if ( dbgU )
-						{
-							image_buf dbgImg;
-							dbgImg.add_plane( weight );
-							dbgImg.add_plane( localvar );
-							dbgImg.add_plane( lum );
-							dbg.video_tracks()[ci]->store( f, to_frame( dbgImg, { "R", "G", "B" }, "f16" ) );
-						}
-#endif
+							img[p] = replace_high( img[p], expm1( weighted_bilateral( log1p( img[p] ), weight, engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) ) ) );
 					}
-					else
+					else if ( estimateNoise )
 					{
-						image_buf fimg;
+					}
 
-						if ( method == "guided_color" )
-						{
+					image_buf fimg;
+
+					if ( method == "guided_color" )
+					{
+						if ( weight.valid() )
+							fimg = guided_filter_color( img, img, std::max( spatX, spatY ), weight * spatSigmaI * spatSigmaI );
+						else
 							fimg = guided_filter_color( img, img, std::max( spatX, spatY ), spatSigmaI * spatSigmaI );
-						}
-						else if ( method == "guided_mono" )
+					}
+					else if ( method == "guided_mono" )
+					{
+						fimg = img;
+						for ( int p = 0; p < 3; ++p )
 						{
-							fimg = img;
-							for ( int p = 0; p < 3; ++p )
+							if ( weight.valid() )
+								fimg[p] = guided_filter_mono( img[p], img[p], std::max( spatX, spatY ), weight * spatSigmaI * spatSigmaI );
+							else
 								fimg[p] = guided_filter_mono( img[p], img[p], std::max( spatX, spatY ), spatSigmaI * spatSigmaI );
 						}
-						else if ( method == "bilateral" )
+					}
+					else if ( method == "bilateral" )
+					{
+						fimg = img;
+						for ( int p = 0; p < 3; ++p )
 						{
-							fimg = img;
-							for ( int p = 0; p < 3; ++p )
+							if ( weight.valid() )
+								fimg[p] = weighted_bilateral( img[p], weight, engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) );
+							else
 								fimg[p] = bilateral( img[p], engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) );
 						}
-
-						img = fimg;
-#if 0
-						const float sigma2 = 0.00005;
-
-						plane detailmask;
-						for ( int p = 0; p < 3; ++p )
-						{
-							plane detail = img[p] - fimg[p];
-							plane noisemask = threshold( exp( square( detail ) / ( -2.F * sigma2 ) ), 0.5F );
-							if ( p == 0 )
-								detailmask = noisemask;
-							else
-								detailmask = max( detailmask, noisemask );
-						}
-						for ( int p = 0; p < 3; ++p )
-						{
-							plane detail = img[p] - fimg[p];
-							img[p] = img[p] - detail * detailmask;
-						}
-#endif
-						
-//							img[p] = guided_filter_mono( img[p], img[p], 5, scale * .0005F );
-//							img[p] = guided_filter_mono( img[p], img[p], 11, lum * 0.0005F );
-//							img[p] = wavelet_filter( img[p], 1, 0.1F );
-//							img[p] = 
 					}
+					else if ( method == "wavelet" )
+					{
+						fimg = img;
+						for ( int p = 0; p < 3; ++p )
+						{
+							if ( weight.valid() )
+								img[p] = wavelet_filter( img[p], waveletLevels, spatSigmaI );
+							else
+								img[p] = wavelet_filter( img[p], waveletLevels, weight * spatSigmaI );
+						}
+					}
+					else if ( method == "despeckle" )
+					{
+						fimg = img;
+						for ( int p = 0; p < 3; ++p )
+							img[p] = despeckle( img[p], spatSigmaI );
+					}
+
+					img = fimg;
+#if 0
+					const float sigma2 = 0.00005;
+
+					plane detailmask;
+					for ( int p = 0; p < 3; ++p )
+					{
+						plane detail = img[p] - fimg[p];
+						plane noisemask = threshold( exp( square( detail ) / ( -2.F * sigma2 ) ), 0.5F );
+						if ( p == 0 )
+							detailmask = noisemask;
+						else
+							detailmask = max( detailmask, noisemask );
+					}
+					for ( int p = 0; p < 3; ++p )
+					{
+						plane detail = img[p] - fimg[p];
+						img[p] = img[p] - detail * detailmask;
+					}
+#endif
 
 					if ( cnt < 1.F )
 						accumImg = img;
