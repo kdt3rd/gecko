@@ -34,19 +34,25 @@ namespace engine
 
 registry::registry( void )
 {
+	register_constant<bool>();
+
 	register_constant<float>();
 	register_constant<double>();
+
 	register_constant<uint8_t>();
 	register_constant<uint16_t>();
 	register_constant<uint32_t>();
 	register_constant<uint64_t>();
+
 	register_constant<int8_t>();
 	register_constant<int16_t>();
 	register_constant<int32_t>();
 	register_constant<int64_t>();
+
 	register_constant<std::string>();
 	register_constant<std::vector<float>>();
 	register_constant<std::vector<double>>();
+
 	register_float_ops( *this );
 }
 

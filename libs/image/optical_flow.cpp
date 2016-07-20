@@ -20,25 +20,46 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#pragma once
+#include "optical_flow.h"
 
-#include "vector_field.h"
-#include "vector_ops.h"
-#include "patch_match.h"
-#include "op_registry.h"
+////////////////////////////////////////
+
+namespace
+{
+using namespace image;
+
+static plane extract_u( const vector_field &v )
+{
+	return v.u();
+}
+
+////////////////////////////////////////
+
+static plane extract_v( const vector_field &v )
+{
+	return v.v();
+}
+
+} // empty namespace
 
 ////////////////////////////////////////
 
 namespace image
 {
 
-//// TODO: Add arguments
-//vector_field oflow_sad( const plane &a, const plane &b );
-//// TODO: Add arguments
-//vector_field oflow_htvl1( const plane &a, const plane &b );
-//vector_field oflow_htvl1( const image_buf &a, const image_buf &b );
+void
+add_oflow( engine::registry &r )
+{
+	using namespace engine;
 
-void add_oflow( engine::registry &r );
+	r.add( op( "v.extract_u", extract_u, op::simple ) );
+	r.add( op( "v.extract_v", extract_v, op::simple ) );
+
+	add_vector_ops( r );
+	add_patchmatch( r );
+}
+
+////////////////////////////////////////
 
 } // namespace image
 

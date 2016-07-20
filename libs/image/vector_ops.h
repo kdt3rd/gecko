@@ -23,22 +23,33 @@
 #pragma once
 
 #include "vector_field.h"
-#include "vector_ops.h"
-#include "patch_match.h"
-#include "op_registry.h"
+#include "image.h"
 
 ////////////////////////////////////////
 
 namespace image
 {
 
-//// TODO: Add arguments
-//vector_field oflow_sad( const plane &a, const plane &b );
-//// TODO: Add arguments
-//vector_field oflow_htvl1( const plane &a, const plane &b );
-//vector_field oflow_htvl1( const image_buf &a, const image_buf &b );
+vector_field concatenate( const vector_field &a, const vector_field &b, bool isAbsolute );
+vector_field project( const vector_field &a, float scale, bool isAbsolute );
 
-void add_oflow( engine::registry &r );
+image_buf warp_lanczos( const image_buf &src, const vector_field &v, bool isAbsolute );
+plane warp_lanczos( const plane &src, const vector_field &v, bool isAbsolute );
+
+image_buf warp_bilinear( const image_buf &src, const vector_field &v, bool isAbsolute );
+plane warp_bilinear( const plane &src, const vector_field &v, bool isAbsolute );
+
+image_buf warp_dirac( const image_buf &src, const vector_field &v, bool isAbsolute );
+plane warp_dirac( const plane &src, const vector_field &v, bool isAbsolute );
+
+vector_field convert_to_absolute( const vector_field &v );
+vector_field convert_to_relative( const vector_field &v );
+
+image_buf colorize( const vector_field &v );
+
+plane divergence( const vector_field &a, const vector_field &b );
+
+void add_vector_ops( engine::registry &r );
 
 } // namespace image
 

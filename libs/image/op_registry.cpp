@@ -110,7 +110,6 @@ registerPlaneOps( engine::registry &r )
 	image::add_plane_math( r );
 	image::add_plane_stats( r );
 	image::add_convolve( r );
-	image::add_spatial( r );
 }
 
 ////////////////////////////////////////
@@ -123,6 +122,8 @@ void initOps( void )
 	registry &r = registry::get();
 	registerPlaneOps( r );
 	registerImageOps( r );
+	image::add_spatial( r );
+	image::add_oflow( r );
 }
 
 }

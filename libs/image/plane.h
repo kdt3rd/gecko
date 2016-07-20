@@ -42,6 +42,7 @@ namespace image
 class plane : public engine::computed_base
 {
 public:
+	typedef float value_type;
 	plane( void );
 	plane( int w, int h );
 	plane( const engine::dimensions &d );
@@ -77,23 +78,23 @@ public:
 
 	inline int stride( void ) const { check_compute(); return _stride; }
 
-	inline size_t buffer_size( void ) const { return static_cast<size_t>( stride() * height() ) * sizeof(float); }
+	inline size_t buffer_size( void ) const { return static_cast<size_t>( stride() * height() ) * sizeof(value_type); }
 
-	inline float *data( void ) { check_compute(); return _mem.get(); }
-	inline const float *data( void ) const { check_compute(); return _mem.get(); }
-	inline const float *cdata( void ) const { check_compute(); return _mem.get(); }
-	inline float *line( int y ) { return data() + y * stride(); }
-	inline const float *line( int y ) const { return cdata() + y * stride(); }
+	inline value_type *data( void ) { check_compute(); return _mem.get(); }
+	inline const value_type *data( void ) const { check_compute(); return _mem.get(); }
+	inline const value_type *cdata( void ) const { check_compute(); return _mem.get(); }
+	inline value_type *line( int y ) { return data() + y * stride(); }
+	inline const value_type *line( int y ) const { return cdata() + y * stride(); }
 
 	inline bool in_bounds_x( int x ) const { return x >= 0 && x < _width; }
 	inline bool in_bounds_y( int y ) const { return y >= 0 && y < _height; }
 	inline bool in_bounds( int x, int y ) const { return in_bounds_x( x ) && in_bounds_y( y ); }
 
-	inline float &get( int x, int y ) { return *( line( y ) + x ); }
-	inline float get( int x, int y ) const { return *( line( y ) + x ); }
-	inline void set( int x, int y, float v ) { get( x, y ) = v; }
+	inline value_type &get( int x, int y ) { return *( line( y ) + x ); }
+	inline value_type get( int x, int y ) const { return *( line( y ) + x ); }
+	inline void set( int x, int y, value_type v ) { get( x, y ) = v; }
 
-	inline float get_zero( int x, int y ) const
+	inline value_type get_zero( int x, int y ) const
 	{
 		if ( x < 0 || x >= _width )
 			return 0.F;
@@ -101,12 +102,12 @@ public:
 			return 0.F;
 		return get( x, y );
 	}
-	inline float get_hold( int x, int y ) const
+	inline value_type get_hold( int x, int y ) const
 	{
 		return get( std::max( 0, std::min( _width_m1, x ) ),
 					std::max( 0, std::min( _height_m1, y ) ) );
 	}
-	inline float get_mirror( int x, int y ) const
+	inline value_type get_mirror( int x, int y ) const
 	{
 		while ( ! in_bounds_x( x ) )
 		{
@@ -127,44 +128,44 @@ public:
 	}
 
 	/// bilinear sample, treating requests outside as zero
-	inline float bilinear_zero( float x, float y ) const
+	inline value_type bilinear_zero( value_type x, value_type y ) const
 	{
 		int ix = static_cast<int>( x );
 		if ( x < 0.F )
 			--ix;
-		float percBx = x - static_cast<float>( ix );
+		value_type percBx = x - static_cast<value_type>( ix );
 		int iy = static_cast<int>( y );
 		if ( y < 0.F )
 			--iy;
-		float percBy = y - static_cast<float>( iy );
+		value_type percBy = y - static_cast<value_type>( iy );
 
-		float a00 = get_zero( ix, iy );
-		float a10 = get_zero( ix + 1, iy );
-		float a01 = get_zero( ix, iy + 1 );
-		float a11 = get_zero( ix + 1, iy + 1 );
-		float t0 = base::lerp( a00, a10, percBx );
-		float t1 = base::lerp( a01, a11, percBx );
+		value_type a00 = get_zero( ix, iy );
+		value_type a10 = get_zero( ix + 1, iy );
+		value_type a01 = get_zero( ix, iy + 1 );
+		value_type a11 = get_zero( ix + 1, iy + 1 );
+		value_type t0 = base::lerp( a00, a10, percBx );
+		value_type t1 = base::lerp( a01, a11, percBx );
 		return base::lerp( t0, t1, percBy );
 	}
 
 	/// bilinear sample, holding edge
-	inline float bilinear_hold( float x, float y ) const
+	inline value_type bilinear_hold( value_type x, value_type y ) const
 	{
 		int ix = static_cast<int>( x );
 		if ( x < 0.F )
 			--ix;
-		float percBx = x - static_cast<float>( ix );
+		value_type percBx = x - static_cast<value_type>( ix );
 		int iy = static_cast<int>( y );
 		if ( y < 0.F )
 			--iy;
-		float percBy = y - static_cast<float>( iy );
+		value_type percBy = y - static_cast<value_type>( iy );
 
-		float a00 = get_hold( ix, iy );
-		float a10 = get_hold( ix + 1, iy );
-		float a01 = get_hold( ix, iy + 1 );
-		float a11 = get_hold( ix + 1, iy + 1 );
-		float t0 = base::lerp( a00, a10, percBx );
-		float t1 = base::lerp( a01, a11, percBx );
+		value_type a00 = get_hold( ix, iy );
+		value_type a10 = get_hold( ix + 1, iy );
+		value_type a01 = get_hold( ix, iy + 1 );
+		value_type a11 = get_hold( ix + 1, iy + 1 );
+		value_type t0 = base::lerp( a00, a10, percBx );
+		value_type t1 = base::lerp( a01, a11, percBx );
 		return base::lerp( t0, t1, percBy );
 	}
 
@@ -198,7 +199,7 @@ private:
 		throw_runtime( "Invalid access of uninitialized plane" );
 	}
 
-	mutable std::shared_ptr<float> _mem;
+	mutable std::shared_ptr<value_type> _mem;
 	int _width = 0;
 	int _width_m1 = 0;
 	int _height = 0;

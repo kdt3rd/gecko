@@ -25,6 +25,7 @@
 #include <base/cpu_features.h>
 #include <iostream>
 #include <cmath>
+#include <random>
 
 // TODO: add ifdefs when compiling for alternate platforms (i.e. ARM)
 #include "sse3/plane_math.h"
@@ -41,6 +42,40 @@ static void assign_value( scanline &dest, float v )
 {
 	for ( int x = 0, N = dest.width(); x != N; ++x )
 		dest[x] = v;
+}
+
+////////////////////////////////////////
+
+static void random_value( scanline &dest, int y, uint32_t seed, float minV, float maxV )
+{
+	std::mt19937 genY( seed );
+	// does this just run the engine y*W times or does it fast jump?
+	// if it's slow, we should have 2, one to generate seeds for
+	// lines, one for each scanline
+	if ( y > 0 )
+		genY.discard( static_cast<unsigned long long>( y ) );
+	std::mt19937 genX( genY() );
+	std::uniform_real_distribution<float> urd( minV, std::nextafter( maxV, std::numeric_limits<float>::max() ) );
+
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = urd( genX );
+}
+
+////////////////////////////////////////
+
+static void iotaX_value( scanline &dest )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = static_cast<float>( x );
+}
+
+////////////////////////////////////////
+
+static void iotaY_value( scanline &dest, int y )
+{
+	float yV = static_cast<float>( y );
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = yV;
 }
 
 ////////////////////////////////////////
@@ -393,6 +428,10 @@ void add_plane_math( engine::registry &r )
 	using namespace engine;
 
 	r.add( op( "p.assign", base::choose_runtime( assign_value, { { base::cpu::simd_feature::SSE3, sse3::assign_value } } ), scanline_plane_adapter<true, decltype(assign_value)>(), dispatch_scan_processing, op::one_to_one ) );
+
+	r.add( op( "p.random", base::choose_runtime( random_value ), n_scanline_plane_adapter<false, decltype(random_value)>(), dispatch_scan_processing, op::n_to_one ) );
+	r.add( op( "p.iota_x", base::choose_runtime( iotaX_value ), scanline_plane_adapter<true, decltype(iotaX_value)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.iota_y", base::choose_runtime( iotaY_value ), n_scanline_plane_adapter<true, decltype(iotaY_value)>(), dispatch_scan_processing, op::n_to_one ) );
 
 	r.add( op( "p.filter_nan", base::choose_runtime( plane_filter_nan ), scanline_plane_adapter<true, decltype(plane_filter_nan)>(), dispatch_scan_processing, op::one_to_one ) );
 

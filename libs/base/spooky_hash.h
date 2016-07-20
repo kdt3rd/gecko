@@ -147,6 +147,12 @@ inline spooky_hash &operator <<( spooky_hash &h, const std::map<K, V> &v )
 	return h;
 }
 
+template <typename A, typename B>
+inline spooky_hash &operator <<( spooky_hash &h, const std::pair<A, B> &v )
+{
+	return h << v.first << v.second;
+}
+
 std::ostream &operator<<( std::ostream &os, const spooky_hash &h );
 std::ostream &operator<<( std::ostream &os, const spooky_hash::value &v );
 

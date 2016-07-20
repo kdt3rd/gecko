@@ -23,10 +23,15 @@ lib = library "image"
 	"op_registry.cpp";
 	"image_ops.cpp";
 	"plane_math.cpp";
+	"plane_ops.cpp";
 	"plane_stats.cpp";
 	"plane_convolve.cpp";
 	"media_io.cpp";
 	"spatial_filter.cpp";
+	"vector_field.cpp";
+	"vector_ops.cpp";
+	"optical_flow.cpp";
+	"patch_match.cpp";
 	sse3src;
 	sse4src;
   }

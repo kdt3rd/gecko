@@ -74,12 +74,17 @@ public:
 		}
 		return r;
 	}
+	inline int width( void ) const { return _planes[0].width(); }
+	inline int height( void ) const { return _planes[0].height(); }
+	inline int planes( void ) const { return static_cast<int>( _planes.size() ); }
 
 	void add_plane( const plane &p );
 	void add_plane( plane &&p );
 
 	inline bool empty( void ) const { return _planes.empty(); }
 	inline size_t size( void ) const { return _planes.size(); }
+	inline plane &operator[]( int i ) { return _planes[static_cast<size_t>(i)]; }
+	inline const plane &operator[]( int i ) const { return _planes[static_cast<size_t>(i)]; }
 	inline plane &operator[]( size_t i ) { return _planes[i]; }
 	inline const plane &operator[]( size_t i ) const { return _planes[i]; }
 

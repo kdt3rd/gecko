@@ -23,8 +23,7 @@
 #pragma once
 
 #include "vector_field.h"
-#include "vector_ops.h"
-#include "patch_match.h"
+#include "image.h"
 #include "op_registry.h"
 
 ////////////////////////////////////////
@@ -32,13 +31,17 @@
 namespace image
 {
 
-//// TODO: Add arguments
-//vector_field oflow_sad( const plane &a, const plane &b );
-//// TODO: Add arguments
-//vector_field oflow_htvl1( const plane &a, const plane &b );
-//vector_field oflow_htvl1( const image_buf &a, const image_buf &b );
+enum class patch_style : int
+{
+	SSD, ///< just sum square difference of values
+	SSD_GRAD, ///< sum square difference of values and gradients
+	GRAD ///< sum square difference gradients only
+};
 
-void add_oflow( engine::registry &r );
+vector_field patch_match( const plane &a, const plane &b, int64_t framenumA, int64_t framenumB, int radius, patch_style style, int iters );
+vector_field patch_match( const image_buf &a, const image_buf &b, int64_t framenumA, int64_t framenumB, int radius, patch_style style, int iters );
+
+void add_patchmatch( engine::registry &r );
 
 } // namespace image
 

@@ -27,8 +27,8 @@ public:
 
 	size_t add_channel( std::string n, image_buffer &i )
 	{
-		precondition( i.width() == _width, "invalid channel width" );
-		precondition( i.height() == _height, "invalid channel height" );
+		precondition( i.width() == _width, "invalid channel width {0} vs {1}", i.width(), _width );
+		precondition( i.height() == _height, "invalid channel height {0} vs {1}", i.height(), _height );
 		_names[std::move(n)] = _channels.size();
 		_channels.push_back( i );
 		return _channels.size() - 1;
@@ -36,16 +36,16 @@ public:
 
 	size_t add_channel( image_buffer &i )
 	{
-		precondition( i.width() == _width, "invalid channel width" );
-		precondition( i.height() == _height, "invalid channel height" );
+		precondition( i.width() == _width, "invalid channel width {0} vs {1}", i.width(), _width );
+		precondition( i.height() == _height, "invalid channel height {0} vs {1}", i.height(), _height );
 		_channels.push_back( i );
 		return _channels.size() - 1;
 	}
 
 	size_t add_channel( image_buffer &&i )
 	{
-		precondition( i.width() == _width, "invalid channel width" );
-		precondition( i.height() == _height, "invalid channel height" );
+		precondition( i.width() == _width, "invalid channel width {0} vs {1}", i.width(), _width );
+		precondition( i.height() == _height, "invalid channel height {0} vs {1}", i.height(), _height );
 		_channels.push_back( std::move( i ) );
 		return _channels.size() - 1;
 	}

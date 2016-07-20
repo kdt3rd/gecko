@@ -85,7 +85,7 @@ int safemain( int argc, char *argv[] )
 			"Processes the image in log space instead of linear", false ),
 		base::cmd_line::option(
 			0, std::string( "spatial-method" ),
-			"<guided_color|guided_mono|wavelet|bilateral|despeckle>", base::cmd_line::arg<1>,
+			"<guided_color|guided_mono|wavelet|bilateral|despeckle|patchmatch>", base::cmd_line::arg<1>,
 			"Specifies the spatial method used", false ),
 		base::cmd_line::option(
 			0, std::string( "spatial-weight" ),
@@ -150,6 +150,8 @@ int safemain( int argc, char *argv[] )
 		else if ( m == "wavelet" )
 			method = m;
 		else if ( m == "despeckle" )
+			method = m;
+		else if ( m == "patchmatch" )
 			method = m;
 		else
 			throw_runtime( "Invalid spatial method requested: {0}", m );
@@ -241,6 +243,7 @@ int safemain( int argc, char *argv[] )
 		media::container v;
 		if ( varU )
 		{
+			std::cout << "Opening variance image " << varU << std::endl;
 			v = media::reader::open( varU );
 			precondition( v.video_tracks().size() == c.video_tracks().size(), "mismatch in video tracks for image and variance image" );
 		}
@@ -263,14 +266,51 @@ int safemain( int argc, char *argv[] )
 			{
 				float cnt = 0.F;
 				image_buf accumImg;
+
+				std::cout << "Processing frame: " << f << std::endl;
+				media::sample cenSamp( f, vt->rate() );
+				auto centerFrm = cenSamp( vt );
+				image_buf centerImg = extract_frame( *centerFrm, { "R", "G", "B" } );
+
 				for ( int64_t curF = f - temporalRadius; curF <= (f + temporalRadius); ++curF )
 				{
 					if ( curF < vt->begin() || curF > vt->end() )
 						continue;
 
 					media::sample sCur( curF, vt->rate() );
-					auto curFrm = sCur( vt );
-					image_buf img = extract_frame( *curFrm, { "R", "G", "B" } );
+
+					image_buf img;
+					if ( curF == f )
+						img = centerImg;
+					else
+					{
+						std::cout << "reading temporal frame " << curF << std::endl;
+						auto curFrm = sCur( vt );
+						img = extract_frame( *curFrm, { "R", "G", "B" } );
+					}
+
+					if ( temporalRadius > 0 && curF != f )
+					{
+						plane lumA = centerImg[0] * 0.3F + centerImg[1] * 0.6F + centerImg[2] * 0.1F;
+						plane lumB = img[0] * 0.3F + img[1] * 0.6F + img[2] * 0.1F;
+//						vector_field vf = patch_match( log1p( lumA ), log1p( lumB ), f, curF, 2, patch_style::SSD_GRAD, 4 );
+						vector_field vf = patch_match( lumA, lumB, f, curF, 2, patch_style::SSD_GRAD, 5 );
+//						vector_field vf = patch_match( log1p( lumA ), log1p( lumB ), f, curF, 2, patch_style::SSD, 1 );
+
+						img[0] = warp_dirac( img[0], vf, true );
+						img[1] = warp_dirac( img[1], vf, true );
+						img[2] = warp_dirac( img[2], vf, true );
+
+						if ( cnt < 1.F )
+							accumImg = img;
+						else
+						{
+							for ( int p = 0; p < 3; ++p )
+								accumImg[p] += img[p];
+						}
+						cnt += 1.F;
+						break;
+					}
 					image_buf weight;
 					if ( varU )
 					{
@@ -355,6 +395,10 @@ int safemain( int argc, char *argv[] )
 							else
 								fimg[p] = wavelet_filter( img[p], waveletLevels, weight[p] * spatSigmaI );
 						}
+					}
+					else if ( method == "patchmatch" )
+					{
+						fimg = img;
 					}
 					else if ( method == "despeckle" )
 					{
