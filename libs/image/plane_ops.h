@@ -27,6 +27,7 @@
 #include "plane_stats.h"
 #include "plane_convolve.h"
 #include "spatial_filter.h"
+#include "optical_flow.h"
 #include <engine/float_ops.h>
 
 ////////////////////////////////////////
@@ -48,6 +49,10 @@ inline plane create_plane( int w, int h, const engine::computed_value<float> &v 
 	d.y = static_cast<uint16_t>( h );
 	return plane( "p.assign", d, v );
 }
+
+plane create_random_plane( int w, int h, uint32_t seed, float minV, float maxV );
+plane create_iotaX_plane( int w, int h );
+plane create_iotaY_plane( int w, int h );
 
 inline plane filter_nan( const plane &p, float repl = 0.F )
 {
