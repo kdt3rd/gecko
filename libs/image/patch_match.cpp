@@ -32,13 +32,15 @@ using namespace image;
 
 struct PatchMatchSSD
 {
-	static inline float compute( const plane &a, const plane &b, int px, int py, int radius )
+	static inline float compute( const plane &a, const plane &b, int ax, int ay, int px, int py, int radius )
 	{
 		float ret = 0.F;
 		for ( int y = -radius; y <= radius; ++y )
 		{
-			int sy = py + y;
-			if ( sy < 0 || sy >= a.height() )
+			int say = ay + y;
+			int sby = py + y;
+			if ( ( say < 0 || say >= a.height() ) ||
+				 ( sby < 0 || sby >= a.height() ) )
 			{
 				ret += static_cast<float>( 2*radius + 1 );
 				continue;
@@ -46,14 +48,15 @@ struct PatchMatchSSD
 
 			for ( int x = -radius; x <= radius; ++x )
 			{
-				int sx = px + x;
-				if ( sx < 0 || sx >= a.width() )
+				int sax = ax + x;
+				int sbx = px + x;
+				if ( ( sax < 0 || sax >= a.width() ) || ( sbx < 0 || sbx >= a.width() ) )
 				{
 					ret += 1.F;
 				}
 				else
 				{
-					float d = a.get( sx, sy ) - b.get( sx, sy );
+					float d = a.get( sax, say ) - b.get( sbx, sby );
 					ret += d * d;
 				}
 			}
@@ -61,14 +64,16 @@ struct PatchMatchSSD
 		return ret;
 	}
 
-	static inline float compute( const image_buf &a, const image_buf &b, int px, int py, int radius )
+	static inline float compute( const image_buf &a, const image_buf &b, int ax, int ay, int px, int py, int radius )
 	{
 		float ret = 0.F;
 		int numC = a.planes();
 		for ( int y = -radius; y <= radius; ++y )
 		{
-			int sy = py + y;
-			if ( sy < 0 || sy >= a.height() )
+			int say = ay + y;
+			int sby = py + y;
+			if ( ( say < 0 || say >= a.height() ) ||
+				 ( sby < 0 || sby >= a.height() ) )
 			{
 				ret += static_cast<float>( numC * (2*radius + 1) );
 				continue;
@@ -76,8 +81,9 @@ struct PatchMatchSSD
 
 			for ( int x = -radius; x <= radius; ++x )
 			{
-				int sx = px + x;
-				if ( sx < 0 || sx >= a.width() )
+				int sax = ax + x;
+				int sbx = px + x;
+				if ( ( sax < 0 || sax >= a.width() ) || ( sbx < 0 || sbx >= a.width() ) )
 				{
 					ret += static_cast<float>( numC );
 				}
@@ -85,7 +91,7 @@ struct PatchMatchSSD
 				{
 					for ( int c = 0; c != numC; ++c )
 					{
-						float d = a[c].get( sx, sy ) - b[c].get( sx, sy );
+						float d = a[c].get( sax, say ) - b[c].get( sbx, sby );
 						ret += d * d;
 					}
 				}
@@ -97,13 +103,15 @@ struct PatchMatchSSD
 
 struct PatchMatchSSDGrad
 {
-	static inline float compute( const plane &a, const plane &b, int px, int py, int radius )
+	static inline float compute( const plane &a, const plane &b, int ax, int ay, int px, int py, int radius )
 	{
 		float ret = 0.F;
 		for ( int y = -radius; y <= radius; ++y )
 		{
-			int sy = py + y;
-			if ( sy < 0 || sy >= a.height() )
+			int say = ay + y;
+			int sby = py + y;
+			if ( ( say < 0 || say >= a.height() ) ||
+				 ( sby < 0 || sby >= a.height() ) )
 			{
 				ret += static_cast<float>( 2*radius + 1 );
 				continue;
@@ -111,18 +119,19 @@ struct PatchMatchSSDGrad
 
 			for ( int x = -radius; x <= radius; ++x )
 			{
-				int sx = px + x;
-				if ( sx < 0 || sx >= a.width() )
+				int sax = ax + x;
+				int sbx = px + x;
+				if ( ( sax < 0 || sax >= a.width() ) || ( sbx < 0 || sbx >= a.width() ) )
 				{
 					ret += 1.F;
 				}
 				else
 				{
-					float d = a.get( sx, sy ) - b.get( sx, sy );
-					float gxa = a.get_zero( sx + 1, sy ) - a.get_zero( sx - 1, sy );
-					float gxb = b.get_zero( sx + 1, sy ) - b.get_zero( sx - 1, sy );
-					float gya = a.get_zero( sx, sy + 1 ) - a.get_zero( sx, sy - 1 );
-					float gyb = b.get_zero( sx, sy + 1 ) - b.get_zero( sx, sy - 1 );
+					float d = a.get( sax, say ) - b.get( sbx, sby );
+					float gxa = a.get_zero( sax + 1, say ) - a.get_zero( sax - 1, say );
+					float gxb = b.get_zero( sbx + 1, sby ) - b.get_zero( sbx - 1, sby );
+					float gya = a.get_zero( sax, say + 1 ) - a.get_zero( sax, say - 1 );
+					float gyb = b.get_zero( sbx, sby + 1 ) - b.get_zero( sbx, sby - 1 );
 
 					gxa -= gxb;
 					gya -= gyb;
@@ -133,14 +142,16 @@ struct PatchMatchSSDGrad
 		return ret;
 	}
 
-	static inline float compute( const image_buf &a, const image_buf &b, int px, int py, int radius )
+	static inline float compute( const image_buf &a, const image_buf &b, int ax, int ay, int px, int py, int radius )
 	{
 		float ret = 0.F;
 		int numC = a.planes();
 		for ( int y = -radius; y <= radius; ++y )
 		{
-			int sy = py + y;
-			if ( sy < 0 || sy >= a.height() )
+			int say = ay + y;
+			int sby = py + y;
+			if ( ( say < 0 || say >= a.height() ) ||
+				 ( sby < 0 || sby >= a.height() ) )
 			{
 				ret += static_cast<float>( numC * ( 2*radius + 1 ) );
 				continue;
@@ -148,8 +159,9 @@ struct PatchMatchSSDGrad
 
 			for ( int x = -radius; x <= radius; ++x )
 			{
-				int sx = px + x;
-				if ( sx < 0 || sx >= a.width() )
+				int sax = ax + x;
+				int sbx = px + x;
+				if ( ( sax < 0 || sax >= a.width() ) || ( sbx < 0 || sbx >= a.width() ) )
 				{
 					ret += static_cast<float>( numC );
 				}
@@ -157,11 +169,11 @@ struct PatchMatchSSDGrad
 				{
 					for ( int c = 0; c != numC; ++c )
 					{
-						float d = a[c].get( sx, sy ) - b[c].get( sx, sy );
-						float gxa = a[c].get_zero( sx + 1, sy ) - a[c].get_zero( sx - 1, sy );
-						float gxb = b[c].get_zero( sx + 1, sy ) - b[c].get_zero( sx - 1, sy );
-						float gya = a[c].get_zero( sx, sy + 1 ) - a[c].get_zero( sx, sy - 1 );
-						float gyb = b[c].get_zero( sx, sy + 1 ) - b[c].get_zero( sx, sy - 1 );
+						float d = a[c].get( sax, say ) - b[c].get( sbx, sby );
+						float gxa = a[c].get_zero( sax + 1, say ) - a[c].get_zero( sax - 1, say );
+						float gxb = b[c].get_zero( sbx + 1, sby ) - b[c].get_zero( sbx - 1, sby );
+						float gya = a[c].get_zero( sax, say + 1 ) - a[c].get_zero( sax, say - 1 );
+						float gyb = b[c].get_zero( sbx, sby + 1 ) - b[c].get_zero( sbx, sby - 1 );
 
 						gxa -= gxb;
 						gya -= gyb;
@@ -176,13 +188,15 @@ struct PatchMatchSSDGrad
 
 struct PatchMatchGrad
 {
-	static inline float compute( const plane &a, const plane &b, int px, int py, int radius )
+	static inline float compute( const plane &a, const plane &b, int ax, int ay, int px, int py, int radius )
 	{
 		float ret = 0.F;
 		for ( int y = -radius; y <= radius; ++y )
 		{
-			int sy = py + y;
-			if ( sy < 0 || sy >= a.height() )
+			int say = ay + y;
+			int sby = py + y;
+			if ( ( say < 0 || say >= a.height() ) ||
+				 ( sby < 0 || sby >= a.height() ) )
 			{
 				ret += static_cast<float>( 2*radius + 1 );
 				continue;
@@ -190,17 +204,18 @@ struct PatchMatchGrad
 
 			for ( int x = -radius; x <= radius; ++x )
 			{
-				int sx = px + x;
-				if ( sx < 0 || sx >= a.width() )
+				int sax = ax + x;
+				int sbx = px + x;
+				if ( ( sax < 0 || sax >= a.width() ) || ( sbx < 0 || sbx >= a.width() ) )
 				{
 					ret += 1.F;
 				}
 				else
 				{
-					float gxa = a.get_zero( sx + 1, sy ) - a.get_zero( sx - 1, sy );
-					float gxb = b.get_zero( sx + 1, sy ) - b.get_zero( sx - 1, sy );
-					float gya = a.get_zero( sx, sy + 1 ) - a.get_zero( sx, sy - 1 );
-					float gyb = b.get_zero( sx, sy + 1 ) - b.get_zero( sx, sy - 1 );
+					float gxa = a.get_zero( sax + 1, say ) - a.get_zero( sax - 1, say );
+					float gxb = b.get_zero( sbx + 1, sby ) - b.get_zero( sbx - 1, sby );
+					float gya = a.get_zero( sax, say + 1 ) - a.get_zero( sax, say - 1 );
+					float gyb = b.get_zero( sbx, sby + 1 ) - b.get_zero( sbx, sby - 1 );
 
 					gxa -= gxb;
 					gya -= gyb;
@@ -211,14 +226,16 @@ struct PatchMatchGrad
 		return ret;
 	}
 
-	static inline float compute( const image_buf &a, const image_buf &b, int px, int py, int radius )
+	static inline float compute( const image_buf &a, const image_buf &b, int ax, int ay, int px, int py, int radius )
 	{
 		float ret = 0.F;
 		int numC = a.planes();
 		for ( int y = -radius; y <= radius; ++y )
 		{
-			int sy = py + y;
-			if ( sy < 0 || sy >= a.height() )
+			int say = ay + y;
+			int sby = py + y;
+			if ( ( say < 0 || say >= a.height() ) ||
+				 ( sby < 0 || sby >= a.height() ) )
 			{
 				ret += static_cast<float>( numC * ( 2*radius + 1 ) );
 				continue;
@@ -226,8 +243,9 @@ struct PatchMatchGrad
 
 			for ( int x = -radius; x <= radius; ++x )
 			{
-				int sx = px + x;
-				if ( sx < 0 || sx >= a.width() )
+				int sax = ax + x;
+				int sbx = px + x;
+				if ( ( sax < 0 || sax >= a.width() ) || ( sbx < 0 || sbx >= a.width() ) )
 				{
 					ret += static_cast<float>( numC );
 				}
@@ -235,10 +253,10 @@ struct PatchMatchGrad
 				{
 					for ( int c = 0; c != numC; ++c )
 					{
-						float gxa = a[c].get_zero( sx + 1, sy ) - a[c].get_zero( sx - 1, sy );
-						float gxb = b[c].get_zero( sx + 1, sy ) - b[c].get_zero( sx - 1, sy );
-						float gya = a[c].get_zero( sx, sy + 1 ) - a[c].get_zero( sx, sy - 1 );
-						float gyb = b[c].get_zero( sx, sy + 1 ) - b[c].get_zero( sx, sy - 1 );
+						float gxa = a[c].get_zero( sax + 1, say ) - a[c].get_zero( sax - 1, say );
+						float gxb = b[c].get_zero( sbx + 1, sby ) - b[c].get_zero( sbx - 1, sby );
+						float gya = a[c].get_zero( sax, say + 1 ) - a[c].get_zero( sax, say - 1 );
+						float gyb = b[c].get_zero( sbx, sby + 1 ) - b[c].get_zero( sbx, sby - 1 );
 
 						gxa -= gxb;
 						gya -= gyb;
@@ -272,7 +290,7 @@ minimizePatch( plane &u, plane &v, plane &d, const BufType &a, const BufType &b,
 	{
 		int altDX = static_cast<int>( u.get( horiz, y ) ) + dir;
 		int altDY = static_cast<int>( v.get( horiz, y ) );
-		float hDist = DistFunc::compute( a, b, altDX, altDY, radius );
+		float hDist = DistFunc::compute( a, b, x, y, altDX, altDY, radius );
 		if ( hDist < curDist )
 		{
 			curDX = altDX;
@@ -287,7 +305,7 @@ minimizePatch( plane &u, plane &v, plane &d, const BufType &a, const BufType &b,
 	{
 		int altDX = static_cast<int>( u.get( x, vert ) );
 		int altDY = static_cast<int>( v.get( x, vert ) ) + dir;
-		float hDist = DistFunc::compute( a, b, altDX, altDY, radius );
+		float hDist = DistFunc::compute( a, b, x, y, altDX, altDY, radius );
 		if ( hDist < curDist )
 		{
 			curDX = altDX;
@@ -310,7 +328,7 @@ minimizePatch( plane &u, plane &v, plane &d, const BufType &a, const BufType &b,
 		altDX = std::max( int(0), std::min( maxX, altDX ) );
 		altDY = std::max( int(0), std::min( maxY, altDY ) );
 
-		float hDist = DistFunc::compute( a, b, altDX, altDY, radius );
+		float hDist = DistFunc::compute( a, b, x, y, altDX, altDY, radius );
 		if ( hDist < curDist )
 		{
 			curDX = altDX;
@@ -338,15 +356,15 @@ matchPassInit( plane &u, plane &v, plane &d, const BufType &a, const BufType &b,
 {
 	for ( int y = 0; y < u.height(); ++y )
 	{
+		std::cout << "\rpatch_match init line " << y << std::flush;
 		for ( int x = 0; x < u.width(); ++x )
 		{
 			int curDX = static_cast<int>( u.get( x, y ) );
 			int curDY = static_cast<int>( v.get( x, y ) );
-			d.get( x, y ) = DistFunc::compute( a, b, curDX, curDY, radius );
-			if ( x == y )
-				std::cout << x << ", " << y << " curDX " << curDX << " curDY " << curDY << ": " << d.get( x, y ) << std::endl;
+			d.get( x, y ) = DistFunc::compute( a, b, x, y, curDX, curDY, radius );
 		}
 	}
+	std::cout << "\rpatch_match init finished" << std::endl;
 }
 
 template <typename BufType, typename DistFunc>
@@ -392,6 +410,7 @@ runMatch( plane &u, plane &v, plane &d, const BufType &a, const BufType &b, uint
 				// if changes don't change, finished
 				changeCount = matchPass<BufType,PatchMatchSSD>( u, v, d, a, b, gen, radius, -1, p );
 				changeCount += matchPass<BufType,PatchMatchSSD>( u, v, d, a, b, gen, radius, 1, p );
+				std::cout << "\niteration " << p << " changed: " << changeCount << " pixels over 2 passes" << std::endl;
 				if ( changeCount == 0 )
 					break;
 			}
@@ -403,6 +422,7 @@ runMatch( plane &u, plane &v, plane &d, const BufType &a, const BufType &b, uint
 				std::cout << "\npatch_match iter " << p << std::endl;
 				changeCount = matchPass<BufType,PatchMatchSSDGrad>( u, v, d, a, b, gen, radius, -1, p );
 				changeCount += matchPass<BufType,PatchMatchSSDGrad>( u, v, d, a, b, gen, radius, 1, p );
+				std::cout << "\niteration " << p << " changed: " << changeCount << " pixels over 2 passes" << std::endl;
 				if ( changeCount == 0 )
 					break;
 			}
@@ -414,6 +434,7 @@ runMatch( plane &u, plane &v, plane &d, const BufType &a, const BufType &b, uint
 				std::cout << "\npatch_match iter " << p << std::endl;
 				changeCount = matchPass<BufType,PatchMatchGrad>( u, v, d, a, b, gen, radius, -1, p );
 				changeCount += matchPass<BufType,PatchMatchGrad>( u, v, d, a, b, gen, radius, 1, p );
+				std::cout << "\niteration " << p << " changed: " << changeCount << " pixels over 2 passes" << std::endl;
 				if ( changeCount == 0 )
 					break;
 			}
@@ -425,11 +446,11 @@ static vector_field pmPlane( const plane &a, const plane &b, int64_t frameA, int
 {
 	plane dist = create_plane( a.width(), a.height(), std::numeric_limits<plane::value_type>::max() );
 	uint32_t seedU = static_cast<uint32_t>( frameA + (frameA - frameB) + 1 );
-//	uint32_t seedV = static_cast<uint32_t>( frameA + (frameA - frameB) - 1 );
-//	plane u = create_random_plane( a.width(), a.height(), seedU, 0.F, static_cast<float>( a.width() ) );
-//	plane v = create_random_plane( a.width(), a.height(), seedV, 0.F, static_cast<float>( a.height() ) );
-	plane u = create_iotaX_plane( a.width(), a.height() );
-	plane v = create_iotaY_plane( a.width(), a.height() );
+	uint32_t seedV = static_cast<uint32_t>( frameA + (frameA - frameB) - 1 );
+	plane u = create_random_plane( a.width(), a.height(), seedU, 0.F, static_cast<float>( a.width() ) );
+	plane v = create_random_plane( a.width(), a.height(), seedV, 0.F, static_cast<float>( a.height() ) );
+//	plane u = create_iotaX_plane( a.width(), a.height() );
+//	plane v = create_iotaY_plane( a.width(), a.height() );
 	runMatch( u, v, dist, a, b, seedU, radius, style, iters );
 
 	return vector_field::create( std::move( u ), std::move( v ) );

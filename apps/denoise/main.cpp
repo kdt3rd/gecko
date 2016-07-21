@@ -291,25 +291,17 @@ int safemain( int argc, char *argv[] )
 
 					if ( temporalRadius > 0 && curF != f )
 					{
-						plane lumA = centerImg[0] * 0.3F + centerImg[1] * 0.6F + centerImg[2] * 0.1F;
-						plane lumB = img[0] * 0.3F + img[1] * 0.6F + img[2] * 0.1F;
+//						plane lumA = centerImg[0] * 0.3F + centerImg[1] * 0.6F + centerImg[2] * 0.1F;
+//						plane lumB = img[0] * 0.3F + img[1] * 0.6F + img[2] * 0.1F;
 //						vector_field vf = patch_match( log1p( lumA ), log1p( lumB ), f, curF, 2, patch_style::SSD_GRAD, 4 );
-						vector_field vf = patch_match( lumA, lumB, f, curF, 2, patch_style::SSD_GRAD, 5 );
+						vector_field vf = patch_match( centerImg, img, f, curF, 4, patch_style::SSD_GRAD, 10 );
 //						vector_field vf = patch_match( log1p( lumA ), log1p( lumB ), f, curF, 2, patch_style::SSD, 1 );
 
+//						img[0] = vf.u() / static_cast<float>( img[0].width() - 1 );//warp_dirac( img[0], vf, true );
+//						img[1] = vf.v() / static_cast<float>( img[0].height() - 1 );//warp_dirac( img[1], vf, true );
 						img[0] = warp_dirac( img[0], vf, true );
 						img[1] = warp_dirac( img[1], vf, true );
 						img[2] = warp_dirac( img[2], vf, true );
-
-						if ( cnt < 1.F )
-							accumImg = img;
-						else
-						{
-							for ( int p = 0; p < 3; ++p )
-								accumImg[p] += img[p];
-						}
-						cnt += 1.F;
-						break;
 					}
 					image_buf weight;
 					if ( varU )
