@@ -32,7 +32,7 @@ using namespace image;
 
 struct PatchMatchSSD
 {
-	static inline float compute( const plane &a, const plane &b, int ax, int ay, int px, int py, int radius )
+	static inline float compute( const const_plane_buffer &a, const const_plane_buffer &b, int ax, int ay, int px, int py, int radius )
 	{
 		float ret = 0.F;
 		for ( int y = -radius; y <= radius; ++y )
@@ -103,7 +103,7 @@ struct PatchMatchSSD
 
 struct PatchMatchSSDGrad
 {
-	static inline float compute( const plane &a, const plane &b, int ax, int ay, int px, int py, int radius )
+	static inline float compute( const const_plane_buffer &a, const const_plane_buffer &b, int ax, int ay, int px, int py, int radius )
 	{
 		float ret = 0.F;
 		for ( int y = -radius; y <= radius; ++y )
@@ -128,10 +128,10 @@ struct PatchMatchSSDGrad
 				else
 				{
 					float d = a.get( sax, say ) - b.get( sbx, sby );
-					float gxa = a.get_zero( sax + 1, say ) - a.get_zero( sax - 1, say );
-					float gxb = b.get_zero( sbx + 1, sby ) - b.get_zero( sbx - 1, sby );
-					float gya = a.get_zero( sax, say + 1 ) - a.get_zero( sax, say - 1 );
-					float gyb = b.get_zero( sbx, sby + 1 ) - b.get_zero( sbx, sby - 1 );
+					float gxa = get_zero( a, sax + 1, say ) - get_zero( a, sax - 1, say );
+					float gxb = get_zero( b, sbx + 1, sby ) - get_zero( b, sbx - 1, sby );
+					float gya = get_zero( a, sax, say + 1 ) - get_zero( a, sax, say - 1 );
+					float gyb = get_zero( b, sbx, sby + 1 ) - get_zero( b, sbx, sby - 1 );
 
 					gxa -= gxb;
 					gya -= gyb;
@@ -170,10 +170,10 @@ struct PatchMatchSSDGrad
 					for ( int c = 0; c != numC; ++c )
 					{
 						float d = a[c].get( sax, say ) - b[c].get( sbx, sby );
-						float gxa = a[c].get_zero( sax + 1, say ) - a[c].get_zero( sax - 1, say );
-						float gxb = b[c].get_zero( sbx + 1, sby ) - b[c].get_zero( sbx - 1, sby );
-						float gya = a[c].get_zero( sax, say + 1 ) - a[c].get_zero( sax, say - 1 );
-						float gyb = b[c].get_zero( sbx, sby + 1 ) - b[c].get_zero( sbx, sby - 1 );
+						float gxa = get_zero( a[c], sax + 1, say ) - get_zero( a[c], sax - 1, say );
+						float gxb = get_zero( b[c], sbx + 1, sby ) - get_zero( b[c], sbx - 1, sby );
+						float gya = get_zero( a[c], sax, say + 1 ) - get_zero( a[c], sax, say - 1 );
+						float gyb = get_zero( b[c], sbx, sby + 1 ) - get_zero( b[c], sbx, sby - 1 );
 
 						gxa -= gxb;
 						gya -= gyb;
@@ -188,7 +188,7 @@ struct PatchMatchSSDGrad
 
 struct PatchMatchGrad
 {
-	static inline float compute( const plane &a, const plane &b, int ax, int ay, int px, int py, int radius )
+	static inline float compute( const const_plane_buffer &a, const const_plane_buffer &b, int ax, int ay, int px, int py, int radius )
 	{
 		float ret = 0.F;
 		for ( int y = -radius; y <= radius; ++y )
@@ -212,10 +212,10 @@ struct PatchMatchGrad
 				}
 				else
 				{
-					float gxa = a.get_zero( sax + 1, say ) - a.get_zero( sax - 1, say );
-					float gxb = b.get_zero( sbx + 1, sby ) - b.get_zero( sbx - 1, sby );
-					float gya = a.get_zero( sax, say + 1 ) - a.get_zero( sax, say - 1 );
-					float gyb = b.get_zero( sbx, sby + 1 ) - b.get_zero( sbx, sby - 1 );
+					float gxa = get_zero( a, sax + 1, say ) - get_zero( a, sax - 1, say );
+					float gxb = get_zero( b, sbx + 1, sby ) - get_zero( b, sbx - 1, sby );
+					float gya = get_zero( a, sax, say + 1 ) - get_zero( a, sax, say - 1 );
+					float gyb = get_zero( b, sbx, sby + 1 ) - get_zero( b, sbx, sby - 1 );
 
 					gxa -= gxb;
 					gya -= gyb;
@@ -253,10 +253,10 @@ struct PatchMatchGrad
 				{
 					for ( int c = 0; c != numC; ++c )
 					{
-						float gxa = a[c].get_zero( sax + 1, say ) - a[c].get_zero( sax - 1, say );
-						float gxb = b[c].get_zero( sbx + 1, sby ) - b[c].get_zero( sbx - 1, sby );
-						float gya = a[c].get_zero( sax, say + 1 ) - a[c].get_zero( sax, say - 1 );
-						float gyb = b[c].get_zero( sbx, sby + 1 ) - b[c].get_zero( sbx, sby - 1 );
+						float gxa = get_zero( a[c], sax + 1, say ) - get_zero( a[c], sax - 1, say );
+						float gxb = get_zero( b[c], sbx + 1, sby ) - get_zero( b[c], sbx - 1, sby );
+						float gya = get_zero( a[c], sax, say + 1 ) - get_zero( a[c], sax, say - 1 );
+						float gyb = get_zero( b[c], sbx, sby + 1 ) - get_zero( b[c], sbx, sby - 1 );
 
 						gxa -= gxb;
 						gya -= gyb;
@@ -271,7 +271,7 @@ struct PatchMatchGrad
 
 template <typename BufType, typename DistFunc>
 inline int64_t
-minimizePatch( plane &u, plane &v, plane &d, const BufType &a, const BufType &b, int x, int y, std::mt19937 &gen, int radius, int dir )
+minimizePatch( plane_buffer &u, plane_buffer &v, plane_buffer &d, const BufType &a, const BufType &b, int x, int y, std::mt19937 &gen, int radius, int dir )
 {
 	float curDist = d.get( x, y );
 
@@ -352,7 +352,7 @@ minimizePatch( plane &u, plane &v, plane &d, const BufType &a, const BufType &b,
 
 template <typename BufType, typename DistFunc>
 inline void
-matchPassInit( plane &u, plane &v, plane &d, const BufType &a, const BufType &b, int radius )
+matchPassInit( plane_buffer &u, plane_buffer &v, plane_buffer &d, const BufType &a, const BufType &b, int radius )
 {
 	for ( int y = 0; y < u.height(); ++y )
 	{
@@ -369,7 +369,7 @@ matchPassInit( plane &u, plane &v, plane &d, const BufType &a, const BufType &b,
 
 template <typename BufType, typename DistFunc>
 inline int64_t
-matchPass( plane &u, plane &v, plane &d, const BufType &a, const BufType &b, std::mt19937 &gen, int radius, int dir, int iter )
+matchPass( plane_buffer &u, plane_buffer &v, plane_buffer &d, const BufType &a, const BufType &b, std::mt19937 &gen, int radius, int dir, int iter )
 {
 	int64_t changeCount = 0;
 	if ( dir == 1 )
@@ -395,7 +395,7 @@ matchPass( plane &u, plane &v, plane &d, const BufType &a, const BufType &b, std
 
 template<typename BufType>
 inline void
-runMatch( plane &u, plane &v, plane &d, const BufType &a, const BufType &b, uint32_t srchseed, int radius, int style, int iters )
+runMatch( plane_buffer &u, plane_buffer &v, plane_buffer &d, const BufType &a, const BufType &b, uint32_t srchseed, int radius, int style, int iters )
 {
 	std::mt19937 gen( srchseed );
 	int64_t changeCount;
@@ -451,7 +451,12 @@ static vector_field pmPlane( const plane &a, const plane &b, int64_t frameA, int
 	plane v = create_random_plane( a.width(), a.height(), seedV, 0.F, static_cast<float>( a.height() ) );
 //	plane u = create_iotaX_plane( a.width(), a.height() );
 //	plane v = create_iotaY_plane( a.width(), a.height() );
-	runMatch( u, v, dist, a, b, seedU, radius, style, iters );
+	const_plane_buffer cA = a;
+	const_plane_buffer cB = b;
+	plane_buffer fU = u;
+	plane_buffer fV = v;
+	plane_buffer fD = dist;
+	runMatch( fU, fV, fD, cA, cB, seedU, radius, style, iters );
 
 	return vector_field::create( std::move( u ), std::move( v ) );
 }
@@ -463,7 +468,10 @@ static vector_field pmImage( const image_buf &a, const image_buf &b, int64_t fra
 	uint32_t seedV = static_cast<uint32_t>( frameA + (frameA - frameB) - 1 );
 	plane u = create_random_plane( a.width(), a.height(), seedU, 0.F, static_cast<float>( a.width() ) );
 	plane v = create_random_plane( a.width(), a.height(), seedV, 0.F, static_cast<float>( a.height() ) );
-	runMatch( u, v, dist, a, b, seedU, radius, style, iters );
+	plane_buffer fU = u;
+	plane_buffer fV = v;
+	plane_buffer fD = dist;
+	runMatch( fU, fV, fD, a, b, seedU, radius, style, iters );
 
 	return vector_field::create( std::move( u ), std::move( v ) );
 }

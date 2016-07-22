@@ -77,7 +77,7 @@ applyWarpBilinearP( scanline &dest, int y, const plane &src, const vector_field 
 		{
 			plane::value_type uV = uLine[x];
 			plane::value_type vV = vLine[x];
-			dest[x] = src.bilinear_hold( uV, vV );
+			dest[x] = bilinear_hold( src, uV, vV );
 		}
 	}
 	else
@@ -89,7 +89,7 @@ applyWarpBilinearP( scanline &dest, int y, const plane &src, const vector_field 
 		{
 			plane::value_type uV = uLine[x] + static_cast<plane::value_type>( x );
 			plane::value_type vV = vLine[x] + yOff;
-			dest[x] = src.bilinear_hold( uV, vV );
+			dest[x] = bilinear_hold( src, uV, vV );
 		}
 	}
 }
@@ -108,8 +108,8 @@ applyWarpDiracP( scanline &dest, int y, const plane &src, const vector_field &v,
 			plane::value_type uV = uLine[x];
 			plane::value_type vV = vLine[x];
 			
-			dest[x] = src.get_hold( static_cast<int>( uV ),
-									static_cast<int>( vV ) );
+			dest[x] = get_hold( src, static_cast<int>( uV ),
+								static_cast<int>( vV ) );
 		}
 	}
 	else
@@ -118,8 +118,8 @@ applyWarpDiracP( scanline &dest, int y, const plane &src, const vector_field &v,
 		const plane::value_type *vLine = v.v().line( y );
 		for ( int x = 0; x < dest.width(); ++x )
 		{
-			dest[x] = src.get_hold( static_cast<int>( uLine[x] ) + x,
-									static_cast<int>( vLine[x] ) + y );
+			dest[x] = get_hold( src, static_cast<int>( uLine[x] ) + x,
+								static_cast<int>( vLine[x] ) + y );
 		}
 	}
 }

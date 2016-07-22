@@ -26,6 +26,7 @@
 #include "allocator.h"
 #include <engine/computed_value.h>
 #include "op_registry.h"
+#include "plane_util.h"
 
 ////////////////////////////////////////
 
@@ -35,6 +36,8 @@ namespace image
 class accum_buf : public engine::computed_base
 {
 public:
+	typedef double value_type;
+
 	accum_buf( void );
 	accum_buf( int w, int h );
 	template <typename... Args>

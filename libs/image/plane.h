@@ -29,6 +29,8 @@
 #include <base/math_functions.h>
 #include <engine/computed_value.h>
 #include "op_registry.h"
+#include "plane_buffer.h"
+#include "plane_util.h"
 
 ////////////////////////////////////////
 
@@ -76,9 +78,16 @@ public:
 	inline int width( void ) const { return _width; }
 	inline int height( void ) const { return _height; }
 
+	inline int lastx( void ) const { return _width_m1; }
+	inline int lasty( void ) const { return _height_m1; }
+
 	inline int stride( void ) const { check_compute(); return _stride; }
 
 	inline size_t buffer_size( void ) const { return static_cast<size_t>( stride() * height() ) * sizeof(value_type); }
+
+	inline operator const_plane_buffer( void ) const { check_compute(); return const_plane_buffer( cdata(), width(), height(), _width_m1, _height_m1, stride() ); }
+
+	inline operator plane_buffer( void ) { check_compute(); return plane_buffer( data(), width(), height(), _width_m1, _height_m1, stride() ); }
 
 	inline value_type *data( void ) { check_compute(); return _mem.get(); }
 	inline const value_type *data( void ) const { check_compute(); return _mem.get(); }
@@ -90,84 +99,13 @@ public:
 	inline bool in_bounds_y( int y ) const { return y >= 0 && y < _height; }
 	inline bool in_bounds( int x, int y ) const { return in_bounds_x( x ) && in_bounds_y( y ); }
 
+	/// Get a reference to a value for setting purposes
 	inline value_type &get( int x, int y ) { return *( line( y ) + x ); }
+	/// Get a value from the plane
+	/// @sa plane_util.h for other access methods
 	inline value_type get( int x, int y ) const { return *( line( y ) + x ); }
+	/// Alternate explicit set method
 	inline void set( int x, int y, value_type v ) { get( x, y ) = v; }
-
-	inline value_type get_zero( int x, int y ) const
-	{
-		if ( x < 0 || x >= _width )
-			return 0.F;
-		if ( y < 0 || y >= _height )
-			return 0.F;
-		return get( x, y );
-	}
-	inline value_type get_hold( int x, int y ) const
-	{
-		return get( std::max( 0, std::min( _width_m1, x ) ),
-					std::max( 0, std::min( _height_m1, y ) ) );
-	}
-	inline value_type get_mirror( int x, int y ) const
-	{
-		while ( ! in_bounds_x( x ) )
-		{
-			if ( x < 0 )
-				x = -x;
-			if ( x > _width_m1 )
-				x = _width_m1 * 2 - x;
-		}
-		while ( ! in_bounds_y( y ) )
-		{
-			if ( y < 0 )
-				y = -y;
-			if ( y > _height_m1 )
-				y = _height_m1 * 2 - y;
-		}
-
-		return get( x, y );
-	}
-
-	/// bilinear sample, treating requests outside as zero
-	inline value_type bilinear_zero( value_type x, value_type y ) const
-	{
-		int ix = static_cast<int>( x );
-		if ( x < 0.F )
-			--ix;
-		value_type percBx = x - static_cast<value_type>( ix );
-		int iy = static_cast<int>( y );
-		if ( y < 0.F )
-			--iy;
-		value_type percBy = y - static_cast<value_type>( iy );
-
-		value_type a00 = get_zero( ix, iy );
-		value_type a10 = get_zero( ix + 1, iy );
-		value_type a01 = get_zero( ix, iy + 1 );
-		value_type a11 = get_zero( ix + 1, iy + 1 );
-		value_type t0 = base::lerp( a00, a10, percBx );
-		value_type t1 = base::lerp( a01, a11, percBx );
-		return base::lerp( t0, t1, percBy );
-	}
-
-	/// bilinear sample, holding edge
-	inline value_type bilinear_hold( value_type x, value_type y ) const
-	{
-		int ix = static_cast<int>( x );
-		if ( x < 0.F )
-			--ix;
-		value_type percBx = x - static_cast<value_type>( ix );
-		int iy = static_cast<int>( y );
-		if ( y < 0.F )
-			--iy;
-		value_type percBy = y - static_cast<value_type>( iy );
-
-		value_type a00 = get_hold( ix, iy );
-		value_type a10 = get_hold( ix + 1, iy );
-		value_type a01 = get_hold( ix, iy + 1 );
-		value_type a11 = get_hold( ix + 1, iy + 1 );
-		value_type t0 = base::lerp( a00, a10, percBx );
-		value_type t1 = base::lerp( a01, a11, percBx );
-		return base::lerp( t0, t1, percBy );
-	}
 
 	/// duplicates the plane, including copying the pixel values
 	/// NB: if the plane has not yet been computed, will compute prior to copy
