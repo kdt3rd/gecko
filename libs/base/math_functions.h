@@ -75,6 +75,18 @@ inline F lerp( F a, F b, F perc )
 
 ////////////////////////////////////////
 
+// derived from wikipedia:
+// p(t) = p1 + (p2/2 - p0/2)*t + (p0 - 5*p1/2 + 2*p2 - p3/2)*t^2 + (3*p1/2 + p3/2 - p0/2 - 3*p2/2)*t^3
+template <typename F>
+inline F cubic_interp( F t, F p0, F p1, F p2, F p3 )
+{
+	return ( p1 + F(0.5) * ( p2 - p0 ) * t +
+			 ( p0 - F(2.5) * p1 + (p2 + p2) - F(0.5) * p3 ) * ( t * t ) +
+			 ( F(1.5) * ( p1 - p2 ) + F(0.5) * ( p3 - p0 ) ) * ( t * t * t ) );
+}
+
+////////////////////////////////////////
+
 inline std::vector<float>
 atrous_expand( const std::vector<float> &a )
 {
