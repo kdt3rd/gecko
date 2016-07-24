@@ -33,7 +33,7 @@ using namespace image;
 static void
 doResizeVertPoint( scanline &dest, int y, const plane &in, float scale )
 {
-	int srcY = static_cast<int>( ( static_cast<float>( y ) + 0.5F ) * scale );
+	int srcY = static_cast<int>( ( static_cast<float>( y ) ) * scale + 0.5F );
 	srcY = std::min( in.height() - 1, srcY );
 	const float *inLine = in.line( srcY );
 	for ( int x = 0; x < dest.width(); ++x )
@@ -46,7 +46,7 @@ doResizeHorizPoint( scanline &dest, const scanline &in, float scale )
 	int maxS = in.width() - 1;
 	for ( int x = 0; x < dest.width(); ++x )
 	{
-		int srcX = static_cast<int>( ( static_cast<float>( x ) + 0.5F ) * scale );
+		int srcX = static_cast<int>( ( static_cast<float>( x ) ) * scale + 0.5F );
 		srcX = std::min( maxS, srcX );
 		dest[x] = in[srcX];
 	}
@@ -57,9 +57,10 @@ doResizeHorizPoint( scanline &dest, const scanline &in, float scale )
 static void
 doResizeVertBilinear( scanline &dest, int y, const plane &in, float scale )
 {
-	float srcY = ( static_cast<float>( y ) + 0.5F ) * scale;
+	float srcY = static_cast<float>( y ) * scale;
 	int lowY = static_cast<int>( srcY );
 	float perc = srcY - static_cast<float>( lowY );
+	lowY = std::min( in.height() - 1, lowY );
 
 	const float *lowLine = in.line( lowY );
 	const float *hiLine = lowLine;
@@ -72,14 +73,14 @@ doResizeVertBilinear( scanline &dest, int y, const plane &in, float scale )
 static void
 doResizeHorizBilinear( scanline &dest, const scanline &in, float scale )
 {
+	int maxw = in.width() - 1;
 	for ( int x = 0; x < dest.width(); ++x )
 	{
-		float srcX = ( static_cast<float>( x ) + 0.5F ) * scale;
+		float srcX = static_cast<float>( x ) * scale;
 		int lowX = static_cast<int>( srcX );
 		float perc = srcX - static_cast<float>( lowX );
-		int hiX = lowX + 1;
-		if ( hiX >= dest.width() )
-			hiX = lowX;
+		lowX = std::min( maxw, lowX );
+		int hiX = std::min( maxw, lowX + 1 );
 
 		dest[x] = base::lerp( in[lowX], in[hiX], perc );
 	}
@@ -90,10 +91,11 @@ doResizeHorizBilinear( scanline &dest, const scanline &in, float scale )
 static void
 doResizeVertBicubic( scanline &dest, int y, const plane &in, float scale )
 {
-	float srcY = ( static_cast<float>( y ) + 0.5F ) * scale;
+	float srcY = static_cast<float>( y ) * scale;
 	int pY = static_cast<int>( srcY );
 	float t = srcY - static_cast<float>( pY );
 	int hm1 = in.height() - 1;
+	pY = std::min( hm1, pY );
 	const float *p0 = in.line( std::max( int(0), pY - 1 ) );
 	const float *p1 = in.line( pY );
 	const float *p2 = in.line( std::min( int(hm1), pY + 1 ) );
@@ -109,14 +111,15 @@ doResizeHorizBicubic( scanline &dest, const scanline &in, float scale )
 	int wm1 = in.width() - 1;
 	for ( int x = 0; x < dest.width(); ++x )
 	{
-		float srcX = ( static_cast<float>( x ) + 0.5F ) * scale;
+		float srcX = static_cast<float>( x ) * scale;
 		int pX = static_cast<int>( srcX );
+		float t = srcX - static_cast<float>( pX );
+		pX = std::min( wm1, pX );
 		float p0 = in[std::max( int(0), pX - 1 )];
 		float p1 = in[pX];
 		float p2 = in[std::min( int(wm1), pX + 1 )];
 		float p3 = in[std::min( int(wm1), pX + 2 )];
 
-		float t = srcX - static_cast<float>( pX );
 		dest[x] = base::cubic_interp( t, p0, p1, p2, p3 );
 	}
 }
