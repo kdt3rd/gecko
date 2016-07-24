@@ -31,6 +31,12 @@ namespace image
 {
 
 template <typename P>
+inline typename P::value_type get( const P &p, int x, int y )
+{
+	return p.get( x, y );
+}
+
+template <typename P>
 inline typename P::value_type get_zero( const P &p, int x, int y )
 {
 	if ( x < 0 || x >= p.width() )
