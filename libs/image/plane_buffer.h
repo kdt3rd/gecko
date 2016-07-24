@@ -34,6 +34,7 @@ class plane_buffer
 public:
 	typedef float value_type;
 
+	inline plane_buffer( void ) {}
 	inline plane_buffer( float *p, int w, int h, int wm1, int hm1, int s )
 		: _ptr( p ), _w( w ), _h( h ), _wm1( wm1 ), _hm1( hm1 ), _stride( s )
 	{}
@@ -69,10 +70,12 @@ public:
 	inline void set( int x, int y, value_type v ) { get( x, y ) = v; }
 
 private:
-	float *_ptr;
-	int _w, _h;
-	int _wm1, _hm1;
-	int _stride;
+	float *_ptr = nullptr;
+	int _w = 0;
+	int _h = 0;
+	int _wm1 = 0;
+	int _hm1 = 0;
+	int _stride = 0;
 };
 
 
@@ -81,6 +84,7 @@ class const_plane_buffer
 public:
 	typedef float value_type;
 
+	inline constexpr const_plane_buffer( void ) {}
 	inline constexpr const_plane_buffer( const float *p, int w, int h, int wm1, int hm1, int s )
 		: _ptr( p ), _w( w ), _h( h ), _wm1( wm1 ), _hm1( hm1 ), _stride( s )
 	{}
@@ -109,10 +113,12 @@ public:
 	inline constexpr value_type get( int x, int y ) const { return *( line( y ) + x ); }
 
 private:
-	const float *_ptr;
-	int _w, _h;
-	int _wm1, _hm1;
-	int _stride;
+	const float *_ptr = nullptr;
+	int _w = 0;
+	int _h = 0;
+	int _wm1 = 0;
+	int _hm1 = 0;
+	int _stride = 0;
 };
 
 } // namespace image
