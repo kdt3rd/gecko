@@ -110,6 +110,7 @@ registerPlaneOps( engine::registry &r )
 	image::add_plane_math( r );
 	image::add_plane_stats( r );
 	image::add_convolve( r );
+	image::add_resize( r );
 }
 
 ////////////////////////////////////////

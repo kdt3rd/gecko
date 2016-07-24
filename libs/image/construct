@@ -24,6 +24,7 @@ lib = library "image"
 	"image_ops.cpp";
 	"plane_math.cpp";
 	"plane_ops.cpp";
+	"plane_resize.cpp";
 	"plane_stats.cpp";
 	"plane_convolve.cpp";
 	"media_io.cpp";
