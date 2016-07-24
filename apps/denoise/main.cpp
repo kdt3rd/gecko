@@ -63,6 +63,7 @@ int safemain( int argc, char *argv[] )
 	bool estimateNoise = false;
 	bool useLog = false;
 	std::string method = "guided_color";
+	std::string temporalmethod;
 	int64_t frameStart = std::numeric_limits<int64_t>::min();
 	int64_t frameEnd = std::numeric_limits<int64_t>::min();
 	base::cmd_line options(
@@ -85,8 +86,12 @@ int safemain( int argc, char *argv[] )
 			"Processes the image in log space instead of linear", false ),
 		base::cmd_line::option(
 			0, std::string( "spatial-method" ),
-			"<guided_color|guided_mono|wavelet|bilateral|despeckle|patchmatch>", base::cmd_line::arg<1>,
+			"<guided_color|guided_mono|wavelet|bilateral|despeckle|none>", base::cmd_line::arg<1>,
 			"Specifies the spatial method used", false ),
+		base::cmd_line::option(
+			0, std::string( "temporal-method" ),
+			"<patchmatch|hierpatch>", base::cmd_line::arg<1>,
+			"Specifies the temporal method used to align frames", false ),
 		base::cmd_line::option(
 			0, std::string( "spatial-weight" ),
 			"<float>", base::cmd_line::arg<1>,
@@ -151,7 +156,7 @@ int safemain( int argc, char *argv[] )
 			method = m;
 		else if ( m == "despeckle" )
 			method = m;
-		else if ( m == "patchmatch" )
+		else if ( m == "none" )
 			method = m;
 		else
 			throw_runtime( "Invalid spatial method requested: {0}", m );
@@ -185,9 +190,25 @@ int safemain( int argc, char *argv[] )
 			throw_runtime( "wavelet levels must be a positive integer (1-N), got {0}", spatW.value() );
 	}
 
+	auto &tempMethod = options["temporal-method"];
+	if ( tempMethod )
+	{
+		std::string m = tempMethod.value();
+		if ( m == "patchmatch" )
+			temporalmethod = m;
+		if ( m == "hierpatch" )
+			temporalmethod = m;
+		else
+			throw_runtime( "Invalid temporal method requested: {0}", m );
+	}
+
 	auto &tempR = options["temporal-radius"];
 	if ( tempR )
 		temporalRadius = atoi( tempR.value() );
+	if ( temporalRadius < 0 )
+		throw_runtime( "Invalid temporal radius specified {0}, must be 0 or positive integer", temporalRadius );
+	if ( temporalRadius > 0 && temporalmethod.empty() )
+		throw_runtime( "Please specify a temporal method to use if specifying a temporal radius" );
 
 	estimateNoise = static_cast<bool>( options["estimate-noise"] );
 	useLog = static_cast<bool>( options["use-log"] );
@@ -268,10 +289,13 @@ int safemain( int argc, char *argv[] )
 				image_buf accumImg;
 
 				std::cout << "Processing frame: " << f << std::endl;
-				media::sample cenSamp( f, vt->rate() );
-				auto centerFrm = cenSamp( vt );
-				image_buf centerImg = extract_frame( *centerFrm, { "R", "G", "B" } );
-
+				image_buf centerImg;
+				{
+					media::sample cenSamp( f, vt->rate() );
+					auto centerFrm = cenSamp( vt );
+					centerImg = extract_frame( *centerFrm, { "R", "G", "B" } );
+				}
+				
 				for ( int64_t curF = f - temporalRadius; curF <= (f + temporalRadius); ++curF )
 				{
 					if ( curF < vt->begin() || curF > vt->end() )
@@ -293,16 +317,38 @@ int safemain( int argc, char *argv[] )
 					{
 //						plane lumA = centerImg[0] * 0.3F + centerImg[1] * 0.6F + centerImg[2] * 0.1F;
 //						plane lumB = img[0] * 0.3F + img[1] * 0.6F + img[2] * 0.1F;
-//						vector_field vf = patch_match( log1p( lumA ), log1p( lumB ), f, curF, 2, patch_style::SSD_GRAD, 4 );
-						vector_field vf = patch_match( centerImg, img, f, curF, 4, patch_style::SSD_GRAD, 10 );
-//						vector_field vf = patch_match( log1p( lumA ), log1p( lumB ), f, curF, 2, patch_style::SSD, 1 );
+//						vector_field vf = patch_match( log1p( lumA ), log1p( lumB ), f, curF, 3, patch_style::SSD_GRAD, 16 );
+						image_buf tmpCen = centerImg;
+						image_buf tmpImg = img;
+						if ( useLog )
+						{
+							for ( int i = 0; i < 3; ++i )
+							{
+								tmpCen[i] = log1p( centerImg[i] );
+								tmpImg[i] = log1p( img[i] );
+							}
+						}
 
-//						img[0] = vf.u() / static_cast<float>( img[0].width() - 1 );//warp_dirac( img[0], vf, true );
-//						img[1] = vf.v() / static_cast<float>( img[0].height() - 1 );//warp_dirac( img[1], vf, true );
-						img[0] = warp_dirac( img[0], vf, true );
-						img[1] = warp_dirac( img[1], vf, true );
-						img[2] = warp_dirac( img[2], vf, true );
+						if ( temporalmethod == "patchmatch" )
+						{
+							// TODO: add parameters for the parameters
+							vector_field vf = patch_match( tmpCen, tmpImg, f, curF, 4, patch_style::SSD_GRAD, 16 );
+							img[0] = warp_dirac( img[0], vf, true );
+							img[1] = warp_dirac( img[1], vf, true );
+							img[2] = warp_dirac( img[2], vf, true );
+						}
+						else if ( temporalmethod == "patchmatch" )
+						{
+							// TODO: add parameters for the parameters
+							vector_field vf = hier_patch_match( tmpCen, tmpImg, f, curF, 4, patch_style::SSD_GRAD, 5 );
+							img[0] = warp_dirac( img[0], vf, true );
+							img[1] = warp_dirac( img[1], vf, true );
+							img[2] = warp_dirac( img[2], vf, true );
+						}
+
+						// TODO: add integration logic here
 					}
+
 					image_buf weight;
 					if ( varU )
 					{
