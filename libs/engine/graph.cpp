@@ -896,9 +896,53 @@ graph::apply_grouping( void )
 						subI = maxInputGroup;
 					}
 				}
-
-				if ( subI == size_t(-1) )
 #endif
+				size_t subI = size_t(-1);
+				size_t soloIn = size_t(-1);
+				for ( size_t i = 0, nI = cur.input_size(); i != nI; ++i )
+				{
+					node_id curIn = cur.input( i );
+					node &curInN = _nodes[curIn];
+					if ( curInN.value().is_null() )
+					{
+						if ( soloIn == size_t(-1) )
+							soloIn = i;
+						else
+						{
+							// at least two nodes needing compute, skip for now
+							soloIn = size_t(-1);
+							break;
+						}
+					}
+				}
+
+				if ( soloIn != size_t(-1) )
+				{
+					node_id curIn = cur.input( soloIn );
+					node &curInN = _nodes[curIn];
+
+					bool doCombine = false;
+
+					TODO("Add accessor to op to check for same grouping function");
+					TODO("Fix the multi-input/output grouping");
+					doCombine = ( curInN.output_size() == 1 );
+					doCombine = doCombine && ( curInN.in_subgroup() && ! curInN.has_ref() );
+					doCombine = doCombine && ( curOp.function().result_type() == _ops[curInN.op()].function().result_type() );
+
+					TODO( "Add check / logic for resize scanline scenario" );
+					doCombine = doCombine && ( curInN.dims() == cur.dims() );
+
+					if ( doCombine )
+					{
+						size_t cIdx = find_subgroup( curIn );
+						_subgroups[cIdx].add( n );
+						_node_to_subgroup[n] = cIdx;
+						cur.set_in_subgroup();
+						subI = cIdx;
+//						std::cout << "ADDING node " << n << " to subgroup " << cIdx << std::endl;
+					}
+				}
+				if ( subI == size_t(-1) )
 				{
 //					std::cout << "CREATING subgroup " << _subgroups.size() << " for node " << n << std::endl;
 					_node_to_subgroup[n] = _subgroups.size();
