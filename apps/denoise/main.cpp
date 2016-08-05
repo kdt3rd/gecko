@@ -59,11 +59,16 @@ int safemain( int argc, char *argv[] )
 	int waveletLevels = 1;
 	float spatSigmaD = 1.5F;
 	float spatSigmaI = 0.025F;
+	float mseThresh = 0.015F;
+	int mseRadius = 5;
+	int matchRadius = 4;
+	int tempIters = 5;
 	int temporalRadius = 0;
 	bool estimateNoise = false;
 	bool useLog = false;
-	std::string method = "guided_color";
+	std::string spatmethod = "guided_color";
 	std::string temporalmethod;
+	std::string integmethod = "mse";
 	int64_t frameStart = std::numeric_limits<int64_t>::min();
 	int64_t frameEnd = std::numeric_limits<int64_t>::min();
 	base::cmd_line options(
@@ -93,9 +98,29 @@ int safemain( int argc, char *argv[] )
 			"<patchmatch|hierpatch>", base::cmd_line::arg<1>,
 			"Specifies the temporal method used to align frames", false ),
 		base::cmd_line::option(
+			0, std::string( "integration-method" ),
+			"<mse|robustave|dumb>", base::cmd_line::arg<1>,
+			"Specifies the integration method used to integrate frames", false ),
+		base::cmd_line::option(
 			0, std::string( "spatial-weight" ),
 			"<float>", base::cmd_line::arg<1>,
 			"Specifies the integration sigma", false ),
+		base::cmd_line::option(
+			0, std::string( "mse-thresh" ),
+			"<float>", base::cmd_line::arg<1>,
+			"Specifies the integration error threshold", false ),
+		base::cmd_line::option(
+			0, std::string( "mse-radius" ),
+			"<int>", base::cmd_line::arg<1>,
+			"Specifies the radius used to find the potential integration error", false ),
+		base::cmd_line::option(
+			0, std::string( "match-radius" ),
+			"<int>", base::cmd_line::arg<1>,
+			"Specifies the radius used to find temporal matches for relevant algorithms", false ),
+		base::cmd_line::option(
+			0, std::string( "temporal-iters" ),
+			"<int>", base::cmd_line::arg<1>,
+			"Specifies the iteration count used to find temporal matches for relevant algorithms", false ),
 		base::cmd_line::option(
 			0, std::string( "spatial-radius" ),
 			"[<size>|<sizeX sizeY>]", base::cmd_line::arg<1,2>,
@@ -142,22 +167,22 @@ int safemain( int argc, char *argv[] )
 	base::cpu::output( std::cout );
 	std::cout << std::endl;
 
-	auto &spatMethod = options["spatial-method"];
-	if ( spatMethod )
+	auto &spatM = options["spatial-method"];
+	if ( spatM )
 	{
-		std::string m = spatMethod.value();
+		std::string m = spatM.value();
 		if ( m == "guided_mono" )
-			method = m;
+			spatmethod = m;
 		else if ( m == "guided_color" )
-			method = m;
+			spatmethod = m;
 		else if ( m == "bilateral" )
-			method = m;
+			spatmethod = m;
 		else if ( m == "wavelet" )
-			method = m;
+			spatmethod = m;
 		else if ( m == "despeckle" )
-			method = m;
+			spatmethod = m;
 		else if ( m == "none" )
-			method = m;
+			spatmethod = m;
 		else
 			throw_runtime( "Invalid spatial method requested: {0}", m );
 	}
@@ -196,7 +221,7 @@ int safemain( int argc, char *argv[] )
 		std::string m = tempMethod.value();
 		if ( m == "patchmatch" )
 			temporalmethod = m;
-		if ( m == "hierpatch" )
+		else if ( m == "hierpatch" )
 			temporalmethod = m;
 		else
 			throw_runtime( "Invalid temporal method requested: {0}", m );
@@ -210,8 +235,50 @@ int safemain( int argc, char *argv[] )
 	if ( temporalRadius > 0 && temporalmethod.empty() )
 		throw_runtime( "Please specify a temporal method to use if specifying a temporal radius" );
 
+	auto &combMethod = options["integration-method"];
+	if ( combMethod )
+	{
+		std::string m = combMethod.value();
+		if ( m == "mse" )
+			integmethod = m;
+		else if ( m == "robustave" )
+			integmethod = m;
+		else if ( m == "dumb" )
+			integmethod = m;
+		else
+			throw_runtime( "Invalid temporal method requested: {0}", m );
+	}
+
+	auto &mseV = options["mse-thresh"];
+	if ( mseV )
+	{
+		if ( integmethod != "mse" )
+			throw_runtime( "MSE threshold only used when integration method is mse" );
+
+		mseThresh = atof( mseV.value() );
+	}
+
+	auto &mseR = options["mse-radius"];
+	if ( mseR )
+	{
+		if ( integmethod != "mse" )
+			throw_runtime( "MSE threshold only used when integration method is mse" );
+
+		mseRadius = atoi( mseR.value() );
+	}
+
+	auto &matchR = options["match-radius"];
+	if ( matchR )
+		matchRadius = atoi( matchR.value() );
+
+	auto &tempIt = options["temporal-iters"];
+	if ( tempIt )
+		tempIters = atoi( tempIt.value() );
+
 	estimateNoise = static_cast<bool>( options["estimate-noise"] );
 	useLog = static_cast<bool>( options["use-log"] );
+	if ( useLog )
+		std::cout << "Using log of image where appropriate" << std::endl;
 
 	media::metadata outputOptions;
 	outputOptions["compression"] = std::string( "piz" );
@@ -285,17 +352,118 @@ int safemain( int argc, char *argv[] )
 
 			for ( int64_t f = fs; f <= fe; ++f )
 			{
-				float cnt = 0.F;
-				image_buf accumImg;
-
 				std::cout << "Processing frame: " << f << std::endl;
 				image_buf centerImg;
+				image_buf weight;
 				{
 					media::sample cenSamp( f, vt->rate() );
 					auto centerFrm = cenSamp( vt );
 					centerImg = extract_frame( *centerFrm, { "R", "G", "B" } );
+
+					if ( varU )
+					{
+						auto curVarFrm = cenSamp( v.video_tracks()[ci] );
+						image_buf varimg = extract_frame( *curVarFrm, { "R", "G", "B" } );
+//						plane varP = varimg[0];
+//						float varRng = ( varThreshHigh - varThreshLow );
+//						for ( int p = 0; p < 3; ++p )
+//						{
+//							plane prefilt = cross_x_img_median( varP );
+//							plane weight = if_less( prefilt, varThreshLow, varP * 0.F + 0.001F, if_greater( prefilt, varThreshHigh, max( varThreshHigh * 1.5 - varP, engine::make_constant(0.F) ) + 0.001F, max( log( varP ), engine::make_constant( 0.F ) ) + 1.F ) );
+//							plane normRng = (prefilt - varThreshLow) / varRng;
+//							plane prefilt = varimg[2] - varimg[1]; // / sqrt( 1000.F * varimg[1] );
+//							plane weight = if_less( prefilt, varThreshLow, prefilt * 0.F, if_greater( prefilt, varThreshHigh, prefilt * 0.F, if_less( normRng, 0.5, normRng, 1.F - normRng ) * 2.F ) );
+//							weight = clamp( weight, engine::make_constant( 0.001F ), engine::make_constant( 2.F ) );
+//							weight = if_greater( weight, spatSigmaI * 2.F, weight * prefilt, weight + 0.001F );
+//							img[p] = prefilt;//weighted_bilateral( img[0], weight, engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) );
+//						}
+
+						plane lum = centerImg[0] * 0.3F + centerImg[1] * 0.6F + centerImg[2] * 0.1F;
+//						lum = log( lum + 1.F );
+
+						plane localvar = local_variance( lum, 5 );
+						plane vweight = filter_nan( varimg[2], 0.F ) / max( lum, engine::make_constant( 0.00001F ) ) * sqrt( max( localvar, engine::make_constant( 0.00001F ) ) );
+						vweight = if_less( vweight, 0.0001F, clamp( vweight, engine::make_constant( 1.F ), engine::make_constant( 1.F ) ), 1.F / vweight );
+
+						weight = centerImg;
+						for ( auto &p: weight )
+							p = vweight;
+					}
+					else if ( estimateNoise )
+					{
+						std::cout << "TODO: Insert finised noise estimate" << std::endl;
+					}
 				}
-				
+
+				image_buf filteredCenter = centerImg;
+				if ( useLog )
+				{
+					for ( int p = 0; p < 3; ++p )
+						filteredCenter[p] = log1p( filteredCenter[p] );
+				}
+
+				if ( spatmethod == "guided_color" )
+				{
+					if ( weight.empty() )
+						filteredCenter = guided_filter_color( filteredCenter, filteredCenter, std::max( spatX, spatY ), spatSigmaI * spatSigmaI );
+					else
+					{
+						plane lumw = weight[0] * 0.3F + weight[1] * 0.6F + weight[2] * 0.1F;
+						filteredCenter = guided_filter_color( filteredCenter, filteredCenter, std::max( spatX, spatY ), lumw * spatSigmaI * spatSigmaI );
+					}
+				}
+				else if ( spatmethod == "guided_mono" )
+				{
+					for ( int p = 0; p < 3; ++p )
+					{
+						if ( weight.empty() )
+							filteredCenter[p] = guided_filter_mono( filteredCenter[p], filteredCenter[p], std::max( spatX, spatY ), spatSigmaI * spatSigmaI );
+						else
+							filteredCenter[p] = guided_filter_mono( filteredCenter[p], filteredCenter[p], std::max( spatX, spatY ), weight[p] * spatSigmaI * spatSigmaI );
+					}
+				}
+				else if ( spatmethod == "bilateral" )
+				{
+					for ( int p = 0; p < 3; ++p )
+					{
+						if ( weight.empty() )
+							filteredCenter[p] = bilateral( filteredCenter[p], engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) );
+						else
+							filteredCenter[p] = weighted_bilateral( filteredCenter[p], weight[p], engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) );
+					}
+				}
+				else if ( spatmethod == "wavelet" )
+				{
+					for ( int p = 0; p < 3; ++p )
+					{
+						if ( weight.empty() )
+							filteredCenter[p] = wavelet_filter( filteredCenter[p], waveletLevels, spatSigmaI );
+						else
+							filteredCenter[p] = wavelet_filter( filteredCenter[p], waveletLevels, weight[p] * spatSigmaI );
+					}
+				}
+				else if ( spatmethod == "despeckle" )
+				{
+					for ( int p = 0; p < 3; ++p )
+						filteredCenter[p] = despeckle( filteredCenter[p], spatSigmaI );
+				}
+
+				if ( useLog )
+				{
+					for ( int p = 0; p < 3; ++p )
+						filteredCenter[p] = expm1( filteredCenter[p] );
+				}
+
+				if ( temporalRadius <= 0 )
+				{
+					oc.video_tracks()[ci]->store( f, to_frame( filteredCenter, { "R", "G", "B" }, "f16" ) );
+					std::cout << "Finished frame: " << f << std::endl;
+					continue;
+				}
+
+				float cnt = 0.F;
+				image_buf accumImg;
+				plane integAmt;
 				for ( int64_t curF = f - temporalRadius; curF <= (f + temporalRadius); ++curF )
 				{
 					if ( curF < vt->begin() || curF > vt->end() )
@@ -308,13 +476,10 @@ int safemain( int argc, char *argv[] )
 						img = centerImg;
 					else
 					{
-						std::cout << "reading temporal frame " << curF << std::endl;
+						std::cout << "  reading temporal frame " << curF << std::endl;
 						auto curFrm = sCur( vt );
 						img = extract_frame( *curFrm, { "R", "G", "B" } );
-					}
 
-					if ( temporalRadius > 0 && curF != f )
-					{
 //						plane lumA = centerImg[0] * 0.3F + centerImg[1] * 0.6F + centerImg[2] * 0.1F;
 //						plane lumB = img[0] * 0.3F + img[1] * 0.6F + img[2] * 0.1F;
 //						vector_field vf = patch_match( log1p( lumA ), log1p( lumB ), f, curF, 3, patch_style::SSD_GRAD, 16 );
@@ -332,126 +497,47 @@ int safemain( int argc, char *argv[] )
 						if ( temporalmethod == "patchmatch" )
 						{
 							// TODO: add parameters for the parameters
-							vector_field vf = patch_match( tmpCen, tmpImg, f, curF, 4, patch_style::SSD_GRAD, 16 );
+							vector_field vf = patch_match( tmpCen, tmpImg, f, curF, matchRadius, patch_style::SSD_GRAD, tempIters );
 							img[0] = warp_dirac( img[0], vf, true );
 							img[1] = warp_dirac( img[1], vf, true );
 							img[2] = warp_dirac( img[2], vf, true );
 						}
-						else if ( temporalmethod == "patchmatch" )
+						else if ( temporalmethod == "hierpatch" )
 						{
 							// TODO: add parameters for the parameters
-							vector_field vf = hier_patch_match( tmpCen, tmpImg, f, curF, 4, patch_style::SSD_GRAD, 5 );
+							vector_field vf = hier_patch_match( tmpCen, tmpImg, f, curF, matchRadius, patch_style::SSD_GRAD, tempIters );
 							img[0] = warp_dirac( img[0], vf, true );
 							img[1] = warp_dirac( img[1], vf, true );
 							img[2] = warp_dirac( img[2], vf, true );
 						}
 
 						// TODO: add integration logic here
-					}
-
-					image_buf weight;
-					if ( varU )
-					{
-						auto curVarFrm = sCur( v.video_tracks()[ci] );
-						image_buf varimg = extract_frame( *curVarFrm, { "R", "G", "B" } );
-//						plane varP = varimg[0];
-//						float varRng = ( varThreshHigh - varThreshLow );
-//						for ( int p = 0; p < 3; ++p )
-//						{
-//							plane prefilt = cross_x_img_median( varP );
-//							plane weight = if_less( prefilt, varThreshLow, varP * 0.F + 0.001F, if_greater( prefilt, varThreshHigh, max( varThreshHigh * 1.5 - varP, engine::make_constant(0.F) ) + 0.001F, max( log( varP ), engine::make_constant( 0.F ) ) + 1.F ) );
-//							plane normRng = (prefilt - varThreshLow) / varRng;
-//							plane prefilt = varimg[2] - varimg[1]; // / sqrt( 1000.F * varimg[1] );
-//							plane weight = if_less( prefilt, varThreshLow, prefilt * 0.F, if_greater( prefilt, varThreshHigh, prefilt * 0.F, if_less( normRng, 0.5, normRng, 1.F - normRng ) * 2.F ) );
-//							weight = clamp( weight, engine::make_constant( 0.001F ), engine::make_constant( 2.F ) );
-//							weight = if_greater( weight, spatSigmaI * 2.F, weight * prefilt, weight + 0.001F );
-//							img[p] = prefilt;//weighted_bilateral( img[0], weight, engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) );
-//						}
-
-						plane lum = img[0] * 0.3F + img[1] * 0.6F + img[2] * 0.1F;
-//						lum = log( lum + 1.F );
-
-						plane localvar = local_variance( lum, 5 );
-						plane vweight = filter_nan( varimg[2], 0.F ) / max( lum, engine::make_constant( 0.00001F ) ) * sqrt( max( localvar, engine::make_constant( 0.00001F ) ) );
-						vweight = if_less( vweight, 0.0001F, clamp( vweight, engine::make_constant( 1.F ), engine::make_constant( 1.F ) ), 1.F / vweight );
-
-						weight = img;
-						for ( auto &p: weight )
-							p = vweight;
-					}
-					else if ( estimateNoise )
-					{
-						std::cout << "TODO: Insert finised noise estimate" << std::endl;
-					}
-
-					if ( useLog )
-					{
-						for ( int p = 0; p < 3; ++p )
-							img[p] = log1p( img[p] );
-					}
-
-					image_buf fimg;
-					if ( method == "guided_color" )
-					{
-						if ( weight.empty() )
-							fimg = guided_filter_color( img, img, std::max( spatX, spatY ), spatSigmaI * spatSigmaI );
-						else
+						if ( integmethod == "mse" )
 						{
-							plane lumw = weight[0] * 0.3F + weight[1] * 0.6F + weight[2] * 0.1F;
-							fimg = guided_filter_color( img, img, std::max( spatX, spatY ), lumw * spatSigmaI * spatSigmaI );
+							for ( int i = 0; i < 3; ++i )
+							{
+								plane e = mse( img[i], centerImg[i], mseRadius );
+								img[i] = if_less( e, mseThresh, img[i], filteredCenter[i] );
+								if ( ! integAmt.valid() )
+									integAmt = threshold( e, mseThresh );
+								else
+									integAmt += threshold( e, mseThresh );
+							}
+						}
+						else if ( integmethod == "robustave" )
+						{
+							throw_not_yet();
 						}
 					}
-					else if ( method == "guided_mono" )
-					{
-						fimg = img;
-						for ( int p = 0; p < 3; ++p )
-						{
-							if ( weight.empty() )
-								fimg[p] = guided_filter_mono( img[p], img[p], std::max( spatX, spatY ), spatSigmaI * spatSigmaI );
-							else
-								fimg[p] = guided_filter_mono( img[p], img[p], std::max( spatX, spatY ), weight[p] * spatSigmaI * spatSigmaI );
-						}
-					}
-					else if ( method == "bilateral" )
-					{
-						fimg = img;
-						for ( int p = 0; p < 3; ++p )
-						{
-							if ( weight.empty() )
-								fimg[p] = bilateral( img[p], engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) );
-							else
-								fimg[p] = weighted_bilateral( img[p], weight[p], engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( spatSigmaD ), engine::make_constant( spatSigmaI ) );
-						}
-					}
-					else if ( method == "wavelet" )
-					{
-						fimg = img;
-						for ( int p = 0; p < 3; ++p )
-						{
-							if ( weight.empty() )
-								fimg[p] = wavelet_filter( img[p], waveletLevels, spatSigmaI );
-							else
-								fimg[p] = wavelet_filter( img[p], waveletLevels, weight[p] * spatSigmaI );
-						}
-					}
-					else if ( method == "patchmatch" )
-					{
-						fimg = img;
-					}
-					else if ( method == "despeckle" )
-					{
-						fimg = img;
-						for ( int p = 0; p < 3; ++p )
-							fimg[p] = despeckle( img[p], spatSigmaI );
-					}
 
-					if ( useLog )
-					{
-						for ( int p = 0; p < 3; ++p )
-							img[p] = expm1( fimg[p] );
-					}
+					if ( cnt < 1.F )
+						accumImg = img;
 					else
-						img = fimg;
+					{
+						for ( int p = 0; p < 3; ++p )
+							accumImg[p] += img[p];
+					}
+					cnt += 1.F;
 #if 0
 					const float sigma2 = 0.00005;
 
@@ -471,16 +557,8 @@ int safemain( int argc, char *argv[] )
 						img[p] = img[p] - detail * detailmask;
 					}
 #endif
-
-					if ( cnt < 1.F )
-						accumImg = img;
-					else
-					{
-						for ( int p = 0; p < 3; ++p )
-							accumImg[p] += img[p];
-					}
-					cnt += 1.F;
 				}
+
 				if ( cnt > 1.F )
 				{
 					for ( int p = 0; p < 3; ++p )
@@ -492,7 +570,13 @@ int safemain( int argc, char *argv[] )
 //				accumImg[1].graph_ptr()->dump_dot( "plane1.dot" );
 //				accumImg[2].graph_ptr()->dump_dot( "plane2.dot" );
 //				accumImg[0].graph_ptr()->dump_refs( std::cout );
-				oc.video_tracks()[ci]->store( f, to_frame( accumImg, { "R", "G", "B" }, "f16" ) );
+				if ( ! integAmt.valid() )
+					oc.video_tracks()[ci]->store( f, to_frame( accumImg, { "R", "G", "B" }, "f16" ) );
+				else
+				{
+					accumImg.add_plane( integAmt / ( ( cnt - 1.F ) * 3.F ) );
+					oc.video_tracks()[ci]->store( f, to_frame( accumImg, { "R", "G", "B", "A" }, "f16" ) );
+				}
 				std::cout << "Finished frame: " << f << std::endl;
 			}
 		}
