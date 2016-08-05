@@ -45,7 +45,7 @@ plane warp_dirac( const plane &src, const vector_field &v, bool isAbsolute );
 vector_field convert_to_absolute( const vector_field &v );
 vector_field convert_to_relative( const vector_field &v );
 
-image_buf colorize( const vector_field &v );
+image_buf colorize( const vector_field &v, bool isAbsolute, float scale = 8.F );
 
 plane divergence( const vector_field &a, const vector_field &b );
 
