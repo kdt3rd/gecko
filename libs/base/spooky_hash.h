@@ -26,6 +26,7 @@
 #include <array>
 #include <vector>
 #include <map>
+#include <memory>
 #include "const_string.h"
 #include <ostream>
 
@@ -151,6 +152,12 @@ template <typename A, typename B>
 inline spooky_hash &operator <<( spooky_hash &h, const std::pair<A, B> &v )
 {
 	return h << v.first << v.second;
+}
+
+template <typename V>
+inline spooky_hash &operator <<( spooky_hash &h, const std::shared_ptr<V> &v )
+{
+	return h << "sp<" << *v << '>';
 }
 
 std::ostream &operator<<( std::ostream &os, const spooky_hash &h );
