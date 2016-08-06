@@ -22,6 +22,7 @@
 
 #include "patch_match.h"
 #include "plane_ops.h"
+#include "media_io.h"
 #include "threading.h"
 #include <random>
 #include <iomanip>
@@ -896,26 +897,25 @@ static bool matchPass2( plane_buffer &u, plane_buffer &v, plane_buffer &d, const
 	int maxSkipX = ( iter == 1 ) ? std::max( int(1), u.width() / (iter * iter + 1) ) : 1;
 	int maxSkipY = ( iter == 1 ) ? std::max( int(1), u.height() / (iter * iter + 1) ) : 1;
 
-	std::cout << "   iter " << iter << " Max skip: " << maxSkipX << ' ' << maxSkipY << std::endl;
-	std::cout << "   iter " << iter << " match pass horizontal left->right: " << std::flush;
+	std::cout << "   iter " << iter
+			  << " skip: " << maxSkipX << ' ' << maxSkipY
+			  << " l->r: " << std::flush;
 	if ( maxSkipX == 1 )
 		threading::get().dispatch( std::bind( matchPassHorizThreadForward1<BufType,DistFunc>, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( u ), std::ref( v ), std::ref( d ), std::cref( a ), std::cref( b ), std::cref( adx ), std::cref( ady ), std::cref( bdx ), std::cref( bdy ), radius, std::ref( counts ), eps ), 0, u.height() );
 	else
 		threading::get().dispatch( std::bind( matchPassHorizThreadForwardN<BufType,DistFunc>, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( u ), std::ref( v ), std::ref( d ), std::cref( a ), std::cref( b ), std::cref( adx ), std::cref( ady ), std::cref( bdx ), std::cref( bdy ), radius, std::ref( counts ), maxSkipX, eps ), 0, u.height() );
 	nChange = getCount( counts );
-	std::cout << nChange << " changed" << std::endl;
+	std::cout << nChange << " t->b: " << std::flush;
 	totChange += nChange;
 
-	std::cout << "   iter " << iter << " match pass vertical top->bottom: " << std::flush;
 	if ( maxSkipY == 1 )
 		threading::get().dispatch( std::bind( matchPassVertThreadDown1<BufType,DistFunc>, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( u ), std::ref( v ), std::ref( d ), std::cref( a ), std::cref( b ), std::cref( adx ), std::cref( ady ), std::cref( bdx ), std::cref( bdy ), radius, std::ref( counts ), eps ), 0, u.width() );
 	else
 		threading::get().dispatch( std::bind( matchPassVertThreadDownN<BufType,DistFunc>, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( u ), std::ref( v ), std::ref( d ), std::cref( a ), std::cref( b ), std::cref( adx ), std::cref( ady ), std::cref( bdx ), std::cref( bdy ), radius, std::ref( counts ), maxSkipY, eps ), 0, u.width() );
 	nChange = getCount( counts );
-	std::cout << nChange << " changed" << std::endl;
+	std::cout << nChange << " random: " << std::flush;
 	totChange += nChange;
 
-	std::cout << "   iter " << iter << " match pass random: " << std::flush;
 	size_t nSeeds = static_cast<size_t>( u.height() );
 	std::vector<uint32_t> seeds( nSeeds, 0 );
 	for ( size_t y = 0; y < nSeeds; ++y )
@@ -923,37 +923,33 @@ static bool matchPass2( plane_buffer &u, plane_buffer &v, plane_buffer &d, const
 
 	threading::get().dispatch( std::bind( matchPassRandomThread<BufType,DistFunc>, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( u ), std::ref( v ), std::ref( d ), std::cref( a ), std::cref( b ), std::cref( adx ), std::cref( ady ), std::cref( bdx ), std::cref( bdy ), radius, std::cref( seeds ), std::ref( counts ), eps ), 0, u.height() );
 	nChange = getCount( counts );
-	std::cout << nChange << " changed" << std::endl;
+	std::cout << nChange << " r->l: " << std::flush;
 	totChange += nChange;
 
-	std::cout << "   iter " << iter << " match pass horizontal right->left: " << std::flush;
 	if ( maxSkipX == 1 )
 		threading::get().dispatch( std::bind( matchPassHorizThreadBackward1<BufType,DistFunc>, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( u ), std::ref( v ), std::ref( d ), std::cref( a ), std::cref( b ), std::cref( adx ), std::cref( ady ), std::cref( bdx ), std::cref( bdy ), radius, std::ref( counts ), eps ), 0, u.height() );
 	else
 		threading::get().dispatch( std::bind( matchPassHorizThreadBackwardN<BufType,DistFunc>, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( u ), std::ref( v ), std::ref( d ), std::cref( a ), std::cref( b ), std::cref( adx ), std::cref( ady ), std::cref( bdx ), std::cref( bdy ), radius, std::ref( counts ), maxSkipX, eps ), 0, u.height() );
 	nChange = getCount( counts );
-	std::cout << nChange << " changed" << std::endl;
+	std::cout << nChange << " b->t: " << std::flush;
 	totChange += nChange;
 
-	std::cout << "   iter " << iter << " match pass vertical bottom->top: " << std::flush;
 	if ( maxSkipY == 1 )
 		threading::get().dispatch( std::bind( matchPassVertThreadUp1<BufType,DistFunc>, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( u ), std::ref( v ), std::ref( d ), std::cref( a ), std::cref( b ), std::cref( adx ), std::cref( ady ), std::cref( bdx ), std::cref( bdy ), radius, std::ref( counts ), eps ), 0, u.width() );
 	else
 		threading::get().dispatch( std::bind( matchPassVertThreadUpN<BufType,DistFunc>, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( u ), std::ref( v ), std::ref( d ), std::cref( a ), std::cref( b ), std::cref( adx ), std::cref( ady ), std::cref( bdx ), std::cref( bdy ), radius, std::ref( counts ), maxSkipY, eps ), 0, u.width() );
 	nChange = getCount( counts );
-	std::cout << nChange << " changed" << std::endl;
+	std::cout << nChange << " EVEN: " << std::flush;
 	totChange += nChange;
 
-	std::cout << "   iter " << iter << " match pass diagonal EVEN: " << std::flush;
 	threading::get().dispatch( std::bind( matchPassDiagonal<BufType,DistFunc>, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( u ), std::ref( v ), std::ref( d ), std::cref( a ), std::cref( b ), std::cref( adx ), std::cref( ady ), std::cref( bdx ), std::cref( bdy ), radius, std::ref( counts ), 0, eps ), 0, u.height() / 2 );
 	nChange = getCount( counts );
-	std::cout << nChange << " changed" << std::endl;
+	std::cout << nChange << " ODD: " << std::flush;
 	totChange += nChange;
 
-	std::cout << "   iter " << iter << " match pass diagonal ODD: " << std::flush;
 	threading::get().dispatch( std::bind( matchPassDiagonal<BufType,DistFunc>, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( u ), std::ref( v ), std::ref( d ), std::cref( a ), std::cref( b ), std::cref( adx ), std::cref( ady ), std::cref( bdx ), std::cref( bdy ), radius, std::ref( counts ), 1, eps ), 0, u.height() / 2 );
 	nChange = getCount( counts );
-	std::cout << nChange << " changed" << std::endl;
+	std::cout << nChange << std::endl;
 	totChange += nChange;
 
 	return totChange == 0;
@@ -1077,14 +1073,13 @@ runMatch( plane_buffer &u, plane_buffer &v, plane_buffer &d, const BufType &a, c
 	float eps = static_cast<float>( radius * 2 + 1 );
 	eps *= eps;
 	eps *= 0.0001F;
-	std::cout << "patch_match epsilon: " << eps << std::endl;
 	switch ( static_cast<patch_style>( style ) )
 	{
 		case patch_style::SSD:
 			matchPassInit<BufType,PatchMatchSSD>( u, v, d, a, b, adx, ady, bdx, bdy, radius );
+			std::cout << "\npatch_match SSD eps " << eps << " radius " << radius << ": " << std::endl;
 			for ( int p = 0; p < iters; ++p )
 			{
-				std::cout << "\npatch_match SSD radius " << radius << " iter " << p << std::endl;
 				// if changes don't change, finished
 				if ( matchPass2<BufType,PatchMatchSSD>( u, v, d, a, b, adx, ady, bdx, bdy, gen, radius, p, eps ) )
 				{
@@ -1095,9 +1090,9 @@ runMatch( plane_buffer &u, plane_buffer &v, plane_buffer &d, const BufType &a, c
 			break;
 		case patch_style::SSD_GRAD:
 			matchPassInit<BufType,PatchMatchSSDGrad>( u, v, d, a, b, adx, ady, bdx, bdy, radius );
+			std::cout << "\npatch_match SSD_GRAD eps " << eps << " radius " << radius << ": " << std::endl;
 			for ( int p = 0; p < iters; ++p )
 			{
-				std::cout << "\npatch_match SSD_GRAD radius " << radius << " iter " << p << std::endl;
 //				if ( p > 0 && p % 5 == 0 )
 //				{
 //					std::cout << "  running serial match" << std::endl;
@@ -1117,9 +1112,9 @@ runMatch( plane_buffer &u, plane_buffer &v, plane_buffer &d, const BufType &a, c
 			break;
 		case patch_style::SSD_GRAD_DIST:
 			matchPassInit<BufType,PatchMatchSSDGradDist>( u, v, d, a, b, adx, ady, bdx, bdy, radius );
+			std::cout << "\npatch_match SSD_GRAD_DIST eps " << eps << " radius " << radius << ": " << std::endl;
 			for ( int p = 0; p < iters; ++p )
 			{
-				std::cout << "\npatch_match SSD_GRAD_DIST radius " << radius << " iter " << p << std::endl;
 				if ( matchPass2<BufType,PatchMatchSSDGradDist>( u, v, d, a, b, adx, ady, bdx, bdy, gen, radius, p, eps ) )
 				{
 					std::cout << "patch_match converged after " << (p + 1) << " iterations" << std::endl;
@@ -1129,9 +1124,9 @@ runMatch( plane_buffer &u, plane_buffer &v, plane_buffer &d, const BufType &a, c
 			break;
 		case patch_style::GRAD:
 			matchPassInit<BufType,PatchMatchGrad>( u, v, d, a, b, adx, ady, bdx, bdy, radius );
+			std::cout << "\npatch_match GRAD eps " << eps << " radius " << radius << ": " << std::endl;
 			for ( int p = 0; p < iters; ++p )
 			{
-				std::cout << "\npatch_match GRAD radius " << radius << " iter " << p << std::endl;
 				if ( matchPass2<BufType,PatchMatchGrad>( u, v, d, a, b, adx, ady, bdx, bdy, gen, radius, p, eps ) )
 				{
 					std::cout << "patch_match converged after " << (p + 1) << " iterations" << std::endl;
@@ -1278,12 +1273,11 @@ matchRefine( plane_buffer &u, plane_buffer &v, plane_buffer &d, const BufType &a
 	float eps = static_cast<float>( radius * 2 + 1 );
 	eps *= eps;
 	eps *= 0.0001F;
-	std::cout << "patch_match " << u.width() << "x" << u.height() << " epsilon: " << eps << std::endl;
 	switch ( static_cast<patch_style>( style ) )
 	{
 		case patch_style::SSD:
 			matchPassInit<BufType,PatchMatchSSD>( u, v, d, a, b, adx, ady, bdx, bdy, radius );
-			std::cout << "\npatch_match_refine SSD radius " << radius << " iters " << iters << std::endl;
+			std::cout << "\npatch_match_refine SSD eps " << eps << " radius " << radius << " iters " << iters << std::endl;
 			for ( int p = 0; p < iters; ++p )
 			{
 				// if changes don't change, finished
@@ -1296,7 +1290,7 @@ matchRefine( plane_buffer &u, plane_buffer &v, plane_buffer &d, const BufType &a
 			break;
 		case patch_style::SSD_GRAD:
 			matchPassInit<BufType,PatchMatchSSDGrad>( u, v, d, a, b, adx, ady, bdx, bdy, radius );
-			std::cout << "\npatch_match SSD_GRAD radius " << radius << " iters " << iters << std::endl;
+			std::cout << "\npatch_match SSD_GRAD eps " << eps << " radius " << radius << " iters " << iters << std::endl;
 			for ( int p = 0; p < iters; ++p )
 			{
 				if ( matchRefineIter<BufType,PatchMatchSSDGrad>( u, v, d, a, b, adx, ady, bdx, bdy, gen, radius, p, eps ) )
@@ -1308,7 +1302,7 @@ matchRefine( plane_buffer &u, plane_buffer &v, plane_buffer &d, const BufType &a
 			break;
 		case patch_style::SSD_GRAD_DIST:
 			matchPassInit<BufType,PatchMatchSSDGradDist>( u, v, d, a, b, adx, ady, bdx, bdy, radius );
-			std::cout << "\npatch_match SSD_GRAD_DIST radius " << radius << " iters " << iters << std::endl;
+			std::cout << "\npatch_match SSD_GRAD_DIST eps " << eps << " radius " << radius << " iters " << iters << std::endl;
 			for ( int p = 0; p < iters; ++p )
 			{
 				if ( matchRefineIter<BufType,PatchMatchSSDGradDist>( u, v, d, a, b, adx, ady, bdx, bdy, gen, radius, p, eps ) )
@@ -1320,7 +1314,7 @@ matchRefine( plane_buffer &u, plane_buffer &v, plane_buffer &d, const BufType &a
 			break;
 		case patch_style::GRAD:
 			matchPassInit<BufType,PatchMatchGrad>( u, v, d, a, b, adx, ady, bdx, bdy, radius );
-			std::cout << "\npatch_match GRAD radius " << radius << " iters " << iters << std::endl;
+			std::cout << "\npatch_match GRAD eps " << eps << " radius " << radius << " iters " << iters << std::endl;
 			for ( int p = 0; p < iters; ++p )
 			{
 				if ( matchRefineIter<BufType,PatchMatchGrad>( u, v, d, a, b, adx, ady, bdx, bdy, gen, radius, p, eps ) )
@@ -1337,14 +1331,8 @@ static vector_field pmHierPlane( const plane &a, const plane &b, int64_t frameA,
 {
 	uint32_t seedU = static_cast<uint32_t>( frameA + (frameA - frameB) + 1 );
 
-	int nLevels = 3;
-	if ( a.width() >= 3840 )
-		nLevels = 5;
-	else if ( a.width() >= 1920 )
-		nLevels = 4;
-
-	std::vector<plane> hierA = make_pyramid( a, "bilinear", 0.5F, nLevels );
-	std::vector<plane> hierB = make_pyramid( b, "bilinear", 0.5F, nLevels );
+	std::vector<plane> hierA = make_pyramid( a, "bilinear", 0.5F, 0, 100 );
+	std::vector<plane> hierB = make_pyramid( b, "bilinear", 0.5F, 0, 100 );
 
 	int levelRadius = std::max( int(2), radius - static_cast<int>( hierA.size() ) );
 	vector_field prevUV;
@@ -1403,14 +1391,8 @@ static vector_field pmHierImage( const image_buf &a, const image_buf &b, int64_t
 {
 	uint32_t seedU = static_cast<uint32_t>( frameA + (frameA - frameB) + 1 );
 
-	int nLevels = 3;
-	if ( a.width() >= 3840 )
-		nLevels = 5;
-	else if ( a.width() >= 1920 )
-		nLevels = 4;
-
-	std::vector<image_buf> hierA = make_pyramid( a, "bilinear", 0.5F, nLevels );
-	std::vector<image_buf> hierB = make_pyramid( b, "bilinear", 0.5F, nLevels );
+	std::vector<image_buf> hierA = make_pyramid( a, "bilinear", 0.5F, 0, 100 );
+	std::vector<image_buf> hierB = make_pyramid( b, "bilinear", 0.5F, 0, 100 );
 
 	int levelRadius = std::max( int(2), radius - static_cast<int>( hierA.size() ) );
 	vector_field prevUV;
@@ -1426,11 +1408,11 @@ static vector_field pmHierImage( const image_buf &a, const image_buf &b, int64_t
 		levelRadius = std::min( radius, levelRadius + 1 );
 		if ( ! prevUV.valid() )
 		{
-			prevUV = pmImage( curA, curB, frameA, frameB, levelRadius, style, refineIters * refineIters );
+			prevUV = pmImage( curA, curB, frameA, frameB, levelRadius, style, refineIters * refineIters * 2 );
 			refineIters -= iters;
 			continue;
 		}
-		
+
 		std::vector<const_plane_buffer> aB, bB;
 		image_buf adx, ady, bdx, bdy;
 		adx = curA; ady = curA;
@@ -1450,7 +1432,7 @@ static vector_field pmHierImage( const image_buf &a, const image_buf &b, int64_t
 				bBdy.emplace_back( static_cast<const_plane_buffer>( bdy[i] ) );
 			}
 			aB.emplace_back( static_cast<const_plane_buffer>( curA[i] ) );
-			bB.emplace_back( static_cast<const_plane_buffer>( curA[i] ) );
+			bB.emplace_back( static_cast<const_plane_buffer>( curB[i] ) );
 		}
 
 		float scaleX = static_cast<float>( curW ) / static_cast<float>( prevUV.u().width() );
