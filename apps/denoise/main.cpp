@@ -59,7 +59,7 @@ int safemain( int argc, char *argv[] )
 	int waveletLevels = 1;
 	float spatSigmaD = 1.5F;
 	float spatSigmaI = 0.025F;
-	float mseThresh = 0.015F;
+	float mseThresh = 0.0075F;
 	int mseRadius = 5;
 	int matchRadius = 4;
 	int tempIters = 5;
@@ -454,6 +454,7 @@ int safemain( int argc, char *argv[] )
 						filteredCenter[p] = expm1( filteredCenter[p] );
 				}
 
+//				debug_save_image( filteredCenter, "filtered_center.#######.exr", f, { "R", "G", "B" }, "f16" );
 				if ( temporalRadius <= 0 )
 				{
 					oc.video_tracks()[ci]->store( f, to_frame( filteredCenter, { "R", "G", "B" }, "f16" ) );
@@ -463,7 +464,7 @@ int safemain( int argc, char *argv[] )
 
 				float cnt = 0.F;
 				image_buf accumImg;
-				plane integAmt;
+//				plane integAmt;
 				for ( int64_t curF = f - temporalRadius; curF <= (f + temporalRadius); ++curF )
 				{
 					if ( curF < vt->begin() || curF > vt->end() )
@@ -497,32 +498,54 @@ int safemain( int argc, char *argv[] )
 						if ( temporalmethod == "patchmatch" )
 						{
 							// TODO: add parameters for the parameters
-							vector_field vf = patch_match( tmpCen, tmpImg, f, curF, matchRadius, patch_style::SSD_GRAD, tempIters );
+							vector_field vf = patch_match( tmpCen, tmpImg, f, curF, matchRadius, patch_style::SSD, tempIters );
+//							std::stringstream fnb;
+//							int offset = f - curF;
+//							fnb << "vec_field_" << f << '_' << (offset < 0 ?'m':'p') << std::abs(offset) << ".exr";
+//							debug_save_image( colorize( vf, true ), fnb.str(), f, { "R", "G", "B", "A" }, "f16" );
 							img[0] = warp_dirac( img[0], vf, true );
 							img[1] = warp_dirac( img[1], vf, true );
 							img[2] = warp_dirac( img[2], vf, true );
+//							std::stringstream warpfn;
+//							warpfn << "warped_" << f << '_' << (offset < 0 ?'m':'p') << std::abs(offset) << ".exr";
+//							debug_save_image( img, warpfn.str(), f, { "R", "G", "B" }, "f16" );
 						}
 						else if ( temporalmethod == "hierpatch" )
 						{
 							// TODO: add parameters for the parameters
-							vector_field vf = hier_patch_match( tmpCen, tmpImg, f, curF, matchRadius, patch_style::SSD_GRAD, tempIters );
+							vector_field vf = hier_patch_match( tmpCen, tmpImg, f, curF, matchRadius, patch_style::SSD, tempIters );
+//							std::stringstream fnb;
+//							int offset = f - curF;
+//							fnb << "vec_field_" << f << '_' << (offset < 0 ?'m':'p') << std::abs(offset) << ".exr";
+//							debug_save_image( colorize( vf, true ), fnb.str(), f, { "R", "G", "B", "A" }, "f16" );
 							img[0] = warp_dirac( img[0], vf, true );
 							img[1] = warp_dirac( img[1], vf, true );
 							img[2] = warp_dirac( img[2], vf, true );
+//							std::stringstream warpfn;
+//							warpfn << "warped_" << f << '_' << (offset < 0 ?'m':'p') << std::abs(offset) << ".exr";
+//							debug_save_image( img, warpfn.str(), f, { "R", "G", "B" }, "f16" );
 						}
 
 						// TODO: add integration logic here
 						if ( integmethod == "mse" )
 						{
+							image_buf tmpI;
 							for ( int i = 0; i < 3; ++i )
 							{
 								plane e = mse( img[i], centerImg[i], mseRadius );
+								tmpI.add_plane( e * 100.F );
+								plane intmap = threshold( e, mseThresh );
+//								if ( ! integAmt.valid() )
+//									integAmt = intmap;
+//								else
+//									integAmt += intmap;
+								// TODO: blur integration map and blend instead of hard thresh
 								img[i] = if_less( e, mseThresh, img[i], filteredCenter[i] );
-								if ( ! integAmt.valid() )
-									integAmt = threshold( e, mseThresh );
-								else
-									integAmt += threshold( e, mseThresh );
 							}
+//							int offset = f - curF;
+//							std::stringstream errfn;
+//							errfn << "mse_" << f << '_' << (offset < 0 ?'m':'p') << std::abs(offset) << ".exr";
+//							debug_save_image( tmpI, errfn.str(), f, { "R", "G", "B" }, "f16" );
 						}
 						else if ( integmethod == "robustave" )
 						{
@@ -570,13 +593,15 @@ int safemain( int argc, char *argv[] )
 //				accumImg[1].graph_ptr()->dump_dot( "plane1.dot" );
 //				accumImg[2].graph_ptr()->dump_dot( "plane2.dot" );
 //				accumImg[0].graph_ptr()->dump_refs( std::cout );
-				if ( ! integAmt.valid() )
-					oc.video_tracks()[ci]->store( f, to_frame( accumImg, { "R", "G", "B" }, "f16" ) );
-				else
+//				if ( ! integAmt.valid() )
 				{
-					accumImg.add_plane( integAmt / ( ( cnt - 1.F ) * 3.F ) );
-					oc.video_tracks()[ci]->store( f, to_frame( accumImg, { "R", "G", "B", "A" }, "f16" ) );
+					oc.video_tracks()[ci]->store( f, to_frame( accumImg, { "R", "G", "B" }, "f16" ) );
 				}
+//				else
+//				{
+//					accumImg.add_plane( integAmt / ( ( cnt - 1.F ) * 3.F ) );
+//					oc.video_tracks()[ci]->store( f, to_frame( accumImg, { "R", "G", "B", "A" }, "f16" ) );
+//				}
 				std::cout << "Finished frame: " << f << std::endl;
 			}
 		}
