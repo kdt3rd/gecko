@@ -22,6 +22,7 @@
 
 #include "op_registry.h"
 #include "image.h"
+#include "media_io.h"
 //#include "image_ops.h"
 #include "plane_ops.h"
 #include "plane_math.h"
@@ -121,6 +122,9 @@ void initOps( void )
 {
 	using namespace engine;
 	registry &r = registry::get();
+
+	image::add_media_io( r );
+
 	registerPlaneOps( r );
 	registerImageOps( r );
 	image::add_spatial( r );

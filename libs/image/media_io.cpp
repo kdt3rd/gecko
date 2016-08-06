@@ -22,6 +22,7 @@
 
 #include "media_io.h"
 #include <base/contract.h>
+#include <media/writer.h>
 
 ////////////////////////////////////////
 
@@ -111,6 +112,64 @@ to_frame( const image_buf &i, const std::vector<std::string> &chans, const std::
 		r->add_channel( chans[c], ib );
 	}
 	return r;
+}
+
+////////////////////////////////////////
+
+void
+debug_save_image( const image_buf &i, const std::string &fn, int64_t sampNum, const std::vector<std::string> &chans, const std::string &type, const media::metadata &options )
+{
+	std::vector<media::track_description> tds;
+
+	tds.push_back( media::TRACK_VIDEO );
+	tds.back().rate( media::sample_rate( 1, 1 ) );
+	tds.back().offset( sampNum );
+	tds.back().duration( 1 );
+	for ( auto &o: options )
+		tds.back().set_option( o.first, o.second );
+
+	base::uri fnU( fn );
+	if ( ! fnU )
+		fnU.set_scheme( "file" );
+	
+	media::container oc = media::writer::open( fnU, tds, options );
+	oc.video_tracks()[0]->store( sampNum, to_frame( i, chans, type ) );
+	std::cout << "Saved debug image to '" << fn << "', frame " << sampNum << std::endl;
+}
+
+////////////////////////////////////////
+
+//image_buf
+//load_frame( const std::shared_ptr<media::container> &c, size_t videoTrackIdx, int64_t sampNum )
+//{
+//	engine::dimensions d = nulldim;
+//	auto vt = c->video_tracks()[videoTrackIdx];
+//	d.x = vt->dimension_x();
+//	d.y = vt->dimension_y();
+//	d.z = vt->dimension_z();
+//	d.w = vt->dimension_z();
+//	return image_buf( "m.load_frame", d, c, videoTrackIdx, sampNum );
+//}
+
+////////////////////////////////////////
+
+//engine::computed_value<bool>
+//save_frame( const image_buf &i,
+//			const std::vector<std::string> &chans,
+//			const std::string &type,
+//			const std::shared_ptr<media::container> &c,
+//			size_t videoTrackIdx,
+//			int64_t sampNum )
+//{
+//	engine::dimensions d = nulldim;
+//	return engine::computed_value<bool>( "m.save_frame", d, i, chans, type, c, videoTrackIdx, sampNum );
+//}
+
+////////////////////////////////////////
+
+void
+add_media_io( engine::registry &r )
+{
 }
 
 ////////////////////////////////////////
