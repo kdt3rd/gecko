@@ -52,6 +52,7 @@ add_oflow( engine::registry &r )
 {
 	using namespace engine;
 
+	r.register_constant<image::vector_field>();
 	r.add( op( "v.extract_u", extract_u, op::simple ) );
 	r.add( op( "v.extract_v", extract_v, op::simple ) );
 
