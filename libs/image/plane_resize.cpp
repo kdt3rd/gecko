@@ -222,7 +222,7 @@ resize_vert( const plane &p, const std::string &filter, int newh )
 ////////////////////////////////////////
 
 std::vector<plane>
-make_pyramid( const plane &in, const std::string &filter, float eta, int n )
+make_pyramid( const plane &in, const std::string &filter, float eta, int n, int minSize )
 {
 	precondition( eta > 0.F && eta < 1.F, "Invalid eta {0} for pyramid, must be between 0 and 1", eta );
 
@@ -237,13 +237,13 @@ make_pyramid( const plane &in, const std::string &filter, float eta, int n )
 		int curW = static_cast<int>( ceilf( curWf ) );
 		int curH = static_cast<int>( ceilf( curHf ) );
 
-		if ( curW < 2 || curH < 2 )
+		if ( curW < minSize || curH < minSize )
 		{
-			std::cout << "Terminating pyramid at level " << curLev << std::endl;
+//			std::cout << "Terminating pyramid at level " << curLev << std::endl;
 			break;
 		}
 
-		std::cout << "adding level " << curLev << " at " << curW << "x" << curH << std::endl;
+//		std::cout << "adding level " << curLev << " at " << curW << "x" << curH << std::endl;
 		if ( filter == "bilinear" )
 			ret.push_back( resize_bilinear( ret.back(), curW, curH ) );
 		else if ( filter == "bicubic" )
@@ -262,7 +262,7 @@ make_pyramid( const plane &in, const std::string &filter, float eta, int n )
 ////////////////////////////////////////
 
 std::vector<image_buf>
-make_pyramid( const image_buf &in, const std::string &filter, float eta, int n )
+make_pyramid( const image_buf &in, const std::string &filter, float eta, int n, int minSize )
 {
 	precondition( eta > 0.F && eta < 1.F, "Invalid eta {0} for pyramid, must be between 0 and 1", eta );
 
@@ -277,13 +277,13 @@ make_pyramid( const image_buf &in, const std::string &filter, float eta, int n )
 		int curW = static_cast<int>( ceilf( curWf ) );
 		int curH = static_cast<int>( ceilf( curHf ) );
 
-		if ( curW < 2 || curH < 2 )
+		if ( curW < minSize || curH < minSize )
 		{
-			std::cout << "Terminating pyramid at level " << curLev << std::endl;
+//			std::cout << "Terminating pyramid at level " << curLev << std::endl;
 			break;
 		}
 
-		std::cout << "adding level " << curLev << " at " << curW << "x" << curH << std::endl;
+//		std::cout << "adding level " << curLev << " at " << curW << "x" << curH << std::endl;
 		if ( filter == "bilinear" )
 		{
 			image_buf tmp = ret.back();
