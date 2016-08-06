@@ -1302,7 +1302,11 @@ graph::add_node( op_id op, any value, const dimensions &d, const std::vector<nod
 	_hash_to_node[hv] = n;
 
 	for ( auto i: inputs )
+	{
+		if ( i == nullnode )
+			continue;
 		_nodes[i].add_output( n );
+	}
 
 	return n;
 }
