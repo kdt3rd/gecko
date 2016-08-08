@@ -96,7 +96,7 @@ image_buf::add_plane( plane &&p )
 engine::hash &
 operator<<( engine::hash &h, const image_buf &i )
 {
-	h << i.size();
+	h << typeid(i).hash_code() << i.size();
 	for ( auto &p: i )
 		h << p;
 

@@ -138,7 +138,7 @@ engine::hash &operator<<( engine::hash &h, const plane &p )
 	if ( p.compute_hash( h ) )
 		return h;
 
-	h << p.width() << p.height();
+	h << typeid(p).hash_code() << p.width() << p.height();
 	h.add( p.cdata(), p.buffer_size() );
 	return h;
 }
