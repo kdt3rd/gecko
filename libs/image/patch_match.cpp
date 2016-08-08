@@ -1166,7 +1166,7 @@ static vector_field pmPlane( const plane &a, const plane &b, int64_t frameA, int
 	plane_buffer fD = dist;
 	runMatch( fU, fV, fD, cA, cB, cAdx, cAdy, cBdx, cBdy, seedU, radius, style, iters );
 
-	return vector_field::create( std::move( u ), std::move( v ) );
+	return vector_field::create( std::move( u ), std::move( v ), true );
 }
 
 static vector_field pmImage( const image_buf &a, const image_buf &b, int64_t frameA, int64_t frameB, int radius, int style, int iters )
@@ -1202,7 +1202,7 @@ static vector_field pmImage( const image_buf &a, const image_buf &b, int64_t fra
 	}
 	runMatch( fU, fV, fD, aB, bB, aBdx, aBdy, bBdx, bBdy, seedU, radius, style, iters );
 
-	return vector_field::create( std::move( u ), std::move( v ) );
+	return vector_field::create( std::move( u ), std::move( v ), true );
 }
 
 ////////////////////////////////////////
@@ -1369,7 +1369,8 @@ static vector_field pmHierPlane( const plane &a, const plane &b, int64_t frameA,
 		float scaleX = static_cast<float>( curW ) / static_cast<float>( prevUV.u().width() );
 		float scaleY = static_cast<float>( curH ) / static_cast<float>( prevUV.u().height() );
 		vector_field newUV = vector_field::create( resize_bicubic( prevUV.u(), curW, curH ) * scaleX,
-												   resize_bicubic( prevUV.v(), curW, curH ) * scaleY );
+												   resize_bicubic( prevUV.v(), curW, curH ) * scaleY,
+												   true );
 		plane_buffer uB = newUV.u();
 		plane_buffer vB = newUV.v();
 		plane d( curW, curH );
@@ -1438,7 +1439,8 @@ static vector_field pmHierImage( const image_buf &a, const image_buf &b, int64_t
 		float scaleX = static_cast<float>( curW ) / static_cast<float>( prevUV.u().width() );
 		float scaleY = static_cast<float>( curH ) / static_cast<float>( prevUV.u().height() );
 		vector_field newUV = vector_field::create( resize_bicubic( prevUV.u(), curW, curH ) * scaleX,
-												   resize_bicubic( prevUV.v(), curW, curH ) * scaleY );
+												   resize_bicubic( prevUV.v(), curW, curH ) * scaleY,
+												   true );
 		plane_buffer uB = newUV.u();
 		plane_buffer vB = newUV.v();
 		plane d( curW, curH );
@@ -1471,7 +1473,7 @@ vector_field patch_match( const plane &a, const plane &b, int64_t framenumA, int
 	d.y = a.height();
 	d.z = 2;
 
-	return vector_field( "p.patch_match", d, a, b, framenumA, framenumB, radius, static_cast<int>(style), iters );
+	return vector_field( true, "p.patch_match", d, a, b, framenumA, framenumB, radius, static_cast<int>(style), iters );
 }
 
 ////////////////////////////////////////
@@ -1483,7 +1485,7 @@ vector_field patch_match( const image_buf &a, const image_buf &b, int64_t framen
 	d.x = a.width();
 	d.y = a.height();
 	d.z = 2;
-	return vector_field( "i.patch_match", d, a, b, framenumA, framenumB, radius, static_cast<int>(style), iters );
+	return vector_field( true, "i.patch_match", d, a, b, framenumA, framenumB, radius, static_cast<int>(style), iters );
 }
 
 ////////////////////////////////////////
@@ -1496,7 +1498,7 @@ hier_patch_match( const plane &a, const plane &b, int64_t framenumA, int64_t fra
 	d.y = a.height();
 	d.z = 2;
 
-	return vector_field( "p.hier_patch_match", d, a, b, framenumA, framenumB, radius, static_cast<int>(style), iters );
+	return vector_field( true, "p.hier_patch_match", d, a, b, framenumA, framenumB, radius, static_cast<int>(style), iters );
 }
 
 ////////////////////////////////////////
@@ -1509,7 +1511,7 @@ hier_patch_match( const image_buf &a, const image_buf &b, int64_t framenumA, int
 	d.x = a.width();
 	d.y = a.height();
 	d.z = 2;
-	return vector_field( "i.hier_patch_match", d, a, b, framenumA, framenumB, radius, static_cast<int>(style), iters );
+	return vector_field( true, "i.hier_patch_match", d, a, b, framenumA, framenumB, radius, static_cast<int>(style), iters );
 }
 
 ////////////////////////////////////////

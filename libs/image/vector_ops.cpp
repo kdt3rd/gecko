@@ -67,9 +67,9 @@ cvtToRelV( scanline &dest, int y, const plane &v )
 ////////////////////////////////////////
 
 static void
-applyWarpBilinearP( scanline &dest, int y, const plane &src, const vector_field &v, bool isAbsolute )
+applyWarpBilinearP( scanline &dest, int y, const plane &src, const vector_field &v )
 {
-	if ( isAbsolute )
+	if ( v.is_absolute() )
 	{
 		const plane::value_type *uLine = v.u().line( y );
 		const plane::value_type *vLine = v.v().line( y );
@@ -97,9 +97,9 @@ applyWarpBilinearP( scanline &dest, int y, const plane &src, const vector_field 
 ////////////////////////////////////////
 
 static void
-applyWarpDiracP( scanline &dest, int y, const plane &src, const vector_field &v, bool isAbsolute )
+applyWarpDiracP( scanline &dest, int y, const plane &src, const vector_field &v )
 {
-	if ( isAbsolute )
+	if ( v.is_absolute() )
 	{
 		const plane::value_type *uLine = v.u().line( y );
 		const plane::value_type *vLine = v.v().line( y );
@@ -229,6 +229,7 @@ static void colorize_thread_rel( size_t tIdx, int s, int e, image_buf &ret, cons
 			magLine[x] = mV;
 			maxFlowMag = std::max( maxFlowMag, mV );
 			float dir = fmodf( atan2f( vV, uV ) / ( 2.F * static_cast<float>( M_PI ) ) + 1.F, 1.F );
+
 			rLine[x] = dir;
 		}
 	}
@@ -237,7 +238,7 @@ static void colorize_thread_rel( size_t tIdx, int s, int e, image_buf &ret, cons
 }
 
 
-static image_buf colorize_vector( const vector_field &v, bool isAbs, float scale )
+static image_buf colorize_vector( const vector_field &v, float scale )
 {
 	std::vector<float> maxmags;
 	maxmags.resize( threading::get().size(), 0.F );
@@ -247,7 +248,7 @@ static image_buf colorize_vector( const vector_field &v, bool isAbs, float scale
 	ret.add_plane( plane( v.width(), v.height() ) );
 	ret.add_plane( plane( v.width(), v.height() ) );
 
-	if ( isAbs )
+	if ( v.is_absolute() )
 		threading::get().dispatch( std::bind( colorize_thread_abs, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( ret ), std::cref( v ), std::ref( maxmags ) ), 0, v.height() );
 	else
 		threading::get().dispatch( std::bind( colorize_thread_rel, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( ret ), std::cref( v ), std::ref( maxmags ) ), 0, v.height() );
@@ -255,6 +256,7 @@ static image_buf colorize_vector( const vector_field &v, bool isAbs, float scale
 	float maxMag = maxmags.front();
 	for ( float mm: maxmags )
 		maxMag = std::max( mm, maxMag );
+	maxMag = std::max( 1.F, maxMag );
 
 	threading::get().dispatch( std::bind( colorize_thread_final, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( ret ), scale, maxMag ), 0, v.height() );
 
@@ -268,23 +270,47 @@ static image_buf colorize_vector( const vector_field &v, bool isAbs, float scale
 namespace image
 {
 
-plane warp_bilinear( const plane &src, const vector_field &v, bool isAbsolute )
+plane warp_dirac( const plane &src, const vector_field &v )
 {
 	precondition( v.width() == src.width() && v.height() == src.height(), "Vector field not same size as plane requested for warp" );
-	return plane( "v.warp_bilinear", src.dims(), src, v, isAbsolute );
+	return plane( "v.p.warp_dirac", src.dims(), src, v );
 }
 
-plane warp_dirac( const plane &src, const vector_field &v, bool isAbsolute )
+image_buf warp_dirac( const image_buf &src, const vector_field &v )
+{
+	image_buf ret;
+	// anything to be gained from inlining this?
+	for ( int i = 0; i != src.planes(); ++i )
+		ret.add_plane( warp_dirac( src[i], v ) );
+	return ret;
+}
+
+////////////////////////////////////////
+
+plane warp_bilinear( const plane &src, const vector_field &v )
 {
 	precondition( v.width() == src.width() && v.height() == src.height(), "Vector field not same size as plane requested for warp" );
-	return plane( "v.warp_dirac", src.dims(), src, v, isAbsolute );
+	return plane( "v.p.warp_bilinear", src.dims(), src, v );
+}
+
+image_buf warp_bilinear( const image_buf &src, const vector_field &v )
+{
+	image_buf ret;
+	// anything to be gained from inlining this?
+	for ( int i = 0; i != src.planes(); ++i )
+		ret.add_plane( warp_bilinear( src[i], v ) );
+	return ret;
 }
 
 vector_field convert_to_absolute( const vector_field &v )
 {
+	if ( v.is_absolute() )
+		return v;
+
 	return vector_field::create(
 		plane( "v.cvt_to_abs_u", v.u().dims(), v.u() ),
-		plane( "v.cvt_to_abs_v", v.v().dims(), v.v() )
+		plane( "v.cvt_to_abs_v", v.v().dims(), v.v() ),
+		true
 								);
 }
 
@@ -292,16 +318,18 @@ vector_field convert_to_absolute( const vector_field &v )
 
 vector_field convert_to_relative( const vector_field &v )
 {
-	return vector_field::create(
-		plane( "v.cvt_to_rel_u", v.u().dims(), v.u() ),
-		plane( "v.cvt_to_rel_v", v.v().dims(), v.v() )
-								);
+	if ( v.is_absolute() )
+		return vector_field::create(
+			plane( "v.cvt_to_rel_u", v.u().dims(), v.u() ),
+			plane( "v.cvt_to_rel_v", v.v().dims(), v.v() ),
+			false );
+	return v;
 }
 
 ////////////////////////////////////////
 
 image_buf
-colorize( const vector_field &v, bool isAbsolute, float scale )
+colorize( const vector_field &v, float scale )
 {
 	engine::dimensions d;
 
@@ -309,7 +337,7 @@ colorize( const vector_field &v, bool isAbsolute, float scale )
 	d.y = v.height();
 	d.z = 4;
 
-	return image_buf( "v.colorize", d, v, isAbsolute, scale );
+	return image_buf( "v.colorize", d, v, scale );
 }
 
 ////////////////////////////////////////
@@ -318,9 +346,9 @@ void add_vector_ops( engine::registry &r )
 {
 	using namespace engine;
 
-	r.add( op( "v.warp_bilinear", base::choose_runtime( applyWarpBilinearP ), n_scanline_plane_adapter<false, decltype(applyWarpBilinearP)>(), dispatch_scan_processing, op::n_to_one ) );
+	r.add( op( "v.p.warp_dirac", base::choose_runtime( applyWarpDiracP ), n_scanline_plane_adapter<false, decltype(applyWarpDiracP)>(), dispatch_scan_processing, op::n_to_one ) );
+	r.add( op( "v.p.warp_bilinear", base::choose_runtime( applyWarpBilinearP ), n_scanline_plane_adapter<false, decltype(applyWarpBilinearP)>(), dispatch_scan_processing, op::n_to_one ) );
 
-	r.add( op( "v.warp_dirac", base::choose_runtime( applyWarpDiracP ), n_scanline_plane_adapter<false, decltype(applyWarpDiracP)>(), dispatch_scan_processing, op::n_to_one ) );
 
 	r.add( op( "v.cvt_to_abs_u", base::choose_runtime( cvtToAbsU ), scanline_plane_adapter<true, decltype(cvtToAbsU)>(), dispatch_scan_processing, op::one_to_one ) );
 	r.add( op( "v.cvt_to_abs_v", base::choose_runtime( cvtToAbsV ), n_scanline_plane_adapter<false, decltype(cvtToAbsV)>(), dispatch_scan_processing, op::n_to_one ) );

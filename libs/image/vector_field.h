@@ -34,17 +34,16 @@ class vector_field : public engine::computed_base
 {
 public:
 	vector_field( void );
-	vector_field( int w, int h );
-	vector_field( const plane &u, const plane &v );
-	vector_field( plane &&u, plane &&v );
-	vector_field( const engine::dimensions &d );
+	vector_field( int w, int h, bool isAbsolute );
+	vector_field( const plane &u, const plane &v, bool isAbsolute );
+	vector_field( plane &&u, plane &&v, bool isAbsolute );
+	vector_field( const engine::dimensions &d, bool isAbsolute );
 
 	template <typename... Args>
-	inline vector_field( const base::cstring &opname, const engine::dimensions &d, Args &&... args )
+	inline vector_field( bool isAbsolute, const base::cstring &opname, const engine::dimensions &d, Args &&... args )
 			: computed_base( image::op_registry(), opname, d, std::forward<Args>( args )... ),
-			  _width( static_cast<int>( d.x ) ),
-			  _height( static_cast<int>( d.y ) ),
-			  _u( "v.extract_u", d, *this ), _v( "v.extract_v", d, *this )
+			  _u( "v.extract_u", d, *this ), _v( "v.extract_v", d, *this ),
+			  _absolute( isAbsolute )
 	{
 	}
 
@@ -54,7 +53,7 @@ public:
 	vector_field &operator=( vector_field && );
 	~vector_field( void );
 
-	inline bool valid( void ) const { return _width > 0 && _height > 0; }
+	inline bool valid( void ) const { return _u.valid() && _v.valid(); }
 
 	inline engine::dimensions dims( void ) const
 	{
@@ -64,23 +63,23 @@ public:
 		return r;
 	}
 
-	inline int width( void ) const { return _width; }
-	inline int height( void ) const { return _height; }
+	inline int width( void ) const { return _u.width(); }
+	inline int height( void ) const { return _u.height(); }
 
+	inline bool is_absolute( void ) const { return _absolute; }
 	inline plane &u( void ) { return _u; }
 	inline const plane &u( void ) const { return _u; }
 	inline plane &v( void ) { return _v; }
 	inline const plane &v( void ) const { return _v; }
 	
-	static vector_field create( const plane &a, const plane &b );
-	static vector_field create( plane &&a, plane &&b );
+	static vector_field create( const plane &a, const plane &b, bool isAbsolute );
+	static vector_field create( plane &&a, plane &&b, bool isAbsolute );
 
 private:
-	int _width = 0;
-	int _height = 0;
-
 	plane _u;
 	plane _v;
+
+	bool _absolute = false;
 };
 
 engine::hash &operator<<( engine::hash &h, const vector_field &v );
