@@ -243,6 +243,11 @@ make_pyramid( const plane &in, const std::string &filter, float eta, int n, int 
 			break;
 		}
 
+		if ( curW >= ret.back().width() )
+			curW = ret.back().width() - 1;
+		if ( curH >= ret.back().height() )
+			curH = ret.back().height() - 1;
+
 //		std::cout << "adding level " << curLev << " at " << curW << "x" << curH << std::endl;
 		if ( filter == "bilinear" )
 			ret.push_back( resize_bilinear( ret.back(), curW, curH ) );
@@ -282,6 +287,11 @@ make_pyramid( const image_buf &in, const std::string &filter, float eta, int n, 
 //			std::cout << "Terminating pyramid at level " << curLev << std::endl;
 			break;
 		}
+
+		if ( curW >= ret.back().width() )
+			curW = ret.back().width() - 1;
+		if ( curH >= ret.back().height() )
+			curH = ret.back().height() - 1;
 
 //		std::cout << "adding level " << curLev << " at " << curW << "x" << curH << std::endl;
 		if ( filter == "bilinear" )
