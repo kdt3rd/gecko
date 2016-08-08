@@ -524,7 +524,7 @@ int safemain( int argc, char *argv[] )
 //						fnb << "vec_field_" << f << '_' << (offset < 0 ?'p':'m') << std::abs(offset) << ".exr";
 //						debug_save_image( colorize( vf, true ), fnb.str(), f, { "R", "G", "B", "A" }, "f16" );
 
-						img = warp_dirac( img, vf );
+						img = warp_bilinear( img, vf );
 
 //						std::stringstream warpfn;
 //						warpfn << "warped_" << f << '_' << (offset < 0 ?'p':'m') << std::abs(offset) << ".exr";
