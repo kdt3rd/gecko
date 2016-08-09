@@ -35,6 +35,10 @@ namespace image
 plane central_gradient_horiz( const plane &p );
 /// [-1, 0, 1]' / 2
 plane central_gradient_vert( const plane &p );
+/// [1, -8, 0, 8, -1] / 12
+plane noise_gradient_horiz5( const plane &p );
+/// [1, -8, 0, 8, -1]' / 12
+plane noise_gradient_vert5( const plane &p );
 
 plane convolve_horiz( const plane &p, const std::vector<float> &k );
 plane convolve_vert( const plane &p, const std::vector<float> &k );
