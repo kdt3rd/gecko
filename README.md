@@ -46,8 +46,24 @@ The tests folder houses unit test wrappers that can be run by typing
 Compiling
 ---------
 
-gecko uses constructor (https://github.com/kdt3rd/constructor) as a
-makefile (or a ninja file if ninja is found) generator, much like
+gecko by default uses two additional components to compile:
+ninja (https://github.com/ninja-build/ninja)
+constructor (https://github.com/kdt3rd/constructor)
+
+Library dependencies are kept to a minimum - gecko attempts to keep a
+clean set of dependencies to make sure that it can easily be a
+friendly architecture for use in corporate environments where GPL code
+can be tricky. But there are libraries that gecko depends on - it
+doesn't make sense to reinvent everything, just the components that
+are interesting to play with.
+
+gecko uses OpenGL for UI components, and a set of media libraries to
+read images (currently, just OpenEXR and TIFF - OpenImageIO does not
+currently allow the kind of media and frame buffer access
+desired). See libs/media/construct. Additionally, it uses zlib to
+compress the UTF tables in libs/utf.
+
+constructor is a makefile / ninja build file generator, much like
 cmake. Why not use cmake? Well, constructor attempts to simplify the
 syntax for cmake, but more importantly allows a cleaner specification
 for custom compilation toolchains and options in a cross-platform
