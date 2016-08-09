@@ -1,8 +1,13 @@
 gecko
 =====
 
-Gecko is a c++11 application framework. It has several libraries, and will end
-up with several applications utilizing those libraries.
+Gecko is a c++11 framework with a number of applications. It has
+several libraries which serve as the basis for an (envisioned) suite
+of applications.
+
+This utilizes c++11 and relatively modern STL components, but does not
+live on the bleeding edge of compiler support. It should compile with
+a compiler equivalent to gcc 4.8 or newer.
 
 Libraries
 ---------
@@ -29,26 +34,48 @@ Applications
 
 image_script - wrapper shell around running image processing
 transcode - convert media files
+denoise - a sample application that can be used in a variety of ways
+to denoise an image sequence
 
 Unit Testing
 ------------
 
-tests houses unit test wrappers that can be run by typing "make test"
+The tests folder houses unit test wrappers that can be run by typing
+"make test"
 
 Compiling
 ---------
 
-gecko uses constructor (https://github.com/kdt3rd/constructor) as a makefile
-generator, much like cmake, only simpler.
+gecko uses constructor (https://github.com/kdt3rd/constructor) as a
+makefile (or a ninja file if ninja is found) generator, much like
+cmake. Why not use cmake? Well, constructor attempts to simplify the
+syntax for cmake, but more importantly allows a cleaner specification
+for custom compilation toolchains and options in a cross-platform
+environment - support for "if it's this OS, or if this library is
+present" type questions have a new approach to incorporating those
+conditional options.
 
-gecko uses C++11, although refrains from using all features of C++11, although
-that may change in teh future. It has been confirmed to compile on gcc 4.8 and
-newer gcc, as well as the recent versions of Xcode on the Mac.
+If you find that constructor does not work out of the box on your
+O.S. flavor, do not be surprised. If you look at
+config/MingW64.construct and can't figure out how to define a
+toolchain that will work, please file an issue report or otherwise
+contact the developer.
 
-Windows support: constructor provides support for cross compiling, and a brief
-  pass was made to compile under Windows. While the intent is to have gecko
-  be a fully cross-platform toolset, at this stage, little is being done for
-  windows.
+As mentioned above, gecko uses C++11, although refrains from using all
+features of C++11, although which components are used will probably
+change in the future as support continues to percolate through the
+"stable" releases of operating systems. It has been confirmed to
+compile on gcc 4.8 and newer gcc, as well as the recent versions of
+Xcode on the Mac. It has largely only been tested compiled as a set of
+static libraries. Dynamic libraries (.so, .dylib, .dll) should be
+possible if desired, but no attempt at dynamic library versioning has
+been put in place, so with the issues of C++ and API stability, it is
+easier and safer to just link things statically.
+
+Windows support: constructor provides support for cross compiling, and
+  a brief pass was made to compile under Windows. While the intent is
+  to have gecko be a fully cross-platform toolset, at this stage,
+  little is being done for windows.
 
 Installing
 ----------
