@@ -63,5 +63,13 @@ plane create_iotaY_plane( int w, int h )
 
 ////////////////////////////////////////
 
+plane
+dirichlet( const plane &p, int border )
+{
+	return plane( "p.dirichlet", p.dims(), p, border );
+}
+
+////////////////////////////////////////
+
 } // namespace image
 

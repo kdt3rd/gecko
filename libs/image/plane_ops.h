@@ -55,6 +55,9 @@ plane create_random_plane( int w, int h, uint32_t seed, float minV, float maxV )
 plane create_iotaX_plane( int w, int h );
 plane create_iotaY_plane( int w, int h );
 
+// fill the border with dirichlet border conditions (0)
+plane dirichlet( const plane &p, int border = 1 );
+
 inline plane filter_nan( const plane &p, float repl = 0.F )
 {
 	return plane( "p.filter_nan", p.dims(), p, repl );

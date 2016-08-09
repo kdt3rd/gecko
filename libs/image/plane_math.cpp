@@ -80,6 +80,29 @@ static void iotaY_value( scanline &dest, int y )
 
 ////////////////////////////////////////
 
+static void
+fill_dirichlet( scanline &dest, int y, const plane &p, int border )
+{
+	int n = dest.width();
+	if ( y < border || y >= ( p.height() - border ) )
+	{
+		for ( int x = 0; x < n; ++x )
+			dest[x] = 0.F;
+		return;
+	}
+	const float *line = p.line( y );
+	int endx = std::max( int(0), n - border );
+	border = std::min( border, n );
+	for ( int x = 0; x < border; ++x )
+		dest[x] = 0.F;
+	for ( int x = border; x < endx; ++x )
+		dest[x] = line[x];
+	for ( int x = endx; x < n; ++x )
+		dest[x] = 0.F;
+}
+
+////////////////////////////////////////
+
 static void plane_filter_nan( scanline &dest, const scanline &src, float repl )
 {
 	for ( int x = 0, N = dest.width(); x != N; ++x )
@@ -434,6 +457,8 @@ void add_plane_math( engine::registry &r )
 	r.add( op( "p.iota_y", base::choose_runtime( iotaY_value ), n_scanline_plane_adapter<true, decltype(iotaY_value)>(), dispatch_scan_processing, op::n_to_one ) );
 
 	r.add( op( "p.filter_nan", base::choose_runtime( plane_filter_nan ), scanline_plane_adapter<true, decltype(plane_filter_nan)>(), dispatch_scan_processing, op::one_to_one ) );
+
+	r.add( op( "p.dirichlet", base::choose_runtime( fill_dirichlet ), n_scanline_plane_adapter<true, decltype(fill_dirichlet)>(), dispatch_scan_processing, op::n_to_one ) );
 
 	r.add( op( "p.add_pp", base::choose_runtime( add_planeplane, { { base::cpu::simd_feature::SSE3, sse3::add_planeplane } } ), scanline_plane_adapter<true, decltype(add_planeplane)>(), dispatch_scan_processing, op::one_to_one ) );
 	r.add( op( "p.add_pn", base::choose_runtime( add_planenumber, { { base::cpu::simd_feature::SSE3, sse3::add_planenumber } } ), scanline_plane_adapter<true, decltype(add_planenumber)>(), dispatch_scan_processing, op::one_to_one ) );
