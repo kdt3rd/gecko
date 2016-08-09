@@ -95,7 +95,7 @@ int safemain( int argc, char *argv[] )
 			"Specifies the spatial method used", false ),
 		base::cmd_line::option(
 			0, std::string( "temporal-method" ),
-			"<patchmatch|hierpatch|ahtvl1>", base::cmd_line::arg<1>,
+			"<patchmatch|hierpatch|ahtvl1|pdtncc>", base::cmd_line::arg<1>,
 			"Specifies the temporal method used to align frames", false ),
 		base::cmd_line::option(
 			0, std::string( "integration-method" ),
@@ -224,6 +224,8 @@ int safemain( int argc, char *argv[] )
 		else if ( m == "hierpatch" )
 			temporalmethod = m;
 		else if ( m == "ahtvl1" )
+			temporalmethod = m;
+		else if ( m == "pdtncc" )
 			temporalmethod = m;
 		else
 			throw_runtime( "Invalid temporal method requested: {0}", m );
@@ -505,30 +507,44 @@ int safemain( int argc, char *argv[] )
 						else if ( temporalmethod == "ahtvl1" )
 						{
 							TODO( "expose tracking parameters" );
-							float lambda = 20.F;
+							float lambda = 200.F;
 							float theta = 0.1F;
 							float epsilon = 0.005F;
-							float edgePower = 2.F;
-							float edgeAlpha = 1000.F;
+							float edgePower = 3.F;
+							float edgeAlpha = 50.F;
 							int edgeBorder = 5;
-							int tvl1Iters = 200;
-							int warpIters = 5;
+							int tvl1Iters = 100;
+							int warpIters = 3;
 							float eta = 0.65F;
 
 							plane lumA = tmpCen[0] * 0.3F + tmpCen[1] * 0.6F + tmpCen[2] * 0.1F;
 							plane lumB = tmpImg[0] * 0.3F + tmpImg[1] * 0.6F + tmpImg[2] * 0.1F;
 							vf = oflow_ahtvl1( lumA, lumB, lambda, theta, epsilon, edgePower, edgeAlpha, edgeBorder, tvl1Iters, warpIters, eta );
 						}
+						else if ( temporalmethod == "pdtncc" )
+						{
+							TODO( "expose tracking parameters" );
+							float lambda = 50.F;
+							float theta = 0.1F;
+							float gamma = 0.001F;
+							int innerIters = 200;
+							int warpIters = 5;
+							float eta = 0.65F;
+
+							plane lumA = tmpCen[0] * 0.3F + tmpCen[1] * 0.6F + tmpCen[2] * 0.1F;
+							plane lumB = tmpImg[0] * 0.3F + tmpImg[1] * 0.6F + tmpImg[2] * 0.1F;
+							vf = oflow_primaldual( lumA, lumB, lambda, theta, gamma, innerIters, warpIters, eta );
+						}
 //						std::stringstream fnb;
-//						int offset = f - curF;
+						int offset = f - curF;
 //						fnb << "vec_field_" << f << '_' << (offset < 0 ?'p':'m') << std::abs(offset) << ".exr";
 //						debug_save_image( colorize( vf, true ), fnb.str(), f, { "R", "G", "B", "A" }, "f16" );
 
 						img = warp_bilinear( img, vf );
 
-//						std::stringstream warpfn;
-//						warpfn << "warped_" << f << '_' << (offset < 0 ?'p':'m') << std::abs(offset) << ".exr";
-//						debug_save_image( img, warpfn.str(), f, { "R", "G", "B" }, "f16" );
+						std::stringstream warpfn;
+						warpfn << "warped_" << f << '_' << (offset < 0 ?'p':'m') << std::abs(offset) << ".exr";
+						debug_save_image( img, warpfn.str(), f, { "R", "G", "B" }, "f16" );
 
 						// TODO: add integration logic here
 						if ( integmethod == "mse" )

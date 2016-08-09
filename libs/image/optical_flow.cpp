@@ -23,6 +23,8 @@
 #include "optical_flow.h"
 #include "plane_ops.h"
 #include "threading.h"
+#include "debug_util.h"
+#include <cmath>
 
 ////////////////////////////////////////
 
@@ -75,8 +77,8 @@ ahtvl1_edgeWeight_thread( size_t, int s, int e, plane_buffer &ew, const const_pl
 			float epy = ebp1Line[x];
 			float gxv = epx - emx;
 			float gyv = epy - emy;
-			float norm = sqrtf( gxv * gxv + gyv * gyv );
-			ewLine[x] = fmaxf( eps, expf( eWeight * powf( norm, ePower ) ) );
+			float norm = std::sqrt( gxv * gxv + gyv * gyv );
+			ewLine[x] = std::max( eps, expf( eWeight * powf( norm, ePower ) ) );
 		}
 
 		for ( int x = exm1 + 1; x < w; ++x )
@@ -94,16 +96,17 @@ ahtvl1_edgeWeight( const plane &curA, const std::vector<float> &edgeKern, float 
 
 	threading::get().dispatch( std::bind( ahtvl1_edgeWeight_thread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( eb ), std::cref( bab ), edgePower, - edgeAlpha, edgeBorder ), 0, curA.height() );
 
-	return ba;
+	return ret;
 }
 
 ////////////////////////////////////////
 
 static void
-peakThread( size_t, int s, int e, plane_buffer &u, const plane_buffer &mu )
+peakThread( size_t, int s, int e, plane_buffer &u, const plane_buffer &mu, int r )
 {
 	int w = u.width();
-
+	float norm = 2.F * static_cast<float>( r ) + 1.F;
+	norm = 1.F / ( norm * norm );
 	for ( int hy = s; hy < e; ++hy )
 	{
 		float *uLine = u.line( hy );
@@ -113,34 +116,34 @@ peakThread( size_t, int s, int e, plane_buffer &u, const plane_buffer &mu )
 			float uV = uLine[hx];
 			float muV = muLine[hx];
 			float sumMU = 0.F;
-			for ( int y = -2; y <= 2; ++y )
+			for ( int y = -r; y <= r; ++y )
 			{
-				for ( int x = -2; x <= 2; ++x )
+				for ( int x = -r; x <= r; ++x )
 				{
 					sumMU += get_hold( mu, hx + x, hy + y );
 				}
 			}
-			float aveMU = sumMU / 25.F;
-			if ( fabsf( uV - muV ) > aveMU )
+			float aveMU = sumMU * norm;
+			if ( std::abs( uV - muV ) > aveMU )
 				uV = muV;
 		}
 	}
 }
 
 static void
-removePeaks( plane &u, plane &v )
+removePeaks( plane &u, plane &v, int r )
 {
 	{
 		plane mu = median( u, 3 );
 		plane_buffer mub = mu;
 		plane_buffer ub = u;
-		threading::get().dispatch( std::bind( peakThread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( ub ), std::cref( mub ) ), 0, u.height() );
+		threading::get().dispatch( std::bind( peakThread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( ub ), std::cref( mub ), r ), 0, u.height() );
 	}
 
 	plane mv = median( v, 3 );
 	plane_buffer mvb = mv;
 	plane_buffer vb = v;
-	threading::get().dispatch( std::bind( peakThread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( vb ), std::cref( mvb ) ), 0, v.height() );
+	threading::get().dispatch( std::bind( peakThread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( vb ), std::cref( mvb ), r ), 0, v.height() );
 }
 
 ////////////////////////////////////////
@@ -286,7 +289,7 @@ ahtvl1_updateU_thread( size_t, int s, int e,
 
 			rho += ( initU - u0Line[x] ) * gXAve;
 			rho += ( initV - v0Line[x] ) * gYAve;
-			float magSq = fmaxf( eps, gXAve * gXAve + gYAve * gYAve );
+			float magSq = std::max( eps, gXAve * gXAve + gYAve * gYAve );
 
 			float u_ = initU, v_ = initV;
 
@@ -376,7 +379,7 @@ ahtvl1_updatePnoedge_thread( size_t, int s, int e, plane_buffer &pu, plane_buffe
 				outU = outU + tau * ( uX - epsilon * outU );
 				outV = outV + tau * ( uY - epsilon * outV );
 
-				float scale = fmaxf( 1.F, sqrtf( outU * outU + outV * outV ) );
+				float scale = std::max( 1.F, std::sqrt( outU * outU + outV * outV ) );
 				outU = outU / scale;
 				outV = outV / scale;
 				puLine[x] = outU;
@@ -397,7 +400,7 @@ ahtvl1_updatePnoedge_thread( size_t, int s, int e, plane_buffer &pu, plane_buffe
 				outU = outU + tau * ( uX - epsilon * outU );
 				outV = outV + tau * ( uY - epsilon * outV );
 
-				float scale = fmaxf( 1.F, sqrtf( outU * outU + outV * outV ) );
+				float scale = std::max( 1.F, std::sqrt( outU * outU + outV * outV ) );
 				outU = outU / scale;
 				outV = outV / scale;
 				puLine[x] = outU;
@@ -436,7 +439,6 @@ ahtvl1_updatePedge_thread( size_t, int s, int e, plane_buffer &pu, plane_buffer 
 				float outU = puLine[x];
 				float outV = pvLine[x];
 				float eW = eLine[x];
-
 				float uX = uLine[x];
 				float uY = up1Line[x] - uX;
 				if ( x < (w - 1) )
@@ -445,9 +447,9 @@ ahtvl1_updatePedge_thread( size_t, int s, int e, plane_buffer &pu, plane_buffer 
 				outU = outU + tau * ( uX - epsilon * outU );
 				outV = outV + tau * ( uY - epsilon * outV );
 
-				float scale = fmaxf( 1.F, sqrtf( outU * outU + outV * outV ) / eW );
-				outU = outU / scale;
-				outV = outV / scale;
+				float scale = eW / std::max( 1.F, std::sqrt( outU * outU + outV * outV ) );
+				outU = outU * scale;
+				outV = outV * scale;
 				puLine[x] = outU;
 				pvLine[x] = outV;
 			}
@@ -467,9 +469,9 @@ ahtvl1_updatePedge_thread( size_t, int s, int e, plane_buffer &pu, plane_buffer 
 				outU = outU + tau * ( uX - epsilon * outU );
 				outV = outV + tau * ( uY - epsilon * outV );
 
-				float scale = fmaxf( 1.F, sqrtf( outU * outU + outV * outV ) / eW );
-				outU = outU / scale;
-				outV = outV / scale;
+				float scale = eW / std::max( 1.F, std::sqrt( outU * outU + outV * outV ) );
+				outU = outU * scale;
+				outV = outV * scale;
 				puLine[x] = outU;
 				pvLine[x] = outV;
 			}
@@ -497,14 +499,6 @@ runAHTVL1( const plane &a, const plane &b, float lambda, float theta, float epsi
 	std::vector<plane> hierB = make_pyramid( b, "bicubic", eta, 0, 16 );
 
 	const float tau = 1.F / ( 4.F * theta + epsilon );
-	std::vector<float> gradKern
-	{
-		1.F / 12.F,
-		-8.F / 12.F,
-		0.F,
-		8.F / 12.F,
-		-1.F / 12.F
-	};
 	std::vector<float> edgeKern;
 	if ( edgeAlpha > 0.F )
 	{
@@ -543,6 +537,7 @@ runAHTVL1( const plane &a, const plane &b, float lambda, float theta, float epsi
 
 			u = resize_bicubic( u, curW, curH ) * scaleX;
 			v = resize_bicubic( v, curW, curH ) * scaleY;
+
 //			puu = resize_bicubic( puu, curW, curH );
 //			puv = resize_bicubic( puv, curW, curH );
 //			pvu = resize_bicubic( pvu, curW, curH );
@@ -556,13 +551,12 @@ runAHTVL1( const plane &a, const plane &b, float lambda, float theta, float epsi
 
 		plane edgeW;
 		if ( edgeAlpha > 0.F )
-		{
 			edgeW = ahtvl1_edgeWeight( curA, edgeKern, edgePower, edgeAlpha, edgeBorder );
-		}
-		plane ax = convolve_horiz( curA, gradKern );
-		plane ay = convolve_vert( curA, gradKern );
-		plane bx = convolve_horiz( curB, gradKern );
-		plane by = convolve_vert( curB, gradKern );
+
+		plane ax = noise_gradient_horiz5( curA );
+		plane ay = noise_gradient_vert5( curA );
+		plane bx = noise_gradient_horiz5( curB );
+		plane by = noise_gradient_vert5( curB );
 
 		int wI = std::max( 1, warpIters - static_cast<int>( hierA.size() ) );
 		int iI = std::max( 1, tvl1Iters / wI );
@@ -598,7 +592,7 @@ runAHTVL1( const plane &a, const plane &b, float lambda, float theta, float epsi
 			}
 		}
 
-		removePeaks( u, v );
+		removePeaks( u, v, 2 );
 	}
 
 	return vector_field::create( std::move( u ), std::move( v ), false );
@@ -606,15 +600,385 @@ runAHTVL1( const plane &a, const plane &b, float lambda, float theta, float epsi
 
 ////////////////////////////////////////
 
-vector_field
-runPD( const plane &a, const plane &b, float lambda, float theta, float gamma, int innerIters, int warpIters, float eta )
+static void
+pdtncc_gradAve_thread( size_t, int s, int e, plane_buffer &gx, const const_plane_buffer &ax, const const_plane_buffer &bx )
 {
-	plane u = create_plane( a.width(), a.height(), 0.F );
-	plane v = create_plane( a.width(), a.height(), 0.F );
+	int w = gx.width();
+	int h = gx.height();
+	int wm1 = w - 1;
+	for ( int y = s; y < e; ++y )
+	{
+		float *gxLine = gx.line( y );
+		if ( y < 1 || y >= (h - 1) )
+		{
+			for ( int x = 0; x < w; ++x )
+				gxLine[x] = 0.F;
+		}
+
+		const float *aLine = ax.line( y );
+		const float *bLine = bx.line( y );
+
+		gxLine[0] = 0.F;
+		for ( int x = 0; x < wm1; ++x )
+			gxLine[x] = ( aLine[x] + bLine[x] ) * 0.5F;
+		gxLine[wm1] = 0.F;
+	}
+}
+
+static void
+pdtncc_gradAve( plane &gxAve, const plane &ax, const plane &bx )
+{
+	plane_buffer gxb = gxAve;
+	const_plane_buffer ab = ax;
+	const_plane_buffer bb = bx;
+
+	threading::get().dispatch( std::bind( pdtncc_gradAve_thread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( gxb ), std::cref( ab ), std::cref( bb ) ), 0, bx.height() );
+}
+
+////////////////////////////////////////
+
+static void
+pdtncc_dualUpdate_thread( size_t, int s, int e, plane_buffer &p1, plane_buffer &p2, plane_buffer &p3, plane_buffer &p4, plane_buffer &p5, plane_buffer &p6, const const_plane_buffer &u_, const const_plane_buffer &v_, const const_plane_buffer &w_, float sigma )
+{
+	int w = p1.width();
+	int h = p1.height();
+	int wm1 = w - 1;
+	int hm1 = h - 1;
+	for ( int y = s; y < e; ++y )
+	{
+		float *p1L = p1.line( y );
+		float *p2L = p2.line( y );
+		float *p3L = p3.line( y );
+		float *p4L = p4.line( y );
+		float *p5L = p5.line( y );
+		float *p6L = p6.line( y );
+		const float *uL = u_.line( y );
+		const float *vL = v_.line( y );
+		const float *wL = w_.line( y );
+		const float *nuL = nullptr;
+		const float *nvL = nullptr;
+		const float *nwL = nullptr;
+		if ( y < hm1 )
+		{
+			nuL = u_.line( y + 1 );
+			nvL = v_.line( y + 1 );
+			nwL = w_.line( y + 1 );
+		}
+		for ( int x = 0; x < w; ++x )
+		{
+			float p1v = p1L[x];
+			float p2v = p2L[x];
+			float p3v = p3L[x];
+			float p4v = p4L[x];
+			float p5v = p5L[x];
+			float p6v = p6L[x];
+
+			float uX = 0.F;
+			float uY = 0.F;
+			float vX = 0.F;
+			float vY = 0.F;
+			float wX = 0.F;
+			float wY = 0.F;
+			if ( x < wm1 )
+			{
+				uX = uL[x + 1] - uL[x];
+				vX = vL[x + 1] - vL[x];
+				wX = wL[x + 1] - wL[x];
+			}
+			if ( nuL )
+			{
+				uY = nuL[x] - uL[x];
+				vY = nvL[x] - vL[x];
+				wY = nwL[x] - wL[x];
+			}
+
+			p1v += sigma * uX;
+			p2v += sigma * uY;
+			p3v += sigma * vX;
+			p4v += sigma * vY;
+			p5v += sigma * wX;
+			p6v += sigma * wY;
+
+			float reproj = 1.F / std::max( 1.F, std::sqrt( p1v * p1v + p2v * p2v + p3v * p3v + p4v * p4v ) );
+			p1L[x] = p1v * reproj;
+			p2L[x] = p2v * reproj;
+			p3L[x] = p3v * reproj;
+			p4L[x] = p4v * reproj;
+
+			reproj = 1.F / std::max( 1.F, std::sqrt( p5v * p5v + p6v * p6v ) );
+			p5L[x] = p5v * reproj;
+			p6L[x] = p6v * reproj;
+		}
+	}
+}
+
+static void
+pdtncc_dualUpdate( plane &p0, plane &p1, plane &p2, plane &p3, plane &p4, plane &p5, const plane &u, const plane &v, const plane &w, float sigma )
+{
+	plane_buffer p0b = p0;
+	plane_buffer p1b = p1;
+	plane_buffer p2b = p2;
+	plane_buffer p3b = p3;
+	plane_buffer p4b = p4;
+	plane_buffer p5b = p5;
+	const_plane_buffer ub = u;
+	const_plane_buffer vb = v;
+	const_plane_buffer wb = w;
+
+	threading::get().dispatch( std::bind( pdtncc_dualUpdate_thread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( p0b ), std::ref( p1b ), std::ref( p2b ), std::ref( p3b ), std::ref( p4b ), std::ref( p5b ), std::cref( ub ), std::cref( vb ), std::cref( wb ), sigma ), 0, u.height() );
+}
+
+////////////////////////////////////////
+
+static void
+pdtncc_primalRho2_thread( size_t, int s, int e,
+	plane_buffer &u_, plane_buffer &u,
+	plane_buffer &v_, plane_buffer &v,
+	plane_buffer &w_, plane_buffer &w,
+	const const_plane_buffer &p0,
+	const const_plane_buffer &p1,
+	const const_plane_buffer &p2,
+	const const_plane_buffer &p3,
+	const const_plane_buffer &p4,
+	const const_plane_buffer &p5,
+	const const_plane_buffer &dT,
+	const const_plane_buffer &u0,
+	const const_plane_buffer &v0,
+	const const_plane_buffer &dX,
+	const const_plane_buffer &dY,
+	float tau, float lambda, float sigma )
+{
+	int wNS = p1.width();
+	const float eps = 1e-9F;
+
+	for ( int y = s; y < e; ++y )
+	{
+		float *u_L = u_.line( y );
+		float *uL = u.line( y );
+		float *v_L = v_.line( y );
+		float *vL = v.line( y );
+		float *w_L = w_.line( y );
+		float *wL = w.line( y );
+		const float *p0L = p0.line( y );
+		const float *p1L = p1.line( y );
+		const float *p2L = p2.line( y );
+		const float *p3L = p3.line( y );
+		const float *p4L = p4.line( y );
+		const float *p5L = p5.line( y );
+		const float *dTL = dT.line( y );
+		const float *u0L = u0.line( y );
+		const float *v0L = v0.line( y );
+		const float *dXL = u0.line( y );
+		const float *dYL = v0.line( y );
+		const float *pp1L = nullptr;
+		const float *pp3L = nullptr;
+		const float *pp5L = nullptr;
+
+		if ( y > 0 )
+		{
+			pp1L = p1.line( y - 1 );
+			pp3L = p3.line( y - 1 );
+			pp5L = p5.line( y - 1 );
+		}
+		for ( int x = 0; x < wNS; ++x )
+		{
+			float rho = dTL[x];
+			float uV = uL[x];
+			float vV = vL[x];
+			float wV = wL[x];
+			float u_v = uV;
+			float v_v = vV;
+			float w_v = wV;
+
+			float p0V = p0L[x];
+			float p1V = p1L[x];
+			float p2V = p2L[x];
+			float p3V = p3L[x];
+			float p4V = p4L[x];
+			float p5V = p5L[x];
+
+			if ( x > 0 )
+			{
+				p0V -= p0L[x - 1];
+				p2V -= p2L[x - 1];
+				p4V -= p4L[x - 1];
+			}
+
+			if ( pp1L )
+			{
+				p1V -= pp1L[x];
+				p3V -= pp3L[x];
+				p5V -= pp5L[x];
+			}
+
+			uV += tau * ( p0V + p1V );
+			vV += tau * ( p2V + p3V );
+			wV += tau * ( p4V + p5V );
+
+			float dXV = dXL[x];
+			float dYV = dYL[x];
+
+			rho += ( uV - u0L[x] ) * dXV + ( vV - v0L[x] ) * dYV + wV * sigma;
+
+			float gradSqr = std::max( eps, dXV * dXV + dYV * dYV + sigma * sigma );
+			float testVal = gradSqr * tau * lambda;
+
+			if ( rho < - testVal )
+			{
+				uV += dXV * tau * lambda;
+				vV += dYV * tau * lambda;
+				wV += sigma * tau * lambda;
+			}
+			else if ( rho > testVal )
+			{
+				uV -= dXV * tau * lambda;
+				vV -= dYV * tau * lambda;
+				wV -= sigma * tau * lambda;
+			}
+			else
+			{
+				uV -= rho * dXV / gradSqr;
+				vV -= rho * dXV / gradSqr;
+				wV -= rho * dXV / gradSqr;
+			}
+
+			uL[x] = uV;
+			u_L[x] = 2.F * uV - u_v;
+			vL[x] = vV;
+			v_L[x] = 2.F * vV - v_v;
+			wL[x] = wV;
+			w_L[x] = 2.F * wV - w_v;
+		}
+	}
+}
+
+static void
+pdtncc_primalRho2( plane &u_, plane &u, plane &v_, plane &v, plane &w_, plane &w, const plane &p0, const plane &p1, const plane &p2, const plane &p3, const plane &p4, const plane &p5, const plane &dT, const plane &u0, const plane &v0, const plane &dX, const plane &dY, float tau, float lambda, float sigma )
+{
+	plane_buffer u_b = u_;
+	plane_buffer ub = u;
+	plane_buffer v_b = v_;
+	plane_buffer vb = v;
+	plane_buffer w_b = w_;
+	plane_buffer wb = w;
+	const_plane_buffer p0b = p0;
+	const_plane_buffer p1b = p1;
+	const_plane_buffer p2b = p2;
+	const_plane_buffer p3b = p3;
+	const_plane_buffer p4b = p4;
+	const_plane_buffer p5b = p5;
+	const_plane_buffer dTb = dT;
+	const_plane_buffer u0b = u0;
+	const_plane_buffer v0b = v0;
+	const_plane_buffer dXb = dX;
+	const_plane_buffer dYb = dY;
+
+	threading::get().dispatch( std::bind( pdtncc_primalRho2_thread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref(u_b), std::ref(ub), std::ref(v_b), std::ref(vb), std::ref(w_b), std::ref(wb), std::cref( p0b ), std::cref( p1b ), std::cref( p2b ), std::cref( p3b ), std::cref( p4b ), std::cref( p5b ), std::cref( dTb ), std::cref( u0b ), std::cref( v0b ), std::cref( dXb ), std::cref( dYb ), tau, lambda, sigma ), 0, u.height() );
+}
+
+////////////////////////////////////////
+
+static vector_field
+runPD( const plane &a, const plane &b, float lambda, float theta, float gamv, int innerIters, int warpIters, float eta )
+{
+	TODO( "Add ability to pass in initial u, v" );
+	std::cout << "switch resize to bspline when ready" << std::endl;
 
 	std::vector<plane> hierA = make_pyramid( a, "bicubic", eta, 0, 16 );
 	std::vector<plane> hierB = make_pyramid( b, "bicubic", eta, 0, 16 );
 
+	float tau = 1.0 / ::sqrt( 8.0 );
+	float sigma = tau; // 1.F / L
+
+	plane u, v;
+	plane lumW;
+	plane p[6];
+	while ( ! hierA.empty() )
+	{
+		plane curA = hierA.back();
+		plane curB = hierB.back();
+		int curW = curA.width();
+		int curH = curA.height();
+		hierA.pop_back();
+		hierB.pop_back();
+
+		if ( ! u.valid() )
+		{
+			u = create_plane( curW, curH, 0.F );
+			v = u.copy();
+			lumW = u.copy();
+			for ( int i = 0; i != 6; ++i )
+				p[i] = u.copy();
+		}
+		else
+		{
+			float scaleX = static_cast<float>( curW ) / static_cast<float>( u.width() );
+			float scaleY = static_cast<float>( curH ) / static_cast<float>( u.height() );
+
+			u = resize_bicubic( u, curW, curH ) * scaleX;
+			v = resize_bicubic( v, curW, curH ) * scaleY;
+
+			lumW = resize_bicubic( lumW, curW, curH );
+			for ( int i = 0; i != 6; ++i )
+				p[i] = resize_bicubic( p[i], curW, curH );
+		}
+
+		plane u_ = u.copy();
+		plane v_ = v.copy();
+		plane lumw_ = lumW.copy();
+
+		plane dX, dY;
+		plane aX, aY;
+
+		bool splitGrads = true;
+		if ( hierA.empty() )
+		{
+			dX = noise_gradient_horiz5( curA );
+			dirichlet( dX );
+			dY = noise_gradient_vert5( curA );
+			dirichlet( dY );
+			splitGrads = false;
+		}
+		else
+		{
+			dX = plane( curW, curH );
+			dY = plane( curW, curH );
+			aX = noise_gradient_horiz5( curA );
+			aY = noise_gradient_vert5( curA );
+		}
+
+		int wI = std::max( 1, warpIters - static_cast<int>( hierA.size() ) );
+		int iI = std::max( 1, innerIters / wI );
+		for ( int w = 0; w != wI; ++w )
+		{
+			plane u0 = u.copy();
+			plane v0 = v.copy();
+
+			plane dT = warp_bilinear( curB, vector_field::create( u, v, false ) );
+			if ( splitGrads )
+			{
+				plane bX = noise_gradient_horiz5( dT );
+				pdtncc_gradAve( dX, aX, bX );
+				plane bY = noise_gradient_vert5( dT );
+				pdtncc_gradAve( dY, aY, bY );
+			}
+
+			dT = dT - curA;
+			dirichlet( dT );
+
+			for ( int i = 0; i != iI; ++i )
+			{
+				// update the dual variables
+				pdtncc_dualUpdate( p[0], p[1], p[2], p[3], p[4], p[5], u_, v_, lumw_, sigma );
+
+				// update the primal
+				pdtncc_primalRho2( u_, u, v_, v, lumw_, lumW, p[0], p[1], p[2], p[3], p[4], p[5], dT, u0, v0, dX, dY, tau, lambda, gamv );
+			}
+		}
+
+		removePeaks( u, v, 3 );
+	}
+	
 	return vector_field::create( std::move( u ), std::move( v ), false );
 }
 
@@ -642,7 +1006,7 @@ oflow_ahtvl1( const plane &a, const plane &b, float lambda, float theta, float e
 ////////////////////////////////////////
 
 vector_field
-oflow_primaldual( const plane &a, const plane &b, float lambda, float theta, float gamma, int innerIters, int warpIters, float eta )
+oflow_primaldual( const plane &a, const plane &b, float lambda, float theta, float sigma, int innerIters, int warpIters, float eta )
 {
 	engine::dimensions d;
 	precondition( a.dims() == b.dims(), "oflow_htvl1 must have a & b of same size, received {0}x{1} and {3}x{4}", a.width(), a.height(), b.width(), b.height() );
@@ -650,7 +1014,7 @@ oflow_primaldual( const plane &a, const plane &b, float lambda, float theta, flo
 	d.y = a.height();
 	d.z = 2;
 
-	return vector_field( true, "p.oflow_primaldual", d, a, b, lambda, theta, gamma, innerIters, warpIters, eta );
+	return vector_field( true, "p.oflow_primaldual", d, a, b, lambda, theta, sigma, innerIters, warpIters, eta );
 }
 
 ////////////////////////////////////////
@@ -665,7 +1029,7 @@ add_oflow( engine::registry &r )
 	r.add( op( "v.extract_v", extract_v, op::simple ) );
 
 	r.add( op( "p.oflow_ahtvl1", runAHTVL1, op::threaded ) );
-	r.add( op( "p.oflow_primaludal", runPD, op::threaded ) );
+	r.add( op( "p.oflow_primaldual", runPD, op::threaded ) );
 
 	add_vector_ops( r );
 	add_patchmatch( r );
