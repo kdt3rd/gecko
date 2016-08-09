@@ -673,24 +673,29 @@ pdtncc_dualUpdate_thread( size_t, int s, int e, plane_buffer &p1, plane_buffer &
 			float p5v = p5L[x];
 			float p6v = p6L[x];
 
-			float uX = 0.F;
-			float uY = 0.F;
-			float vX = 0.F;
-			float vY = 0.F;
-			float wX = 0.F;
-			float wY = 0.F;
+			float uX = uL[x];
+			float uY = uX;
+			float vX = vL[x];
+			float vY = vX;
+			float wX = wL[x];
+			float wY = wX;
 			if ( x < wm1 )
 			{
-				uX = uL[x + 1] - uL[x];
-				vX = vL[x + 1] - vL[x];
-				wX = wL[x + 1] - wL[x];
+				uX = uL[x + 1] - uX;
+				vX = vL[x + 1] - vX;
+				wX = wL[x + 1] - wX;
 			}
+			else
+				uX = vX = wX = 0.0F;
+
 			if ( nuL )
 			{
-				uY = nuL[x] - uL[x];
-				vY = nvL[x] - vL[x];
-				wY = nwL[x] - wL[x];
+				uY = nuL[x] - uY;
+				vY = nvL[x] - vY;
+				wY = nwL[x] - wY;
 			}
+			else
+				uY = vY = wY = 0.F;
 
 			p1v += sigma * uX;
 			p2v += sigma * uY;
@@ -746,9 +751,9 @@ pdtncc_primalRho2_thread( size_t, int s, int e,
 	const const_plane_buffer &v0,
 	const const_plane_buffer &dX,
 	const const_plane_buffer &dY,
-	float tau, float lambda, float sigma )
+	float tau, float lambda, float gamv )
 {
-	int wNS = p1.width();
+	int wNS = u.width();
 	const float eps = 1e-9F;
 
 	for ( int y = s; y < e; ++y )
@@ -768,8 +773,8 @@ pdtncc_primalRho2_thread( size_t, int s, int e,
 		const float *dTL = dT.line( y );
 		const float *u0L = u0.line( y );
 		const float *v0L = v0.line( y );
-		const float *dXL = u0.line( y );
-		const float *dYL = v0.line( y );
+		const float *dXL = dX.line( y );
+		const float *dYL = dY.line( y );
 		const float *pp1L = nullptr;
 		const float *pp3L = nullptr;
 		const float *pp5L = nullptr;
@@ -818,28 +823,28 @@ pdtncc_primalRho2_thread( size_t, int s, int e,
 			float dXV = dXL[x];
 			float dYV = dYL[x];
 
-			rho += ( uV - u0L[x] ) * dXV + ( vV - v0L[x] ) * dYV + wV * sigma;
+			rho += ( uV - u0L[x] ) * dXV + ( vV - v0L[x] ) * dYV + wV * gamv;
 
-			float gradSqr = std::max( eps, dXV * dXV + dYV * dYV + sigma * sigma );
+			float gradSqr = std::max( eps, dXV * dXV + dYV * dYV + gamv * gamv );
 			float testVal = gradSqr * tau * lambda;
 
 			if ( rho < - testVal )
 			{
 				uV += dXV * tau * lambda;
 				vV += dYV * tau * lambda;
-				wV += sigma * tau * lambda;
+				wV += gamv * tau * lambda;
 			}
 			else if ( rho > testVal )
 			{
 				uV -= dXV * tau * lambda;
 				vV -= dYV * tau * lambda;
-				wV -= sigma * tau * lambda;
+				wV -= gamv * tau * lambda;
 			}
 			else
 			{
 				uV -= rho * dXV / gradSqr;
-				vV -= rho * dXV / gradSqr;
-				wV -= rho * dXV / gradSqr;
+				vV -= rho * dYV / gradSqr;
+				wV -= rho * gamv / gradSqr;
 			}
 
 			uL[x] = uV;
@@ -853,7 +858,7 @@ pdtncc_primalRho2_thread( size_t, int s, int e,
 }
 
 static void
-pdtncc_primalRho2( plane &u_, plane &u, plane &v_, plane &v, plane &w_, plane &w, const plane &p0, const plane &p1, const plane &p2, const plane &p3, const plane &p4, const plane &p5, const plane &dT, const plane &u0, const plane &v0, const plane &dX, const plane &dY, float tau, float lambda, float sigma )
+pdtncc_primalRho2( plane &u_, plane &u, plane &v_, plane &v, plane &w_, plane &w, const plane &p0, const plane &p1, const plane &p2, const plane &p3, const plane &p4, const plane &p5, const plane &dT, const plane &u0, const plane &v0, const plane &dX, const plane &dY, float tau, float lambda, float gamv )
 {
 	plane_buffer u_b = u_;
 	plane_buffer ub = u;
@@ -873,7 +878,7 @@ pdtncc_primalRho2( plane &u_, plane &u, plane &v_, plane &v, plane &w_, plane &w
 	const_plane_buffer dXb = dX;
 	const_plane_buffer dYb = dY;
 
-	threading::get().dispatch( std::bind( pdtncc_primalRho2_thread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref(u_b), std::ref(ub), std::ref(v_b), std::ref(vb), std::ref(w_b), std::ref(wb), std::cref( p0b ), std::cref( p1b ), std::cref( p2b ), std::cref( p3b ), std::cref( p4b ), std::cref( p5b ), std::cref( dTb ), std::cref( u0b ), std::cref( v0b ), std::cref( dXb ), std::cref( dYb ), tau, lambda, sigma ), 0, u.height() );
+	threading::get().dispatch( std::bind( pdtncc_primalRho2_thread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref(u_b), std::ref(ub), std::ref(v_b), std::ref(vb), std::ref(w_b), std::ref(wb), std::cref( p0b ), std::cref( p1b ), std::cref( p2b ), std::cref( p3b ), std::cref( p4b ), std::cref( p5b ), std::cref( dTb ), std::cref( u0b ), std::cref( v0b ), std::cref( dXb ), std::cref( dYb ), tau, lambda, gamv ), 0, u.height() );
 }
 
 ////////////////////////////////////////
@@ -949,6 +954,7 @@ runPD( const plane &a, const plane &b, float lambda, float theta, float gamv, in
 
 		int wI = std::max( 1, warpIters - static_cast<int>( hierA.size() ) );
 		int iI = std::max( 1, innerIters / wI );
+
 		for ( int w = 0; w != wI; ++w )
 		{
 			plane u0 = u.copy();
@@ -957,9 +963,20 @@ runPD( const plane &a, const plane &b, float lambda, float theta, float gamv, in
 			plane dT = warp_bilinear( curB, vector_field::create( u, v, false ) );
 			if ( splitGrads )
 			{
-				plane bX = noise_gradient_horiz5( dT );
+				plane bX, bY;
+				if ( curW <= 512 )
+				{
+					bX = central_gradient_horiz( dT );
+					bY = central_gradient_vert( dT );
+				}
+				else
+				{
+					bX = noise_gradient_horiz5( dT );
+					bY = noise_gradient_vert5( dT );
+				}
+//				plane bX = noise_gradient_horiz5( dT );
 				pdtncc_gradAve( dX, aX, bX );
-				plane bY = noise_gradient_vert5( dT );
+//				plane bY = noise_gradient_vert5( dT );
 				pdtncc_gradAve( dY, aY, bY );
 			}
 
