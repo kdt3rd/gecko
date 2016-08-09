@@ -536,15 +536,15 @@ int safemain( int argc, char *argv[] )
 							vf = oflow_primaldual( lumA, lumB, lambda, theta, gamma, innerIters, warpIters, eta );
 						}
 //						std::stringstream fnb;
-						int offset = f - curF;
+//						int offset = f - curF;
 //						fnb << "vec_field_" << f << '_' << (offset < 0 ?'p':'m') << std::abs(offset) << ".exr";
 //						debug_save_image( colorize( vf, true ), fnb.str(), f, { "R", "G", "B", "A" }, "f16" );
 
 						img = warp_bilinear( img, vf );
 
-						std::stringstream warpfn;
-						warpfn << "warped_" << f << '_' << (offset < 0 ?'p':'m') << std::abs(offset) << ".exr";
-						debug_save_image( img, warpfn.str(), f, { "R", "G", "B" }, "f16" );
+//						std::stringstream warpfn;
+//						warpfn << "warped_" << f << '_' << (offset < 0 ?'p':'m') << std::abs(offset) << ".exr";
+//						debug_save_image( img, warpfn.str(), f, { "R", "G", "B" }, "f16" );
 
 						// TODO: add integration logic here
 						if ( integmethod == "mse" )
