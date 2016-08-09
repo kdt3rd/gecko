@@ -21,6 +21,7 @@ lib = library "image"
 	"scanline_group.cpp";
 	"scanline_process.cpp";
 	"op_registry.cpp";
+	"debug_util.cpp";
 	"image_ops.cpp";
 	"plane_math.cpp";
 	"plane_ops.cpp";
