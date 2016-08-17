@@ -257,6 +257,9 @@ public:
 	}
 
 private:
+	inline void process_bind( std::vector<std::shared_ptr<engine::subgroup_function>> &funcs, engine::subgroup &sg, engine::node &n, const base::sequence<> & )
+	{
+	}
 	template <size_t... S>
 	inline void process_bind( std::vector<std::shared_ptr<engine::subgroup_function>> &funcs, engine::subgroup &sg, engine::node &n, const base::sequence<S...> & )
 	{
@@ -358,6 +361,9 @@ public:
 	}
 
 private:
+	inline void process_bind( std::vector<std::shared_ptr<engine::subgroup_function>> &funcs, engine::subgroup &sg, engine::node &n, const base::sequence<> & )
+	{
+	}
 	template <size_t... S>
 	inline void process_bind( std::vector<std::shared_ptr<engine::subgroup_function>> &funcs, engine::subgroup &sg, engine::node &n, const base::sequence<S...> & )
 	{
