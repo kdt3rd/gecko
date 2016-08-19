@@ -416,10 +416,18 @@ static void plane_clamp_pnn( scanline &dest, const scanline &a, float minV, floa
 
 ////////////////////////////////////////
 
-static void plane_ifless( scanline &dest, const scanline &a, float b, const scanline &c, const scanline &d )
+static void plane_ifless_fpp( scanline &dest, const scanline &a, float b, const scanline &c, const scanline &d )
 {
 	for ( int x = 0, N = dest.width(); x != N; ++x )
 		dest[x] = a[x] < b ? c[x] : d[x];
+}
+
+////////////////////////////////////////
+
+static void plane_ifless_ppp( scanline &dest, const scanline &a, const scanline &b, const scanline &c, const scanline &d )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = a[x] < b[x] ? c[x] : d[x];
 }
 
 ////////////////////////////////////////
@@ -501,7 +509,8 @@ void add_plane_math( engine::registry &r )
 
 	r.add( op( "p.clamp_pnn", base::choose_runtime( plane_clamp_pnn ), scanline_plane_adapter<true, decltype(plane_clamp_pnn)>(), dispatch_scan_processing, op::one_to_one ) );
 
-	r.add( op( "p.if_less_fpp", base::choose_runtime( plane_ifless ), scanline_plane_adapter<true, decltype(plane_ifless)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.if_less_fpp", base::choose_runtime( plane_ifless_fpp ), scanline_plane_adapter<true, decltype(plane_ifless_fpp)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.if_less_ppp", base::choose_runtime( plane_ifless_ppp ), scanline_plane_adapter<true, decltype(plane_ifless_ppp)>(), dispatch_scan_processing, op::one_to_one ) );
 	r.add( op( "p.if_greater_fpp", base::choose_runtime( plane_ifgreater ), scanline_plane_adapter<true, decltype(plane_ifgreater)>(), dispatch_scan_processing, op::one_to_one ) );
 
 	r.add( op( "p.threshold_f", base::choose_runtime( plane_thresholdf ), scanline_plane_adapter<true, decltype(plane_thresholdf)>(), dispatch_scan_processing, op::one_to_one ) );

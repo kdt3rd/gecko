@@ -169,6 +169,15 @@ inline plane if_less( const plane &a, float b, const plane &c, const plane &d )
 	return plane( "p.if_less_fpp", a.dims(), a, b, c, d );
 }
 
+/// out = (a < b) ? c : d
+inline plane if_less( const plane &a, const plane &b, const plane &c, const plane &d )
+{
+	precondition( a.width() == b.width() && a.height() == b.height(), "unable to compute if_less for planes of different sizes" );
+	precondition( a.width() == c.width() && a.height() == c.height(), "unable to compute if_less for planes of different sizes" );
+	precondition( a.width() == d.width() && a.height() == d.height(), "unable to compute if_less for planes of different sizes" );
+	return plane( "p.if_less_ppp", a.dims(), a, b, c, d );
+}
+
 /// out = (a > b) ? c : d
 inline plane if_greater( const plane &a, float b, const plane &c, const plane &d )
 {
