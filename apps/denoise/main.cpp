@@ -91,7 +91,7 @@ int safemain( int argc, char *argv[] )
 			"Processes the image in log space instead of linear", false ),
 		base::cmd_line::option(
 			0, std::string( "spatial-method" ),
-			"<guided_color|guided_mono|wavelet|bilateral|despeckle|none>", base::cmd_line::arg<1>,
+			"<guided_color|guided_mono|wavelet|bilateral|despeckle|savgol|savgolmin|none>", base::cmd_line::arg<1>,
 			"Specifies the spatial method used", false ),
 		base::cmd_line::option(
 			0, std::string( "temporal-method" ),
@@ -180,6 +180,10 @@ int safemain( int argc, char *argv[] )
 		else if ( m == "wavelet" )
 			spatmethod = m;
 		else if ( m == "despeckle" )
+			spatmethod = m;
+		else if ( m == "savgol" )
+			spatmethod = m;
+		else if ( m == "savgolmin" )
 			spatmethod = m;
 		else if ( m == "none" )
 			spatmethod = m;
@@ -450,6 +454,30 @@ int safemain( int argc, char *argv[] )
 				{
 					for ( int p = 0; p < 3; ++p )
 						filteredCenter[p] = despeckle( filteredCenter[p], spatSigmaI );
+				}
+				else if ( spatmethod == "savgol" )
+				{
+					int rad = spatX;
+					int order = spatY;
+					if ( order < 0 )
+					{
+						std::cout << "No order specified for Savitsky Golay filter, using 4" << std::endl;
+						order = 4;
+					}
+					for ( int p = 0; p < 3; ++p )
+						filteredCenter[p] = savitsky_golay_filter( filteredCenter[p], rad, order );
+				}
+				else if ( spatmethod == "savgolmin" )
+				{
+					int rad = spatX;
+					int order = spatY;
+					if ( order < 0 )
+					{
+						std::cout << "No order specified for Savitsky Golay filter, using 4" << std::endl;
+						order = 4;
+					}
+					for ( int p = 0; p < 3; ++p )
+						filteredCenter[p] = savitsky_golay_minimize_error( filteredCenter[p], rad, order );
 				}
 
 				if ( useLog )

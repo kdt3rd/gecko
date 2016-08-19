@@ -24,6 +24,7 @@
 #include <base/math_functions.h>
 #include <base/contract.h>
 #include <base/cpu_features.h>
+#include <base/svd.h>
 #include "plane_ops.h"
 #include "scanline_process.h"
 #include "threading.h"
@@ -511,6 +512,125 @@ guided_filter_color_impl( const image_buf &I, const image_buf &p, int r, Epsilon
 	return ret;
 }
 
+static void
+sav_gol_thread( size_t, int s, int e, plane &r, const plane &p, const math::svd<float>::grid_type &A, int radius )
+{
+	const size_t M = A.size();
+
+	int w = r.width();
+//	int h = r.height();
+	for ( int y = s; y < e; ++y )
+	{
+		float *destP = r.line( y );
+		const float *srcP = p.line( y );
+		for ( int x = 0; x < w; ++x )
+		{
+			float r = srcP[x];
+
+			int curX = - radius;
+			int curY = curX;
+			double sum2R = 0.0;
+			for ( auto uv: A[0] )
+				sum2R += r * uv;
+
+			for ( size_t row = 1; row != M; ++row )
+			{
+				if ( 0 == curY && 0 == curX )
+					++curX;
+
+				r = get_mirror( p, x + curX, y + curY );
+				for ( auto uv: A[row] )
+					sum2R += r * uv;
+
+				++curX;
+				if ( curX > radius )
+				{
+					curX = - radius;
+					++curY;
+				}
+			}
+			destP[x] = static_cast<float>( sum2R );
+		}
+	}
+}
+
+static plane
+apply_sav_gol( const plane &p, int radius, int order )
+{
+	plane r( p.width(), p.height() );
+
+	typedef math::svd<float> svdf;
+	svdf savFunc;
+	svdf::grid_type A;
+	const size_t W = radius * 2 + 1;
+	const size_t M = W * W;
+	const size_t N = ( order + 1 ) * ( order + 2 ) / 2;
+
+	A.resize( M );
+	int curX = - radius;
+	int curY = - radius;
+	float posScale = 1.F / float( radius );
+	A[0].resize( N, 0.F );
+	A[0][0] = 1.F;
+	for ( size_t row = 1; row != M; ++row )
+	{
+		if ( curY == 0 && curX == 0 )
+			++curX;
+
+		svdf::col_type &coeff = A[row];
+		coeff.resize( N, 0.F );
+		coeff[0] = 1.F;
+		size_t curIdx = 1;
+		for ( int i = 1; i <= order; ++i )
+		{
+			int xPow = i, yPow = 0;
+			while ( xPow >= 0 )
+			{
+				float xV = powf( float( curX ) * posScale, xPow );
+				float yV = powf( float( curY ) * posScale, yPow );
+				coeff[curIdx] = xV * yV;
+				--xPow;
+				++yPow;
+				++curIdx;
+			}
+		}
+
+		++curX;
+		if ( curX > radius )
+		{
+			curX = - radius;
+			++curY;
+		}
+	}
+
+//	std::cout << "Savitsky Golay radius: " << radius << " order: " << order << " -> matrix " << M << 'x' << N << std::endl;
+	if ( ! savFunc.init( A, 0.F ) )
+		std::cout << "warning, small values removed from SVD decomposition for radius " << radius << " order " << order << std::endl;
+
+	// pre-propagate the solve
+	A = savFunc.u();
+	svdf::col_type v0 = savFunc.v()[0];
+	const svdf::col_type &w = savFunc.w();
+	for ( size_t j = 0; j != N; ++j )
+	{
+		if ( w[j] )
+			v0[j] /= w[j];
+		else
+			v0[j] = 0.F;
+	}
+
+	for ( size_t i = 0; i != M; ++i )
+	{
+		svdf::col_type &u = A[i];
+		for ( size_t j = 0; j != N; ++j )
+			u[j] *= v0[j];
+	}
+
+	threading::get().dispatch( std::bind( sav_gol_thread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( r ), std::cref( p ), std::cref( A ), radius ), p );
+
+	return r;
+}
+
 }
 
 ////////////////////////////////////////
@@ -552,12 +672,13 @@ median3( const plane &p1, const plane &p2, const plane &p3 )
 plane
 despeckle( const plane &p, float thresh )
 {
-	plane mid = separable_convolve( p, { 0.25F, 0.5F, 0.25F } );
-	plane high = p - mid;
-	plane med = cross_x_img_median( p );
+//	plane mid = separable_convolve( p, { 0.25F, 0.5F, 0.25F } );
+//	plane high = p - mid;
+//	plane med = cross_x_img_median( p );
+	plane med = median( p, 3 );
 	plane highmed = p - med;
-	plane highdiff = high - highmed;
-	return mid + high * ( 1.F - exp( square( highdiff ) / ( -2.F * thresh * thresh ) ) );
+//	plane highdiff = high - highmed;
+	return highmed;//mid + high * ( 1.F - exp( square( highdiff ) / ( -2.F * thresh * thresh ) ) );
 }
 
 ////////////////////////////////////////
@@ -651,6 +772,41 @@ guided_filter_color( const image_buf &I, const image_buf &p, int r, const plane 
 
 ////////////////////////////////////////
 
+plane
+savitsky_golay_filter( const plane &p, int radius, int order )
+{
+	return plane( "p.sav_gol", p.dims(), p, radius, order );
+}
+
+////////////////////////////////////////
+
+plane
+savitsky_golay_minimize_error( const plane &p, int radius, int max_order )
+{
+	plane r;
+	plane minErr;
+	for ( int o = 0; o <= max_order; ++o )
+	{
+		plane sg = savitsky_golay_filter( p, radius, o );
+		plane curErr = mse( sg, p, radius );
+
+		if ( o == 0 )
+		{
+			minErr = curErr;
+			r = sg;
+		}
+		else
+		{
+			r = if_less( curErr, minErr, sg, r );
+			minErr = if_less( curErr, minErr, curErr, minErr );
+		}
+	}
+	
+	return r;
+}
+
+////////////////////////////////////////
+
 void add_spatial( engine::registry &r )
 {
 	using namespace engine;
@@ -667,6 +823,8 @@ void add_spatial( engine::registry &r )
 	r.add( op( "p.bilateral", base::choose_runtime( apply_bilateral ), op::threaded ) );
 	r.add( op( "p.cross_bilateral", base::choose_runtime( apply_cross_bilateral ), op::threaded ) );
 	r.add( op( "p.weighted_bilateral", base::choose_runtime( apply_weighted_bilateral ), op::threaded ) );
+
+	r.add( op( "p.sav_gol", base::choose_runtime( apply_sav_gol ), op::threaded ) );
 }
 
 ////////////////////////////////////////

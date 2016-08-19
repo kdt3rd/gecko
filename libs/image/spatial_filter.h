@@ -60,6 +60,9 @@ image_buf guided_filter_mono( const image_buf &I, const image_buf &p, int r, con
 image_buf guided_filter_color( const image_buf &I, const image_buf &p, int r, float eps );
 image_buf guided_filter_color( const image_buf &I, const image_buf &p, int r, const plane &eps, float epsScale = 1.F );
 
+plane savitsky_golay_filter( const plane &p, int radius, int order );
+plane savitsky_golay_minimize_error( const plane &p, int radius, int max_order );
+
 void add_spatial( engine::registry &r );
 
 } // namespace image
