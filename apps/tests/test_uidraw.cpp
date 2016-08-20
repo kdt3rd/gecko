@@ -20,6 +20,7 @@ namespace
 int safemain( int /*argc*/, char * /*argv*/ [] )
 {
 	auto sys = platform::platform::common().create();
+
 	auto win = sys->new_window();
 	win->resize( 400, 400 );
 	win->set_title( "Draw Test" );
@@ -164,7 +165,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	win->show();
 
 	auto dispatch = sys->get_dispatcher();
-	return dispatch->execute();;
+	return dispatch->execute();
 }
 
 }
