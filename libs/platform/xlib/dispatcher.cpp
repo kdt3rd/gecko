@@ -10,6 +10,7 @@
 #include <utf/utfcat.h>
 #include <sys/select.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include "dispatcher.h"
 
 namespace platform { namespace xlib
@@ -31,8 +32,14 @@ dispatcher::dispatcher( const std::shared_ptr<Display> &dpy, const std::shared_p
 	{
 		_wait_pipe[0] = -1;
 		_wait_pipe[1] = -1;
-		throw_runtime( "Failed to create signaling pipe" );
+		throw_errno( "Failed to create signaling pipe" );
 	}
+	if ( ::fcntl( _wait_pipe[0], F_SETFD, FD_CLOEXEC ) == -1 ||
+		 ::fcntl( _wait_pipe[1], F_SETFD, FD_CLOEXEC ) == -1 )
+		throw_errno( "Unable to convert signaling pipe to close-on-exec" );
+	if ( ::fcntl( _wait_pipe[0], F_SETFL, O_NONBLOCK ) == -1 ||
+		 ::fcntl( _wait_pipe[1], F_SETFL, O_NONBLOCK ) == -1 )
+		throw_runtime( "Unable to convert signaling pipe to non blocking" );
 }
 
 ////////////////////////////////////////
@@ -123,6 +130,15 @@ int dispatcher::execute( void )
 			{
 				if ( FD_ISSET( x.first, &waitreadobjs ) )
 					firenow.push_back( x.second );
+			}
+			if ( FD_ISSET( _wait_pipe[0], &waitreadobjs ) )
+			{
+				char j;
+				int rc;
+				do
+				{
+					rc = ::read( _wait_pipe[0], &j, 1 );
+				} while ( rc > 0 || ( rc == -1 && errno == EINTR ) );
 			}
 		}
 
