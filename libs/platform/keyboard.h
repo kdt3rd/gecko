@@ -190,6 +190,11 @@ enum class scancode : uint32_t
 	KEY_EXSEL = 164,
 	KEY_OUT2 = 165,
 
+	KEY_PLAY_NEXT_TRACK = 171,
+	KEY_PLAY_TOGGLE = 172,
+	KEY_PLAY_PREV_TRACK = 173,
+	KEY_PLAY_STOP = 174,
+
 	KEY_KP_00               = 176,
 	KEY_KP_000              = 177,
 	KEY_KP_THOUSAND_SEP     = 178,

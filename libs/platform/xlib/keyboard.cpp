@@ -5,6 +5,7 @@
 #include <base/pointer.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
+#include <X11/XF86keysym.h>
 
 ////////////////////////////////////////
 
@@ -111,6 +112,14 @@ const std::map<KeySym,platform::scancode> sym2code =
 	{ XK_Shift_R, platform::scancode::KEY_RSHIFT },
 	{ XK_Alt_R, platform::scancode::KEY_RALT },
 	{ XK_Meta_R, platform::scancode::KEY_RGUI },
+
+	{ XF86XK_AudioLowerVolume, platform::scancode::KEY_VOLUMEDOWN },
+	{ XF86XK_AudioMute, platform::scancode::KEY_MUTE },
+	{ XF86XK_AudioRaiseVolume, platform::scancode::KEY_VOLUMEUP },
+	{ XF86XK_AudioPlay, platform::scancode::KEY_PLAY_TOGGLE },
+	{ XF86XK_AudioStop, platform::scancode::KEY_PLAY_STOP },
+	{ XF86XK_AudioPrev, platform::scancode::KEY_PLAY_PREV_TRACK },
+	{ XF86XK_AudioNext, platform::scancode::KEY_PLAY_NEXT_TRACK },
 };
 
 ////////////////////////////////////////
