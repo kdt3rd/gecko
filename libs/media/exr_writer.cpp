@@ -31,7 +31,7 @@
 # include <base/string_util.h>
 # include <base/thread_util.h>
 # include <base/file_system.h>
-# include <color/description.h>
+# include <color/state.h>
 # include <thread>
 
 # pragma GCC diagnostic push
@@ -160,8 +160,8 @@ public:
 		auto id = parms.find( media_ImageDescription );
 		if ( id != parms.end() )
 		{
-			const color::description &desc = any_cast<const color::description &>( id->second );
-			const color::description::cx &chroma = desc.chroma();
+			const color::state &st = any_cast<const color::state &>( id->second );
+			const color::state::cx &chroma = st.chroma();
 			_chroma = Imf::Chromaticities(
 				IMATH_NAMESPACE::V2f( float(chroma.red.x), float(chroma.red.y) ),
 				IMATH_NAMESPACE::V2f( float(chroma.green.x), float(chroma.green.y) ),

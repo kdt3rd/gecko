@@ -36,8 +36,9 @@ namespace color
 {
 
 
-/// @brief Class description provides a basic description of attributes
-///        describing a color.
+/// @brief Class description provides a basic set of attributes
+///        describing the current state of an image or other color
+///        value.
 ///
 /// This is most commonly used to describe how to interpret color channels
 /// of an image, and then can be used to compute the transformation between
@@ -60,7 +61,7 @@ namespace color
 ///   using any of a number of pre-defined transforms into alternate
 ///   representations of the same data. Examples include RGB, XYZ,
 ///   YCbCr(Rec.709 vs. Rec.2020 vs. Native), HSL, HSV, et al.
-class description
+class state
 {
 public:
 	typedef double value_type;
@@ -101,7 +102,7 @@ public:
 	inline void signal( range r ) { _range = r; }
 
 	/// The transfer curve (OETF or EOTF, depending) that has been
-	/// applied to the data corresponding to this description
+	/// applied to the data corresponding to this state
 	inline transfer curve( void ) const { return _curve; }
 	/// has different meanings depending on the curve
 	inline value_type curve_a( void ) const { return _curve_a; }
