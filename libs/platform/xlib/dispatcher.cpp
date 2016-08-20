@@ -8,6 +8,8 @@
 #include <base/meta.h>
 #include <utf/utf.h>
 #include <utf/utfcat.h>
+#include <sys/select.h>
+#include <unistd.h>
 #include "dispatcher.h"
 
 namespace platform { namespace xlib
@@ -23,13 +25,24 @@ dispatcher::dispatcher( const std::shared_ptr<Display> &dpy, const std::shared_p
 
 	_xim = XOpenIM( _display.get(), nullptr, nullptr, nullptr ); // TODO resource/class name?
 	if ( !_xim )
-		throw std::runtime_error( "failed to open input method" );
+		throw_runtime( "failed to open input method" );
+
+	if ( pipe( _wait_pipe ) < 0 )
+	{
+		_wait_pipe[0] = -1;
+		_wait_pipe[1] = -1;
+		throw_runtime( "Failed to create signaling pipe" );
+	}
 }
 
 ////////////////////////////////////////
 
 dispatcher::~dispatcher( void )
 {
+	if ( _wait_pipe[0] >= 0 )
+		::close( _wait_pipe[0] );
+	if ( _wait_pipe[1] >= 0 )
+		::close( _wait_pipe[1] );
 }
 
 ////////////////////////////////////////
@@ -39,9 +52,152 @@ int dispatcher::execute( void )
 	XFlush( _display.get() );
 	_exit_code = 0;
 
+	int xFD = ConnectionNumber( _display.get() );
+	bool done = false;
+	fd_set waitreadobjs;
+	std::map<int, std::shared_ptr<waitable>> waitmap;
+	std::vector<std::shared_ptr<waitable>> firenow;
+	std::vector<std::shared_ptr<waitable>> timeouts;
+	struct timeval tv;
+	while ( !done )
+	{
+		firenow.clear();
+		waitmap.clear();
+		timeouts.clear();
+		int nWaits = std::max( _wait_pipe[0], xFD );
+		FD_ZERO( &waitreadobjs );
+		FD_SET( xFD, &waitreadobjs );
+		if ( _wait_pipe[0] >= 0 )
+			FD_SET( _wait_pipe[0], &waitreadobjs );
+
+		waitable::time_point curt = waitable::clock::now();
+		tv.tv_sec = 0;
+		tv.tv_usec = 0;
+		struct timeval *tvptr = nullptr;
+		for ( auto &w: _waitables )
+		{
+			intptr_t oid = w->poll_object();
+			if ( oid != intptr_t(-1) )
+			{
+				int objfd = static_cast<int>( oid );
+				waitmap[objfd] = w;
+				FD_SET( objfd, &waitreadobjs );
+				nWaits = std::max( nWaits, objfd );
+			}
+			waitable::duration when;
+			if ( w->poll_timeout( when, curt ) )
+			{
+				if ( when < waitable::duration::zero() )
+				{
+					firenow.push_back( w );
+				}
+				else
+				{
+					timeouts.push_back( w );
+					std::chrono::seconds secs = std::chrono::duration_cast<std::chrono::seconds>( when );
+					when -= std::chrono::duration_cast<waitable::duration>( secs );
+					std::chrono::microseconds usecs = std::chrono::duration_cast<std::chrono::microseconds>( when );
+					if ( secs.count() < tv.tv_sec || ( secs.count() == tv.tv_sec && usecs.count() < tv.tv_usec ) )
+					{
+						tv.tv_sec = secs.count();
+						tv.tv_usec = usecs.count();
+					}
+
+					tvptr = &tv;
+				}
+			}
+		}
+
+		bool doTimeouts = false;
+		if ( firenow.empty() )
+		{
+			++nWaits;
+			int selrv = select( nWaits, &waitreadobjs, NULL, NULL, tvptr );
+
+			// timeout if selrv == 0
+			if ( selrv < 0 )
+				throw_errno( "Error waiting for events to be available" );
+
+			doTimeouts = ( selrv == 0 );
+			for ( auto &x: waitmap )
+			{
+				if ( FD_ISSET( x.first, &waitreadobjs ) )
+					firenow.push_back( x.second );
+			}
+		}
+
+		curt = waitable::clock::now();
+		if ( doTimeouts )
+		{
+			for ( auto &w: timeouts )
+				w->emit( curt );
+		}
+		for ( auto &w: firenow )
+			w->emit( curt );
+		done = drainEvents();
+	}
+
+	return _exit_code;
+}
+
+////////////////////////////////////////
+
+void dispatcher::exit( int code )
+{
+	_exit_code = code;
+}
+
+////////////////////////////////////////
+
+void
+dispatcher::add_waitable( const std::shared_ptr<waitable> &w )
+{
+	::platform::dispatcher::add_waitable( w );
+	if ( _wait_pipe[1] >= 0 )
+	{
+		char x = 'x';
+		::write( _wait_pipe[1], &x, sizeof(char) );
+	}
+}
+
+////////////////////////////////////////
+
+void
+dispatcher::remove_waitable( const std::shared_ptr<waitable> &w )
+{
+	if ( _wait_pipe[1] >= 0 )
+	{
+		char x = 'x';
+		::write( _wait_pipe[1], &x, sizeof(char) );
+	}
+}
+
+////////////////////////////////////////
+
+void dispatcher::add_window( const std::shared_ptr<window> &w )
+{
+	_windows[w->id()] = w;
+	XSetWMProtocols( _display.get(), w->id(), &_atom_delete_window, 1 );
+
+	// Create an input context.
+	auto xic = XCreateIC( _xim,
+		XNClientWindow, w->id(),
+		XNFocusWindow, w->id(), 
+		XNInputStyle, XIMPreeditNothing | XIMStatusNothing,
+		nullptr );
+	if ( !xic )
+		throw_runtime( "failed to create input context" );
+	w->set_input_context( xic );
+}
+
+////////////////////////////////////////
+
+bool
+dispatcher::drainEvents( void )
+{
 	bool done = false;
 	XEvent event;
-	while ( !done )
+	while ( ! done && XPending( _display.get() ) )
 	{
 		XNextEvent( _display.get(), &event );
 		switch ( event.type )
@@ -233,32 +389,7 @@ int dispatcher::execute( void )
 		}
 	}
 
-	return _exit_code;
-}
-
-////////////////////////////////////////
-
-void dispatcher::exit( int code )
-{
-	_exit_code = code;
-}
-
-////////////////////////////////////////
-
-void dispatcher::add_window( const std::shared_ptr<window> &w )
-{
-	_windows[w->id()] = w;
-	XSetWMProtocols( _display.get(), w->id(), &_atom_delete_window, 1 );
-
-	// Create an input context.
-	auto xic = XCreateIC( _xim,
-		XNClientWindow, w->id(),
-		XNFocusWindow, w->id(), 
-		XNInputStyle, XIMPreeditNothing | XIMStatusNothing,
-		nullptr );
-	if ( !xic )
-		throw std::runtime_error( "failed to create input context" );
-	w->set_input_context( xic );
+	return done;
 }
 
 ////////////////////////////////////////

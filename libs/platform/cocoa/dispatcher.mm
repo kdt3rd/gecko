@@ -220,7 +220,7 @@ std::cout << "Done event" << std::endl;
 
 	[pool release];
 */
-	
+	std::cout << "TODO: Add waitable loop" << std::endl;
     [NSApp run];
 	std::cout << "DONE EXECUTE" << std::endl;
 

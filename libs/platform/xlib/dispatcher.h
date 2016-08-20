@@ -25,6 +25,8 @@ public:
 
 	int execute( void ) override;
 	void exit( int code ) override;
+	void add_waitable( const std::shared_ptr<waitable> &w ) override;
+	void remove_waitable( const std::shared_ptr<waitable> &w ) override;
 
 	/// @brief Add a window.
 	///
@@ -32,7 +34,10 @@ public:
 	void add_window( const std::shared_ptr<window> &w );
 
 private:
+	bool drainEvents( void );
+
 	int _exit_code = 0;
+	int _wait_pipe[2];
 	std::shared_ptr<Display> _display;
 	Atom _atom_delete_window;
 	XIM _xim;

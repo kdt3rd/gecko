@@ -7,10 +7,10 @@
 
 #include "screen.h"
 #include "window.h"
-#include "timer.h"
 #include "dispatcher.h"
 #include "keyboard.h"
 #include "mouse.h"
+#include "timer.h"
 
 namespace platform
 {
@@ -58,12 +58,6 @@ public:
 	/// @return A new window
 	virtual std::shared_ptr<window> new_window( void ) = 0;
 
-	/// @brief Create a new timer.
-	///
-	/// Create a new timer.  Newly created timers are stopped and must be started.
-	/// @return A new timer
-	virtual std::shared_ptr<timer> new_timer( void ) = 0;
-
 	/// @brief Get the dispatcher.
 	///
 	/// Get the dispatcher for the system.
@@ -82,7 +76,23 @@ public:
 	/// @return The mouse
 	virtual std::shared_ptr<mouse> get_mouse( void ) = 0;
 
+	/// @brief creates a generic timer.
+	///
+	/// NB: The owner of the shared pointer is responsible for
+	/// registering and unregistering as a waitable with the
+	/// dispatcher
+	std::shared_ptr<timer> create_timer( void );
+
+	/// @brief creates a one off timer.
+	///
+	/// This will register a timer and call the callback when it
+	/// expires, managing the timer for the user (not reusable)
+	void create_one_off_timer( double in_seconds, const std::function<void(void)> &e );
+	void create_one_off_timer( timer::duration in_seconds, const std::function<void(void)> &e );
+	void create_one_off_timer( timer::time_point when, const std::function<void(void)> &e );
+
 private:
+	void dispatch_oneoff_timer( const std::shared_ptr<timer> &t, const std::function<void(void)> &e );
 	std::string _name;
 	std::string _desc;
 };

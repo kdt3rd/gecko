@@ -4,7 +4,6 @@ extra_source = optional_source{
 		"system.mm",
 		"screen.mm",
 		"window.mm",
-		"timer.cpp",
 		"keyboard.mm",
 		"mouse.cpp",
 		"dispatcher.mm",

@@ -8,7 +8,6 @@ extra_source = optional_source{
 		"system.cpp";
 		"screen.cpp";
 		"window.cpp";
-		"timer.cpp";
 		"keyboard.cpp";
 		"mouse.cpp";
 		"dispatcher.cpp";

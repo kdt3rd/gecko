@@ -2,7 +2,6 @@
 #include "system.h"
 #include "screen.h"
 #include "window.h"
-#include "timer.h"
 #include "dispatcher.h"
 
 #include <platform/platform.h>
@@ -80,13 +79,6 @@ std::shared_ptr<::platform::window> system::new_window( void )
 	auto ret = std::make_shared<window>( _display );
 	_dispatcher->add_window( ret );
 	return ret;
-}
-
-////////////////////////////////////////
-
-std::shared_ptr<::platform::timer> system::new_timer( void )
-{
-	return std::make_shared<timer>();
 }
 
 ////////////////////////////////////////

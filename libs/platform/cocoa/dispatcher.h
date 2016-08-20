@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <map>
+#include <vector>
 #include <platform/dispatcher.h>
 #include "window.h"
 #include "keyboard.h"
@@ -20,8 +21,11 @@ public:
 	dispatcher( const std::shared_ptr<keyboard> &k, const std::shared_ptr<mouse> &m );
 	~dispatcher( void );
 
-	int execute( void );
-	void exit( int code );
+	int execute( void ) override;
+	void exit( int code ) override;
+
+	void add_waitable( const std::shared_ptr<waitable> &w ) override;
+	void remove_waitable( const std::shared_ptr<waitable> &w ) override;
 
 	void add_window( const std::shared_ptr<window> &w );
 
