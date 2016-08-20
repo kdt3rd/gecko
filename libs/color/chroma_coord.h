@@ -42,7 +42,6 @@ class chroma_coord
 public:
 	typedef V value_type;
 
-	inline constexpr chroma_coord( void ) noexcept : x( value_type(0) ), y( value_type(0) ) {}
 	inline constexpr chroma_coord( value_type xv, value_type yv ) noexcept : x( xv ), y( yv ) {}
 
 	template <typename OV>
@@ -76,7 +75,7 @@ public:
 		return fromXYZ( xyz.x, xyz.y, xyz.z );
 	}
 
-	value_type x, y;
+	value_type x = value_type(0), y = value_type(0);
 };
 
 ////////////////////////////////////////

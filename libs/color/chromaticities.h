@@ -22,6 +22,9 @@
 
 #pragma once
 
+#include <initializer_list>
+#include <base/contract.h>
+
 #include "chroma_coord.h"
 #include "matrix.h"
 
@@ -119,6 +122,16 @@ public:
 	typedef triplet<value_type> xyz;
 	typedef matrix<value_type> mat;
 
+	inline constexpr chromaticities( const xy &r, const xy &g, const xy &b, const xy &w ) : red( r ), green( g ), blue( b ), white( w ) {}
+	inline chromaticities( std::initializer_list<xy> &i )
+	{
+		if ( i.size() != 4 )
+			throw_runtime( "Invalid initializer list for chromaticities, expect 4 x,y chroma pairs" );
+		red = i[0];
+		green = i[1];
+		blue = i[2];
+		white = i[3];
+	}
 	inline mat RGBtoXYZ( value_type Y = value_type(1) ) const
 	{
 		xyz r = red.toXYZ( Y );

@@ -23,6 +23,10 @@
 #pragma once
 
 #include "chromaticities.h"
+#include "primaries.h"
+#include "space.h"
+#include "range.h"
+#include "transfer_curve.h"
 
 
 ////////////////////////////////////////
@@ -31,82 +35,6 @@
 namespace color
 {
 
-/// @brief Describes the normalization of encoded values
-///
-/// This covers all the variants of the classic full vs. legal 
-enum class range
-{
-	FULL, ///< normal 0 - 2^bits - 1 integer encoding 0.0 - 1.0
-	ITU_FULL, ///< 0 - 2^bits ITU-BT.HDR defined scaling
-	SMPTE,  ///< also called legal or video range
-			///< for luma: 16-235 (scaled based on bits)
-			///< for chroma: 16-240 (scaled based on bits)
-			///< reserved values: 0,255 for 8 bits, 0-3,1020-1023 for 10, etc.
-	SIGNAL, ///< same reserved values as SMPTE, but
-			///< scales the non-reserved values 0-1 with
-			///< no extra gap range
-	SMPTE_PLUS  ///< A combination of SMPTE and SIGNAL
-		///< where the black level is the same
-		///< as legal, but the peak is the same as signal
-};
-
-enum class space
-{
-	RGB, ///< RGB, where chromaticities describe how to convert to XYZ
-	XYZ, ///< CIE XYZ, chromaticies record what RGB the XYZ came from
-	LMS_CAM02, ///< LMS space, as defined in CIECAM02
-	LMS_ICTCP, ///< LMS space, as defined in BT.HDR
-	CHONG, ///< perceptually uniform, illuminant invariant, per Chong et al. siggraph 2008
-
-	/// @defgroup Color opponent spaces attempting to separate
-	/// intensity / luminance / brightness from chroma / saturation / hue
-	/// @{
-	LAB, ///< CIE L*a*b*, chromaticies record what RGB it came from,
-		 ///< white point for normalization
-	HUNTER_LAB, ///< Hunter Lab, chromaticies record what RGB it came from,
-				///< white point for normalization
-	LCH, ///< CIE LCh, similar to Lab, but cylindrical coordinates for
-		 ///< chroma (relative saturation) and hue
-	LUV, ///< CIE L*u*v*, from CIE 1976
-	YCBCR_BT601, ///< YCbCr as defined in BT.601
-	YCBCR_BT709, ///< YCbCr as defined in BT.709
-	YCBCR_BT2020, ///< YCbCr as defined in BT.2020
-	YCBCR_CUSTOM, ///< YCbCr computed using chromaticities
-	ICTCP_BTHDR, ///< ICtCp, as defined in BT.HDR
-	IPT, ///< Ebner & Fairchild, 1998
-	HSV_HEX, ///< HSV, using hexagonal approximation
-	HSV_CYL, ///< HSV, using cylindrical (polar) math
-	HSI_HEX, ///< HSI, using hexagonal approximation
-	HSI_CYL, ///< HSI, using cylindrical (polar) math
-	HSL_HEX, ///< HSL, using hexagonal approximation
-	HSL_CYL, ///< HSL, using cylindrical (polar) math
-	/// @}
-};
-
-enum class transfer
-{
-	LINEAR, ///< Linear (NO) curve
-	GAMMA_sRGB, ///< sRGB EOTF
-	GAMMA_BT709, ///< BT.709 OETF
-	GAMMA_BT2020, ///< BT.2020 OETF
-	GAMMA_BT1886, ///< computes a, b using Lb, Lw from BT.1886 EOTF
-	GAMMA_DCI, ///< gamma EOTF for digital cinema, gamma = 2.6
-	GAMMA_CUSTOM, ///< custom gamma EOTF, no linear breakpoint
-	SONY_SLOG1, ///< Sony S-Log v1
-	SONY_SLOG2, ///< Sony S-Log v2
-	SONY_SLOG3, ///< Sony S-Log v3 encoding of linear scene reflection
-	ARRI_LOGC_NORMSENS_SUP2, ///< ARRI Log-C SUP 2.X or earlier normalized
-							 ///< sensor signal (need to know EI)
-	ARRI_LOGC_SCENELIN_SUP2, ///< ARRI Log-C SUP 2.X or earlier linear scene
-							 ///< exposure (need to know EI)
-	ARRI_LOGC_NORMSENS_SUP3, ///< ARRI Log-C SUP 3.X or newer normalized
-							 ///< sensor signal (need to know EI)
-	ARRI_LOGC_SCENELIN_SUP3, ///< ARRI Log-C SUP 3.X or newer linear scene
-							 ///< exposure (need to know EI)
-	CINEON, ///< Cineon printing density
-	ST_2084, ///< ST.2084 Perceptual Quantizer (PQ)
-	BBC_HLG, ///< BBC Hybrid Log Gamma (need to know the system gamma)
-};
 
 /// @brief Class description provides a basic description of attributes
 ///        describing a color.
@@ -175,20 +103,27 @@ public:
 	/// The transfer curve (OETF or EOTF, depending) that has been
 	/// applied to the data corresponding to this description
 	inline transfer curve( void ) const { return _curve; }
-	inline value_type curve_gamma( void ) const { return _curve_gamma; }
-	inline value_type curve_black( void ) const { return _curve_black; }
-	inline value_type curve_white( void ) const { return _curve_white; }
+	/// has different meanings depending on the curve
+	inline value_type curve_a( void ) const { return _curve_a; }
+	/// has different meanings depending on the curve
+	inline value_type curve_b( void ) const { return _curve_b; }
+	/// has different meanings depending on the curve
+	inline value_type curve_c( void ) const { return _curve_c; }
+	/// has different meanings depending on the curve
+	inline value_type curve_d( void ) const { return _curve_d; }
 
 	/// Define the transfer curve applied to the data
-	inline void curve( transfer c,
-					   value_type Lb,
-					   value_type Lw,
-					   value_type gamma )
+	inline void curve( transfer crv,
+					   value_type a,
+					   value_type b,
+					   value_type c,
+					   value_type d )
 	{
-		_curve = c;
-		_curve_black = Lb;
-		_curve_white = Lw;
-		_curve_gamma = gamma;
+		_curve = crv;
+		_curve_a = a;
+		_curve_b = b;
+		_curve_c = c;
+		_curve_d = d;
 	}
 
 	/// encoding bits
@@ -205,9 +140,10 @@ private:
 	value_type _black_offset = value_type(0.0);
 	range _range = range::FULL;
 	transfer _curve = transfer::LINEAR;
-	value_type _curve_gamma = value_type(1.0);
-	value_type _curve_black = value_type(0.0);
-	value_type _curve_white = value_type(1.0);
+	value_type _curve_a = value_type(1.0);
+	value_type _curve_b = value_type(0.0);
+	value_type _curve_c = value_type(1.0);
+	value_type _curve_d = value_type(0.0);
 	int _bits = 10;
 };
 
