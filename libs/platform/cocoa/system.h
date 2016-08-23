@@ -20,7 +20,6 @@ public:
 
 	std::vector<std::shared_ptr<::platform::screen>> screens( void ) override;
 	std::shared_ptr<::platform::window> new_window( void ) override;
-	std::shared_ptr<::platform::timer> new_timer( void ) override;
 
 	std::shared_ptr<::platform::dispatcher> get_dispatcher( void ) override;
 	std::shared_ptr<::platform::keyboard> get_keyboard( void ) override;
