@@ -29,8 +29,8 @@ struct font_manager::pimpl
 font_manager::font_manager( void )
 	: _impl( new pimpl )
 {
-	if ( FcInit() != FcTrue )
-		throw std::runtime_error( "error intializing fontconfig" );
+//	if ( FcInit() != FcTrue )
+//		throw std::runtime_error( "error intializing fontconfig" );
 
 	/*
 	set_manager_name( "fontconfig" );
@@ -40,7 +40,8 @@ font_manager::font_manager( void )
 	set_manager_version( version.str() );
 	*/
 
-	_impl->config = FcConfigGetCurrent();
+//	_impl->config = FcConfigGetCurrent();
+	_impl->config = FcInitLoadConfigAndFonts();
 	FcConfigSetRescanInterval( _impl->config, 0 );
 
 	if ( FT_Init_FreeType( &(_impl->ftlib) ) != 0 )
@@ -65,7 +66,12 @@ std::set<std::string> font_manager::get_families( void )
 
 	FcPattern *pat = FcPatternCreate();
 	FcObjectSet *os = FcObjectSetBuild( FC_FAMILY, nullptr );
+
+	FcConfigSubstitute( _impl->config, pat, FcMatchPattern );
+	FcDefaultSubstitute( pat );
+
 	FcFontSet *fs = FcFontList( _impl->config, pat, os );
+
 	if ( fs )
 	{
 		FcChar8 *name = nullptr;
@@ -90,6 +96,9 @@ std::set<std::string> font_manager::get_styles( const std::string &family )
 	std::set<std::string> ret;
 
 	FcPattern *pat = FcPatternBuild( nullptr, FC_FAMILY, FcTypeString, family.c_str(), nullptr );
+	FcConfigSubstitute( _impl->config, pat, FcMatchPattern );
+	FcDefaultSubstitute( pat );
+
 	FcObjectSet *os = FcObjectSetBuild( FC_STYLE, nullptr );
 	FcFontSet *fs = FcFontList( _impl->config, pat, os );
 	if ( fs )
@@ -121,6 +130,8 @@ font_manager::get_font( const std::string &family, const std::string &style, dou
 		FC_LANG, FcTypeString, lang.c_str(),
 		FC_PIXEL_SIZE, FcTypeDouble, pixsize,
 		nullptr );
+	FcConfigSubstitute( _impl->config, pat, FcMatchPattern );
+	FcDefaultSubstitute( pat );
 
 	if ( ! pat )
 		throw std::runtime_error( "Unable to build font pattern" );
