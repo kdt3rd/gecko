@@ -1,4 +1,9 @@
 
 lib = library "layout"
-  source "simple_area.cpp"
+  source {
+	  "solver.cpp";
+	  "area.cpp";
+	  "grid.cpp";
+	  "hbox.cpp";
+  }
   libs "base"

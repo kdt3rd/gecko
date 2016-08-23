@@ -1,33 +1,69 @@
 
 #pragma once
 
+#include "area.h"
+#include "solver.h"
+
 namespace layout
 {
 
 ////////////////////////////////////////
 
-/// @brief A layout
-///
-/// Layouts work in 2 passes.
-/// The first pass computes the minimum size from areas.
-/// The second pass computes the actual position and size of each area.
-template<typename container, typename area>
-class layout
+class layout : public area
 {
 public:
-	virtual ~layout( void )
+	layout( void )
+		: area( "layout" )
 	{
 	}
 
-	virtual void set_pad( double left, double right, double top, double bottom ) = 0;
-	virtual void set_spacing( double horiz, double vert ) = 0;
-
-	virtual void recompute_minimum( container &a ) = 0;
-	virtual void recompute_layout( container &a ) = 0;
-
-	virtual void added( const std::shared_ptr<area> & )
+	void minimize( const expression &e )
 	{
+		_solver.add_objective( e );
 	}
+
+	void add_constraint( const constraint &c )
+	{
+		_solver.add_constraint( c );
+	}
+
+	void add_variable( const variable &v, double str = strong )
+	{
+		_solver.add_variable( v, str );
+	}
+
+	void suggest( const variable &v, double x )
+	{
+		if ( !_solver.has_variable( v ) )
+			_solver.add_variable( v );
+		_solver.suggest( v, x );
+	}
+
+	virtual void update( void )
+	{
+		_solver.update_variables();
+	}
+
+	virtual void reset( void )
+	{
+		_solver.reset();
+	}
+
+	layout &operator<<( const constraint &c )
+	{
+		add_constraint( c );
+		return *this;
+	}
+
+	layout &operator<<( const variable &v )
+	{
+		add_variable( v );
+		return *this;
+	}
+
+protected:
+
+	solver _solver;
 };
 
 ////////////////////////////////////////

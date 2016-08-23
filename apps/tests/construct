@@ -1,6 +1,4 @@
 
---executable( "test_layout", Compile( "test_layout.cpp" ), LinkLibs( "layout", platform ) )
-
 local base = l.base.lib
 local utf = l.utf.lib
 local sqlite = l.sqlite.lib
@@ -11,11 +9,13 @@ local gl = l.gl.lib
 local platform = l.platform.lib
 local draw = l.draw.lib
 local script = l.script.lib
+local layout = l.layout.lib
 --local gui = l.gui.lib
 
 executable( "test_signal", "test_signal.cpp", base )
 executable( "test_platform", "test_platform.cpp", platform, gl )
 executable( "test_draw", "test_draw.cpp", platform, draw )
+executable( "test_rectangle", "test_rectangle.cpp", platform, draw )
 executable( "test_uidraw", "test_uidraw.cpp", platform, draw, script )
 --executable( "test_app", "test_app.cpp", gui )
 executable( "test_font", "test_font.cpp", script )
@@ -31,7 +31,8 @@ executable( "test_exr", "test_exr.cpp", media, base )
 executable( "test_tcp", "test_tcp.cpp", net )
 executable( "test_web", "test_web.cpp", web )
 executable( "test_ws", "test_ws.cpp", web )
-executable( "test_triangle", "test_triangle.cpp", platform, gl )
+executable( "test_triangle", "test_triangle.cpp", platform, gl, draw )
+executable( "test_layout", "test_layout.cpp", platform, draw, layout )
 
 executable( "segfault", "segfault.cpp" )
 

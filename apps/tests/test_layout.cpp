@@ -1,191 +1,129 @@
 
-#include <iostream>
-#include <map>
-#include <functional>
+#include <platform/platform.h>
+#include <platform/system.h>
+#include <platform/dispatcher.h>
+#include <gl/opengl.h>
+#include <gl/api.h>
+#include <gl/mesh.h>
+#include <gl/png_image.h>
+#include <base/contract.h>
+#include <base/timer.h>
+#include <base/math_functions.h>
+#include <draw/path.h>
+#include <draw/rectangle.h>
+#include <layout/grid.h>
+#include <layout/hbox.h>
 
-#define PLATFORM_H <platform/PLATFORM/system.h>
-#include PLATFORM_H
-
-#include <layout/form_layout.h>
-#include <layout/box_layout.h>
-#include <layout/grid_layout.h>
-#include <layout/tree_layout.h>
-
-namespace {
-
-////////////////////////////////////////
-
-std::shared_ptr<layout::layout> test_box( const std::shared_ptr<layout::area> &c )
+namespace
 {
-	auto l =  std::make_shared<layout::box_layout>( c, direction::DOWN );
-	for ( size_t i = 0; i < 5; ++i )
-	{
-		auto a = l->new_area( i == 2 ? 1.0 : 0.0 );
-		a->set_minimum( 100, 24 );
-	}
-	return l;
-}
 
-////////////////////////////////////////
-
-std::shared_ptr<layout::layout> test_tree( const std::shared_ptr<layout::area> &c )
+int safemain( int /*argc*/, char * /*argv*/ [] )
 {
-	auto l = std::make_shared<layout::tree_layout>( c, 24.0 );
-	for ( size_t i = 0; i < 2; ++i )
-	{
-		auto a = l->new_area( 0.0 );
-		a->set_minimum( 100, 24 );
-	}
-	auto b1 = l->new_branch();
-	for ( size_t i = 0; i < 2; ++i )
-	{
-		auto a = b1->new_area();
-		a->set_minimum( 100, 24 );
-	}
-	for ( size_t i = 0; i < 2; ++i )
-	{
-		auto a = l->new_area( 0.0 );
-		a->set_minimum( 100, 24 );
-	}
-	l->new_area( 1.0 );
+	std::vector<gl::color> colors = { gl::red, gl::green, gl::blue, gl::white };
+	std::vector<layout::area> widgets;
+	widgets.emplace_back( "w1" );
+	widgets.emplace_back( "w2" );
+	widgets.emplace_back( "w3" );
+	widgets.emplace_back( "w4" );
+	layout::area &w1 = widgets[0];
+	layout::area &w2 = widgets[1];
+	layout::area &w3 = widgets[2];
+	layout::area &w4 = widgets[3];
 
-	return l;
-}
+	// Setup constraints for the widgets
+	layout::grid lay( 2, 3 );
+	lay.set_padding( 20, 10 );
+	lay.set_spacing( 6, 6 );
+	lay.add( w1, 0, 0 );
+	lay.add( w2, 1, 0 );
+	lay.add( w3, 0, 1, 2, 1 );
+	lay.add( w4, 0, 2, 2, 1 );
 
-////////////////////////////////////////
+	lay.suggest( w1.minimum_width(), 20 );
+	lay.suggest( w2.minimum_width(), 20 );
+	lay.suggest( w3.minimum_width(), 20 );
+	lay.suggest( w4.minimum_width(), 20 );
+	lay.suggest( w1.minimum_height(), 10 );
+	lay.suggest( w2.minimum_height(), 10 );
+	lay.suggest( w3.minimum_height(), 10 );
+	lay.suggest( w4.minimum_height(), 10 );
+	lay.add_constraint( w1.height() * 2 == w1.width() );
 
-std::shared_ptr<layout::layout> test_form( const std::shared_ptr<layout::area> &c )
-{
-	std::shared_ptr<layout::area> a, b;
-
-	auto l = std::make_shared<layout::form_layout>( c );
-
-	for ( size_t i = 0; i < 5; ++i )
-	{
-		std::tie( a, b ) = l->new_row();
-		a->set_minimum( 100, 24 );
-		b->set_minimum( 100, 24 );
-	}
-
-	return l;
-}
-
-////////////////////////////////////////
-
-std::shared_ptr<layout::layout> test_grid( std::shared_ptr<layout::area> c )
-{
-	auto l = std::make_shared<layout::grid_layout>( c );
-
-	for ( size_t i = 0; i < 5; ++i )
-		auto tmp = l->new_column( i == 2 ? 1.0 : 0.0 );
-
-	for ( size_t i = 0; i < 5; ++i )
-	{
-		auto tmp = l->new_row( i == 2 ? 1.0 : 0.0 );
-		for ( auto a: tmp )
-			a->set_minimum( 50, 24 );
-	}
-
-	return l;
-}
-
-////////////////////////////////////////
-
-std::map<std::string,std::function<std::shared_ptr<layout::layout>(std::shared_ptr<layout::area>)>> tests =
-{
-	{ "grid", test_grid },
-	{ "box", test_box },
-	{ "form", test_form },
-	{ "tree", test_tree },
-};
-
-////////////////////////////////////////
-
-int safemain( int argc, char **argv )
-{
-	precondition( argc > 1, "expected argument" );
-
-	auto sys = std::make_shared<platform::native_system>();
+	// Create a window
+	auto sys = platform::platform::common().create();
 	auto win = sys->new_window();
+	win->resize( 400, 400 );
+	win->set_title( "Layout" );
+	win->acquire();
 
-	auto c = std::make_shared<layout::area>();
+	// Add variables to be adjusted manually
+	lay.add_variable( lay.left() );
+	lay.add_variable( lay.right() );
+	lay.add_variable( lay.top() );
+	lay.add_variable( lay.bottom() );
+	lay.suggest( lay.left(), 0 );
+	lay.suggest( lay.top(), 0 );
+	lay.suggest( lay.right(), win->width() );
+	lay.suggest( lay.bottom(), win->height() );
 
-	auto layout = tests[argv[1]]( c );
+	// OpenGL information & initialization
+	gl::matrix4 matrix;
+	gl::api ogl;
+	//ogl.setup_debugging();
 
-//	auto fontmgr = sys->get_font_manager();
-//	auto font = fontmgr->get_font( "ubuntu", "bold", 48.0 );
-//	if ( !font )
-//		throw std::runtime_error( "font not found" );
-
-	draw::gradient grad;
-	grad.add_stop( 0.0, draw::color( 0.6, 0.6, 0.6 ) );
-	grad.add_stop( 1.0, draw::color( 0.3, 0.3, 0.3 ) );
-
-	auto redraw_window = [&] ( void )
+	// Create rectangles for each widget
+	std::vector<draw::rectangle> rects;
+	for ( size_t i = 0; i < widgets.size(); ++i )
 	{
-		auto canvas = win->canvas();
-		canvas->fill( draw::color( 0.5, 0.5, 0.5 ) );
+		auto &w = widgets[i];
+		rects.emplace_back( w.left().value(), w.top().value(), w.right().value() - w.left().value(), w.bottom().value() - w.top().value(), colors[i] );
+	}
 
-		/*
-		bool skip = true;
-		for ( auto a: *c )
+	// Render function
+	win->exposed = [&]( void )
+	{
+		win->acquire();
+
+		lay.suggest( lay.right(), win->width() );
+		lay.suggest( lay.bottom(), win->height() );
+		lay.update();
+
+		matrix = gl::matrix4::ortho( 0, static_cast<float>( win->width() ), 0, static_cast<float>( win->height() ) );
+
+		ogl.clear();
+		ogl.viewport( 0, 0, win->width(), win->height() );
+
+		for ( size_t i = 0; i < widgets.size(); ++i )
 		{
-			if ( ( a->width() * a->height() > 0 ) && !skip )
-			{
-				draw::path p;
-				p.rounded_rect( { a->x1() + 0.5, a->y1() + 0.5 }, a->width(), a->height(), 5 );
-				draw::paint paint( draw::color( 1, 1, 1 ) );
-				paint.set_fill_linear( { a->x1(), a->y1() }, 0, a->height(), grad );
-				canvas->draw_path( p, paint );
-			}
-			else
-				skip = false;
+			auto &w = widgets[i];
+			auto &r = rects[i];
+//			std::cout << i << ": " << w.left().value() << ',' << w.top().value() << ' ' << w.right().value() - w.left().value() << 'x' << w.bottom().value() - w.top().value() << std::endl;
+			r.resize( w.left().value(), w.top().value(), w.right().value() - w.left().value(), w.bottom().value() - w.top().value() );
+			r.draw( ogl, matrix );
 		}
-		*/
-//		draw::paint paint2( { 1, 1, 1, 0 } );
-//		paint2.set_fill_color( { 1, 1, 1 } );
-//		canvas->draw_text( font, { 50, 150 }, "Hell0 World!", paint2 );
-		canvas->present();
+
+		win->release();
+
+		// Cause a redraw to continue the animation
+		//win->invalidate( base::rect() );
 	};
 
-	auto recompute_layout = [&] ( double w, double h )
+	// Key to take a screenshot.
+	win->key_pressed = [&]( const std::shared_ptr<platform::keyboard> &, platform::scancode c )
 	{
-		layout->recompute_minimum();
-
-		if ( w < c->minimum_width() )
-			w = c->minimum_width();
-		if ( h < c->minimum_height() )
-			h = c->minimum_height();
-		c->set_horizontal( 0, w );
-		c->set_vertical( 0, h );
-
-		layout->recompute_layout();
+		if ( c == platform::scancode::KEY_S )
+		{
+			win->acquire();
+			gl::png_write( "/tmp/test.png", static_cast<size_t>( win->width() ), static_cast<size_t>( win->height() ), 3 );
+			win->release();
+		}
 	};
 
-	recompute_layout( 640, 480 );
-
-	win->resized.callback( recompute_layout );
-	win->exposed.callback( redraw_window );
-
-	win->set_title( "Hello World" );
-	win->resize( 640, 480 );
 	win->show();
 
-	std::shared_ptr<platform::timer> t = sys->new_timer();
-	t->elapsed.callback( [&]
-	{
-		t->schedule( 10.0 );
-	} );
-
-//	win->when_entered( [&] { std::cout << "Entered!" << std::endl; } );
-//	win->when_exited( [&] { std::cout << "Exited!" << std::endl; } );
-
-	t->schedule( 1.0 );
-
-	return sys->get_dispatcher()->execute();
+	auto dispatch = sys->get_dispatcher();
+	return dispatch->execute();;
 }
-
-////////////////////////////////////////
 
 }
 
@@ -200,7 +138,7 @@ int main( int argc, char *argv[] )
 	}
 	catch ( std::exception &e )
 	{
-		print_exception( std::cerr, e );
+		base::print_exception( std::cerr, e );
 	}
 	return ret;
 }

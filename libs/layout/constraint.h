@@ -1,151 +1,136 @@
 
 #pragma once
 
-#include <base/contract.h>
-#include <base/direction.h>
-#include <base/orientation.h>
 #include <memory>
-#include <iostream>
+#include "expression.h"
 
 namespace layout
 {
 
+constexpr double required = 1001001000.0;
+constexpr double strong =      1000000.0;
+constexpr double medium =         1000.0;
+constexpr double weak =              1.0;
+
 ////////////////////////////////////////
 
-template<typename list, typename area>
-void overlap_minimum( const list &areas, area &master, orientation orient, double pad1 = 0.0, double pad2 = 0.0 )
+class constraint
 {
-	if ( orient == orientation::HORIZONTAL )
+public:
+	enum class relation
 	{
-		double w = 0.0;
-		for ( auto &a: areas )
-			w = std::max( w, a->minimum_width() );
-		master.set_minimum_width( w + pad1 + pad2 );
-	}
-	else
+		LESS_EQUAL,
+		GREATER_EQUAL,
+		EQUAL
+	};
+
+	constraint( void )
 	{
-		double h = 0.0;
-		for ( auto &a: areas )
-			h = std::max( h, a->minimum_height() );
-		master.set_minimum_height( h + pad1 + pad2 );
 	}
+
+	constraint( const expression &e, relation o, double str = required )
+		: _data( std::make_shared<data>( e, o, str ) )
+	{
+	}
+
+	double strength( void ) const
+	{
+		precondition( _data, "null constraint data" );
+		return _data->_strength;
+	}
+
+	const expression &get_expr( void ) const
+	{
+		precondition( _data, "null constraint data" );
+		return _data->_expr;
+	}
+
+	relation op( void ) const
+	{
+		precondition( _data, "null constraint data" );
+		return _data->_op;
+	}
+
+	bool operator<( const constraint &c ) const
+	{
+		return _data < c._data;
+	}
+
+	void set_strength( double str )
+	{
+		precondition( _data, "null constraint data" );
+		_data->_strength = str;
+	}
+
+private:
+	struct data
+	{
+		data( const expression &e, relation o, double s )
+			: _expr( e ), _op( o ), _strength( s )
+		{
+		}
+
+		expression _expr;
+		relation _op;
+		double _strength;
+	};
+
+	std::shared_ptr<data> _data;
+};
+
+////////////////////////////////////////
+
+inline std::ostream &operator<<( std::ostream &out, const constraint &c )
+{
+	out << c.get_expr();
+	switch ( c.op() )
+	{
+		case constraint::relation::LESS_EQUAL: out << " <= 0"; break;
+		case constraint::relation::GREATER_EQUAL: out << " >= 0"; break;
+		case constraint::relation::EQUAL: out << " == 0"; break;
+	}
+
+	return out;
 }
 
-template<typename list, typename area>
-void overlap_constraint( const list &areas, const area &master, orientation orient, double pad1 = 0.0, double pad2 = 0.0 )
+////////////////////////////////////////
+
+inline constraint operator<=( const expression &e1, const expression &e2 )
 {
-	if ( orient == orientation::HORIZONTAL )
-	{
-		double x = master.x1() + pad1;
-		double w = master.width() - pad1 - pad2;
-		for ( auto &a: areas )
-			a->set_horizontal( x, x + w );
-	}
-	else
-	{
-		double y = master.y1() + pad1;
-		double h = master.height() - pad1 - pad2;
-		for ( auto &a: areas )
-			a->set_vertical( y, y + h );
-	}
+	return constraint( e1 - e2, constraint::relation::LESS_EQUAL );
 }
 
-template<typename list, typename area>
-void flow_minimum( const list &areas, area &master, direction dir, double spacing = 0.0, double pad1 = 0.0, double pad2 = 0.0 )
+////////////////////////////////////////
+
+inline constraint operator>=( const expression &e1, const expression &e2 )
 {
-	if ( dir == direction::LEFT || dir == direction::RIGHT )
-	{
-		double w = 0.0;
-		for ( auto &a: areas )
-			w += a->minimum_width();
-		master.set_minimum_width( w + pad1 + pad2 + ( spacing * ( areas.size() - 1 ) ) );
-	}
-	else
-	{
-		double h = 0.0;
-		for ( auto &a: areas )
-			h += a->minimum_height();
-		master.set_minimum_height( h + pad1 + pad2 + ( spacing * ( areas.size() - 1 ) ) );
-	}
+	return constraint( e1 - e2, constraint::relation::GREATER_EQUAL );
 }
 
-template<typename list, typename wlist, typename area>
-void flow_constraint( const list &areas, const wlist &weights, const area &master, direction dir, double spacing = 0.0, double pad1 = 0.0, double pad2 = 0.0 )
+////////////////////////////////////////
+
+inline constraint operator==( const expression &e1, const expression &e2 )
 {
-	double t = 0.0;
-	double s = pad1 + pad2 + ( spacing * ( areas.size() - 1 ) ); 
-	if ( dir == direction::LEFT || dir == direction::RIGHT )
-	{
-		for ( size_t i = 0; i < areas.size(); ++i )
-		{
-			t += weights[i];
-			s += areas[i]->minimum_width();
-		}
+	return constraint( e1 - e2, constraint::relation::EQUAL );
+}
 
-		double x = master.x1() + pad1;
-		double extra = std::max( master.width() - s, 0.0 );
-		if ( dir == direction::RIGHT )
-		{
-			for ( size_t i = 0; i < areas.size(); ++i )
-			{
-				auto &a = areas[i];
-				double w = a->minimum_width();
-				if ( t > 0.0 )
-					w += extra * weights[i] / t;
-				a->set_horizontal( x, x + w );
-				x += w + spacing;
-			}
-		}
-		else
-		{
-			for ( size_t i = areas.size(); i > 0; --i )
-			{
-				auto &a = areas[i-1];
-				double w = a->minimum_width();
-				if ( t > 0.0 )
-					w += extra * weights[i-1] / t;
-				a->set_horizontal( x, x + w );
-				x += w + spacing;
-			}
-		}
-	}
-	else
-	{
-		for ( size_t i = 0; i < areas.size(); ++i )
-		{
-			t += weights[i];
-			s += areas[i]->minimum_height();
-		}
+////////////////////////////////////////
 
-		double y = master.y1() + pad1;
-		double extra = std::max( master.height() - s, 0.0 );
-		if ( dir == direction::DOWN )
-		{
-			for ( size_t i = 0; i < areas.size(); ++i )
-			{
-				auto &a = areas[i];
-				double h = a->minimum_height();
-				if ( t > 0.0 )
-					h += extra * weights[i] / t;
-				a->set_vertical( y, y + h );
-				y += h + spacing;
-			}
-		}
-		else
-		{
-			for ( size_t i = areas.size(); i > 0; --i )
-			{
-				auto &a = areas[i-1];
-				double h = a->minimum_height();
-				if ( t > 0.0 )
-					h += extra * weights[i-1] / t;
-				a->set_vertical( y, y + h );
-				y += h + spacing;
-			}
-		}
-	}
+inline constraint operator||( constraint &&c, double str )
+{
+	c.set_strength( str );
+	return std::move( c );
+}
+
+////////////////////////////////////////
+
+inline constraint operator||( double str, constraint &&c )
+{
+	c.set_strength( str );
+	return std::move( c );
 }
 
 ////////////////////////////////////////
 
 }
+
