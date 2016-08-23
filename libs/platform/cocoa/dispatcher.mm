@@ -238,6 +238,20 @@ void dispatcher::exit( int code )
 
 ////////////////////////////////////////
 
+void dispatcher::add_waitable( const std::shared_ptr<waitable> &w )
+{
+	throw_not_yet();
+}
+
+////////////////////////////////////////
+
+void dispatcher::remove_waitable( const std::shared_ptr<waitable> &w )
+{
+	throw_not_yet();
+}
+
+////////////////////////////////////////
+
 void dispatcher::add_window( const std::shared_ptr<window> &w )
 {
 	int style = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
