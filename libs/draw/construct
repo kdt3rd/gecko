@@ -8,6 +8,8 @@ local srcs = {
 	"tessellator.cpp";
 	"clipper.cpp";
 	"text.cpp";
+	"rectangle.cpp";
+	"triangle.cpp";
 }
 
 --[====[
