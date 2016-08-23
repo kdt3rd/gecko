@@ -108,6 +108,11 @@ public:
 		return _data.size() / stride();
 	}
 
+	void set( size_t i, const Args &...args )
+	{
+		assign( i * stride(), args... );
+	}
+
 	/// @brief Returns true if the buffer is empty.
 	bool empty( void ) const
 	{
@@ -180,6 +185,13 @@ public:
 		return _vbo;
 	}
 
+	void update( buffer_usage u = buffer_usage::DYNAMIC_DRAW )
+	{
+		auto v = vbo( u );
+		auto bound = v->bind();
+		bound.data( _data, u );
+	}
+
 private:
 	void push_back( const tuple &t )
 	{
@@ -231,6 +243,54 @@ private:
 	}
 
 	void append( void )
+	{
+	}
+
+	template<typename ...More>
+	void assign( size_t i, const vec2 &p, const More &...args )
+	{
+		_data.at( i ) = p[0];
+		_data.at( i+1 ) = p[1];
+		assign( i + 2, args... );
+	}
+
+	template<typename ...More>
+	void assign( size_t i, const vec3 &p, const More &...args )
+	{
+		_data.at( i ) = p[0];
+		_data.at( i+1 ) = p[1];
+		_data.at( i+2 ) = p[2];
+		assign( i + 3, args... );
+	}
+
+	template<typename ...More>
+	void assign( size_t i, const vec4 &p, const More &...args )
+	{
+		_data.at( i ) = p[0];
+		_data.at( i+1 ) = p[1];
+		_data.at( i+2 ) = p[2];
+		_data.at( i+3 ) = p[3];
+		assign( i + 4, args... );
+	}
+
+	template<typename ...More>
+	void assign( size_t i, const color &c, const More &...args )
+	{
+		_data.at( i ) = c.red();
+		_data.at( i+1 ) = c.green();
+		_data.at( i+2 ) = c.blue();
+		_data.at( i+3 ) = c.alpha();
+		assign( i + 4, args... );
+	}
+
+	template<typename ...More>
+	void assign( size_t i, float f, const More &...args )
+	{
+		_data.at( i ) = f;
+		assign( i + 1, args... );
+	}
+
+	void assign( size_t )
 	{
 	}
 

@@ -13,7 +13,7 @@ namespace gl
 
 /// @brief OpenGL vertex buffer object (VBO).
 /// A VBO holds floating point data for vertices.
-/// Nultiple attributes can be stored in a VBO, or
+/// Multiple attributes can be stored in a VBO, or
 /// multiple VBOs can be used with one attribute each.
 /// @sa gl::vertex_array
 class vertex_buffer

@@ -150,6 +150,11 @@ public:
 
 	bool valid( void ) const;
 
+	const std::shared_ptr<vertex_array> &vertex_array_object( void ) const
+	{
+		return _vao;
+	}
+
 private:
 	typedef std::tuple<primitive,size_t,size_t> Primitive;
 	std::shared_ptr<vertex_array> _vao;
