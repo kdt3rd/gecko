@@ -29,8 +29,8 @@ struct font_manager::pimpl
 font_manager::font_manager( void )
 	: _impl( new pimpl )
 {
-//	if ( FcInit() != FcTrue )
-//		throw std::runtime_error( "error intializing fontconfig" );
+	if ( FcInit() != FcTrue )
+		throw std::runtime_error( "error intializing fontconfig" );
 
 	/*
 	set_manager_name( "fontconfig" );
@@ -40,8 +40,7 @@ font_manager::font_manager( void )
 	set_manager_version( version.str() );
 	*/
 
-//	_impl->config = FcConfigGetCurrent();
-	_impl->config = FcInitLoadConfigAndFonts();
+	_impl->config = FcConfigGetCurrent();
 	FcConfigSetRescanInterval( _impl->config, 0 );
 
 	if ( FT_Init_FreeType( &(_impl->ftlib) ) != 0 )
