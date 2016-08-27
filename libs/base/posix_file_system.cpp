@@ -348,6 +348,7 @@ directory_iterator posix_file_system::readdir( const uri &path )
 				}
 				return uri( path, result->d_name );
 			}
+			// else if errno != 0 there was an error, do we care?
 		} while ( false );
 		return uri();
 	};
