@@ -326,9 +326,10 @@ directory_iterator posix_file_system::readdir( const uri &path )
 	if ( !dir )
 		throw_errno( "opendir failed on {0}", fpath );
 
-	// is there a better detector? Some people may spoof this
-#if defined(__GNU_LIBRARY__)
+	// glibc deprecates readdir_r in 2.24, handle that
+#if defined(__GNU_LIBRARY__) && ( __GLIBC__ > 2 || ( __GLIBC__ == 2 && __GLIBC_MINOR__ >= 24 ) ) 
 	// glibc deprecates readdir_r as readdir is safe to call in a multi-threaded environment
+	// apparently using an internal lock on the temporary buffers used to make system calls
 	// (with different DIR)
 	auto next_entry = [=]( void )
 	{
@@ -351,7 +352,7 @@ directory_iterator posix_file_system::readdir( const uri &path )
 		return uri();
 	};
 #else
-	size_t n = static_cast<size_t>( std::max( ::pathconf( fpath.c_str(), _PC_NAME_MAX), long(255) ) ) + 1;
+	size_t n = static_cast<size_t>( std::max( fpathconf( dirfd( dir.get() ), _PC_NAME_MAX ), long(255) ) ) + 1;
 	n += offsetof( struct dirent, d_name );
 	std::shared_ptr<struct dirent> dir_ent( reinterpret_cast<dirent*>( new char[n] ), []( struct dirent *d ) { delete [] reinterpret_cast<char*>( d ); } );
 
