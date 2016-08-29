@@ -887,7 +887,12 @@ static vector_field
 runPD( const plane &a, const plane &b, float lambda, float theta, float gamv, int innerIters, int warpIters, float eta )
 {
 	TODO( "Add ability to pass in initial u, v" );
-	std::cout << "switch resize to bspline when ready" << std::endl;
+	static bool first = true;
+	if ( first )
+	{
+		std::cout << "switch resize to bspline when ready" << std::endl;
+		first = false;
+	}
 
 	std::vector<plane> hierA = make_pyramid( a, "bicubic", eta, 0, 16 );
 	std::vector<plane> hierB = make_pyramid( b, "bicubic", eta, 0, 16 );
