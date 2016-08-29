@@ -729,6 +729,12 @@ graph::move_constants( void )
 	}
 	for ( ; curPos != N; ++curPos )
 	{
+		node &cur = _nodes[curPos];
+
+		// skip dead nodes
+		if ( cur.op() == nullop )
+			continue;
+
 		if ( _nodes[curPos].value().empty() )
 			continue;
 
