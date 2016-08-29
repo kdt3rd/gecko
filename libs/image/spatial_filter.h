@@ -30,6 +30,12 @@
 namespace image
 {
 
+/// applies a morphological erode, returning the min
+plane erode( const plane &p, int radius );
+
+/// applies a morphological dilate, returning the max of the area
+plane dilate( const plane &p, int radius );
+
 /// NB: diameter, not radius, so 3 is a 3x3 median
 plane median( const plane &p, int diameter );
 

@@ -35,6 +35,64 @@ namespace
 {
 using namespace image;
 
+////////////////////////////////////////
+
+void
+apply_erode( scanline &dest, int y, const plane &p, int radius )
+{
+	int maxy = p.height() - 1;
+	int maxx = p.width() - 1;
+
+	for ( int x = 0, w = dest.width(); x < w; ++x )
+	{
+		float minV = dest[x];
+		for ( int cy = y - radius; cy <= y + radius; ++cy )
+		{
+			if ( cy < 0 || cy >= maxy )
+				continue;
+
+			const float *inP = p.line( cy );
+			for ( int cx = x - radius; cx <= x + radius; ++cx )
+			{
+				if ( cx < 0 || cy >= maxx )
+					continue;
+
+				minV = std::min( minV, inP[cx] );
+			}
+		}
+		dest[x] = minV;
+	}
+}
+
+////////////////////////////////////////
+
+void
+apply_dilate( scanline &dest, int y, const plane &p, int radius )
+{
+	int maxy = p.height() - 1;
+	int maxx = p.width() - 1;
+
+	for ( int x = 0, w = dest.width(); x < w; ++x )
+	{
+		float maxV = dest[x];
+		for ( int cy = y - radius; cy <= y + radius; ++cy )
+		{
+			if ( cy < 0 || cy >= maxy )
+				continue;
+
+			const float *inP = p.line( cy );
+			for ( int cx = x - radius; cx <= x + radius; ++cx )
+			{
+				if ( cx < 0 || cy >= maxx )
+					continue;
+
+				maxV = std::max( maxV, inP[cx] );
+			}
+		}
+		dest[x] = maxV;
+	}
+}
+
 
 ////////////////////////////////////////
 
@@ -641,6 +699,22 @@ namespace image
 ////////////////////////////////////////
 
 plane
+erode( const plane &p, int radius )
+{
+	return plane( "p.erode", p.dims(), p, radius );
+}
+
+////////////////////////////////////////
+
+plane
+dilate( const plane &p, int radius )
+{
+	return plane( "p.dilate", p.dims(), p, radius );
+}
+
+////////////////////////////////////////
+
+plane
 median( const plane &p, int diameter )
 {
 	if ( diameter == 3 )
@@ -810,6 +884,9 @@ savitsky_golay_minimize_error( const plane &p, int radius, int max_order )
 void add_spatial( engine::registry &r )
 {
 	using namespace engine;
+
+	r.add( op( "p.erode", base::choose_runtime( apply_erode ), n_scanline_plane_adapter<false, decltype(apply_erode)>(), dispatch_scan_processing, op::n_to_one ) );
+	r.add( op( "p.dilate", base::choose_runtime( apply_dilate ), n_scanline_plane_adapter<false, decltype(apply_dilate)>(), dispatch_scan_processing, op::n_to_one ) );
 
 	r.add( op( "p.median_3x3", base::choose_runtime( median_3x3 ), n_scanline_plane_adapter<false, decltype(median_3x3)>(), dispatch_scan_processing, op::n_to_one ) );
 
