@@ -150,7 +150,17 @@ platform::scancode keyboard::get_scancode( XKeyEvent &ev )
 	KeySym symbol;
 	char buffer[32];
 	XLookupString( &ev, buffer, sizeof(buffer), &symbol, nullptr );
+	if ( symbol != NoSymbol )
+		return get_scancode( ev, symbol );
 
+	return platform::scancode::KEY_UNKNOWN;
+}
+
+////////////////////////////////////////
+
+platform::scancode
+keyboard::get_scancode( XKeyEvent &ev, KeySym symbol )
+{
 	if ( symbol >= XK_a && symbol <= XK_z )
 		return static_cast<platform::scancode>( static_cast<uint32_t>(platform::scancode::KEY_A) + ( symbol - XK_a ) );
 

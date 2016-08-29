@@ -19,6 +19,7 @@ public:
 
 	/// @brief Get the platform::scancode of the given keycode.
 	::platform::scancode get_scancode( XKeyEvent &ev );
+	::platform::scancode get_scancode( XKeyEvent &ev, KeySym ks );
 };
 
 ////////////////////////////////////////

@@ -288,23 +288,62 @@ dispatcher::drainEvents( void )
 			case KeyPress:
 			{
 				auto w = _windows[event.xkey.window];
-				platform::scancode sc = _keyboard->get_scancode( event.xkey );
-				if ( w->key_pressed )
-					w->key_pressed( _keyboard, sc );
-				if ( w->text_entered )
+				char keybuf[32];
+				std::unique_ptr<char[]> tmpbuf;
+				char *keyptr = keybuf;
+				size_t keyptrlen = sizeof(keybuf);
+				KeySym symbol;
+				bool gotSym = false;
+				int length = 0;
+				bool cont = false;
+				do
 				{
-					char keybuf[16];
 					Status status;
-					int length = Xutf8LookupString( w->input_context(), &event.xkey, keybuf, sizeof(keybuf), nullptr, &status );
-					if ( length > 0 )
+					length = Xutf8LookupString( w->input_context(), &event.xkey, keybuf, sizeof(keybuf), &symbol, &status );
+					switch ( status )
 					{
-						std::stringstream tmp( std::string( keybuf, size_t(length) ) );
-						utf::iterator it( tmp, utf::UTF8 );
-						while ( ++it )
-						{
-							if ( utf::is_graphic( *it ) )
-								w->text_entered( _keyboard, *it );
-						}
+						case XBufferOverflow:
+							tmpbuf.reset( new char[keyptrlen*2]);
+							keyptr = tmpbuf.get();
+							keyptrlen = keyptrlen*2;
+							cont = true;
+							break;
+
+						case XLookupNone:
+							break;
+						case XLookupChars:
+							gotSym = false;
+							break;
+						case XLookupBoth:
+							gotSym = true;
+							break;
+						case XLookupKeySym:
+							gotSym = true;
+							keyptr = nullptr;
+							length = 0;
+							break;
+					}
+				} while ( cont );
+				
+				if ( w->key_pressed )
+				{
+					platform::scancode sc;
+					if ( gotSym )
+						sc = _keyboard->get_scancode( event.xkey, symbol );
+					else
+						sc = _keyboard->get_scancode( event.xkey );
+					w->key_pressed( _keyboard, sc );
+				}
+
+				if ( keyptr && length > 0 && w->text_entered )
+				{
+					std::stringstream tmp( std::string( keyptr, size_t(length) ) );
+					utf::iterator it( tmp, utf::UTF8 );
+					while ( ++it )
+					{
+						// why only graphic? Why not formatting as well?
+						if ( utf::is_graphic( *it ) )
+							w->text_entered( _keyboard, *it );
 					}
 				}
 				break;
@@ -313,9 +352,11 @@ dispatcher::drainEvents( void )
 			case KeyRelease:
 			{
 				auto w = _windows[event.xkey.window];
-				platform::scancode sc = _keyboard->get_scancode( event.xkey );
 				if ( w->key_released )
+				{
+					platform::scancode sc = _keyboard->get_scancode( event.xkey );
 					w->key_released( _keyboard, sc );
+				}
 				break;
 			}
 
