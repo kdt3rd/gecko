@@ -23,6 +23,7 @@
 #include "vector_ops.h"
 #include "threading.h"
 #include "scanline_process.h"
+#include "plane_ops.h"
 #include <base/cpu_features.h>
 #include <base/contract.h>
 
@@ -270,6 +271,21 @@ static image_buf colorize_vector( const vector_field &v, float scale )
 namespace image
 {
 
+////////////////////////////////////////
+
+plane confidence( const vector_field &a, const vector_field &b, int conservativeness )
+{
+	precondition( a.width() == b.width() && a.height() == b.height(), "Vector field not same size as other requested for divergence" );
+	if ( conservativeness <= 0 )
+		return log1p( magnitude( a.u() + warp_bilinear( b.u(), a ), a.v() + warp_bilinear( b.v(), a ) ) );
+
+	return log1p( magnitude( a.u() + warp_bilinear( b.u(), a ), a.v() + warp_bilinear( b.v(), a ) ) *
+				  magnitude( erode( a.u(), conservativeness ) - dilate( a.u(), conservativeness ),
+							 erode( a.v(), conservativeness ) - dilate( a.v(), conservativeness ) ) );
+}
+
+////////////////////////////////////////
+
 plane warp_dirac( const plane &src, const vector_field &v )
 {
 	precondition( v.width() == src.width() && v.height() == src.height(), "Vector field not same size as plane requested for warp" );
@@ -305,7 +321,7 @@ image_buf warp_bilinear( const image_buf &src, const vector_field &v )
 vector_field convert_to_absolute( const vector_field &v )
 {
 	if ( v.is_absolute() )
-		return v;
+		return vector_field::create( v.u(), v.v(), true );
 
 	return vector_field::create(
 		plane( "v.cvt_to_abs_u", v.u().dims(), v.u() ),
@@ -323,7 +339,8 @@ vector_field convert_to_relative( const vector_field &v )
 			plane( "v.cvt_to_rel_u", v.u().dims(), v.u() ),
 			plane( "v.cvt_to_rel_v", v.v().dims(), v.v() ),
 			false );
-	return v;
+
+	return vector_field::create( v.u(), v.v(), false );
 }
 
 ////////////////////////////////////////

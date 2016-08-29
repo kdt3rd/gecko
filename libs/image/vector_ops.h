@@ -33,7 +33,7 @@ namespace image
 vector_field concatenate( const vector_field &a, const vector_field &b );
 vector_field project( const vector_field &a, float scale );
 
-plane divergence( const vector_field &a, const vector_field &b );
+plane confidence( const vector_field &a, const vector_field &b, int conservativeness = 2 );
 
 image_buf warp_dirac( const image_buf &src, const vector_field &v );
 plane warp_dirac( const plane &src, const vector_field &v );
