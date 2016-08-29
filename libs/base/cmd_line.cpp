@@ -281,7 +281,7 @@ cmd_line::counted( option &opt, size_t &idx, const std::vector<char *> & )
 std::ostream &
 operator<<( std::ostream &out, const cmd_line &cmdline )
 {
-	out << "Usage: " << cmdline.simple_usage() << '\n';
+	out << "Usage: " << cmdline.simple_usage() << "\n\n";
 	std::vector<std::string> list;
 	size_t width = 0;
 	for ( auto &opt: cmdline.options() )
