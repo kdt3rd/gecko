@@ -333,23 +333,28 @@ directory_iterator posix_file_system::readdir( const uri &path )
 	// (with different DIR)
 	auto next_entry = [=]( void )
 	{
-		struct dirent *result = NULL;
-		do
+		while ( true )
 		{
 			errno = 0;
-			result = ::readdir( dir.get() );
+			struct dirent *result = ::readdir( dir.get() );
 			if ( result )
 			{
 				if ( result->d_name[0] == '.' )
 				{
 					if ( result->d_name[1] == '\0' ||
 						 ( result->d_name[1] == '.' && result->d_name[2] == '\0' ) )
+					{
 						continue;
+					}
 				}
 				return uri( path, result->d_name );
 			}
-			// else if errno != 0 there was an error, do we care?
-		} while ( false );
+			else if ( errno != 0 )
+				throw_errno( "reading directory {0}", path );
+
+			// errno == 0, no result -> end of stream
+			break;
+		}
 		return uri();
 	};
 #else
