@@ -35,6 +35,7 @@
 #include <image/threading.h>
 #include <sstream>
 #include <iostream>
+#include <iomanip>
 #include <cstdlib>
 #include <fstream>
 #include <typeindex>
@@ -60,6 +61,9 @@ int safemain( int argc, char *argv[] )
 	float spatSigmaD = 1.5F;
 	float spatSigmaI = 0.025F;
 	float mseThresh = 0.0075F;
+	float confThresh = 0.0F;
+	int conservativeness = 0;
+	float vecFilter = 0.0F;
 	int mseRadius = 5;
 	int matchRadius = 4;
 	int tempIters = 5;
@@ -74,13 +78,13 @@ int safemain( int argc, char *argv[] )
 	base::cmd_line options(
 		argv[0],
 		base::cmd_line::option(
-			0, std::string(),
-			"<input_file>", base::cmd_line::arg<1>,
-			"Input file pattern to process", true ),
-		base::cmd_line::option(
 			0, std::string( "variance" ),
 			"<file>", base::cmd_line::arg<1>,
 			"Input file pattern holding variance to compute weight", false ),
+		base::cmd_line::option(
+			0, std::string( "debug-vectors" ),
+			"<fileroot>", base::cmd_line::arg<1>,
+			"Saves colorized vector fields to given file root plus tag to indicate which vector", false ),
 		base::cmd_line::option(
 			0, std::string( "estimate-noise" ),
 			std::string(), base::cmd_line::flag,
@@ -122,6 +126,18 @@ int safemain( int argc, char *argv[] )
 			"<int>", base::cmd_line::arg<1>,
 			"Specifies the iteration count used to find temporal matches for relevant algorithms", false ),
 		base::cmd_line::option(
+			0, std::string( "conf-thresh" ),
+			"<float>", base::cmd_line::arg<1>,
+			"Specifies the vector confidence threshold (0.0 means no vector confidence, values less than thresh are good)", false ),
+		base::cmd_line::option(
+			0, std::string( "conf-safety" ),
+			"<int>", base::cmd_line::arg<1>,
+			"Specifies how conservative the vector confidence is (0 is not, higher is more conservative)", false ),
+		base::cmd_line::option(
+			0, std::string( "vec-filter" ),
+			"<float>", base::cmd_line::arg<1>,
+			"Specifies the vector filtering level (higher is more, 0.0 is off)", false ),
+		base::cmd_line::option(
 			0, std::string( "spatial-radius" ),
 			"[<size>|<sizeX sizeY>]", base::cmd_line::arg<1,2>,
 			"Radius for spatial filtering", false ),
@@ -145,6 +161,10 @@ int safemain( int argc, char *argv[] )
 			'T', std::string( "threads" ),
 			"<int>", base::cmd_line::arg<1>,
 			"Number of threads to use for processing", false ),
+		base::cmd_line::option(
+			0, std::string(),
+			"<input_file>", base::cmd_line::arg<1>,
+			"Input file pattern to process", true ),
 		base::cmd_line::option(
 			0, std::string(),
 			"<output_file>", base::cmd_line::arg<1>,
@@ -283,6 +303,18 @@ int safemain( int argc, char *argv[] )
 	if ( tempIt )
 		tempIters = atoi( tempIt.value() );
 
+	auto &confV = options["conf-thresh"];
+	if ( confV )
+		confThresh = atof( confV.value() );
+
+	auto &confSafeV = options["conf-safety"];
+	if ( confSafeV )
+		conservativeness = atoi( confSafeV.value() );
+
+	auto &vecFiltV = options["vec-filter"];
+	if ( vecFiltV )
+		vecFilter = atof( vecFiltV.value() );
+
 	estimateNoise = static_cast<bool>( options["estimate-noise"] );
 	useLog = static_cast<bool>( options["use-log"] );
 	if ( useLog )
@@ -307,6 +339,10 @@ int safemain( int argc, char *argv[] )
 	auto &inP = options["<input_file>"];
 	auto &outP = options["<output_file>"];
 	auto &varP = options["variance"];
+	auto &debugVecP = options["debug-vectors"];
+	if ( debugVecP && temporalRadius <= 0 )
+		throw_runtime( "Debug vectors requested, but temporal radius is 0" );
+
 	if ( inP && outP )
 	{
 		base::uri inputU( inP.value() );
@@ -363,10 +399,19 @@ int safemain( int argc, char *argv[] )
 				std::cout << "Processing frame: " << f << std::endl;
 				image_buf centerImg;
 				image_buf weight;
+				plane cenAlpha;
 				{
 					media::sample cenSamp( f, vt->rate() );
 					auto centerFrm = cenSamp( vt );
 					centerImg = extract_frame( *centerFrm, { "R", "G", "B" } );
+					if ( centerFrm->has_channel( "A" ) )
+					{
+						if ( f == fs )
+							std::cout << "Using alpha channel in integration map" << std::endl;
+
+						image_buf tmpCA = extract_frame( *centerFrm, { "A" } );
+						cenAlpha = tmpCA[0];
+					}
 
 					if ( varU )
 					{
@@ -496,7 +541,7 @@ int safemain( int argc, char *argv[] )
 
 				float cnt = 0.F;
 				image_buf accumImg;
-//				plane integAmt;
+				plane integAmt;
 				for ( int64_t curF = f - temporalRadius; curF <= (f + temporalRadius); ++curF )
 				{
 					if ( curF < vt->begin() || curF > vt->end() )
@@ -505,6 +550,7 @@ int safemain( int argc, char *argv[] )
 					media::sample sCur( curF, vt->rate() );
 
 					image_buf img;
+					plane curAlpha;
 					if ( curF == f )
 						img = centerImg;
 					else
@@ -512,10 +558,12 @@ int safemain( int argc, char *argv[] )
 						std::cout << "  reading temporal frame " << curF << std::endl;
 						auto curFrm = sCur( vt );
 						img = extract_frame( *curFrm, { "R", "G", "B" } );
+						if ( curFrm->has_channel( "A" ) )
+						{
+							image_buf tmpA = extract_frame( *curFrm, { "A" } );
+							curAlpha = tmpA[0];
+						}
 
-//						plane lumA = centerImg[0] * 0.3F + centerImg[1] * 0.6F + centerImg[2] * 0.1F;
-//						plane lumB = img[0] * 0.3F + img[1] * 0.6F + img[2] * 0.1F;
-//						vector_field vf = patch_match( log1p( lumA ), log1p( lumB ), f, curF, 3, patch_style::SSD_GRAD, 16 );
 						image_buf tmpCen = centerImg;
 						image_buf tmpImg = img;
 						if ( useLog )
@@ -527,7 +575,7 @@ int safemain( int argc, char *argv[] )
 							}
 						}
 
-						vector_field vf;
+						vector_field vf, vb;
 						if ( temporalmethod == "patchmatch" )
 							vf = patch_match( tmpCen, tmpImg, f, curF, matchRadius, patch_style::SSD, tempIters );
 						else if ( temporalmethod == "hierpatch" )
@@ -548,13 +596,15 @@ int safemain( int argc, char *argv[] )
 							plane lumA = tmpCen[0] * 0.3F + tmpCen[1] * 0.6F + tmpCen[2] * 0.1F;
 							plane lumB = tmpImg[0] * 0.3F + tmpImg[1] * 0.6F + tmpImg[2] * 0.1F;
 							vf = oflow_ahtvl1( lumA, lumB, lambda, theta, epsilon, edgePower, edgeAlpha, edgeBorder, tvl1Iters, warpIters, eta );
+							if ( confThresh > 0.F )
+								vb = oflow_ahtvl1( lumB, lumA, lambda, theta, epsilon, edgePower, edgeAlpha, edgeBorder, tvl1Iters, warpIters, eta );
 						}
 						else if ( temporalmethod == "pdtncc" )
 						{
 							TODO( "expose tracking parameters" );
-							float lambda = 50.F;
+							float lambda = 20.F;
 							float theta = 0.1F;
-							float gamma = 0.001F;
+							float gamma = 0.001F;//0.001F;
 							int innerIters = 200;
 							int warpIters = 5;
 							float eta = 0.65F;
@@ -562,31 +612,88 @@ int safemain( int argc, char *argv[] )
 							plane lumA = tmpCen[0] * 0.3F + tmpCen[1] * 0.6F + tmpCen[2] * 0.1F;
 							plane lumB = tmpImg[0] * 0.3F + tmpImg[1] * 0.6F + tmpImg[2] * 0.1F;
 							vf = oflow_primaldual( lumA, lumB, lambda, theta, gamma, innerIters, warpIters, eta );
+							if ( confThresh > 0.F )
+								vb = oflow_primaldual( lumB, lumA, lambda, theta, gamma, innerIters, warpIters, eta );
 						}
-//						std::stringstream fnb;
-//						int offset = f - curF;
-//						fnb << "vec_field_" << f << '_' << (offset < 0 ?'p':'m') << std::abs(offset) << ".exr";
-//						debug_save_image( colorize( vf, true ), fnb.str(), f, { "R", "G", "B", "A" }, "f16" );
+
+						if ( vecFilter > 0.F )
+						{
+							plane lumA = filteredCenter[0] * 0.3F + filteredCenter[1] * 0.6F + filteredCenter[2] * 0.1F;
+
+//							vf.u() = cross_bilateral( vf.u(), lumA, engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( 10.F ), engine::make_constant( vecFilter ) );
+//							vf.v() = cross_bilateral( vf.v(), lumA, engine::make_constant( spatX ), engine::make_constant( spatY ), engine::make_constant( 10.F ), engine::make_constant( vecFilter ) );
+							vf.u() = guided_filter_mono( lumA, vf.u(), 8, vecFilter );
+							vf.v() = guided_filter_mono( lumA, vf.v(), 8, vecFilter );
+							if ( vb.valid() )
+							{
+//								plane lumB = tmpImg[0] * 0.3F + tmpImg[1] * 0.6F + tmpImg[2] * 0.1F;
+//								vb.u() = guided_filter_mono( lumB, vb.u(), 7, vecFilter );
+//								vb.v() = guided_filter_mono( lumB, vb.v(), 7, vecFilter );
+							}
+
+						}
 
 						img = warp_bilinear( img, vf );
-
 //						std::stringstream warpfn;
 //						warpfn << "warped_" << f << '_' << (offset < 0 ?'p':'m') << std::abs(offset) << ".exr";
 //						debug_save_image( img, warpfn.str(), f, { "R", "G", "B" }, "f16" );
 
+						plane alpPlane;
+						if ( cenAlpha.valid() && curAlpha.valid() )
+						{
+							plane warpA = warp_bilinear( curAlpha, vf );
+							alpPlane = 1.F - erode( warpA * cenAlpha, 1 );
+						}
+
+						plane vecConf;
+						if ( vb.valid() )
+						{
+							vecConf = confidence( vf, vb, conservativeness );
+							vecConf = erode( threshold( vecConf, confThresh ), 1 );
+//							image_buf tmp;
+//							tmp.add_plane( vecConf );
+//							tmp.add_plane( vecConf );
+//							tmp.add_plane( vecConf );
+//							std::stringstream vconffn;
+//							int offset = f - curF;
+//							vconffn << "vecconf_" << f << '_' << (offset < 0 ?'p':'m') << std::abs(offset) << ".exr";
+//							debug_save_image( tmp, vconffn.str(), f, { "R", "G", "B" }, "f16" );
+						}
+
+						if ( debugVecP )
+						{
+							std::stringstream fnb;
+							int offset = f - curF;
+							fnb << debugVecP.value() << "_frm_" << std::setw(7) << std::setfill('0') << f << '_' << (offset < 0 ?'p':'m') << std::abs(offset) << "_forward_vec.exr";
+							debug_save_image( colorize( vf, true ), fnb.str(), f, { "R", "G", "B", "A" }, "f16" );
+							if ( vb.valid() )
+							{
+								std::stringstream fnb2;
+								fnb2 << debugVecP.value() << "_frm_" << std::setw(7) << std::setfill('0') << f << '_' << (offset < 0 ?'p':'m') << std::abs(offset) << "_backward_vec.exr";
+								debug_save_image( colorize( vb, true ), fnb2.str(), f, { "R", "G", "B", "A" }, "f16" );
+								
+							}
+						}
+
 						// TODO: add integration logic here
 						if ( integmethod == "mse" )
 						{
-							image_buf tmpI;
+//							image_buf tmpI;
 							for ( int i = 0; i < 3; ++i )
 							{
 								plane e = mse( img[i], centerImg[i], mseRadius );
-								tmpI.add_plane( e * 100.F );
+								if ( vecConf.valid() )
+									e = e + vecConf;
+								if ( alpPlane.valid() )
+									e = e + alpPlane;
+
+								e = separable_convolve( e, { 0.05F, 0.2F, 0.5F, 0.2F, 0.05F } );
+//								tmpI.add_plane( e );
 								plane intmap = threshold( e, mseThresh );
-//								if ( ! integAmt.valid() )
-//									integAmt = intmap;
-//								else
-//									integAmt += intmap;
+								if ( ! integAmt.valid() )
+									integAmt = intmap;
+								else
+									integAmt += intmap;
 								// TODO: blur integration map and blend instead of hard thresh
 								img[i] = if_less( e, mseThresh, img[i], filteredCenter[i] );
 							}
@@ -641,15 +748,15 @@ int safemain( int argc, char *argv[] )
 //				accumImg[1].graph_ptr()->dump_dot( "plane1.dot" );
 //				accumImg[2].graph_ptr()->dump_dot( "plane2.dot" );
 //				accumImg[0].graph_ptr()->dump_refs( std::cout );
-//				if ( ! integAmt.valid() )
+				if ( ! integAmt.valid() )
 				{
 					oc.video_tracks()[ci]->store( f, to_frame( accumImg, { "R", "G", "B" }, "f16" ) );
 				}
-//				else
-//				{
-//					accumImg.add_plane( integAmt / ( ( cnt - 1.F ) * 3.F ) );
-//					oc.video_tracks()[ci]->store( f, to_frame( accumImg, { "R", "G", "B", "A" }, "f16" ) );
-//				}
+				else
+				{
+					accumImg.add_plane( integAmt / ( ( cnt - 1.F ) * 3.F ) );
+					oc.video_tracks()[ci]->store( f, to_frame( accumImg, { "R", "G", "B", "A" }, "f16" ) );
+				}
 				std::cout << "Finished frame: " << f << std::endl;
 			}
 		}
