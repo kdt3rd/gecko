@@ -416,10 +416,34 @@ static void plane_clamp_pnn( scanline &dest, const scanline &a, float minV, floa
 
 ////////////////////////////////////////
 
+static void plane_ifless_fff( scanline &dest, const scanline &a, float b, float c, float d )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = a[x] < b ? c : d;
+}
+
+////////////////////////////////////////
+
+static void plane_ifless_ffp( scanline &dest, const scanline &a, float b, float c, const scanline &d )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = a[x] < b ? c : d[x];
+}
+
+////////////////////////////////////////
+
 static void plane_ifless_fpp( scanline &dest, const scanline &a, float b, const scanline &c, const scanline &d )
 {
 	for ( int x = 0, N = dest.width(); x != N; ++x )
 		dest[x] = a[x] < b ? c[x] : d[x];
+}
+
+////////////////////////////////////////
+
+static void plane_ifless_fpf( scanline &dest, const scanline &a, float b, const scanline &c, float d )
+{
+	for ( int x = 0, N = dest.width(); x != N; ++x )
+		dest[x] = a[x] < b ? c[x] : d;
 }
 
 ////////////////////////////////////////
@@ -509,7 +533,10 @@ void add_plane_math( engine::registry &r )
 
 	r.add( op( "p.clamp_pnn", base::choose_runtime( plane_clamp_pnn ), scanline_plane_adapter<true, decltype(plane_clamp_pnn)>(), dispatch_scan_processing, op::one_to_one ) );
 
+	r.add( op( "p.if_less_fff", base::choose_runtime( plane_ifless_fff ), scanline_plane_adapter<true, decltype(plane_ifless_fff)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.if_less_ffp", base::choose_runtime( plane_ifless_ffp ), scanline_plane_adapter<true, decltype(plane_ifless_ffp)>(), dispatch_scan_processing, op::one_to_one ) );
 	r.add( op( "p.if_less_fpp", base::choose_runtime( plane_ifless_fpp ), scanline_plane_adapter<true, decltype(plane_ifless_fpp)>(), dispatch_scan_processing, op::one_to_one ) );
+	r.add( op( "p.if_less_fpf", base::choose_runtime( plane_ifless_fpf ), scanline_plane_adapter<true, decltype(plane_ifless_fpf)>(), dispatch_scan_processing, op::one_to_one ) );
 	r.add( op( "p.if_less_ppp", base::choose_runtime( plane_ifless_ppp ), scanline_plane_adapter<true, decltype(plane_ifless_ppp)>(), dispatch_scan_processing, op::one_to_one ) );
 	r.add( op( "p.if_greater_fpp", base::choose_runtime( plane_ifgreater ), scanline_plane_adapter<true, decltype(plane_ifgreater)>(), dispatch_scan_processing, op::one_to_one ) );
 
