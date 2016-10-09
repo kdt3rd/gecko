@@ -42,30 +42,12 @@ void grid::reset( void )
 
 ////////////////////////////////////////
 
-void grid::set_spacing( double s )
-{
-	_default_hspacing = _default_vspacing = s;
-	_solver.suggest( _hspacing, _default_hspacing );
-	_solver.suggest( _vspacing, _default_vspacing );
-}
-
-////////////////////////////////////////
-
 void grid::set_spacing( double h, double v )
 {
 	_default_hspacing = h;
 	_default_vspacing = v;
 	_solver.suggest( _hspacing, _default_hspacing );
 	_solver.suggest( _vspacing, _default_vspacing );
-}
-
-////////////////////////////////////////
-
-void grid::set_padding( double p )
-{
-	_default_hpadding = _default_vpadding = p;
-	_solver.suggest( _hpadding, _default_hpadding );
-	_solver.suggest( _vpadding, _default_vpadding );
 }
 
 ////////////////////////////////////////

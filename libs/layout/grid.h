@@ -17,10 +17,17 @@ public:
 
 	void reset( void ) override;
 
-	void set_spacing( double s );
 	void set_spacing( double h, double v );
-	void set_padding( double p );
+	void set_spacing( double s )
+	{
+		set_spacing( s, s );
+	}
+
 	void set_padding( double h, double v );
+	void set_padding( double p )
+	{
+		set_padding( p, p );
+	}
 
 private:
 	void create_tabs( size_t w, size_t h );

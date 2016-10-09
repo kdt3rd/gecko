@@ -24,7 +24,14 @@ public:
 
 	void add_constraint( const constraint &c )
 	{
-		_solver.add_constraint( c );
+		if ( c.strength() > strong )
+		{
+			constraint tmp( c );
+			tmp.set_strength( strong );
+			_solver.add_constraint( tmp );
+		}
+		else
+			_solver.add_constraint( c );
 	}
 
 	void add_variable( const variable &v, double str = strong )

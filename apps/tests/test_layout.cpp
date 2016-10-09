@@ -48,6 +48,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	lay.suggest( w3.minimum_height(), 10 );
 	lay.suggest( w4.minimum_height(), 10 );
 	lay.add_constraint( w1.height() * 2 == w1.width() );
+	lay.add_constraint( w3.height() * 2 == w1.height() );
+	lay.add_constraint( w4.height() * 2 == w3.height() );
 
 	// Create a window
 	auto sys = platform::platform::common().create();
