@@ -34,7 +34,7 @@ int safemain( int argc, char *argv[] )
 		s.add_constraint( x0 >= 0 );
 		s.add_constraint( x1 >= 0 );
 		s.add_constraint( ( x0 * 2 ) == x1 );
-		s.suggest_value( x1, 1 );
+		s.suggest( x1, 1 );
 
 		s.update_variables();
 
