@@ -185,6 +185,7 @@ struct cpu
 
 	static bool has_SYSCALL( void );
 	static bool has_RDTSCP( void );
+	/// @}
 };
 
 template <typename Functor>
