@@ -28,10 +28,20 @@
 # define bswap_16 _byteswap_ushort
 # define bswap_32 _byteswap_ulong
 # define bswap_64 _byteswap_uint64
-#elif (defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 8) || defined(__clang__) || (defined(__clang__) && __has_builtin(__builtin_bswap16))
+#elif (defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 8)
 # define bswap_16(x) __builtin_bswap16(x)
 # define bswap_32(x) __builtin_bswap32(x)
 # define bswap_64(x) __builtin_bswap64(x)
+#elif defined(__clang__)
+# if (defined(__has_builtin) && __has_builtin(__builtin_bswap16))
+#  define bswap_16(x) __builtin_bswap16(x)
+#  define bswap_32(x) __builtin_bswap32(x)
+#  define bswap_64(x) __builtin_bswap64(x)
+# else
+#  define bswap_16(x) __builtin_bswap16(x)
+#  define bswap_32(x) __builtin_bswap32(x)
+#  define bswap_64(x) __builtin_bswap64(x)
+# endif
 #elif defined(__linux__)
 # include_next <endian.h>
 # include <byteswap.h>
