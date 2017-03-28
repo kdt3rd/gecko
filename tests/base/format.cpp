@@ -51,4 +51,5 @@ int main( void )
 		std::cerr << '\n';
 		base::print_exception( std::cerr, e );
 	}
+	return -1;
 }

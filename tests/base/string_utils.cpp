@@ -168,4 +168,5 @@ int main( int argc, char *argv[] )
 	{
 		base::print_exception( std::cerr, e );
 	}
+	return -1;
 }
