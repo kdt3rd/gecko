@@ -150,7 +150,7 @@ int dispatcher::execute( void )
 		}
 		for ( auto &w: firenow )
 			w->emit( curt );
-		done = drainEvents();
+		done = drain_xlib_events();
 	}
 
 	return _exit_code;
@@ -169,11 +169,7 @@ void
 dispatcher::add_waitable( const std::shared_ptr<waitable> &w )
 {
 	::platform::dispatcher::add_waitable( w );
-	if ( _wait_pipe[1] >= 0 )
-	{
-		char x = 'x';
-		::write( _wait_pipe[1], &x, sizeof(char) );
-	}
+	wake_up_executor();
 }
 
 ////////////////////////////////////////
@@ -181,11 +177,8 @@ dispatcher::add_waitable( const std::shared_ptr<waitable> &w )
 void
 dispatcher::remove_waitable( const std::shared_ptr<waitable> &w )
 {
-	if ( _wait_pipe[1] >= 0 )
-	{
-		char x = 'x';
-		::write( _wait_pipe[1], &x, sizeof(char) );
-	}
+	::platform::dispatcher::remove_waitable( w );
+	wake_up_executor();
 }
 
 ////////////////////////////////////////
@@ -208,8 +201,20 @@ void dispatcher::add_window( const std::shared_ptr<window> &w )
 
 ////////////////////////////////////////
 
+void
+dispatcher::wake_up_executor( void )
+{
+	if ( _wait_pipe[1] >= 0 )
+	{
+		char x = 'x';
+		::write( _wait_pipe[1], &x, sizeof(char) );
+	}
+}
+
+////////////////////////////////////////
+
 bool
-dispatcher::drainEvents( void )
+dispatcher::drain_xlib_events( void )
 {
 	bool done = false;
 	XEvent event;

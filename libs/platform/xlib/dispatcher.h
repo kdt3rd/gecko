@@ -34,7 +34,8 @@ public:
 	void add_window( const std::shared_ptr<window> &w );
 
 private:
-	bool drainEvents( void );
+	void wake_up_executor( void );
+	bool drain_xlib_events( void );
 
 	int _exit_code = 0;
 	int _wait_pipe[2];
