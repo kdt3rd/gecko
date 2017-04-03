@@ -58,15 +58,14 @@ int dispatcher::execute( void )
 {
 	XFlush( _display.get() );
 	_exit_code = 0;
-
+	_exit_requested.store( false );
 	int xFD = ConnectionNumber( _display.get() );
-	bool done = false;
 	fd_set waitreadobjs;
 	std::map<int, std::shared_ptr<waitable>> waitmap;
 	std::vector<std::shared_ptr<waitable>> firenow;
 	std::vector<std::shared_ptr<waitable>> timeouts;
 	struct timeval tv;
-	while ( !done )
+	while ( ! _exit_requested.load() )
 	{
 		firenow.clear();
 		waitmap.clear();
@@ -150,7 +149,8 @@ int dispatcher::execute( void )
 		}
 		for ( auto &w: firenow )
 			w->emit( curt );
-		done = drain_xlib_events();
+		if ( drain_xlib_events() )
+			break;
 	}
 
 	return _exit_code;
@@ -161,6 +161,7 @@ int dispatcher::execute( void )
 void dispatcher::exit( int code )
 {
 	_exit_code = code;
+	_exit_requested.store( true );
 }
 
 ////////////////////////////////////////

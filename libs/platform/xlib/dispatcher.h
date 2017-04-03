@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <map>
+#include <atomic>
 #include <platform/dispatcher.h>
 #include "window.h"
 #include "keyboard.h"
@@ -39,6 +40,7 @@ private:
 
 	int _exit_code = 0;
 	int _wait_pipe[2];
+	std::atomic<bool> _exit_requested{false};
 	std::shared_ptr<Display> _display;
 	Atom _atom_delete_window;
 	XIM _xim;
