@@ -145,6 +145,44 @@ keyboard::~keyboard( void )
 
 ////////////////////////////////////////
 
+void keyboard::start( void )
+{
+}
+
+////////////////////////////////////////
+
+void keyboard::cancel( void )
+{
+}
+
+////////////////////////////////////////
+
+void keyboard::shutdown( void )
+{
+}
+
+////////////////////////////////////////
+
+intptr_t keyboard::poll_object( void )
+{
+	return intptr_t(-1);
+}
+
+////////////////////////////////////////
+
+bool keyboard::poll_timeout( duration &, const time_point & )
+{
+	return false;
+}
+
+////////////////////////////////////////
+
+void keyboard::emit( const time_point &curtime )
+{
+}
+
+////////////////////////////////////////
+
 platform::scancode keyboard::get_scancode( XKeyEvent &ev )
 {
 	KeySym symbol;
