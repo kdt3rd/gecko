@@ -138,16 +138,21 @@ window::window( const std::shared_ptr<Display> &dpy )
 	// calling glXGetProcAddressARB
 	auto glXCreateContextAttribsARB = reinterpret_cast<glXCreateContextAttribsARBProc>( glXGetProcAddressARB( reinterpret_cast<const GLubyte *>( "glXCreateContextAttribsARB" ) ) );
 
+	if ( ! glXCreateContextAttribsARB )
+		throw std::runtime_error( "unable to retrieve the OpenGL glXCreateContextAttribsARB" );
+
 	// If it does, try to get a GL 4.0 context!
 	int atrributes[] =
 	{
 		GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
 		GLX_CONTEXT_MINOR_VERSION_ARB, 3,
-		GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_DEBUG_BIT_ARB,
+		GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_DEBUG_BIT_ARB|GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
 		None
 	};
 
 	_glc = glXCreateContextAttribsARB( disp, bestFbc, 0, True, atrributes );
+	if ( ! _glc )
+		throw std::runtime_error( "Unable to create OpenGL context" );
 
 	glXMakeCurrent( disp, _win, _glc );
 
@@ -157,6 +162,19 @@ window::window( const std::shared_ptr<Display> &dpy )
 
 	if ( !gl3wIsSupported( 3, 3 ) )
 		throw std::runtime_error( "opengl 3.3 not supported" );
+
+	std::cout << "OpenGL:\n\tvendor " << glGetString( GL_VENDOR )
+			  << "\n\trenderer " << glGetString( GL_RENDERER )
+			  << "\n\tversion " << glGetString( GL_VERSION )
+			  << "\n\tshader language " << glGetString( GL_SHADING_LANGUAGE_VERSION )
+			  << "\n\n" << std::endl;
+
+//	int extCount;
+//	glGetIntegerv(GL_NUM_EXTENSIONS, &extCount);
+//	std::cout << extCount << " extensions:\n";
+//	for (int i = 0; i < extCount; ++i)
+//		std::cout << "Extension " << i << ": " << glGetStringi( GL_EXTENSIONS, i ) << '\n';
+//	std::cout << std::endl;
 
 	// Sync to ensure any errors generated are processed.
 	XSync( disp, False );
