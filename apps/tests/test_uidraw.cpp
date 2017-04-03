@@ -124,8 +124,6 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	// Render function
 	win->exposed = [&]( void )
 	{
-		win->acquire();
-
 		gl::versor rotate( angle, 0.F, 0.F, 1.F );
 		matrix = gl::matrix4::ortho( 0, static_cast<float>( win->width() ), 0, static_cast<float>( win->height() ) );
 
@@ -145,8 +143,6 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		// draw the text
 		samptext.render( matrix );
 
-		win->release();
-
 		// Cause a redraw to continue the animation
 		win->invalidate( base::rect() );
 	};
@@ -159,6 +155,10 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 			win->acquire();
 			gl::png_write( "/tmp/test.png", static_cast<size_t>( win->width() ), static_cast<size_t>( win->height() ), 3 );
 			win->release();
+		}
+		else if ( c == platform::scancode::KEY_Q )
+		{
+			sys->get_dispatcher()->exit( 0 );
 		}
 	};
 

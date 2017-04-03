@@ -27,11 +27,11 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	float w = 100;
 	float dw = 4;
 
+	win->release();
+
 	// Called to draw the window
 	win->exposed = [&]( void )
 	{
-		win->acquire();
-
 		matrix = gl::matrix4::ortho( 0, static_cast<float>( win->width() ), 0, static_cast<float>( win->height() ) );
 
 		// Clear the window
@@ -41,8 +41,6 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		// Draw the rectangle
 		rect.resize( 50, 50, w, 100 );
 		rect.draw( ogl, matrix );
-
-		win->release();
 
 		// Cause a redraw to continue the animation
 		win->invalidate( base::rect() );

@@ -21,11 +21,9 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	win->set_title( "Hello World" );
 	win->exposed = [&]( void )
 	{
-		win->acquire();
 		glViewport( 0, 0, static_cast<GLsizei>(win->width()), static_cast<GLsizei>(win->height()) );
 		glClearColor( 0.0, 1.0, 0.0, 1.0 );
 		glClear( GL_COLOR_BUFFER_BIT );
-		win->release();
 	};
 	win->resized = [&]( double w, double h )
 	{

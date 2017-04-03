@@ -87,6 +87,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	gl::program::uniform matrix_loc = triangle.get_uniform_location( "matrix" );
 	float speed = 0.01F;
 
+	win->release();
+
 	// Called to draw the window
 	win->exposed = [&]( void )
 	{
@@ -94,8 +96,6 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		if ( std::abs( matrix.get( 0, 3 ) ) > 1.F )
 			speed = -speed;
 		matrix.translate_x( speed );
-
-		win->acquire();
 
 		// Clear the window
 		ogl.clear();
@@ -107,8 +107,6 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 			bound.set_uniform( matrix_loc, matrix );
 			bound.draw();
 		}
-
-		win->release();
 
 		// Cause a redraw to continue the animation
 		win->invalidate( base::rect() );

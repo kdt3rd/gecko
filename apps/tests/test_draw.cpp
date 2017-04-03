@@ -109,11 +109,11 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	gl::program::uniform matrix_loc = star.get_uniform_location( "matrix" );
 	gl::matrix4 local = gl::matrix4::translation( 200, 200 );
 
+	win->release();
+
 	// Render function
 	win->exposed = [&]( void )
 	{
-		win->acquire();
-
 		gl::versor rotate( angle, 0.F, 0.F, 1.F );
 		matrix = gl::matrix4::ortho( 0, static_cast<float>( win->width() ), 0, static_cast<float>( win->height() ) );
 
@@ -129,8 +129,6 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		angle += 1.0_deg;
 		while ( angle > 360.0_deg )
 			angle -= 360.0_deg;
-
-		win->release();
 
 		// Cause a redraw to continue the animation
 		win->invalidate( base::rect() );
