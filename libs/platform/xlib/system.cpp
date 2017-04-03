@@ -61,9 +61,16 @@ system::system( void )
 	for ( int i = 0; i < ScreenCount( _display.get() ); ++i )
 		_screens[0] = std::make_shared<screen>( _display, i );
 
+	// don't have a good way to identify individual keyboards
+	// in raw xlib?
 	_keyboard = std::make_shared<keyboard>();
+	// don't have a good way to identify individual keyboards
+	// in raw xlib?
 	_mouse = std::make_shared<mouse>();
+
 	_dispatcher = std::make_shared<dispatcher>( _display, _keyboard, _mouse );
+//	_dispatcher->add_waitable( _keyboard );
+//	_dispatcher->add_waitable( _mouse );
 }
 
 ////////////////////////////////////////
