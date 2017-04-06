@@ -1,3 +1,9 @@
+//
+// Copyright (c) 2016 Ian Godin and Kimball Thurston
+// All rights reserved.
+// Copyrights licensed under the MIT License.
+// See the accompanying LICENSE.txt file for terms
+//
 
 #include "text.h"
 #include <gl/vertex_buffer_data.h>

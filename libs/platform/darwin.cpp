@@ -1,20 +1,44 @@
+//
+// Copyright (c) 2013-2017 Ian Godin and Kimball Thurston
+// All rights reserved.
+// Copyrights licensed under the MIT License.
+// See the accompanying LICENSE.txt file for terms
+//
 
 #include "platform.h"
 #include <platform/cocoa/system.h>
 //#include <platform/dummy/system.h>
+#include <mutex>
 #include <clocale>
+
+namespace
+{
+
+static std::once_flag dar_init_flag;
+
+static void initialize( void )
+{
+	std::setlocale( LC_ALL, "" );
+}
+
+}
 
 namespace platform
 {
 
 ////////////////////////////////////////
 
-void platform::init( void )
+std::vector<platform> &platform::init( void )
 {
-	std::setlocale( LC_ALL, "" );
+	std::call_once( dar_init_flag, &initialize );
 
-	platform::platform::enroll( "cocoa", "gl", [] { return std::make_shared<cocoa::system>(); } );
-//	platform::platform::enroll( "dummy", "dummy", [] { return std::make_shared<dummy::system>(); } );
+	static std::vector<platform> plat
+	{
+		platform( "cocoa", "gl", [] { return std::make_shared<cocoa::system>(); } ),
+//	platform( "dummy", "dummy", [] { return std::make_shared<dummy::system>(); } )
+	};
+
+	return plat;
 }
 
 }

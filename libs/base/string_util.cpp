@@ -1,3 +1,9 @@
+//
+// Copyright (c) 2014-2016 Ian Godin and Kimball Thurston
+// All rights reserved.
+// Copyrights licensed under the MIT License.
+// See the accompanying LICENSE.txt file for terms
+//
 
 #include "string_util.h"
 

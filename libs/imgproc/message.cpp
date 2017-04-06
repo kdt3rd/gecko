@@ -1,3 +1,9 @@
+//
+// Copyright (c) 2014 Ian Godin
+// All rights reserved.
+// Copyrights licensed under the MIT License.
+// See the accompanying LICENSE.txt file for terms
+//
 
 #include "message.h"
 #include <utf/utf.h>

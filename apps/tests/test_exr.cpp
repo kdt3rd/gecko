@@ -1,3 +1,9 @@
+//
+// Copyright (c) 2015-2017 Ian Godin and Kimball Thurston
+// All rights reserved.
+// Copyrights licensed under the MIT License.
+// See the accompanying LICENSE.txt file for terms
+//
 
 #include <base/uri.h>
 #include <base/scope_guard.h>

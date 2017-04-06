@@ -1,19 +1,16 @@
+//
+// Copyright (c) 2013-2017 Ian Godin and Kimball Thurston
+// All rights reserved.
+// Copyrights licensed under the MIT License.
+// See the accompanying LICENSE.txt file for terms
+//
 
-#include <algorithm>
-#include <mutex>
 #include "platform.h"
-
-namespace
-{
-	std::vector<platform::platform> *platforms = nullptr;
-	std::mutex lock;
-}
-
-namespace platform
-{
 
 ////////////////////////////////////////
 
+namespace platform
+{
 
 ////////////////////////////////////////
 
@@ -24,45 +21,16 @@ platform::platform( std::string name, std::string render, const std::function<st
 
 ////////////////////////////////////////
 
-void platform::enroll( std::string name, std::string render, const std::function<std::shared_ptr<system>(void)> &creator )
-{
-	std::lock_guard<std::mutex> guard( lock );
-
-	if ( platforms == nullptr )
-		platforms = new std::vector<::platform::platform>;
-
-	platforms->emplace_back( name, render, creator );
-}
-
-////////////////////////////////////////
-
-namespace
-{
-	std::once_flag flag;
-}
-
 const std::vector<platform> &platform::list( void )
 {
-	std::call_once( flag, &platform::init );
-
-	std::lock_guard<std::mutex> guard( lock );
-	if ( platforms == nullptr )
-		platforms = new std::vector<::platform::platform>;
-
-	return *platforms;
+	return init();
 }
 
 ////////////////////////////////////////
 
-platform &platform::common( void )
+const platform &platform::common( void )
 {
-	std::call_once( flag, &platform::init );
-
-	std::lock_guard<std::mutex> guard( lock );
-	if ( platforms == nullptr )
-		throw std::runtime_error( "platform not found" );
-
-	return platforms->front();
+	return init().front();
 }
 
 ////////////////////////////////////////

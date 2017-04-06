@@ -1,4 +1,11 @@
 //
+// Copyright (c) 2014 Kimball Thurston
+// All rights reserved.
+// Copyrights licensed under the MIT License.
+// See the accompanying LICENSE.txt file for terms
+//
+
+//
 // Based on the following by Jukka Jylänki
 //
 // http://clb.demon.fi/files/RectangleBinPack.pdf
@@ -20,7 +27,6 @@ namespace base
 {
 
 /// @brief Pack areas into a single rectangular region
-/// @author Kimball Thurston
 class pack
 {
 public:

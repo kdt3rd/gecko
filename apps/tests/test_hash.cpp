@@ -1,3 +1,9 @@
+//
+// Copyright (c) 2014-2015 Ian Godin
+// All rights reserved.
+// Copyrights licensed under the MIT License.
+// See the accompanying LICENSE.txt file for terms
+//
 
 #include <base/sha256.h>
 #include <base/sha160.h>

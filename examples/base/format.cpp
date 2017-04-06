@@ -1,3 +1,10 @@
+//
+// Copyright (c) 2016 Ian Godin
+// All rights reserved.
+// Copyrights licensed under the MIT License.
+// See the accompanying LICENSE.txt file for terms
+//
+
 /// @name base
 /// Formatting class
 /// @{

@@ -1,3 +1,9 @@
+//
+// Copyright (c) 2014-2017 Ian Godin and Kimball Thurston
+// All rights reserved.
+// Copyrights licensed under the MIT License.
+// See the accompanying LICENSE.txt file for terms
+//
 
 #include "image.h"
 #include "shaders.h"
