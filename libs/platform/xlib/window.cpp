@@ -332,10 +332,11 @@ void window::resize_event( double w, double h )
 	{
 		_last_w = tw;
 		_last_h = th;
-		glXMakeCurrent( _display.get(), _win, _glc );
+		acquire();
 		glViewport( 0, 0, tw, th );
 		if ( resized )
 			resized( w, h );
+		release();
 	}
 }
 
@@ -344,12 +345,13 @@ void window::resize_event( double w, double h )
 void window::expose_event( void )
 {
 	_invalid = false;
-	glXMakeCurrent( _display.get(), _win, _glc );
+	acquire();
 	if ( exposed )
 		exposed();
 	glXSwapBuffers( _display.get(), _win );
 	glFlush();
 	XFlush( _display.get() );
+	release();
 }
 
 ////////////////////////////////////////
