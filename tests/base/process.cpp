@@ -82,7 +82,11 @@ int safemain( int argc, char *argv[] )
 	{
 		base::process proc;
 		proc.set_pipe( true, true, true );
+#ifdef __APPLE__
+		proc.execute( "/bin/cat", { "/tmp/doesnt_exist" } );
+#else
 		proc.execute( "/usr/bin/cat", { "/tmp/doesnt_exist" } );
+#endif
 
 		test.message( "pid {0}", proc.id() );
 
