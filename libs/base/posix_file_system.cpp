@@ -304,9 +304,19 @@ posix_file_system::readlink( const uri &path, size_t sz )
 	} while ( true );
 
 	linkname[static_cast<size_t>(r)] = '\0';
-	fpath.clear();
-	fpath.append( linkname.get() );
-	return uri( uri::unescape( fpath ) );
+	std::cout << "Before: " << fpath << std::endl;
+	if ( linkname[0] == '/' )
+	{
+		fpath.clear();
+		fpath.append( linkname.get() );
+		return uri( uri::unescape( fpath ) );
+	}
+	else
+	{
+		uri tmp = path.parent();
+		tmp /= linkname.get();
+		return tmp;
+	}
 }
 
 
