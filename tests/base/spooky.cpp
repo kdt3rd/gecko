@@ -199,6 +199,12 @@ int safemain( int argc, char *argv[] )
 					base::spooky_hash::value measure[dMEASURES];
 					base::spooky_hash::value counter[dMEASURES];
 
+					for ( int m = 0; m != dMEASURES; ++m )
+					{
+						measure[m][0] = 1;
+						measure[m][1] = 2;
+					}
+
 					for ( int l = 0; l != 2; ++l )
 						for ( int m = 0; m != dMEASURES; ++m )
 							counter[m][l] = 0;

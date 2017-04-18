@@ -67,7 +67,7 @@ spooky_hash::hash64( const void *message, size_t length, uint64_t seed )
 	sd = hash128( message, length, sd );
 	return sd[0];
 }
-		
+
 inline uint32_t
 spooky_hash::hash32( const void *message, size_t length, uint32_t seed )
 {
@@ -163,7 +163,7 @@ inline bool operator<( const spooky_hash::value &a, const spooky_hash::value &b 
 {
 	return a[0] < b[0] || ( a[0] == b[0] && a[1] < b[1] );
 }
-	
+
 } // namespace base
 
 
