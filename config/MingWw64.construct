@@ -4,7 +4,7 @@ add_toolset "mingw-w64-archiver"
 	  tag="static_lib";
 	  name="x86_64-w64-mingw32-ar";
 	  input_tools={"cc"};
-	  output={".a"};
+	  output_extensions={".a"};
 	  output_prefix="lib";
 	  exe=file.find_exe("x86_64-w64-mingw32-ar");
 	  build_desc=" AR $out_short";
@@ -14,9 +14,10 @@ add_toolset "mingw-w64-archiver"
 	  tag="static_lib_cxx";
 	  name="x86_64-w64-mingw32-ar";
 	  input_tools={"cc", "cxx"};
-	  output={".a"};
+	  output_extensions={".a"};
 	  output_prefix="lib";
-	  exe=file.find_exe("x86_64-w64-mingw32-ar");
+	  --exe=file.find_exe("x86_64-w64-mingw32-ar");
+	  exe=file.find_exe("shitbagger");
 	  build_desc=" AR $out_short";
 	  cmd={ file.find_exe("rm"), "-f", "$out", "&&", "$exe", "rcs", "$out", "$in" };
   };
@@ -154,6 +155,7 @@ add_toolset "mingw-w64-gcc"
 	  name="x86_64-w64-mingw32-gcc_linker";
 	  exe=file.find_exe("x86_64-w64-mingw32-gcc");
 	  input_tools={"cc", "static_lib", "dynamic_lib"};
+	  output_extensions={".exe"};
 	  options={
 		  optimization={
 			  ["debug"]={"-g"};
@@ -194,13 +196,14 @@ add_toolset "mingw-w64-gcc"
 		  libdirs="-L";
 	  };
 	  build_desc=" LD $out_short";
-	  cmd={ "$exe", "$threads", "$language", "$optimization", "$vectorize", "$cflags", "-pipe", "-o", "$out", "$in", "$ldflags", "$libdirs", "$libs" };
+	  cmd={ "$exe", "$threads", "$language", "$optimization", "$vectorize", "$cflags", "-pipe", "-o", "$out", "$in", "-static", "$ldflags", "$libdirs", "$libs" };
   };
   add_tool {
 	  tag="ld_cxx";
 	  name="x86_64-w64-mingw32-g++_linker";
 	  exe=file.find_exe("x86_64-w64-mingw32-g++");
 	  input_tools={"cc", "cxx", "static_lib", "static_lib_cxx", "dynamic_lib", "dynamic_lib_cxx"};
+	  output_extensions={".exe"};
 	  options={
 		  optimization={
 			  ["debug"]={"-g"};
@@ -241,5 +244,5 @@ add_toolset "mingw-w64-gcc"
 		  libdirs="-L";
 	  };
 	  build_desc=" LD $out_short";
-	  cmd={ "$exe", "$threads", "$language", "$optimization", "$vectorize", "$cflags", "-pipe", "-o", "$out", "$in", "$ldflags", "$libdirs", "$libs" };
+	  cmd={ "$exe", "$threads", "$language", "$optimization", "$vectorize", "$cflags", "-pipe", "-o", "$out", "$in", "-static", "$ldflags", "$libdirs", "$libs" };
   };

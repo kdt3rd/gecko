@@ -59,4 +59,10 @@ lib = library "base"
 		  };
 	  },
   }
+  system_libs{
+	  system="Linux";
+	  libs={"dl", "rt"};
+  }
+
+
 

@@ -162,7 +162,6 @@ env::launch_vars( void ) const
 		return _launch_store.get();
 
 #ifdef _WIN32
-	size_t byteCount = 0;
 	std::string accumString;
 	for ( auto &i: _env )
 	{

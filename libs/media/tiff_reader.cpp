@@ -20,6 +20,7 @@
 
 # include <tiffio.h>
 # include <tiffio.hxx>
+#endif // HAVE_LIBTIFF
 
 ////////////////////////////////////////
 
@@ -28,6 +29,7 @@ namespace media
 
 ////////////////////////////////////////
 
+#if defined(HAVE_LIBTIFF)
 namespace
 {
 

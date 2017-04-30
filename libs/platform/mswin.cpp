@@ -14,10 +14,14 @@ namespace platform
 
 ////////////////////////////////////////
 
-void platform::init( void )
+std::vector<platform> &platform::init( void )
 {
-	platform::platform::enroll( "mswin", "gl", [] { return std::make_shared<mswin::system>(); } );
+	static std::vector<platform> plat
+	{
+		platform( "mswin", "gl", [](const std::string &d) { return std::make_shared<mswin::system>( d ); } )
 //	platform::platform::enroll( "dummy", "dummy", [] { return std::make_shared<dummy::system>(); } );
+	};
+	return plat;
 }
 
 }

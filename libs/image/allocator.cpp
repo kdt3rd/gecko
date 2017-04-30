@@ -403,11 +403,12 @@ allocator::create( std::unique_lock<std::mutex> &lk, size_t bytes, size_t align,
 #ifdef _WIN32
 	p = _aligned_malloc( bytes, align );
 	if ( p == nullptr )
+		throw_location( std::system_error( errno, std::system_category(), base::format( "Unable to allocate aligned memory of {0} bytes, aligned to {1}", bytes, align ) ) );
 #else
 	int s = posix_memalign( &p, align, bytes );
 	if ( s != 0 )
-#endif
 		throw_location( std::system_error( s, std::system_category(), base::format( "Unable to allocate aligned memory of {0} bytes, aligned to {1}", bytes, align ) ) );
+#endif
 
 	lk.lock();
 

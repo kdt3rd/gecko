@@ -2716,7 +2716,9 @@ void tessellator::init_edge_dict( void )
 
 void tessellator::done_edge_dict( void )
 {
+#ifndef NDEBUG
 	int fixedEdges = 0;
+#endif
 	active_region *reg;
 	while ( ( reg = _dict->min()->key() ) != nullptr )
 	{
