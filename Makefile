@@ -4,7 +4,7 @@
 .NOTPARALLEL:
 .SILENT:
 
-.PHONY: all clean graph config release build debug
+.PHONY: all clean graph config release build debug win64
 LIVE_CONFIG := build
 
 ifeq ($(findstring release,${MAKECMDGOALS}),release)
@@ -16,12 +16,15 @@ endif
 ifeq ($(findstring debug,${MAKECMDGOALS}),debug)
 LIVE_CONFIG := debug
 endif
+ifeq ($(findstring debug,${MAKECMDGOALS}),win64)
+LIVE_CONFIG := win64
+endif
 
 ifeq ("$(wildcard ${LIVE_CONFIG})","")
 NEED_CONFIG := config
 endif
 
-TARGETS := $(filter-out all clean graph config release build debug,${MAKECMDGOALS})
+TARGETS := $(filter-out all clean graph config release build debug win64,${MAKECMDGOALS})
 MAKECMDGOALS :=
 
 all: ${LIVE_CONFIG}
@@ -45,6 +48,10 @@ debug/: ${NEED_CONFIG}
 debug: debug/
 	@cd debug; ninja ${TARGETS}
 
+win64cross-release/: ${NEED_CONFIG}
+
+win64: win64cross-release/
+	@cd win64cross-release; ninja ${TARGETS}
 
 ${TARGETS} :: all ;
 
