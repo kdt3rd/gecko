@@ -9,7 +9,7 @@
 
 #include "compiler_support.h"
 #include <cstdint>
-#if defined(_MSC_VER) && _MSC_VER >= 1400  /* Visual Studio */
+#if defined(__MINGW32__) || (defined(_MSC_VER) && _MSC_VER >= 1400)  /* Visual Studio */
 # include <cstdlib>
 # define bswap_16 _byteswap_ushort
 # define bswap_32 _byteswap_ulong
@@ -58,7 +58,7 @@ inline T bswap_32( T x )
 		T n;
 		uint8_t c[4];
 	} bytes;
-	bytes.n = c;
+	bytes.n = x;
 	std::swap( bytes.c[0], bytes.c[3] );
 	std::swap( bytes.c[1], bytes.c[2] );
 	return bytes.n;
@@ -73,7 +73,7 @@ inline T bswap_64( T x )
 		T n;
 		uint8_t c[8];
 	} bytes;
-	bytes.n = c;
+	bytes.n = x;
 	std::swap( bytes.c[0], bytes.c[7] );
 	std::swap( bytes.c[1], bytes.c[6] );
 	std::swap( bytes.c[2], bytes.c[5] );

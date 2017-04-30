@@ -47,6 +47,11 @@ public:
 
 	virtual ~file_system( void );
 
+	/// @brief Retrieves the current directory for the process.
+	///
+	/// NB: This should be used carefully, as it is not guaranteed to
+	/// be thread safe, so should only be called during initialization
+	/// when there is only 1 thread running.
 	virtual uri current_path( void ) const = 0;
 
 	/// @brief Perform a stat, retrieving information about path

@@ -9,6 +9,7 @@ require "MingWw64"
 configuration "release"
   optimization "heavy"
   warnings "most"
+  defines "NDEBUG"
 
 if toolset_active( "mingw-w64-archiver" ) and toolset_active( "mingw-w64-gcc" ) then
 
@@ -19,6 +20,7 @@ if toolset_active( "mingw-w64-archiver" ) and toolset_active( "mingw-w64-gcc" ) 
 	  skip_on_error( true )
       optimization "heavy"
       warnings "most"
+      defines { "NDEBUG", "NO_OLDNAMES" }
 
 end
 

@@ -29,7 +29,7 @@ namespace
 DWORD countSetBits( ULONG_PTR bitMask )
 {
     const DWORD LSHIFT = sizeof(ULONG_PTR)*8 - 1;
-    const ULONG_PTR bitTest = (ULONG_PTR)1 << LSHIFT;    
+    ULONG_PTR bitTest = (ULONG_PTR)1 << LSHIFT;    
     DWORD ret = 0;
 
 	for (DWORD i = 0; i <= LSHIFT; ++i)
@@ -103,7 +103,7 @@ int queryProcCount( void )
 				processorCoreCount++;
 
 				// A hyperthreaded core supplies more than one logical processor.
-				logicalProcessorCount += CountSetBits(ptr->ProcessorMask);
+				logicalProcessorCount += countSetBits(ptr->ProcessorMask);
 				break;
 
 			case RelationCache:

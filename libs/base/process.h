@@ -11,7 +11,11 @@
 #include <vector>
 #include <atomic>
 #include <functional>
-#include <unistd.h>
+#ifdef _WIN32
+# include <windows.h>
+#else
+# include <unistd.h>
+#endif
 #include "stream.h"
 
 namespace base
@@ -22,7 +26,11 @@ namespace base
 class process
 {
 public:
+#ifdef _WIN32
+	typedef HANDLE id_t;
+#else
 	typedef pid_t id_t;
+#endif
 
 	process( void );
 	~process( void );
@@ -105,9 +113,15 @@ private:
 	void update_status( int status );
 
 	id_t _id = 0;
+#ifdef _WIN32
+	HANDLE _fin = INVALID_HANDLE_VALUE;
+	HANDLE _fout = INVALID_HANDLE_VALUE;
+	HANDLE _ferr = INVALID_HANDLE_VALUE;
+#else
 	int _fdin = -1;
 	int _fdout = -1;
 	int _fderr = -1;
+#endif
 	std::unique_ptr<base::istream> _stdout;
 	std::unique_ptr<base::istream> _stderr;
 	std::unique_ptr<base::ostream> _stdin;

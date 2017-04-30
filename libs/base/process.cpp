@@ -13,13 +13,15 @@
 #include <condition_variable>
 #include <map>
 #include <thread>
-#include <sys/resource.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <signal.h>
+#ifndef _WIN32
+# include <sys/resource.h>
+# include <sys/types.h>
+# include <sys/stat.h>
+# include <sys/wait.h>
+# include <unistd.h>
+# include <fcntl.h>
+# include <signal.h>
+#endif
 
 namespace base
 {
@@ -27,6 +29,7 @@ namespace base
 namespace
 {
 
+#ifndef _WIN32
 int safe_dup( int fsrc )
 {
 	int result = -1;
@@ -100,6 +103,7 @@ public:
 private:
 	int _pipe[2];
 };
+#endif
 
 std::mutex the_mutex;
 std::condition_variable the_condition;
@@ -139,12 +143,18 @@ process::~process( void )
 void process::set_input( const std::string &in_file )
 {
 	_stdin.reset();
+#ifdef _WIN32
+	if ( _fin != INVALID_HANDLE_VALUE )
+		::CloseHandle( _fin );
+	throw_not_yet();
+#else
 	if ( _fdin >= 0 )
 		::close( _fdin );
 
 	_fdin = ::open( in_file.c_str(), O_RDONLY );
 	if ( _fdin < 0 )
 		throw_errno( "opening process input ({0})", in_file );
+#endif
 }
 
 ////////////////////////////////////////
@@ -152,12 +162,18 @@ void process::set_input( const std::string &in_file )
 void process::set_output( const std::string &out_file )
 {
 	_stdout.reset();
+#ifdef _WIN32
+	if ( _fout != INVALID_HANDLE_VALUE )
+		::CloseHandle( _fout );
+	throw_not_yet();
+#else
 	if ( _fdout >= 0 )
 		::close( _fdout );
 
 	_fdout = ::open( out_file.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0644 );
 	if ( _fdout < 0 )
 		throw_errno( "opening process output ({0})", out_file );
+#endif
 }
 
 ////////////////////////////////////////
@@ -165,12 +181,18 @@ void process::set_output( const std::string &out_file )
 void process::set_error( const std::string &err_file )
 {
 	_stderr.reset();
+#ifdef _WIN32
+	if ( _ferr != INVALID_HANDLE_VALUE )
+		::CloseHandle( _ferr );
+	throw_not_yet();
+#else
 	if ( _fderr >= 0 )
 		::close( _fderr );
 
 	_fderr = ::open( err_file.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0644 );
 	if ( _fderr < 0 )
 		throw_errno( "opening process error ({0})", err_file );
+#endif
 }
 
 ////////////////////////////////////////
@@ -179,6 +201,13 @@ void process::set_output_error( const std::string &out_file )
 {
 	_stdout.reset();
 	_stderr.reset();
+#ifdef _WIN32
+	if ( _fout != INVALID_HANDLE_VALUE )
+		::CloseHandle( _fout );
+	if ( _ferr != INVALID_HANDLE_VALUE )
+		::CloseHandle( _ferr );
+	throw_not_yet();
+#else
 	if ( _fdout >= 0 )
 		::close( _fdout );
 	if ( _fderr >= 0 )
@@ -188,12 +217,16 @@ void process::set_output_error( const std::string &out_file )
 	if ( _fdout < 0 )
 		throw_errno( "opening process output/error ({0})", out_file );
 	_fderr = safe_dup( _fdout );
+#endif
 }
 
 ////////////////////////////////////////
 
 void process::set_pipe( bool in, bool out, bool err )
 {
+#ifdef _WIN32
+	throw_not_yet();
+#else
 	if ( in )
 	{
 		if ( _fdin >= 0 )
@@ -223,12 +256,16 @@ void process::set_pipe( bool in, bool out, bool err )
 		auto berr = std::unique_ptr<base::istream::streambuf_type>( new base::unix_streambuf( std::ios_base::in | std::ios_base::binary, serr.steal_read(), false, "stderr" ) );
 		_stderr = std::unique_ptr<base::istream>( new base::istream( std::move( berr ) ) );
 	}
+#endif
 }
 
 ////////////////////////////////////////
 
 void process::execute( const std::string &exe, const std::vector<std::string> &args )
 {
+#ifdef _WIN32
+	throw_not_yet();
+#else
 	try
 	{
 		_id = fork();
@@ -291,6 +328,7 @@ void process::execute( const std::string &exe, const std::vector<std::string> &a
 	{
 		throw_add( "creating process {0}", exe );
 	}
+#endif
 }
 
 ////////////////////////////////////////
@@ -315,6 +353,9 @@ void process::set_callback( const std::function<void(void)> &cb )
 
 void process::terminate( bool force )
 {
+#ifdef _WIN32
+	throw_not_yet();
+#else
 	if ( _id > 0 )
 	{
 		if ( force )
@@ -322,6 +363,7 @@ void process::terminate( bool force )
 		else
 			::kill( _id, SIGTERM );
 	}
+#endif
 }
 
 ////////////////////////////////////////
@@ -336,6 +378,9 @@ void process::wait( void )
 
 void process::update_status( int status )
 {
+#ifdef _WIN32
+	throw_not_yet();
+#else
 	_exited = WIFEXITED( status );
 	if ( _exited )
 		_exit_status = WEXITSTATUS( status );
@@ -361,12 +406,16 @@ void process::update_status( int status )
 		{
 		}
 	}
+#endif
 }
 
 ////////////////////////////////////////
 
 void process::collect_zombies( void )
 {
+#ifdef _WIN32
+	throw_not_yet();
+#else
 	while ( true )
 	{
 		int status = 0;
@@ -397,6 +446,7 @@ void process::collect_zombies( void )
 			}
 		}
 	}
+#endif
 }
 
 ////////////////////////////////////////
