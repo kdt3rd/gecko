@@ -55,9 +55,11 @@ uri
 file_system::stat( const uri &path, struct stat *buf )
 {
 	lstat( path, buf );
-
-	int depth = 0;
+#ifdef _WIN32
+	throw_not_yet();
+#else
 	uri curpath = path;
+	int depth = 0;
 	std::shared_ptr<file_system> fs;
 	while ( S_ISLNK( buf->st_mode ) )
 	{
@@ -71,8 +73,8 @@ file_system::stat( const uri &path, struct stat *buf )
 		if ( depth > 20 )
 			throw std::system_error( ELOOP, std::system_category(), path.pretty() );
 	}
-
 	return curpath;
+#endif
 }
 
 ////////////////////////////////////////

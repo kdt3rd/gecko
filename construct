@@ -20,7 +20,7 @@ if toolset_active( "mingw-w64-archiver" ) and toolset_active( "mingw-w64-gcc" ) 
 	  skip_on_error( true )
       optimization "heavy"
       warnings "most"
-      defines { "NDEBUG", "NO_OLDNAMES" }
+      defines { "NDEBUG" }
 
 end
 
