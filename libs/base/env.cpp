@@ -83,6 +83,16 @@ env::get( cstring var ) const
 
 ////////////////////////////////////////
 
+bool
+env::is_set( cstring var ) const
+{
+	std::unique_lock<std::mutex> lk( _mutex );
+	auto mi = _env.find( var );
+	return ( mi != _env.end() );
+}
+
+////////////////////////////////////////
+
 void
 env::set( cstring var, cstring val )
 {

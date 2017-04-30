@@ -32,6 +32,7 @@ class env
 {
 public:
 	std::string get( cstring var ) const;
+	bool is_set( cstring var ) const;
 	void set( cstring var, cstring val );
 
 	void clear( void );
