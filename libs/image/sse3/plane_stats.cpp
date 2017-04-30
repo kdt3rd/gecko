@@ -32,6 +32,11 @@ static void sat_cols1( size_t, int s, int e, accum_buf &dest, const plane &p )
 	int pS = p.stride();
 	int h = dest.height();
 
+	// we aren't using x for direct access, convert to 0 basis for
+	// easier math
+	s = s - dest.x1();
+	e = e - dest.x1();
+
 	int x = s;
 	while ( x < e )
 	{
@@ -75,6 +80,11 @@ static void sat_cols( size_t, int s, int e, accum_buf &dest, const plane &p, int
 	int dS = dest.stride();
 	int pS = p.stride();
 	int h = dest.height();
+	// we aren't using x for direct access, convert to 0 basis for
+	// easier math
+	s = s - dest.x1();
+	e = e - dest.x1();
+
 	for ( int x = s; x < e; ++x )
 	{
 		double sum = 0.0;
@@ -161,18 +171,18 @@ namespace sse3
 accum_buf
 compute_SAT( const plane &p, int power )
 {
-	accum_buf dest( p.width(), p.height() );
+	accum_buf dest( p.x1(), p.y1(), p.x2(), p.y2() );
 	switch ( power )
 	{
 		case 1:
-			threading::get().dispatch( std::bind( sat_cols1, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( dest ), std::cref( p ) ), 0, p.width() );
+			threading::get().dispatch( std::bind( sat_cols1, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( dest ), std::cref( p ) ), p.x1(), p.width() );
 			break;
 		default:
-			threading::get().dispatch( std::bind( sat_cols, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( dest ), std::cref( p ), power ), 0, p.width() );
+			threading::get().dispatch( std::bind( sat_cols, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( dest ), std::cref( p ), power ), p.x1(), p.width() );
 			break;
 	}
 
-	threading::get().dispatch( std::bind( sat_rows, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( dest ) ), 0, dest.height() );
+	threading::get().dispatch( std::bind( sat_rows, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( dest ) ), dest.y1(), dest.height() );
 
 	return dest;
 }

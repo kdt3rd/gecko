@@ -37,8 +37,8 @@ static void random_value( scanline &dest, int y, uint32_t seed, float minV, floa
 	// does this just run the engine y*W times or does it fast jump?
 	// if it's slow, we should have 2, one to generate seeds for
 	// lines, one for each scanline
-	if ( y > 0 )
-		genY.discard( static_cast<unsigned long long>( y ) );
+	if ( y > static_cast<int>( minV ) )
+		genY.discard( static_cast<unsigned long long>( y - static_cast<int>( minV ) ) );
 	std::mt19937 genX( genY() );
 	std::uniform_real_distribution<float> urd( minV, std::nextafter( maxV, std::numeric_limits<float>::max() ) );
 
@@ -51,7 +51,7 @@ static void random_value( scanline &dest, int y, uint32_t seed, float minV, floa
 static void iotaX_value( scanline &dest )
 {
 	for ( int x = 0, N = dest.width(); x != N; ++x )
-		dest[x] = static_cast<float>( x );
+		dest[x] = static_cast<float>( x + dest.offset() );
 }
 
 ////////////////////////////////////////
@@ -66,10 +66,66 @@ static void iotaY_value( scanline &dest, int y )
 ////////////////////////////////////////
 
 static void
+fill_pad( scanline &dest, int y, const plane &p, float val )
+{
+	int n = dest.width();
+	if ( y < p.y1() || y > p.y2() )
+	{
+		for ( int x = 0; x < n; ++x )
+			dest[x] = val;
+		return;
+	}
+
+	int curx = dest.offset();
+	auto i = dest.begin();
+	auto e = dest.end();
+	while ( curx < p.x1() )
+	{
+		*i++ = val;
+		++curx;
+	}
+	const float *line = p.line( y );
+	int inW = p.width();
+	memcpy( i, line, inW * sizeof(float) );
+	i += inW;
+
+	while ( i < e )
+		*i++ = val;
+}
+
+////////////////////////////////////////
+
+static void
+fill_pad_hold( scanline &dest, int y, const plane &p )
+{
+	int srcY = std::max( std::min( p.y2(), y ), p.y1() );
+
+	int curx = dest.offset();
+	const float *line = p.line( srcY );
+	float leftV = line[0];
+	auto i = dest.begin();
+	auto e = dest.end();
+	while ( curx < p.x1() )
+	{
+		*i++ = leftV;
+		++curx;
+	}
+	int inW = p.width();
+	memcpy( i, line, inW * sizeof(float) );
+	i += inW;
+
+	float rightV = line[inW - 1];
+	while ( i < e )
+		*i++ = rightV;
+}
+
+////////////////////////////////////////
+
+static void
 fill_dirichlet( scanline &dest, int y, const plane &p, int border )
 {
 	int n = dest.width();
-	if ( y < border || y >= ( p.height() - border ) )
+	if ( y < ( p.y1() + border ) || y > ( p.y2() - border ) )
 	{
 		for ( int x = 0; x < n; ++x )
 			dest[x] = 0.F;
@@ -472,6 +528,9 @@ void add_plane_math( engine::registry &r )
 	r.add( op( "p.random", base::choose_runtime( random_value ), n_scanline_plane_adapter<false, decltype(random_value)>(), dispatch_scan_processing, op::n_to_one ) );
 	r.add( op( "p.iota_x", base::choose_runtime( iotaX_value ), scanline_plane_adapter<true, decltype(iotaX_value)>(), dispatch_scan_processing, op::one_to_one ) );
 	r.add( op( "p.iota_y", base::choose_runtime( iotaY_value ), n_scanline_plane_adapter<true, decltype(iotaY_value)>(), dispatch_scan_processing, op::n_to_one ) );
+
+	r.add( op( "p.pad", base::choose_runtime( fill_pad ), n_scanline_plane_adapter<true, decltype(fill_pad)>(), dispatch_scan_processing, op::n_to_one ) );
+	r.add( op( "p.pad_hold", base::choose_runtime( fill_pad_hold ), n_scanline_plane_adapter<true, decltype(fill_pad_hold)>(), dispatch_scan_processing, op::n_to_one ) );
 
 	r.add( op( "p.filter_nan", base::choose_runtime( plane_filter_nan ), scanline_plane_adapter<true, decltype(plane_filter_nan)>(), dispatch_scan_processing, op::one_to_one ) );
 

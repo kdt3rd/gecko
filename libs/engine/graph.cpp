@@ -33,13 +33,13 @@ namespace engine
 std::ostream &
 operator<<( std::ostream &os, const dimensions &d )
 {
-	os << "[ " << d.x << ", " << d.y << ", " << d.z << ", " << d.w << " ]";
+	os << "[ (" << d.x1 << ',' << d.y1 << " - " << d.x2 << ',' << d.y2 << ") " << (d.x2 - d.x1 + 1) << 'x' << (d.y2 - d.y1 + 1) << 'x' << d.planes << 'x' << d.images << 'x' << d.bytes_per_item << " ]";
 	return os;
 }
 
 ////////////////////////////////////////
 graph::graph( const registry &r )
-	: _ops( r )
+	: _ops( r ), _computing( 0 )
 {
 }
 
@@ -72,8 +72,10 @@ const any &
 graph::get_value( node_id n )
 {
 	precondition( n < _nodes.size(), "invalid node id {0}", n );
-	node &node = _nodes[n];
-	any &v = node.value();
+	++_computing;
+	on_scope_exit{ --_computing; };
+
+	any &v = _nodes[n].value();
 	if ( v.empty() )
 		return process( n );
 
@@ -1232,7 +1234,7 @@ graph::add_node( op_id op, any value, const dimensions &d, std::initializer_list
 		precondition( n < _nodes.size(), "Invalid input given for new node" );
 		h << _nodes[n].hash_value();
 	}
-	hash::value hv = h.final();
+	hash::value hv = h.finish();
 
 //	std::cout << "graph " << this << ": Adding op " << _ops[op].name() << ": " << hv << std::endl;
 	return add_node( op, std::move( value ), d, inputs, hv );
@@ -1316,7 +1318,7 @@ graph::add_node( op_id op, any value, const dimensions &d, const std::vector<nod
 		precondition( n < _nodes.size(), "Invalid input given for new node" );
 		h << _nodes[n].hash_value();
 	}
-	hash::value hv = h.final();
+	hash::value hv = h.finish();
 
 	return add_node( op, std::move( value ), d, inputs, hv );
 }

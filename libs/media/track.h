@@ -36,14 +36,15 @@ class track
 {
 public:
 	// TODO: b, e, r are duplicate w/ info in track_description
-	track( std::string n, int64_t b, int64_t e, const sample_rate &r, const track_description &td )
-			: _name( std::move( n ) ), _desc( td ), _begin( b ), _end( e ), _rate( r )
+	track( std::string n, std::string v, int64_t b, int64_t e, const sample_rate &r, const track_description &td )
+			: _name( std::move( n ) ), _view( std::move( v ) ), _desc( td ), _begin( b ), _end( e ), _rate( r )
 	{
 	}
 
 	virtual ~track( void );
 
 	inline const std::string &name( void ) const;
+	inline const std::string &view( void ) const;
 	inline int64_t begin( void ) const;
 	inline int64_t end( void ) const;
 	inline const sample_rate &rate( void ) const;
@@ -59,6 +60,7 @@ protected:
 	
 private:
 	std::string _name;
+	std::string _view;
 	track_description _desc;
 	int64_t _begin, _end;
 	sample_rate _rate;
@@ -67,6 +69,7 @@ private:
 ////////////////////////////////////////
 
 inline const std::string &track::name( void ) const { return _name; }
+inline const std::string &track::view( void ) const { return _view; }
 inline int64_t track::begin( void ) const { return _begin; }
 inline int64_t track::end( void ) const { return _end; }
 inline const sample_rate &track::rate( void ) const { return _rate; }

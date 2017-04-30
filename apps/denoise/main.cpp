@@ -566,9 +566,9 @@ int safemain( int argc, char *argv[] )
 
 						vector_field vf, vb;
 						if ( temporalmethod == "patchmatch" )
-							vf = patch_match( tmpCen, tmpImg, f, curF, matchRadius, patch_style::SSD, tempIters );
+							vf = patch_match( tmpCen, tmpImg, plane(), f, curF, matchRadius, patch_style::SSD, tempIters );
 						else if ( temporalmethod == "hierpatch" )
-							vf = hier_patch_match( tmpCen, tmpImg, f, curF, matchRadius, patch_style::SSD, tempIters );
+							vf = hier_patch_match( tmpCen, tmpImg, plane(), f, curF, matchRadius, patch_style::SSD, tempIters );
 						else if ( temporalmethod == "ahtvl1" )
 						{
 							TODO( "expose tracking parameters" );
@@ -584,9 +584,9 @@ int safemain( int argc, char *argv[] )
 
 							plane lumA = tmpCen[0] * 0.3F + tmpCen[1] * 0.6F + tmpCen[2] * 0.1F;
 							plane lumB = tmpImg[0] * 0.3F + tmpImg[1] * 0.6F + tmpImg[2] * 0.1F;
-							vf = oflow_ahtvl1( lumA, lumB, lambda, theta, epsilon, edgePower, edgeAlpha, edgeBorder, tvl1Iters, warpIters, eta );
+							vf = oflow_ahtvl1( lumA, lumB, plane(), plane(), vector_field(), lambda, theta, epsilon, edgePower, edgeAlpha, edgeBorder, tvl1Iters, warpIters, eta );
 							if ( confThresh > 0.F )
-								vb = oflow_ahtvl1( lumB, lumA, lambda, theta, epsilon, edgePower, edgeAlpha, edgeBorder, tvl1Iters, warpIters, eta );
+								vb = oflow_ahtvl1( lumB, lumA, plane(), plane(), vector_field(), lambda, theta, epsilon, edgePower, edgeAlpha, edgeBorder, tvl1Iters, warpIters, eta );
 						}
 						else if ( temporalmethod == "pdtncc" )
 						{
@@ -600,9 +600,9 @@ int safemain( int argc, char *argv[] )
 
 							plane lumA = tmpCen[0] * 0.3F + tmpCen[1] * 0.6F + tmpCen[2] * 0.1F;
 							plane lumB = tmpImg[0] * 0.3F + tmpImg[1] * 0.6F + tmpImg[2] * 0.1F;
-							vf = oflow_primaldual( lumA, lumB, lambda, theta, gamma, innerIters, warpIters, eta );
+							vf = oflow_primaldual( lumA, lumB, plane(), plane(), vector_field(), lambda, theta, gamma, innerIters, warpIters, eta );
 							if ( confThresh > 0.F )
-								vb = oflow_primaldual( lumB, lumA, lambda, theta, gamma, innerIters, warpIters, eta );
+								vb = oflow_primaldual( lumB, lumA, plane(), plane(), vector_field(), lambda, theta, gamma, innerIters, warpIters, eta );
 						}
 
 						if ( vecFilter > 0.F )
@@ -654,12 +654,12 @@ int safemain( int argc, char *argv[] )
 							std::stringstream fnb;
 							int offset = f - curF;
 							fnb << debugVecP.value() << "_frm_" << std::setw(7) << std::setfill('0') << f << '_' << (offset < 0 ?'p':'m') << std::abs(offset) << "_forward_vec.exr";
-							debug_save_image( colorize( vf, true ), fnb.str(), f, { "R", "G", "B", "A" }, "f16" );
+							debug_save_image( colorize( vf, plane(), true ), fnb.str(), f, { "R", "G", "B", "A" }, "f16" );
 							if ( vb.valid() )
 							{
 								std::stringstream fnb2;
 								fnb2 << debugVecP.value() << "_frm_" << std::setw(7) << std::setfill('0') << f << '_' << (offset < 0 ?'p':'m') << std::abs(offset) << "_backward_vec.exr";
-								debug_save_image( colorize( vb, true ), fnb2.str(), f, { "R", "G", "B", "A" }, "f16" );
+								debug_save_image( colorize( vb, plane(), true ), fnb2.str(), f, { "R", "G", "B", "A" }, "f16" );
 								
 							}
 						}

@@ -21,24 +21,19 @@
 namespace image
 {
 
-inline plane create_plane( int w, int h, float v )
-{
-	engine::dimensions d;
-	d.x = static_cast<uint16_t>( w );
-	d.y = static_cast<uint16_t>( h );
-	return plane( "p.assign", d, v );
-}
-inline plane create_plane( int w, int h, const engine::computed_value<float> &v )
-{
-	engine::dimensions d;
-	d.x = static_cast<uint16_t>( w );
-	d.y = static_cast<uint16_t>( h );
-	return plane( "p.assign", d, v );
-}
+plane create_plane( int x1, int y1, int x2, int y2, float v );
+plane create_plane( int x1, int y1, int x2, int y2, const engine::computed_value<float> &v );
 
-plane create_random_plane( int w, int h, uint32_t seed, float minV, float maxV );
-plane create_iotaX_plane( int w, int h );
-plane create_iotaY_plane( int w, int h );
+plane create_random_plane( int x1, int y1, int x2, int y2, uint32_t seed, float minV, float maxV );
+plane create_iotaX_plane( int x1, int y1, int x2, int y2 );
+plane create_iotaY_plane( int x1, int y1, int x2, int y2 );
+
+plane pad( const plane &a, int l, int t, int r, int b, float val );
+plane pad_hold( const plane &a, int l, int t, int r, int b );
+
+/// returns a new a, padded to match a potentially larger b
+plane union_dim( const plane &a, const plane &b, float outside = 0.F );
+plane union_dim_hold( const plane &a, const plane &b );
 
 // fill the border with dirichlet border conditions (0)
 plane dirichlet( const plane &p, int border = 1 );
@@ -53,7 +48,7 @@ inline plane abs( plane &&p ) { return plane( "p.abs", p.dims(), std::move( p ) 
 
 inline plane copysign( const plane &a, const plane &b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to copysign for planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to copysign for planes of different sizes a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.copysign_pp", a.dims(), a, b );
 }
 
@@ -78,13 +73,13 @@ inline plane sqrt( plane &&p ) { return plane( "p.sqrt", p.dims(), std::move( p 
 inline plane magnitude( const plane &p ) { return plane( "p.abs", p.dims(), p ); }
 inline plane magnitude( const plane &a, const plane &b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to find magnitude for planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to find magnitude for planes of different sizes a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.mag2", a.dims(), a, b );
 }
 
 inline plane magnitude( const plane &a, const plane &b, const plane &c )
 {
-	precondition( a.width() == b.width() && a.height() == b.height() && a.width() == c.width() && a.height() == c.height(), "unable to find magnitude for planes of different sizes" );
+	precondition( a.dims() == b.dims() && a.dims() == c.dims(), "unable to find magnitude for planes of different sizes a {0} vs b {1} vs c {2}", a.dims(), b.dims(), c.dims() );
 	return plane( "p.mag3", a.dims(), a, b, c );
 }
 
@@ -100,7 +95,7 @@ inline plane log2( const plane &p ) { return plane( "p.log2", p.dims(), p ); }
 
 inline plane pow( const plane &a, const plane &b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to compute power for planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to compute power for planes of different sizes a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.pow_pp", a.dims(), a, b );
 }
 inline plane pow( const plane &p, int i ) { return plane( "p.pow_pi", p.dims(), p, i ); }
@@ -109,7 +104,7 @@ inline plane pow( const plane &p, float v ) { return plane( "p.pow_pn", p.dims()
 // trig functions
 inline plane atan2( const plane &a, const plane &b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to compute atan2 for planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to compute atan2 for planes of different sizes a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.atan2", a.dims(), a, b );
 }
 
@@ -123,7 +118,7 @@ inline plane min( const engine::computed_value<float> &a, const plane &b ) { ret
 
 inline plane min( const plane &a, const plane &b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to compute min for planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to compute min for planes of different sizes a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.min_pp", a.dims(), a, b );
 }
 inline plane max( const plane &a, const engine::computed_value<float> &b )
@@ -133,7 +128,7 @@ inline plane max( const plane &a, const engine::computed_value<float> &b )
 inline plane max( const engine::computed_value<float> &a, const plane &b ) { return max( b, a ); }
 inline plane max( const plane &a, const plane &b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to compute max for planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to compute max for planes of different sizes a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.max_pp", a.dims(), a, b );
 }
 
@@ -155,39 +150,39 @@ inline plane if_less( const plane &a, float b, float c, float d )
 /// out = (a < b) ? c : d
 inline plane if_less( const plane &a, float b, float c, const plane &d )
 {
-	precondition( a.width() == d.width() && a.height() == d.height(), "unable to compute if_less for planes of different sizes" );
+	precondition( a.dims() == d.dims(), "unable to compute if_less for planes of different sizes a {0} vs d {1}", a.dims(), d.dims() );
 	return plane( "p.if_less_ffp", a.dims(), a, b, c, d );
 }
 
 /// out = (a < b) ? c : d
 inline plane if_less( const plane &a, float b, const plane &c, const plane &d )
 {
-	precondition( a.width() == c.width() && a.height() == c.height(), "unable to compute if_less for planes of different sizes" );
-	precondition( a.width() == d.width() && a.height() == d.height(), "unable to compute if_less for planes of different sizes" );
+	precondition( a.dims() == c.dims(), "unable to compute if_less for planes of different sizes a {0} vs c {1}", a.dims(), c.dims() );
+	precondition( a.dims() == d.dims(), "unable to compute if_less for planes of different sizes a {0} vs d {1}", a.dims(), d.dims() );
 	return plane( "p.if_less_fpp", a.dims(), a, b, c, d );
 }
 
 /// out = (a < b) ? c : d
 inline plane if_less( const plane &a, float b, const plane &c, float d )
 {
-	precondition( a.width() == c.width() && a.height() == c.height(), "unable to compute if_less for planes of different sizes" );
+	precondition( a.dims() == c.dims(), "unable to compute if_less for planes of different sizes a {0} vs c {1}", a.dims(), c.dims() );
 	return plane( "p.if_less_fpf", a.dims(), a, b, c, d );
 }
 
 /// out = (a < b) ? c : d
 inline plane if_less( const plane &a, const plane &b, const plane &c, const plane &d )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to compute if_less for planes of different sizes" );
-	precondition( a.width() == c.width() && a.height() == c.height(), "unable to compute if_less for planes of different sizes" );
-	precondition( a.width() == d.width() && a.height() == d.height(), "unable to compute if_less for planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to compute if_less for planes of different sizes a {0} vs b {1}", a.dims(), b.dims() );
+	precondition( a.dims() == c.dims(), "unable to compute if_less for planes of different sizes a {0} vs c {1}", a.dims(), c.dims() );
+	precondition( a.dims() == d.dims(), "unable to compute if_less for planes of different sizes a {0} vs d {1}", a.dims(), d.dims() );
 	return plane( "p.if_less_ppp", a.dims(), a, b, c, d );
 }
 
 /// out = (a > b) ? c : d
 inline plane if_greater( const plane &a, float b, const plane &c, const plane &d )
 {
-	precondition( a.width() == c.width() && a.height() == c.height(), "unable to compute if_less for planes of different sizes" );
-	precondition( a.width() == d.width() && a.height() == d.height(), "unable to compute if_less for planes of different sizes" );
+	precondition( a.dims() == c.dims(), "unable to compute if_less for planes of different sizes a {0} vs c {1}", a.dims(), c.dims() );
+	precondition( a.dims() == d.dims(), "unable to compute if_less for planes of different sizes a {0} vs d {1}", a.dims(), d.dims() );
 	return plane( "p.if_greater_fpp", a.dims(), a, b, c, d );
 }
 
@@ -199,7 +194,7 @@ inline plane threshold( const plane &a, float t )
 /// out = ( a > t ) ? 1.F : 0.F;
 inline plane threshold( const plane &a, const plane &t )
 {
-	precondition( a.width() == t.width() && a.height() == t.height(), "unable to compute threshold for planes of different sizes" );
+	precondition( a.dims() == t.dims(), "unable to compute threshold for planes of different sizes a {0} vs t {1}", a.dims(), t.dims() );
 	return plane( "p.threshold_p", a.dims(), a, t );
 }
 
@@ -224,25 +219,25 @@ inline plane operator-( plane &&p )
 /// @{
 inline plane operator+( const plane &a, const plane &b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to add planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to add planes of different sizes a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.add_pp", a.dims(), a, b );
 }
 
 inline plane operator+( plane &&a, const plane &b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to add planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to add planes of different sizes a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.add_pp", a.dims(), std::move( a ), b );
 }
 
 inline plane operator+( const plane &a, plane &&b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to add planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to add planes of different sizes a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.add_pp", a.dims(), a, std::move( b ) );
 }
 
 inline plane operator+( plane &&a, plane &&b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to add planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to add planes of different sizes a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.add_pp", a.dims(), std::move( a ), std::move( b ) );
 }
 
@@ -308,25 +303,25 @@ inline plane &operator+=( plane &a, const engine::computed_value<float> &b )
 /// @{
 inline plane operator-( const plane &a, const plane &b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to subtract planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to subtract planes of different sizes a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.sub_pp", a.dims(), a, b );
 }
 
 inline plane operator-( plane &&a, const plane &b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to subtract planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to subtract planes of different a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.sub_pp", a.dims(), std::move( a ), b );
 }
 
 inline plane operator-( const plane &a, plane &&b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to subtract planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to subtract planes of different a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.sub_pp", a.dims(), a, std::move( b ) );
 }
 
 inline plane operator-( plane &&a, plane &&b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to subtract planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to subtract planes of different a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.sub_pp", a.dims(), std::move( a ), std::move( b ) );
 }
 
@@ -392,25 +387,25 @@ inline plane &operator-=( plane &a, const engine::computed_value<float> &b )
 /// @{
 inline plane operator*( const plane &a, const plane &b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to multiply planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to multiply planes of different a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.mul_pp", a.dims(), a, b );
 }
 
 inline plane operator*( plane &&a, const plane &b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to multiply planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to multiply planes of different a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.mul_pp", a.dims(), std::move( a ), b );
 }
 
 inline plane operator*( const plane &a, plane &&b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to multiply planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to multiply planes of different a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.mul_pp", a.dims(), a, std::move( b ) );
 }
 
 inline plane operator*( plane &&a, plane &&b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to multiply planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to multiply planes of different a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.mul_pp", a.dims(), std::move( a ), std::move( b ) );
 }
 
@@ -477,25 +472,25 @@ inline plane &operator*=( plane &a, const engine::computed_value<float> &b )
 /// @{
 inline plane operator/( const plane &a, const plane &b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to divide planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to divide planes of different a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.div_pp", a.dims(), a, b );
 }
 
 inline plane operator/( plane &&a, const plane &b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to divide planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to divide planes of different a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.div_pp", a.dims(), std::move( a ), b );
 }
 
 inline plane operator/( const plane &a, plane &&b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to divide planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to divide planes of different a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.div_pp", a.dims(), a, std::move( b ) );
 }
 
 inline plane operator/( plane &&a, plane &&b )
 {
-	precondition( a.width() == b.width() && a.height() == b.height(), "unable to divide planes of different sizes" );
+	precondition( a.dims() == b.dims(), "unable to divide planes of different a {0} vs b {1}", a.dims(), b.dims() );
 	return plane( "p.div_pp", a.dims(), std::move( a ), std::move( b ) );
 }
 

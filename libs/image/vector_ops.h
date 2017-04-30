@@ -39,7 +39,9 @@ vector_field convert_to_relative( const vector_field &v );
 /// 
 /// The extension above KITTI is to additionally produce the vector
 /// magnitude as the 4th (alpha) channel
-image_buf colorize( const vector_field &v, float scale = 8.F );
+image_buf colorize( const vector_field &v, const plane &alpha, float scale = 8.F );
+
+vector_field modify_vectors( const plane &newu, const plane &newv, bool isAbs );
 
 void add_vector_ops( engine::registry &r );
 

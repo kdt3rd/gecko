@@ -11,6 +11,7 @@
 
 #include "sample_data.h"
 #include "image_buffer.h"
+#include "metadata.h"
 
 #include <map>
 #include <vector>
@@ -23,8 +24,9 @@ namespace media
 class image_frame : public sample_data
 {
 public:
-	image_frame( int64_t w, int64_t h )
-		: _width( w ), _height( h )
+	image_frame( int64_t x1, int64_t y1, int64_t x2, int64_t y2 )
+			: _x1( x1 ), _y1( y1 ), _x2( x2 ), _y2( y2 ),
+			  _width( x2 - x1 + 1 ), _height( y2 - y1 + 1 )
 	{
 	}
 	virtual ~image_frame( void );
@@ -60,6 +62,11 @@ public:
 	{
 		_names[std::move(name)] = chan;
 	}
+
+	int64_t x1( void ) const { return _x1; }
+	int64_t y1( void ) const { return _y1; }
+	int64_t x2( void ) const { return _x2; }
+	int64_t y2( void ) const { return _y2; }
 
 	int64_t width( void ) const
 	{
@@ -135,16 +142,29 @@ public:
 		return _names.find( n ) != _names.end();
 	}
 
+	inline void set_meta( base::cstring name, metadata_value v ) { _metadata[name] = std::move( v ); }
+	inline const metadata &meta( void ) const { return _metadata; }
+	void copy_meta( const metadata &m );
+
+	inline void set_render_data( base::cstring name, metadata_value v ) { _renderdata[name] = std::move( v ); }
+	inline const metadata &render_data( void ) const { return _renderdata; }
+
 private:
 	bool has_channels( void )
 	{
 		return true;
 	}
 
-	int64_t _width;
-	int64_t _height;
+	int64_t _x1 = 0;
+	int64_t _y1 = 0;
+	int64_t _x2 = 0;
+	int64_t _y2 = 0;
+	int64_t _width = 0;
+	int64_t _height = 0;
 	std::map<std::string,size_t> _names;
 	std::vector<image_buffer> _channels;
+	metadata _metadata;
+	metadata _renderdata;
 };
 
 ////////////////////////////////////////

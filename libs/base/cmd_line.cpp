@@ -93,6 +93,18 @@ void cmd_line::add_help( void )
 
 ////////////////////////////////////////
 
+void cmd_line::add_version( const std::string &name, const std::string &ver )
+{
+	auto verfunc = [name,ver]( option &, size_t &, const std::vector<char *> & ) -> bool
+	{
+		std::cout << name << " version " << ver << std::endl;
+		exit( 0 );
+	};
+	add( option( 'v', "version", std::string(), verfunc, "Print application version and exit", false ) );
+}
+
+////////////////////////////////////////
+
 const cmd_line::option &
 cmd_line::operator[]( const char *n ) const
 {
@@ -288,6 +300,7 @@ std::ostream &
 operator<<( std::ostream &out, const cmd_line &cmdline )
 {
 	out << "Usage: " << cmdline.simple_usage() << "\n\n";
+        out << "Arguments and options:\n";
 	std::vector<std::string> list;
 	size_t width = 0;
 	for ( auto &opt: cmdline.options() )

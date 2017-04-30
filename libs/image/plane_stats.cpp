@@ -49,12 +49,11 @@ static void
 compute_mean_sat( scanline &dest, int y, const accum_buf &sat, int radius )
 {
 	int wm1 = sat.width() - 1;
-	int hm1 = sat.height() - 1;
 	int y0 = y - radius - 1;
-	int y1 = std::max( int(0), std::min( hm1, y + radius ) );
-	int nY = y1 - (y0 < 0 ? -1 : y0 );
+	int y1 = std::max( sat.y1(), std::min( sat.y2(), y + radius ) );
+	int nY = y1 - (y0 < sat.y1() ? -1 : y0 );
 	const double *y1line = sat.line( y1 );
-	if ( y0 < 0 )
+	if ( y0 < sat.y1() )
 	{
 		for ( int x = 0; x <= wm1; ++x )
 		{
@@ -100,21 +99,45 @@ compute_mean_sat( scanline &dest, int y, const accum_buf &sat, int radius )
 static void
 compute_mean( scanline &dest, int y, const plane &p, int radius )
 {
-	double scale = static_cast<double>( ( radius * 2 + 1 ) * ( radius * 2 + 1 ) );
+	int64_t scaleI = ( radius * 2 + 1 ) * ( radius * 2 + 1 );
+	int minY = y - radius, maxY = y + radius;
+	for ( int cy = minY; cy <= (y+radius); ++cy )
+	{
+		if ( cy < p.y1() )
+		{
+			++minY;
+			scaleI -= ( radius * 2 + 1 );
+		}
+		if ( cy > p.y2() )
+		{
+			--maxY;
+			scaleI -= ( radius * 2 + 1 );
+		}
+	}
 	int wm1 = dest.width() - 1;
-	int hm1 = p.height() - 1;
 	for ( int x = 0; x <= wm1; ++x )
 	{
 		double sum = 0.0;
-		for ( int cy = y - radius; cy <= (y+radius); ++cy )
+
+		int64_t xscale = scaleI;
+		int minX = x - radius;
+		int maxX = x + radius;
+		if ( minX < 0 )
 		{
-			int rY = std::max( int(0), std::min( hm1, cy ) );
-			const float *srcL = p.line( rY );
-			for ( int cx = x - radius; cx <= x + radius; ++cx )
-			{
-				int rx = std::max( int(0), std::min( wm1, cx ) );
-				sum += static_cast<double>( srcL[rx] );
-			}
+			xscale += minX * ( maxY - minY + 1 );
+			minX = 0;
+		}
+		if ( maxX > wm1 )
+		{
+			xscale -= ( maxX - wm1 ) * ( maxY - minY + 1 );
+			maxX = wm1;
+		}
+		double scale = static_cast<double>( xscale );
+		for ( int cy = minY; cy <= maxY; ++cy )
+		{
+			const float *srcL = p.line( cy );
+			for ( int cx = minX; cx <= maxX; ++cx )
+				sum += static_cast<double>( srcL[cx] );
 		}
 		dest[x] = static_cast<float>( sum / scale );
 	}
@@ -126,10 +149,9 @@ static void
 compute_variance_sat( scanline &dest, int y, const accum_buf &sat, const accum_buf &sat2, int radius )
 {
 	int wm1 = sat.width() - 1;
-	int hm1 = sat.height() - 1;
 	int y0 = y - radius - 1;
-	int y1 = std::max( 0, std::min( hm1, y + radius ) );
-	int nY = y1 - (y0 < 0 ? -1 : y0 );
+	int y1 = std::max( sat.y1(), std::min( sat.y2(), y + radius ) );
+	int nY = y1 - (y0 < sat.y1() ? -1 : y0 );
 	for ( int x = 0; x <= wm1; ++x )
 	{
 		int x0 = x - radius - 1;
@@ -137,23 +159,23 @@ compute_variance_sat( scanline &dest, int y, const accum_buf &sat, const accum_b
 		int nX = x1 - (x0 < 0 ? -1 : x0);
 		double Am = 0.0, Bm = 0.0, Cm = 0.0;
 		double As = 0.0, Bs = 0.0, Cs = 0.0;
-		if ( y0 >= 0 )
+		if ( y0 >= sat.y1() )
 		{
-			Bm = sat.get( x1, y0 );
-			Bs = sat2.get( x1, y0 );
+			Bm = sat.get( x1 + sat.x1(), y0 );
+			Bs = sat2.get( x1 + sat.x1(), y0 );
 			if ( x0 >= 0 )
 			{
-				Am = sat.get( x0, y0 );
-				As = sat2.get( x0, y0 );
+				Am = sat.get( x0 + sat.x1(), y0 );
+				As = sat2.get( x0 + sat.x1(), y0 );
 			}
 		}
 		if ( x0 >= 0 )
 		{
-			Cm = sat.get( x0, y1 );
-			Cs = sat2.get( x0, y1 );
+			Cm = sat.get( x0 + sat.x1(), y1 );
+			Cs = sat2.get( x0 + sat.x1(), y1 );
 		}
-		double Dm = sat.get( x1, y1 );
-		double Ds = sat2.get( x1, y1 );
+		double Dm = sat.get( x1 + sat.x1(), y1 );
+		double Ds = sat2.get( x1 + sat.x1(), y1 );
 		
 		double Ex = Am + Dm - Bm - Cm;
 		double Ex2 = As + Ds - Bs - Cs;
@@ -171,7 +193,6 @@ compute_variance( scanline &dest, int y, const plane &p, int radius )
 	// passes :(
 	const double n = static_cast<double>( ( radius * 2 + 1 ) * ( radius * 2 + 1 ) );
 	int wm1 = dest.width() - 1;
-	int hm1 = p.height() - 1;
 	for ( int x = 0; x <= wm1; ++x )
 	{
 		double K = 0.0;
@@ -179,7 +200,7 @@ compute_variance( scanline &dest, int y, const plane &p, int radius )
 		double ex2 = 0.0;
 		for ( int cy = y - radius; cy <= (y+radius); ++cy )
 		{
-			int rY = std::max( int(0), std::min( hm1, cy ) );
+			int rY = std::max( p.y1(), std::min( p.y2(), cy ) );
 			const float *srcL = p.line( rY );
 			if ( cy == (y - radius) )
 				K = static_cast<double>( srcL[std::max(int(0), x - radius)] );
@@ -206,8 +227,8 @@ static void sat_cols( size_t, int s, int e, accum_buf &dest, const plane &p, int
 	for ( int x = s; x < e; ++x )
 	{
 		double sum = 0.0;
-		double *out = dest.data() + x;
-		const float *col = p.cdata() + x;
+		double *out = dest.data() + ( x - p.x1() );
+		const float *col = p.cdata() + ( x - p.x1() );
 		switch ( power )
 		{
 			case 1:
@@ -279,10 +300,10 @@ static void sat_rows( size_t, int s, int e, accum_buf &dest )
 static accum_buf
 compute_SAT( const plane &p, int power )
 {
-	accum_buf dest( p.width(), p.height() );
-	threading::get().dispatch( std::bind( sat_cols, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( dest ), std::cref( p ), power ), 0, p.width() );
+	accum_buf dest( p.x1(), p.y1(), p.x2(), p.y2() );
+	threading::get().dispatch( std::bind( sat_cols, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( dest ), std::cref( p ), power ), p.x1(), p.width() );
 
-	threading::get().dispatch( std::bind( sat_rows, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( dest ) ), 0, dest.height() );
+	threading::get().dispatch( std::bind( sat_rows, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( dest ) ), p.y1(), dest.height() );
 
 	return dest;
 }
@@ -330,7 +351,7 @@ compute_histogram( const plane &p, int bins, float lowV, float highV )
 	}
 
 	vals.resize( 1, std::vector<uint64_t>( static_cast<size_t>( bins ), 0 ) );
-	add_histo( 0, 0, p.height(), p, vals, lowV, highV );
+	add_histo( 0, p.y1(), p.y2(), p, vals, lowV, highV );
 	return vals[0];
 }
 
@@ -340,7 +361,6 @@ static void
 compute_mse( scanline &dest, int y, const plane &p, const plane &p2, int radius )
 {
 	int wm1 = dest.width() - 1;
-	int hm1 = p.height() - 1;
 	int n2 = radius * 2 + 1;
 	n2 *= n2;
 	float norm = 1.F / static_cast<float>( n2 );
@@ -349,7 +369,7 @@ compute_mse( scanline &dest, int y, const plane &p, const plane &p2, int radius 
 		float sum = 0.F;
 		for ( int cy = y - radius; cy <= (y+radius); ++cy )
 		{
-			int rY = std::max( int(0), std::min( hm1, cy ) );
+			int rY = std::max( p.y1(), std::min( p.y2(), cy ) );
 			const float *srcL = p.line( rY );
 			const float *srcL2 = p2.line( rY );
 
@@ -401,7 +421,9 @@ local_variance( const plane &p, int radius )
 plane
 local_mean( const accum_buf &sat, int radius )
 {
-	return plane( "p.local_mean_sat", sat.dims(), sat, radius );
+	engine::dimensions d = sat.dims();
+	d.bytes_per_item = static_cast<engine::dimensions::value_type>( sizeof(float) );
+	return plane( "p.local_mean_sat", d, sat, radius );
 }
 
 ////////////////////////////////////////
@@ -409,7 +431,9 @@ local_mean( const accum_buf &sat, int radius )
 plane
 local_variance( const accum_buf &sat, const accum_buf &sat2, int radius )
 {
-	return plane( "p.local_variance_sat", sat.dims(), sat, sat2, radius );
+	engine::dimensions d = sat.dims();
+	d.bytes_per_item = static_cast<engine::dimensions::value_type>( sizeof(float) );
+	return plane( "p.local_variance_sat", d, sat, sat2, radius );
 }
 
 ////////////////////////////////////////
@@ -417,7 +441,9 @@ local_variance( const accum_buf &sat, const accum_buf &sat2, int radius )
 accum_buf
 sum_area_table( const plane &p, int power )
 {
-	return accum_buf( "p.sum_area_table", p.dims(), p, power );
+	engine::dimensions d = p.dims();
+	d.bytes_per_item = static_cast<engine::dimensions::value_type>( sizeof(double) );
+	return accum_buf( "p.sum_area_table", d, p, power );
 }
 
 ////////////////////////////////////////
@@ -425,7 +451,7 @@ sum_area_table( const plane &p, int power )
 plane
 mse( const plane &p, const plane &p2, int radius )
 {
-	precondition( p.width() == p2.width() && p.height() == p2.height(), "unable to compute MSE for planes of different sizes" );
+	precondition( p.dims() == p2.dims(), "unable to compute MSE for planes of different sizes" );
 	return plane( "p.mean_square_error", p.dims(), p, p2, radius );
 }
 
@@ -435,7 +461,11 @@ engine::computed_value< std::vector<uint64_t> >
 histogram( const plane &p, int bins, float lowV, float highV )
 {
 	engine::dimensions d;
-	d.x = bins;
+	d.x1 = 0;
+	d.y1 = 0;
+	d.x2 = bins - 1;
+	d.y2 = 0;
+	d.bytes_per_item = static_cast<engine::dimensions::value_type>( sizeof(uint64_t) );
 	return engine::computed_value< std::vector<uint64_t> >( op_registry(), "p.histogram", d, p, bins, lowV, highV );
 }
 

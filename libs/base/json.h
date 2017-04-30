@@ -162,6 +162,11 @@ public:
 		return _storage.valid();
 	}
 
+	inline explicit operator bool( void ) const
+	{
+		return valid() && ! is<json_null>();
+	}
+
 	template <typename X, typename... Args>
 	void set( Args &&...args )
 	{
@@ -171,13 +176,35 @@ public:
 	template <typename X>
 	X &get( void )
 	{
-		return _storage.get<X>();
+		try
+		{
+			return _storage.get<X>();
+		}
+		catch ( std::bad_cast &e )
+		{
+			throw_runtime( "unable to extract type '{0}' from json entry, actual type is '{1}'", typeid(X).name(), _storage.type_name() );
+		}
+		catch ( ... )
+		{
+			throw;
+		}
 	}
 
 	template <typename X>
 	const X &get( void ) const
 	{
-		return _storage.get<X>();
+		try
+		{
+			return _storage.get<X>();
+		}
+		catch ( std::bad_cast &e )
+		{
+			throw_runtime( "unable to extract type '{0}' from json entry, actual type is '{1}'", typeid(X).name(), _storage.type_name() );
+		}
+		catch ( ... )
+		{
+			throw;
+		}
 	}
 
 	void clear( void )

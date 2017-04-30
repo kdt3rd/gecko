@@ -54,7 +54,7 @@ class tiff_read_track : public video_track
 {
 public:
 	tiff_read_track( int64_t b, int64_t e, file_sequence &&fseq )
-			: video_track( "<image>", b, e, sample_rate( 24, 1 ),
+			: video_track( "<image>", std::string(), b, e, sample_rate( 24, 1 ),
 						   media::track_description( media::TRACK_VIDEO ) ),
 			  _files( std::move( fseq ) )
 	{}
@@ -62,6 +62,11 @@ public:
 	virtual image_frame *doRead( int64_t f );
 
 	virtual void doWrite( int64_t , const image_frame & )
+	{
+		throw_logic( "reader asked to write a frame" );
+	}
+
+	virtual void doWrite( int64_t , const std::vector<std::shared_ptr<image_frame>> & )
 	{
 		throw_logic( "reader asked to write a frame" );
 	}
@@ -148,7 +153,8 @@ tiff_read_track::doRead( int64_t f )
 		const char *channames[] = { "R", "G", "B", "A" };
 		int64_t w = static_cast<int64_t>( sizeX );
 		int64_t h = static_cast<int64_t>( sizeY );
-		ret.reset( new image_frame( w, h ) );
+		int64_t x1 = 0, y1 = 0, x2 = w - 1, y2 = h - 1;
+		ret.reset( new image_frame( x1, y1, x2, y2 ) );
 		for ( uint16_t s = 0; s < samps; ++s )
 		{
 			image_buffer imgbuf;
@@ -160,31 +166,31 @@ tiff_read_track::doRead( int64_t f )
 					break;
 				case 8:
 					if ( sf == SAMPLEFORMAT_INT )
-						imgbuf = image_buffer::simple_buffer<int8_t>( w, h );
+						imgbuf = image_buffer::simple_buffer<int8_t>( x1, y1, x2, y2 );
 					else
-						imgbuf = image_buffer::simple_buffer<uint8_t>( w, h );
+						imgbuf = image_buffer::simple_buffer<uint8_t>( x1, y1, x2, y2 );
 					break;
 				case 16:
 					if ( sf == SAMPLEFORMAT_INT )
-						imgbuf = image_buffer::simple_buffer<int16_t>( w, h );
+						imgbuf = image_buffer::simple_buffer<int16_t>( x1, y1, x2, y2 );
 					else
-						imgbuf = image_buffer::simple_buffer<uint16_t>( w, h );
+						imgbuf = image_buffer::simple_buffer<uint16_t>( x1, y1, x2, y2 );
 					break;
 				case 32:
 					if ( sf == SAMPLEFORMAT_UINT )
-						imgbuf = image_buffer::simple_buffer<uint32_t>( w, h );
+						imgbuf = image_buffer::simple_buffer<uint32_t>( x1, y1, x2, y2 );
 					else if ( sf == SAMPLEFORMAT_INT )
-						imgbuf = image_buffer::simple_buffer<int32_t>( w, h );
+						imgbuf = image_buffer::simple_buffer<int32_t>( x1, y1, x2, y2 );
 					else // void or ieeefp
-						imgbuf = image_buffer::simple_buffer<float>( w, h );
+						imgbuf = image_buffer::simple_buffer<float>( x1, y1, x2, y2 );
 					break;
 				case 64:
 					if ( sf == SAMPLEFORMAT_UINT )
-						imgbuf = image_buffer::simple_buffer<uint64_t>( w, h );
+						imgbuf = image_buffer::simple_buffer<uint64_t>( x1, y1, x2, y2 );
 					else if ( sf == SAMPLEFORMAT_INT )
-						imgbuf = image_buffer::simple_buffer<int64_t>( w, h );
+						imgbuf = image_buffer::simple_buffer<int64_t>( x1, y1, x2, y2 );
 					else // void or ieeefp
-						imgbuf = image_buffer::simple_buffer<double>( w, h );
+						imgbuf = image_buffer::simple_buffer<double>( x1, y1, x2, y2 );
 					break;
 				default:
 					

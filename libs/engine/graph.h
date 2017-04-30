@@ -12,6 +12,8 @@
 #include <set>
 #include <ostream>
 #include <base/const_string.h>
+#include <mutex>
+#include <atomic>
 
 #include "types.h"
 #include "node.h"
@@ -110,6 +112,8 @@ public:
 	void dump_dot( std::ostream &os, bool incHash = false ) const;
 	void dump_refs( std::ostream &os ) const;
 
+	inline bool computing( void ) const { return _computing.load() > 0; }
+
 private:
 	graph( void ) = delete;
 	graph( const graph & ) = delete;
@@ -157,6 +161,8 @@ private:
 	std::vector<subgroup> _subgroups;
 	std::map<node_id, size_t> _node_to_subgroup;
 	node_id _start_of_processing = 0;
+	std::mutex _value_get_mutex;
+	std::atomic<int> _computing;
 };
 
 ////////////////////////////////////////

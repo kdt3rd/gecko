@@ -33,29 +33,36 @@ public:
 	}
 
 	template<typename T>
-	image_buffer( const std::shared_ptr<T> &data, int64_t w, int64_t h )
+	image_buffer( const std::shared_ptr<T> &data, int64_t x1, int64_t y1, int64_t x2, int64_t y2 )
 		: _data( data ),
 		  _bits( static_cast<int64_t>(sizeof(T) * 8) ),
 		  _offset( 0 ),
-		  _width( w ), _height( h ),
+		  _x1( x1 ), _y1( y1 ), _x2( x2 ), _y2( y2 ),
+		  _width( x2 - x1 + 1 ), _height( y2 - y1 + 1 ),
 		  _xstride( static_cast<int64_t>(sizeof(T)*8) ),
-		  _ystride( static_cast<int64_t>(sizeof(T)*8)*w ),
+		  _ystride( static_cast<int64_t>(sizeof(T)*8)*( x2 - x1 + 1 ) ),
 		  _floating( std::is_floating_point<T>::value ),
 		  _unsigned( std::is_unsigned<T>::value )
 	{
 	}
 
 	template<typename T>
-	image_buffer( const std::shared_ptr<T> &data, int64_t w, int64_t h, int64_t xstride, int64_t ystride )
+	image_buffer( const std::shared_ptr<T> &data, int64_t x1, int64_t y1, int64_t x2, int64_t y2, int64_t xstride, int64_t ystride )
 		: _data( data ),
 		  _bits( sizeof(T) * 8 ),
 		  _offset( 0 ),
-		  _width( w ), _height( h ),
+		  _x1( x1 ), _y1( y1 ), _x2( x2 ), _y2( y2 ),
+		  _width( x2 - x1 + 1 ), _height( y2 - y1 + 1 ),
 		  _xstride( xstride ), _ystride( ystride ),
 		  _floating( std::is_floating_point<T>::value ),
 		  _unsigned( std::is_unsigned<T>::value )
 	{
 	}
+
+	inline int64_t x1( void ) const { return _x1; }
+	inline int64_t y1( void ) const { return _y1; }
+	inline int64_t x2( void ) const { return _x2; }
+	inline int64_t y2( void ) const { return _y2; }
 
 	inline int64_t width( void ) const
 	{
@@ -108,10 +115,12 @@ public:
 	}
 
 	template<typename T>
-	static image_buffer simple_buffer( int64_t w, int64_t h )
+	static image_buffer simple_buffer( int64_t x1, int64_t y1, int64_t x2, int64_t y2 )
 	{
+		int64_t w = ( x2 - x1 + 1 );
+		int64_t h = ( y2 - y1 + 1 );
 		auto data = std::shared_ptr<T>( new T[static_cast<size_t>(w*h)], base::array_deleter<T>() );
-		return image_buffer( data, w, h );
+		return image_buffer( data, x1, y1, x2, y2 );
 	}
 
 private:
@@ -130,6 +139,10 @@ private:
 	std::shared_ptr<void> _data;
 	int64_t _bits = 8;
 	int64_t _offset = 0;
+	int64_t _x1 = 0;
+	int64_t _y1 = 0;
+	int64_t _x2 = 0;
+	int64_t _y2 = 0;
 	int64_t _width = 0;
 	int64_t _height = 0;
 	int64_t _xstride = 0;

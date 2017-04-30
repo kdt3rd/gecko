@@ -45,6 +45,10 @@ public:
 		return std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::high_resolution_clock::now() - _start );
 	}
 
+	std::chrono::duration<double> seconds( void ) const
+	{
+		return ( std::chrono::high_resolution_clock::now() - _start );
+	}
 private:
 	std::chrono::high_resolution_clock::time_point _start;
 };

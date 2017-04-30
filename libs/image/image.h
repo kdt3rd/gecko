@@ -36,10 +36,10 @@ public:
 		: computed_base( image::op_registry(), opname, d, std::forward<Args>( args )... )
 	{
 		engine::dimensions pd = d;
-		pd.z = 0;
-		pd.w = 0;
-		_planes.reserve( static_cast<size_t>( d.z ) );
-		for ( uint16_t p = 0; p != d.z; ++p )
+		pd.planes = 1;
+		pd.images = 0;
+		_planes.reserve( static_cast<size_t>( d.planes ) );
+		for ( engine::dimensions::value_type p = 0; p != d.planes; ++p )
 			_planes.push_back( plane( "i.extract", pd, *this, size_t(p) ) );
 	}
 
@@ -55,10 +55,15 @@ public:
 		if ( r == engine::nulldim && ! _planes.empty() )
 		{
 			r = _planes.front().dims();
-			r.z = static_cast<uint16_t>( size() );
+			r.planes = static_cast<uint16_t>( size() );
+			r.images = 1;
 		}
 		return r;
 	}
+	inline int x1( void ) const { return _planes[0].x1(); }
+	inline int y1( void ) const { return _planes[0].y1(); }
+	inline int x2( void ) const { return _planes[0].x2(); }
+	inline int y2( void ) const { return _planes[0].y2(); }
 	inline int width( void ) const { return _planes[0].width(); }
 	inline int height( void ) const { return _planes[0].height(); }
 	inline int planes( void ) const { return static_cast<int>( _planes.size() ); }

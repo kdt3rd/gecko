@@ -6,6 +6,7 @@
 //
 
 #include "image_ops.h"
+#include "plane_ops.h"
 
 ////////////////////////////////////////
 
@@ -16,8 +17,8 @@ image_buf
 combine( const plane &p )
 {
 	engine::dimensions id = p.dims();
-	id.z = 1;
-	id.w = 0;
+	id.planes = 1;
+	id.images = 1;
 	return image_buf( "i.combine_p", id, p );
 }
 
@@ -28,8 +29,8 @@ combine( const plane &p, const plane &p2 )
 	// but what about 4:2:0?
 	precondition( p.dims() == p2.dims(), "plane dimensions should match to combine to an image" );
 	engine::dimensions id = p.dims();
-	id.z = 2;
-	id.w = 0;
+	id.planes = 2;
+	id.images = 1;
 	return image_buf( "i.combine_pp", id, p, p2 );
 }
 
@@ -42,8 +43,8 @@ combine( const plane &p, const plane &p2, const plane &p3 )
 	// but what about 4:2:0?
 	precondition( p.dims() == p2.dims() && p.dims() == p3.dims(), "plane dimensions should match to combine to an image" );
 	engine::dimensions id = p.dims();
-	id.z = 3;
-	id.w = 0;
+	id.planes = 3;
+	id.images = 1;
 	return image_buf( "i.combine_ppp", id, p, p2, p3 );
 }
 
@@ -56,9 +57,31 @@ combine( const plane &p, const plane &p2, const plane &p3, const plane &p4 )
 	// but what about 4:2:0?
 	precondition( p.dims() == p2.dims() && p.dims() == p3.dims() && p.dims() == p4.dims(), "plane dimensions should match to combine to an image" );
 	engine::dimensions id = p.dims();
-	id.z = 4;
-	id.w = 0;
+	id.planes = 4;
+	id.images = 1;
 	return image_buf( "i.combine_pppp", id, p, p2, p3, p4 );
+}
+
+////////////////////////////////////////
+
+image_buf
+union_dim( const image_buf &a, const image_buf &b, float outside )
+{
+	image_buf ret = a;
+	for ( int p = 0; p < ret.planes(); ++p )
+		ret[p] = union_dim( a[p], b[p], outside );
+	return ret;
+}
+
+////////////////////////////////////////
+
+image_buf
+union_dim_hold( const image_buf &a, const image_buf &b )
+{
+	image_buf ret = a;
+	for ( int p = 0; p < ret.planes(); ++p )
+		ret[p] = union_dim_hold( a[p], b[p] );
+	return ret;
 }
 
 ////////////////////////////////////////

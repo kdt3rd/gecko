@@ -15,8 +15,8 @@ namespace image
 
 ////////////////////////////////////////
 
-scanline_group::scanline_group( int w, size_t nOuts )
-	: _outputs( nOuts, scanline() ), _scan_width( w )
+scanline_group::scanline_group( int offx, int w, size_t nOuts )
+	: _outputs( nOuts, scanline() ), _scan_offset( offx ), _scan_width( w )
 {
 }
 
@@ -81,7 +81,7 @@ scanline_group::find_or_checkout( const std::vector<scanline> &inputs, bool in_p
 	}
 
 //	std::cout << "creating new spare as destinaton" << std::endl;
-	_spare.emplace_back( scanline( _scan_width ) );
+	_spare.emplace_back( scanline( _scan_offset, _scan_width ) );
 	return _spare.back();
 }
 

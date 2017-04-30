@@ -48,6 +48,8 @@ using metadata_value = base::any;
 typedef std::map<std::string, metadata_value> metadata;
 
 #define media_ImageDescription "img_desc"
+#define media_ImageDisplayWin "disp_win"
+#define media_ImagePixelAspectRatio "img_pixAR"
 } // namespace media
 
 

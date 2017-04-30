@@ -280,7 +280,7 @@ spooky_hash::add( const void *msg, size_t len )
 ////////////////////////////////////////
 
 spooky_hash::value
-spooky_hash::final( void ) const
+spooky_hash::finish( void ) const
 {
 	value ret;
 	if ( _length < bufSize )
@@ -448,7 +448,7 @@ spooky_hash &operator <<( spooky_hash &h, const cstring &s )
 
 spooky_hash &operator <<( spooky_hash &h, const spooky_hash &x )
 {
-	h << x.final();
+	h << x.finish();
 	return h;
 }
 
@@ -457,7 +457,7 @@ spooky_hash &operator <<( spooky_hash &h, const spooky_hash &x )
 std::ostream &
 operator<<( std::ostream &os, const spooky_hash &h )
 {
-	os << h.final();
+	os << h.finish();
 	return os;
 }
 

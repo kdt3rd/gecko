@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "compiler_support.h"
 #include <cstdint>
 #if defined(_MSC_VER) && _MSC_VER >= 1400  /* Visual Studio */
 # include <cstdlib>

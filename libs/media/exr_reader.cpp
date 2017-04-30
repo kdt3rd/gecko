@@ -135,8 +135,8 @@ private:
 class exr_read_track : public video_track
 {
 public:
-	exr_read_track( std::string n, int64_t b, int64_t e, const sample_rate &sr, const base::uri &files, int part, std::vector<std::string> &&chan )
-		: video_track( std::move( n ), b, e, sr, media::track_description( media::TRACK_VIDEO ) ), _files( files ), _part( part ), _channels( std::move( chan ) )
+	exr_read_track( std::string n, std::string v, int64_t b, int64_t e, const sample_rate &sr, const base::uri &files, int part, std::vector<std::string> &&chan )
+		: video_track( std::move( n ), std::move( v ), b, e, sr, media::track_description( media::TRACK_VIDEO ) ), _files( files ), _part( part ), _channels( std::move( chan ) )
 	{
 	}
 
@@ -156,12 +156,19 @@ public:
 		Imf::InputPart input( file, _part );
 		const Imf::Header header = input.header();
 
-		Imath::Box2i disp = header.dataWindow();
-		int64_t w = disp.max.x - disp.min.x + 1;
-		int64_t h = disp.max.y - disp.min.y + 1;
+		// TODO: stash off other metadata, color info...
+		Imath::Box2i dispWin = header.displayWindow();
+		Imath::Box2i dataWin = header.dataWindow();
+		TODO( "Generalize the display window for other formats" );
+		float pAR = header.pixelAspectRatio();
+
+		int64_t w = ( dataWin.max.x - dataWin.min.x + 1 );
 		Imf::FrameBuffer fbuf;
 
-		ret.reset( new image_frame( w, h ) );
+		ret.reset( new image_frame( dataWin.min.x, dataWin.min.y, dataWin.max.x, dataWin.max.y ) );
+		ret->set_meta( media_ImageDisplayWin, dispWin );
+		ret->set_meta( media_ImagePixelAspectRatio, pAR );
+
 		for ( size_t c = 0; c < _channels.size(); ++c )
 		{
 			const std::string &cname = _channels.at( c );
@@ -172,17 +179,17 @@ public:
 			{
 				case Imf::UINT:
 					bytes = sizeof(uint32_t);
-					imgbuf = image_buffer::simple_buffer<uint32_t>( w, h );
+					imgbuf = image_buffer::simple_buffer<uint32_t>( dataWin.min.x, dataWin.min.y, dataWin.max.x, dataWin.max.y );
 					break;
 
 				case Imf::HALF:
 					bytes = sizeof(base::half);
-					imgbuf = image_buffer::simple_buffer<base::half>( w, h );
+					imgbuf = image_buffer::simple_buffer<base::half>( dataWin.min.x, dataWin.min.y, dataWin.max.x, dataWin.max.y );
 					break;
 
 				case Imf::FLOAT:
 					bytes = sizeof(float);
-					imgbuf = image_buffer::simple_buffer<float>( w, h );
+					imgbuf = image_buffer::simple_buffer<float>( dataWin.min.x, dataWin.min.y, dataWin.max.x, dataWin.max.y );
 					break;
 
 				case Imf::NUM_PIXELTYPES:
@@ -190,18 +197,22 @@ public:
 					throw_logic( "unknown OpenEXR pixel type {0}", static_cast<int>( imfchan.type ) );
 			}
 
-			char *data = static_cast<char*>( imgbuf.data() ) - static_cast<size_t>( disp.min.x + disp.min.y * w ) * bytes;
+			char *data = static_cast<char*>( imgbuf.data() ) - static_cast<int64_t>( dataWin.min.x + dataWin.min.y * w ) * static_cast<int64_t>( bytes );
 			fbuf.insert( cname, Imf::Slice( imfchan.type, data, bytes, bytes * static_cast<size_t>(w), 1, 1, 0.0 ) );
 			ret->add_channel( cname, imgbuf );
 		}
 
 		input.setFrameBuffer( fbuf );
-		input.readPixels( disp.min.y, disp.max.y );
+		input.readPixels( dataWin.min.y, dataWin.max.y );
 
 		return ret.release();
 	}
 
 	virtual void doWrite( int64_t , const image_frame & )
+	{
+		throw_logic( "reader asked to write a frame" );
+	}
+	virtual void doWrite( int64_t , const std::vector<std::shared_ptr<image_frame>> & )
 	{
 		throw_logic( "reader asked to write a frame" );
 	}
@@ -213,14 +224,24 @@ private:
 
 ////////////////////////////////////////
 
-void addexrtrack( container &c, const base::uri &u, int64_t start, int64_t last, const media::sample_rate &sr, std::string track, int part, const Imf::ChannelList &channels )
+void addexrtrack( container &c, const base::uri &u, int64_t start, int64_t last, const media::sample_rate &sr, std::string track, std::string view, int part, const Imf::ChannelList &channels )
 {
 	std::vector<std::string> chans;
 	for ( auto chan = channels.begin(); chan != channels.end(); ++chan )
 		chans.emplace_back( chan.name() );
 	std::reverse( chans.begin(), chans.end() );
 	if ( !chans.empty() )
-		c.add_track( std::make_shared<exr_read_track>( std::move( track ), start, last, sr, u, part, std::move( chans ) ) );
+	{
+//		std::cout << "exr reader adding part " << part << " track " << track << " channels ";
+//		for ( size_t i = 0; i != chans.size(); ++i )
+//		{
+//			if ( i > 0 )
+//				std::cout << ", ";
+//			std::cout << chans[i];
+//		}
+//		std::cout << std::endl;
+		c.add_track( std::make_shared<exr_read_track>( std::move( track ), std::move( view ), start, last, sr, u, part, std::move( chans ) ) );
+	}
 }
 
 media::sample_rate extract_rate( const Imf::Header &h )
@@ -282,21 +303,25 @@ OpenEXRReader::create( const base::uri &u, const metadata & )
 		const Imf::Header header = file.header( 0 );
 		sample_rate sr = extract_rate( header );
 
+		std::string name, view;
+		if ( header.hasName() )
+			name = header.name();
+		if ( header.hasView() )
+			view = header.view();
+
 		if ( Imf::hasMultiView( header ) )
 		{
+			// hmmm, old multiview but single part file
 			const auto &mview = Imf::multiView( header );
 			for ( auto &v: mview )
-				addexrtrack( result, u, start, last, sr, v, 0, Imf::channelsInView( v, header.channels(), mview ) );
-			addexrtrack( result, u, start, last, sr, std::string(), 0, Imf::channelsInNoView( header.channels(), mview ) );
+			{
+				addexrtrack( result, u, start, last, sr, name, v, 0, Imf::channelsInView( v, header.channels(), mview ) );
+			}
+			addexrtrack( result, u, start, last, sr, name, std::string(), 0, Imf::channelsInNoView( header.channels(), mview ) );
 		}
 		else
 		{
-			if ( header.hasName() )
-				addexrtrack( result, u, start, last, sr, header.name(), 0, header.channels() );
-			if ( header.hasView() )
-				addexrtrack( result, u, start, last, sr, header.view(), 0, header.channels() );
-			if ( !header.hasName() && !header.hasView() )
-				addexrtrack( result, u, start, last, sr, "default", 0, header.channels() );
+			addexrtrack( result, u, start, last, sr, std::move( name ), std::move( view ), 0, header.channels() );
 		}
 	}
 	else
@@ -305,10 +330,14 @@ OpenEXRReader::create( const base::uri &u, const metadata & )
 		{
 			const Imf::Header header = file.header( p );
 			sample_rate sr = extract_rate( header );
+
+			std::string name, view;
 			if ( header.hasName() )
-				addexrtrack( result, u, start, last, sr, header.name(), p, header.channels() );
+				name = header.name();
 			if ( header.hasView() )
-				addexrtrack( result, u, start, last, sr, header.view(), p, header.channels() );
+				view = header.view();
+
+			addexrtrack( result, u, start, last, sr, std::move( name ), std::move( view ), p, header.channels() );
 		}
 	}
 

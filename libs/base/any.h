@@ -57,14 +57,20 @@ public:
 	{
 	}
 
+	/// @brief Copy constructor-ish to avoid by reference any recursion
+	any( any &that )
+		: _ptr( that.clone() )
+	{
+	}
+
 	/// @brief Copy constructor
-	any( const any &that)
+	any( const any &that )
 		: _ptr( that.clone() )
 	{
 	}
 
 	/// @brief Move constructor
-	any( any &&that)
+	any( any &&that )
 		: _ptr( std::move( that._ptr ) )
 	{
 	}

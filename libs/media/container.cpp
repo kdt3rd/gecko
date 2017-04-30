@@ -22,6 +22,15 @@ audio_track::~audio_track( void ) {}
 data_track::~data_track( void ) {}
 image_frame::~image_frame( void ) {}
 
+////////////////////////////////////////
+
+void
+image_frame::copy_meta( const metadata &m )
+{
+	for ( const auto &i: m )
+		_metadata[i.first] = i.second;
+}
+
 
 ////////////////////////////////////////
 

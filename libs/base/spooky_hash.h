@@ -40,7 +40,7 @@ public:
 
 	void add( const void *msg, size_t len );
 
-	value final( void ) const;
+	value finish( void ) const;
 
 	static value hash128( const void *msg, size_t len, const value &seed );
 	static inline uint64_t hash64( const void *msg, size_t len, uint64_t seed );

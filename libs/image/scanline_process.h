@@ -20,17 +20,17 @@ namespace image
 
 inline scanline scan_dup( const plane &p, int y )
 {
-	return scanline( p.line( y ), p.width(), p.stride(), true );
+	return scanline( p.x1(), p.line( y ), p.width(), p.stride(), true );
 }
 
 inline scanline scan_ref( plane &p, int y )
 {
-	return scanline( p.line( y ), p.width(), p.stride() );
+	return scanline( p.x1(), p.line( y ), p.width(), p.stride() );
 }
 
 inline scanline scan_ref( const plane &p, int y )
 {
-	return scanline( p.line( y ), p.width(), p.stride() );
+	return scanline( p.x1(), p.line( y ), p.width(), p.stride() );
 }
 
 ////////////////////////////////////////

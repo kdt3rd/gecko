@@ -108,8 +108,8 @@ private:
 class exr_write_track : public video_track
 {
 public:
-	exr_write_track( std::string n, int64_t b, int64_t e, const sample_rate &sr, const base::uri &files, const media::track_description &td, const metadata &parms )
-			: video_track( std::move( n ), b, e, sr, td ),
+	exr_write_track( std::string n, std::string v, int64_t b, int64_t e, const sample_rate &sr, const base::uri &files, const media::track_description &td, const metadata &parms )
+			: video_track( std::move( n ), std::move( v ), b, e, sr, td ),
 			  _files( files ), _compression( Imf::NO_COMPRESSION )
 	{
 		using namespace base;
@@ -153,6 +153,20 @@ public:
 				IMATH_NAMESPACE::V2f( float(chroma.blue.x), float(chroma.blue.y) ),
 				IMATH_NAMESPACE::V2f( float(chroma.white.x), float(chroma.white.y) ) );
 		}
+		else
+		{
+			color::chromaticities<float> r709 = color::two_deg::Rec_709<float>();
+			_chroma = Imf::Chromaticities(
+				IMATH_NAMESPACE::V2f( float(r709.red.x), float(r709.red.y) ),
+				IMATH_NAMESPACE::V2f( float(r709.green.x), float(r709.green.y) ),
+				IMATH_NAMESPACE::V2f( float(r709.blue.x), float(r709.blue.y) ),
+				IMATH_NAMESPACE::V2f( float(r709.white.x), float(r709.white.y) ) );
+			
+		}
+
+		auto idw = parms.find( media_ImageDisplayWin );
+		if ( idw != parms.end() )
+			_disp_win = any_cast<Imath::Box2i>( id->second );
 	}
 
 	virtual image_frame *doRead( int64_t )
@@ -166,16 +180,47 @@ public:
 		base::ostream stream = fs->open_write( _files.get_frame( f ) );
 		exr_ostream estr( stream );
 
-		Imf::Header fHeader( static_cast<int>( frm.width() ), static_cast<int>( frm.height() ), 1, IMATH_NAMESPACE::V2f(0, 0), 1, Imf::INCREASING_Y, _compression );
+		float pAR = 1.F;
+		Imath::Box2i dataWin;
+		dataWin.min.x = frm.x1();
+		dataWin.min.y = frm.y1();
+		dataWin.max.x = frm.x2();
+		dataWin.max.y = frm.y2();
+
+		// TODO: extract other metadata to write
+		Imath::Box2i dispWin = _disp_win;
+		if ( dispWin.min.x > dispWin.max.x )
+			dispWin = dataWin;
+
+		// TODO: make these NOT metadata but implicit in the
+		// definition!  then we can just loop over the metadata and
+		// insert it into the header if we understand the type...
+		using namespace base;
+		auto idw = frm.meta().find( media_ImageDisplayWin );
+		if ( idw != frm.meta().end() )
+			dispWin = any_cast<Imath::Box2i>( idw->second );
+		auto iAR = frm.meta().find( media_ImagePixelAspectRatio );
+		if ( iAR != frm.meta().end() )
+			pAR = any_cast<float>( iAR->second );
+
+//		std::cout << "writing display window of " << dispWin.min.x << ',' << dispWin.min.y << " - " << dispWin.max.x << ',' << dispWin.max.y << std::endl;
+		Imf::Header fHeader( dispWin, dataWin, pAR, IMATH_NAMESPACE::V2f(0, 0), 1, Imf::INCREASING_Y, _compression );
 
 		fHeader.insert( Imf::ChromaticitiesAttribute::staticTypeName(), Imf::ChromaticitiesAttribute( _chroma ) );
+		for ( const auto &rd: frm.render_data() )
+			fHeader.insert( rd.first.c_str(), Imf::StringAttribute( any_cast<const std::string &>( rd.second ) ) );
+
 		for ( size_t c = 0; c < frm.size(); ++c )
 		{
 			const image_buffer &ib = frm.at( c );
-			if ( ib.bits() != 16 || ! ib.is_floating() )
+			if ( ib.bits() == 16 && ib.is_floating() )
+				fHeader.channels().insert( frm.name( c ), Imf::Channel( Imf::HALF ) );
+			else if ( ib.bits() == 32 && ib.is_floating() )
+				fHeader.channels().insert( frm.name( c ), Imf::Channel( Imf::FLOAT ) );
+			else if ( ib.bits() == 32 )
+				fHeader.channels().insert( frm.name( c ), Imf::Channel( Imf::UINT ) );
+			else
 				throw_not_yet();
-
-			fHeader.channels().insert( frm.name( c ), Imf::Channel( Imf::HALF ) );
 		}
 
 		// TODO: how do we do multi-part output???  need to re-do
@@ -187,11 +232,45 @@ public:
 		for ( size_t c = 0; c < frm.size(); ++c )
 		{
 			const image_buffer &ib = frm.at( c );
-			fB.insert( frm.name( c ),
-					   Imf::Slice( Imf::HALF, const_cast<char *>( reinterpret_cast<const char *>( ib.data() ) ), static_cast<size_t>( ib.xstride_bytes() ), static_cast<size_t>( ib.ystride_bytes() ) ) );
+			int64_t w = ib.width();
+			if ( ib.bits() == 16 && ib.is_floating() )
+			{
+				char *data = ( const_cast<char *>( static_cast<const char*>( ib.data() ) )
+							   - static_cast<int64_t>( dataWin.min.x + dataWin.min.y * w ) * sizeof(base::half) );
+				fB.insert( frm.name( c ),
+						   Imf::Slice( Imf::HALF,
+									   data,
+									   static_cast<size_t>( ib.xstride_bytes() ),
+									   static_cast<size_t>( ib.ystride_bytes() ) ) );
+			}
+			else if ( ib.bits() == 32 && ib.is_floating() )
+			{
+				char *data = ( const_cast<char *>( static_cast<const char*>( ib.data() ) )
+							   - static_cast<int64_t>( dataWin.min.x + dataWin.min.y * w ) * sizeof(float) );
+				fB.insert( frm.name( c ),
+						   Imf::Slice( Imf::FLOAT,
+									   data,
+									   static_cast<size_t>( ib.xstride_bytes() ),
+									   static_cast<size_t>( ib.ystride_bytes() ) ) );
+			}
+			else if ( ib.bits() == 32 )
+			{
+				char *data = ( const_cast<char *>( static_cast<const char*>( ib.data() ) )
+							   - static_cast<int64_t>( dataWin.min.x + dataWin.min.y * w ) * sizeof(uint32_t) );
+				fB.insert( frm.name( c ),
+						   Imf::Slice( Imf::UINT,
+									   data,
+									   static_cast<size_t>( ib.xstride_bytes() ),
+									   static_cast<size_t>( ib.ystride_bytes() ) ) );
+			}
 		}
+
 		file.setFrameBuffer( fB );
 		file.writePixels( static_cast<int>( frm.height() ) );
+	}
+
+	virtual void doWrite( int64_t f, const std::vector<std::shared_ptr<image_frame>> &frms )
+	{
 	}
 
 
@@ -199,6 +278,7 @@ private:
 	file_sequence _files;
 	Imf::Compression _compression;
 	Imf::Chromaticities _chroma;
+	Imath::Box2i _disp_win;
 };
 
 ////////////////////////////////////////
@@ -211,6 +291,8 @@ public:
 	{
 		_description = "OpenEXR Writer";
 		_extensions.emplace_back( "exr" );
+		_extensions.emplace_back( "sxr" );
+		_extensions.emplace_back( "mxr" ); // multi-view EXR
 		_extensions.emplace_back( "aces" );
 		_parms.push_back( media::parameter_definition(
 							  "compression", 
@@ -253,7 +335,7 @@ OpenEXRWriter::create( const base::uri &u, const std::vector<track_description> 
 		if ( td.type() != TRACK_VIDEO )
 			throw_runtime( "OpenEXR only supports video tracks right now" );
 
-		ret.add_track( std::make_shared<exr_write_track>( td.name(), td.offset(), td.offset() + td.duration() - 1, td.rate(), u, td, params ) );
+		ret.add_track( std::make_shared<exr_write_track>( td.name(), td.view(), td.offset(), td.offset() + td.duration() - 1, td.rate(), u, td, params ) );
 	}
 	return ret;
 }

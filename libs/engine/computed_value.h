@@ -145,7 +145,7 @@ protected:
 		static inline std::shared_ptr<graph> find_graph( const registry &reg, const X &v )
 		{
 			const std::shared_ptr<graph> &r = v.graph_ptr();
-			if ( r && &(r->op_registry()) == &reg )
+			if ( r && &(r->op_registry()) == &reg && ! r->computing() )
 				return r;
 
 			return std::shared_ptr<graph>();
@@ -233,10 +233,7 @@ public:
 
 	explicit inline operator V( void ) const
 	{
-		if ( _graph )
-			return engine::any_cast<V>( _graph->get_value( _id ) );
-
-		throw_runtime( "Attempt to evaluate uninitialized computed_value" );
+		return engine::any_cast<V>( compute() );
 	}
 
 };

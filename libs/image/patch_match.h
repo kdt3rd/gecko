@@ -24,11 +24,14 @@ enum class patch_style : int
 	GRAD ///< sum square difference gradients only
 };
 
-vector_field patch_match( const plane &a, const plane &b, int64_t framenumA, int64_t framenumB, int radius, patch_style style, int iters );
-vector_field patch_match( const image_buf &a, const image_buf &b, int64_t framenumA, int64_t framenumB, int radius, patch_style style, int iters );
+vector_field patch_match( const plane &a, const plane &b, const plane &alpha, int64_t framenumA, int64_t framenumB, int radius, patch_style style, int iters );
+/// pass in empty plane for no-alpha treatment
+vector_field patch_match( const image_buf &a, const image_buf &b, const plane &alpha, int64_t framenumA, int64_t framenumB, int radius, patch_style style, int iters );
 
-vector_field hier_patch_match( const plane &a, const plane &b, int64_t framenumA, int64_t framenumB, int radius, patch_style style, int iters );
-vector_field hier_patch_match( const image_buf &a, const image_buf &b, int64_t framenumA, int64_t framenumB, int radius, patch_style style, int iters );
+vector_field hier_patch_match( const plane &a, const plane &b, const plane &alpha, int64_t framenumA, int64_t framenumB, int radius, patch_style style, int iters );
+/// pass in empty plane for no-alpha treatment
+vector_field hier_patch_match( const image_buf &a, const image_buf &b, const plane &alpha, int64_t framenumA, int64_t framenumB, int radius, patch_style style, int iters );
+
 
 void add_patchmatch( engine::registry &r );
 

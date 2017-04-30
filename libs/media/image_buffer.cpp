@@ -139,7 +139,7 @@ void image_buffer::set_scanline( int64_t y, const float *line, int64_t stride )
 void image_buffer::get_scanline_u8( int64_t y, float *line, int64_t stride ) const
 {
 	const uint8_t *data = static_cast<const uint8_t*>( _data.get() );
-	data += ( _offset + ( y / _ysubsample ) * _ystride ) / 8;
+	data += ( _offset + ( ( y - _y1 ) / _ysubsample ) * _ystride ) / 8;
 
 	for ( int64_t x = 0; x < _width; ++x )
 	{
@@ -153,7 +153,7 @@ void image_buffer::get_scanline_u8( int64_t y, float *line, int64_t stride ) con
 void image_buffer::get_scanline_u16( int64_t y, float *line, int64_t stride ) const
 {
 	const uint16_t *data = static_cast<const uint16_t*>( _data.get() );
-	data += ( _offset + ( y / _ysubsample ) * _ystride ) / 16;
+	data += ( _offset + ( ( y - _y1 ) / _ysubsample ) * _ystride ) / 16;
 
 	for ( int64_t x = 0; x < _width; ++x )
 	{
@@ -167,7 +167,7 @@ void image_buffer::get_scanline_u16( int64_t y, float *line, int64_t stride ) co
 void image_buffer::get_scanline_f16( int64_t y, float *line, int64_t stride ) const
 {
 	const base::half *data = static_cast<const base::half*>( _data.get() );
-	data += ( _offset + ( y / _ysubsample ) * _ystride ) / 16;
+	data += ( _offset + ( ( y - _y1 ) / _ysubsample ) * _ystride ) / 16;
 
 	for ( int64_t x = 0; x < _width; ++x )
 	{
@@ -181,7 +181,7 @@ void image_buffer::get_scanline_f16( int64_t y, float *line, int64_t stride ) co
 void image_buffer::get_scanline_f32( int64_t y, float *line, int64_t stride ) const
 {
 	const float *data = static_cast<const float*>( _data.get() );
-	data += ( _offset + ( y / _ysubsample ) * _ystride ) / 32;
+	data += ( _offset + ( ( y - _y1 ) / _ysubsample ) * _ystride ) / 32;
 
 	for ( int64_t x = 0; x < _width; ++x )
 	{
@@ -195,7 +195,7 @@ void image_buffer::get_scanline_f32( int64_t y, float *line, int64_t stride ) co
 void image_buffer::get_scanline_f64( int64_t y, float *line, int64_t stride ) const
 {
 	const double *data = static_cast<const double*>( _data.get() );
-	data += ( _offset + ( y / _ysubsample ) * _ystride ) / 64;
+	data += ( _offset + ( ( y - _y1 ) / _ysubsample ) * _ystride ) / 64;
 
 	for ( int64_t x = 0; x < _width; ++x )
 	{
@@ -209,7 +209,7 @@ void image_buffer::get_scanline_f64( int64_t y, float *line, int64_t stride ) co
 void image_buffer::set_scanline_u8( int64_t y, const float *line, int64_t stride )
 {
 	uint8_t *data = static_cast<uint8_t*>( _data.get() );
-	data += ( _offset + ( y / _ysubsample ) * _ystride ) / 8;
+	data += ( _offset + ( ( y - _y1 ) / _ysubsample ) * _ystride ) / 8;
 
 	for ( int64_t x = 0; x < _width; ++x )
 	{
@@ -223,7 +223,7 @@ void image_buffer::set_scanline_u8( int64_t y, const float *line, int64_t stride
 void image_buffer::set_scanline_u16( int64_t y, const float *line, int64_t stride )
 {
 	uint16_t *data = static_cast<uint16_t *>( _data.get() );
-	data += ( _offset + ( y / _ysubsample ) * _ystride ) / 16;
+	data += ( _offset + ( ( y - _y1 ) / _ysubsample ) * _ystride ) / 16;
 
 	for ( int64_t x = 0; x < _width; ++x )
 	{
@@ -237,7 +237,7 @@ void image_buffer::set_scanline_u16( int64_t y, const float *line, int64_t strid
 void image_buffer::set_scanline_f16( int64_t y, const float *line, int64_t stride )
 {
 	base::half *data = static_cast<base::half*>( _data.get() );
-	data += ( _offset + ( y / _ysubsample ) * _ystride ) / 16;
+	data += ( _offset + ( ( y - _y1 ) / _ysubsample ) * _ystride ) / 16;
 
 	for ( int64_t x = 0; x < _width; ++x )
 	{
@@ -251,7 +251,7 @@ void image_buffer::set_scanline_f16( int64_t y, const float *line, int64_t strid
 void image_buffer::set_scanline_f32( int64_t y, const float *line, int64_t stride )
 {
 	float *data = static_cast<float*>( _data.get() );
-	data += ( _offset + ( y / _ysubsample ) * _ystride ) / 32;
+	data += ( _offset + ( ( y - _y1 ) / _ysubsample ) * _ystride ) / 32;
 
 	for ( int64_t x = 0; x < _width; ++x )
 	{
@@ -265,7 +265,7 @@ void image_buffer::set_scanline_f32( int64_t y, const float *line, int64_t strid
 void image_buffer::set_scanline_f64( int64_t y, const float *line, int64_t stride )
 {
 	double *data = static_cast<double*>( _data.get() );
-	data += ( _offset + ( y / _ysubsample ) * _ystride ) / 64;
+	data += ( _offset + ( ( y - _y1 ) / _ysubsample ) * _ystride ) / 64;
 
 	for ( int64_t x = 0; x < _width; ++x )
 	{

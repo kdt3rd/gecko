@@ -270,7 +270,7 @@ void json::parse_array( std::istream_iterator<char> &it, std::istream_iterator<c
 
 	skip_whitespace( it, end, line );
 	if ( *it != '[' )
-		throw_runtime( "invalid json value at line {0}", line );
+		throw_runtime( "invalid json value, expecting array open, at line {0}", line );
 	++it;
 
 	json_array arr;
@@ -308,7 +308,7 @@ void json::parse_object( std::istream_iterator<char> &it, std::istream_iterator<
 
 	skip_whitespace( it, end, line );
 	if ( *it != '{' )
-		throw_runtime( "invalid json value at line {0}", line );
+		throw_runtime( "invalid json value, expecting object open, at line {0}", line );
 	++it;
 
 	json_object obj;
@@ -336,6 +336,7 @@ void json::parse_object( std::istream_iterator<char> &it, std::istream_iterator<
 			if ( *it != ',' )
 				throw_runtime( "expected ',' or '}' in json object at line {0} (got {1})", line, *it );
 			++it;
+			skip_whitespace( it, end, line );
 		}
 	}
 
@@ -355,7 +356,7 @@ void json::parse_string( std::istream_iterator<char> &it, std::istream_iterator<
 	std::string n;
 
 	if ( *it != '"' )
-		throw_runtime( "invalid json value at line {0}", line );
+		throw_runtime( "invalid json value, expecting string open but got {1}, at line {0}", line, *it );
 	++it;
 
 	while ( it != end )
@@ -421,13 +422,13 @@ void json::parse_true( std::istream_iterator<char> &it, std::istream_iterator<ch
 	while ( it != end && *next != '\0' )
 	{
 		if ( *it != *next )
-			throw_runtime( "invalid json value at line {0}", line );
+			throw_runtime( "invalid json value validating boolean true at line {0}", line );
 		++next;
 		++it;
 	}
 
 	if ( *next != '\0' )
-		throw_runtime( "invalid json value at line {0}", line );
+		throw_runtime( "invalid json, extra chars validating boolean true value, at line {0}", line );
 
 	set<bool>( true );
 }
@@ -442,13 +443,13 @@ void json::parse_false( std::istream_iterator<char> &it, std::istream_iterator<c
 	while ( it != end && *next != '\0' )
 	{
 		if ( *it != *next )
-			throw_runtime( "invalid json value at line {0}", line );
+			throw_runtime( "invalid json value validating boolean false at line {0}", line );
 		++next;
 		++it;
 	}
 
 	if ( *next != '\0' )
-		throw_runtime( "invalid json value at line {0}", line );
+		throw_runtime( "invalid json value, extra values validating boolean false, at line {0}", line );
 
 	set<bool>( false );
 }
@@ -463,13 +464,13 @@ void json::parse_null( std::istream_iterator<char> &it, std::istream_iterator<ch
 	while ( it != end && *next != '\0' )
 	{
 		if ( *it != *next )
-			throw_runtime( "invalid json value at line {0}", line );
+			throw_runtime( "invalid json value validating null at line {0}", line );
 		++next;
 		++it;
 	}
 
 	if ( *next != '\0' )
-		throw_runtime( "invalid json value at line {0}", line );
+		throw_runtime( "invalid json value, extra values validating null, at line {0}", line );
 
 	set<json_null>();
 }
@@ -491,7 +492,7 @@ void json::parse_number( std::istream_iterator<char> &it, std::istream_iterator<
 	}
 
 	if ( n.empty() )
-		throw_runtime( "invalid json value at line {0} (character {1})", line, *it );
+		throw_runtime( "invalid json value parsing number at line {0} (character {1})", line, *it );
 
 	size_t pos = 0;
 	double x = std::stod( n, &pos );

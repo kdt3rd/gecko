@@ -38,9 +38,9 @@ class scanline
 {
 public:
 	scanline( void ) = default;
-	scanline( const float *b, int w, int s, bool dup = false );
-	scanline( float *b, int w, int s );
-	scanline( int w );
+	scanline( int offX, const float *b, int w, int s, bool dup = false );
+	scanline( int offX, float *b, int w, int s );
+	scanline( int offX, int w );
 	scanline( const scanline &o ) = default;
 	scanline( scanline &&o ) = default;
 	scanline &operator=( const scanline &o ) = default;
@@ -54,6 +54,7 @@ public:
 	inline bool is_reference( void ) const;
 	inline bool unique( void ) const;
 
+	inline int offset( void ) const;
 	inline int width( void ) const;
 	inline int stride( void ) const;
 
@@ -94,6 +95,7 @@ public:
 private:
 	std::shared_ptr<float> _ptr;
 	const float *_ref_ptr = nullptr;
+	int _offset = 0;
 	int _width = 0;
 	int _stride = 0;
 };
@@ -102,7 +104,7 @@ private:
 
 inline bool scanline::operator==( const scanline &o ) const
 {
-	return _ref_ptr == o._ref_ptr && _width == o._width;
+	return _ref_ptr == o._ref_ptr && _offset == o._offset && _width == o._width;
 }
 
 inline bool scanline::operator!=( const scanline &o ) const
@@ -136,6 +138,11 @@ scanline::unique( void ) const
 
 ////////////////////////////////////////
 
+inline int scanline::offset( void ) const 
+{
+	return _offset;
+}
+
 inline int scanline::width( void ) const 
 {
 	return _width;
@@ -153,6 +160,7 @@ scanline::clear( void )
 {
 	_ptr.reset();
 	_ref_ptr = nullptr;
+	_offset = 0;
 	_width = 0;
 	_stride = 0;
 }

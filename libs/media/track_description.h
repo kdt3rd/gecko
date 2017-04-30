@@ -42,8 +42,11 @@ public:
 
 	inline track_type type( void ) const { return _type; }
 
-	inline void name( base::cstring name ) { _name = name; }
+	inline void name( base::cstring n ) { _name = n; }
 	inline const std::string &name( void ) const { return _name; }
+
+	inline void view( base::cstring n ) { _view = n; }
+	inline const std::string &view( void ) const { return _view; }
 
 	inline void offset( int64_t o ) { _offset = o; }
 	inline int64_t offset( void ) const { return _offset; }
@@ -64,6 +67,7 @@ public:
 private:
 	track_type _type;
 	std::string _name;
+	std::string _view;
 	int64_t _offset = -1;
 	int64_t _duration = -1;
 	sample_rate _sample_rate;

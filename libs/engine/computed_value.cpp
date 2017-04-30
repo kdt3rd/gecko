@@ -6,6 +6,7 @@
 //
 
 #include "computed_value.h"
+#include <mutex>
 
 ////////////////////////////////////////
 
@@ -86,6 +87,7 @@ computed_base::compute( void ) const
 {
 	if ( ! _graph )
 		throw_runtime( "No graph to compute with" );
+	std::unique_lock<std::mutex> lk( _graph->_value_get_mutex );
 	return _graph->get_value( _id );
 }
 

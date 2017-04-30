@@ -25,7 +25,6 @@ using namespace image;
 void
 apply_erode( scanline &dest, int y, const plane &p, int radius )
 {
-	int maxy = p.height() - 1;
 	int maxx = p.width() - 1;
 
 	for ( int x = 0, w = dest.width(); x < w; ++x )
@@ -33,7 +32,7 @@ apply_erode( scanline &dest, int y, const plane &p, int radius )
 		float minV = dest[x];
 		for ( int cy = y - radius; cy <= y + radius; ++cy )
 		{
-			if ( cy < 0 || cy >= maxy )
+			if ( cy < p.y1() || cy > p.y2() )
 				continue;
 
 			const float *inP = p.line( cy );
@@ -54,7 +53,6 @@ apply_erode( scanline &dest, int y, const plane &p, int radius )
 void
 apply_dilate( scanline &dest, int y, const plane &p, int radius )
 {
-	int maxy = p.height() - 1;
 	int maxx = p.width() - 1;
 
 	for ( int x = 0, w = dest.width(); x < w; ++x )
@@ -62,7 +60,7 @@ apply_dilate( scanline &dest, int y, const plane &p, int radius )
 		float maxV = dest[x];
 		for ( int cy = y - radius; cy <= y + radius; ++cy )
 		{
-			if ( cy < 0 || cy >= maxy )
+			if ( cy < p.y1() || cy > p.y2() )
 				continue;
 
 			const float *inP = p.line( cy );
@@ -100,8 +98,8 @@ inline void sort( float &a, float &b )
 void
 median_3x3( scanline &dest, int y, const plane &p )
 {
-	int sy1 = std::min( int(p.height() - 1), y + 1 );
-	int sym1 = std::max( int(0), y - 1 );
+	int sy1 = std::min( p.y2(), y + 1 );
+	int sym1 = std::max( p.y1(), y - 1 );
 
 	scanline p1 = scan_ref( p, sy1 );
 	scanline c1 = scan_ref( p, y );
@@ -136,9 +134,7 @@ static void generic_median_thread( size_t , int s, int e, plane &r, const plane 
 	int halfD = diam / 2;
 	bool even = halfD * 2 == diam;
 	int w = p.width();
-	int h = p.height();
 	int wm1 = w - 1;
-	int hm1 = h - 1;
 	size_t middle = tmpV.size() / 2;
 	for ( int y = s; y < e; ++y )
 	{
@@ -157,7 +153,7 @@ static void generic_median_thread( size_t , int s, int e, plane &r, const plane 
 				++fx;
 			for ( int cy = fy; cy <= ty; ++cy )
 			{
-				int ready = std::min( hm1, std::max( int(0), cy ) );
+				int ready = std::min( r.y2(), std::max( r.y1(), cy ) );
 				const float *lineP = p.line( ready );
 
 				for ( int cx = fx; cx <= tx; ++cx )
@@ -174,7 +170,7 @@ static void generic_median_thread( size_t , int s, int e, plane &r, const plane 
 
 static plane generic_median( const plane &p, int diam )
 {
-	plane r( p.width(), p.height() );
+	plane r( p.x1(), p.y1(), p.x2(), p.y2() );
 
 	threading::get().dispatch( std::bind( generic_median_thread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( r ), std::cref( p ), diam ), p );
 
@@ -193,10 +189,10 @@ cross_x_median( scanline &dest, int y, const plane &p )
 			dest[x] = s[x];
 		return;
 	}
-	int syp2 = std::min( int(p.height() - 1), y + 1 );
-	int syp1 = std::min( int(p.height() - 1), y + 1 );
-	int sym1 = std::max( int(0), y - 1 );
-	int sym2 = std::max( int(0), y - 2 );
+	int syp2 = std::min( p.y2(), y + 1 );
+	int syp1 = std::min( p.y2(), y + 1 );
+	int sym1 = std::max( p.y1(), y - 1 );
+	int sym2 = std::max( p.y1(), y - 2 );
 
 	scanline m2 = scan_ref( p, sym2 );
 	scanline m1 = scan_ref( p, sym1 );
@@ -234,6 +230,60 @@ cross_x_median( scanline &dest, int y, const plane &p )
 ////////////////////////////////////////
 
 void
+doDespeckle( scanline &dest, int y, const plane &p, float bright, float dark )
+{
+	if ( y == p.y1() || y == p.y2() )
+	{
+		scanline c1 = scan_ref( p, y );
+		for ( int x = 0, w = dest.width(); x < w; ++x )
+			dest[x] = c1[x];
+		return;
+	}
+
+	scanline p1 = scan_ref( p, y + 1 );
+	scanline c1 = scan_ref( p, y );
+	scanline m1 = scan_ref( p, y - 1 );
+
+	float r1, r2, r3, r4, r5, r6, r7, r8, r9;
+	dest[0] = c1[0];
+	for ( int x = 1, w = dest.width() - 1, xm1 = 0, xp1 = 2; x < w; ++x, ++xm1, ++xp1 )
+	{
+		r1 = m1[xm1]; r2 = m1[x]; r3 = m1[xp1];
+		r4 = c1[xm1]; r5 = c1[x]; r6 = c1[xp1];
+		r7 = p1[xm1]; r8 = p1[x]; r9 = p1[xp1];
+		float gl = r5 - r4;
+		float gr = r5 - r6;
+		float gul = r5 - r1;
+		float gum = r5 - r2;
+		float gur = r5 - r3;
+		float gll = r5 - r7;
+		float glm = r5 - r8;
+		float glr = r5 - r9;
+		if ( gl > 0.F && gr > 0.F && gul > 0.F && gum > 0.F &&
+			 gur > 0.F && gll > 0.F && glm > 0.F && glr > 0.F )
+		{
+			float orig = r5;
+			mnmx9( r1, r2, r3, r4, r5, r6, r7, r8, r9 );
+			dest[x] = base::lerp( orig, r2, bright );
+		}
+		else if ( gl < 0.F && gr < 0.F && gul < 0.F && gum < 0.F &&
+				  gur < 0.F && gll < 0.F && glm < 0.F && glr < 0.F )
+		{
+			float orig = r5;
+			mnmx9( r1, r2, r3, r4, r5, r6, r7, r8, r9 );
+			dest[x] = base::lerp( orig, r2, dark );
+		}
+		else
+		{
+			dest[x] = r5;
+		}
+	}
+	dest[dest.width() - 1] = c1[dest.width() - 1];
+}
+
+////////////////////////////////////////
+
+void
 median_planes( scanline &dest, const scanline &a, const scanline &b, const scanline &c )
 {
 	for ( int x = 0, w = dest.width(); x < w; ++x )
@@ -257,7 +307,6 @@ cross_bilateral_thread( size_t , int s, int e, plane &r, const plane &p, const p
 	sumW.resize( static_cast<size_t>( p.width() ), 0.F );
 
 	int w = p.width();
-	int hm1 = p.height() - 1;
 	int wm1 = w - 1;
 	float dsig = -1.F / ( sigR * sigR * 2.F );
 	float isig = -1.F / ( sigI * sigI * 2.F );
@@ -270,7 +319,7 @@ cross_bilateral_thread( size_t , int s, int e, plane &r, const plane &p, const p
 		const float *cenP = ref.line( y );
 		for ( int cy = y - dy; cy <= y + dy; ++cy )
 		{
-			int rY = std::max( int(0), std::min( hm1, cy ) );
+			int rY = std::max( p.y1(), std::min( p.y2(), cy ) );
 			int distY = (cy - y) * (cy - y);
 			const float *srcP = p.line( rY );
 			const float *refP = ref.line( rY );
@@ -301,7 +350,7 @@ cross_bilateral_thread( size_t , int s, int e, plane &r, const plane &p, const p
 static plane
 apply_bilateral( const plane &p, int dx, int dy, float sigR, float sigI )
 {
-	plane r( p.width(), p.height() );
+	plane r( p.x1(), p.y1(), p.x2(), p.y2() );
 
 	threading::get().dispatch( std::bind( cross_bilateral_thread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( r ), std::cref( p ), std::cref( p ), dx, dy, sigR, sigI ), p );
 
@@ -311,7 +360,7 @@ apply_bilateral( const plane &p, int dx, int dy, float sigR, float sigI )
 static plane
 apply_cross_bilateral( const plane &p, const plane &ref, int dx, int dy, float sigR, float sigI )
 {
-	plane r( p.width(), p.height() );
+	plane r( p.x1(), p.y1(), p.x2(), p.y2() );
 
 	threading::get().dispatch( std::bind( cross_bilateral_thread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( r ), std::cref( p ), std::cref( ref ), dx, dy, sigR, sigI ), p );
 
@@ -327,7 +376,6 @@ weighted_bilateral_thread( size_t , int s, int e, plane &r, const plane &p, cons
 	sumW.resize( static_cast<size_t>( p.width() ), 0.F );
 
 	int w = p.width();
-	int hm1 = p.height() - 1;
 	int wm1 = w - 1;
 	float dsig = -1.F / ( sigR * sigR * 2.F );
 	for ( int y = s; y < e; ++y )
@@ -340,7 +388,7 @@ weighted_bilateral_thread( size_t , int s, int e, plane &r, const plane &p, cons
 		const float *cenP = p.line( y );
 		for ( int cy = y - dy; cy <= y + dy; ++cy )
 		{
-			int rY = std::max( int(0), std::min( hm1, cy ) );
+			int rY = std::max( p.y1(), std::min( p.y2(), cy ) );
 			int distY = (cy - y) * (cy - y);
 			const float *srcP = p.line( rY );
 			for ( int x = 0; x < w; ++x )
@@ -372,7 +420,7 @@ weighted_bilateral_thread( size_t , int s, int e, plane &r, const plane &p, cons
 static plane
 apply_weighted_bilateral( const plane &p, const plane &w, int dx, int dy, float sigR, float sigI )
 {
-	plane r( p.width(), p.height() );
+	plane r( p.x1(), p.y1(), p.x2(), p.y2() );
 
 	threading::get().dispatch( std::bind( weighted_bilateral_thread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( r ), std::cref( p ), std::cref( w ), dx, dy, sigR, sigI ), p );
 
@@ -472,7 +520,7 @@ template <typename Epsilon>
 inline plane
 guided_filter_impl( const plane &I, const plane &p, int r, Epsilon eps )
 {
-	precondition( p.width() == I.width() && p.height() == I.height(), "unable to guided_filter planes of different sizes" );
+	precondition( p.dims() == I.dims(), "unable to guided_filter planes of different sizes" );
 	plane mean_I = local_mean( I, r );
 //	plane mean_II = local_mean( square( I ), r );
 //	plane var_I = mean_II - square( mean_I );
@@ -561,7 +609,7 @@ sav_gol_thread( size_t, int s, int e, plane &r, const plane &p, const math::svd<
 	const size_t M = A.size();
 
 	int w = r.width();
-//	int h = r.height();
+	int offX = r.x1();
 	for ( int y = s; y < e; ++y )
 	{
 		float *destP = r.line( y );
@@ -581,7 +629,7 @@ sav_gol_thread( size_t, int s, int e, plane &r, const plane &p, const math::svd<
 				if ( 0 == curY && 0 == curX )
 					++curX;
 
-				r = get_mirror( p, x + curX, y + curY );
+				r = get_mirror( p, offX + x + curX, y + curY );
 				for ( auto uv: A[row] )
 					sum2R += r * uv;
 
@@ -600,7 +648,7 @@ sav_gol_thread( size_t, int s, int e, plane &r, const plane &p, const math::svd<
 static plane
 apply_sav_gol( const plane &p, int radius, int order )
 {
-	plane r( p.width(), p.height() );
+	plane r( p.x1(), p.y1(), p.x2(), p.y2() );
 
 	typedef math::svd<float> svdf;
 	svdf savFunc;
@@ -674,6 +722,96 @@ apply_sav_gol( const plane &p, int radius, int order )
 	return r;
 }
 
+////////////////////////////////////////
+
+static void
+nlm_add_contrib_l2( float &weight, float &sum, const plane &src, int x, int y, int offX, int offY, int window, const std::vector<float> &windowKern, float compareSigma )
+{
+	float wdiff = 0.F;
+	for ( int wY = -window; wY <= window; ++wY )
+	{
+		float yW = windowKern[wY + window];
+		int srcY = y + wY;
+		int testY = testY + wY;
+		if ( srcY < src.y1() || srcY > src.y2() )
+		{
+			// outside source image but from center area so
+			// ignore this one
+			continue;
+		}
+		if ( testY < src.y1() || testY > src.y2() )
+		{
+			// center of pixel is on the image, but the
+			// search is off - just return and don't add any
+			// of this pixel
+			return;
+		}
+		for ( int wX = -window; wX <= window; ++wX )
+		{
+			float xW = windowKern[wY + window];
+			int srcX = x + wX;
+			int testX = offX + wX;
+			if ( srcX < src.x1() || srcX > src.x2() )
+			{
+				continue;
+			}
+			if ( testX < src.x1() || testX > src.x2() )
+			{
+				// center of pixel is on the image, but the
+				// search is off - just return and don't add any
+				// of this pixel
+				return;
+			}
+
+			float delta = src.get( srcX, srcY ) - src.get( testX, testY );
+			wdiff += delta*delta * xW * yW;
+		}
+	}
+	float finWeight = expf( - wdiff * wdiff * compareSigma );
+	sum += src.get( x + offX, y + offY ) * finWeight;
+	weight += finWeight;
+}
+
+static void
+standard_nlm_p( size_t tIdx, int s, int e, plane &out, const plane &src, int search, int compare, float searchSigma, float compareSigma, float centerWeight )
+{
+	int width = out.width();
+	std::vector<float> spatKern( compare*2 + 1 );
+	// Buades recommends h = 10*sigma, but his images are 0 - 255 not
+	// 0 - 1, still want 10x?
+	compareSigma = 1.F / (compareSigma*compareSigma);
+	for ( int y = s; y < e; ++y )
+	{
+		scanline outscan = scan_ref( out, y );
+		for ( int x = 0; x < width; ++x )
+		{
+			float weight = 0.F;
+			float sum = 0.F;
+			for ( int sY = -search; sY <= search; ++sY )
+			{
+				int curY = y + sY;
+				for ( int sX = -search; sX <= search; ++sX )
+				{
+					if ( sX == 0 && sY == 0 )
+					{
+						sum += centerWeight * src.get( x + sX, curY );
+						weight += centerWeight;
+						continue;
+					}
+					nlm_add_contrib_l2( weight, sum, src, x, y, sX, sY, compare, spatKern, compareSigma );
+				}
+			}
+			// in a subsequent paper, Buades recommends to average
+			// the result w/ a portion of the source image:
+			// out = est + max(0, (VarX - sigma^2)/VarX ) * (orig - est)
+			//
+			// basically saying as the (local) variance of the pixel
+			// goes up relative to the global standard deviation
+			// provided, mix back in a portion of the original
+		}
+	}
+}
+
 }
 
 ////////////////////////////////////////
@@ -729,15 +867,9 @@ median3( const plane &p1, const plane &p2, const plane &p3 )
 ////////////////////////////////////////
 
 plane
-despeckle( const plane &p, float thresh )
+despeckle( const plane &p, float bright, float dark )
 {
-//	plane mid = separable_convolve( p, { 0.25F, 0.5F, 0.25F } );
-//	plane high = p - mid;
-//	plane med = cross_x_img_median( p );
-	plane med = median( p, 3 );
-	plane highmed = p - med;
-//	plane highdiff = high - highmed;
-	return highmed;//mid + high * ( 1.F - exp( square( highdiff ) / ( -2.F * thresh * thresh ) ) );
+	return plane( "p.despeckle", p.dims(), p, bright, dark );
 }
 
 ////////////////////////////////////////
@@ -775,7 +907,7 @@ wavelet_filter( const plane &p, size_t levels, float sigma )
 plane
 wavelet_filter( const plane &p, size_t levels, const plane &sigma )
 {
-	precondition( p.width() == sigma.width() && p.height() == sigma.height(), "unable to wavelet_filter planes of different sizes" );
+	precondition( p.dims() == sigma.dims(), "unable to wavelet_filter planes of different sizes" );
 	return wavelet_filter_impl( p, levels, sigma );
 }
 
@@ -790,7 +922,7 @@ guided_filter_mono( const plane &I, const plane &p, int r, float eps )
 plane
 guided_filter_mono( const plane &I, const plane &p, int r, const plane &eps, float epsScale )
 {
-	precondition( p.width() == eps.width() && p.height() == eps.height(), "unable to guided_filter planes of different sizes" );
+	precondition( p.dims() == eps.dims(), "unable to guided_filter planes of different sizes" );
 	return guided_filter_impl( I, p, r, eps * epsScale );
 }
 
@@ -866,6 +998,28 @@ savitsky_golay_minimize_error( const plane &p, int radius, int max_order )
 
 ////////////////////////////////////////
 
+plane
+nlm( const plane &p, int search, int compare, float searchSigma, float compareSigma, float centerWeight )
+{
+	plane r( p.x1(), p.y1(), p.x2(), p.y2() );
+
+	threading::get().dispatch( std::bind( standard_nlm_p, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( r ), std::cref( p ), search, compare, searchSigma, compareSigma, centerWeight ), p );
+
+	return r;
+}
+
+////////////////////////////////////////
+
+plane nlm( const std::vector<plane> &p, int search, int compare, float searchSigma, float compareSigma, float centerWeight );
+image_buf nlm( const image_buf &p, int search, int compare, float searchSigma, float compareSigma, float centerWeight );
+image_buf nlm( const std::vector<image_buf> &p, int search, int compare, float searchSigma, float compareSigma, float centerWeight );
+
+/// use L-1 norm instead of L-2 (faster because we can precompute
+/// areas for differences)
+plane nlm_L1( const plane &p, int search, int compare, float searchSigma, float compareSigma, float centerWeight );
+
+////////////////////////////////////////
+
 void add_spatial( engine::registry &r )
 {
 	using namespace engine;
@@ -880,6 +1034,8 @@ void add_spatial( engine::registry &r )
 
 	r.add( op( "p.cross_x_median", base::choose_runtime( cross_x_median ), n_scanline_plane_adapter<false, decltype(cross_x_median)>(), dispatch_scan_processing, op::n_to_one ) );
 	r.add( op( "p.median3", base::choose_runtime( median_planes ), scanline_plane_adapter<true, decltype(median_planes)>(), dispatch_scan_processing, op::one_to_one ) );
+
+	r.add( op( "p.despeckle", base::choose_runtime( doDespeckle ), n_scanline_plane_adapter<false, decltype(doDespeckle)>(), dispatch_scan_processing, op::n_to_one ) );
 
 	// wants a temporary scanline for efficiency, so just do generic threading
 	r.add( op( "p.bilateral", base::choose_runtime( apply_bilateral ), op::threaded ) );

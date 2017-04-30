@@ -21,7 +21,7 @@ namespace image
 class scanline_group
 {
 public:
-	explicit scanline_group( int w, size_t nOuts );
+	explicit scanline_group( int offx, int w, size_t nOuts );
 	~scanline_group( void );
 
 	void output_scan( size_t i, scanline &&s );
@@ -33,6 +33,7 @@ public:
 private:
 	std::vector<scanline> _outputs;
 	std::vector<scanline> _spare;
+	int _scan_offset = 0;
 	int _scan_width = 0;
 };
 

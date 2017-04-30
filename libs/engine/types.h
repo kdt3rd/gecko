@@ -39,26 +39,35 @@ T any_cast( any &a )
 
 /// Storage type for storing the dimensions of a particular processing node
 ///
-/// storing 4 values so that there can be constructs such as a list of
-/// images represented - x width, y height, z planes, w images
+/// storing the bytes necessary for storage, as well as 6 dimensions that can be used to store the data window for a plane, the number of planes and the number of images
 ///
-/// TODO: we use an int32_t - is this enough for audio applications?
-/// more than enough for imaging given the multiple dimensions
+/// TODO: do we need anything different for audio processing? is int16_t enough for 1D things???
 struct dimensions
 {
 	constexpr dimensions( void ) {}
-	typedef int32_t value_type;
-	value_type x = 0, y = 0, z = 0, w = 0;
+	typedef int16_t value_type;
+	value_type x1 = 0;
+	value_type y1 = 0;
+	value_type x2 = 0;
+	value_type y2 = 0;
+	value_type planes = 0;
+	value_type images = 0;
+	value_type bytes_per_item = 0;
+	value_type reserved = 0;
 };
 constexpr dimensions nulldim;
 inline hash &operator<<( hash &h, const dimensions &d )
 {
-	h << d.x << d.y << d.z << d.w;
+	h << d.x1 << d.y1 << d.x2 << d.y2 << d.planes << d.images << d.bytes_per_item;
 	return h;
 }
 inline bool operator==( const dimensions &a, const dimensions &b )
 {
-	return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w;
+	return ( a.x1 == b.x1 && a.y1 == b.y1 &&
+			 a.x2 == b.x2 && a.y2 == b.y2 &&
+			 a.planes == b.planes &&
+			 a.images == b.images &&
+			 a.bytes_per_item == b.bytes_per_item );
 }
 inline bool operator!=( const dimensions &a, const dimensions &b )
 {

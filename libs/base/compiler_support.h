@@ -31,3 +31,14 @@
 # endif
 #endif
 
+#ifndef __has_builtin
+# define __has_builtin(x) 0
+#endif
+
+#if defined(__GNUC__) || defined(__clang__)
+# define GK_FORCE_INLINE inline __attribute__((always_inline))
+#elif defined(_WIN32)
+# define GK_FORCE_INLINE __forceinline
+#else
+# define GK_FORCE_INLINE inline
+#endif

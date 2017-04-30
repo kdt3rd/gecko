@@ -23,7 +23,7 @@ scanline_plane_functor::~scanline_plane_functor( void )
 ////////////////////////////////////////
 
 static void
-scanline_thread_process( size_t, int start, int end, engine::subgroup &sg, int w )
+scanline_thread_process( size_t, int start, int end, engine::subgroup &sg, int offx, int w )
 {
 	// the recursive process allows scanline to be re-used as
 	// source and destination, iterative trivially avoids
@@ -38,7 +38,7 @@ scanline_thread_process( size_t, int start, int end, engine::subgroup &sg, int w
 	std::vector<std::shared_ptr<engine::subgroup_function>> funcs;
 	sg.bind_functions( funcs );
 	size_t nOuts = sg.outputs().size();
-	scanline_group scans( w, nOuts );
+	scanline_group scans( offx, w, nOuts );
 
 	for ( int y = start; y < end; ++y )
 	{
@@ -83,10 +83,10 @@ scanline_thread_process( size_t, int start, int end, engine::subgroup &sg, int w
 
 void dispatch_scan_processing( engine::subgroup &sg, const engine::dimensions &dims )
 {
-	int w = static_cast<int>( dims.x );
-	int h = static_cast<int>( dims.y );
+	int w = static_cast<int>( dims.x2 - dims.x1 + 1 );
+	int h = static_cast<int>( dims.y2 - dims.y1 + 1 );
 
-	threading::get().dispatch( std::bind( scanline_thread_process, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( sg ), w ), 0, h );
+	threading::get().dispatch( std::bind( scanline_thread_process, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( sg ), dims.x1, w ), dims.y1, h );
 }
 
 

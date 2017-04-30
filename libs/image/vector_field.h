@@ -19,7 +19,7 @@ class vector_field : public engine::computed_base
 {
 public:
 	vector_field( void );
-	vector_field( int w, int h, bool isAbsolute );
+	vector_field( int x1, int y1, int x2, int y2, bool isAbsolute );
 	vector_field( const plane &u, const plane &v, bool isAbsolute );
 	vector_field( plane &&u, plane &&v, bool isAbsolute );
 	vector_field( const engine::dimensions &d, bool isAbsolute );
@@ -42,11 +42,15 @@ public:
 
 	inline engine::dimensions dims( void ) const
 	{
-		engine::dimensions r;
-		r.x = static_cast<engine::dimensions::value_type>( width() );
-		r.y = static_cast<engine::dimensions::value_type>( height() );
+		engine::dimensions r = _u.dims();
+		r.planes = 2;
 		return r;
 	}
+
+	inline int x1( void ) const { return _u.x1(); }
+	inline int y1( void ) const { return _u.y1(); }
+	inline int x2( void ) const { return _u.x2(); }
+	inline int y2( void ) const { return _u.y2(); }
 
 	inline int width( void ) const { return _u.width(); }
 	inline int height( void ) const { return _u.height(); }

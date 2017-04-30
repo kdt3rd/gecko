@@ -47,7 +47,7 @@ public:
 
 	inline void dispatch( const std::function<void(size_t, int, int)> &f, const plane &p )
 	{
-		dispatch( f, 0, p.height() );
+		dispatch( f, p.y1(), p.height() );
 	}
 
 	/// Shutdown the threads

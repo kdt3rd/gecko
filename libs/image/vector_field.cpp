@@ -21,15 +21,17 @@ vector_field::vector_field( void )
 
 ////////////////////////////////////////
 
-vector_field::vector_field( int w, int h, bool isAbsolute )
-	: _u( w, h ), _v( w, h ), _absolute( isAbsolute )
+vector_field::vector_field( int x1, int y1, int x2, int y2, bool isAbsolute )
+	: _u( x1, y1, x2, y2 ), _v( x1, y1, x2, y2 ), _absolute( isAbsolute )
 {
 }
 
 ////////////////////////////////////////
 
 vector_field::vector_field( const engine::dimensions &d, bool isAbsolute )
-	: vector_field( static_cast<int>( d.x ), static_cast<int>( d.y ), isAbsolute )
+	: vector_field( static_cast<int>( d.x1 ), static_cast<int>( d.y1 ),
+					static_cast<int>( d.x2 ), static_cast<int>( d.y2 ),
+					isAbsolute )
 {
 }
 
@@ -38,7 +40,7 @@ vector_field::vector_field( const engine::dimensions &d, bool isAbsolute )
 vector_field::vector_field( const plane &u, const plane &v, bool isAbsolute )
 	: _u( u ), _v( v ), _absolute( isAbsolute )
 {
-	precondition( u.width() == v.width() && u.height() == v.height(), "vector_field must have u and v of same size, received {0}x{1} and {2}x{3}", u.width(), u.height(), v.width(), v.height() );
+	precondition( u.dims() == v.dims(), "vector_field must have u and v of same size, received u {0}, v {1}", u.dims(), u.dims() );
 }
 
 ////////////////////////////////////////
@@ -46,7 +48,7 @@ vector_field::vector_field( const plane &u, const plane &v, bool isAbsolute )
 vector_field::vector_field( plane &&u, plane &&v, bool isAbsolute )
 	: _u( std::move( u ) ), _v( std::move( v ) ), _absolute( isAbsolute )
 {
-	precondition( _u.width() == _v.width() && _u.height() == _v.height(), "vector_field must have u and v of same size, received {0}x{1} and {2}x{3}", _u.width(), _u.height(), _v.width(), _v.height() );
+	precondition( _u.dims() == _v.dims(), "vector_field must have u and v of same size, received u {0}, v {1}", u.dims(), u.dims() );
 }
 
 ////////////////////////////////////////
@@ -119,7 +121,7 @@ engine::hash &operator<<( engine::hash &h, const vector_field &v )
 	if ( v.compute_hash( h ) )
 		return h;
 
-	h << typeid(v).hash_code() << v.width() << v.height() << v.is_absolute() << v.u() << v.v();
+	h << typeid(v).hash_code() << v.is_absolute() << v.u() << v.v();
 	return h;
 }
 

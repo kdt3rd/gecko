@@ -273,6 +273,8 @@ public:
 	/// The option will cause the program to print a help messages and exit.
 	void add_help( void );
 
+	void add_version( const std::string &appName, const std::string &version );
+
 	/// @}
 
 	/// @name Accessors

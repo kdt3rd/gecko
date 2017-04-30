@@ -38,6 +38,11 @@ public:
 			doWrite( f, *frm );
 	}
 
+	inline void store( int64_t f, const std::vector<std::shared_ptr<image_frame>> &frms )
+	{
+		doWrite( f, frms );
+	}
+
 protected:
 	friend class sample;
 
@@ -46,6 +51,7 @@ protected:
 
 	virtual void write( int64_t offset, const sample_rate &r, const sample_data &sd );
 	virtual void doWrite( int64_t offset, const image_frame &sd ) = 0;
+	virtual void doWrite( int64_t offset, const std::vector<std::shared_ptr<image_frame>> &sd ) = 0;
 
 private:
 };

@@ -113,7 +113,7 @@ void initOps( void )
 	registerPlaneOps( r );
 	registerImageOps( r );
 	image::add_spatial( r );
-	image::add_oflow( r );
+	image::add_vector_ops( r );
 }
 
 }

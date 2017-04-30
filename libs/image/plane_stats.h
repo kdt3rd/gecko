@@ -20,14 +20,14 @@ namespace image
 inline engine::computed_value<double> sum( const plane &p )
 {
 	engine::dimensions d;
-	d.x = 1;
+	d.bytes_per_item = static_cast<engine::dimensions::value_type>( sizeof(double) );
 	return engine::computed_value<double>( op_registry(), "p.sum", d, p );
 }
 
 inline engine::computed_value<double> sum( plane &&p )
 {
 	engine::dimensions d;
-	d.x = 1;
+	d.bytes_per_item = static_cast<engine::dimensions::value_type>( sizeof(double) );
 	return engine::computed_value<double>( op_registry(), "p.sum", d, std::move( p ) );
 }
 

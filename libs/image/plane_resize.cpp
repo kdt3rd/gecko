@@ -18,8 +18,8 @@ using namespace image;
 static void
 doResizeVertPoint( scanline &dest, int y, const plane &in, float scale )
 {
-	int srcY = static_cast<int>( ( static_cast<float>( y ) ) * scale + 0.5F );
-	srcY = std::min( in.height() - 1, srcY );
+	int srcY = static_cast<int>( ( static_cast<float>( y - in.y1() ) ) * scale + 0.5F ) + in.y1();
+	srcY = std::min( in.y2(), srcY );
 	const float *inLine = in.line( srcY );
 	for ( int x = 0; x < dest.width(); ++x )
 		dest[x] = inLine[x];
@@ -42,15 +42,15 @@ doResizeHorizPoint( scanline &dest, const scanline &in, float scale )
 static void
 doResizeVertBilinear( scanline &dest, int y, const plane &in, float scale )
 {
-	float srcY = static_cast<float>( y ) * scale;
-	int lowY = static_cast<int>( srcY );
-	float perc = srcY - static_cast<float>( lowY );
-	lowY = std::min( in.height() - 1, lowY );
+	int zeroY = y - in.y1();
+	float srcY1 = ( static_cast<float>( zeroY ) + 0.5F ) * scale;
+	int p1 = static_cast<int>( srcY1 );
+	float perc = srcY1 - static_cast<float>( p1 );
+	p1 = std::min( in.y2(), p1 + in.y1() );
+	int p2 = std::min( in.y2(), p1 + 1 );
 
-	const float *lowLine = in.line( lowY );
-	const float *hiLine = lowLine;
-	if ( ( lowY + 1 ) < in.height() )
-		hiLine = in.line( lowY + 1 );
+	const float *lowLine = in.line( p1 );
+	const float *hiLine = in.line( p2 );
 	for ( int x = 0; x < dest.width(); ++x )
 		dest[x] = base::lerp( lowLine[x], hiLine[x], perc );
 }
@@ -61,13 +61,12 @@ doResizeHorizBilinear( scanline &dest, const scanline &in, float scale )
 	int maxw = in.width() - 1;
 	for ( int x = 0; x < dest.width(); ++x )
 	{
-		float srcX = static_cast<float>( x ) * scale;
-		int lowX = static_cast<int>( srcX );
-		float perc = srcX - static_cast<float>( lowX );
-		lowX = std::min( maxw, lowX );
-		int hiX = std::min( maxw, lowX + 1 );
-
-		dest[x] = base::lerp( in[lowX], in[hiX], perc );
+		float srcX1 = ( static_cast<float>( x ) + 0.5F ) * scale;
+		int p1 = static_cast<int>( srcX1 );
+		float perc = srcX1 - static_cast<float>( p1 );
+		p1 = std::min( maxw, p1 );
+		int p2 = std::min( maxw, p1 + 1 );
+		dest[x] = base::lerp( in[p1], in[p2], perc );
 	}
 }
 
@@ -76,15 +75,15 @@ doResizeHorizBilinear( scanline &dest, const scanline &in, float scale )
 static void
 doResizeVertBicubic( scanline &dest, int y, const plane &in, float scale )
 {
-	float srcY = static_cast<float>( y ) * scale;
+	float srcY = static_cast<float>( y - in.y1() ) * scale + static_cast<float>( in.y1() );
 	int pY = static_cast<int>( srcY );
 	float t = srcY - static_cast<float>( pY );
-	int hm1 = in.height() - 1;
-	pY = std::min( hm1, pY );
-	const float *p0 = in.line( std::max( int(0), pY - 1 ) );
+
+	pY = std::min( in.y2(), pY );
+	const float *p0 = in.line( std::max( in.y1(), pY - 1 ) );
 	const float *p1 = in.line( pY );
-	const float *p2 = in.line( std::min( int(hm1), pY + 1 ) );
-	const float *p3 = in.line( std::min( int(hm1), pY + 2 ) );
+	const float *p2 = in.line( std::min( in.y2(), pY + 1 ) );
+	const float *p3 = in.line( std::min( in.y2(), pY + 2 ) );
 
 	for ( int x = 0; x < dest.width(); ++x )
 		dest[x] = base::cubic_interp( t, p0[x], p1[x], p2[x], p3[x] );
@@ -123,7 +122,7 @@ resize_horiz_point( const plane &p, int neww )
 {
 	precondition( neww > 0, "Invalid new width {0} to resize", neww );
 	engine::dimensions d = p.dims();
-	d.x = neww;
+	d.x2 = d.x1 + neww - 1;
 	float scale = static_cast<float>( p.width() ) / static_cast<float>( neww );
 	return plane( "p.resize_horiz_point", d, p, scale );
 }
@@ -135,7 +134,7 @@ resize_vert_point( const plane &p, int newh )
 {
 	precondition( newh > 0, "Invalid new width {0} to resize", newh );
 	engine::dimensions d = p.dims();
-	d.y = newh;
+	d.y2 = d.y1 + newh - 1;
 	float scale = static_cast<float>( p.height() ) / static_cast<float>( newh );
 	return plane( "p.resize_vert_point", d, p, scale );
 }
@@ -147,7 +146,7 @@ resize_horiz_bilinear( const plane &p, int neww )
 {
 	precondition( neww > 0, "Invalid new width {0} to resize", neww );
 	engine::dimensions d = p.dims();
-	d.x = neww;
+	d.x2 = d.x1 + neww - 1;
 	float scale = static_cast<float>( p.width() ) / static_cast<float>( neww );
 	return plane( "p.resize_horiz_bilinear", d, p, scale );
 }
@@ -159,7 +158,7 @@ resize_vert_bilinear( const plane &p, int newh )
 {
 	precondition( newh > 0, "Invalid new width {0} to resize", newh );
 	engine::dimensions d = p.dims();
-	d.y = newh;
+	d.y2 = d.y1 + newh - 1;
 	float scale = static_cast<float>( p.height() ) / static_cast<float>( newh );
 	return plane( "p.resize_vert_bilinear", d, p, scale );
 }
@@ -171,7 +170,7 @@ resize_horiz_bicubic( const plane &p, int neww )
 {
 	precondition( neww > 0, "Invalid new width {0} to resize", neww );
 	engine::dimensions d = p.dims();
-	d.x = neww;
+	d.x2 = d.x1 + neww - 1;
 	float scale = static_cast<float>( p.width() ) / static_cast<float>( neww );
 	return plane( "p.resize_horiz_bicubic", d, p, scale );
 }
@@ -183,7 +182,7 @@ resize_vert_bicubic( const plane &p, int newh )
 {
 	precondition( newh > 0, "Invalid new width {0} to resize", newh );
 	engine::dimensions d = p.dims();
-	d.y = newh;
+	d.y2 = d.y1 + newh - 1;
 	float scale = static_cast<float>( p.height() ) / static_cast<float>( newh );
 	return plane( "p.resize_vert_bicubic", d, p, scale );
 }
@@ -234,15 +233,20 @@ make_pyramid( const plane &in, const std::string &filter, float eta, int n, int 
 			curH = ret.back().height() - 1;
 
 //		std::cout << "adding level " << curLev << " at " << curW << "x" << curH << std::endl;
+#define DIRECT_PYRAMIDS 1
+#if DIRECT_PYRAMIDS
+		plane tmp = in;
+#else
+		plane tmp = ret.back();
+#endif
 		if ( filter == "bilinear" )
-			ret.push_back( resize_bilinear( ret.back(), curW, curH ) );
+			ret.push_back( resize_bilinear( tmp, curW, curH ) );
 		else if ( filter == "bicubic" )
-			ret.push_back( resize_bicubic( ret.back(), curW, curH ) );
+			ret.push_back( resize_bicubic( tmp, curW, curH ) );
 		else if ( filter == "point" || filter == "dirac" )
-			ret.push_back( resize_point( ret.back(), curW, curH ) );
+			ret.push_back( resize_point( tmp, curW, curH ) );
 		else
 			throw_not_yet();
-
 		++curLev;
 	}
 
@@ -279,23 +283,25 @@ make_pyramid( const image_buf &in, const std::string &filter, float eta, int n, 
 			curH = ret.back().height() - 1;
 
 //		std::cout << "adding level " << curLev << " at " << curW << "x" << curH << std::endl;
+#if DIRECT_PYRAMIDS
+		image_buf tmp = in;
+#else
+		image_buf tmp = ret.back();
+#endif
 		if ( filter == "bilinear" )
 		{
-			image_buf tmp = ret.back();
-			for ( size_t p = 0; p != tmp.size(); ++p )
-				tmp[p] = resize_bilinear( tmp[p], curW, curH );
+			for ( size_t p = 0; p != in.size(); ++p )
+				tmp[p] = resize_bilinear( in[p], curW, curH );
 			ret.emplace_back( std::move( tmp ) );
 		}
 		else if ( filter == "bicubic" )
 		{
-			image_buf tmp = ret.back();
 			for ( size_t p = 0; p != tmp.size(); ++p )
 				tmp[p] = resize_bicubic( tmp[p], curW, curH );
 			ret.emplace_back( std::move( tmp ) );
 		}
 		else if ( filter == "point" || filter == "dirac" )
 		{
-			image_buf tmp = ret.back();
 			for ( size_t p = 0; p != tmp.size(); ++p )
 				tmp[p] = resize_point( tmp[p], curW, curH );
 			ret.emplace_back( std::move( tmp ) );
