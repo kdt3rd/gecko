@@ -12,6 +12,7 @@
 #include "plane_util.h"
 #include <base/cpu_features.h>
 #include <base/contract.h>
+#include <cfloat>
 
 ////////////////////////////////////////
 

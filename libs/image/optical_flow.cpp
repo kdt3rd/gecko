@@ -822,7 +822,7 @@ static void
 ahtvl1_updatePnoedge_thread( size_t, int s, int e, plane_buffer &pu, plane_buffer &pv, const const_plane_buffer &u, float tau, float epsilon )
 {
 	int w = pu.width();
-#if defined(__SSE__)
+#if defined(__SSSE3__)
 	const __m128 tauV = _mm_set1_ps( tau );
 	const __m128 epsV = _mm_set1_ps( epsilon );
 	const __m128 oneV = _mm_set1_ps( 1.F );
