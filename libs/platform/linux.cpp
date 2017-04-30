@@ -38,7 +38,7 @@ std::vector<platform> &platform::init( void )
 
 	static std::vector<platform> plat
 	{
-		platform( "xlib", "gl", [] { return std::make_shared<xlib::system>(); } ),
+		platform( "xlib", "gl", [](const std::string &d) { return std::make_shared<xlib::system>( d ); } ),
 //		platform( "wayland", "gl", [] { return std::make_shared<wayland::system>(); } )
 	};
 

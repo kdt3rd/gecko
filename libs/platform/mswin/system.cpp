@@ -19,7 +19,7 @@ namespace platform { namespace mswin
 
 ////////////////////////////////////////
 
-system::system( void )
+system::system( const std::string & )
 	: platform::system( "mswin", "Microsoft Windows" )
 {
 	_keyboard = std::make_shared<keyboard>();

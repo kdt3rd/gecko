@@ -18,7 +18,7 @@ namespace platform { namespace mswin
 class system : public ::platform::system
 {
 public:
-	system( void );
+	system( const std::string & );
 	virtual ~system( void );
 
 	virtual std::vector<std::shared_ptr<::platform::screen>> screens( void ) { return _screens; }

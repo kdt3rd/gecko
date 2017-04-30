@@ -12,6 +12,7 @@
 
 #include <platform/platform.h>
 #include <base/contract.h>
+#include <base/env.h>
 #include <stdexcept>
 
 ////////////////////////////////////////
@@ -47,15 +48,26 @@ namespace platform { namespace xlib
 
 ////////////////////////////////////////
 
-system::system( void )
+system::system( const std::string &d )
 		: ::platform::system( "x11", "X11/XLib" )
 {
+	const char *dname = nullptr;
+	if ( ! d.empty() )
+		dname = d.c_str();
+	std::string disenv = base::env::global().get( "DISPLAY" );
+	if ( ! dname && ! disenv.empty() )
+		dname = disenv.c_str();
+
 	XSetErrorHandler( &xErrorCB );
 	XSetIOErrorHandler( &xIOErrorCB );
 
-	_display.reset( XOpenDisplay( nullptr ), &XCloseDisplay );
+	_display.reset( XOpenDisplay( dname ), &XCloseDisplay );
 	if ( ! _display )
+	{
+		if ( dname )
+			throw std::runtime_error( "Unable to connect to display '" + std::string( dname ) + "'" );
 		throw std::runtime_error( "no X display" );
+	}
 
 	if ( ! XSupportsLocale() )
 		throw std::runtime_error( "Current locale not supported by X" );

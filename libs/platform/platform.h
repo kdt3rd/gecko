@@ -25,10 +25,11 @@ public:
 	const std::string &name( void ) const { return _name; }
 	const std::string &renderer( void ) const { return _render; }
 
-	std::shared_ptr<system> create( void ) const { return _creator(); }
+	std::shared_ptr<system> create( const std::string &disp = std::string() ) const { return _creator( disp ); }
 
 	static const std::vector<platform> &list( void );
 	static const platform &common( void );
+	static std::shared_ptr<system> find_running( const std::string &disp = std::string() );
 
 	platform( void ) = default;
 	platform( const platform & ) = default;
@@ -41,12 +42,11 @@ private:
 	// each O.S. need to implement this
 	static std::vector<platform> &init( void );
 
-	// TODO: support passing a display name (valid for Xlib, wayland anyway)
-	platform( std::string name, std::string render, const std::function<std::shared_ptr<system>(void)> &creator );
+	platform( std::string name, std::string render, const std::function<std::shared_ptr<system>(const std::string &)> &creator );
 
 	std::string _name;
 	std::string _render;
-	std::function<std::shared_ptr<system>(void)> _creator;
+	std::function<std::shared_ptr<system>(const std::string &)> _creator;
 };
 
 ////////////////////////////////////////

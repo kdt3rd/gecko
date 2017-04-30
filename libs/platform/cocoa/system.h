@@ -20,7 +20,7 @@ class system : public ::platform::system
 {
 public:
 	/// @brief Constructor.
-	system( void );
+	system( const std::string & );
 
 	~system( void );
 

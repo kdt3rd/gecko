@@ -20,7 +20,7 @@ namespace platform { namespace cocoa
 
 ////////////////////////////////////////
 
-system::system( void )
+system::system( const std::string & )
 	: platform::system( "cocoa", "Cocoa" )
 {
     [NSAutoreleasePool new];

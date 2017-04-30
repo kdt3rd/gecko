@@ -20,7 +20,7 @@ namespace platform { namespace xlib
 class system : public ::platform::system
 {
 public:
-	system( void );
+	system( const std::string &d );
 	~system( void );
 
 	std::vector<std::shared_ptr<::platform::screen>> screens( void ) override
