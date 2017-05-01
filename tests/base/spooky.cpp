@@ -284,7 +284,7 @@ int safemain( int argc, char *argv[] )
 			c[1] = 0xbaceba11baceba11;
 			state.reset( seed );
 			state.add( buf, i );
-			c = state.final();
+			c = state.finish();
 			if ( v != c )
 				test.failure( "state vs. static function: {0,w8,f0,ar,B16}.{1,w8,f0,ar,B16} vs {2,w8,f0,ar,B16}.{3,w8,f0,ar,B16}", v[0], v[1], c[0], c[1] );
 			else
@@ -295,7 +295,7 @@ int safemain( int argc, char *argv[] )
 				state.reset( seed );
 				state.add( buf, j );
 				state.add( buf + j, i - j );
-				c = state.final();
+				c = state.finish();
 				if ( v != c )
 					test.failure( "partial state i {4} j {5} : {0,w8,f0,ar,B16}.{1,w8,f0,ar,B16} vs {2,w8,f0,ar,B16}.{3,w8,f0,ar,B16}", c[0], c[1], v[0], v[1], i, j );
 				else
