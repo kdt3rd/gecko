@@ -16,6 +16,11 @@ lib = library "gl"
 	"vertex_array.cpp";
 	"mesh.cpp";
   }
+  external_lib{
+	  lib="libpng";
+	  required=true;
+	  source={"png_image.cpp"};
+  }
   libs "base"
   system_libs{
 	  system="Linux",
@@ -25,8 +30,7 @@ lib = library "gl"
 	  system="Darwin",
 	  libs={"OpenGL"}
   }
-  external_lib{
-	  lib="libpng";
-	  required=true;
-	  source={"png_image.cpp"};
+  system_libs{
+	  system="Windows",
+	  libs={"opengl32"}
   }

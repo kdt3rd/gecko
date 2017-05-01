@@ -69,7 +69,7 @@ dispatcher::dispatcher( const std::shared_ptr<keyboard> &k, const std::shared_pt
     wc.hCursor       = LoadCursor( NULL, IDC_ARROW );
     wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
     wc.lpszMenuName  = NULL;
-    wc.lpszClassName = L"WindowClass";
+    wc.lpszClassName = "WindowClass";
     wc.hIconSm       = LoadIcon( NULL, IDI_APPLICATION );
 
 	ATOM ret = RegisterClassEx( &wc );

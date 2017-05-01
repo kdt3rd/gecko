@@ -488,51 +488,57 @@ int safemain( int argc, char *argv[] )
 		std::string fn = argv[1];
 		ucd_reader reader;
 
-		std::ifstream in( fn.c_str() );
 		if ( fn.find( ".gz" ) != std::string::npos )
 		{
+			std::ifstream in( fn.c_str(), std::ios_base::in|std::ios_base::binary );
 			static const size_t kChunk = 16384;
 			z_stream strm;
 			strm.zalloc = Z_NULL;
 			strm.zfree = Z_NULL;
 			strm.opaque = Z_NULL;
+			strm.avail_in = 0;
+			strm.next_in = Z_NULL;
 
-			Bytef tmpBuf[kChunk];
-
-			std::string slurp;
-			while ( in )
-			{
-				ssize_t n = in.read( reinterpret_cast<char *>( tmpBuf ), kChunk ).gcount();
-				if ( n > 0 )
-					slurp.append( reinterpret_cast<char *>( tmpBuf ), static_cast<size_t>( n ) );
-			}
-
-			strm.avail_in = static_cast<uInt>( slurp.size() );
-			strm.next_in = reinterpret_cast<Bytef *>( const_cast<char *>( slurp.data() ) );
-
-			int zErr = inflateInit2( &strm, 16+MAX_WBITS );
+			int zErr = inflateInit2( &strm, 32+15 );
 			if ( zErr != Z_OK )
 			{
-				std::cerr << "Unable to init compression library" << std::endl;
+				std::cerr << "Unable to init compression library: (" << zErr << ") " << ( strm.msg ? strm.msg : zError( zErr ) ) << std::endl;
 				return -1;
 			}
 
+			Bytef tmpBufIn[kChunk];
+			Bytef tmpBufOut[kChunk];
+
 			std::string decomp;
 
-			while ( zErr != Z_STREAM_END )
+			do
 			{
-				strm.avail_out = kChunk;
-				strm.next_out = tmpBuf;
-
-				zErr = inflate( &strm, Z_SYNC_FLUSH );
-				if ( zErr != Z_OK && zErr != Z_STREAM_END )
+				strm.avail_in = in.read( reinterpret_cast<char *>( tmpBufIn ), kChunk ).gcount();
+				if ( strm.avail_in == 0 )
+					break;
+				strm.next_in = tmpBufIn;
+				do
 				{
-					std::cerr << "Error reading compressed file: " << zErr << std::endl;
-					return -1;
-				}
+					strm.avail_out = kChunk;
+					strm.next_out = tmpBufOut;
 
-				decomp.append( reinterpret_cast<char *>( tmpBuf ), kChunk - strm.avail_out );
-			}
+					zErr = inflate( &strm, Z_NO_FLUSH );
+					switch ( zErr )
+					{
+						case Z_NEED_DICT:
+						case Z_STREAM_ERROR:
+						case Z_DATA_ERROR:
+						case Z_MEM_ERROR:
+							std::cerr << "Error reading compressed file: (" << zErr << ") " << ( strm.msg ? strm.msg : zError( zErr ) ) << std::endl;
+							zErr = inflateEnd( &strm );
+							return -1;
+						default:
+							break;
+					}
+					size_t have = kChunk - strm.avail_out;
+					decomp.append( reinterpret_cast<char *>( tmpBufOut ), have );
+				} while ( strm.avail_out == 0 );
+			} while ( zErr != Z_STREAM_END );
 
 			zErr = inflateEnd( &strm );
 
@@ -541,6 +547,7 @@ int safemain( int argc, char *argv[] )
 		}
 		else
 		{
+			std::ifstream in( fn.c_str() );
 			in >> reader;
 		}
 	}

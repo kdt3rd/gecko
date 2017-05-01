@@ -329,7 +329,7 @@ std::unique_ptr<row> solver::create_row( const constraint &c, tag &t )
 			result->insert( slack, coeff );
 			if ( c.strength() < required )
 			{
-				symbol err( symbol::type::ERROR, _symid++ );
+				symbol err( symbol::type::E_R_R_O_R, _symid++ );
 				t.second = err;
 				result->insert( err, -coeff );
 				_objective->insert( err, c.strength() );
@@ -341,8 +341,8 @@ std::unique_ptr<row> solver::create_row( const constraint &c, tag &t )
 		{
 			if ( c.strength() < required )
 			{
-				symbol errp( symbol::type::ERROR, _symid++ );
-				symbol errm( symbol::type::ERROR, _symid++ );
+				symbol errp( symbol::type::E_R_R_O_R, _symid++ );
+				symbol errm( symbol::type::E_R_R_O_R, _symid++ );
 				t.first = errp;
 				t.second = errm;
 				result->insert( errp, -1.0 );
@@ -376,12 +376,12 @@ symbol solver::choose_subject( const row &r, const tag &t )
 			return it.first;
 	}
 
-	if ( t.first.kind() == symbol::type::SLACK || t.first.kind() == symbol::type::ERROR )
+	if ( t.first.kind() == symbol::type::SLACK || t.first.kind() == symbol::type::E_R_R_O_R )
 	{
 		if ( r[t.first] < 0.0 )
 			return t.first;
 	}
-	if ( t.second.kind() == symbol::type::SLACK || t.second.kind() == symbol::type::ERROR )
+	if ( t.second.kind() == symbol::type::SLACK || t.second.kind() == symbol::type::E_R_R_O_R )
 	{
 		if ( r[t.second] < 0.0 )
 			return t.second;
@@ -584,9 +584,9 @@ solver::row_map::iterator solver::get_marker_leaving_row( const symbol &marker )
 
 void solver::remove_constraint_effects( const constraint &c, const tag &t )
 {
-	if ( t.first.kind() == symbol::type::ERROR )
+	if ( t.first.kind() == symbol::type::E_R_R_O_R )
 		remove_marker_effects( t.first, c.strength() );
-	if ( t.second.kind() == symbol::type::ERROR )
+	if ( t.second.kind() == symbol::type::E_R_R_O_R )
 		remove_marker_effects( t.second, c.strength() );
 }
 

@@ -29,8 +29,8 @@ window::window( void )
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 	_hwnd = CreateWindowEx(
 		WS_EX_CLIENTEDGE,
-		L"WindowClass",
-		L"Title",
+		"WindowClass",
+		"Title",
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
 		NULL, NULL, hInstance, NULL );

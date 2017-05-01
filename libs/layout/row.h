@@ -122,7 +122,7 @@ public:
 		for ( auto &p: _cells )
 		{
 			const symbol &sym = p.first;
-			if ( sym.kind() == symbol::type::SLACK || sym.kind() == symbol::type::ERROR )
+			if ( sym.kind() == symbol::type::SLACK || sym.kind() == symbol::type::E_R_R_O_R )
 				return sym;
 		}
 		return symbol();

@@ -8,7 +8,11 @@
 #include "address.h"
 #include <base/contract.h>
 #include <cstring>
-#include <netdb.h>
+#ifdef _WIN32
+# include <ws2tcpip.h>
+#else
+# include <netdb.h>
+#endif
 
 namespace net
 {

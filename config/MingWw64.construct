@@ -7,7 +7,7 @@ add_toolset "mingw-w64-archiver"
 	  output_extensions={".a"};
 	  output_prefix="lib";
 	  exe=file.find_exe("x86_64-w64-mingw32-ar");
-	  build_desc=" AR $out_short";
+	  description=" AR $out_short";
 	  cmd={ file.find_exe("rm"), "-f", "$out", "&&", "$exe", "rcs", "$out", "$in" };
   };
   add_tool {
@@ -16,9 +16,8 @@ add_toolset "mingw-w64-archiver"
 	  input_tools={"cc", "cxx"};
 	  output_extensions={".a"};
 	  output_prefix="lib";
-	  --exe=file.find_exe("x86_64-w64-mingw32-ar");
-	  exe=file.find_exe("shitbagger");
-	  build_desc=" AR $out_short";
+	  exe=file.find_exe("x86_64-w64-mingw32-ar");
+	  description=" AR $out_short";
 	  cmd={ file.find_exe("rm"), "-f", "$out", "&&", "$exe", "rcs", "$out", "$in" };
   };
 
@@ -49,12 +48,12 @@ add_toolset "mingw-w64-gcc"
 			  optdebug={"-g", "-Og"};
 		  };
 		  language={
-			  C={ "-m64" };
-			  C99={ "-m64", "-std=c99" };
-			  C11={ "-m64", "-std=c11" };
+			  C={ "-m64", "-mwin32", "-pie" };
+			  C99={ "-m64", "-std=c99", "-mwin32", "-pie" };
+			  C11={ "-m64", "-std=c11", "-mwin32", "-pie" };
 		  };
 		  threads={
-			  on={}; -- {"-pthread"} for mingw threads?
+			  on={ "-mthreads" }; -- {"-pthread"} for mingw threads?
 			  off={};
 		  };
 		  vectorize={
@@ -85,7 +84,7 @@ add_toolset "mingw-w64-gcc"
 		  includes="-I";
 		  defines="-D";
 	  };
-	  build_desc=" CC $out_short";
+	  description=" CC $out_short";
 	  cmd={"$exe", "$threads", "$language", "$optimization", "$warnings", "$vectorize", "$cflags", "$defines", "$includes", "-c", "-o", "$out", "$in"};
   };
   add_tool {
@@ -111,12 +110,12 @@ add_toolset "mingw-w64-gcc"
 			  optdebug={"-g", "-Og"};
 		  };
 		  language={
-			  ["c++"]={ "-m64", "-x", "c++" };
-			  ["c++11"]={ "-m64", "-x", "c++", "-std=c++11" };
-			  ["c++14"]={ "-m64", "-x", "c++", "-std=c++14" };
+			  ["c++"]={ "-m64", "-mwin32", "-pie", "-x", "c++" };
+			  ["c++11"]={ "-m64", "-mwin32", "-pie", "-x", "c++", "-std=c++11" };
+			  ["c++14"]={ "-m64", "-mwin32", "-pie", "-x", "c++", "-std=c++14" };
 		  };
 		  threads={
-			  on={}; -- {"-pthread"} for mingw threads?
+			  on={ "-mthreads" }; -- {"-pthread"} for mingw threads?
 			  off={};
 		  };
 		  vectorize={
@@ -147,7 +146,7 @@ add_toolset "mingw-w64-gcc"
 		  includes="-I";
 		  defines="-D";
 	  };
-	  build_desc=" CC $out_short";
+	  description=" CC $out_short";
 	  cmd={"$exe", "$threads", "$language", "$optimization", "$warnings", "$vectorize", "$cflags", "$defines", "$includes", "-c", "-o", "$out", "$in"};
   };
   add_tool {
@@ -170,7 +169,7 @@ add_toolset "mingw-w64-gcc"
 			  C11={"-m64", "-std=c11"};
 		  };
 		  threads={
-			  on={}; -- {"-pthread"} for mingw threads?
+			  on={ "-mthreads" }; -- {"-pthread"} for mingw threads?
 			  off={};
 		  };
 		  vectorize={
@@ -195,8 +194,8 @@ add_toolset "mingw-w64-gcc"
 		  libs="-l";
 		  libdirs="-L";
 	  };
-	  build_desc=" LD $out_short";
-	  cmd={ "$exe", "$threads", "$language", "$optimization", "$vectorize", "$cflags", "-pipe", "-o", "$out", "$in", "-static", "$ldflags", "$libdirs", "$libs" };
+	  description=" LD $out_short";
+	  cmd={ "$exe", "$threads", "$language", "$optimization", "$vectorize", "$cflags", "-pipe", "-static", "-o", "$out", "$in", "$libdirs", "$libs", "$ldflags", "$ldflags_static" };
   };
   add_tool {
 	  tag="ld_cxx";
@@ -243,6 +242,6 @@ add_toolset "mingw-w64-gcc"
 		  libs="-l";
 		  libdirs="-L";
 	  };
-	  build_desc=" LD $out_short";
-	  cmd={ "$exe", "$threads", "$language", "$optimization", "$vectorize", "$cflags", "-pipe", "-o", "$out", "$in", "-static", "$ldflags", "$libdirs", "$libs" };
+	  description=" LD $out_short";
+	  cmd={ "$exe", "$threads", "$language", "$optimization", "$vectorize", "$cflags", "-pipe", "-static", "-o", "$out", "$in", "$libdirs", "$libs", "$ldflags", "$ldflags_static" };
   };

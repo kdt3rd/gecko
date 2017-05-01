@@ -23,8 +23,6 @@ public:
 
 	virtual std::vector<std::shared_ptr<::platform::screen>> screens( void ) { return _screens; }
 	virtual std::shared_ptr<::platform::window> new_window( void );
-	virtual std::shared_ptr<::platform::timer> new_timer( void );
-
 	virtual std::shared_ptr<::platform::dispatcher> get_dispatcher( void );
 	virtual std::shared_ptr<::platform::keyboard> get_keyboard( void );
 	virtual std::shared_ptr<::platform::mouse> get_mouse( void );

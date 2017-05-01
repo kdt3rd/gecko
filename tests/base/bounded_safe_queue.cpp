@@ -12,7 +12,9 @@
 #include <iostream>
 #include <thread>
 #include <cstdlib>
+#ifndef _WIN32
 #include <signal.h>
+#endif
 
 namespace
 {
@@ -63,8 +65,9 @@ int safemain( int argc, char *argv[] )
 	base::cmd_line options( argv[0] );
 	test.setup( options );
 
+#ifndef _WIN32
 	signal( SIGPIPE, SIG_IGN );
-
+#endif
 	try
 	{
 		options.parse( argc, argv );

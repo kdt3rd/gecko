@@ -5,4 +5,8 @@ lib = library "net"
 	"socket.cpp",
 	"tcp_socket.cpp"
   }
+  system_libs{
+	  system="Windows",
+	  libs={"wsock32"}
+  }
   libs "base"

@@ -18,7 +18,7 @@ if toolset_active( "mingw-w64-archiver" ) and toolset_active( "mingw-w64-gcc" ) 
 	  toolset "mingw-w64-archiver"
       toolset "mingw-w64-gcc"
 	  skip_on_error( true )
-      optimization "heavy"
+      optimization "optdebug"
       warnings "most"
       defines { "NDEBUG", "_USE_MATH_DEFINES" }
 

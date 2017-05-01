@@ -20,7 +20,7 @@ public:
 		INVALID,
 		EXTERNAL,
 		SLACK,
-		ERROR,
+		E_R_R_O_R, // windows has ERROR as a constant
 		DUMMY
 	};
 
@@ -67,7 +67,7 @@ inline std::ostream &operator<<( std::ostream &out, const symbol &s )
 		case symbol::type::INVALID: out << "i" << s.id(); break;
 		case symbol::type::EXTERNAL: out << "v" << s.id(); break;
 		case symbol::type::SLACK: out << "s" << s.id(); break;
-		case symbol::type::ERROR: out << "e" << s.id(); break;
+		case symbol::type::E_R_R_O_R: out << "e" << s.id(); break;
 		case symbol::type::DUMMY: out << "d" << s.id(); break;
 	}
 	return out;

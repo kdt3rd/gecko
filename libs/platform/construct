@@ -1,7 +1,7 @@
 
 local xlib = subdir "xlib";
 local cocoa = subdir "cocoa";
---local mswin = subdir "mswin";
+local mswin = subdir "mswin";
 
 lib = library "platform"
   source{
@@ -16,6 +16,7 @@ lib = library "platform"
 		"waitable.cpp";
 		xlib.extra_source;
 		cocoa.extra_source;
+		mswin.extra_source;
   }
   optional_source{
 	  {
@@ -39,4 +40,8 @@ lib = library "platform"
   system_libs{
 	  system="Darwin";
 	  libs=cocoa.extra_libs;
+  }
+  system_libs{
+	  system="Windows";
+	  libs=mswin.extra_libs;
   }
