@@ -16,6 +16,7 @@
 #ifdef _WIN32
 # include <winsock2.h>
 # include <ws2tcpip.h>
+# include <base/win32_system_error.h>
 #else
 # include <sys/ioctl.h>
 # include <sys/types.h>
@@ -40,22 +41,33 @@ tcp_socket::tcp_socket( void )
 	if ( _socket < 0 )
 		throw_errno( "creating socket" );
 
-	int on = 1;
 
-	if ( setsockopt( _socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on) ) < 0 )
-		throw_errno( "setsockopt/reuseaddr" );
-	if ( setsockopt( _socket, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on) ) < 0 )
-		throw_errno( "setsockopt/keepalive" );
-	if ( setsockopt( _socket, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on) ) < 0 )
-		throw_errno( "setsockopt/nodelay" );
-#ifdef __linux__
-	if ( setsockopt( _socket, IPPROTO_TCP, TCP_CORK, &on, sizeof(on) ) < 0 )
-		throw_errno( "setsockopt/cork" );
+#ifdef _WIN32
+	// grrr, windows has these same things, but they take different types...
+	// double grrr, they also take a char * instead of void *
+	// for the argument thing, but we'll just cheat and do the
+	// cast everywhere
+	BOOL on = true;
+#else
+	int on = 1;
 #endif
 
+	if ( setsockopt( _socket, SOL_SOCKET, SO_REUSEADDR, (const char *)&on, sizeof(on) ) < 0 )
+		throw_errno( "setsockopt/reuseaddr" );
+	if ( setsockopt( _socket, SOL_SOCKET, SO_KEEPALIVE, (const char *)&on, sizeof(on) ) < 0 )
+		throw_errno( "setsockopt/keepalive" );
+	if ( setsockopt( _socket, IPPROTO_TCP, TCP_NODELAY, (const char *)&on, sizeof(on) ) < 0 )
+		throw_errno( "setsockopt/nodelay" );
+# ifdef __linux__
+	if ( setsockopt( _socket, IPPROTO_TCP, TCP_CORK, &on, sizeof(on) ) < 0 )
+		throw_errno( "setsockopt/cork" );
+# endif
+
+#ifndef _WIN32
 	int low_delay = IPTOS_LOWDELAY;
 	if ( setsockopt( _socket, IPPROTO_IP, IP_TOS, &low_delay, sizeof(low_delay) ) < 0 )
 		throw_errno( "setsockopt/lowdelay" );
+#endif
 }
 
 ////////////////////////////////////////
@@ -77,10 +89,21 @@ void tcp_socket::connect( uint32_t host, uint16_t port, double timeout )
     remote.sin_addr.s_addr = htonl( host );
     remote.sin_port = htons( port );
 
+#ifdef _WIN32
+#pragma TODO("Win32 has ioctlsocket but unclear how to check the error")
+//	unsigned long mode = 1;
+//	ioctlsocket( _socket, FIONBIO, &mode );
+//	on_scope_exit
+//	{
+//		mode = 0;
+//		ioctlsocket( _socket, FIONBIO, &mode );
+//	};
+#else
 	// switch to non-blocking (and back when done).
     int flags = fcntl( _socket, F_GETFL, 0 );
     fcntl( _socket, F_SETFL, flags | O_NONBLOCK );
     on_scope_exit { fcntl( _socket, F_SETFL, flags ); };
+#endif
 
 	// begin connect and wait for completion.
     if ( ::connect( _socket, reinterpret_cast<struct sockaddr *>(&remote), sizeof(remote) ) == -1 )
@@ -105,6 +128,7 @@ void tcp_socket::connect( uint32_t host, uint16_t port, double timeout )
         if ( count == 0 )
 			throw_location( std::system_error( ETIMEDOUT, std::system_category(), "connect" ) );
 
+#ifndef _WIN32
         int err = -1;
         socklen_t errlen = sizeof(err);
         if ( ::getsockopt( _socket, SOL_SOCKET, SO_ERROR, &err, &errlen ) != 0 )
@@ -112,6 +136,7 @@ void tcp_socket::connect( uint32_t host, uint16_t port, double timeout )
 
         if ( err != 0 )
 			throw_location( std::system_error( err, std::system_category(), "connect" ) );
+#endif
     }
 }
 
@@ -181,9 +206,15 @@ void tcp_socket::write( const void *buf, size_t bytes )
                 FD_ZERO( &fds );
                 FD_SET( _socket, &fds );
                 struct timeval tval;
+#ifdef _WIN32
+				tval.tv_sec = 0;
+				tval.tv_usec = 0;
+#else
+				// windows does not support the SO_SNDTIMEO, although they do support setting it?
                 socklen_t tSz = sizeof(tval);
                 if ( ::getsockopt( _socket, SOL_SOCKET, SO_SNDTIMEO, &tval, &tSz ) != 0 )
                     throw_errno( "getsockopt/sndtimeo" );
+#endif
                 while ( true )
                 {
                     int s = 0;
@@ -216,9 +247,15 @@ void tcp_socket::write( const void *buf, size_t bytes )
 
 size_t tcp_socket::bytes_waiting( void )
 {
+#ifdef _WIN32
+	u_long n = 0;
+	if ( ioctlsocket( _socket, FIONREAD, &n ) != 0 )
+		throw_win32_error( "bytes/ioctl" );
+#else
     int n = 0;
     if ( ioctl( _socket, FIONREAD, &n ) != 0 )
         throw_errno( "bytes/ioctl" );
+#endif
     return static_cast<size_t>( n );
 }
 

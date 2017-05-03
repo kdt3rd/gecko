@@ -47,6 +47,9 @@ int safemain( int argc, char *argv[] )
 	if ( auto &opt = options["<dir>"] )
 		master_dir = opt.value();
 
+#ifdef _WIN32
+	std::cerr << "ERROR: implement fullpath resolution" << std::endl;
+#else
 	// Resolve relative paths (the simple way)
 	{
 		char fullpath[PATH_MAX];
@@ -55,9 +58,9 @@ int safemain( int argc, char *argv[] )
 			throw_errno( "realpath resolving {0}", master_dir );
 		master_dir = p;
 	}
+#endif
 
 	// Setup file system.
-	base::file_system::add( "file", std::make_shared<base::posix_file_system>() );
 	auto fs = base::file_system::get( std::string( "file" ) );
 
 	// Create a web server

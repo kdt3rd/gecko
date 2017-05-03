@@ -7,6 +7,6 @@ lib = library "net"
   }
   system_libs{
 	  system="Windows",
-	  libs={"wsock32"}
+	  libs={"ws2_32"}
   }
   libs "base"
