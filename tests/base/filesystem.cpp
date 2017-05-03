@@ -12,7 +12,12 @@
 #include <base/cmd_line.h>
 #include <base/scope_guard.h>
 #include <base/unit_test.h>
+#include <base/file_system.h>
+#ifdef _WIN32
+#include <base/win32_file_system.h>
+#else
 #include <base/posix_file_system.h>
+#endif
 #include <sstream>
 #include <iostream>
 
@@ -37,7 +42,11 @@ int safemain( int argc, char *argv[] )
 	{
 		try
 		{
+#ifdef _WIN32
+			base::file_system::add( "file", std::make_shared<base::win32_file_system>() );
+#else
 			base::file_system::add( "file", std::make_shared<base::posix_file_system>() );
+#endif
 			fstest.failure( "registration succeeded, should have already defined automatically" );
 		}
 		catch ( std::exception &e )
@@ -108,9 +117,13 @@ int safemain( int argc, char *argv[] )
 
 	fstest["statfs"] = [&]( void )
 	{
+#ifdef _WIN32
+		fstest.failure( "statfs not implemented for Win32 - need statvfs struct" );
+#else
 		struct statvfs fsinfo;
 		fs->statfs( tmppath, &fsinfo );
 		fstest.success( "file system at {0} has {1} bytes free", tmppath, (fsinfo.f_bsize*fsinfo.f_bavail) );
+#endif
 	};
 
 	fstest["ostream"] = [&]( void )
@@ -207,10 +220,15 @@ int safemain( int argc, char *argv[] )
 
 		struct stat buf;
 		fs->lstat( target, &buf );
+#ifdef _WIN32
+		std::cout << "WIN32: Need S_ISLNK equivalent" << std::endl;
+		fstest.success( "created symlink" );
+#else
 		if ( S_ISLNK( buf.st_mode ) )
 			fstest.success( "created symlink" );
 		else
 			fstest.failure( "symlink failed" );
+#endif
 	};
 
 	fstest["link"] = [&]( void )
