@@ -45,6 +45,7 @@ public:
 
 	bool check_last_position( int16_t x, int16_t y ) { if ( _last_x != x || _last_y != y ) { _last_x = x; _last_y = y; return true; } return false; }
 	bool check_last_size( uint16_t w, uint16_t h ) { if ( _last_w != w || _last_h != h ) { _last_w = w; _last_h = h; return true; } return false; }
+	void update_position( void );
 
 	HWND id( void ) const { return _hwnd; }
 

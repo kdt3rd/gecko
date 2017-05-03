@@ -11,6 +11,7 @@
 #include <stdexcept>
 
 #include <windows.h>
+#include <base/win32_system_error.h>
 
 #include <gl/opengl.h>
 
@@ -18,6 +19,9 @@ namespace
 {
 	HGLRC WINAPI (*wglCreateContextAttribsARB)( HDC, HGLRC, const int * ) = nullptr;
 }
+
+// prescribed method to enable nvidia GPU on laptops w/ dual GPU
+//extern "C" { _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001; }
 
 namespace platform { namespace mswin
 {
@@ -44,9 +48,10 @@ window::window( void )
 	PIXELFORMATDESCRIPTOR pfd;
 	memset( &pfd, 0, sizeof(PIXELFORMATDESCRIPTOR) );
 	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+	pfd.nVersion = 1;
 	pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW;
 	pfd.iPixelType = PFD_TYPE_RGBA;
-	pfd.cColorBits = 32;
+	pfd.cColorBits = 24;//32;
 	pfd.cDepthBits = 32;
 	pfd.iLayerType = PFD_MAIN_PLANE;
 
@@ -60,7 +65,6 @@ window::window( void )
 	if ( !bResult )
 		throw std::runtime_error( "set pixel format failed" );
 
-	// Create an OpenGL 2.1 context for our device context
 	HGLRC tempOpenGLContext = wglCreateContext( _hdc );
 	wglMakeCurrent( _hdc, tempOpenGLContext );
 
@@ -71,7 +75,8 @@ window::window( void )
 		WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
 		WGL_CONTEXT_MINOR_VERSION_ARB, 3,
 		WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
-		0
+		//WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+		0, 0
 	};
 
 	wglCreateContextAttribsARB = reinterpret_cast<decltype(wglCreateContextAttribsARB)>( wglGetProcAddress("wglCreateContextAttribsARB") );
@@ -79,9 +84,15 @@ window::window( void )
 		throw std::runtime_error( "wgl create context missing" );
 
 	_hrc = wglCreateContextAttribsARB( _hdc, NULL, attributes );
+	if ( _hrc == nullptr )
+		throw_win32_error( "unable to create OpenGL context" );
+
 	wglMakeCurrent( NULL, NULL );
 	wglDeleteContext( tempOpenGLContext );
 	wglMakeCurrent( _hdc, _hrc );
+
+	update_position();
+	//wglCreateLayerContext
 
 //	int glVersion[2];
 //	glGetIntegerv( GL_MAJOR_VERSION, &glVersion[0] );
@@ -172,7 +183,13 @@ void window::set_popup( void )
 void window::invalidate( const base::rect &r )
 {
 	RECT rect = { LONG( std::floor( r.x1() ) ), LONG( std::floor( r.y1() ) ), LONG( std::ceil( r.x2() ) ), LONG( std::ceil( r.y2() ) ) };
-	InvalidateRect( _hwnd, &rect, FALSE );
+	if ( rect.left == rect.top &&
+		 rect.left == rect.right &&
+		 rect.left == rect.bottom )
+		RedrawWindow( _hwnd, NULL, NULL, RDW_INTERNALPAINT );
+	else
+		RedrawWindow( _hwnd, &rect, NULL, RDW_INTERNALPAINT );
+//	InvalidateRect( _hwnd, &rect, FALSE );
 }
 
 ////////////////////////////////////////
@@ -187,17 +204,36 @@ void window::acquire( void )
 
 void window::release( void )
 {
+	wglMakeCurrent( NULL, NULL );
 }
+
+////////////////////////////////////////
+
+void window::update_position( void )
+{
+	RECT pos;
+	GetWindowRect( _hwnd, &pos );
+	// TODO: do we have to handle the resize handle width???
+	_last_x = pos.left;
+	_last_y = pos.top;
+	_last_w = pos.right - pos.left + 1;
+	_last_h = pos.bottom - pos.top + 1;
+	std::cout << "window resized to: " << _last_w << " x " << _last_h << " (" << pos.left << ", " << pos.top << " " << pos.right << ", " << pos.bottom << ")" << std::endl;
+}
+
 
 ////////////////////////////////////////
 
 void window::expose_event( void )
 {
+	acquire();
 //	PAINTSTRUCT ps;
 //	BeginPaint( _hwnd, &ps );
 	exposed();
 //	EndPaint( _hwnd, &ps );
+//	wglSwapLayerBuffers( _hdc, WGL_SWAP_MAIN_PLANE );
 	SwapBuffers( _hdc );
+	release();
 }
 
 ////////////////////////////////////////

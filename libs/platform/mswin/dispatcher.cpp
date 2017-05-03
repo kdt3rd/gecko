@@ -38,9 +38,16 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam )
 
 		case WM_PAINT:
 			win->expose_event();
-			return 0;
+			return DefWindowProc( hwnd, msg, wParam, lParam );
 
-        default:
+		case WM_EXITSIZEMOVE:
+		{
+			LRESULT r = DefWindowProc( hwnd, msg, wParam, lParam );
+			win->update_position();
+			return r;
+		}
+
+		default:
             return DefWindowProc( hwnd, msg, wParam, lParam );
     }
     return 0;
@@ -90,11 +97,43 @@ int dispatcher::execute( void )
 	_exit_code = 0;
 
 	MSG Msg;
-
-	while( GetMessage(&Msg, NULL, 0, 0) > 0 )
+	DWORD millis = 0;
+	while ( true )
 	{
-		TranslateMessage( &Msg );
-		DispatchMessage( &Msg );
+		// TODO: this only works for windows created in this thread
+		millis = INFINITE;
+		waitable::time_point curt = waitable::clock::now();
+		for ( auto &w: _waitables )
+		{
+			waitable::duration when;
+			if ( w->poll_timeout( when, curt ) )
+			{
+				if ( when < waitable::duration::zero() )
+					w->emit( curt );
+				else
+				{
+					std::chrono::milliseconds msecs = std::chrono::duration_cast<std::chrono::milliseconds>( when );
+					if ( millis == INFINITE )
+						millis = DWORD( msecs.count() );
+					else
+						millis = std::min( millis, DWORD( msecs.count() ) );
+				}
+			}
+		}
+		// TODO: convert to MsgWaitForMultipleObjectsEx
+		if ( PeekMessage( &Msg, NULL, 0, 0, PM_REMOVE ) )
+		{
+			TranslateMessage( &Msg );
+			DispatchMessage( &Msg );
+		}
+		else
+		{
+			DWORD w = MsgWaitForMultipleObjectsEx( 0, NULL, millis, QS_ALLINPUT, MWMO_ALERTABLE|MWMO_INPUTAVAILABLE );
+			if ( w == WAIT_FAILED )
+			{
+				std::cout << "message wait failed..." << std::endl;
+			}
+		}
 	}
 
 	return _exit_code;

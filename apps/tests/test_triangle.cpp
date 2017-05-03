@@ -30,6 +30,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	ogl.enable( gl::capability::DEPTH_TEST );
 	ogl.depth_func( gl::depth_test::LESS );
 	ogl.enable( gl::capability::CULL_FACE );
+	//ogl.clear_color( gl::color( 0.2, 0.4, 0.1 ) );
 
 	// Create a triangle mesh
 	gl::mesh triangle;
@@ -95,6 +96,12 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 
 	win->release();
 
+	auto animtimer = sys->create_timer();
+	animtimer->elapsed = [&]() { win->invalidate( base::rect() ); };
+	animtimer->reset_repeat( 0.1 );
+	sys->get_dispatcher()->add_waitable( animtimer );
+	animtimer->activate( true );
+
 	// Called to draw the window
 	win->exposed = [&]( void )
 	{
@@ -115,7 +122,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		}
 
 		// Cause a redraw to continue the animation
-		win->invalidate( base::rect() );
+//		win->invalidate( base::rect() );
 	};
 
 	// Key to take a screenshot.

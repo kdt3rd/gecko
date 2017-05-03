@@ -31,7 +31,11 @@ executable( "test_exr", "test_exr.cpp", media, base )
 executable( "test_tcp", "test_tcp.cpp", net )
 executable( "test_web", "test_web.cpp", web )
 executable( "test_ws", "test_ws.cpp", web )
-executable( "test_triangle", "test_triangle.cpp", platform, gl, draw )
+--executable( "test_triangle", "test_triangle.cpp", platform, gl, draw )
+executable "test_triangle"
+  source "test_triangle.cpp"
+  libs{ platform, gl, draw }
+  kind "app"
 executable( "test_layout", "test_layout.cpp", platform, draw, layout )
 
 executable( "segfault", "segfault.cpp" )
