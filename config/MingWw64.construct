@@ -56,6 +56,11 @@ add_toolset "mingw-w64-gcc"
 			  on={ "-mthreads" }; -- {"-pthread"} for mingw threads?
 			  off={};
 		  };
+		  style={
+			  default={};
+			  cmd={};
+			  app={"-mwindows"};
+		  };
 		  vectorize={
 			  none={};
 			  native={"-mtune=native", "-march=native"};
@@ -73,6 +78,7 @@ add_toolset "mingw-w64-gcc"
 		  optimization="opt";
 		  language="C99";
 		  threads="off";
+		  style="default";
 		  vectorize="none";
 	  };
 	  dependencies={
@@ -85,7 +91,7 @@ add_toolset "mingw-w64-gcc"
 		  defines="-D";
 	  };
 	  description=" CC $out_short";
-	  cmd={"$exe", "$threads", "$language", "$optimization", "$warnings", "$vectorize", "$cflags", "$defines", "$includes", "-c", "-o", "$out", "$in"};
+	  cmd={"$exe", "$threads", "$language", "$style", "$optimization", "$warnings", "$vectorize", "$cflags", "$defines", "$includes", "-c", "-o", "$out", "$in"};
   };
   add_tool {
 	  tag="cxx";
@@ -118,6 +124,11 @@ add_toolset "mingw-w64-gcc"
 			  on={ "-mthreads" }; -- {"-pthread"} for mingw threads?
 			  off={};
 		  };
+		  style={
+			  default={};
+			  cmd={};
+			  app={"-mwindows"};
+		  };
 		  vectorize={
 			  none={};
 			  native={"-mtune=native", "-march=native"};
@@ -135,6 +146,7 @@ add_toolset "mingw-w64-gcc"
 		  optimization="opt";
 		  language="c++";
 		  threads="off";
+		  style="default";
 		  vectorize="none";
 	  };
 	  dependencies={
@@ -147,7 +159,7 @@ add_toolset "mingw-w64-gcc"
 		  defines="-D";
 	  };
 	  description=" CC $out_short";
-	  cmd={"$exe", "$threads", "$language", "$optimization", "$warnings", "$vectorize", "$cflags", "$defines", "$includes", "-c", "-o", "$out", "$in"};
+	  cmd={"$exe", "$threads", "$language", "$style", "$optimization", "$warnings", "$vectorize", "$cflags", "$defines", "$includes", "-c", "-o", "$out", "$in"};
   };
   add_tool {
 	  tag="ld";
@@ -172,6 +184,11 @@ add_toolset "mingw-w64-gcc"
 			  on={ "-mthreads" }; -- {"-pthread"} for mingw threads?
 			  off={};
 		  };
+		  style={
+			  default={};
+			  cmd={};
+			  app={"-mwindows"};
+		  };
 		  vectorize={
 			  none={};
 			  native={"-mtune=native", "-march=native"};
@@ -188,6 +205,7 @@ add_toolset "mingw-w64-gcc"
 		  optimization="opt";
 		  language="C99";
 		  threads="off";
+		  style="default";
 		  vectorize="none";
 	  };
 	  flag_prefixes={
@@ -195,7 +213,7 @@ add_toolset "mingw-w64-gcc"
 		  libdirs="-L";
 	  };
 	  description=" LD $out_short";
-	  cmd={ "$exe", "$threads", "$language", "$optimization", "$vectorize", "$cflags", "-pipe", "-static", "-o", "$out", "$in", "$libdirs", "$libs", "$ldflags", "$ldflags_static" };
+	  cmd={ "$exe", "$threads", "$language", "$style", "$optimization", "$vectorize", "$cflags", "-pipe", "-static", "-o", "$out", "$in", "$libdirs", "$libs", "$ldflags", "$ldflags_static" };
   };
   add_tool {
 	  tag="ld_cxx";
@@ -217,8 +235,13 @@ add_toolset "mingw-w64-gcc"
 			  ["c++14"]={ "-m64", "-std=c++14" };
 		  };
 		  threads={
-			  on={}; -- {"-pthread"} for mingw threads?
+			  on={ "-mthreads" }; -- {"-pthread"} for mingw threads?
 			  off={};
+		  };
+		  style={
+			  default={};
+			  cmd={};
+			  app={"-mwindows"};
 		  };
 		  vectorize={
 			  none={};
@@ -236,6 +259,7 @@ add_toolset "mingw-w64-gcc"
 		  optimization="opt";
 		  language="c++";
 		  threads="off";
+		  style="default";
 		  vectorize="none";
 	  };
 	  flag_prefixes={
@@ -243,5 +267,5 @@ add_toolset "mingw-w64-gcc"
 		  libdirs="-L";
 	  };
 	  description=" LD $out_short";
-	  cmd={ "$exe", "$threads", "$language", "$optimization", "$vectorize", "$cflags", "-pipe", "-static", "-o", "$out", "$in", "$libdirs", "$libs", "$ldflags", "$ldflags_static" };
+	  cmd={ "$exe", "$threads", "$language", "$style", "$optimization", "$vectorize", "$cflags", "-pipe", "-static", "-o", "$out", "$in", "$libdirs", "$libs", "$ldflags", "$ldflags_static" };
   };
