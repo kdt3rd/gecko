@@ -732,7 +732,7 @@ nlm_add_contrib_l2( float &weight, float &sum, const plane &src, int x, int y, i
 	{
 		float yW = windowKern[wY + window];
 		int srcY = y + wY;
-		int testY = testY + wY;
+		int testY = offY + wY;
 		if ( srcY < src.y1() || srcY > src.y2() )
 		{
 			// outside source image but from center area so
