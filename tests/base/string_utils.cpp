@@ -10,14 +10,13 @@
 #include <base/unit_test.h>
 #include <base/scope_guard.h>
 #include <base/cmd_line.h>
+#include <base/language.h>
 #include <iostream>
 
 namespace
 {
 
-
 ////////////////////////////////////////
-
 
 int safemain( int argc, char *argv[] )
 {
@@ -29,6 +28,36 @@ int safemain( int argc, char *argv[] )
 	auto errhandler = base::make_guard( [&]() { std::cerr << options << std::endl; } );
 	options.parse( argc, argv );
 	errhandler.dismiss();
+
+	strtest["language"] = [&]( void )
+	{
+		try
+		{
+			std::string lang = base::locale::language();
+			strtest.success( "language: " + lang );
+		}
+		catch ( std::exception &e )
+		{
+			strtest.failure( std::string( "unable to query language: " ) + e.what() );
+		}
+
+		try
+		{
+			base::locale::set( "en_US" );
+			strtest.success( "set language to: en_US" );
+		}
+		catch ( std::exception &e )
+		{
+			strtest.failure( std::string( "unable to set default locale: " ) + e.what() );
+		}
+
+		try
+		{
+		}
+		catch ( std::exception &e )
+		{
+		}
+	};
 
 	strtest["trims"] = [&]( void )
 	{
@@ -120,7 +149,7 @@ int safemain( int argc, char *argv[] )
 		strtest.test( base::to_upper( std::string( "foo" ) ) == "FOO", "base::to_upper" );
 		strtest.test( base::to_upper( std::string( "FOO" ) ) == "FOO", "base::to_upper" );
 		strtest.test( base::to_upper( std::string( "ooF" ) ) == "OOF", "base::to_upper" );
-		strtest.test( base::to_upper( std::wstring( L"Zoë" ), std::locale( "en_US.UTF-8" ) ) == L"ZOË", "base::to_upper" );
+		strtest.test( base::to_upper( std::wstring( L"Zoë" ), base::locale::query( "en_US.UTF-8" ) ) == L"ZOË", "base::to_upper" );
 	};
 
 	strtest["to_lower"] = [&]( void )
@@ -128,9 +157,8 @@ int safemain( int argc, char *argv[] )
 		strtest.test( base::to_lower( std::string( "foo" ) ) == "foo", "base::to_upper" );
 		strtest.test( base::to_lower( std::string( "FOO" ) ) == "foo", "base::to_upper" );
 		strtest.test( base::to_lower( std::string( "ooF" ) ) == "oof", "base::to_upper" );
-		strtest.test( base::to_lower( std::wstring( L"Zoë" ), std::locale( "en_US.UTF-8" ) ) == L"zoë", "base::to_upper" );
+		strtest.test( base::to_lower( std::wstring( L"Zoë" ), base::locale::query( "en_US.UTF-8" ) ) == L"zoë", "base::to_upper" );
 	};
-
 	strtest.run( options );
 	strtest.clean();
 

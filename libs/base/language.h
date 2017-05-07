@@ -8,6 +8,7 @@
 #pragma once
 
 #include <string>
+#include <locale>
 
 ////////////////////////////////////////
 
@@ -19,6 +20,9 @@ namespace locale
 
 void set( const std::string &l );
 std::string language( void );
+// if available, returns the locale for language specified
+// (mostly a cross-platform function)
+std::locale query( const std::string &l );
 
 }
 
