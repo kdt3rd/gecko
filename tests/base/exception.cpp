@@ -45,7 +45,7 @@ int safemain( int argc, char *argv[] )
 {
 	base::cmd_line options( argv[0] );
 
-	base::unit_test test( "cmd_line" );
+	base::unit_test test( "exception" );
 	test.setup( options );
 
 	auto errhandler = base::make_guard( [&]() { std::cerr << options << std::endl; } );
