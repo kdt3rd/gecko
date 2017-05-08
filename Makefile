@@ -60,7 +60,7 @@ cppcheck: build/compile_commands.json
 	@cppcheck --project=build/compile_commands.json --enable=all --std=c++11
 
 tidy: build/compile_commands.json
-	@clang-tidy -checks='*' --header-filter=.* -p build $(shell cat build/compile_commands.json|grep '\"file\":' | cut -d'"' -f 4) > clang_tidy_warnings.log
+	@clang-tidy -checks='*' --header-filter='.*' -p build $(shell cat build/compile_commands.json|grep '\"file\":' | cut -d'"' -f 4) > clang_tidy_warnings.log
 	@echo "warnings in clang_tidy_warnings.log..."
 
 ${TARGETS} :: all ;
