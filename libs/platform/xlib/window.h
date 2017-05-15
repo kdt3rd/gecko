@@ -10,6 +10,7 @@
 #include <platform/window.h>
 #include <X11/Xlib.h>
 #include <gl/opengl.h>
+#include <GL/glx.h>
 
 namespace platform { namespace xlib
 {
