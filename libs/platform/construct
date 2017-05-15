@@ -1,7 +1,16 @@
 
 local xlib = subdir "xlib";
+local wayland = subdir "wayland";
 local cocoa = subdir "cocoa";
 local mswin = subdir "mswin";
+
+function combine(a, b)
+	local r = a;
+	for i, v in ipairs(b) do
+		table.insert(r, v);
+	end
+	return r
+end
 
 lib = library "platform"
   source{
@@ -15,6 +24,7 @@ lib = library "platform"
 		"dispatcher.cpp";
 		"waitable.cpp";
 		xlib.extra_source;
+		wayland.extra_source;
 		cocoa.extra_source;
 		mswin.extra_source;
   }
@@ -35,7 +45,7 @@ lib = library "platform"
   libs{ "utf", "base" }
   system_libs{
 	  system="Linux";
-	  libs=xlib.extra_libs;
+	  libs=combine(xlib.extra_libs, wayland.extra_libs);
   }
   system_libs{
 	  system="Darwin";

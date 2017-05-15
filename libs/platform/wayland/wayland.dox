@@ -1,0 +1,6 @@
+
+/// @namespace platform::wayland
+/// @brief Wayland platform implementation.
+///
+/// Implementation of the platform classes using Wayland compositing system
+

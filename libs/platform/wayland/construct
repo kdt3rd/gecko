@@ -1,0 +1,18 @@
+
+-- technically this needs to be a different
+-- filter, like whether wayland is available or
+-- preferred
+extra_source = optional_source{
+	system="Linux";
+	source={
+		"system.cpp";
+		"screen.cpp";
+		"window.cpp";
+		"keyboard.cpp";
+		"mouse.cpp";
+		"dispatcher.cpp";
+	};
+};
+
+extra_libs = {"wayland-client", "wayland-egl", "EGL", "gl"};
+

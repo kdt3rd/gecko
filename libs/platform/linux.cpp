@@ -7,9 +7,10 @@
 
 #include "platform.h"
 #include <platform/xlib/system.h>
-//#include <platform/wayland/system.h>
+#include <platform/wayland/system.h>
 //#include <platform/xcb/system.h>
 //#include <platform/dummy/system.h>
+#include <base/compiler_support.h>
 #include <clocale>
 #include <mutex>
 
@@ -38,8 +39,9 @@ std::vector<platform> &platform::init( void )
 
 	static std::vector<platform> plat
 	{
+#pragma TODO("Add ifdef support for whether the various subsystems exist")
+		platform( "wayland", "egl", [](const std::string &d) { return std::make_shared<wayland::system>( d ); } ),
 		platform( "xlib", "gl", [](const std::string &d) { return std::make_shared<xlib::system>( d ); } ),
-//		platform( "wayland", "gl", [] { return std::make_shared<wayland::system>(); } )
 	};
 
 	return plat;
