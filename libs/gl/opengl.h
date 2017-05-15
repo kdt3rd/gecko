@@ -18,6 +18,5 @@
 
 #ifdef __unix__
 #	include "gl3w.h"
-#	include <GL/glx.h>
 #endif
 
