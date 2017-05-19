@@ -59,11 +59,11 @@ split( const stringT &str, const Delim &delim, Inserter insert, bool skip_empty 
 					insert = stringT();
 				else
 					insert = str.substr( last );
+
 				break;
 			}
-			else
-				insert = str.substr( last, cur - last );
 
+			insert = str.substr( last, cur - last );
 			last = cur + 1;
 			cur = str.find_first_of( delim, last );
 		} while ( last != stringT::npos );

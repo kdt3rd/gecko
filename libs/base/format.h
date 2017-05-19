@@ -64,7 +64,7 @@ private:
 	static int parse_number( const char * &fmt, const char *end );
 };
 
-}
+} // namespace detail
 
 ////////////////////////////////////////
 
@@ -279,5 +279,5 @@ infix_separated_printer<C> infix_separated( std::string sep, const C &c )
 
 ////////////////////////////////////////
 
-}
+} // namespace base
 

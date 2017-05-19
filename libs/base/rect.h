@@ -25,9 +25,7 @@ class rect
 {
 public:
 	/// @brief Default constructor
-	rect( void )
-	{
-	}
+	rect( void ) = default;
 
 	/// @brief Constructor from point, width, and height
 	rect( const point &p, double w, double h )
@@ -207,5 +205,5 @@ inline std::ostream &operator<<( std::ostream &out, const rect &r )
 
 ////////////////////////////////////////
 
-}
+} // namespace base
 

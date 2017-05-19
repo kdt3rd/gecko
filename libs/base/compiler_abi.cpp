@@ -25,7 +25,7 @@ demangle( const char *sym )
 #if defined(__GNUC__)
 	int status = 0;
 	char *ptr = abi::__cxa_demangle( sym, nullptr, nullptr, &status );
-	on_scope_exit{ if ( ptr ) ::free( ptr ); };
+	on_scope_exit{ if ( ptr ) ::free( ptr ); }; // NOLINT
 
 	// per the comment in cxxabi.h, return is 0, -1, -2, -3
 	switch ( status )
@@ -43,7 +43,4 @@ demangle( const char *sym )
 	return retval;
 }
 
-} // base
-
-
-
+} // namespace base

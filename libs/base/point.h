@@ -21,15 +21,20 @@ class point
 public:
 	/// @brief Default constructor.
 	/// Create the point (0,0) (the origin).
-	constexpr point( void )
-	{
-	}
+	constexpr point( void ) = default;
 
 	/// @brief Point constructor.
 	constexpr point( double xx, double yy )
 		: _x( xx ), _y( yy )
 	{
 	}
+
+	~point( void ) = default;
+	constexpr point( const point &p ) = default;
+	point &operator=( const point &p ) = default;
+
+	constexpr point( point &&p ) noexcept = default;
+	point &operator=( point &&p ) noexcept = default;
 
 	/// @brief X coordinate of the point.
 	constexpr double x( void ) const { return _x; }
@@ -174,5 +179,5 @@ inline point operator*( double v, const point &p )
 
 ////////////////////////////////////////
 
-}
+} // namespace base
 

@@ -7,7 +7,7 @@
 
 #include "cpu_features.h"
 
-#include <stdint.h>
+#include <cstdint>
 
 #include <bitset>
 #include <vector>

@@ -37,7 +37,7 @@ public:
 
 	void clear( void );
 	void clear_except( cstring var );
-	void clear_except( std::initializer_list<cstring> l );
+	void clear_except( std::initializer_list<cstring> vars );
 
 	/// takes a snapshot of the current env state and uses that to
 	/// construct a (cached) set of data that can be used to launch a
@@ -55,7 +55,7 @@ private:
 	mutable std::mutex _mutex;
 	std::map<std::string,std::string> _env;
 	mutable std::vector<std::string> _launch_vals;
-	mutable std::unique_ptr<char *[]> _launch_store;
+	mutable std::vector<char *> _launch_store;
 };
 
 } // namespace base

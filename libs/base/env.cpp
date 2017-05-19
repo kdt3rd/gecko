@@ -50,9 +50,9 @@ void initGlobalEnv( base::env &e )
 		e.set( var, val );
 	}
 #else
-	for ( size_t i = 0; environ[i]; ++i )
+	for ( size_t i = 0; environ[i] != nullptr; ++i )
 	{
-		base::cstring t = environ[i];
+		base::cstring t{ environ[i] };
 		auto p = t.find_first_of( '=' );
 		if ( p != base::cstring::npos )
 			e.set( t.substr( 0, p ), t.substr( p + 1 ) );
@@ -60,7 +60,7 @@ void initGlobalEnv( base::env &e )
 #endif
 }
 
-}
+} // namespace
 
 
 ////////////////////////////////////////
@@ -158,8 +158,8 @@ char **
 env::launch_vars( void ) const
 {
 	std::unique_lock<std::mutex> lk( _mutex );
-	if ( _launch_store.get() != nullptr )
-		return _launch_store.get();
+	if ( !_launch_store.empty() )
+		return _launch_store.data();
 
 #ifdef _WIN32
 	std::string accumString;
@@ -181,13 +181,12 @@ env::launch_vars( void ) const
 		_launch_vals.emplace_back( std::move( tmp ) );
 	}
 #endif
-	_launch_store.reset( new char *[_launch_vals.size() + 1] );
+	_launch_store.resize( _launch_vals.size() + 1, nullptr );
 	size_t i = 0;
-	char **ptr = _launch_store.get();
 	for ( ; i < _launch_vals.size(); ++i )
-		ptr[i] = &(_launch_vals[i][0]);
-	ptr[i] = nullptr;
-	return ptr;
+		_launch_store[i] = &(_launch_vals[i][0]);
+
+	return _launch_store.data();
 }
 
 ////////////////////////////////////////
@@ -206,13 +205,13 @@ void
 env::clear_cache( void )
 {
 	_launch_vals.clear();
-	_launch_store.reset();
+	_launch_store.clear();
 }
 
 ////////////////////////////////////////
 
 
-} // base
+} // namespace base
 
 
 

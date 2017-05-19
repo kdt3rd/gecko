@@ -30,9 +30,12 @@ public:
 		EQUAL
 	};
 
-	constraint( void )
-	{
-	}
+	constraint( void ) = default;
+	~constraint( void ) = default;
+	constraint( const constraint & ) = default;
+	constraint &operator=( const constraint & ) = default;
+	constraint( constraint && ) noexcept = default;
+	constraint &operator=( constraint && ) noexcept = default;
 
 	constraint( const expression &e, relation o, double str = required )
 		: _data( std::make_shared<data>( e, o, str ) )

@@ -37,10 +37,10 @@ namespace base
 
 template < typename charT, typename traitsT = std::char_traits<charT> > class const_string;
 
-typedef const_string<char> cstring;
-typedef const_string<wchar_t> wcstring;
-typedef const_string<char16_t> u16cstring;
-typedef const_string<char32_t> u32cstring;
+using cstring = const_string<char>;
+using wcstring = const_string<wchar_t>;
+using u16cstring = const_string<char16_t>;
+using u32cstring = const_string<char32_t>;
 
 ///
 /// @brief Class const_string provides a simple memory reference string
@@ -61,21 +61,28 @@ template <class charT, typename traitsT>
 class const_string
 {
 public:
-	typedef traitsT traits_type;
-	typedef typename traitsT::char_type value_type;
-	typedef std::size_t size_type;
-	typedef const value_type * const_iterator;
-	typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+	using traits_type = traitsT;
+	using value_type = typename traitsT::char_type;
+	using size_type = std::size_t;
+	using const_iterator = const value_type *;
+	using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 	static const size_type npos = static_cast<size_type>(-1);
 
-	constexpr const_string( void ) : _str( nullptr ), _sz( 0 ) {}
+	constexpr const_string( void ) = default;
+	// NB: this can fail with constructs char buf[128]; - it's not
+	// actually only string literals even tho it is constexpr :(
 	template <std::size_t N>
-	constexpr const_string( const value_type (&s)[N] ) : _str( s ), _sz( N - 1 ) {}
+	constexpr const_string( const value_type (&s)[N] ) // NOLINT
+	: _str( s ), _sz( N - 1 ) {}
 	constexpr const_string( const value_type *s, size_type N ) : _str( s ), _sz( N ) {}
 	template <typename allocTs>
-	constexpr const_string( const std::basic_string<charT, traitsT, allocTs> &s ) : _str( s.data() ), _sz( s.size() ) {}
-	constexpr const_string( const value_type *s ) : _str( s ), _sz( traits_type::length( s ) ) {}
+	constexpr const_string( const std::basic_string<charT, traitsT, allocTs> &s ) // NOLINT
+	: _str( s.data() ), _sz( s.size() ) {}
+	constexpr const_string( const value_type *s ) // NOLINT
+	: _str( s ), _sz( traits_type::length( s ) ) {}
+
+	~const_string( void ) = default;
 
 	constexpr const_string( const const_string & ) noexcept = default;
 	constexpr const_string( const_string && ) noexcept = default;
@@ -237,8 +244,8 @@ private:
 		return n == 0 ? eqret : ( traits_type::lt( *a, *b ) ? -1 : ( traits_type::lt( *b, *a ) ? 1 : compare_priv( a + 1, b + 1, n - 1, eqret ) ) );
 	}
 
-	const value_type *_str;
-	size_type _sz;
+	const value_type *_str{ nullptr };
+	size_type _sz{ 0 };
 };
 
 template <typename streamT, typename charT, typename traitsT>
@@ -393,9 +400,9 @@ inline Ret stoa( RetT (*convFunc)( const CharT *, CharT **, Base... ), const cha
 	if ( endP == s )
 		throw std::invalid_argument( fname );
 	else if ( errno == ERANGE ||
-			  ( std::is_same<Ret,int>::value &&
-				( tmp < static_cast<RetT>( std::numeric_limits<int>::min() ) ||
-				  tmp > static_cast<RetT>( std::numeric_limits<int>::max() ) ) ) )
+			  ( std::is_same<Ret,RetT>::value == false &&
+				( tmp < static_cast<RetT>( std::numeric_limits<Ret>::min() ) ||
+				  tmp > static_cast<RetT>( std::numeric_limits<Ret>::max() ) ) ) )
 		throw std::out_of_range( fname );
 	else
 		ret = static_cast<Ret>( tmp );
@@ -408,40 +415,40 @@ inline Ret stoa( RetT (*convFunc)( const CharT *, CharT **, Base... ), const cha
 } //namespace detail
 
 
-inline int stoi( cstring s, std::size_t *pos = 0, int base = 10 )
+inline int stoi( cstring s, std::size_t *pos = nullptr, int base = 10 ) // NOLINT
 {
-	return detail::stoa<long,int>( &std::strtol, "base::const_string::stoi", s.data(), pos, base );
+	return detail::stoa<long,int>( &std::strtol, "base::const_string::stoi", s.data(), pos, base ); // NOLINT
 }
 
-inline long stol( cstring s, std::size_t *pos = 0, int base = 10 )
+inline long stol( cstring s, std::size_t *pos = nullptr, int base = 10 ) // NOLINT
 {
 	return detail::stoa( &std::strtol, "base::const_string::stol", s.data(), pos, base );
 }
 
-inline long long stoll( cstring s, std::size_t *pos = 0, int base = 10 )
+inline long long stoll( cstring s, std::size_t *pos = nullptr, int base = 10 ) // NOLINT
 {
 	return detail::stoa( &std::strtoll, "base::const_string::stoll", s.data(), pos, base );
 }
 
-inline unsigned long stoul( cstring s, std::size_t *pos = 0, int base = 10 )
+inline unsigned long stoul( cstring s, std::size_t *pos = nullptr, int base = 10 ) // NOLINT
 {
 	return detail::stoa( &std::strtoul, "base::const_string::stoul", s.data(), pos, base );
 }
 
-inline unsigned long long stoull( cstring s, std::size_t *pos = 0, int base = 10 )
+inline unsigned long long stoull( cstring s, std::size_t *pos = nullptr, int base = 10 ) // NOLINT
 {
 	return detail::stoa( &std::strtoull, "base::const_string::stoull", s.data(), pos, base );
 }
 
-inline float stof( cstring s, std::size_t *pos = 0 )
+inline float stof( cstring s, std::size_t *pos = nullptr )
 {
 	return detail::stoa( &std::strtof, "base::const_string::stof", s.data(), pos );
 }
-inline double stod( cstring s, std::size_t *pos = 0 )
+inline double stod( cstring s, std::size_t *pos = nullptr )
 {
 	return detail::stoa( &std::strtod, "base::const_string::stod", s.data(), pos );
 }
-inline long double stold( cstring s, std::size_t *pos = 0 )
+inline long double stold( cstring s, std::size_t *pos = nullptr )
 {
 	return detail::stoa( &std::strtold, "base::const_string::stold", s.data(), pos );
 }

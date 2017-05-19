@@ -48,5 +48,5 @@ public:
 	static constexpr const char *invert = "\x1B[7m";
 };
 
-}
+} // namespace base
 

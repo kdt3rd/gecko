@@ -87,7 +87,7 @@ constexpr inline int from_digit( char v )
 
 inline int from_hex( char v )
 {
-	return std::isalpha( int(v) ) ? 10 + (std::tolower(int(v)) - int('a')) : (int(v) - int('0'));
+	return ( std::isalpha( int(v) ) != 0 ) ? 10 + (std::tolower(int(v)) - int('a')) : (int(v) - int('0'));
 }
 
 inline char from_hex( char p1, char p2 )
@@ -292,5 +292,5 @@ inline stringT to_upper( const stringT &str, const std::locale &loc = std::local
 
 ////////////////////////////////////////
 
-}
+} // namespace base
 

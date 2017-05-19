@@ -43,14 +43,21 @@ public:
 	scope_guard( void ) = delete;
 
 	scope_guard( const scope_guard & ) = delete;
-
 	scope_guard &operator=( const scope_guard & ) = delete;
 
 	/// @brief Move constructor.
-	scope_guard( scope_guard && rhs )
+	scope_guard( scope_guard && rhs ) noexcept
 		: _f( std::move( rhs._f ) ), _active( rhs._active )
 	{
 		rhs.dismiss();
+	}
+
+	scope_guard &operator=( scope_guard &&rhs ) noexcept
+	{
+		_f = std::move( rhs._f );
+		_active = rhs._active;
+		rhs.dismiss();
+		return *this;
 	}
 
 private:
@@ -73,9 +80,9 @@ namespace detail
 	{
 		return scope_guard<function>( std::forward<function>( fn ) );
 	}
-}
+} // namespace detail
 
-}
+} // namespace base
 
 #define CONCATENATE_IMPL(s1, s2) s1##s2
 #define CONCATENATE(s1, s2) CONCATENATE_IMPL(s1, s2)

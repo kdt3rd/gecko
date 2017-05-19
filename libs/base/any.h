@@ -23,7 +23,7 @@ namespace base
 class bad_any_cast : public std::runtime_error
 {
 public:
-	virtual ~bad_any_cast( void );
+	~bad_any_cast( void ) override = default;
 	bad_any_cast( const bad_any_cast & ) = default;
 	bad_any_cast( bad_any_cast && ) = default;
 	bad_any_cast &operator=( const bad_any_cast & ) = default;
@@ -46,19 +46,24 @@ public:
 
 	/// @brief Default constructor
 	/// It contains no value until one is assigned.
-	any( void )
-	{
-	}
+	any( void ) = default;
+
+	~any( void ) = default;
 
 	/// @brief Constuct from the given r-value
+	///
+	/// Note that this is not explicit, such that any is implicitly
+	/// constructable from ... anything. However, as a result, we need
+	/// to define the following function taking a non-const reference
+	/// to avoid recursion...
 	template<typename U>
-	any( U &&value )
+	any( U &&value ) // NOLINT
 		: _ptr( new derived<decay<U>>( std::forward<U>( value ) ) )
 	{
 	}
 
 	/// @brief Copy constructor-ish to avoid by reference any recursion
-	any( any &that )
+	any( any &that ) // NOLINT
 		: _ptr( that.clone() )
 	{
 	}
@@ -97,7 +102,7 @@ public:
 	template<class U>
 	bool is_type( void ) const
 	{
-	    typedef decay<U> T;
+	    using T = decay<U>;
 	    auto d = dynamic_cast<derived<T>*>( _ptr.get() );
 	    return bool( d );
 	}
@@ -106,7 +111,7 @@ public:
 	template<class U>
 	decay<U> &as( void )
 	{
-	    typedef decay<U> T;
+	    using T = decay<U>;
 	    auto d = dynamic_cast<derived<T>*>( _ptr.get() );
 	    if ( !d )
 		{
@@ -153,7 +158,7 @@ public:
 	}
 
 	/// @brief Assignment move operator
-	any &operator=( any &&a )
+	any &operator=( any &&a ) noexcept
 	{
 		using std::swap;
 	    if ( _ptr == a._ptr )
@@ -184,8 +189,14 @@ private:
 	class any_base
 	{
 	public:
-	    virtual ~any_base( void );
-	    virtual std::unique_ptr<any_base> clone( void ) const = 0;
+		any_base( void ) = default;
+	    virtual ~any_base( void ) = default;
+		any_base( const any_base & ) = delete;
+		any_base &operator=( const any_base & ) = delete;
+		any_base( any_base && ) = delete;
+		any_base &operator=( any_base && ) = delete;
+
+		virtual std::unique_ptr<any_base> clone( void ) const = 0;
 		virtual const void *binary_stream_ptr( size_t &s ) const = 0;
 	};
 
@@ -194,17 +205,23 @@ private:
 	{
 	public:
 	    template<typename U>
-		derived( U &&value )
+		explicit derived( U &&value )
 			: _value( std::forward<U>( value ) )
 		{
 		}
+		derived( void ) = delete;
+		~derived( void ) override = default;
+		derived( const derived & ) = delete;
+		derived &operator=( const derived & ) = delete;
+		derived( derived && ) = delete;
+		derived &operator=( derived && ) = delete;
 
-		std::unique_ptr<any_base> clone( void ) const
+		std::unique_ptr<any_base> clone( void ) const override
 		{
 			return std::unique_ptr<any_base>( new derived<T>( _value ) );
 		}
 
-		virtual const void *binary_stream_ptr( size_t &s ) const
+		const void *binary_stream_ptr( size_t &s ) const override
 		{
 			s = sizeof(_value);
 			return &_value;

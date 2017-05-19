@@ -138,7 +138,7 @@ detail::format_specifier::parse_number( const char * &fmt, const char *end )
 
 	while ( fmt != end )
 	{
-		if ( !isdigit( *fmt ) )
+		if ( 0 == isdigit( *fmt ) )
 			break;
 
 		n = n * 10 + ( *fmt - '0' );
@@ -154,5 +154,5 @@ detail::format_specifier::parse_number( const char * &fmt, const char *end )
 
 ////////////////////////////////////////
 
-}
+} // namespace base
 
