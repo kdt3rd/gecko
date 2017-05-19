@@ -12,12 +12,20 @@
 # define STRINGIZE(x) #x
 # define DEFER(FUNC,...) FUNC(__VA_ARGS__)
 
+#if __cplusplus >= 201703L
+# define FALLTHROUGH [[fallthrough]]
+#endif
+
 #if defined(__clang__)
-# define FALLTHROUGH [[clang::fallthrough]];
+# ifndef FALLTHROUGH
+#  define FALLTHROUGH [[clang::fallthrough]];
+# endif
 # define TODO(x) _Pragma(STRINGIZE(GCC warning x " at line " DEFER(STRINGIZE,__LINE__)))
 #else
 # if defined(__GNUC__)
-#  define FALLTHROUGH [[fallthrough]]
+#  ifndef FALLTHROUGH
+#   define FALLTHROUGH __attribute__((fallthrough))
+#  endif
 #  if (__GNUC__ < 5)
 #   define HAS_MISSING_STREAM_MOVE_CTORS
 #   define HAS_BAD_CODECVT_HEADER
@@ -27,8 +35,11 @@
 #  if defined(_MSC_VER)
 #   define TODO(x) __pragma(STRINGIZE(message(x " at line " DEFER(STRINGIZE,__LINE__))))
 #  endif
-#  define FALLTHROUGH
 # endif
+#endif
+
+#ifndef FALLTHROUGH
+# define FALLTHROUGH
 #endif
 
 #ifndef __has_builtin

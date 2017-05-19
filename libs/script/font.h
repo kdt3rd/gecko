@@ -7,10 +7,11 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
+#include <functional>
 #include <map>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include <base/point.h>
 #include <base/pack.h>
