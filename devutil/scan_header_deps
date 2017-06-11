@@ -1,0 +1,211 @@
+#! /usr/bin/env python
+
+import string
+import re
+import os
+import stat
+import sys
+import codecs
+import argparse
+
+class IncludePath( object ):
+    def __init__( self, path ):
+        self.path = path
+        self._cache = {}
+
+    def has_file( self, fn ):
+        if fn in self._cache:
+            return self._cache[fn]
+
+        try:
+            ap = os.path.join( self.path, fn )
+            ret = os.access( ap, os.R_OK )
+        except:
+            ret = False
+
+        self._cache[fn] = ret
+        return ret
+
+    def __contains__( self, key ):
+        return self.has_file( key )
+
+class FileTree( object ):
+    def __init__( self, root ):
+        self.root = root
+        self.include_paths = []
+        self.sys_include_paths = []
+        self._searched = {}
+        self._additional_files = []
+        self._included = {}
+        self._missing_reported = {}
+
+    def add_include( self, i ):
+        fullpath = os.path.normpath( os.path.join( self.root, i ) )
+        if os.access( fullpath, os.X_OK ):
+            self.include_paths.append( IncludePath( fullpath ) )
+            return
+        fullpath = os.path.abspath( i )
+        if os.access( fullpath, os.X_OK ):
+            self.include_paths.append( IncludePath( fullpath ) )
+            return
+
+        print( "ERROR: Unable to locate include path '" + i + "'" )
+        return
+
+    def add_sys_include(self, i ):
+        fullpath = os.path.normpath(os.path.join( self.root, i ) )
+        if os.access( fullpath, os.X_OK ):
+            self.sys_include_paths.append( IncludePath( fullpath ) )
+            return
+        fullpath = os.path.abspath( i )
+        if os.access( fullpath, os.X_OK ):
+            self.sys_include_paths.append( IncludePath( fullpath ) )
+            return
+
+        print( "ERROR: Unable to locate system include path '" + i + "'" )
+        return
+
+    def process(self):
+        s = os.stat(self.root)
+        if stat.S_ISDIR(s.st_mode):
+            for dname, subdirs, files in os.walk( self.root ):
+                self._process_files( dname, files )
+                if '.git' in subdirs:
+                    subdirs.remove( '.git' )
+        elif stat.S_ISREG(s.st_mode):
+            ( d, f ) = os.path.split( self.root )
+            self._process_files( d, [f] )
+        addlfiles = self._additional_files
+        while len(addlfiles) > 0:
+            self._additional_files = []
+            for p in addlfiles:
+                self._process_file( p[0], p[1] )
+            addlfiles = self._additional_files
+
+    def report(self, elideDupes):
+        output = {}
+        indent = ""
+        curset = []
+        for (k, v) in self._searched.items():
+            if k in output:
+                continue
+            if k not in self._included:
+                curset.append( [k, ""] )
+
+        while len(curset) > 0:
+            (f, indent) = curset.pop()
+            if len(indent) == 0:
+                output = {}
+            if elideDupes:
+                if f in output:
+                    continue
+                output[f] = True
+            print( indent + f )
+            if f in self._searched:
+                indent += "  "
+                for h in self._searched[f]:
+                    curset.append( [h, indent] )
+
+    _incstmt = re.compile( r"^#\s*include\s+([<\"])([^\">]+)[>\"]" )
+    _csrc = [".cpp", ".h", ".C", ".c", ".cc", ".hh", ".inl", ".tcc", ".H"]
+
+    def _process_files(self, d, files):
+        for fname in files:
+            fn, fext = os.path.splitext( fname )
+            if fext not in FileTree._csrc:
+                continue
+            self._process_file(d, fname)
+
+    def _process_file( self, d, fname ):
+        pathn = os.path.join( d, fname )
+        try:
+            f = codecs.open( pathn, 'r', 'utf-8' )
+        except:
+            print( " Couldn't open " + fname + " for read" )
+            return
+
+        self._searched[pathn] = []
+        try:
+            self._additional_files.remove(pathn)
+        except:
+            pass
+        curline = 0
+        for line in f:
+            curline = curline + 1
+            hmatch = FileTree._incstmt.match( line )
+            if hmatch:
+                islocalhdr = hmatch.group(1)
+                hdrname = hmatch.group(2)
+                if islocalhdr == '"':
+                    h = self._add_local( pathn, d, hdrname )
+                else:
+                    h = self._add_far( pathn, d, hdrname )
+                self._searched[pathn].append( h )
+        f.close()
+
+    def _add_local(self, src, d, h):
+        tmpfn = os.path.join( d, h )
+        if tmpfn in self._searched:
+            return tmpfn
+        if os.access( tmpfn, os.R_OK ):
+            self._record_future( tmpfn )
+            return tmpfn
+        print( "'%s': header '%s' not found in '%s', suggest using angle brackets to include <%s>" % ( src, tmpfn, d, h ) )
+        return self._add_far( src, d, h )
+
+    def _add_far(self, src, d, h):
+        for i in range(0,len(self.include_paths)):
+            if self.include_paths[i].has_file( h ):
+                tmpfn = os.path.join( self.include_paths[i].path, h )
+                self._record_future( tmpfn )
+                return tmpfn
+        for i in range(0,len(self.sys_include_paths)):
+            if self.sys_include_paths[i].has_file( h ):
+                tmpfn = os.path.join( self.sys_include_paths[i].path, h )
+                self._included[tmpfn] = True
+                return tmpfn
+        if h not in self._missing_reported:
+            print( "'%s': header '%s' not found in any provided include paths" % ( src, h ) )
+            self._missing_reported[h] = True
+
+        tmpfn = os.path.join( d, h )
+        if tmpfn in self._searched:
+            return
+        tmpfn = os.path.join( d, h )
+        if os.access( tmpfn, os.R_OK ):
+            print( "Header '%s' found in '%s', suggest using quotes to include \"%s\"" % (h, d, h) )
+            self._record_future( tmpfn )
+            return tmpfn
+        return h
+
+    def _record_future( self, fn ):
+        self._included[fn] = True
+        if fn in self._searched:
+            return
+        if fn not in self._additional_files:
+            self._additional_files.append( os.path.split( fn ) )
+        
+
+def main():
+    parser = argparse.ArgumentParser(description='Discover header file include tree.')
+    parser.add_argument('-I', '--include', action='append', dest='include_path', default=[], help='Add a path which will be used for include resolution. Files discovered in these paths will be recursively scanned')
+    parser.add_argument('--sys_include', action='append', dest='sys_paths', default=[], help='Add a path which will be used for include resolution. Files discovered in these paths will be recursively scanned')
+    parser.add_argument('root', default='.', nargs='?', help='Specify root path to recursively walk looking for c-ish files to scan for includes')
+    args = parser.parse_args()
+
+    ft = FileTree( os.path.abspath(args.root) )
+    for i in args.include_path:
+        ft.add_include( i )
+    for i in args.sys_paths:
+        ft.add_sys_include( i )
+
+    ft.process()
+    ft.report(True)
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
