@@ -75,13 +75,13 @@ class format_holder
 {
 public:
 	/// @brief Construct format holder.
-	format_holder( std::string fmt, const Args &...args )
+	explicit format_holder( std::string fmt, const Args &...args )
 		: _fmt( std::move( fmt ) ), _args( std::tie( args... ) )
 	{
 	}
 
 	/// @brief Convert to a string.
-	operator std::string() const
+	operator std::string() const // NOLINT
 	{
 		std::ostringstream str;
 		write( str );

@@ -90,7 +90,7 @@ public:
 	const_string &operator=( const_string && ) noexcept = default;
 
 	/// @brief cast operator to std::basic_string
-	constexpr operator std::basic_string<charT, traitsT>( void ) const { return to_string(); }
+	constexpr operator std::basic_string<charT, traitsT>( void ) const { return to_string(); } // NOLINT
 	/// @brief conversion function
 	constexpr std::basic_string<charT, traitsT> to_string( void ) const { return empty() ? std::basic_string<charT, traitsT>() : std::basic_string<charT, traitsT>( data(), size() ); }
 

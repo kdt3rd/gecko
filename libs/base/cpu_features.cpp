@@ -1024,7 +1024,7 @@ bool cpu::has_NEON( void ) {
 
 ////////////////////////////////////////
 
-} // base
+} // namespace base
 
 
 
