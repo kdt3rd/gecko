@@ -1,9 +1,7 @@
 
 lib = library "layout"
   source {
-	  "solver.cpp";
 	  "area.cpp";
-	  "grid.cpp";
-	  "hbox.cpp";
+	  "border_layout.cpp";
   }
   libs "base"

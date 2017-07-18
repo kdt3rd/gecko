@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016 Ian Godin
+// Copyright (c) 2017 Ian Godin
 // All rights reserved.
 // Copyrights licensed under the MIT License.
 // See the accompanying LICENSE.txt file for terms
@@ -12,14 +12,13 @@ namespace layout
 
 ////////////////////////////////////////
 
-area::area( const std::string &n )
-	: _left( n + ".l" ) , _right( n + base::to_string( ".r" ) ) , _top( n + base::to_string( ".t" ) ) , _bottom( n + base::to_string( ".b" ) ), _min_width( n + ".minw" ), _min_height( n + ".minh" )
+void area::compute_minimum( void )
 {
 }
 
 ////////////////////////////////////////
 
-area::~area( void )
+void area::compute_layout( void )
 {
 }
 

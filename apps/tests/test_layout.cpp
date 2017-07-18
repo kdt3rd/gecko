@@ -17,45 +17,38 @@
 #include <base/math_functions.h>
 #include <draw/path.h>
 #include <draw/rectangle.h>
-#include <layout/grid.h>
-#include <layout/hbox.h>
+#include <layout/border_layout.h>
 
 namespace
 {
 
 int safemain( int /*argc*/, char * /*argv*/ [] )
 {
-	std::vector<gl::color> colors = { gl::red, gl::green, gl::blue, gl::white };
-	std::vector<layout::area> widgets;
-	widgets.emplace_back( "w1" );
-	widgets.emplace_back( "w2" );
-	widgets.emplace_back( "w3" );
-	widgets.emplace_back( "w4" );
-	layout::area &w1 = widgets[0];
-	layout::area &w2 = widgets[1];
-	layout::area &w3 = widgets[2];
-	layout::area &w4 = widgets[3];
+	std::vector<gl::color> colors = { gl::red, gl::green, gl::blue, gl::yellow, gl::white };
+
+	std::vector<std::shared_ptr<layout::area>> widgets( 5 );
+	widgets[0] = std::make_shared<layout::area>();
+	widgets[1] = std::make_shared<layout::area>();
+	widgets[2] = std::make_shared<layout::area>();
+	widgets[3] = std::make_shared<layout::area>();
+	widgets[4] = std::make_shared<layout::area>();
+
+	widgets[0]->set_minimum( 50, 25 );
+	widgets[1]->set_minimum( 50, 25 );
+	widgets[2]->set_minimum( 50, 50 );
+	widgets[3]->set_minimum( 50, 50 );
+	widgets[4]->set_minimum( 25, 25 );
 
 	// Setup constraints for the widgets
-	layout::grid lay( 2, 3 );
-	lay.set_padding( 20, 10 );
-	lay.set_spacing( 6, 6 );
-	lay.add( w1, 0, 0 );
-	lay.add( w2, 1, 0 );
-	lay.add( w3, 0, 1, 2, 1 );
-	lay.add( w4, 0, 2, 2, 1 );
-
-	lay.suggest( w1.minimum_width(), 20 );
-	lay.suggest( w2.minimum_width(), 20 );
-	lay.suggest( w3.minimum_width(), 20 );
-	lay.suggest( w4.minimum_width(), 20 );
-	lay.suggest( w1.minimum_height(), 10 );
-	lay.suggest( w2.minimum_height(), 10 );
-	lay.suggest( w3.minimum_height(), 10 );
-	lay.suggest( w4.minimum_height(), 10 );
-	lay.add_constraint( w1.height() * 2 == w1.width() );
-	lay.add_constraint( w3.height() * 2 == w1.height() );
-	lay.add_constraint( w4.height() * 2 == w3.height() );
+	layout::border_layout lay;
+	lay.set_padding( 15, 15, 10, 10 );
+	lay.set_spacing( 5, 3 );
+	lay.set_top( widgets[0] );
+	lay.set_bottom( widgets[1] );
+	lay.set_left( widgets[2] );
+	lay.set_right( widgets[3] );
+	lay.set_center( widgets[4] );
+	lay.compute_minimum();
 
 	// Create a window
 	auto sys = platform::platform::common().create();
@@ -63,16 +56,6 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	win->resize( 400, 400 );
 	win->set_title( "Layout" );
 	win->acquire();
-
-	// Add variables to be adjusted manually
-	lay.add_variable( lay.left() );
-	lay.add_variable( lay.right() );
-	lay.add_variable( lay.top() );
-	lay.add_variable( lay.bottom() );
-	lay.suggest( lay.left(), 0 );
-	lay.suggest( lay.top(), 0 );
-	lay.suggest( lay.right(), win->width() );
-	lay.suggest( lay.bottom(), win->height() );
 
 	// OpenGL information & initialization
 	gl::matrix4 matrix;
@@ -83,8 +66,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	std::vector<draw::rectangle> rects;
 	for ( size_t i = 0; i < widgets.size(); ++i )
 	{
-		auto &w = widgets[i];
-		rects.emplace_back( w.left().value(), w.top().value(), w.right().value() - w.left().value(), w.bottom().value() - w.top().value(), colors[i] );
+		auto &w = *widgets[i];
+		rects.emplace_back( w.x1(), w.y1(), w.width(), w.height(), colors[i] );
 	}
 
 	// Render function
@@ -92,9 +75,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	{
 		win->acquire();
 
-		lay.suggest( lay.right(), win->width() );
-		lay.suggest( lay.bottom(), win->height() );
-		lay.update();
+		lay.set_size( win->width(), win->height() );
+		lay.compute_layout();
 
 		matrix = gl::matrix4::ortho( 0, static_cast<float>( win->width() ), 0, static_cast<float>( win->height() ) );
 
@@ -103,10 +85,9 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 
 		for ( size_t i = 0; i < widgets.size(); ++i )
 		{
-			auto &w = widgets[i];
+			auto &w = *widgets[i];
 			auto &r = rects[i];
-//			std::cout << i << ": " << w.left().value() << ',' << w.top().value() << ' ' << w.right().value() - w.left().value() << 'x' << w.bottom().value() - w.top().value() << std::endl;
-			r.resize( w.left().value(), w.top().value(), w.right().value() - w.left().value(), w.bottom().value() - w.top().value() );
+			r.resize( w.x1(), w.y1(), w.width(), w.height() );
 			r.draw( ogl, matrix );
 		}
 
@@ -130,7 +111,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	win->show();
 
 	auto dispatch = sys->get_dispatcher();
-	return dispatch->execute();;
+	return dispatch->execute();
 }
 
 }
