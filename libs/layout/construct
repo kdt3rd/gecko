@@ -2,6 +2,7 @@
 lib = library "layout"
   source {
 	  "area.cpp";
+	  "box_layout.cpp";
 	  "border_layout.cpp";
   }
   libs "base"

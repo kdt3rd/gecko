@@ -18,36 +18,48 @@
 #include <draw/path.h>
 #include <draw/rectangle.h>
 #include <layout/border_layout.h>
+#include <layout/box_layout.h>
 
 namespace
 {
 
 int safemain( int /*argc*/, char * /*argv*/ [] )
 {
-	std::vector<gl::color> colors = { gl::red, gl::green, gl::blue, gl::yellow, gl::white };
+	std::vector<gl::color> colors = { gl::red, gl::green, gl::blue, gl::yellow, gl::cyan, gl::magenta, gl::white, gl::color( 0.5, 0.5, 0.5 ) };
 
-	std::vector<std::shared_ptr<layout::area>> widgets( 5 );
+	std::vector<std::shared_ptr<layout::area>> widgets( 7 );
 	widgets[0] = std::make_shared<layout::area>();
 	widgets[1] = std::make_shared<layout::area>();
 	widgets[2] = std::make_shared<layout::area>();
 	widgets[3] = std::make_shared<layout::area>();
 	widgets[4] = std::make_shared<layout::area>();
+	widgets[5] = std::make_shared<layout::area>();
+	widgets[6] = std::make_shared<layout::area>();
 
 	widgets[0]->set_minimum( 50, 25 );
-	widgets[1]->set_minimum( 50, 25 );
+	widgets[1]->set_minimum( 50, 50 );
 	widgets[2]->set_minimum( 50, 50 );
 	widgets[3]->set_minimum( 50, 50 );
-	widgets[4]->set_minimum( 25, 25 );
+	widgets[4]->set_minimum( 15, 25 );
+	widgets[5]->set_minimum( 15, 25 );
+	widgets[6]->set_minimum( 15, 25 );
+
+	auto hbox = std::make_shared<layout::hbox_layout>();
+	hbox->set_padding( 5, 5, 5, 5 );
+	hbox->set_spacing( 5, 5 );
+	hbox->add( widgets[4] );
+	hbox->add( widgets[5] );
+	hbox->add( widgets[6] );
 
 	// Setup constraints for the widgets
 	layout::border_layout lay;
 	lay.set_padding( 15, 15, 10, 10 );
 	lay.set_spacing( 5, 3 );
-	lay.set_top( widgets[0] );
-	lay.set_bottom( widgets[1] );
-	lay.set_left( widgets[2] );
-	lay.set_right( widgets[3] );
-	lay.set_center( widgets[4] );
+	lay.set_top( hbox );
+	lay.set_bottom( widgets[0] );
+	lay.set_left( widgets[1] );
+	lay.set_right( widgets[2] );
+	lay.set_center( widgets[3] );
 	lay.compute_minimum();
 
 	// Create a window
@@ -65,10 +77,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	// Create rectangles for each widget
 	std::vector<draw::rectangle> rects;
 	for ( size_t i = 0; i < widgets.size(); ++i )
-	{
-		auto &w = *widgets[i];
-		rects.emplace_back( w.x1(), w.y1(), w.width(), w.height(), colors[i] );
-	}
+		rects.emplace_back( colors[i] );
+	rects.emplace_back( colors.back() );
 
 	// Render function
 	win->exposed = [&]( void )
@@ -82,15 +92,24 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 
 		ogl.clear();
 		ogl.viewport( 0, 0, win->width(), win->height() );
+		ogl.save_matrix();
 
 		for ( size_t i = 0; i < widgets.size(); ++i )
 		{
+			if ( i == 4 )
+			{
+				auto &r = rects.back();
+				r.resize( hbox->x1(), hbox->y1(), hbox->width(), hbox->height() );
+				r.draw( ogl, matrix );
+				ogl.translate( hbox->x1(), hbox->y1() );
+			}
 			auto &w = *widgets[i];
 			auto &r = rects[i];
 			r.resize( w.x1(), w.y1(), w.width(), w.height() );
 			r.draw( ogl, matrix );
 		}
 
+		ogl.restore_matrix();
 		win->release();
 
 		// Cause a redraw to continue the animation
