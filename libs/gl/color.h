@@ -113,6 +113,9 @@ constexpr color black( 0, 0, 0 );
 constexpr color red( 1, 0, 0 );
 constexpr color green( 0, 1, 0 );
 constexpr color blue( 0, 0, 1 );
+constexpr color yellow( 1, 1, 0 );
+constexpr color magenta( 1, 0, 1 );
+constexpr color cyan( 0, 1, 1 );
 
 ////////////////////////////////////////
 
