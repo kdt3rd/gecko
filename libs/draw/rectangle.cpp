@@ -12,6 +12,13 @@ namespace draw
 
 ////////////////////////////////////////
 
+rectangle::rectangle( const gl::color &c )
+	: _x( 0.0 ), _y( 0.0 ), _w( 100.0 ), _h( 100.0 ), _color( c )
+{
+}
+
+////////////////////////////////////////
+
 rectangle::rectangle( float x, float y, float w, float h, const gl::color &c )
 	: _x( x ), _y( y ), _w( w ), _h( h ), _color( c )
 {
@@ -23,7 +30,7 @@ void rectangle::draw( gl::api &ogl, const gl::matrix4 &m )
 {
 	initialize( ogl );
 	auto bound = _mesh.bind();
-	bound.set_uniform( _matrix_loc, m );
+	bound.set_uniform( _matrix_loc, ogl.current_matrix() * m );
 	bound.draw();
 }
 

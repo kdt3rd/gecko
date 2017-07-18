@@ -19,6 +19,7 @@ namespace draw
 class rectangle
 {
 public:
+	rectangle( const gl::color &c );
 	rectangle( float x, float y, float w, float h, const gl::color &c = gl::white );
 
 	void draw( gl::api &ogl, const gl::matrix4 &m );
