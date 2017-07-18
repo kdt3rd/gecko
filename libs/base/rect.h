@@ -86,10 +86,10 @@ public:
 	double y2( void ) const { return _position.y() + _extent.h() - 1.0; }
 
 	/// @brief Position of the rectangle
-	point position( void ) const { return _position; }
+	const point &position( void ) const { return _position; }
 
 	/// @brief Size of the rectangle
-	size extent( void ) const { return _extent; }
+	const size &extent( void ) const { return _extent; }
 
 	/// @brief Top left corner
 	point top_left( void ) const { return _position; }
@@ -137,6 +137,9 @@ public:
 
 	/// @brief Set height
 	void set_height( double h ) { _extent.set_height( h ); fix_extent(); }
+
+	/// @brief Set size
+	void set_size( double w, double h ) { _extent.set_width( w ); _extent.set_height( h ); fix_extent(); }
 
 	/// @brief Set left side
 	void set_x1( double x ) { _position.set_x( x ); }
