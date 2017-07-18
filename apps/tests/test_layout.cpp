@@ -17,7 +17,7 @@
 #include <base/math_functions.h>
 #include <draw/path.h>
 #include <draw/rectangle.h>
-#include <layout/border_layout.h>
+#include <layout/packing_layout.h>
 #include <layout/box_layout.h>
 
 namespace
@@ -25,7 +25,7 @@ namespace
 
 int safemain( int /*argc*/, char * /*argv*/ [] )
 {
-	std::vector<gl::color> colors = { gl::red, gl::green, gl::blue, gl::yellow, gl::cyan, gl::magenta, gl::white, gl::color( 0.5, 0.5, 0.5 ) };
+	std::vector<gl::color> colors = { gl::red, gl::green, gl::blue, gl::white, gl::cyan, gl::cyan, gl::yellow, gl::color( 0.5, 0.5, 0.5 ) };
 
 	std::vector<std::shared_ptr<layout::area>> widgets( 7 );
 	widgets[0] = std::make_shared<layout::area>();
@@ -42,7 +42,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	widgets[3]->set_minimum( 50, 50 );
 	widgets[4]->set_minimum( 15, 25 );
 	widgets[5]->set_minimum( 15, 25 );
-	widgets[6]->set_minimum( 15, 25 );
+	widgets[6]->set_minimum( 35.5, 25 );
 
 	auto hbox = std::make_shared<layout::hbox_layout>();
 	hbox->set_padding( 5, 5, 5, 5 );
@@ -52,14 +52,14 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	hbox->add( widgets[6] );
 
 	// Setup constraints for the widgets
-	layout::border_layout lay;
+	layout::packing_layout lay;
 	lay.set_padding( 15, 15, 10, 10 );
 	lay.set_spacing( 5, 3 );
-	lay.set_top( hbox );
-	lay.set_bottom( widgets[0] );
-	lay.set_left( widgets[1] );
-	lay.set_right( widgets[2] );
-	lay.set_center( widgets[3] );
+	lay.add( hbox, base::alignment::TOP );
+	lay.add( widgets[0], base::alignment::BOTTOM );
+	lay.add( widgets[1], base::alignment::LEFT );
+	lay.add( widgets[2], base::alignment::RIGHT );
+	lay.add( widgets[3], base::alignment::CENTER );
 	lay.compute_minimum();
 
 	// Create a window

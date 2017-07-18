@@ -8,6 +8,8 @@
 #pragma once
 
 #include "layout.h"
+#include <base/alignment.h>
+#include <list>
 #include <memory>
 
 namespace layout
@@ -15,16 +17,12 @@ namespace layout
 
 ////////////////////////////////////////
 
-class border_layout : public layout
+class packing_layout : public layout
 {
 public:
-	border_layout( void );
+	packing_layout( void );
 
-	void set_top( const std::shared_ptr<area> &a ) { _top = a; }
-	void set_bottom( const std::shared_ptr<area> &a ) { _bottom = a; }
-	void set_left( const std::shared_ptr<area> &a ) { _left = a; }
-	void set_right( const std::shared_ptr<area> &a ) { _right = a; }
-	void set_center( const std::shared_ptr<area> &a ) { _center = a; }
+	void add( const std::shared_ptr<area> &a, base::alignment where ) { _areas.emplace_back( a, where ); }
 
 	/// @brief Compute the minimum size of this layout.
 	void compute_minimum( void ) override;
@@ -33,11 +31,18 @@ public:
 	void compute_layout( void ) override;
 
 private:
-	std::weak_ptr<area> _top;
-	std::weak_ptr<area> _bottom;
-	std::weak_ptr<area> _left;
-	std::weak_ptr<area> _right;
-	std::weak_ptr<area> _center;
+	struct section
+	{
+		section( const std::shared_ptr<area> &ar, base::alignment al )
+			: _area( ar ), _align( al )
+		{
+		}
+
+		std::weak_ptr<area> _area;
+		base::alignment _align;
+	};
+
+	std::list<section> _areas;
 };
 
 ////////////////////////////////////////
