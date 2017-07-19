@@ -28,7 +28,10 @@ public:
 	std::shared_ptr<system> create( const std::string &disp = std::string() ) const { return _creator( disp ); }
 
 	static const std::vector<platform> &list( void );
-	static const platform &common( void );
+	/// This will return the first platform in the list of
+	/// supported / compiled-in platforms as the 'preferred'
+	/// TODO: add a configuration file about which one to use?
+	static const platform &preferred( void );
 	static std::shared_ptr<system> find_running( const std::string &disp = std::string() );
 
 	platform( void ) = default;

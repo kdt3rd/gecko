@@ -16,7 +16,7 @@ namespace
 
 int safemain( int /*argc*/, char * /*argv*/ [] )
 {
-	auto sys = platform::platform::common().create();
+	auto sys = platform::platform::find_running();
 
 	auto screens = sys->screens();
 

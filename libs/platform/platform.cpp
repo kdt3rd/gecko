@@ -29,7 +29,7 @@ const std::vector<platform> &platform::list( void )
 ////////////////////////////////////////
 
 const platform &
-platform::common( void )
+platform::preferred( void )
 {
 	return init().front();
 }

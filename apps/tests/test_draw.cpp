@@ -23,7 +23,7 @@ namespace
 
 int safemain( int /*argc*/, char * /*argv*/ [] )
 {
-	auto sys = platform::platform::common().create();
+	auto sys = platform::platform::find_running();
 	auto win = sys->new_window();
 	win->resize( 400, 400 );
 	win->set_title( "Draw Test" );
