@@ -12,7 +12,6 @@ extra_source = optional_source{
 		"mouse.cpp";
 		"dispatcher.cpp";
 	};
+	defines = {"HAVE_WAYLAND"};
+	libs = {"wayland-client", "wayland-egl", "egl", "gl"};
 };
-
-extra_libs = {"wayland-client", "wayland-egl", "EGL", "gl"};
-
