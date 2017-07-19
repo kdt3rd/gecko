@@ -17,7 +17,7 @@ namespace
 int safemain( int /*argc*/, char * /*argv*/ [] )
 {
 	// Create a window
-	auto sys = platform::platform::common().create();
+	auto sys = platform::platform::find_running();
 	auto win = sys->new_window();
 	win->set_title( "Triangle" );
 	win->acquire();

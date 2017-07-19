@@ -12,43 +12,34 @@ lib = library "script"
 	"font_manager.cpp"
   }
   optional_source{
-	  system="Darwin",
+	  system="Darwin";
 	  source={
 		  "cocoa/font_manager.mm",
 		  "cocoa/font.mm",
 		  "darwin.cpp",
-	  }
+	  };
+	  libs={"AppKit", "Cocoa"};
   }
   optional_source{
-	  system="Linux",
+	  system="Linux";
 	  source={
 		  "fontconfig/font_manager.cpp",
 		  "fontconfig/font.cpp",
 		  "linux.cpp",
-	  }
+	  };
+	  libs={"freetype2", "fontconfig"};
   }
   optional_source{
-	  system="Windows",
+	  system="Windows";
 	  source={
 		  "mswin/font_manager.cpp",
 		  "mswin/font.cpp",
 		  "mswin.cpp",
-	  }
+	  };
+	  libs={"gdi32"};
   }
   -- can also call optional_source all at once as on giant table
   libs{ "base", "utf" }
-  system_libs{
-	  system="Darwin",
-	  libs={"AppKit", "Cocoa"}
-  }
-  system_libs{
-		  system="Linux",
-		  libs={"freetype2", "fontconfig"}
-  }
-  system_libs{
-		  system="Windows",
-		  libs={"gdi32"}
-  }
   -- can also call system_libs like:
   -- system_libs( "Darwin", "AppKit", "Cocoa" )
   -- not sure which is preferred

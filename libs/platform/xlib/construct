@@ -12,7 +12,6 @@ extra_source = optional_source{
 		"mouse.cpp";
 		"dispatcher.cpp";
 	};
+	defines = {"HAVE_XLIB"};
+	libs = {"x11", "gl"};
 };
-
-extra_libs = {"x11", "gl"};
-

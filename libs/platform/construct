@@ -23,35 +23,27 @@ lib = library "platform"
 		"mouse.cpp";
 		"dispatcher.cpp";
 		"waitable.cpp";
-		xlib.extra_source;
-		wayland.extra_source;
 		cocoa.extra_source;
 		mswin.extra_source;
   }
   optional_source{
 	  {
 		  system="Linux";
-		  source={ "linux.cpp" };
+		  source={
+			  "linux.cpp";
+			  xlib.extra_source;
+			  wayland.extra_source;
+		  };
 	  },
 	  {
 		  system="Darwin";
 		  source={ "darwin.cpp" };
+		  libs=cocoa.extra_libs;
 	  },
 	  {
 		  system="Windows";
 		  source={ "mswin.cpp" };
+		  libs=mswin.extra_libs;
 	  },
   }
   libs{ "utf", "base" }
-  system_libs{
-	  system="Linux";
-	  libs=combine(xlib.extra_libs, wayland.extra_libs);
-  }
-  system_libs{
-	  system="Darwin";
-	  libs=cocoa.extra_libs;
-  }
-  system_libs{
-	  system="Windows";
-	  libs=mswin.extra_libs;
-  }

@@ -6,8 +6,17 @@
 //
 
 #include "platform.h"
-#include <platform/xlib/system.h>
-#include <platform/wayland/system.h>
+#ifdef HAVE_XLIB
+# include <platform/xlib/system.h>
+#endif
+#ifdef HAVE_WAYLAND
+# include <platform/wayland/system.h>
+#endif
+
+#if !defined(HAVE_WAYLAND) && !defined(HAVE_XLIB)
+# error "No valid platform libraries found, please install necessary libraries"
+#endif
+
 //#include <platform/xcb/system.h>
 //#include <platform/dummy/system.h>
 #include <base/compiler_support.h>
@@ -39,9 +48,12 @@ std::vector<platform> &platform::init( void )
 
 	static std::vector<platform> plat
 	{
-#pragma TODO("Add ifdef support for whether the various subsystems exist")
+#ifdef HAVE_WAYLAND
 		platform( "wayland", "egl", [](const std::string &d) { return std::make_shared<wayland::system>( d ); } ),
+#endif
+#ifdef HAVE_XLIB
 		platform( "xlib", "gl", [](const std::string &d) { return std::make_shared<xlib::system>( d ); } ),
+#endif
 	};
 
 	return plat;
