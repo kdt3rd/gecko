@@ -19,6 +19,7 @@
 #include <draw/rectangle.h>
 #include <layout/packing_layout.h>
 #include <layout/box_layout.h>
+#include <layout/tree_layout.h>
 
 namespace
 {
@@ -40,27 +41,36 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	widgets[1]->set_minimum( 50, 50 );
 	widgets[2]->set_minimum( 50, 50 );
 	widgets[3]->set_minimum( 50, 50 );
-	widgets[4]->set_minimum( 15, 25 );
-	widgets[5]->set_minimum( 15, 25 );
-	widgets[6]->set_minimum( 35.5, 25 );
+	widgets[4]->set_minimum( 10, 10 );
+	widgets[5]->set_minimum( 50, 35 );
+	widgets[6]->set_minimum( 50, 35 );
 
-	auto hbox = std::make_shared<layout::hbox_layout>();
-	hbox->set_padding( 5, 5, 5, 5 );
-	hbox->set_spacing( 5, 5 );
-	hbox->add( widgets[4] );
-	hbox->add( widgets[5] );
-	hbox->add( widgets[6] );
+	for ( auto &w: widgets )
+		w->set_expansion_flex( 1.0 );
+
+	/*
+	auto subl = std::make_shared<layout::box_layout>( base::alignment::BOTTOM );
+	subl->set_padding( 5, 5, 5, 5 );
+	subl->set_spacing( 5, 5 );
+	subl->add( widgets[4] );
+	subl->add( widgets[5] );
+	subl->add( widgets[6] );
+	*/
+
+	auto subl = std::make_shared<layout::tree_layout>( widgets[4], widgets[5], widgets[6] );
+	subl->set_padding( 5, 5, 5, 5 );
+	subl->set_spacing( 5, 5 );
 
 	// Setup constraints for the widgets
 	layout::packing_layout lay;
 	lay.set_padding( 15, 15, 10, 10 );
 	lay.set_spacing( 5, 3 );
-	lay.add( hbox, base::alignment::TOP );
+	lay.add( widgets[1], base::alignment::TOP );
 	lay.add( widgets[0], base::alignment::BOTTOM );
-	lay.add( widgets[1], base::alignment::LEFT );
+	lay.add( subl, base::alignment::LEFT );
 	lay.add( widgets[2], base::alignment::RIGHT );
 	lay.add( widgets[3], base::alignment::CENTER );
-	lay.compute_minimum();
+	lay.compute_bounds();
 
 	// Create a window
 	auto sys = platform::platform::find_running();
@@ -99,9 +109,9 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 			if ( i == 4 )
 			{
 				auto &r = rects.back();
-				r.resize( hbox->x1(), hbox->y1(), hbox->width(), hbox->height() );
+				r.resize( subl->x1(), subl->y1(), subl->width(), subl->height() );
 				r.draw( ogl, matrix );
-				ogl.translate( hbox->x1(), hbox->y1() );
+				ogl.translate( subl->x1(), subl->y1() );
 			}
 			auto &w = *widgets[i];
 			auto &r = rects[i];

@@ -17,6 +17,9 @@ namespace layout
 
 ////////////////////////////////////////
 
+/// @brief Layout which packs areas arounds the sides of a shrinking center area.
+///
+/// @image html doc/keyboard.svg
 class packing_layout : public layout
 {
 public:
@@ -25,7 +28,7 @@ public:
 	void add( const std::shared_ptr<area> &a, base::alignment where ) { _areas.emplace_back( a, where ); }
 
 	/// @brief Compute the minimum size of this layout.
-	void compute_minimum( void ) override;
+	void compute_bounds( void ) override;
 
 	/// @brief Compute the position and size of children
 	void compute_layout( void ) override;

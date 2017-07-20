@@ -18,10 +18,12 @@ packing_layout::packing_layout( void )
 
 ////////////////////////////////////////
 
-void packing_layout::compute_minimum( void )
+void packing_layout::compute_bounds( void )
 {
-	double w = _pad[0] + _pad[1];
-	double h = _pad[2] + _pad[3];
+	double minw = _pad[0] + _pad[1];
+	double minh = _pad[2] + _pad[3];
+	double maxw = _pad[0] + _pad[1];
+	double maxh = _pad[2] + _pad[3];
 
 	bool top = false;
 	bool bottom = false;
@@ -33,12 +35,14 @@ void packing_layout::compute_minimum( void )
 		auto a = s._area.lock();
 		if ( a )
 		{
-			a->compute_minimum();
+			a->compute_bounds();
 			switch ( s._align )
 			{
 				case base::alignment::CENTER:
-					w += a->minimum_width() + ( left ? _spacing[0] : 0.0 ) + ( right ? _spacing[0] : 0.0 );
-					h += a->minimum_height() + ( top ? _spacing[1] : 0.0 ) + ( bottom ? _spacing[1] : 0.0 );
+					minw += a->minimum_width() + ( left ? _spacing[0] : 0.0 ) + ( right ? _spacing[0] : 0.0 );
+					minh += a->minimum_height() + ( top ? _spacing[1] : 0.0 ) + ( bottom ? _spacing[1] : 0.0 );
+					maxw += a->maximum_width() + ( left ? _spacing[0] : 0.0 ) + ( right ? _spacing[0] : 0.0 );
+					maxh += a->maximum_height() + ( top ? _spacing[1] : 0.0 ) + ( bottom ? _spacing[1] : 0.0 );
 					top = true;
 					bottom = true;
 					right = true;
@@ -46,67 +50,87 @@ void packing_layout::compute_minimum( void )
 					break;
 
 				case base::alignment::TOP:
-					h += a->minimum_height() + ( top ? _spacing[1] : 0.0 );
-					w = std::max( w, a->minimum_width() );
+					minh += a->minimum_height() + ( top ? _spacing[1] : 0.0 );
+					maxh += a->maximum_height() + ( top ? _spacing[1] : 0.0 );
+					minw = std::max( minw, a->minimum_width() );
+					maxw = std::max( maxw, a->maximum_width() );
 					top = true;
 					break;
 
 				case base::alignment::TOP_LEFT:
-					w += a->minimum_width() + ( left ? _spacing[0] : 0.0 );
-					h += a->minimum_height() + ( top ? _spacing[1] : 0.0 );
+					minw += a->minimum_width() + ( left ? _spacing[0] : 0.0 );
+					minh += a->minimum_height() + ( top ? _spacing[1] : 0.0 );
+					maxw += a->maximum_width() + ( left ? _spacing[0] : 0.0 );
+					maxh += a->maximum_height() + ( top ? _spacing[1] : 0.0 );
 					top = true;
 					left = true;
 					break;
 
 				case base::alignment::TOP_RIGHT:
-					w += a->minimum_width() + ( right ? _spacing[0] : 0.0 );
-					h += a->minimum_height() + ( top ? _spacing[1] : 0.0 );
+					minw += a->minimum_width() + ( right ? _spacing[0] : 0.0 );
+					minh += a->minimum_height() + ( top ? _spacing[1] : 0.0 );
+					maxw += a->maximum_width() + ( right ? _spacing[0] : 0.0 );
+					maxh += a->maximum_height() + ( top ? _spacing[1] : 0.0 );
 					top = true;
 					right = true;
 					break;
 
 				case base::alignment::BOTTOM:
-					h += a->minimum_height() + ( bottom ? _spacing[1] : 0.0 );
-					w = std::max( w, a->minimum_width() );
+					minh += a->minimum_height() + ( bottom ? _spacing[1] : 0.0 );
+					minw = std::max( minw, a->minimum_width() );
+					maxh += a->maximum_height() + ( bottom ? _spacing[1] : 0.0 );
+					maxw = std::max( maxw, a->maximum_width() );
 					bottom = true;
 					break;
 
 				case base::alignment::BOTTOM_RIGHT:
-					w += a->minimum_width() + ( right ? _spacing[0] : 0.0 );
-					h += a->minimum_height() + ( bottom ? _spacing[1] : 0.0 );
+					minw += a->minimum_width() + ( right ? _spacing[0] : 0.0 );
+					minh += a->minimum_height() + ( bottom ? _spacing[1] : 0.0 );
+					maxw += a->maximum_width() + ( right ? _spacing[0] : 0.0 );
+					maxh += a->maximum_height() + ( bottom ? _spacing[1] : 0.0 );
 					bottom = true;
 					right = true;
 					break;
 
 				case base::alignment::BOTTOM_LEFT:
-					w += a->minimum_width() + ( left ? _spacing[0] : 0.0 );
-					h += a->minimum_height() + ( bottom ? _spacing[1] : 0.0 );
+					minw += a->minimum_width() + ( left ? _spacing[0] : 0.0 );
+					minh += a->minimum_height() + ( bottom ? _spacing[1] : 0.0 );
+					maxw += a->maximum_width() + ( left ? _spacing[0] : 0.0 );
+					maxh += a->maximum_height() + ( bottom ? _spacing[1] : 0.0 );
 					bottom = true;
 					left = true;
 					break;
 
 				case base::alignment::RIGHT:
-					w += a->minimum_width() + ( right ? _spacing[0] : 0.0 );
-					h = std::max( h, a->minimum_height() );
+					minw += a->minimum_width() + ( right ? _spacing[0] : 0.0 );
+					minh = std::max( minh, a->minimum_height() );
+					maxw += a->maximum_width() + ( right ? _spacing[0] : 0.0 );
+					maxh = std::max( maxh, a->maximum_height() );
 					right = true;
 					break;
 
 				case base::alignment::LEFT:
-					w += a->minimum_width() + ( left ? _spacing[0] : 0.0 );
-					h = std::max( h, a->minimum_height() );
+					minw += a->minimum_width() + ( left ? _spacing[0] : 0.0 );
+					minh = std::max( minh, a->minimum_height() );
+					maxw += a->maximum_width() + ( left ? _spacing[0] : 0.0 );
+					maxh = std::max( maxh, a->maximum_height() );
 					right = true;
 					break;
 			}
 		}
 	}
 
-	set_minimum( w, h );
+	set_minimum( minw, minh );
+	set_maximum( maxw, maxh );
 }
 
 ////////////////////////////////////////
 
 void packing_layout::compute_layout( void )
 {
+	// Clean up areas that have been deleted.
+	_areas.remove_if( []( const section &s ) { return s._area.expired(); } );
+
 	double x = _pad[0];
 	double y = _pad[2];
 	double w = std::max( width() - _pad[0] - _pad[1], minimum_width() );

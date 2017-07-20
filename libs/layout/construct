@@ -2,7 +2,9 @@
 lib = library "layout"
   source {
 	  "area.cpp";
+	  "layout.cpp";
 	  "box_layout.cpp";
 	  "packing_layout.cpp";
+	  "tree_layout.cpp";
   }
   libs "base"

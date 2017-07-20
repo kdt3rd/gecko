@@ -2,6 +2,8 @@
 #pragma once
 
 #include "area.h"
+#include <list>
+#include <memory>
 
 namespace layout
 {
@@ -28,6 +30,9 @@ public:
 	}
 
 protected:
+	void expand_width( const std::list<std::weak_ptr<area>> &areas, double extra );
+	void expand_height( const std::list<std::weak_ptr<area>> &areas, double extra );
+
 	double _pad[4] = { 0.0 };
 	double _spacing[2] = { 0.0 };
 };
