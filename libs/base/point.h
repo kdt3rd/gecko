@@ -29,11 +29,19 @@ public:
 	{
 	}
 
-	~point( void ) = default;
+	/// @brief Copy constructor.
 	constexpr point( const point &p ) = default;
+
+	/// @brief Move constructor.
+	constexpr point( point &&p ) noexcept = default;
+
+	/// @brief Destructor.
+	~point( void ) = default;
+
+	/// @brief Copy assignment.
 	point &operator=( const point &p ) = default;
 
-	constexpr point( point &&p ) noexcept = default;
+	/// @brief Move assignment.
 	point &operator=( point &&p ) noexcept = default;
 
 	/// @brief X coordinate of the point.

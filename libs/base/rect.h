@@ -48,6 +48,12 @@ public:
 		fix_extent();
 	}
 
+	rect( double x, double y, double w, double h )
+		: _position( x, y ), _extent( w, h )
+	{
+		fix_extent();
+	}
+
 	/// @brief Constructor from size
 	rect( const size &s )
 		: _extent( s )
@@ -140,6 +146,9 @@ public:
 
 	/// @brief Set size
 	void set_size( double w, double h ) { _extent.set_width( w ); _extent.set_height( h ); fix_extent(); }
+
+	/// @brief Set size
+	void set_size( const base::size &s ) { _extent = s; }
 
 	/// @brief Set left side
 	void set_x1( double x ) { _position.set_x( x ); }
