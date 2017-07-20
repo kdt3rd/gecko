@@ -18,6 +18,7 @@
 #include "color.h"
 
 #include <base/contract.h>
+#include <base/rect.h>
 
 #include <exception>
 #include <memory>
@@ -88,6 +89,11 @@ public:
 
 	/// @brief Set the viewport coordinates.
 	void viewport( double x, double y, double w, double h );
+
+	/// @brief Set the viewport coordinates.
+	void push_scissor( double x, double y, double w, double h );
+
+	void pop_scissor( void );
 
 	/// @brief Save the current matrix
 	void save_matrix( void );
@@ -197,6 +203,7 @@ public:
 
 private:
 	std::vector<matrix4> _matrix;
+	std::vector<base::rect> _scissors;
 };
 
 ////////////////////////////////////////

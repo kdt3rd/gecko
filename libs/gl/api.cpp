@@ -159,9 +159,46 @@ void api::depth_func( depth_test t )
 
 ////////////////////////////////////////
 
-void api::viewport( double x, double y, double w, double h )
+void api::viewport( double xx, double yy, double ww, double hh )
 {
-	glViewport( static_cast<GLint>( std::lround( x ) ), static_cast<GLint>( std::lround( y ) ), static_cast<GLsizei>( std::lround( w ) ), static_cast<GLsizei>( std::lround( h ) ) );
+	GLint x = static_cast<GLint>( std::lround( xx ) );
+	GLint y = static_cast<GLint>( std::lround( yy ) );
+	GLint w = static_cast<GLsizei>( std::lround( ww ) );
+	GLint h = static_cast<GLsizei>( std::lround( hh ) );
+	glViewport( x, y, w, h );
+}
+
+////////////////////////////////////////
+
+void api::push_scissor( double xx, double yy, double ww, double hh )
+{
+	_scissors.emplace_back( xx, yy, ww, hh );
+	if ( _scissors.empty() )
+		enable( capability::SCISSOR_TEST );
+	GLint x = static_cast<GLint>( std::lround( xx ) );
+	GLint y = static_cast<GLint>( std::lround( yy ) );
+	GLint w = static_cast<GLsizei>( std::lround( ww ) );
+	GLint h = static_cast<GLsizei>( std::lround( hh ) );
+	glScissor( x, y, w, h );
+}
+
+////////////////////////////////////////
+
+void api::pop_scissor( void )
+{
+	precondition( !_scissors.empty(), "no scissor to pop" );
+	_scissors.pop_back();
+	if ( _scissors.empty() )
+		disable( capability::SCISSOR_TEST );
+	else
+	{
+		const base::rect &r = _scissors.back();
+		GLint x = static_cast<GLint>( std::lround( r.x() ) );
+		GLint y = static_cast<GLint>( std::lround( r.y() ) );
+		GLint w = static_cast<GLsizei>( std::lround( r.width() ) );
+		GLint h = static_cast<GLsizei>( std::lround( r.height() ) );
+		glScissor( x, y, w, h );
+	}
 }
 
 ////////////////////////////////////////
