@@ -33,6 +33,7 @@ void packing_layout::compute_bounds( void )
 	base::rect min;
 	base::rect max;
 
+	// To compute the minimum size, we build backwards from the inside out.
 	for ( auto &s: base::reverse( _areas ) )
 	{
 		auto a = s._area.lock();

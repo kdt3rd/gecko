@@ -19,18 +19,23 @@ namespace layout
 
 /// @brief Layout which packs areas arounds the sides of a shrinking center area.
 ///
-/// @image html doc/keyboard.svg
+/// This layout puts it's areas along the sides in the order added.
+/// The widget will fill the selectd side, but will be at minimum size in the orthogonal direction.
+/// The last area can be put in the center, taking the rest of the unused space.
 class packing_layout : public layout
 {
 public:
+	/// @brief Default constructor.
 	packing_layout( void );
 
+	/// @brief Add area to one side.
+	//
+	/// @param a Area to add.
+	/// @param where Which side to add to.
 	void add( const std::shared_ptr<area> &a, base::alignment where );
 
-	/// @brief Compute the minimum size of this layout.
 	void compute_bounds( void ) override;
 
-	/// @brief Compute the position and size of children
 	void compute_layout( void ) override;
 
 private:

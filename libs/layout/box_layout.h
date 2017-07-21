@@ -17,17 +17,21 @@ namespace layout
 
 ////////////////////////////////////////
 
+/// @brief Layout that strings areas in a line.
+///
+/// This layout puts all areas side by side in a particular direction.
 class box_layout : public layout
 {
 public:
+	/// @brief Default constructor.
 	box_layout( base::alignment direction = base::alignment::RIGHT );
 
+	/// @brief Add an area.
+	/// @param a Area to add.
 	void add( const std::shared_ptr<area> &a ) { _areas.push_back( a ); }
 
-	/// @brief Compute the minimum size of this layout.
 	void compute_bounds( void ) override;
 
-	/// @brief Compute the position and size of children
 	void compute_layout( void ) override;
 
 private:

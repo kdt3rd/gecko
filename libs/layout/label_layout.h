@@ -14,6 +14,7 @@ namespace layout
 
 ////////////////////////////////////////
 
+/// @brief Layout which vertically aligns two areas.
 class label_layout : public layout
 {
 public:
