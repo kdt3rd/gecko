@@ -11,6 +11,10 @@ namespace layout
 class tree_layout : public layout
 {
 public:
+	tree_layout( void )
+	{
+	}
+
 	tree_layout( const std::shared_ptr<area> &g, const std::shared_ptr<area> &t, const std::shared_ptr<area> &c )
 		: _groove( g ), _title( t ), _content( c )
 	{
@@ -19,6 +23,21 @@ public:
 	tree_layout( double i, const std::shared_ptr<area> &t )
 		: _title( t ), _indent( i )
 	{
+	}
+
+	void set_groove( const std::shared_ptr<area> &g )
+	{
+		_groove = g;
+	}
+
+	void set_title( const std::shared_ptr<area> &t )
+	{
+		_title = t;
+	}
+
+	void set_content( const std::shared_ptr<area> &c )
+	{
+		_content = c;
 	}
 
 	/// @brief Compute the minimum size of this layout.

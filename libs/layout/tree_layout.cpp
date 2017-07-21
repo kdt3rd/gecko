@@ -1,5 +1,6 @@
 
 #include "tree_layout.h"
+#include <base/format.h>
 
 namespace layout
 {

@@ -25,7 +25,7 @@ class packing_layout : public layout
 public:
 	packing_layout( void );
 
-	void add( const std::shared_ptr<area> &a, base::alignment where ) { _areas.emplace_back( a, where ); }
+	void add( const std::shared_ptr<area> &a, base::alignment where );
 
 	/// @brief Compute the minimum size of this layout.
 	void compute_bounds( void ) override;

@@ -14,68 +14,78 @@
 #include <gl/png_image.h>
 #include <base/contract.h>
 #include <base/timer.h>
-#include <base/math_functions.h>
+#include <base/function_traits.h>
 #include <draw/path.h>
 #include <draw/rectangle.h>
 #include <layout/packing_layout.h>
 #include <layout/box_layout.h>
 #include <layout/tree_layout.h>
+#include <layout/form_layout.h>
+#include <layout/label_layout.h>
 
 namespace
 {
 
+template<typename Area>
+class widget : public Area
+{
+public:
+	widget( const gl::color &c )
+		: _rect( c )
+	{
+		this->set_minimum( 100, 25 );
+	}
+
+	void draw( gl::api &ogl, const gl::matrix4 &m )
+	{
+		_rect.resize( this->x(), this->y(), this->width(), this->height() );
+		_rect.draw( ogl, m );
+		ogl.save_matrix();
+		ogl.translate( this->x(), this->y() );
+		for ( auto &c: _children )
+			c( ogl, m );
+		ogl.restore_matrix();
+	}
+
+	template<typename W, class ...Args>
+	auto add_child( const std::shared_ptr<W> &a, Args &&...args ) -> decltype( Area::add( a, std::forward<Args>(args)...) )
+	{
+		_children.push_back( [=]( gl::api &ogl, const gl::matrix4 &m ) { a->draw( ogl, m ); } );
+		return Area::add( a, std::forward<Args>( args )... );
+	}
+
+private:
+	draw::rectangle _rect;
+	std::list<std::function<void(gl::api&,const gl::matrix4&)>> _children;
+};
+
+template<>
+class widget<layout::area> : public layout::area
+{
+public:
+	widget( const gl::color &c )
+		: _rect( c )
+	{
+		this->set_minimum( 50, 25 );
+	}
+
+	void draw( gl::api &ogl, const gl::matrix4 &m )
+	{
+		_rect.resize( this->x(), this->y(), this->width(), this->height() );
+		_rect.draw( ogl, m );
+	}
+
+private:
+	draw::rectangle _rect;
+};
+
 int safemain( int /*argc*/, char * /*argv*/ [] )
 {
-	std::vector<gl::color> colors = { gl::red, gl::green, gl::blue, gl::white, gl::cyan, gl::cyan, gl::yellow, gl::color( 0.5, 0.5, 0.5 ) };
-
-	std::vector<std::shared_ptr<layout::area>> widgets( 7 );
-	widgets[0] = std::make_shared<layout::area>();
-	widgets[1] = std::make_shared<layout::area>();
-	widgets[2] = std::make_shared<layout::area>();
-	widgets[3] = std::make_shared<layout::area>();
-	widgets[4] = std::make_shared<layout::area>();
-	widgets[5] = std::make_shared<layout::area>();
-	widgets[6] = std::make_shared<layout::area>();
-
-	widgets[0]->set_minimum( 50, 25 );
-	widgets[1]->set_minimum( 50, 50 );
-	widgets[2]->set_minimum( 50, 50 );
-	widgets[3]->set_minimum( 50, 50 );
-	widgets[4]->set_minimum( 10, 10 );
-	widgets[5]->set_minimum( 50, 35 );
-	widgets[6]->set_minimum( 50, 35 );
-
-	for ( auto &w: widgets )
-		w->set_expansion_flex( 1.0 );
-
-	/*
-	auto subl = std::make_shared<layout::box_layout>( base::alignment::BOTTOM );
-	subl->set_padding( 5, 5, 5, 5 );
-	subl->set_spacing( 5, 5 );
-	subl->add( widgets[4] );
-	subl->add( widgets[5] );
-	subl->add( widgets[6] );
-	*/
-
-	auto subl = std::make_shared<layout::tree_layout>( widgets[4], widgets[5], widgets[6] );
-	subl->set_padding( 5, 5, 5, 5 );
-	subl->set_spacing( 5, 5 );
-
-	// Setup constraints for the widgets
-	layout::packing_layout lay;
-	lay.set_padding( 15, 15, 10, 10 );
-	lay.set_spacing( 5, 3 );
-	lay.add( widgets[1], base::alignment::TOP );
-	lay.add( widgets[0], base::alignment::BOTTOM );
-	lay.add( subl, base::alignment::LEFT );
-	lay.add( widgets[2], base::alignment::RIGHT );
-	lay.add( widgets[3], base::alignment::CENTER );
-	lay.compute_bounds();
+	typedef widget<layout::area> simple;
 
 	// Create a window
 	auto sys = platform::platform::find_running();
 	auto win = sys->new_window();
-	win->resize( 400, 400 );
 	win->set_title( "Layout" );
 	win->acquire();
 
@@ -84,42 +94,40 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	gl::api ogl;
 	//ogl.setup_debugging();
 
-	// Create rectangles for each widget
-	std::vector<draw::rectangle> rects;
-	for ( size_t i = 0; i < widgets.size(); ++i )
-		rects.emplace_back( colors[i] );
-	rects.emplace_back( colors.back() );
+	// Create "widgets"
+	widget<layout::packing_layout> root( gl::grey );
+	root.set_padding( 5, 5, 5, 5 );
+	root.set_spacing( 5, 5 );
+
+	auto top = std::make_shared<widget<layout::box_layout>>( gl::green );
+	root.add_child( top, base::alignment::TOP );
+	root.add_child( std::make_shared<simple>( gl::blue ), base::alignment::LEFT );
+	root.add_child( std::make_shared<simple>( gl::blue ), base::alignment::RIGHT );
+
+	top->set_padding( 5, 5, 5, 5 );
+	top->set_spacing( 5, 5 );
+	for ( size_t i = 0; i < 10; ++i )
+		top->add_child( std::make_shared<simple>( gl::yellow ) );
+
+	root.compute_bounds();
+	win->resize( root.minimum_width(), root.minimum_height() );
 
 	// Render function
 	win->exposed = [&]( void )
 	{
 		win->acquire();
 
-		lay.set_size( win->width(), win->height() );
-		lay.compute_layout();
+		root.set_size( win->width(), win->height() );
+		root.compute_bounds();
+		root.compute_layout();
 
 		matrix = gl::matrix4::ortho( 0, static_cast<float>( win->width() ), 0, static_cast<float>( win->height() ) );
 
 		ogl.clear();
 		ogl.viewport( 0, 0, win->width(), win->height() );
-		ogl.save_matrix();
 
-		for ( size_t i = 0; i < widgets.size(); ++i )
-		{
-			if ( i == 4 )
-			{
-				auto &r = rects.back();
-				r.resize( subl->x1(), subl->y1(), subl->width(), subl->height() );
-				r.draw( ogl, matrix );
-				ogl.translate( subl->x1(), subl->y1() );
-			}
-			auto &w = *widgets[i];
-			auto &r = rects[i];
-			r.resize( w.x1(), w.y1(), w.width(), w.height() );
-			r.draw( ogl, matrix );
-		}
+		root.draw( ogl, matrix );
 
-		ogl.restore_matrix();
 		win->release();
 
 		// Cause a redraw to continue the animation
