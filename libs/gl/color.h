@@ -108,8 +108,11 @@ private:
 
 ////////////////////////////////////////
 
+constexpr color transparent( 0, 0, 0, 0 );
 constexpr color white( 1, 1, 1 );
 constexpr color black( 0, 0, 0 );
+constexpr color grey( 0.5, 0.5, 0.5 );
+constexpr color gray( 0.5, 0.5, 0.5 );
 constexpr color red( 1, 0, 0 );
 constexpr color green( 0, 1, 0 );
 constexpr color blue( 0, 0, 1 );
