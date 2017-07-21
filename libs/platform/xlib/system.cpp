@@ -40,6 +40,13 @@ xIOErrorCB( Display * )
 	exit( -1 );
 }
 
+void CloseDisplay( Display *disp )
+{
+	if ( disp != nullptr )
+		XCloseDisplay( disp );
+}
+
+
 }
 
 
@@ -61,7 +68,7 @@ system::system( const std::string &d )
 	XSetErrorHandler( &xErrorCB );
 	XSetIOErrorHandler( &xIOErrorCB );
 
-	_display.reset( XOpenDisplay( dname ), &XCloseDisplay );
+	_display.reset( XOpenDisplay( dname ), &CloseDisplay );
 	if ( ! _display )
 	{
 		if ( dname )
