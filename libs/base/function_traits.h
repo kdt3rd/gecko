@@ -97,13 +97,13 @@ template <typename R, typename... Args>
 struct function_traits< std::function<R ( Args... )>> : base_traits<R, Args...>
 {
 };
-	
+
 /// specialization for a class member function
 template <typename C, typename R, typename... Args>
 struct function_traits<R(C::*)(Args...)> : base_traits<R, Args...>
 {
 };
-	
+
 /// specialization for a const class member function
 template <typename C, typename R, typename... Args>
 struct function_traits<R(C::*)(Args...) const> : base_traits<R, Args...>

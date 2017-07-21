@@ -195,6 +195,13 @@ public:
 	/// @brief Grow the rectangle
 	void grow( double left, double right, double top, double bottom );
 
+	void include( rect &other );
+
+	bool empty( void ) const
+	{
+		return _extent.empty();
+	}
+
 private:
 	void fix_extent( void )
 	{

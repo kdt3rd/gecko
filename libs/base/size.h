@@ -11,6 +11,7 @@
 #include <cmath>
 #include <cstdint>
 #include <functional>
+#include <algorithm>
 
 namespace base
 {
@@ -81,6 +82,25 @@ public:
 	{
 		_w = std::floor( _w );
 		_h = std::floor( _h );
+	}
+
+	/// @brief Maximum operation.
+	void maximum( const size &o )
+	{
+		_w = std::max( _w, o.w() );
+		_h = std::max( _h, o.h() );
+	}
+
+	/// @brief Minimum operation.
+	void minimum( const size &o )
+	{
+		_w = std::min( _w, o.w() );
+		_h = std::min( _h, o.h() );
+	}
+
+	bool empty( void ) const
+	{
+		return _w > 0.0 && _h > 0.0;
 	}
 
 private:

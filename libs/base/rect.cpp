@@ -60,5 +60,18 @@ void rect::grow( double left, double right, double top, double bottom )
 
 ////////////////////////////////////////
 
+void rect::include( rect &other )
+{
+	double xx1 = std::min( x1(), other.x1() );
+	double yy1 = std::min( y1(), other.y1() );
+	double xx2 = std::max( x2(), other.x2() );
+	double yy2 = std::max( y2(), other.y2() );
+
+	set_horizontal( xx1, xx2 );
+	set_vertical( yy1, yy2 );
+}
+
+////////////////////////////////////////
+
 }
 
