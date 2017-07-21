@@ -156,7 +156,11 @@ void png_write( const char *file_name, size_t w, size_t h, size_t c )
 	}
 
 	std::unique_ptr<uint8_t[]> img( new uint8_t[w*h*c] );
+	GLint align = 0;
+	glGetIntegerv( GL_PACK_ALIGNMENT, &align );
+	glPixelStorei( GL_PACK_ALIGNMENT, 1 );
 	glReadPixels( 0, 0, static_cast<GLsizei>( w ), static_cast<GLsizei>( h ), fmt, GL_UNSIGNED_BYTE, img.get() );
+	glPixelStorei( GL_PACK_ALIGNMENT, align );
 
 	png_write_data( file_name, w, h, c, img.get(), true );
 }
