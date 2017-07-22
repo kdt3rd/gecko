@@ -100,7 +100,7 @@ public:
 
 	bool empty( void ) const
 	{
-		return _w > 0.0 && _h > 0.0;
+		return _w <= 0.0 && _h <= 0.0;
 	}
 
 private:

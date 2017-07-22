@@ -15,19 +15,28 @@ namespace layout
 ////////////////////////////////////////
 
 /// @brief Layout which vertically aligns two areas.
-class label_layout : public layout
+class field_layout : public layout
 {
 public:
-	label_layout( const std::shared_ptr<area> &l, const std::shared_ptr<area> &e );
+	field_layout( const std::shared_ptr<area> &l, const std::shared_ptr<area> &e );
+
+	double field_minimum_width( void );
+
+	void set_field_width( double w )
+	{
+		_width = w;
+	}
 
 	/// @brief Compute the minimum size of this layout.
 	void compute_bounds( void ) override;
 
 	/// @brief Compute the position and size of children
 	void compute_layout( void ) override;
+
 private:
+	double _width = 0.0;
 	std::weak_ptr<area> _label;
-	std::weak_ptr<area> _entry;
+	std::weak_ptr<area> _field;
 };
 
 ////////////////////////////////////////

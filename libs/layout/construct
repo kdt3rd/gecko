@@ -6,7 +6,7 @@ lib = library "layout"
 	  "box_layout.cpp";
 	  "packing_layout.cpp";
 	  "tree_layout.cpp";
-	  "label_layout.cpp";
+	  "field_layout.cpp";
 	  "form_layout.cpp";
   }
   libs "base"

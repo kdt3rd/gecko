@@ -21,7 +21,7 @@
 #include <layout/box_layout.h>
 #include <layout/tree_layout.h>
 #include <layout/form_layout.h>
-#include <layout/label_layout.h>
+#include <layout/field_layout.h>
 
 namespace
 {
@@ -72,33 +72,21 @@ private:
 	std::list<std::function<void(gl::api&,const gl::matrix4&)>> _children;
 };
 
-template<>
-class widget<layout::area> : public layout::area
+template<typename Area>
+class terminal_widget : public Area
 {
 public:
-	widget( const gl::color &c )
+	terminal_widget( const gl::color &c )
 		: _rect( c )
 	{
 		this->set_minimum( 50, 25 );
 	}
 
-	void draw( gl::api &ogl, const gl::matrix4 &m )
+	template<typename ...Args>
+	terminal_widget( const gl::color &c, Args &&...args )
+		: Area( std::forward<Args>( args )... ), _rect( c )
 	{
-		_rect.resize( this->x(), this->y(), this->width(), this->height() );
-		_rect.draw( ogl, m );
-	}
-
-private:
-	draw::rectangle _rect;
-};
-
-template<>
-class widget<layout::tree_layout> : public layout::tree_layout
-{
-public:
-	widget( const gl::color &cl, const std::shared_ptr<layout::area> &g, const std::shared_ptr<layout::area> &t, const std::shared_ptr<layout::area> &c )
-		: tree_layout( g, t, c ), _rect( cl )
-	{
+		this->set_minimum( 100, 25 );
 	}
 
 	template<typename W>
@@ -123,21 +111,23 @@ private:
 	std::list<std::function<void(gl::api&,const gl::matrix4&)>> _children;
 };
 
-typedef widget<layout::area> simple;
+typedef terminal_widget<layout::area> simple;
 
 std::list<std::shared_ptr<layout::area>> keepers;
 
 template<typename W>
-std::shared_ptr<widget<layout::tree_layout>> make_tree( const std::shared_ptr<W> &content )
+std::shared_ptr<terminal_widget<layout::tree_layout>> make_tree( const std::shared_ptr<W> &content )
 {
 	auto groove = std::make_shared<simple>( gl::blue );
-	groove->set_minimum_width( 10 );
+	groove->set_minimum_width( 15 );
 	auto title = std::make_shared<simple>( gl::blue );
-	auto result = std::make_shared<widget<layout::tree_layout>>( gl::grey, groove, title, content );
+	auto result = std::make_shared<terminal_widget<layout::tree_layout>>( gl::grey, groove, title, content );
+	result->set_spacing( 5, 5 );
+
 	result->draw_subchild( groove );
 	result->draw_subchild( title );
 	result->draw_subchild( content );
-	result->set_spacing( 5, 5 );
+
 	keepers.push_back( groove );
 	keepers.push_back( title );
 	keepers.push_back( content );
@@ -160,27 +150,48 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	//ogl.setup_debugging();
 
 	// Create "widgets"
-	widget<layout::packing_layout> root( gl::grey );
+	widget<layout::packing_layout> root( gl::black );
 	root.set_padding( 5, 5, 5, 5 );
 	root.set_spacing( 5, 5 );
 
-	auto list = std::make_shared<widget<layout::box_layout>>( gl::black, base::alignment::BOTTOM );
-	list->set_padding( 5, 5, 5, 5 );
+	auto list = std::make_shared<widget<layout::box_layout>>( gl::gray, base::alignment::BOTTOM );
+//	list->set_padding( 5, 5, 5, 5 );
 	list->set_spacing( 5, 5 );
+	auto form = std::make_shared<terminal_widget<layout::form_layout>>( gl::magenta, list );
+	form->draw_subchild( list );
 	for ( size_t i = 0; i < 5; ++i )
 	{
-		auto t = std::make_shared<simple>( gl::white );
-		t->set_minimum_width( 200 );
-		auto c = make_tree( t );
+		auto l = std::make_shared<simple>( gl::blue );
+		auto e = std::make_shared<simple>( gl::green );
+		auto f = std::make_shared<terminal_widget<layout::field_layout>>( gl::grey, l, e );
+		f->set_spacing( 5, 5 );
+		f->draw_subchild( l );
+		f->draw_subchild( e );
+		form->add( f );
+		auto c = make_tree( f );
 		for ( size_t j = 0; j < i; ++j )
 			c = make_tree( c );
 		list->add_child( make_tree( c ) );
 	}
 
-	auto top = std::make_shared<widget<layout::box_layout>>( gl::green );
+	auto label = std::make_shared<simple>( gl::red );
+	auto field = std::make_shared<simple>( gl::red );
+	auto ftest = std::make_shared<terminal_widget<layout::field_layout>>( gl::grey, label, field );
+	ftest->set_spacing( 5, 5 );
+	ftest->draw_subchild( label );
+	ftest->draw_subchild( field );
+
+	auto right = std::make_shared<widget<layout::box_layout>>( gl::gray, base::alignment::BOTTOM );
+	right->add_child( ftest );
+//	right->set_padding( 5, 5, 5, 5 );
+	right->set_spacing( 5, 5 );
+
+	auto top = std::make_shared<widget<layout::box_layout>>( gl::grey );
+	auto center = std::make_shared<simple>( gl::white );
 	root.add_child( top, base::alignment::TOP );
-	root.add_child( list, base::alignment::LEFT );
-	root.add_child( std::make_shared<simple>( gl::blue ), base::alignment::RIGHT );
+	root.add_child( form, base::alignment::LEFT );
+	root.add_child( right, base::alignment::RIGHT );
+	root.add_child( center, base::alignment::CENTER );
 
 	top->set_padding( 5, 5, 5, 5 );
 	top->set_spacing( 5, 5 );
