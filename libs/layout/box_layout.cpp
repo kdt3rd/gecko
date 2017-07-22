@@ -46,8 +46,11 @@ void box_layout::compute_bounds( void )
 					maxh = std::max( maxh, a->maximum_height() );
 				}
 			}
-			minw += _spacing[0] * ( _areas.size() - 1 );
-			maxw += _spacing[0] * ( _areas.size() - 1 );
+			if ( !_areas.empty() )
+			{
+				minw += _spacing[0] * ( _areas.size() - 1 );
+				maxw += _spacing[0] * ( _areas.size() - 1 );
+			}
 			break;
 
 		case base::alignment::TOP:
@@ -64,8 +67,11 @@ void box_layout::compute_bounds( void )
 					maxh += a->maximum_height();
 				}
 			}
-			minh += _spacing[1] * ( _areas.size() - 1 );
-			maxh += _spacing[1] * ( _areas.size() - 1 );
+			if ( !_areas.empty() )
+			{
+				minh += _spacing[1] * ( _areas.size() - 1 );
+				maxh += _spacing[1] * ( _areas.size() - 1 );
+			}
 			break;
 
 		case base::alignment::TOP_LEFT:
@@ -84,10 +90,13 @@ void box_layout::compute_bounds( void )
 					maxh += a->maximum_height();
 				}
 			}
-			minw += _spacing[0] * ( _areas.size() - 1 );
-			maxw += _spacing[0] * ( _areas.size() - 1 );
-			minh += _spacing[1] * ( _areas.size() - 1 );
-			maxh += _spacing[1] * ( _areas.size() - 1 );
+			if ( !_areas.empty() )
+			{
+				minw += _spacing[0] * ( _areas.size() - 1 );
+				minh += _spacing[1] * ( _areas.size() - 1 );
+				maxw += _spacing[0] * ( _areas.size() - 1 );
+				maxh += _spacing[1] * ( _areas.size() - 1 );
+			}
 			break;
 
 		case base::alignment::CENTER:
@@ -97,6 +106,11 @@ void box_layout::compute_bounds( void )
 	minh += _pad[2] + _pad[3];
 	maxw += _pad[0] + _pad[1];
 	maxh += _pad[2] + _pad[3];
+	if ( _areas.empty() )
+	{
+		maxw = 1e6;
+		maxh = 1e6;
+	}
 
 	set_minimum( minw, minh );
 	set_maximum( maxw, maxh );
@@ -175,7 +189,10 @@ void box_layout::compute_layout( void )
 	{
 		auto a = wa.lock();
 		if ( a )
+		{
 			a->set_size( a->minimum_size() );
+			a->compute_layout();
+		}
 	}
 
 	double w = std::max( 0.0, width() - _pad[0] - _pad[1] );
