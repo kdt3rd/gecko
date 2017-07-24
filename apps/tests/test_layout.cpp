@@ -22,6 +22,7 @@
 #include <layout/tree_layout.h>
 #include <layout/form_layout.h>
 #include <layout/field_layout.h>
+#include <layout/grid_layout.h>
 
 namespace
 {
@@ -115,10 +116,17 @@ typedef terminal_widget<layout::area> simple;
 
 std::list<std::shared_ptr<layout::area>> keepers;
 
+std::shared_ptr<simple> make_simple( const gl::color &c )
+{
+	auto a = std::make_shared<simple>( c );
+	keepers.push_back( a );
+	return a;
+}
+
 template<typename W>
 std::shared_ptr<terminal_widget<layout::tree_layout>> make_tree( const std::shared_ptr<W> &content )
 {
-	auto groove = std::make_shared<simple>( gl::blue );
+	auto groove = std::make_shared<simple>( gl::color( 0.45, 0.45, 0.45 ) );
 	groove->set_minimum_width( 15 );
 	auto title = std::make_shared<simple>( gl::blue );
 	auto result = std::make_shared<terminal_widget<layout::tree_layout>>( gl::grey, groove, title, content );
@@ -150,20 +158,20 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	//ogl.setup_debugging();
 
 	// Create "widgets"
-	widget<layout::packing_layout> root( gl::black );
+	widget<layout::packing_layout> root( gl::white );
 	root.set_padding( 5, 5, 5, 5 );
 	root.set_spacing( 5, 5 );
 
 	auto list = std::make_shared<widget<layout::box_layout>>( gl::gray, base::alignment::BOTTOM );
-//	list->set_padding( 5, 5, 5, 5 );
 	list->set_spacing( 5, 5 );
 	auto form = std::make_shared<terminal_widget<layout::form_layout>>( gl::magenta, list );
 	form->draw_subchild( list );
-	for ( size_t i = 0; i < 5; ++i )
+	for ( size_t i = 0; i < 3; ++i )
 	{
 		auto l = std::make_shared<simple>( gl::blue );
 		auto e = std::make_shared<simple>( gl::green );
 		auto f = std::make_shared<terminal_widget<layout::field_layout>>( gl::grey, l, e );
+		e->set_minimum_width( 150 );
 		f->set_spacing( 5, 5 );
 		f->draw_subchild( l );
 		f->draw_subchild( e );
@@ -183,11 +191,10 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 
 	auto right = std::make_shared<widget<layout::box_layout>>( gl::gray, base::alignment::BOTTOM );
 	right->add_child( ftest );
-//	right->set_padding( 5, 5, 5, 5 );
 	right->set_spacing( 5, 5 );
 
 	auto top = std::make_shared<widget<layout::box_layout>>( gl::grey );
-	auto center = std::make_shared<simple>( gl::white );
+	auto center = std::make_shared<widget<layout::grid_layout>>( gl::black );
 	root.add_child( top, base::alignment::TOP );
 	root.add_child( form, base::alignment::LEFT );
 	root.add_child( right, base::alignment::RIGHT );
@@ -201,6 +208,16 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		a->set_expansion_flex( 1.0 );
 		top->add_child( a );
 	}
+
+	center->add_columns( 3 );
+	center->add_rows( 3 );
+	center->set_padding( 5, 5, 5, 5 );
+	center->set_spacing( 5, 5 );
+	center->add_child( make_simple( gl::blue ), 0, 0, 2, 1 );
+	center->add_child( make_simple( gl::blue ), 2, 0, 1, 2 );
+	center->add_child( make_simple( gl::blue ), 1, 2, 2, 1 );
+	center->add_child( make_simple( gl::blue ), 0, 1, 1, 2 );
+	center->add_child( make_simple( gl::red ), 1, 1, 1, 1 );
 
 	root.compute_bounds();
 	win->resize( root.minimum_width(), root.minimum_height() );
@@ -222,9 +239,6 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		root.draw( ogl, matrix );
 
 		win->release();
-
-		// Cause a redraw to continue the animation
-		//win->invalidate( base::rect() );
 	};
 
 	// Key to take a screenshot.

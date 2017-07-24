@@ -8,5 +8,6 @@ lib = library "layout"
 	  "tree_layout.cpp";
 	  "field_layout.cpp";
 	  "form_layout.cpp";
+	  "grid_layout.cpp";
   }
   libs "base"

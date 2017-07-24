@@ -10,7 +10,7 @@ namespace layout
 
 ////////////////////////////////////////
 
-/// @brief Base class for a layout
+/// @brief Base class for a layout.
 ///
 /// The base class provides padding (space around the outside of the children areas),
 /// and spacing (space between children areas).
@@ -35,10 +35,48 @@ public:
 
 protected:
 	/// @brief Distribute the extra width.
-	void expand_width( const std::list<std::weak_ptr<area>> &areas, double extra );
+	void expand_width( std::list<std::shared_ptr<area>> &areas, double extra );
+
+	/// @brief Distribute the extra width.
+	template<typename Container>
+	void expand_width( const Container &areas, double extra )
+	{
+		if ( extra <= 0.0 )
+			return;
+
+		// Lock the pointers and remove any null pointer.
+		std::list<std::shared_ptr<area>> lst;
+		for ( auto &p: areas )
+		{
+			auto a = p.lock();
+			if ( a )
+				lst.push_back( a );
+		}
+
+		expand_width( lst, extra );
+	}
 
 	/// @brief Distribute the extra height.
-	void expand_height( const std::list<std::weak_ptr<area>> &areas, double extra );
+	void expand_height( std::list<std::shared_ptr<area>> &areas, double extra );
+
+	/// @brief Distribute the extra height.
+	template<typename Container>
+	void expand_height( const Container &areas, double extra )
+	{
+		if ( extra <= 0.0 )
+			return;
+
+		// Lock the pointers and remove any null pointer.
+		std::list<std::shared_ptr<area>> lst;
+		for ( auto &p: areas )
+		{
+			auto a = p.lock();
+			if ( a )
+				lst.push_back( a );
+		}
+
+		expand_height( lst, extra );
+	}
 
 	double _pad[4] = { 0.0 };
 	double _spacing[2] = { 0.0 };

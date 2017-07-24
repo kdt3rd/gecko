@@ -33,6 +33,8 @@ void tree_layout::compute_bounds( void )
 		minh += c->minimum_height();
 		maxw = std::max( maxw, c->maximum_width() );
 		maxh += c->maximum_height();
+		if ( !std::dynamic_pointer_cast<tree_layout>( c ) )
+			minw += _indent + _spacing[0];
 	}
 	if ( g )
 	{
@@ -88,8 +90,16 @@ void tree_layout::compute_layout( void )
 	y += th + _spacing[1];
 	if ( c )
 	{
-		c->set( { x, y }, { cw, ch } );
-		c->compute_layout();
+		if ( std::dynamic_pointer_cast<tree_layout>( c ) )
+		{
+			c->set( { x, y }, { cw, ch } );
+			c->compute_layout();
+		}
+		else
+		{
+			c->set( { x + _indent + _spacing[0], y }, { cw - _indent - _spacing[0], ch } );
+			c->compute_layout();
+		}
 	}
 }
 

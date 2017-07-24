@@ -121,11 +121,11 @@ public:
 	/// @brief Priority for expanding areas.
 	///
 	/// When multiple areas can be expanded, the higher priority ones are expanded first.
-	size_t expansion_priority( void ) const { return _priority; }
+	int32_t expansion_priority( void ) const { return _priority; }
 
 	/// @brief Set the priority for expanding areas.
 	///
-	void set_expansion_priority( size_t p ) { _priority = p; }
+	void set_expansion_priority( int32_t p ) { _priority = p; }
 
 	void set_expansion_flex( double f = 1.0 );
 
@@ -165,7 +165,7 @@ private:
 	base::size _min = { 0.0, 0.0 };
 	base::size _max = { 1e6, 1e6 };
 	double _flex = 0.0;
-	size_t _priority = 0;
+	int32_t _priority = 0;
 };
 
 ////////////////////////////////////////

@@ -6,19 +6,10 @@ namespace layout
 
 ////////////////////////////////////////
 
-void layout::expand_width( const std::list<std::weak_ptr<area>> &areas, double extra )
+void layout::expand_width( std::list<std::shared_ptr<area>> &lst, double extra )
 {
 	if ( extra <= 0.0 )
 		return;
-
-	// Lock the pointers and remove any null pointer.
-	std::list<std::shared_ptr<area>> lst;
-	for ( auto &p: areas )
-	{
-		auto a = p.lock();
-		if ( a )
-			lst.push_back( a );
-	}
 
 	// Sort by priority (descending order).
 	lst.sort( []( const std::shared_ptr<area> &a, const std::shared_ptr<area> &b ) { return b->expansion_priority() < a->expansion_priority(); } );
@@ -27,7 +18,7 @@ void layout::expand_width( const std::list<std::weak_ptr<area>> &areas, double e
 	while ( !lst.empty() && extra > 0.0 )
 	{
 		double overall_flex = 0.0;
-		size_t pri = lst.front()->expansion_priority();
+		int32_t pri = lst.front()->expansion_priority();
 		while ( !lst.empty() && lst.front()->expansion_priority() == pri )
 		{
 			overall_flex += lst.front()->expansion_flex();
@@ -50,19 +41,10 @@ void layout::expand_width( const std::list<std::weak_ptr<area>> &areas, double e
 
 ////////////////////////////////////////
 
-void layout::expand_height( const std::list<std::weak_ptr<area>> &areas, double extra )
+void layout::expand_height( std::list<std::shared_ptr<area>> &lst, double extra )
 {
 	if ( extra <= 0.0 )
 		return;
-
-	// Lock the pointers and remove any null pointer.
-	std::list<std::shared_ptr<area>> lst;
-	for ( auto &p: areas )
-	{
-		auto a = p.lock();
-		if ( a )
-			lst.push_back( a );
-	}
 
 	// Sort by priority
 	lst.sort( []( const std::shared_ptr<area> &a, const std::shared_ptr<area> &b ) { return b->expansion_priority() < a->expansion_priority(); } );
@@ -71,7 +53,7 @@ void layout::expand_height( const std::list<std::weak_ptr<area>> &areas, double 
 	while ( !lst.empty() && extra > 0.0 )
 	{
 		double overall_flex = 0.0;
-		size_t pri = lst.front()->expansion_priority();
+		int32_t pri = lst.front()->expansion_priority();
 		while ( !lst.empty() && lst.front()->expansion_priority() == pri )
 		{
 			overall_flex += lst.front()->expansion_flex();

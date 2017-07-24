@@ -1,4 +1,20 @@
 
 /// @namespace layout
-/// @brief Layout algorithms for rectangles
+/// @brief Layout algorithms for areas.
 ///
+/// An area is a rectangular region.
+/// This area can have a minimum and maximum size, as well as parameters controlling how it expands (or contracts).
+/// @sa area
+///
+/// A layout contains areas, and will control the size and positions of those areas.
+/// Since it is also an area, a layout can be nested in another layout.
+/// @sa layout
+///
+/// There are several types of layouts.
+///  - Box layout: areas will flow in a direction (@sa box_layout).
+///  - Packing layout: pack areas along it's outside edges.
+///  - Grid layout: arrange areas in a grid.
+///  - Tree layout: arrange areas in a hierarchy.
+///  - Form and field layout: align areas as labels and fields.
+///
+
