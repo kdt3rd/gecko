@@ -48,7 +48,7 @@ void form_layout::compute_bounds( void )
 
 void form_layout::compute_layout( void )
 {
-	_layout->set( { 0, 0 }, { width(), height() } );
+	_layout->set( { x1(), y1() }, { width(), height() } );
 	_layout->compute_layout();
 }
 

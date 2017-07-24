@@ -85,13 +85,13 @@ void field_layout::compute_layout( void )
 	w -= fw;
 	if ( l )
 	{
-		l->set( { x, _pad[2] }, { w, h } );
+		l->set( { x1() + x, y1() + _pad[2] }, { w, h } );
 		l->compute_layout();
 		x += w + _spacing[0];
 	}
 	if ( f )
 	{
-		f->set( { x, _pad[2] }, { fw, h } );
+		f->set( { x1() + x, y1() + _pad[2] }, { fw, h } );
 		f->compute_layout();
 	}
 }

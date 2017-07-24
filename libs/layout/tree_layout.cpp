@@ -90,13 +90,13 @@ void tree_layout::compute_layout( void )
 	double y = _pad[2];
 	if ( g )
 	{
-		g->set( { x, y }, { iw, th + _spacing[1] + ch } );
+		g->set( { x1() + x, y1() + y }, { iw, th + _spacing[1] + ch } );
 		g->compute_layout();
 	}
 	x += iw;
 	if ( t )
 	{
-		t->set( { x, y }, { cw, th } );
+		t->set( { x1() + x, y1() + y }, { cw, th } );
 		t->compute_layout();
 	}
 	y += th + _spacing[1];
@@ -107,12 +107,12 @@ void tree_layout::compute_layout( void )
 		{
 			if ( std::dynamic_pointer_cast<tree_layout>( a ) )
 			{
-				a->set( { x, y }, { cw, a->minimum_height() } );
+				a->set( { x1() + x, y1() + y }, { cw, a->minimum_height() } );
 				a->compute_layout();
 			}
 			else
 			{
-				a->set( { x + _indent, y }, { cw - _indent, a->minimum_height() } );
+				a->set( { x1() + x + _indent, y1() + y }, { cw - _indent, a->minimum_height() } );
 				a->compute_layout();
 			}
 			y += a->minimum_height() + _spacing[1];

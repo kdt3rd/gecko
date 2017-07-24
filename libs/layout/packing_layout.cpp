@@ -164,7 +164,7 @@ void packing_layout::compute_layout( void )
 		{
 			if ( w <= 0.0 || h <= 0.0 )
 			{
-				a->set( { x, y }, { w, h } );
+				a->set( { x1() + x, y1() + y }, { w, h } );
 				a->compute_layout();
 				continue;
 			}
@@ -180,7 +180,7 @@ void packing_layout::compute_layout( void )
 			{
 				// Fill the last remaining space
 				case base::alignment::CENTER:
-					a->set( { x, y }, { w, h } );
+					a->set( { x1() + x, y1() + y }, { w, h } );
 					x += w / 2.0;
 					y += h / 2.0;
 					w = 0.0;
@@ -193,7 +193,7 @@ void packing_layout::compute_layout( void )
 
 				// Fill the space at the top
 				case base::alignment::TOP:
-					a->set( { x, y }, { w, ah } );
+					a->set( { x1() + x, y1() + y }, { w, ah } );
 					ah += ( top ? _spacing[1] : 0.0 );
 					y += ah;
 					h -= ah;
@@ -202,7 +202,7 @@ void packing_layout::compute_layout( void )
 
 				// Fill the space at the top left
 				case base::alignment::TOP_LEFT:
-					a->set( { x, y }, { aw, ah } );
+					a->set( { x1() + x, y1() + y }, { aw, ah } );
 					aw += ( left ? _spacing[0] : 0.0 );
 					ah += ( top ? _spacing[1] : 0.0 );
 					x += aw;
@@ -214,7 +214,7 @@ void packing_layout::compute_layout( void )
 					break;
 
 				case base::alignment::TOP_RIGHT:
-					a->set( { x, y + h - ah }, { aw, ah } );
+					a->set( { x1() + x, y1() + y + h - ah }, { aw, ah } );
 					aw += ( right ? _spacing[0] : 0.0 );
 					ah += ( top ? _spacing[1] : 0.0 );
 					y += ah;
@@ -225,14 +225,14 @@ void packing_layout::compute_layout( void )
 					break;
 
 				case base::alignment::BOTTOM:
-					a->set( { x, y + h - ah }, { w, ah } );
+					a->set( { x1() + x, y1() + y + h - ah }, { w, ah } );
 					ah += ( bottom ? _spacing[1] : 0.0 );
 					h -= ah;
 					bottom = true;
 					break;
 
 				case base::alignment::BOTTOM_RIGHT:
-					a->set( { x + w - aw, y + h - ah }, { aw, ah } );
+					a->set( { x1() + x + w - aw, y1() + y + h - ah }, { aw, ah } );
 					aw += ( right ? _spacing[0] : 0.0 );
 					ah += ( bottom ? _spacing[1] : 0.0 );
 					w -= aw;
@@ -242,7 +242,7 @@ void packing_layout::compute_layout( void )
 					break;
 
 				case base::alignment::BOTTOM_LEFT:
-					a->set( { x, y + h - ah }, { aw, ah } );
+					a->set( { x1() + x, y1() + y + h - ah }, { aw, ah } );
 					aw += ( left ? _spacing[0] : 0.0 );
 					ah += ( bottom ? _spacing[1] : 0.0 );
 					x += aw;
@@ -253,14 +253,14 @@ void packing_layout::compute_layout( void )
 					break;
 
 				case base::alignment::RIGHT:
-					a->set( { x + w - aw, y }, { aw, h } );
+					a->set( { x1() + x + w - aw, y1() + y }, { aw, h } );
 					aw += ( right ? _spacing[0] : 0.0 );
 					w -= aw;
 					right = true;
 					break;
 
 				case base::alignment::LEFT:
-					a->set( { x, y }, { aw, h } );
+					a->set( { x1() + x, y1() + y }, { aw, h } );
 					aw += ( right ? _spacing[0] : 0.0 );
 					x += aw;
 					w -= aw;

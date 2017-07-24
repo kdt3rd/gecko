@@ -169,10 +169,10 @@ void grid_layout::compute_layout( void )
 			auto r = _cols.at( c._x + c._w - 1 );
 			auto t = _rows.at( c._y );
 			auto b = _rows.at( c._y + c._h - 1 );
-			a->set_x1( l->x1() );
-			a->set_y1( t->y1() );
-			a->set_x2( r->x2() );
-			a->set_y2( b->y2() );
+			a->set_x1( x1() + l->x1() );
+			a->set_y1( y1() + t->y1() );
+			a->set_x2( x1() + r->x2() );
+			a->set_y2( y1() + b->y2() );
 			a->compute_layout();
 		}
 	}

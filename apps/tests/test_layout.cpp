@@ -48,11 +48,11 @@ public:
 	{
 		_rect.resize( this->x(), this->y(), this->width(), this->height() );
 		_rect.draw( ogl, m );
-		ogl.save_matrix();
-		ogl.translate( this->x(), this->y() );
+//		ogl.save_matrix();
+//		ogl.translate( this->x(), this->y() );
 		for ( auto &c: _children )
 			c( ogl, m );
-		ogl.restore_matrix();
+//		ogl.restore_matrix();
 	}
 
 	template<typename W>
@@ -100,11 +100,11 @@ public:
 	{
 		_rect.resize( this->x(), this->y(), this->width(), this->height() );
 		_rect.draw( ogl, m );
-		ogl.save_matrix();
-		ogl.translate( this->x(), this->y() );
+//		ogl.save_matrix();
+//		ogl.translate( this->x(), this->y() );
 		for ( auto &c: _children )
 			c( ogl, m );
-		ogl.restore_matrix();
+//		ogl.restore_matrix();
 	}
 
 private:
@@ -201,7 +201,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	right->set_spacing( 5, 5 );
 
 	auto top = std::make_shared<widget<layout::box_layout>>( gl::grey );
-	auto center = std::make_shared<widget<layout::grid_layout>>( gl::black );
+	auto center = std::make_shared<widget<layout::box_layout>>( gl::black, base::alignment::BOTTOM );
 	root.add_child( top, base::alignment::TOP );
 	root.add_child( form, base::alignment::LEFT );
 	root.add_child( right, base::alignment::RIGHT );
@@ -216,17 +216,24 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		top->add_child( a );
 	}
 
-	center->add_columns( 3 );
-	center->add_rows( 3 );
-	center->set_padding( 5, 5, 5, 5 );
-	center->set_spacing( 5, 5 );
-	center->add_child( make_simple( gl::blue ), 0, 0, 2, 1 );
-	center->add_child( make_simple( gl::blue ), 2, 0, 1, 2 );
-	center->add_child( make_simple( gl::blue ), 1, 2, 2, 1 );
-	center->add_child( make_simple( gl::blue ), 0, 1, 1, 2 );
-	center->add_child( make_simple( gl::red ), 1, 1, 1, 1 );
+	auto grid = std::make_shared<widget<layout::grid_layout>>( gl::black );
+	grid->add_columns( 3 );
+	grid->add_rows( 3 );
+	grid->set_padding( 5, 5, 5, 5 );
+	grid->set_spacing( 5, 5 );
+	grid->add_child( make_simple( gl::blue ), 0, 0, 2, 1 );
+	grid->add_child( make_simple( gl::blue ), 2, 0, 1, 2 );
+	grid->add_child( make_simple( gl::blue ), 1, 2, 2, 1 );
+	grid->add_child( make_simple( gl::blue ), 0, 1, 1, 2 );
+	grid->add_child( make_simple( gl::red ), 1, 1, 1, 1 );
+	center->add_child( grid );
+
+	auto spring = std::make_shared<simple>( gl::color( 0.85, 0.85, 0.85 ) );
+	spring->set_expansion_flex( 1.0 );
+	center->add_child( spring );
 
 	root.compute_bounds();
+	win->set_minimum_size( root.minimum_width(), root.minimum_height() );
 	win->resize( root.minimum_width(), root.minimum_height() );
 
 	// Render function

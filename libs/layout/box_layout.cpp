@@ -216,7 +216,7 @@ void box_layout::compute_layout( void )
 		{
 			double aw = a->width();
 			double ah = a->height();
-			a->set( { x, y }, { aw * dx + w, ah * dy + h } );
+			a->set( { x1() + x, y1() + y }, { aw * dx + w, ah * dy + h } );
 			x += ( aw + _spacing[0] ) * dx;
 			y += ( ah + _spacing[1] ) * dy;
 			a->compute_layout();
