@@ -127,12 +127,13 @@ std::shared_ptr<widget<layout::tree_layout>> make_tree( void )
 {
 	auto groove = std::make_shared<simple>( gl::color( 0.45, 0.45, 0.45 ) );
 	keepers.push_back( groove );
-	groove->set_minimum_width( 10 );
+	groove->set_minimum_width( 15 );
 
 	auto title = std::make_shared<simple>( gl::blue );
 	keepers.push_back( title );
 
 	auto result = std::make_shared<widget<layout::tree_layout>>( gl::grey, groove, title );
+	result->set_indent( 15 );
 	result->set_spacing( 5, 5 );
 	result->draw_subchild( groove );
 	result->draw_subchild( title );

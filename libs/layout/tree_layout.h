@@ -35,6 +35,11 @@ public:
 		_title = t;
 	}
 
+	void set_indent( double i )
+	{
+		_indent = i;
+	}
+
 	void add( const std::shared_ptr<area> &c )
 	{
 		_areas.push_back( c );
