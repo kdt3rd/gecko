@@ -11,7 +11,6 @@ void tree_layout::compute_bounds( void )
 {
 	auto g = _groove.lock();
 	auto t = _title.lock();
-	auto c = _content.lock();
 
 	double minw = 0.0;
 	double minh = 0.0;
@@ -26,15 +25,28 @@ void tree_layout::compute_bounds( void )
 		maxw = std::max( maxw, t->maximum_width() );
 		maxh += t->maximum_height();
 	}
-	if ( c )
+	for ( auto &w: _areas )
 	{
-		c->compute_bounds();
-		minw = std::max( minw, c->minimum_width() );
-		minh += c->minimum_height();
-		maxw = std::max( maxw, c->maximum_width() );
-		maxh += c->maximum_height();
-		if ( !std::dynamic_pointer_cast<tree_layout>( c ) )
-			minw += _indent + _spacing[0];
+		auto a = w.lock();
+		if ( a )
+		{
+			a->compute_bounds();
+			if ( std::dynamic_pointer_cast<tree_layout>( a ) )
+				minw = std::max( minw, a->minimum_width() );
+			else
+				minw = std::max( minw, a->minimum_width() + _indent + _spacing[0] );
+			minh += a->minimum_height();
+			if ( std::dynamic_pointer_cast<tree_layout>( a ) )
+				maxw = std::max( maxw, a->maximum_width() );
+			else
+				maxw = std::max( maxw, a->maximum_width() + _indent + _spacing[0] );
+			maxh += a->maximum_height();
+		}
+	}
+	if ( !_areas.empty() )
+	{
+		minh += ( _areas.size() - 1 ) * _spacing[1];
+		maxh += ( _areas.size() - 1 ) * _spacing[1];
 	}
 	if ( g )
 	{
@@ -60,8 +72,6 @@ void tree_layout::compute_layout( void )
 {
 	auto g = _groove.lock();
 	auto t = _title.lock();
-	auto c = _content.lock();
-
 
 	double iw = _indent;
 	if ( g )
@@ -88,17 +98,22 @@ void tree_layout::compute_layout( void )
 		t->compute_layout();
 	}
 	y += th + _spacing[1];
-	if ( c )
+	for ( auto &w: _areas )
 	{
-		if ( std::dynamic_pointer_cast<tree_layout>( c ) )
+		auto a = w.lock();
+		if ( a )
 		{
-			c->set( { x, y }, { cw, ch } );
-			c->compute_layout();
-		}
-		else
-		{
-			c->set( { x + _indent + _spacing[0], y }, { cw - _indent - _spacing[0], ch } );
-			c->compute_layout();
+			if ( std::dynamic_pointer_cast<tree_layout>( a ) )
+			{
+				a->set( { x, y }, { cw, a->minimum_height() } );
+				a->compute_layout();
+			}
+			else
+			{
+				a->set( { x + _indent + _spacing[0], y }, { cw - _indent - _spacing[0], a->minimum_height() } );
+				a->compute_layout();
+			}
+			y += a->minimum_height() + _spacing[1];
 		}
 	}
 }

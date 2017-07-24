@@ -123,23 +123,20 @@ std::shared_ptr<simple> make_simple( const gl::color &c )
 	return a;
 }
 
-template<typename W>
-std::shared_ptr<terminal_widget<layout::tree_layout>> make_tree( const std::shared_ptr<W> &content )
+std::shared_ptr<widget<layout::tree_layout>> make_tree( void )
 {
 	auto groove = std::make_shared<simple>( gl::color( 0.45, 0.45, 0.45 ) );
-	groove->set_minimum_width( 15 );
-	auto title = std::make_shared<simple>( gl::blue );
-	auto result = std::make_shared<terminal_widget<layout::tree_layout>>( gl::grey, groove, title, content );
-	result->set_spacing( 5, 5 );
+	keepers.push_back( groove );
+	groove->set_minimum_width( 10 );
 
+	auto title = std::make_shared<simple>( gl::blue );
+	keepers.push_back( title );
+
+	auto result = std::make_shared<widget<layout::tree_layout>>( gl::grey, groove, title );
+	result->set_spacing( 5, 5 );
 	result->draw_subchild( groove );
 	result->draw_subchild( title );
-	result->draw_subchild( content );
 
-	keepers.push_back( groove );
-	keepers.push_back( title );
-	keepers.push_back( content );
-	keepers.push_back( result );
 	return result;
 }
 
@@ -162,10 +159,10 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	root.set_padding( 5, 5, 5, 5 );
 	root.set_spacing( 5, 5 );
 
-	auto list = std::make_shared<widget<layout::box_layout>>( gl::gray, base::alignment::BOTTOM );
-	list->set_spacing( 5, 5 );
-	auto form = std::make_shared<terminal_widget<layout::form_layout>>( gl::magenta, list );
-	form->draw_subchild( list );
+	auto tree = make_tree();
+	auto form = std::make_shared<terminal_widget<layout::form_layout>>( gl::magenta, tree );
+	form->draw_subchild( tree );
+
 	for ( size_t i = 0; i < 3; ++i )
 	{
 		auto l = std::make_shared<simple>( gl::blue );
@@ -176,10 +173,19 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		f->draw_subchild( l );
 		f->draw_subchild( e );
 		form->add( f );
-		auto c = make_tree( f );
-		for ( size_t j = 0; j < i; ++j )
-			c = make_tree( c );
-		list->add_child( make_tree( c ) );
+
+		auto c = make_tree();
+		c->add_child( f );
+		auto tmp = make_tree();
+		tmp->add_child( make_simple( gl::blue ) );
+		c->add_child( tmp );
+		for ( size_t j = 0; j <= i; ++j )
+		{
+			auto tmp = make_tree();
+			tmp->add_child( c );
+			c = tmp;
+		}
+		tree->add_child( c );
 	}
 
 	auto label = std::make_shared<simple>( gl::red );

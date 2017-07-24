@@ -15,8 +15,8 @@ public:
 	{
 	}
 
-	tree_layout( const std::shared_ptr<area> &g, const std::shared_ptr<area> &t, const std::shared_ptr<area> &c )
-		: _groove( g ), _title( t ), _content( c )
+	tree_layout( const std::shared_ptr<area> &g, const std::shared_ptr<area> &t )
+		: _groove( g ), _title( t )
 	{
 	}
 
@@ -35,9 +35,9 @@ public:
 		_title = t;
 	}
 
-	void set_content( const std::shared_ptr<area> &c )
+	void add( const std::shared_ptr<area> &c )
 	{
-		_content = c;
+		_areas.push_back( c );
 	}
 
 	/// @brief Compute the minimum size of this layout.
@@ -49,7 +49,7 @@ public:
 private:
 	std::weak_ptr<area> _groove;
 	std::weak_ptr<area> _title;
-	std::weak_ptr<area> _content;
+	std::list<std::weak_ptr<area>> _areas;
 	double _indent = 10.0;
 };
 
