@@ -239,8 +239,6 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	// Render function
 	win->exposed = [&]( void )
 	{
-		win->acquire();
-
 		root.set_size( win->width(), win->height() );
 		root.compute_bounds();
 		root.compute_layout();
@@ -251,8 +249,6 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		ogl.viewport( 0, 0, win->width(), win->height() );
 
 		root.draw( ogl, matrix );
-
-		win->release();
 	};
 
 	// Key to take a screenshot.
