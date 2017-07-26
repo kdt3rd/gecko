@@ -28,6 +28,7 @@
 //
 
 // Author: Eric Veach, July 1994.
+// Converted to C++ and greatly simplified (for a specific use case) by Ian Godin - 2016
 
 #pragma once
 

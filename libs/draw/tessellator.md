@@ -131,16 +131,16 @@ dictionary.  We achieve this by:
 
   1. Writing the numerical computations for maximum precision rather
      than maximum speed.
-     
+
   2. Making no assumptions at all about the results of the edge
      intersection calculations -- for sufficiently degenerate inputs,
      the computed location is not much better than a random number.
-     
+
   3. When numerical errors violate the invariants, restore them
      by making *topological* changes when necessary (ie. relinking
      the mesh structure).
-     
-     
+
+
 Triangulation and Grouping
 --------------------------
 
