@@ -161,7 +161,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	root.set_spacing( 5, 5 );
 
 	auto tree = make_tree();
-	auto form = std::make_shared<terminal_widget<layout::form_layout>>( gl::magenta, tree );
+	auto form = std::make_shared<terminal_widget<layout::form_layout>>( gl::color( 0.75, 0.75, 0.75 ), tree );
+	form->set_padding( 5, 5, 5, 5 );
 	form->draw_subchild( tree );
 
 	for ( size_t i = 0; i < 3; ++i )
@@ -169,6 +170,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		auto l = std::make_shared<simple>( gl::blue );
 		auto e = std::make_shared<simple>( gl::green );
 		auto f = std::make_shared<terminal_widget<layout::field_layout>>( gl::grey, l, e );
+		l->set_minimum_width( 200 );
 		e->set_minimum_width( 150 );
 		f->set_spacing( 5, 5 );
 		f->draw_subchild( l );
@@ -197,7 +199,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	ftest->draw_subchild( field );
 
 	auto right = std::make_shared<widget<layout::box_layout>>( gl::gray, base::alignment::BOTTOM );
-	right->add_child( ftest );
+//	right->add_child( ftest );
 	right->set_spacing( 5, 5 );
 
 	auto top = std::make_shared<widget<layout::box_layout>>( gl::grey );

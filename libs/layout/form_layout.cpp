@@ -31,24 +31,28 @@ void form_layout::add( const std::shared_ptr<field_layout> &f )
 
 void form_layout::compute_bounds( void )
 {
+	// Compute the size of the fields
 	double minw = 0.0;
 	for ( auto &f: _fields )
 		minw = std::max( minw, f->field_minimum_width() );
 
+	// Set the (minimum) size of the fields
 	for ( auto &f: _fields )
 		f->set_field_width( minw );
 
+	// Now compute the sub-layout bounds.
 	_layout->compute_bounds();
 
-	set_minimum( _layout->minimum_size() );
-	set_maximum( _layout->maximum_size() );
+	base::size pads( _pad[0] + _pad[1], _pad[2] + _pad[3] );
+	set_minimum( _layout->minimum_size() + pads );
+	set_maximum( _layout->maximum_size() + pads );
 }
 
 ////////////////////////////////////////
 
 void form_layout::compute_layout( void )
 {
-	_layout->set( { x1(), y1() }, { width(), height() } );
+	_layout->set( { x1() + _pad[0], y1() + _pad[2] }, { width() - _pad[0] - _pad[1], height() - _pad[2] - _pad[3] } );
 	_layout->compute_layout();
 }
 

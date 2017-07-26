@@ -43,6 +43,7 @@ void field_layout::compute_bounds( void )
 	double maxw = _pad[0] + _pad[1];
 	double maxh = 0.0;
 
+
 	if ( l )
 	{
 		minw += l->minimum_width();
@@ -50,8 +51,10 @@ void field_layout::compute_bounds( void )
 		maxw += l->maximum_width();
 		maxh += l->maximum_height();
 	}
+
 	if ( l && f )
 		minw += _spacing[0];
+
 	if ( f )
 	{
 		double w = std::max( f->minimum_width(), _width );
@@ -60,6 +63,7 @@ void field_layout::compute_bounds( void )
 		maxw += f->maximum_width();
 		maxh = std::max( maxh, f->maximum_height() );
 	}
+
 	minh += _pad[2] + _pad[3];
 	maxh += _pad[2] + _pad[3];
 
