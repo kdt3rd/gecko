@@ -134,7 +134,7 @@ std::shared_ptr<widget<layout::tree_layout>> make_tree( void )
 
 	auto result = std::make_shared<widget<layout::tree_layout>>( gl::grey, groove, title );
 	result->set_indent( 15 );
-	result->set_spacing( 5, 5 );
+	result->set_spacing( 1, 5 );
 	result->draw_subchild( groove );
 	result->draw_subchild( title );
 
@@ -199,7 +199,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	ftest->draw_subchild( field );
 
 	auto right = std::make_shared<widget<layout::box_layout>>( gl::gray, base::alignment::BOTTOM );
-//	right->add_child( ftest );
+	right->add_child( ftest );
 	right->set_spacing( 5, 5 );
 
 	auto top = std::make_shared<widget<layout::box_layout>>( gl::grey );
