@@ -79,25 +79,16 @@ void
 font::render(
 	const std::function<void(float,float,float,float)> &add_point,
 	const std::function<void(size_t,size_t,size_t)> &add_tri,
-	const std::function<void(void)> &reset,
 	const base::point &start, const std::string &utf8 )
 {
 	if ( utf8.empty() )
 		return;
 
-	// In case we have to change the texture size in the
-	// middle of rendering, add this extra loop
-	uint32_t fVer;
-	do
+	std::wstring tmp;
 	{
-		fVer = _glyph_version;
-		size_t points = 0;
 		std::mbstate_t s = std::mbstate_t();
 		size_t curpos = 0;
 		size_t nleft = utf8.size();
-		wchar_t prev = L'\0';
-
-		double curposX = start.x();
 		while ( true )
 		{
 			wchar_t ccode = 0;
@@ -110,67 +101,63 @@ font::render(
 			curpos += r;
 			if ( r == 0 || ccode == '\0' )
 				break;
-
-			const text_extents &gext = get_glyph( static_cast<char32_t>( ccode ) );
-//			std::cout << "char code: '" << char(ccode) << "' (" << ccode << ") gext.x_advance: " << gext.x_advance << std::endl;
-			if ( fVer != _glyph_version )
-			{
-				reset();
-				// kill the inner loop and start over
-				break;
-			}
-			double k = kerning( static_cast<char32_t>( prev ), static_cast<char32_t>( ccode ) );
-			curposX -= k;
-
-			auto idx_base_i = _glyph_index_offset.find( static_cast<char32_t>( ccode ) );
-			if ( idx_base_i != _glyph_index_offset.end() )
-			{
-				size_t coordOff = idx_base_i->second;
-				size_t idx_base = points;
-
-				if ( ( idx_base / 2 + 3 ) > static_cast<size_t>( std::numeric_limits<uint16_t>::max() ) )
-					throw std::runtime_error( "String too long for OpenGL ES" );
-
-				double upperY = start.y() - gext.y_bearing;
-				double lowerY = upperY + gext.height;
-				double leftX = curposX + gext.x_bearing;
-				double rightX = leftX + gext.width;
-
-//				std::cout << "char code: '" << char(ccode) << "' (" << ccode << ") coordOff: " << coordOff << " upperY: " << upperY << " lowerY: " << lowerY << " leftX: " << leftX << " rightX: " << rightX << '\n'
-//						  << " coords: "
-//						  << _glyph_coords[coordOff + 0] << ", " << _glyph_coords[coordOff + 1]
-//						  << ", " << _glyph_coords[coordOff + 2] << ", " << _glyph_coords[coordOff + 3]
-//						  << ", " << _glyph_coords[coordOff + 4] << ", " << _glyph_coords[coordOff + 5]
-//						  << ", " << _glyph_coords[coordOff + 6] << ", " << _glyph_coords[coordOff + 7]
-//						  << " idx_base: " << idx_base << " (" << idx_base/2 << ")"
-//						  << std::endl;
-				add_point(
-					static_cast<float>( leftX ), static_cast<float>( upperY ),
-					_glyph_coords[coordOff + 0], _glyph_coords[coordOff + 1] );
-
-				add_point(
-					static_cast<float>( rightX ), static_cast<float>( upperY ),
-					_glyph_coords[coordOff + 2], _glyph_coords[coordOff + 3] );
-
-				add_point(
-					static_cast<float>( rightX ), static_cast<float>( lowerY ),
-					_glyph_coords[coordOff + 4], _glyph_coords[coordOff + 5] );
-
-				add_point(
-					static_cast<float>( leftX ), static_cast<float>( lowerY ),
-					_glyph_coords[coordOff + 6], _glyph_coords[coordOff + 7] );
-
-				points += 4;
-
-				uint16_t idxVal = static_cast<uint16_t>( idx_base );
-				add_tri( idxVal, idxVal + 1, idxVal + 2 );
-				add_tri( idxVal + 2, idxVal + 3, idxVal );
-			}
-
-			curposX += gext.x_advance;
-			prev = ccode;
+			tmp.push_back( ccode );
 		}
-	} while ( fVer != _glyph_version );
+	}
+
+	// Preload all of the glyphs
+	for ( wchar_t ccode: tmp )
+		get_glyph( static_cast<char32_t>( ccode ) );
+
+	wchar_t prev = L'\0';
+	double curposX = 0.0;
+	size_t points = 0;
+	for ( wchar_t ccode: tmp )
+	{
+		const text_extents &gext = get_glyph( static_cast<char32_t>( ccode ) );
+		double k = kerning( static_cast<char32_t>( prev ), static_cast<char32_t>( ccode ) );
+		curposX -= k;
+
+		auto idx_base_i = _glyph_index_offset.find( static_cast<char32_t>( ccode ) );
+		if ( idx_base_i != _glyph_index_offset.end() )
+		{
+			size_t coordOff = idx_base_i->second;
+			size_t idx_base = points;
+
+			if ( ( idx_base / 2 + 3 ) > static_cast<size_t>( std::numeric_limits<uint16_t>::max() ) )
+				throw std::runtime_error( "String too long for OpenGL ES" );
+
+			double upperY = start.y() - gext.y_bearing;
+			double lowerY = upperY + gext.height;
+			double leftX = curposX + gext.x_bearing;
+			double rightX = leftX + gext.width;
+
+			add_point(
+				static_cast<float>( leftX ), static_cast<float>( upperY ),
+				_glyph_coords[coordOff + 0], _glyph_coords[coordOff + 1] );
+
+			add_point(
+				static_cast<float>( rightX ), static_cast<float>( upperY ),
+				_glyph_coords[coordOff + 2], _glyph_coords[coordOff + 3] );
+
+			add_point(
+				static_cast<float>( rightX ), static_cast<float>( lowerY ),
+				_glyph_coords[coordOff + 4], _glyph_coords[coordOff + 5] );
+
+			add_point(
+				static_cast<float>( leftX ), static_cast<float>( lowerY ),
+				_glyph_coords[coordOff + 6], _glyph_coords[coordOff + 7] );
+
+			points += 4;
+
+			uint16_t idxVal = static_cast<uint16_t>( idx_base );
+			add_tri( idxVal, idxVal + 1, idxVal + 2 );
+			add_tri( idxVal + 2, idxVal + 3, idxVal );
+		}
+
+		curposX += gext.x_advance;
+		prev = ccode;
+	}
 }
 
 ////////////////////////////////////////

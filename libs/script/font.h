@@ -78,7 +78,6 @@ public:
 	void render(
 		const std::function<void(float,float,float,float)> &add_point,
 		const std::function<void(size_t,size_t,size_t)> &add_tri,
-		const std::function<void(void)> &reset,
 		const base::point &start, const std::string &utf8 );
 
 	/// @brief Glyph version.

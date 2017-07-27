@@ -103,7 +103,7 @@ void text::update( void )
 			coords.clear();
 			tris.clear();
 		};
-		_font->render( add_point, add_tri, reset, base::point( 0.0, 0.0 ), _utf8 );
+		_font->render( add_point, add_tri, base::point( 0.0, 0.0 ), _utf8 );
 	}
 
 	// Update the font texture if needed.
