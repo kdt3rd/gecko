@@ -13,7 +13,9 @@
 #include <string>
 #include <vector>
 
+#include <base/alignment.h>
 #include <base/point.h>
+#include <base/rect.h>
 #include <base/pack.h>
 #include "extents.h"
 
@@ -105,6 +107,8 @@ public:
 	}
 
 	void load_glyphs( const std::string &utf8 );
+
+	base::point align_text( const std::string &utf8, const base::rect &rect, base::alignment a );
 
 protected:
 	/// @brief Construct a font.
