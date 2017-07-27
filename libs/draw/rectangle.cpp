@@ -13,15 +13,19 @@ namespace draw
 ////////////////////////////////////////
 
 rectangle::rectangle( const gl::color &c )
-	: _x( 0.0 ), _y( 0.0 ), _w( 100.0 ), _h( 100.0 ), _color( c )
+	: _color( c )
 {
+	_rect = gl::matrix4::scaling( 100, 100 );
 }
 
 ////////////////////////////////////////
 
 rectangle::rectangle( float x, float y, float w, float h, const gl::color &c )
-	: _x( x ), _y( y ), _w( w ), _h( h ), _color( c )
+	: _color( c )
 {
+	_rect = gl::matrix4::scaling( w, h );
+	_rect.translate_x( x );
+	_rect.translate_y( y );
 }
 
 ////////////////////////////////////////
@@ -30,7 +34,7 @@ void rectangle::draw( gl::api &ogl )
 {
 	initialize( ogl );
 	auto bound = _mesh.bind();
-	bound.set_uniform( _matrix_loc, ogl.current_matrix() );
+	bound.set_uniform( _matrix_loc, _rect * ogl.current_matrix() );
 	bound.draw();
 }
 
@@ -38,19 +42,15 @@ void rectangle::draw( gl::api &ogl )
 
 void rectangle::resize( float x, float y, float w, float h )
 {
-	_x = x;
-	_y = y;
-	_w = w;
-	_h = h;
+	_rect = gl::matrix4::scaling( w, h );
+	_rect.translate_x( x );
+	_rect.translate_y( y );
 }
 
 ////////////////////////////////////////
 
 void rectangle::initialize( gl::api &ogl )
 {
-	if ( _init && _resized )
-		return;
-
 	if ( !_init )
 	{
 		// Setup program with vertex and fragment shaders
@@ -85,10 +85,10 @@ void rectangle::initialize( gl::api &ogl )
 		);
 
 		// Setup vertices
-		_vertices.push_back( { _x, _y }, _color );
-		_vertices.push_back( { _x + _w, _y }, _color );
-		_vertices.push_back( { _x + _w, _y + _h }, _color );
-		_vertices.push_back( { _x, _y + _h }, _color );
+		_vertices.push_back( { 0.F, 0.F }, _color );
+		_vertices.push_back( { 1.F, 0.F }, _color );
+		_vertices.push_back( { 1.F, 1.F }, _color );
+		_vertices.push_back( { 0.F, 1.F }, _color );
 
 		_vertices.vbo( gl::buffer_usage::DYNAMIC_DRAW );
 
@@ -102,14 +102,6 @@ void rectangle::initialize( gl::api &ogl )
 
 		_mesh.add_triangles( 6 );
 		_matrix_loc = _mesh.get_uniform_location( "matrix" );
-	}
-	else
-	{
-		_vertices.set( 0, { _x, _y }, _color );
-		_vertices.set( 1, { _x + _w, _y }, _color );
-		_vertices.set( 2, { _x + _w, _y + _h }, _color );
-		_vertices.set( 3, { _x, _y + _h }, _color );
-		_vertices.update();
 	}
 
 	_init = true;

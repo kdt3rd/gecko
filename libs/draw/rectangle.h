@@ -29,13 +29,13 @@ public:
 private:
 	void initialize( gl::api &ogl );
 
-	float _x, _y, _w, _h;
+	gl::matrix4 _rect;
+//	float _x, _y, _w, _h;
 	gl::color _color;
-	bool _init = false;
-	bool _resized = false;
 	gl::mesh _mesh;
 	gl::vertex_buffer_data<gl::vec2,gl::color> _vertices;
 	gl::program::uniform _matrix_loc;
+	bool _init = false;
 };
 
 
