@@ -32,8 +32,8 @@ private:
 
 	bool _update = false;
 
-	std::string _utf8;
 	std::shared_ptr<script::font> _font;
+	std::string _utf8;
 	gl::vec2 _pos;
 	gl::color _color;
 
@@ -41,6 +41,7 @@ private:
 	gl::program::uniform _col_pos;
 	gl::program::uniform _tex_pos;
 	gl::program::uniform _mat_pos;
+
 	struct GlyphPack
 	{
 		uint32_t version;

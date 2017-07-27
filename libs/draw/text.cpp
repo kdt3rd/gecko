@@ -174,39 +174,6 @@ void main()
 	_col_pos = _mesh.get_uniform_location( "color" );
 	_tex_pos = _mesh.get_uniform_location( "textTex" );
 	_update = false;
-/*
-	if ( ! _text_program )
-		_text_program = program( "text.vert", "text_bitmap.frag" );
-	checkgl();
-
-	use_program( _text_program );
-	checkgl();
-
-	auto ta = _text_array->bind();
-	checkgl();
-
-	enable( gl::capability::BLEND );
-	blend_func( gl::blend_style::SRC_ALPHA, gl::blend_style::ONE_MINUS_SRC_ALPHA );
-
-	ta.attrib_pointer( _text_program->get_attribute_location( "text_tex_coords" ),
-					   _text_texture_vertices, _text_texcoord_buf, 2 );
-	ta.attrib_pointer( _text_program->get_attribute_location( "text_out_coords" ),
-					   _text_output_vertices, _text_coord_buf, 2 );
-	_text_program->set_uniform( "text_tex", GLint(0) );
-	_text_program->set_uniform( "color", c.get_fill_color() );
-	_text_program->set_uniform( "mvp_matrix", current_matrix() );
-
-	auto idc = _text_indices->bind( gl::buffer<uint16_t>::target::ELEMENT_ARRAY_BUFFER );
-
-	idc.data( _text_idx_buf, gl::usage::STATIC_DRAW );
-	idc.draw( gl::primitive::TRIANGLES, _text_idx_buf.size() );
-//	ta.draw_indices( gl::primitive::TRIANGLES, _text_idx_buf );
-	// is this safe in GL ES? It's fine for normal OpenGL, and is fewer indices...
-//	ta.draw_indices( gl::primitive::QUADS, _text_idx_buf );
-	checkgl();
-
-	disable( gl::capability::BLEND );
-	*/
 }
 
 ////////////////////////////////////////
