@@ -98,11 +98,6 @@ void text::update( void )
 			tris.push_back( a, b, c );
 		};
 
-		auto reset = [&]( void )
-		{
-			coords.clear();
-			tris.clear();
-		};
 		_font->render( add_point, add_tri, base::point( 0.0, 0.0 ), _utf8 );
 	}
 
