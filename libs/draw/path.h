@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <gl/vector.h>
+#include <base/rect.h>
 
 namespace draw
 {
@@ -33,14 +34,8 @@ public:
 	/// @brief Default constructor.
 	path( void );
 
-	/// @brief Copy constructor.
+	/// @brief Constructor with initial point.
 	path( const gl::vec2 &p );
-
-//	/// @brief Rectangle constructor.
-//	path( const rect &r );
-
-//	/// @brief Rounded rectangle constructor.
-//	path( const rect &r, float radius );
 
 	/// @brief Destructor.
 	~path( void );
@@ -88,9 +83,6 @@ public:
 	/// @brief Draw a full circle.
 	void circle( const gl::vec2 &center, float radius );
 
-//	/// @brief Draw a rectangle.
-//	void rectangle( const rect &r, bool reversed = false );
-
 	/// @brief Draw a rectangle.
 	void rectangle( const gl::vec2 &p1, const gl::vec2 &p2 );
 
@@ -102,9 +94,6 @@ public:
 
 	/// @brief Draw a rounded rectangle.
 	void rounded_rect( const gl::vec2 &p1, float w, float h, float r );
-
-//	/// @brief Draw a rounded rectangle.
-//	void rounded_rect( const rect &r, float rad );
 
 	const std::vector<float> &get_data( void ) const { return _data; }
 	const std::vector<action> &get_actions( void ) const { return _actions; }

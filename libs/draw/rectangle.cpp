@@ -26,11 +26,11 @@ rectangle::rectangle( float x, float y, float w, float h, const gl::color &c )
 
 ////////////////////////////////////////
 
-void rectangle::draw( gl::api &ogl, const gl::matrix4 &m )
+void rectangle::draw( gl::api &ogl )
 {
 	initialize( ogl );
 	auto bound = _mesh.bind();
-	bound.set_uniform( _matrix_loc, ogl.current_matrix() * m );
+	bound.set_uniform( _matrix_loc, ogl.current_matrix() );
 	bound.draw();
 }
 

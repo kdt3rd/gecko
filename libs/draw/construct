@@ -10,10 +10,22 @@ local srcs = {
 	"text.cpp";
 	"rectangle.cpp";
 	"triangle.cpp";
+--	"canvas.cpp";
 }
 
---[====[
 local shaders = {
+	"color_mesh.frag";
+	"color_mesh.vert";
+	"conical_gradient.frag";
+	"linear_gradient.frag";
+	"position_uv.vert";
+	"quadrant.vert";
+	"radial_gradient.frag";
+	"simple.vert";
+	"single_color.frag";
+	"text_bitmap.frag";
+	"texture.frag";
+	"text.vert";
 }
 
 local cpp_shaders = {
@@ -35,7 +47,7 @@ local shader_h = code.create(
 		"}";
 } )
 
-local shader_code = code.generate{
+local shader_code = code.generate({
 	output = "shaders.cpp",
 	input_items = shaders,
 	file_prefix = cpp_shaders,
@@ -48,10 +60,8 @@ local shader_code = code.generate{
 	item_suffix = { "\t\t}, $item_file_size",
 					"\t}" },
 	comma_separate = true
-}
+})
 shader_code:add_dependency( "order", shader_h )
---]====]
-local shader_code;
 
 lib = library "draw"
   source{ srcs, shader_code }:include_artifact_dir()

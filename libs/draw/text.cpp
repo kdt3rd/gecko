@@ -47,7 +47,7 @@ void text::set_color( const gl::color &c )
 
 ////////////////////////////////////////
 
-void text::render( const gl::matrix4 &ortho )
+void text::draw( gl::api &ogl )
 {
 	if ( _update )
 		update();
@@ -59,14 +59,13 @@ void text::render( const gl::matrix4 &ortho )
 			std::shared_ptr<gl::texture> texture = x->second.texture;
 
 			gl::matrix4 local = gl::matrix4::translation( _pos[0], _pos[1] );
-			gl::api ogl;
 			ogl.enable( gl::capability::BLEND );
 			ogl.blend_func( gl::blend_style::SRC_ALPHA, gl::blend_style::ONE_MINUS_SRC_ALPHA );
 
 			auto txt = texture->bind();
 
 			auto b = _mesh.bind();
-			b.set_uniform( _mat_pos, local * ortho );
+			b.set_uniform( _mat_pos, local * ogl.current_matrix() );
 			b.set_uniform( _col_pos, _color );
 			b.set_uniform( _tex_pos, static_cast<int>( txt.unit() ) );
 			b.draw();

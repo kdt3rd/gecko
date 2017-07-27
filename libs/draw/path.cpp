@@ -27,24 +27,6 @@ path::path( const gl::vec2 &p )
 
 ////////////////////////////////////////
 
-/*
-path::path( const rect &r )
-{
-	rectangle( r );
-}
-*/
-
-////////////////////////////////////////
-
-/*
-path::path( const rect &r, float rad )
-{
-	rounded_rect( r, rad );
-}
-*/
-
-////////////////////////////////////////
-
 path::~path( void )
 {
 }
@@ -116,29 +98,6 @@ void path::circle( const gl::vec2 &center, float radius )
 
 ////////////////////////////////////////
 
-/*
-void path::rectangle( const rect &r, bool reversed )
-{
-	if ( reversed )
-	{
-		move_to( r.top_left() );
-		line_to( r.bottom_left() );
-		line_to( r.bottom_right() );
-		line_to( r.top_right() );
-	}
-	else
-	{
-		move_to( r.top_left() );
-		line_to( r.top_right() );
-		line_to( r.bottom_right() );
-		line_to( r.bottom_left() );
-	}
-	close();
-}
-*/
-
-////////////////////////////////////////
-
 void path::rectangle( const gl::vec2 &p1, const gl::vec2 &p2 )
 {
 	const float x1 = std::min( p1[0], p2[0] );
@@ -176,15 +135,6 @@ void path::rounded_rect( const gl::vec2 &p1, float w, float h, float r )
 {
 	rounded_rect( p1, { p1[0] + w, p1[1] + h }, r );
 }
-
-////////////////////////////////////////
-
-/*
-void path::rounded_rect( const rect &r, float rad )
-{
-	rounded_rect( r.top_left(), r.bottom_right(), rad );
-}
-*/
 
 ////////////////////////////////////////
 

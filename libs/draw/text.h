@@ -25,7 +25,7 @@ public:
 	void set_position( const gl::vec2 &p );
 	void set_color( const gl::color &c );
 
-	void render( const gl::matrix4 &ortho );
+	void draw( gl::api &ogl );
 
 private:
 	void update( void );
