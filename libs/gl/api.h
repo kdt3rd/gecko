@@ -111,10 +111,35 @@ public:
 	void multiply( const matrix4 &m );
 
 	/// @brief Get the current matrix.
-	matrix4 current_matrix( void )
+	const matrix4 &model_matrix( void ) const
 	{
-		precondition( !_matrix.empty(), "no matrix available" );;;
+		precondition( !_matrix.empty(), "no matrix available" );
 		return _matrix.back();
+	}
+
+	const matrix4 &view_matrix( void ) const
+	{
+		return _view;
+	}
+
+	void set_view( const matrix4 &m )
+	{
+		_view = m;
+	}
+
+	const matrix4 &projection_matrix( void ) const
+	{
+		return _projection;
+	}
+
+	void set_projection( const matrix4 &m )
+	{
+		_projection = m;
+	}
+
+	matrix4 current_matrix( void ) const
+	{
+		return  model_matrix() * view_matrix() * projection_matrix();
 	}
 
 	/// @brief Restore a saved matrix.
@@ -203,6 +228,8 @@ public:
 
 private:
 	std::vector<matrix4> _matrix;
+	matrix4 _view;
+	matrix4 _projection;
 	std::vector<base::rect> _scissors;
 };
 

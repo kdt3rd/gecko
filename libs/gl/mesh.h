@@ -21,7 +21,7 @@ namespace gl
 ////////////////////////////////////////
 
 /// @brief Mesh composed of vertex attributes, elements and a program.
-/// Mesh are created by setting up a program, setting up vertex attributes,
+/// Mesh are created by setting up a program, setting up vertex attributes, and
 /// adding elements.
 class mesh
 {
