@@ -147,7 +147,10 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 			angle -= 360.0_deg;
 
 		// draw the text
-		samptext.render( matrix );
+		ogl.save_matrix();
+		ogl.multiply( matrix );
+		samptext.draw( ogl );
+		ogl.restore_matrix();
 
 		// Cause a redraw to continue the animation
 		win->invalidate( base::rect() );

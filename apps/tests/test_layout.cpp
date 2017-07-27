@@ -15,7 +15,6 @@
 #include <base/contract.h>
 #include <base/timer.h>
 #include <base/function_traits.h>
-#include <draw/path.h>
 #include <draw/rectangle.h>
 #include <layout/packing_layout.h>
 #include <layout/box_layout.h>
@@ -44,21 +43,21 @@ public:
 		this->set_minimum( 100, 25 );
 	}
 
-	void draw( gl::api &ogl, const gl::matrix4 &m )
+	void draw( gl::api &ogl )
 	{
 		_rect.resize( this->x(), this->y(), this->width(), this->height() );
-		_rect.draw( ogl, m );
+		_rect.draw( ogl );
 //		ogl.save_matrix();
 //		ogl.translate( this->x(), this->y() );
 		for ( auto &c: _children )
-			c( ogl, m );
+			c( ogl );
 //		ogl.restore_matrix();
 	}
 
 	template<typename W>
 	void draw_subchild( const std::shared_ptr<W> &a )
 	{
-		_children.push_back( [=]( gl::api &ogl, const gl::matrix4 &m ) { a->draw( ogl, m ); } );
+		_children.push_back( [=]( gl::api &ogl ) { a->draw( ogl ); } );
 	}
 
 	template<typename W, typename ...Args>
@@ -70,7 +69,7 @@ public:
 
 private:
 	draw::rectangle _rect;
-	std::list<std::function<void(gl::api&,const gl::matrix4&)>> _children;
+	std::list<std::function<void(gl::api&)>> _children;
 };
 
 template<typename Area>
@@ -93,23 +92,23 @@ public:
 	template<typename W>
 	void draw_subchild( const std::shared_ptr<W> &a )
 	{
-		_children.push_back( [=]( gl::api &ogl, const gl::matrix4 &m ) { a->draw( ogl, m ); } );
+		_children.push_back( [=]( gl::api &ogl ) { a->draw( ogl ); } );
 	}
 
-	void draw( gl::api &ogl, const gl::matrix4 &m )
+	void draw( gl::api &ogl )
 	{
 		_rect.resize( this->x(), this->y(), this->width(), this->height() );
-		_rect.draw( ogl, m );
+		_rect.draw( ogl );
 //		ogl.save_matrix();
 //		ogl.translate( this->x(), this->y() );
 		for ( auto &c: _children )
-			c( ogl, m );
+			c( ogl );
 //		ogl.restore_matrix();
 	}
 
 private:
 	draw::rectangle _rect;
-	std::list<std::function<void(gl::api&,const gl::matrix4&)>> _children;
+	std::list<std::function<void(gl::api&)>> _children;
 };
 
 typedef terminal_widget<layout::area> simple;
@@ -245,12 +244,11 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		root.compute_bounds();
 		root.compute_layout();
 
-		matrix = gl::matrix4::ortho( 0, static_cast<float>( win->width() ), 0, static_cast<float>( win->height() ) );
-
+		ogl.set_projection( gl::matrix4::ortho( 0, static_cast<float>( win->width() ), 0, static_cast<float>( win->height() ) ) );
 		ogl.clear();
 		ogl.viewport( 0, 0, win->width(), win->height() );
 
-		root.draw( ogl, matrix );
+		root.draw( ogl );
 	};
 
 	// Key to take a screenshot.

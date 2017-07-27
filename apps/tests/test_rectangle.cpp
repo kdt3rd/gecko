@@ -29,7 +29,6 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	draw::rectangle rect( 50, 50, 100, 100, gl::blue );
 
 	// Matrix for setting up ortho view
-	gl::matrix4 matrix;
 	float w = 100;
 	float dw = 4;
 
@@ -38,15 +37,15 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	// Called to draw the window
 	win->exposed = [&]( void )
 	{
-		matrix = gl::matrix4::ortho( 0, static_cast<float>( win->width() ), 0, static_cast<float>( win->height() ) );
 
 		// Clear the window
 		ogl.clear();
 		ogl.viewport( 0, 0, win->width(), win->height() );
+		ogl.set_projection( gl::matrix4::ortho( 0, static_cast<float>( win->width() ), 0, static_cast<float>( win->height() ) ) );
 
 		// Draw the rectangle
 		rect.resize( 50, 50, w, 100 );
-		rect.draw( ogl, matrix );
+		rect.draw( ogl );
 
 		// Cause a redraw to continue the animation
 		win->invalidate( base::rect() );
