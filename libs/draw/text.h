@@ -47,6 +47,8 @@ private:
 		uint32_t version;
 		std::shared_ptr<gl::texture> texture;
 	};
+
+	static std::weak_ptr<gl::program> _program_cache;
 	static std::map<std::shared_ptr<script::font>, GlyphPack> _font_glyph_cache;
 };
 

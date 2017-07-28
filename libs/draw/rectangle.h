@@ -25,17 +25,22 @@ public:
 	void draw( gl::api &ogl );
 
 	void resize( float x, float y, float w, float h );
+	void set_color( const gl::color &c )
+	{
+		_color = c;
+	}
 
 private:
 	void initialize( gl::api &ogl );
 
 	gl::matrix4 _rect;
-//	float _x, _y, _w, _h;
 	gl::color _color;
-	gl::mesh _mesh;
-	gl::vertex_buffer_data<gl::vec2,gl::color> _vertices;
-	gl::program::uniform _matrix_loc;
-	bool _init = false;
+
+	std::shared_ptr<gl::mesh> _mesh;
+
+	static std::weak_ptr<gl::mesh> _mesh_cache;
+	static gl::program::uniform _matrix_loc;
+	static gl::program::uniform _color_loc;
 };
 
 

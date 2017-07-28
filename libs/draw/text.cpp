@@ -12,6 +12,7 @@
 namespace draw
 {
 
+std::weak_ptr<gl::program> text::_program_cache;
 std::map<std::shared_ptr<script::font>, text::GlyphPack> text::_font_glyph_cache;
 
 ////////////////////////////////////////
@@ -116,16 +117,13 @@ void text::update( void )
 		texture = pk.texture;
 	}
 	else
-	{
 		texture = ogl.new_texture( gl::texture::target::IMAGE_2D );
-	}
 
 	auto txt = texture->bind();
 
 	if ( storeTex )
 	{
 		txt.set_wrapping( gl::wrapping::CLAMP_TO_EDGE );
-//		txt.set_filters( gl::filter::NEAREST, gl::filter::NEAREST );
 		txt.set_filters( gl::filter::LINEAR, gl::filter::LINEAR );
 		txt.image_2d_red( gl::format::RED,
 						  _font->bitmap_width(),
@@ -135,32 +133,46 @@ void text::update( void )
 		_font_glyph_cache[_font] = { _font->glyph_version(), texture };
 	}
 
-	_mesh.get_program().set(
-		ogl.new_vertex_shader( R"SHADER(
-#version 330
-layout(location = 0) in vec2 vertex_pos;
-layout(location = 1) in vec2 char_pos;
-uniform mat4 matrix;
-out vec2 tex_pos;
-void main()
-{
-	tex_pos = char_pos;
-	gl_Position = matrix * vec4( vertex_pos, 0.0, 1.0 );
-}
-)SHADER" ),
-		ogl.new_fragment_shader( R"SHADER(
-#version 330
-in vec2 tex_pos;
-out vec4 frag_color;
-uniform vec4 color;
-uniform sampler2D textTex;
-void main()
-{
-	vec4 texColor = texture( textTex, tex_pos );
-	frag_color = vec4( color.r, color.g, color.b, color.a * texColor.r );
-}
-)SHADER" )
-							);
+	auto prog = _program_cache.lock();
+	if ( !prog )
+	{
+		auto vshader = ogl.new_vertex_shader( R"SHADER(
+			#version 330
+
+			layout(location = 0) in vec2 vertex_pos;
+			layout(location = 1) in vec2 char_pos;
+
+			uniform mat4 matrix;
+			out vec2 tex_pos;
+
+			void main()
+			{
+				tex_pos = char_pos;
+				gl_Position = matrix * vec4( vertex_pos, 0.0, 1.0 );
+			}
+		)SHADER" );
+
+		auto fshader = ogl.new_fragment_shader( R"SHADER(
+			#version 330
+
+			in vec2 tex_pos;
+			out vec4 frag_color;
+
+			uniform vec4 color;
+			uniform sampler2D textTex;
+
+			void main()
+			{
+				vec4 texColor = texture( textTex, tex_pos );
+				frag_color = vec4( color.r, color.g, color.b, color.a * texColor.r );
+			}
+		)SHADER" );
+
+		prog = ogl.new_program( vshader, fshader );
+		_program_cache = prog;
+	}
+
+	_mesh.set_program( prog );
 
 	{
 		auto tbind = _mesh.bind();
@@ -170,6 +182,7 @@ void main()
 
 		_mesh.add_triangles( tris.size() );
 	}
+
 	_mat_pos = _mesh.get_uniform_location( "matrix" );
 	_col_pos = _mesh.get_uniform_location( "color" );
 	_tex_pos = _mesh.get_uniform_location( "textTex" );
