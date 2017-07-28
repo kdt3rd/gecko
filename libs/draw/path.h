@@ -155,6 +155,11 @@ public:
 		_actions.clear();
 	}
 
+	bool empty( void ) const
+	{
+		return _actions.empty();
+	}
+
 private:
 	template<typename Iterator>
 	gl::vec2 pt( Iterator &i ) const

@@ -109,6 +109,7 @@ void texture::binding::set_wrapping( wrapping w )
 {
 	glTexParameteri( _target, GL_TEXTURE_WRAP_S, static_cast<GLint>(w) );
 	glTexParameteri( _target, GL_TEXTURE_WRAP_T, static_cast<GLint>(w) );
+	glTexParameteri( _target, GL_TEXTURE_WRAP_R, static_cast<GLint>(w) );
 }
 
 ////////////////////////////////////////
@@ -117,6 +118,7 @@ void texture::binding::set_wrapping( wrapping s, wrapping t )
 {
 	glTexParameteri( _target, GL_TEXTURE_WRAP_S, static_cast<GLint>(s) );
 	glTexParameteri( _target, GL_TEXTURE_WRAP_T, static_cast<GLint>(t) );
+	glTexParameteri( _target, GL_TEXTURE_WRAP_R, static_cast<GLint>(t) );
 }
 
 ////////////////////////////////////////
@@ -148,8 +150,9 @@ void texture::binding::set_swizzle( swizzle r, swizzle g, swizzle b, swizzle a )
 
 void texture::binding::operator=( binding &&other )
 {
-	precondition( _unit != invalid_unit, "invalid texture unit" );
-	precondition( theBound[_unit] == &other, "bound texture lost unit" );
+	precondition( other._unit != invalid_unit, "invalid texture unit" );
+	precondition( theBound[other._unit] == &other, "bound texture lost unit" );
+	_unit = other._unit;
 	other._unit = invalid_unit;
 	theBound[_unit] = this;
 }

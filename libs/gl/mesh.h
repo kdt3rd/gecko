@@ -101,6 +101,12 @@ public:
 		_prog = p;
 	}
 
+	template<typename ...Shaders>
+	void set_program( const std::shared_ptr<shader> &s, Shaders ...shaders )
+	{
+		_prog = std::make_shared<program>( s, std::forward<Shaders>( shaders )... );
+	}
+
 	/// @brief Add triangles to draw.
 	void add_triangles( size_t count, size_t start_vertex = 0 );
 

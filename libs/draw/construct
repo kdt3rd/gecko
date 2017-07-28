@@ -9,8 +9,7 @@ local srcs = {
 	"clipper.cpp";
 	"text.cpp";
 	"rectangle.cpp";
-	"triangle.cpp";
---	"canvas.cpp";
+	"object.cpp";
 }
 
 local shaders = {

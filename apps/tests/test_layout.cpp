@@ -244,9 +244,9 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		root.compute_bounds();
 		root.compute_layout();
 
+		ogl.viewport( 0, 0, win->width(), win->height() );
 		ogl.set_projection( gl::matrix4::ortho( 0, static_cast<float>( win->width() ), 0, static_cast<float>( win->height() ) ) );
 		ogl.clear();
-		ogl.viewport( 0, 0, win->width(), win->height() );
 
 		root.draw( ogl );
 	};

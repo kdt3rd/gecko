@@ -117,6 +117,12 @@ public:
 		return _matrix.back();
 	}
 
+	void set_model( const matrix4 &m )
+	{
+		precondition( !_matrix.empty(), "no matrix available" );
+		_matrix.back() = m;
+	}
+
 	const matrix4 &view_matrix( void ) const
 	{
 		return _view;
