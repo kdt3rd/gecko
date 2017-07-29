@@ -62,7 +62,25 @@ namespace gl
 
 ////////////////////////////////////////
 
-void color::get_lab( float &l, float &astar, float &bstar )
+void color::get_lin( float &r, float &g, float &b ) const
+{
+	r = toLin( _r );
+	g = toLin( _g );
+	b = toLin( _b );
+}
+
+////////////////////////////////////////
+
+void color::set_lin( float r, float g, float b )
+{
+	_r = fromLin( r );
+	_g = fromLin( g );
+	_b = fromLin( b );
+}
+
+////////////////////////////////////////
+
+void color::get_lab( float &l, float &astar, float &bstar ) const
 {
 	float r = toLin( _r );
 	float g = toLin( _g );
@@ -96,7 +114,7 @@ void color::set_lab( float l, float astar, float bstar )
 
 ////////////////////////////////////////
 
-void color::get_hsl( float &h, float &s, float &l )
+void color::get_hsl( float &h, float &s, float &l ) const
 {
 	float min = std::min( std::min( _r, _g ), _b );
 	float max = std::max( std::max( _r, _g ), _b );
@@ -164,7 +182,7 @@ color color::desaturate( float amt )
 {
 	float l, a, b;
 	get_lab( l, a, b );
-	
+
 	return color( space::LAB, l, a * amt, b * amt );
 }
 
@@ -191,10 +209,15 @@ color color::change( float amt )
 color color::mix( const color &a, const color &b, float m )
 {
 	float n = 1.0F - m;
+	float ra, ga, ba;
+	float rb, gb, bb;
+	a.get_lin( ra, ga, ba );
+	b.get_lin( rb, gb, bb );
 	return {
-		a.red() * n + b.red() * m,
-		a.green() * n + b.green() * m,
-		a.blue() * n + b.blue() * m,
+		space::LINEAR,
+		ra * n + rb * m,
+		ga * n + gb * m,
+		ba * n + bb * m,
 		a.alpha() * n + b.alpha() * m
 	};
 }

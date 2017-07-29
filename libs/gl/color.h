@@ -26,6 +26,7 @@ public:
 	enum class space
 	{
 		SRGB, // R G B [0..1]
+		LINEAR, // R G B [0..1]
 		LAB, // L [0..1], a* b* [-1,1]
 		HSL, // H radians, S L [0..1]
 	};
@@ -48,6 +49,7 @@ public:
 		switch ( s )
 		{
 			case space::SRGB: set( i, j, k ); break;
+			case space::LINEAR: set_lin( i, j, k ); break;
 			case space::LAB: set_lab( i, j, k ); break;
 			case space::HSL: set_hsl( i, j, k ); break;
 		}
@@ -74,14 +76,20 @@ public:
 		_a = a;
 	}
 
+	/// @brief Get the linear color values
+	void get_lin( float &r, float &g, float &b ) const;
+
+	/// @brief Set the color values in the linear color space
+	void set_lin( float r, float g, float b );
+
 	/// @brief Get the LAB color values
-	void get_lab( float &l, float &a, float &b );
+	void get_lab( float &l, float &a, float &b ) const;
 
 	/// @brief Set the color values in the LAB color space
 	void set_lab( float l, float a, float b );
 
 	/// @brief Get the HSL color values
-	void get_hsl( float &h, float &s, float &l );
+	void get_hsl( float &h, float &s, float &l ) const;
 
 	/// @brief Set the color values in the HSL color space
 	void set_hsl( float h, float s, float l );
