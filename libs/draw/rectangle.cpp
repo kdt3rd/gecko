@@ -65,7 +65,7 @@ void rectangle::initialize( gl::api &ogl )
 			_mesh = std::make_shared<gl::mesh>();
 
 			// Setup program with vertex and fragment shaders
-			_mesh->set_program( new_program( ogl, "color_mesh.vert", "color_mesh.frag" ) );
+			_mesh->set_program( new_program( ogl, "simple.vert", "single_color.frag" ) );
 
 			// Setup vertices
 			gl::vertex_buffer_data<gl::vec2> vertices;

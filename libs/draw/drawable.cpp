@@ -146,9 +146,9 @@ gl::program::uniform drawable::fill_mesh( gl::api &ogl, gl::mesh &m, const paint
 
 ////////////////////////////////////////
 
-gl::program::uniform drawable::stroke_mesh( gl::api &ogl, gl::mesh &m, const paint &p )
+gl::program::uniform drawable::stroke_mesh( gl::api &ogl, gl::mesh &m, const paint &p, const std::string &vert )
 {
-	m.set_program( new_program( ogl, "color_mesh.vert", "single_color.frag", false ) );
+	m.set_program( new_program( ogl, vert, "single_color.frag", false ) );
 	m.get_program().use();
 	m.set_uniform( "color", p.get_stroke_color() );
 	return m.get_uniform_location( "matrix" );

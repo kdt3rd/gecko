@@ -14,7 +14,6 @@ local srcs = {
 }
 
 local shaders = {
-	"color_mesh.frag";
 	"color_mesh.vert";
 	"conical_gradient.frag";
 	"linear_gradient.frag";
