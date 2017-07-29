@@ -21,39 +21,41 @@ namespace gl
 /// @todo Complete missing capabilities
 enum class capability
 {
-	/// If enabled, blend the computed fragment color values with the values in the color buffers.
+	/// Blend the computed fragment color values with the values in the color buffers.
 	/// @see gl::api::blend_func.
 	/// @see gl::blend_style
 	BLEND = GL_BLEND,
 
-	/// If enabled, cull polygons based on their winding in window coordinates.
+	/// Cull polygons based on their winding in window coordinates.
 	/// @see gl::api::cull_face
 	/// @todo Write cull face
 	CULL_FACE = GL_CULL_FACE,
 
-	/// If enabled, do depth comparisons and update the depth buffer. Note that even if the depth buffer exists and the depth mask is non-zero, the depth buffer is not updated if the depth test is disabled.
+	/// Do depth comparisons and update the depth buffer. Note that even if the depth buffer exists and the depth mask is non-zero, the depth buffer is not updated if the depth test is disabled.
 	/// @see gl::api::depth_func
 	/// @see gl::api::depth_range
 	/// @todo Write depth_func and depth_range
 	DEPTH_TEST = GL_DEPTH_TEST,
 
-	/// If enabled, dither color components or indices before they are written to the color buffer.
+	/// Dither color components or indices before they are written to the color buffer.
 	DITHER = GL_DITHER,
 
-	/// If enabled, and if the polygon is rendered in GL_FILL mode, an offset is added to depth values of a polygon's fragments before the depth comparison is performed.
+	/// If the polygon is rendered in GL_FILL mode, an offset is added to depth values of a polygon's fragments before the depth comparison is performed.
 	/// @see gl::api::polygon_offset
 	/// @todo Write polygon_offset
 	POLYGON_OFFSET_FILL = GL_POLYGON_OFFSET_FILL,
 
-	/// If enabled, compute a temporary coverage value where each bit is determined by the alpha value at the corresponding sample location. The temporary coverage value is then ANDed with the fragment coverage value.
+	/// Compute a temporary coverage value where each bit is determined by the alpha value at the corresponding sample location. The temporary coverage value is then ANDed with the fragment coverage value.
 	SAMPLE_ALPHA_TO_COVERAGE = GL_SAMPLE_ALPHA_TO_COVERAGE,
 
-	/// If enabled, discard fragments that are outside the scissor rectangle.
+	/// Discard fragments that are outside the scissor rectangle.
 	SCISSOR_TEST = GL_SCISSOR_TEST,
 
-	/// If enabled, do stencil testing and update the stencil buffer.
+	/// Do stencil testing and update the stencil buffer.
 	STENCIL_TEST = GL_STENCIL_TEST,
 
+	/// Use multiple fragment samples in computing the final color of a pixel.
+	MULTISAMPLE = GL_MULTISAMPLE,
 };
 
 ////////////////////////////////////////

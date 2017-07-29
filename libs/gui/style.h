@@ -10,8 +10,6 @@
 #include <memory>
 #include <string>
 #include <script/font.h>
-#include <draw/canvas.h>
-#include <base/alignment.h>
 
 namespace gui
 {
@@ -26,8 +24,8 @@ public:
 
 	virtual std::shared_ptr<script::font> default_font( bool bold = false ) = 0;
 
-	virtual void background( const std::shared_ptr<draw::canvas> &c ) = 0;
-	virtual const base::color &label_color( void ) = 0;
+	virtual void background( gl::api &ogl ) = 0;
+	virtual const gl::color &label_color( void ) = 0;
 
 	virtual base::size button_size( const base::size &content ) = 0;
 	virtual base::rect button_content( const base::rect &size ) = 0;

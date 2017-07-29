@@ -24,6 +24,11 @@ public:
 	system( const std::string &d );
 	~system( void );
 
+	bool is_working( void ) const
+	{
+		return static_cast<bool>( _display );
+	}
+
 	std::vector<std::shared_ptr<::platform::screen>> screens( void ) override
 	{
 		return _screens;
@@ -37,6 +42,8 @@ public:
 
 	void set_compositor( struct wl_compositor *c ) { _compositor = c; }
 	void set_shell( struct wl_shell *s ) { _shell = s; }
+
+	static bool is_available( void );
 
 private:
 	std::shared_ptr<struct wl_display> _display;

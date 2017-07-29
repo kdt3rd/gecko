@@ -82,51 +82,48 @@ system::system( const std::string &d )
 		dname = d.c_str();
 
 	_display.reset( wl_display_connect( dname ), []( struct wl_display *ptr ) { if ( ptr ) wl_display_disconnect( ptr ); } );
-	if ( ! _display )
+	if ( _display )
 	{
-		if ( dname )
-			throw std::runtime_error( "Unable to connect to display '" + std::string( dname ) + "'" );
-		throw std::runtime_error( "no Wayland display" );
+		wl_display_set_user_data( _display.get(), this );
+
+		// huh, thought this would have to be a member, but it seems
+		// once a listener is added, you can blow away the registry
+		// reference (until you might need it again)? although I guess
+		// in the initial pass, you register bindings to the registry
+		// and that increments the ref count
+		std::shared_ptr<struct wl_registry> reg;
+		reg.reset( wl_display_get_registry( _display.get() ), []( struct wl_registry *ptr ) { if ( ptr ) wl_registry_destroy( ptr ); } );
+		if ( ! reg )
+			throw std::runtime_error( "unable to create global wayland registry" );
+		wl_registry_set_user_data( reg.get(), this );
+		wl_registry_add_listener( reg.get(), &sys_reg_listener, this );
+
+		// trigger a round trip so the compositor, etc. and other seats,
+		// etc. are found
+		wl_display_dispatch( _display.get() );
+		wl_display_roundtrip( _display.get() );
+
+		_egl_disp = eglGetDisplay( (EGLNativeDisplayType)_display.get() );
+		EGLint maj = 0, min = 0;
+		eglInitialize( _egl_disp, &maj, &min );
+		if ( maj < 1 || ( maj == 1 && min < 4 ) )
+			throw std::runtime_error( "EGL version too old, reuire 1.4 to support OpenGL API" );
+
+		std::cout << "EGL version " << maj << '.' << min << std::endl;
+		if ( ! eglBindAPI( EGL_OPENGL_API ) )
+			throw std::runtime_error( "Error binding to OpenGL API" );
+
+		// need to add / remove screens based on registry
+		_screens.emplace_back( std::make_shared<screen>() );
+
+		// need to add / remove keyboards / mice based on registry
+		_keyboard = std::make_shared<keyboard>();
+		_mouse = std::make_shared<mouse>();
+
+		_dispatcher = std::make_shared<dispatcher>( _display, _keyboard, _mouse );
+		// _dispatcher->add_waitable( _keyboard );
+		// _dispatcher->add_waitable( _mouse );
 	}
-	wl_display_set_user_data( _display.get(), this );
-
-	// huh, thought this would have to be a member, but it seems
-	// once a listener is added, you can blow away the registry
-	// reference (until you might need it again)? although I guess
-	// in the initial pass, you register bindings to the registry
-	// and that increments the ref count
-	std::shared_ptr<struct wl_registry> reg;
-	reg.reset( wl_display_get_registry( _display.get() ), []( struct wl_registry *ptr ) { if ( ptr ) wl_registry_destroy( ptr ); } );
-	if ( ! reg )
-		throw std::runtime_error( "unable to create global wayland registry" );
-	wl_registry_set_user_data( reg.get(), this );
-	wl_registry_add_listener( reg.get(), &sys_reg_listener, this );
-
-	// trigger a round trip so the compositor, etc. and other seats,
-	// etc. are found
-	wl_display_dispatch( _display.get() );
-	wl_display_roundtrip( _display.get() );
-
-	_egl_disp = eglGetDisplay( (EGLNativeDisplayType)_display.get() );
-	EGLint maj = 0, min = 0;
-	eglInitialize( _egl_disp, &maj, &min );
-	if ( maj < 1 || ( maj == 1 && min < 4 ) )
-		throw std::runtime_error( "EGL version too old, reuire 1.4 to support OpenGL API" );
-
-	std::cout << "EGL version " << maj << '.' << min << std::endl;
-	if ( ! eglBindAPI( EGL_OPENGL_API ) )
-		throw std::runtime_error( "Error binding to OpenGL API" );
-
-	// need to add / remove screens based on registry
-	_screens.emplace_back( std::make_shared<screen>() );
-
-	// need to add / remove keyboards / mice based on registry
-	_keyboard = std::make_shared<keyboard>();
-	_mouse = std::make_shared<mouse>();
-
-	_dispatcher = std::make_shared<dispatcher>( _display, _keyboard, _mouse );
-//	_dispatcher->add_waitable( _keyboard );
-//	_dispatcher->add_waitable( _mouse );
 }
 
 ////////////////////////////////////////
@@ -163,6 +160,16 @@ std::shared_ptr<::platform::keyboard> system::get_keyboard( void )
 std::shared_ptr<::platform::mouse> system::get_mouse( void )
 {
 	return _mouse;
+}
+
+////////////////////////////////////////
+
+bool system::is_available( void )
+{
+	struct wl_display *d = wl_display_connect( nullptr );
+	bool result = ( d != nullptr );
+	wl_display_disconnect( d );
+	return result;
 }
 
 ////////////////////////////////////////

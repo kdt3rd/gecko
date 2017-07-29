@@ -44,7 +44,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 
 		draw::gradient g;
 		g.add_stop( 0.0, gl::blue );
-		g.add_stop( 0.5, gl::white );
+		g.add_stop( 0.5, gl::green );
 		g.add_stop( 1.0, gl::red );
 
 		draw::paint paint;

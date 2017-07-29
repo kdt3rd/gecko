@@ -1,16 +1,14 @@
-#version 150
+#version 330
 
-in vec2 text_out_coords;
-in vec2 text_tex_coords;
+layout(location = 0) in vec2 vertex_pos;
+layout(location = 1) in vec2 char_pos;
 
-uniform mat4 mvp_matrix;
-
-out vec2 textCoord;
+uniform mat4 matrix;
+out vec2 tex_pos;
 
 void main()
 {
-	textCoord = text_tex_coords;
-	gl_Position = vec4( text_out_coords, 0.0, 1.0 );
-	gl_Position = mvp_matrix * gl_Position;
+	tex_pos = char_pos;
+	gl_Position = matrix * vec4( vertex_pos, 0.0, 1.0 );
 }
 

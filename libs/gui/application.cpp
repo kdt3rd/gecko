@@ -6,9 +6,11 @@
 //
 
 #include "application.h"
+#include "window.h"
 #include <platform/platform.h>
 #include <platform/system.h>
 #include <script/font_manager.h>
+#include <base/contract.h>
 
 namespace
 {
@@ -33,18 +35,20 @@ application::application( const std::string &p, const std::string &r )
 	if ( platforms.empty() )
 		throw std::runtime_error( "no platforms available" );
 
-	for ( size_t i = 0; i < platforms.size(); ++i )
+	for ( const auto &plat: platforms )
 	{
-		if ( p.empty() || ( platforms[i].name() == p ) )
+		if ( p.empty() || ( plat.name() == p ) )
 		{
-			if ( r.empty() || ( platforms[i].render() == r ) )
+			if ( r.empty() || ( plat.renderer() == r ) )
 			{
-				std::cout << p << ' ' << platforms[i].name() << std::endl;
-				const platform::platform &plat = platforms[i];
-				_platform = plat.name() + "+" + plat.render();
-				_impl->sys = plat.create();
-				_impl->dispatch = _impl->sys->get_dispatcher();
-				break;
+				auto sys = plat.create();
+				if ( sys->is_working() )
+				{
+					_platform = plat.name() + "+" + plat.renderer();
+					_impl->sys = plat.create();
+					_impl->dispatch = _impl->sys->get_dispatcher();
+					break;
+				}
 			}
 		}
 	}
@@ -75,16 +79,18 @@ std::shared_ptr<window> application::new_window( void )
 
 std::shared_ptr<popup> application::new_popup( void )
 {
-	auto w = _impl->sys->new_window();
-	return std::make_shared<popup>( w );
+	throw_not_yet();
+//	auto w = _impl->sys->new_window();
+//	return std::make_shared<popup>( w );
 }
 
 ////////////////////////////////////////
 
 std::shared_ptr<menu> application::new_menu( void )
 {
-	auto w = _impl->sys->new_window();
-	return std::make_shared<menu>( w );
+	throw_not_yet();
+//	auto w = _impl->sys->new_window();
+//	return std::make_shared<menu>( w );
 }
 
 ////////////////////////////////////////

@@ -8,23 +8,27 @@
 #pragma once
 
 #include <type_traits>
-#include <draw/canvas.h>
-#include <layout/simple_area.h>
+#include <layout/area.h>
 #include <platform/keyboard.h>
 #include "context.h"
+
+namespace gl
+{
+class api;
+};
 
 namespace gui
 {
 
 ////////////////////////////////////////
 
-class widget : public layout::simple_area
+class widget : public layout::area
 {
 public:
 	widget( void );
 	virtual ~widget( void );
 
-	virtual void paint( const std::shared_ptr<draw::canvas> &canvas );
+	virtual void paint( gl::api &ogl );
 	virtual bool mouse_press( const base::point &p, int button );
 	virtual bool mouse_release( const base::point &p, int button );
 	virtual bool mouse_move( const base::point &p );

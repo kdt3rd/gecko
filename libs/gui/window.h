@@ -7,9 +7,10 @@
 
 #pragma once
 
-#include "widget.h"
 #include "context.h"
 #include <base/scope_guard.h>
+#include <platform/keyboard.h>
+#include <memory>
 
 namespace platform
 {
@@ -18,6 +19,8 @@ namespace platform
 
 namespace gui
 {
+
+class widget;
 
 ////////////////////////////////////////
 
@@ -59,10 +62,8 @@ protected:
 	void key_released( platform::scancode c );
 	void text_entered( char32_t c );
 
-	std::shared_ptr<layout::simple_area> _area;
 	std::shared_ptr<platform::window> _window;
 	std::shared_ptr<widget> _widget;
-	std::shared_ptr<draw::canvas> _canvas;
 };
 
 ////////////////////////////////////////

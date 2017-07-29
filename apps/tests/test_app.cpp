@@ -12,26 +12,29 @@
 #include <memory>
 
 #include <gui/application.h>
-#include <gui/dark_style.h>
-#include <gui/container.h>
-#include <gui/layouts.h>
-#include <gui/label.h>
-#include <gui/button.h>
-#include <gui/slider.h>
-#include <gui/background_color.h>
+#include <gui/window.h>
+#include <base/contract.h>
+//#include <gui/dark_style.h>
+//#include <gui/container.h>
+//#include <gui/layouts.h>
+//#include <gui/label.h>
+//#include <gui/button.h>
+//#include <gui/slider.h>
+//#include <gui/background_color.h>
 //#include <gui/scroll_area.h>
 //#include <gui/tree_node.h>
-#include <gui/line_edit.h>
-#include <gui/color_picker.h>
+//#include <gui/line_edit.h>
+//#include <gui/color_picker.h>
 
 namespace {
 
 static constexpr double padding = 12;
 static std::shared_ptr<gui::application> app;
-static std::shared_ptr<gui::menu> extra;
+//static std::shared_ptr<gui::menu> extra;
 
 ////////////////////////////////////////
 
+/*
 std::shared_ptr<gui::form> build_form( direction dir )
 {
 	auto container = std::make_shared<gui::form>( dir );
@@ -79,9 +82,11 @@ std::shared_ptr<gui::form> build_form( direction dir )
 	container->add( std::make_shared<gui::label>( "Who" ), slider2 );
 	return container;
 }
+*/
 
 ////////////////////////////////////////
 
+/*
 std::shared_ptr<gui::background> build_grid( direction dir )
 {
 	auto container = std::make_shared<gui::grid>( dir );
@@ -110,9 +115,11 @@ std::shared_ptr<gui::background> build_grid( direction dir )
 
 	return bg;
 }
+*/
 
 ////////////////////////////////////////
 
+/*
 std::shared_ptr<gui::simple_container> build_box( direction dir )
 {
 	auto container = std::make_shared<gui::simple_container>( dir );
@@ -129,6 +136,7 @@ std::shared_ptr<gui::simple_container> build_box( direction dir )
 
 	return container;
 }
+*/
 
 ////////////////////////////////////////
 
@@ -173,6 +181,7 @@ std::shared_ptr<gui::tree_node> build_tree( direction dir )
 
 ////////////////////////////////////////
 
+/*
 std::shared_ptr<gui::simple_container> build_edit( direction dir )
 {
 	auto container = std::make_shared<gui::simple_container>( dir );
@@ -183,6 +192,7 @@ std::shared_ptr<gui::simple_container> build_edit( direction dir )
 	container->add( std::make_shared<gui::line_edit>( "Some text" ) );
 	return container;
 }
+*/
 
 ////////////////////////////////////////
 
@@ -207,6 +217,7 @@ std::shared_ptr<gui::widget> build_all( direction dir )
 
 ////////////////////////////////////////
 
+/*
 std::shared_ptr<gui::simple_container> build_color( direction dir )
 {
 	auto container = std::make_shared<gui::simple_container>( dir );
@@ -218,6 +229,7 @@ std::shared_ptr<gui::simple_container> build_color( direction dir )
 
 	return container;
 }
+*/
 
 ////////////////////////////////////////
 
@@ -230,6 +242,7 @@ int safemain( int argc, char **argv )
 	auto win = app->new_window();
 	win->set_title( app->active_platform() );
 
+	/*
 	std::string test = "form";
 	if ( argc > 1 )
 		test = argv[1];
@@ -253,20 +266,19 @@ int safemain( int argc, char **argv )
 		win->set_widget( build_grid( dir ) );
 	else if ( test == "box" )
 		win->set_widget( build_box( dir ) );
+	*/
 	/*
 	else if ( test == "tree" )
 		win->set_widget( build_tree( dir ) );
-	*/
 	else if ( test == "edit" )
 		win->set_widget( build_edit( dir ) );
 	else if ( test == "color" )
 		win->set_widget( build_color( dir ) );
-	/*
 	else if ( test == "all" )
 		win->set_widget( build_all( dir ) );
-	*/
 	else
 		throw std::runtime_error( "unknown test" );
+	*/
 
 	win->show();
 	int code = app->run();

@@ -69,12 +69,8 @@ system::system( const std::string &d )
 	XSetIOErrorHandler( &xIOErrorCB );
 
 	_display.reset( XOpenDisplay( dname ), &CloseDisplay );
-	if ( ! _display )
-	{
-		if ( dname )
-			throw std::runtime_error( "Unable to connect to display '" + std::string( dname ) + "'" );
-		throw std::runtime_error( "no X display" );
-	}
+	if (  !_display )
+		return;
 
 	if ( ! XSupportsLocale() )
 		throw std::runtime_error( "Current locale not supported by X" );

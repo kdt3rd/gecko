@@ -9,8 +9,6 @@
 #include <cmath>
 #include <algorithm>
 
-////////////////////////////////////////
-
 namespace draw
 {
 

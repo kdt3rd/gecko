@@ -80,15 +80,15 @@ window::window( EGLDisplay disp, struct wl_compositor *comp, struct wl_shell *sh
 	EGLint num_config = 0;
 
 	if ( ! eglChooseConfig( disp, attributes, &config, 1, &num_config ) )
-		throw std::runtime_error( "Unable to find valid egl context config" );
+		throw std::runtime_error( "unable to find valid egl context config" );
 	if ( 0 == num_config )
-		throw std::runtime_error( "Unable to find valid egl context config" );
-	std::cout << "found " << num_config << " configs" << std::endl;
+		throw std::runtime_error( "unable to find valid egl context config" );
+
 #pragma TODO("Implement shared context - create one in system, pass it here")
 	_egl_context = eglCreateContext( disp, config, EGL_NO_CONTEXT, ctxtattribs );
 	if ( ! _egl_context )
 		throw std::runtime_error( "Unable to create egl context" );
-	
+
 #pragma TODO("add more error checks")
 	_surface = wl_compositor_create_surface( comp );
 	_shell_surf = wl_shell_get_shell_surface( shell, _surface );

@@ -31,13 +31,16 @@ class system
 public:
 	/// @brief Constructor.
 	///
-	/// Construct a base 
+	/// Construct a system with the given name/description.
 	/// @param name Name of the system
 	/// @param desc Description of the system
 	system( std::string name, std::string desc );
-	
+
 	/// @brief Destructor.
 	virtual ~system( void );
+
+	/// @brief Is this system functional.
+	virtual bool is_working( void ) const = 0;
 
 	/// @brief Name of the system.
 	///
@@ -57,7 +60,6 @@ public:
 	/// @return Vector of screens
 	virtual std::vector<std::shared_ptr<screen>> screens( void ) = 0;
 
-	
 	/// @brief Create a new window.
 	///
 	/// Creates a new window.  Newly created windows are hidden and of size 0x0.

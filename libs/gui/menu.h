@@ -20,7 +20,7 @@ class menu : public window
 public:
 	menu( const std::shared_ptr<platform::window> &w );
 	virtual ~menu( void );
-	
+
 	void add_entry( const std::string &n );
 
 private:

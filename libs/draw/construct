@@ -64,5 +64,5 @@ shader_code:add_dependency( "order", shader_h )
 
 lib = library "draw"
   source{ srcs, shader_code }:include_artifact_dir()
-  libs{ "gl" }
+  libs{ "gl", "script" }
 

@@ -9,13 +9,19 @@
 
 #include <memory>
 #include <set>
-#include "window.h"
-#include "popup.h"
-#include "menu.h"
-#include <script/font_manager.h>
+
+namespace script
+{
+class font;
+class font_manager;
+}
 
 namespace gui
 {
+
+class window;
+class popup;
+class menu;
 
 ////////////////////////////////////////
 

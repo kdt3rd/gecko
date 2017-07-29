@@ -41,17 +41,12 @@ platform::find_running( const std::string &disp )
 {
 	for ( auto &p: init() )
 	{
-		try
-		{
-			return p.create( disp );
-		}
-		catch ( std::exception &e )
-		{
-			std::cerr << "Unable to connect to '" << p.name() << "' (renderer '" << p.renderer() << "'): " << e.what() << std::endl;
-		}
+		auto result = p.create( disp );
+		if ( result->is_working() )
+			return result;
 	}
 
-	throw std::runtime_error( "Unable to find any enabled or running display system for the current platform" );
+	throw std::runtime_error( "no display system found" );
 }
 
 ////////////////////////////////////////

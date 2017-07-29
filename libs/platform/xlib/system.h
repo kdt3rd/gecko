@@ -23,6 +23,11 @@ public:
 	system( const std::string &d );
 	~system( void );
 
+	bool is_working( void ) const
+	{
+		return static_cast<bool>( _display );
+	}
+
 	std::vector<std::shared_ptr<::platform::screen>> screens( void ) override
 	{
 		return _screens;

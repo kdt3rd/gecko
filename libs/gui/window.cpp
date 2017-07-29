@@ -7,10 +7,10 @@
 
 #include <iostream>
 #include "window.h"
-#include "application.h"
-#include "style.h"
+#include "widget.h"
 #include <platform/window.h>
-#include <gl/opengl.h>
+#include <gl/api.h>
+#include <base/contract.h>
 
 namespace gui
 {
@@ -30,7 +30,6 @@ window::window( const std::shared_ptr<platform::window> &win )
 	_window->key_pressed = [this]( const std::shared_ptr<platform::keyboard> &, const platform::scancode &c ) { key_pressed( c ); };
 	_window->key_released = [this]( const std::shared_ptr<platform::keyboard> &, const platform::scancode &c ) { key_released( c ); };
 	_window->text_entered = [this]( const std::shared_ptr<platform::keyboard> &, const char32_t &c ) { text_entered( c ); };
-	_canvas = std::make_shared<draw::canvas>();
 }
 
 ////////////////////////////////////////
@@ -83,7 +82,7 @@ void window::set_widget( const std::shared_ptr<widget> &w )
 		_widget = w;
 		_widget->set_horizontal( 0.0, _window->width() - 1.0 );
 		_widget->set_vertical( 0.0, _window->height() - 1.0 );
-		_widget->compute_minimum();
+		_widget->compute_bounds();
 	} );
 }
 
@@ -121,28 +120,27 @@ window::bound_context window::bind( void )
 void window::paint( void )
 {
 	_window->acquire();
-	glViewport( 0, 0, static_cast<GLsizei>(_window->width()), static_cast<GLsizei>(_window->height()) );
-	glEnable( GL_MULTISAMPLE );
-	glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
-	glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
 
-	_canvas->clear_color( { 0.13, 0.13, 0.13, 1 } );
-	_canvas->clear();
+	gl::api ogl;
+	ogl.viewport( 0, 0, _window->width(), _window->height() );
+	ogl.enable( gl::capability::MULTISAMPLE );
+//	glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
+//	glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
 
-	_canvas->save_matrix();
-	_canvas->ortho( 0, static_cast<float>(_window->width()), 0, static_cast<float>(_window->height()) );
+	ogl.clear_color( { 0.15, 0.15, 0.15, 1 } );
+	ogl.clear();
+	ogl.set_projection( gl::matrix4::ortho( 0, static_cast<float>(_window->width()), 0, static_cast<float>(_window->height()) ) );
 
 	if ( _widget )
 	{
 		in_context( [&,this]
 		{
-			_widget->compute_minimum();
+			_widget->compute_bounds();
 			_widget->compute_layout();
-			_widget->paint( _canvas );
+			_widget->paint( ogl );
 		} );
 	}
 
-	_canvas->restore_matrix();
 	_window->release();
 }
 

@@ -2,21 +2,8 @@
 lib = library "gui"
   source{
 	  "application.cpp",
-	  "layouts.cpp",
 	  "context.cpp",
-	  "widget.cpp",
 	  "window.cpp",
-	  "popup.cpp",
-	  "menu.cpp",
-	  "background.cpp",
-	  "background_color.cpp",
-	  "label.cpp",
-	  "button.cpp",
-	  "slider.cpp",
-	  "line_edit.cpp",
-	  --"scroll_area.cpp",
-	  "container.cpp",
-	  --"tree_node.cpp",
-	  "color_picker.cpp"
+--	  "widget.cpp",
   }
-  libs{ "platform", "layout", "utf" }
+  libs{ "platform", "draw", "layout", "utf" }
