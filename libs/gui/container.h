@@ -8,7 +8,9 @@
 #pragma once
 
 #include "widget.h"
-#include "layouts.h"
+#include <layout/grid_layout.h>
+#include <layout/box_layout.h>
+#include <layout/tree_layout.h>
 #include <map>
 
 namespace gui
@@ -16,28 +18,25 @@ namespace gui
 
 ////////////////////////////////////////
 
-template<typename the_layout>
-class container : public widget, public the_layout
+template<typename TheLayout>
+class container : public widget
 {
 public:
-	using the_layout::the_layout;
-
 	~container( void )
 	{
 	}
 
-	void compute_minimum( void ) override
+	void compute_bounds( void ) override
 	{
-		for ( auto w: _widgets )
-			w->compute_minimum();
-		this->recompute_minimum( *this );
+		_layout.compute_bounds();
+		this->set_minimum( _layout.minimum_size() );
+		this->set_maximum( _layout.maximum_size() );
 	}
 
 	void compute_layout( void ) override
 	{
-		this->recompute_layout( *this );
-		for ( auto w: _widgets )
-			w->compute_layout();
+		_layout.set_extent( extent() );
+		_layout.compute_layout();
 	}
 
 	bool mouse_press( const base::point &p, int button ) override
@@ -132,18 +131,31 @@ public:
 		return widget::text_input( c );
 	}
 
-	void paint( const std::shared_ptr<draw::canvas> &c ) override
+	void paint( gl::api &ogl ) override
 	{
 		for ( auto w: _widgets )
-			w->paint( c );
+			w->paint( ogl );
+	}
+
+	template<typename ...Args>
+	void add( const std::shared_ptr<widget> &w, Args ...args )
+	{
+		_widgets.push_back( w );
+		_layout.add( w, std::forward<Args>( args )... );
+	}
+
+	void set_padding( double l, double r, double t, double b )
+	{
+		_layout.set_padding( l, r, t, b );
+	}
+
+	void set_spacing( double h, double v )
+	{
+		_layout.set_spacing( h, v );
 	}
 
 protected:
-	void added( const std::shared_ptr<widget> &w ) override
-	{
-		_widgets.push_back( w );
-	}
-
+	TheLayout _layout;
 	std::vector<std::shared_ptr<widget>> _widgets;
 	std::shared_ptr<widget> _mouse_grab;
 	std::shared_ptr<widget> _key_focus;
@@ -151,19 +163,13 @@ protected:
 
 ////////////////////////////////////////
 
-typedef container<form_layout> form;
-typedef container<grid_layout> grid;
-typedef container<box_layout> simple_container;
+extern template class container<layout::grid_layout>;
+extern template class container<layout::box_layout>;
+extern template class container<layout::tree_layout>;
 
-#pragma GCC diagnostic push
-#ifdef __clang__
-#pragma GCC diagnostic ignored "-Wweak-template-vtables"
-#endif
-extern template class container<form_layout>;
-extern template class container<grid_layout>;
-extern template class container<tree_layout>;
-extern template class container<box_layout>;
-#pragma GCC diagnostic pop
+typedef container<layout::grid_layout> grid;
+typedef container<layout::box_layout> box;
+typedef container<layout::tree_layout> tree;
 
 ////////////////////////////////////////
 

@@ -14,6 +14,7 @@
 #include <gui/application.h>
 #include <gui/window.h>
 #include <gui/label.h>
+#include <gui/container.h>
 #include <base/contract.h>
 //#include <gui/dark_style.h>
 //#include <gui/container.h>
@@ -243,7 +244,16 @@ int safemain( int argc, char **argv )
 	auto win = app->new_window();
 	win->set_title( app->active_platform() );
 
-	win->set_widget( std::make_shared<gui::label>( "Hello World", base::alignment::CENTER ) );
+	auto label1 = std::make_shared<gui::label>( "Hello", base::alignment::LEFT );
+	label1->set_color( gl::red );
+	auto label2 = std::make_shared<gui::label>( "World", base::alignment::RIGHT );
+	label2->set_color( gl::green );
+	auto box = std::make_shared<gui::box>();
+	box->set_padding( 12, 12, 5, 5 );
+	box->set_spacing( 8, 0 );
+	box->add( label1 );
+	box->add( label2 );
+	win->set_widget( box );
 
 	/*
 	std::string test = "form";

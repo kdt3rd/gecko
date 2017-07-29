@@ -12,10 +12,9 @@ namespace gui
 
 ////////////////////////////////////////
 
-template class container<form_layout>;
-template class container<grid_layout>;
-template class container<box_layout>;
-template class container<tree_layout>;
+template class container<layout::grid_layout>;
+template class container<layout::box_layout>;
+template class container<layout::tree_layout>;
 
 ////////////////////////////////////////
 

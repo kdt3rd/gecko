@@ -5,6 +5,7 @@ lib = library "gui"
 	  "context.cpp",
 	  "window.cpp",
 	  "widget.cpp",
+	  "container.cpp",
 	  "label.cpp",
   }
   libs{ "platform", "draw", "layout", "utf" }
