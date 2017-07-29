@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "drawable.h"
 #include <script/font.h>
 #include <gl/color.h>
 #include <gl/mesh.h>
@@ -16,7 +17,7 @@ namespace draw
 
 ////////////////////////////////////////
 
-class text
+class text : public drawable
 {
 public:
 	text( void );
@@ -42,7 +43,7 @@ public:
 		return _utf8;
 	}
 
-	void draw( gl::api &ogl );
+	void draw( gl::api &ogl ) override;
 
 private:
 	void update( void );

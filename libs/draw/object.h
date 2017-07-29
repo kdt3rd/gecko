@@ -1,6 +1,13 @@
+//
+// Copyright (c) 2017 Ian Godin
+// All rights reserved.
+// Copyrights licensed under the MIT License.
+// See the accompanying LICENSE.txt file for terms
+//
 
 #pragma once
 
+#include "drawable.h"
 #include "path.h"
 #include "paint.h"
 #include <gl/mesh.h>
@@ -11,7 +18,7 @@ namespace draw
 
 ////////////////////////////////////////
 
-class object
+class object : public drawable
 {
 public:
 	object( void );
@@ -23,10 +30,9 @@ public:
 		create( ogl, p, paint( c ) );
 	}
 
-	void draw( gl::api &ogl );
+	void draw( gl::api &ogl ) override;
 
 private:
-	std::shared_ptr<gl::texture> gradient( gl::api &ogl, const gradient &g, size_t n = 128 );
 
 	gl::mesh _stroke;
 	gl::mesh _fill;

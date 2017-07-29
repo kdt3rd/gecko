@@ -1,3 +1,9 @@
+//
+// Copyright (c) 2017 Ian Godin
+// All rights reserved.
+// Copyrights licensed under the MIT License.
+// See the accompanying LICENSE.txt file for terms
+//
 
 #include "object.h"
 #include "polylines.h"
@@ -74,7 +80,7 @@ void object::create( gl::api &ogl, const path &p, const paint &c )
 		_fill.set_uniform( "txt", 0 );
 		_fill.set_uniform( "origin", c.get_fill_linear_origin() );
 		_fill.set_uniform( "dir", c.get_fill_linear_size() );
-		_fill_texture = gradient( ogl, c.get_fill_linear_gradient() );
+		_fill_texture = new_gradient( ogl, c.get_fill_linear_gradient() );
 		_fill_texture->bind().set_wrapping( gl::wrapping::CLAMP_TO_EDGE );
 	}
 	else if ( c.has_fill_radial() )
@@ -86,7 +92,7 @@ void object::create( gl::api &ogl, const path &p, const paint &c )
 		_fill.set_uniform( "txt", 0 );
 		_fill.set_uniform( "center", c.get_fill_radial_p1() );
 		_fill.set_uniform( "radius", c.get_fill_radial_r2() );
-		_fill_texture = gradient( ogl, c.get_fill_radial_gradient() );
+		_fill_texture = new_gradient( ogl, c.get_fill_radial_gradient() );
 		_fill_texture->bind().set_wrapping( gl::wrapping::CLAMP_TO_EDGE );
 	}
 	else if ( c.has_fill_conical() )
@@ -97,7 +103,7 @@ void object::create( gl::api &ogl, const path &p, const paint &c )
 		_fill.get_program().use();
 		_fill.set_uniform( "txt", 0 );
 		_fill.set_uniform( "center", c.get_fill_conical_center() );
-		_fill_texture = gradient( ogl, c.get_fill_conical_gradient() );
+		_fill_texture = new_gradient( ogl, c.get_fill_conical_gradient() );
 		_fill_texture->bind().set_wrapping( gl::wrapping::REPEAT );
 	}
 	else if ( c.has_no_fill() )
@@ -160,39 +166,6 @@ void object::draw( gl::api &ogl )
 	}
 }
 
-////////////////////////////////////////
-
-namespace
-{
-inline uint8_t clampColorByte( float c )
-{
-	c = std::max( 0.F, std::min( 255.F, std::floor( c * 255.F ) ) );
-	return uint8_t( c );
-}
-}
-
-////////////////////////////////////////
-
-std::shared_ptr<gl::texture> object::gradient( gl::api &ogl, const draw::gradient &g, size_t n )
-{
-	std::vector<uint8_t> bytes( n * 4 );
-	for ( size_t i = 0; i < n; ++i )
-	{
-		double stop = double(i)/double(n-1);
-		gl::color c = g.sample( stop );
-		bytes[i*4+0] = clampColorByte( c.red() );
-		bytes[i*4+1] = clampColorByte( c.green() );
-		bytes[i*4+2] = clampColorByte( c.blue() );
-		bytes[i*4+3] = clampColorByte( c.alpha() );
-	}
-
-	auto ret = ogl.new_texture( gl::texture::target::RECTANGLE );
-	{
-		auto txt = ret->bind();
-		txt.image_2d_rgba( gl::format::RGBA, n, 1, gl::image_type::UNSIGNED_BYTE, bytes.data() );
-	}
-	return ret;
-}
 ////////////////////////////////////////
 
 }

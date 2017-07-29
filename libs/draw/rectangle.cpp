@@ -65,35 +65,7 @@ void rectangle::initialize( gl::api &ogl )
 			_mesh = std::make_shared<gl::mesh>();
 
 			// Setup program with vertex and fragment shaders
-			_mesh->get_program().set(
-				ogl.new_vertex_shader( R"SHADER(
-					#version 330
-
-					layout(location = 0) in vec2 vertex_position;
-
-					uniform mat4 matrix;
-					uniform vec4 mesh_color;
-
-					out vec3 color;
-
-					void main()
-					{
-						color = vec3( mesh_color );
-						gl_Position = matrix * vec4( vertex_position, 0.0, 1.0 );
-					}
-				)SHADER" ),
-				ogl.new_fragment_shader( R"SHADER(
-					#version 330
-
-					in vec3 color;
-					out vec4 frag_color;
-
-					void main()
-					{
-						frag_color = vec4( color, 1.0 );
-					}
-				)SHADER" )
-			);
+			_mesh->set_program( new_program( ogl, "color_mesh.vert", "color_mesh.frag" ) );
 
 			// Setup vertices
 			gl::vertex_buffer_data<gl::vec2> vertices;
@@ -106,13 +78,13 @@ void rectangle::initialize( gl::api &ogl )
 			gl::element_buffer_data elements { 0, 3, 1, 1, 3, 2 };
 			{
 				auto bound = _mesh->bind();
-				bound.vertex_attribute( "vertex_position", vertices );
+				bound.vertex_attribute( "position", vertices );
 				bound.set_elements( elements );
 			}
 
 			_mesh->add_triangles( 6 );
 			_matrix_loc = _mesh->get_uniform_location( "matrix" );
-			_color_loc = _mesh->get_uniform_location( "mesh_color" );
+			_color_loc = _mesh->get_uniform_location( "color" );
 
 			_mesh_cache = _mesh;
 		}
