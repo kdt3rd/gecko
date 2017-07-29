@@ -9,7 +9,8 @@
 
 #include "widget.h"
 #include "application.h"
-#include <draw/stretchable.h>
+#include <draw/rectangle.h>
+#include <draw/text.h>
 #include <base/alignment.h>
 #include <base/signal.h>
 
@@ -22,29 +23,18 @@ class button : public widget
 {
 public:
 	button( void );
-	button( std::string l, base::alignment a = base::alignment::CENTER, const base::color &c = { 1.0, 1.0, 1.0 }, const std::shared_ptr<script::font> &f = application::current()->get_default_font() );
+	button( std::string l, base::alignment a = base::alignment::CENTER, const gl::color &c = gl::white, const std::shared_ptr<script::font> &f = application::current()->get_default_font() );
 	~button( void );
 
-	const std::string &text( void ) const
-	{
-		return _text;
-	}
-
-	void set_text( const std::string &t )
-	{
-		_text = t;
-	}
-
-	void set_font( const std::shared_ptr<script::font> &f )
-	{
-		_font = f;
-	}
-
 	void set_pressed( bool p );
+	void set_text( const std::string &utf8 ) { _text.set_text( utf8 ); }
+	void set_color( const gl::color &c ) { _text.set_color( c ); }
+	void set_font( const std::shared_ptr<script::font> &f ) { _text.set_font( f ); }
+	void set_align( base::alignment a ) { _align = a; }
 
-	void paint( const std::shared_ptr<draw::canvas> &c ) override;
+	void paint( gl::api &ogl ) override;
 
-	void compute_minimum( void ) override;
+	void compute_bounds( void ) override;
 
 	bool mouse_press( const base::point &p, int button ) override;
 	bool mouse_release( const base::point &p, int button ) override;
@@ -53,13 +43,9 @@ public:
 	base::signal<void(void)> when_activated;
 
 private:
-	std::string _text;
-	base::alignment _align = base::alignment::CENTER;
-	base::color _color = { 1.0, 1.0, 1.0 };
-	std::shared_ptr<script::font> _font = application::current()->get_default_font();
-
-	std::shared_ptr<draw::stretchable> _draw;
-
+	draw::rectangle _rect = draw::rectangle( { 0.25, 0.25, 0.25 } );
+	draw::text _text;
+	base::alignment _align = base::alignment::LEFT;
 	bool _pressed = false;
 	bool _tracking = false;
 };

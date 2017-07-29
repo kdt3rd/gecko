@@ -8,7 +8,6 @@
 #include <iostream>
 #include "button.h"
 #include "application.h"
-#include "style.h"
 
 
 namespace gui
@@ -22,9 +21,12 @@ button::button( void )
 
 ////////////////////////////////////////
 
-button::button( std::string l, base::alignment a, const base::color &c, const std::shared_ptr<script::font> &f )
-	: _text( std::move( l ) ), _align( a ), _color( c ), _font( f )
+button::button( std::string l, base::alignment a, const gl::color &c, const std::shared_ptr<script::font> &f )
+	: _align( a )
 {
+	_text.set_font( f );
+	_text.set_text( l );
+	_text.set_color( c );
 }
 
 ////////////////////////////////////////
@@ -40,58 +42,46 @@ void button::set_pressed( bool p )
 	if ( p != _pressed )
 	{
 		_pressed = p;
+		if ( _pressed )
+			_rect.set_color( { 0.05, 0.05, 0.05 } );
+		else
+			_rect.set_color( { 0.25, 0.25, 0.25 } );
 		invalidate();
 	}
 }
 
 ////////////////////////////////////////
 
-void button::paint( const std::shared_ptr<draw::canvas> &canvas )
+void button::paint( gl::api &ogl )
 {
-	if ( !_draw )
+	_rect.resize( x(), y(), width(), height() );
+	_rect.draw( ogl );
+	const auto &f = _text.get_font();
+	if ( f )
 	{
-		base::path path;
-		path.rounded_rect( { 0, 0 }, 20, 20, 3 );
-
-		base::paint paint;
-		paint.set_fill_color( { 0.27, 0.27, 0.27 } );
-
-		_draw = std::make_shared<draw::stretchable>();
-		_draw->create( canvas, path, paint, { 10, 10 } );
+		base::rect lbox = *this;
+		lbox.shrink( 10, 10, 5, 5 );
+		_text.set_position( f->align_text( _text.get_text(), lbox, _align ) );
+		_text.draw( ogl );
 	}
-
-	_draw->set( canvas, *this );
-	_draw->draw( *canvas );
-
-	base::rect content( *this );
-	content.shrink( 6, 6, 3, 3 );
-	base::point p = canvas->align_text( _font, _text, content, _align );
-	base::paint paint;
-	paint.set_fill_color( _color );
-	canvas->draw_text( _font, p, _text, paint );
 }
 
 ////////////////////////////////////////
 
-void button::compute_minimum( void )
+void button::compute_bounds( void )
 {
-	script::font_extents fex = _font->extents();
-	script::text_extents tex = _font->extents( _text );
-
-	base::size textsize( tex.x_advance, fex.height );
-
-	base::size full( textsize );
-	full.grow( 12, 6 );
-	full.ceil();
-	full.set_height( std::max( full.h(), 21.0 ) );
-
-	set_minimum( full );
+	const auto &f = _text.get_font();
+	script::font_extents fex = f->extents();
+	script::text_extents tex = f->extents( _text.get_text() );
+	set_minimum( tex.x_advance + 20, fex.height + 10 );
 }
 
 ////////////////////////////////////////
 
-bool button::mouse_press( const base::point &p, int /*button*/ )
+bool button::mouse_press( const base::point &p, int button )
 {
+	unused( button );
+
 	if ( contains( p ) )
 	{
 		_tracking = true;
@@ -102,8 +92,10 @@ bool button::mouse_press( const base::point &p, int /*button*/ )
 
 ////////////////////////////////////////
 
-bool button::mouse_release( const base::point &p, int /*button*/ )
+bool button::mouse_release( const base::point &p, int button )
 {
+	unused( button );
+
 	if ( _tracking )
 	{
 		_tracking = false;

@@ -22,7 +22,7 @@ class label : public widget
 {
 public:
 	label( void );
-	label( std::string l, base::alignment a = base::alignment::LEFT, const gl::color &c = { 1.0, 1.0, 1.0, 1.0 }, const std::shared_ptr<script::font> &f = application::current()->get_default_font() );
+	label( std::string l, base::alignment a = base::alignment::LEFT, const gl::color &c = gl::white, const std::shared_ptr<script::font> &f = application::current()->get_default_font() );
 	~label( void );
 
 	void set_text( const std::string &utf8 ) { _text.set_text( utf8 ); }
