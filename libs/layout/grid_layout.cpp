@@ -73,7 +73,7 @@ void grid_layout::compute_bounds( void )
 			tmp.clear();
 			for ( size_t x = 0; x < c._w; ++x )
 			{
-				auto col = _cols.at( x + c._x );
+				auto col = _cols.at( c._x + x );
 				w += col->width();
 				tmp.push_back( std::move( col ) );
 			}
@@ -85,7 +85,7 @@ void grid_layout::compute_bounds( void )
 			tmp.clear();
 			for ( size_t y = 0; y < c._h; ++y )
 			{
-				auto row = _rows.at( y + c._y );
+				auto row = _rows.at( c._y + y );
 				h += row->height();
 				tmp.push_back( std::move( row ) );
 			}
@@ -171,8 +171,8 @@ void grid_layout::compute_layout( void )
 			auto b = _rows.at( c._y + c._h - 1 );
 			a->set_x1( x1() + l->x1() );
 			a->set_y1( y1() + t->y1() );
-			a->set_x2( x1() + r->x2() );
-			a->set_y2( y1() + b->y2() );
+			a->set_x2( x1() + r->x2() + 1 );
+			a->set_y2( y1() + b->y2() + 1 );
 			a->compute_layout();
 		}
 	}
