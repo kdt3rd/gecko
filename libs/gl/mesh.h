@@ -98,6 +98,7 @@ public:
 	/// @brief Set the program for this mesh.
 	void set_program( const std::shared_ptr<gl::program> &p )
 	{
+		precondition( p, "null program" );
 		_prog = p;
 	}
 

@@ -82,14 +82,20 @@ std::string program::log( void )
 
 program::attribute program::get_attribute_location( const std::string &name )
 {
-	return static_cast<program::attribute>( glGetAttribLocation( _program, name.c_str() ) );
+	GLint loc = glGetAttribLocation( _program, name.c_str() );
+	if ( loc < 0 )
+		throw_runtime( "gl attribute {0} not found", name );
+	return static_cast<program::attribute>( loc );
 }
 
 ////////////////////////////////////////
 
 program::uniform program::get_uniform_location( const std::string &name )
 {
-	return static_cast<program::uniform>( glGetUniformLocation( _program, name.c_str() ) );
+	GLint loc = glGetUniformLocation( _program, name.c_str() );
+	if ( loc < 0 )
+		throw_runtime( "gl uniform {0} not found", name );
+	return static_cast<program::uniform>( loc );
 }
 
 ////////////////////////////////////////
