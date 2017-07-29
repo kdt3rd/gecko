@@ -5,7 +5,7 @@
 // See the accompanying LICENSE.txt file for terms
 //
 
-#include "object.h"
+#include "shape.h"
 #include "polylines.h"
 #include "shaders.h"
 
@@ -14,13 +14,13 @@ namespace draw
 
 ////////////////////////////////////////
 
-object::object( void )
+shape::shape( void )
 {
 }
 
 ////////////////////////////////////////
 
-void object::create( gl::api &ogl, const path &p, const paint &c )
+void shape::create( gl::api &ogl, const path &p, const paint &c )
 {
 	if ( p.empty() || c.empty() )
 		return;
@@ -48,7 +48,7 @@ void object::create( gl::api &ogl, const path &p, const paint &c )
 
 ////////////////////////////////////////
 
-void object::draw( gl::api &ogl )
+void shape::draw( gl::api &ogl )
 {
 	// Draw fill
 	if ( _fill.valid() )

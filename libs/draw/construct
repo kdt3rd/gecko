@@ -10,7 +10,7 @@ local srcs = {
 	"drawable.cpp";
 	"text.cpp";
 	"rectangle.cpp";
-	"object.cpp";
+	"shape.cpp";
 }
 
 local shaders = {

@@ -18,10 +18,10 @@ namespace draw
 
 ////////////////////////////////////////
 
-class object : public drawable
+class shape : public drawable
 {
 public:
-	object( void );
+	shape( void );
 
 	void create( gl::api &ogl, const path &p, const paint &c );
 

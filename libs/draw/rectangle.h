@@ -26,6 +26,7 @@ public:
 	void draw( gl::api &ogl ) override;
 
 	void resize( float x, float y, float w, float h );
+
 	void set_color( const gl::color &c )
 	{
 		_color = c;

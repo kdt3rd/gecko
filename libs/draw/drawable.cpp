@@ -104,17 +104,17 @@ std::shared_ptr<gl::texture> drawable::get_fill_texture( gl::api &ogl, const pai
 
 ////////////////////////////////////////
 
-gl::program::uniform drawable::fill_mesh( gl::api &ogl, gl::mesh &m, const paint &p )
+gl::program::uniform drawable::fill_mesh( gl::api &ogl, gl::mesh &m, const paint &p, const std::string &vert )
 {
 	if ( p.has_fill_color() )
 	{
-		m.set_program( new_program( ogl, "position_uv.vert", "single_color.frag", false ) );
+		m.set_program( new_program( ogl, vert, "single_color.frag", false ) );
 		m.get_program().use();
 		m.set_uniform( "color", p.get_fill_color() );
 	}
 	else if ( p.has_fill_linear() )
 	{
-		m.set_program( new_program( ogl, "position_uv.vert", "linear_gradient.frag", false ) );
+		m.set_program( new_program( ogl, vert, "linear_gradient.frag", false ) );
 		m.get_program().use();
 		m.set_uniform( "txt", 0 );
 		m.set_uniform( "origin", p.get_fill_linear_origin() );
@@ -122,7 +122,7 @@ gl::program::uniform drawable::fill_mesh( gl::api &ogl, gl::mesh &m, const paint
 	}
 	else if ( p.has_fill_radial() )
 	{
-		m.set_program( new_program( ogl, "position_uv.vert", "radial_gradient.frag", false ) );
+		m.set_program( new_program( ogl, vert, "radial_gradient.frag", false ) );
 		m.get_program().use();
 		m.set_uniform( "txt", 0 );
 		m.set_uniform( "center", p.get_fill_radial_p1() );
@@ -130,7 +130,7 @@ gl::program::uniform drawable::fill_mesh( gl::api &ogl, gl::mesh &m, const paint
 	}
 	else if ( p.has_fill_conical() )
 	{
-		m.set_program( new_program( ogl, "position_uv.vert", "conical_gradient.frag", false ) );
+		m.set_program( new_program( ogl, vert, "conical_gradient.frag", false ) );
 		m.get_program().use();
 		m.set_uniform( "txt", 0 );
 		m.set_uniform( "center", p.get_fill_conical_center() );
