@@ -239,6 +239,17 @@ void api::restore_matrix( void )
 
 ////////////////////////////////////////
 
+void api::reset( void )
+{
+	_matrix.clear();
+	_matrix.emplace_back();
+	_view = gl::matrix4::identity();
+	_projection = gl::matrix4::identity();
+	_scissors.clear();
+}
+
+////////////////////////////////////////
+
 #ifndef __APPLE__
 
 namespace

@@ -13,6 +13,7 @@
 
 #include <gui/application.h>
 #include <gui/window.h>
+#include <gui/label.h>
 #include <base/contract.h>
 //#include <gui/dark_style.h>
 //#include <gui/container.h>
@@ -241,6 +242,8 @@ int safemain( int argc, char **argv )
 
 	auto win = app->new_window();
 	win->set_title( app->active_platform() );
+
+	win->set_widget( std::make_shared<gui::label>( "Hello World", base::alignment::CENTER ) );
 
 	/*
 	std::string test = "form";

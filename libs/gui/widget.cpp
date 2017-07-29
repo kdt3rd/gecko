@@ -6,106 +6,90 @@
 //
 
 #include "widget.h"
-
+#include <base/contract.h>
 
 ////////////////////////////////////////
-
 
 namespace gui
 {
 
-
 ////////////////////////////////////////
-
 
 widget::widget( void )
 {
 }
 
-
 ////////////////////////////////////////
-
 
 widget::~widget( void )
 {
 }
 
-
 ////////////////////////////////////////
 
-
-void widget::paint( const std::shared_ptr<draw::canvas> & /*canvas*/ )
+void widget::paint( gl::api &ogl )
 {
 }
 
-
 ////////////////////////////////////////
 
-
-bool widget::mouse_press( const base::point & /*p*/, int /*button*/ )
+bool widget::mouse_press( const base::point &p, int button )
 {
+	unused( p, button );
 	return false;
 }
 
-
 ////////////////////////////////////////
 
-
-bool widget::mouse_release( const base::point & /*p*/, int /*button*/ )
+bool widget::mouse_release( const base::point &p, int button )
 {
+	unused( p, button );
 	return false;
 }
 
-
 ////////////////////////////////////////
 
-
-bool widget::mouse_move( const base::point & /*p*/ )
+bool widget::mouse_move( const base::point &p )
 {
+	unused( p );
 	return false;
 }
 
-
 ////////////////////////////////////////
 
-
-bool widget::mouse_wheel( int /*a*/ )
+bool widget::mouse_wheel( int a )
 {
+	unused( a );
 	return false;
 }
 
-
 ////////////////////////////////////////
 
-
-bool widget::key_press( platform::scancode /*c*/ )
+bool widget::key_press( platform::scancode c )
 {
+	unused( c );
 	return false;
 }
 
-
 ////////////////////////////////////////
 
-
-bool widget::key_release( platform::scancode /*c*/ )
+bool widget::key_release( platform::scancode c )
 {
+	unused( c );
 	return false;
 }
 
-
 ////////////////////////////////////////
 
-
-bool widget::text_input( char32_t /*c*/ )
+bool widget::text_input( char32_t c )
 {
+	unused( c );
 	return false;
 }
 
-
 ////////////////////////////////////////
 
-
-} // gui
+}
 
 
 

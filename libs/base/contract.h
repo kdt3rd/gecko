@@ -153,6 +153,9 @@ public:
 #define logic_check( check, ... ) \
 	do { if ( unlikely( !(check) ) ) throw_location( std::logic_error( base::format( __VA_ARGS__ ) ) ); } while ( false )
 
+#define unused( ... ) \
+	(void)( __VA_ARGS__ )
+
 /// @}
 
 ////////////////////////////////////////

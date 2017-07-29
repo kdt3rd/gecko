@@ -17,6 +17,12 @@ std::map<std::shared_ptr<script::font>, text::GlyphPack> text::_font_glyph_cache
 
 ////////////////////////////////////////
 
+text::text( void )
+{
+}
+
+////////////////////////////////////////
+
 text::text( const std::shared_ptr<script::font> &font )
 	: _font( font )
 {
@@ -24,9 +30,24 @@ text::text( const std::shared_ptr<script::font> &font )
 
 ////////////////////////////////////////
 
+text::text( const std::shared_ptr<script::font> &font, const std::string &utf8 )
+	: _font( font ), _utf8( utf8 )
+{
+}
+
+////////////////////////////////////////
+
+void text::set_font( const std::shared_ptr<script::font> &font )
+{
+	_update = ( font != _font );
+	_font = font;
+}
+
+////////////////////////////////////////
+
 void text::set_text( const std::string &utf8 )
 {
-	_update = true;
+	_update = ( utf8 != _utf8 );
 	_utf8 = utf8;
 }
 
@@ -34,7 +55,6 @@ void text::set_text( const std::string &utf8 )
 
 void text::set_position( const gl::vec2 &p )
 {
-	_update = true;
 	_pos = p;
 }
 
@@ -42,7 +62,6 @@ void text::set_position( const gl::vec2 &p )
 
 void text::set_color( const gl::color &c )
 {
-	_update = true;
 	_color = c;
 }
 

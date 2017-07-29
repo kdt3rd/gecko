@@ -10,6 +10,7 @@
 #include "context.h"
 #include <base/scope_guard.h>
 #include <platform/keyboard.h>
+#include <gl/api.h>
 #include <memory>
 
 namespace platform
@@ -62,6 +63,7 @@ protected:
 	void key_released( platform::scancode c );
 	void text_entered( char32_t c );
 
+	gl::api _ogl;
 	std::shared_ptr<platform::window> _window;
 	std::shared_ptr<widget> _widget;
 };

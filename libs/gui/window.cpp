@@ -9,7 +9,6 @@
 #include "window.h"
 #include "widget.h"
 #include <platform/window.h>
-#include <gl/api.h>
 #include <base/contract.h>
 
 namespace gui
@@ -121,23 +120,25 @@ void window::paint( void )
 {
 	_window->acquire();
 
-	gl::api ogl;
-	ogl.viewport( 0, 0, _window->width(), _window->height() );
-	ogl.enable( gl::capability::MULTISAMPLE );
-//	glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
-//	glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
+	double w = _window->width();
+	double h = _window->height();
 
-	ogl.clear_color( { 0.15, 0.15, 0.15, 1 } );
-	ogl.clear();
-	ogl.set_projection( gl::matrix4::ortho( 0, static_cast<float>(_window->width()), 0, static_cast<float>(_window->height()) ) );
+	_ogl.reset();
+	_ogl.viewport( 0, 0, w, h );
+	_ogl.enable( gl::capability::MULTISAMPLE );
+
+	_ogl.clear_color( { 0.15, 0.15, 0.15, 1 } );
+	_ogl.clear();
+	_ogl.set_projection( gl::matrix4::ortho( 0, w, 0, h ) );
 
 	if ( _widget )
 	{
 		in_context( [&,this]
 		{
 			_widget->compute_bounds();
+			_widget->set_size( w, h );
 			_widget->compute_layout();
-			_widget->paint( ogl );
+			_widget->paint( _ogl );
 		} );
 	}
 

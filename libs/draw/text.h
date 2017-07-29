@@ -19,11 +19,28 @@ namespace draw
 class text
 {
 public:
+	text( void );
 	text( const std::shared_ptr<script::font> &font );
+	text( const std::shared_ptr<script::font> &font, const std::string &utf8 );
 
+	void set_font( const std::shared_ptr<script::font> &font );
 	void set_text( const std::string &utf8 );
 	void set_position( const gl::vec2 &p );
+	void set_position( const base::point &p )
+	{
+		set_position( gl::vec2( p.x(), p.y() ) );
+	}
 	void set_color( const gl::color &c );
+
+	const std::shared_ptr<script::font> &get_font( void ) const
+	{
+		return _font;
+	}
+
+	const std::string &get_text( void ) const
+	{
+		return _utf8;
+	}
 
 	void draw( gl::api &ogl );
 

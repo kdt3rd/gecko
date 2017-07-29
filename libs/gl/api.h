@@ -229,6 +229,8 @@ public:
 		return std::make_shared<vertex_array>( std::forward<Args>( args )... );
 	}
 
+	void reset( void );
+
 	/// @brief Setup debugging (if available).
 	void setup_debugging( void );
 

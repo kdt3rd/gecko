@@ -20,9 +20,12 @@ label::label( void )
 
 ////////////////////////////////////////
 
-label::label( std::string l, base::alignment a, const base::color &c, const std::shared_ptr<script::font> &f )
-	: _text( std::move( l ) ), _align( a ), _color( c ), _font( f )
+label::label( std::string l, base::alignment a, const gl::color &c, const std::shared_ptr<script::font> &f )
+	: _align( a )
 {
+	_text.set_font( f );
+	_text.set_text( l );
+	_text.set_color( c );
 }
 
 ////////////////////////////////////////
@@ -33,21 +36,23 @@ label::~label( void )
 
 ////////////////////////////////////////
 
-void label::paint( const std::shared_ptr<draw::canvas> &c )
+void label::paint( gl::api &ogl )
 {
-	base::point p = c->align_text( _font, _text, *this, _align );
-
-	base::paint paint;
-	paint.set_fill_color( _color );
-	c->draw_text( _font, p, _text, paint );
+	const auto &f = _text.get_font();
+	if ( f )
+	{
+		_text.set_position( f->align_text( _text.get_text(), *this, _align ) );
+		_text.draw( ogl );
+	}
 }
 
 ////////////////////////////////////////
 
-void label::compute_minimum( void )
+void label::compute_bounds( void )
 {
-	script::font_extents fex = _font->extents();
-	script::text_extents tex = _font->extents( _text );
+	const auto &f = _text.get_font();
+	script::font_extents fex = f->extents();
+	script::text_extents tex = f->extents( _text.get_text() );
 	set_minimum( tex.x_advance + 12, fex.height );
 }
 
