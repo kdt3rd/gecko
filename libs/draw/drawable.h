@@ -7,9 +7,11 @@
 
 #pragma once
 
+#include "paint.h"
 #include "gradient.h"
 #include <gl/texture.h>
 #include <gl/program.h>
+#include <gl/mesh.h>
 #include <map>
 #include <string>
 
@@ -28,7 +30,11 @@ public:
 protected:
 	std::shared_ptr<gl::texture> new_gradient( gl::api &ogl, const gradient &g, size_t n = 128 );
 
-	std::shared_ptr<gl::program> new_program( gl::api &ogl, const std::string &vert, const std::string &frag );
+	std::shared_ptr<gl::program> new_program( gl::api &ogl, const std::string &vert, const std::string &frag, bool cached = true );
+
+	std::shared_ptr<gl::texture> get_fill_texture( gl::api &ogl, const paint &p );
+	gl::program::uniform fill_mesh( gl::api &ogl, gl::mesh &m, const paint &p );
+	gl::program::uniform stroke_mesh( gl::api &ogl, gl::mesh &m, const paint &p );
 
 private:
 	static std::map<std::string,std::weak_ptr<gl::program>> _program_cache;

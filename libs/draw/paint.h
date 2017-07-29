@@ -72,6 +72,8 @@ public:
 	/// @brief Returns true if no fill.
 	bool has_no_fill( void ) const { return _fill_type == NONE; }
 
+	bool has_fill( void ) const { return _fill_type != NONE; }
+
 	/// @}
 
 	/// @name Solid color fill.

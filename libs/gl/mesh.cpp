@@ -146,6 +146,13 @@ void mesh::clear( void )
 
 ////////////////////////////////////////
 
+void mesh::clear_program( void )
+{
+	_prog.reset();
+}
+
+////////////////////////////////////////
+
 bool mesh::valid( void ) const
 {
 	return _vao && _prog && !_prims.empty();

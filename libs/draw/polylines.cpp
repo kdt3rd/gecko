@@ -219,6 +219,31 @@ void polylines::filled( const std::function<void(float,float)> &add_point, const
 
 ////////////////////////////////////////
 
+void polylines::filled( gl::mesh &m, const std::string &attr )
+{
+	gl::vertex_buffer_data<gl::vec2> points;
+	gl::element_buffer_data tris;
+
+	auto add_point = [&]( float cx, float cy )
+	{
+		points.push_back( { cx, cy } );
+	};
+
+	auto add_tri = [&]( size_t a, size_t b, size_t c )
+	{
+		tris.push_back( a, b, c );
+	};
+
+	filled( add_point, add_tri );
+
+	auto bind = m.bind();
+	bind.vertex_attribute( attr, points );
+	bind.set_elements( tris );
+	m.add_triangles( tris.size() );
+}
+
+////////////////////////////////////////
+
 void polylines::save_svg( std::ostream &out )
 {
 	out << "<svg>\n";

@@ -10,6 +10,7 @@
 #include <vector>
 #include "polyline.h"
 #include <gl/vector.h>
+#include <gl/mesh.h>
 
 namespace draw
 {
@@ -49,6 +50,7 @@ public:
 	polylines offset( float width );
 
 	void filled( const std::function<void(float,float)> &points, const std::function<void(size_t,size_t,size_t)> &tris );
+	void filled( gl::mesh &mesh, const std::string &pos );
 
 	std::vector<polyline>::iterator begin( void )
 	{

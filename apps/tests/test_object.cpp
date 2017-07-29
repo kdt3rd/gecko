@@ -48,7 +48,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		g.add_stop( 1.0, gl::red );
 
 		draw::paint paint;
-		paint.set_stroke( gl::red, 2.F );
+		paint.set_stroke( gl::white, 2.F );
 //		paint.set_fill_linear( { -141, -141 }, 282, 282, g );
 		paint.set_fill_radial( { 0, 0 }, 200, g );
 //		paint.set_fill_conical( { 0, 0 }, g );
@@ -60,6 +60,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	// View/projection Matrix
 	float angle = 0.F;
 	gl::matrix4 local = gl::matrix4::translation( 200, 200 );
+	ogl.clear_color( { 0.15, 0.15, 0.15 } );
 
 	win->release();
 

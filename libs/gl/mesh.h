@@ -160,6 +160,7 @@ public:
 	binding bind( void );
 
 	void clear( void );
+	void clear_program( void );
 
 	bool valid( void ) const;
 
