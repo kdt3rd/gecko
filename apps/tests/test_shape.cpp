@@ -50,7 +50,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 
 		draw::paint paint;
 		paint.set_stroke( gl::white, 2.F );
-		paint.set_fill_radial( { 0, 0 }, 200, g );
+//		paint.set_fill_radial( { 0, 0 }, 25, 150, g );
+		paint.set_fill_box( { -50, -25 }, { 50, 25 }, 100, g );
 
 		// Finally setup the star mesh
 		star.create( ogl, path, paint );

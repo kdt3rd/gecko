@@ -50,6 +50,10 @@ void paint::clear_fill( void )
 		case CONICAL:
 			_fill_conical.~conical();
 			break;
+
+		case BOX:
+			_fill_box.~box();
+			break;
 	}
 	_fill_type = NONE;
 }
