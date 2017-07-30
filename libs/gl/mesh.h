@@ -108,6 +108,11 @@ public:
 		_prog = std::make_shared<program>( s, std::forward<Shaders>( shaders )... );
 	}
 
+	bool has_program( void )
+	{
+		return static_cast<bool>( _prog );
+	}
+
 	/// @brief Add triangles to draw.
 	void add_triangles( size_t count, size_t start_vertex = 0 );
 

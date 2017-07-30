@@ -141,7 +141,10 @@ gl::program::uniform drawable::fill_mesh( gl::api &ogl, gl::mesh &m, const paint
 	}
 	else
 		throw std::runtime_error( "unhandled fill type" );
-	return m.get_uniform_location( "matrix" );
+
+	if ( m.has_program() )
+		return m.get_uniform_location( "matrix" );
+	return -1;
 }
 
 ////////////////////////////////////////

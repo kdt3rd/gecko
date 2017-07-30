@@ -62,6 +62,13 @@ public:
 		return _data[i];
 	}
 
+	template<typename ...Args>
+	void set( Args ...args )
+	{
+		static_assert( sizeof...(Args) == N, "invalid initializer list" );
+		setN( 0, args... );
+	}
+
 	/// @brief Get data
 	const float *data( void ) const
 	{

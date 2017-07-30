@@ -36,7 +36,7 @@ protected:
 
 	gl::program::uniform fill_mesh( gl::api &ogl, gl::mesh &m, const paint &p, const std::string &vert = "position_uv.vert" );
 
-	gl::program::uniform stroke_mesh( gl::api &ogl, gl::mesh &m, const paint &p, const std::string &vert = "position_uv.vert" );
+	gl::program::uniform stroke_mesh( gl::api &ogl, gl::mesh &m, const paint &p, const std::string &vert = "simple.vert" );
 
 private:
 	static std::map<std::string,std::weak_ptr<gl::program>> _program_cache;
