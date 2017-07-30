@@ -112,7 +112,7 @@ void polylines::close( void )
 
 ////////////////////////////////////////
 
-polylines polylines::stroked( float width )
+polylines polylines::stroked( float width ) const
 {
 	using namespace draw::detail;
 	Path subj;
@@ -147,7 +147,7 @@ polylines polylines::stroked( float width )
 
 ////////////////////////////////////////
 
-polylines polylines::offset( float width )
+polylines polylines::offset( float width ) const
 {
 	using namespace draw::detail;
 	Path subj;
@@ -180,7 +180,7 @@ polylines polylines::offset( float width )
 
 ////////////////////////////////////////
 
-void polylines::filled( const std::function<void(float,float)> &add_point, const std::function<void(size_t,size_t,size_t)> &add_tri )
+void polylines::filled( const std::function<void(float,float)> &add_point, const std::function<void(size_t,size_t,size_t)> &add_tri ) const
 {
 	precondition( !_lines.empty(), "no polylines" );
 
@@ -219,7 +219,7 @@ void polylines::filled( const std::function<void(float,float)> &add_point, const
 
 ////////////////////////////////////////
 
-void polylines::filled( gl::mesh &m, const std::string &attr )
+void polylines::filled( gl::mesh &m, const std::string &attr ) const
 {
 	gl::vertex_buffer_data<gl::vec2> points;
 	gl::element_buffer_data tris;

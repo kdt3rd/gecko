@@ -46,11 +46,11 @@ public:
 
 	void close( void );
 
-	polylines stroked( float width );
-	polylines offset( float width );
+	polylines stroked( float width ) const;
+	polylines offset( float width ) const;
 
-	void filled( const std::function<void(float,float)> &points, const std::function<void(size_t,size_t,size_t)> &tris );
-	void filled( gl::mesh &mesh, const std::string &pos );
+	void filled( const std::function<void(float,float)> &points, const std::function<void(size_t,size_t,size_t)> &tris ) const;
+	void filled( gl::mesh &mesh, const std::string &pos ) const;
 
 	std::vector<polyline>::iterator begin( void )
 	{
@@ -70,6 +70,11 @@ public:
 	std::vector<polyline>::const_iterator end( void ) const
 	{
 		return _lines.end();
+	}
+
+	bool empty( void ) const
+	{
+		return _lines.empty();
 	}
 
 	void save_svg( std::ostream &out );
