@@ -20,17 +20,10 @@ quadrant::quadrant( void )
 
 ////////////////////////////////////////
 
-void quadrant::create( gl::api &ogl, const path &p, const paint &c )
+void quadrant::create( gl::api &ogl, const polylines &lines, const paint &c )
 {
-	if ( p.empty() || c.empty() )
-	{
-		std::cout << "OOPS " << p.empty() << ' ' << c.empty() << std::endl;
-		std::cout << c.get_stroke_width() << std::endl;
+	if ( lines.empty() || c.empty() )
 		return;
-	}
-
-	polylines lines;
-	p.replay( lines );
 
 	// Setup the stroke rendering.
 	if ( c.get_stroke_width() != 0.0 )

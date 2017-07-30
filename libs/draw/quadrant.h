@@ -10,6 +10,7 @@
 #include "drawable.h"
 #include "path.h"
 #include "paint.h"
+#include "polylines.h"
 #include <gl/mesh.h>
 #include <gl/api.h>
 
@@ -23,7 +24,22 @@ class quadrant : public drawable
 public:
 	quadrant( void );
 
-	void create( gl::api &ogl, const path &p, const paint &c );
+	void create( gl::api &ogl, const polylines &p, const paint &c );
+
+	void create( gl::api &ogl, const polylines &p, const gl::color &c )
+	{
+		create( ogl, p, paint( c, 1.F ) );
+	}
+
+	void create( gl::api &ogl, const path &p, const paint &c )
+	{
+		if ( p.empty() || c.empty() )
+			return;
+
+		polylines lines;
+		p.replay( lines );
+		create( ogl, lines, c );
+	}
 
 	void create( gl::api &ogl, const path &p, const gl::color &c )
 	{
