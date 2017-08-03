@@ -13,23 +13,23 @@ namespace base
 
 ////////////////////////////////////////
 
-void rect::set_horizontal( double x1, double x2 )
+void rect::set_horizontal( coord_type x1, coord_type x2 )
 {
 	_position.set_x( std::min( x1, x2 ) );
-	_extent.set_width( std::abs( x2 - x1 ) + 1.0 );
+	_extent.set_width( std::abs( x2 - x1 ) + coord_type(1) );
 }
 
 ////////////////////////////////////////
 
-void rect::set_vertical( double y1, double y2 )
+void rect::set_vertical( coord_type y1, coord_type y2 )
 {
 	_position.set_y( std::min( y1, y2 ) );
-	_extent.set_height( std::abs( y2 - y1 ) + 1.0 );
+	_extent.set_height( std::abs( y2 - y1 ) + coord_type(1) );
 }
 
 ////////////////////////////////////////
 
-bool rect::contains( double x, double y ) const
+bool rect::contains( coord_type x, coord_type y ) const
 {
 	if ( x < x1() || x > x2() )
 		return false;
@@ -42,7 +42,7 @@ bool rect::contains( double x, double y ) const
 
 ////////////////////////////////////////
 
-void rect::shrink( double left, double right, double top, double bottom )
+void rect::shrink( coord_type left, coord_type right, coord_type top, coord_type bottom )
 {
 	_position.move_by( left, top );
 	_extent.shrink( left + right, top + bottom );
@@ -51,7 +51,7 @@ void rect::shrink( double left, double right, double top, double bottom )
 
 ////////////////////////////////////////
 
-void rect::grow( double left, double right, double top, double bottom )
+void rect::grow( coord_type left, coord_type right, coord_type top, coord_type bottom )
 {
 	_position.move_by( -left, -top );
 	_extent.grow( left + right, top + bottom );
@@ -62,10 +62,10 @@ void rect::grow( double left, double right, double top, double bottom )
 
 void rect::include( rect &other )
 {
-	double xx1 = std::min( x1(), other.x1() );
-	double yy1 = std::min( y1(), other.y1() );
-	double xx2 = std::max( x2(), other.x2() );
-	double yy2 = std::max( y2(), other.y2() );
+	coord_type xx1 = std::min( x1(), other.x1() );
+	coord_type yy1 = std::min( y1(), other.y1() );
+	coord_type xx2 = std::max( x2(), other.x2() );
+	coord_type yy2 = std::max( y2(), other.y2() );
 
 	set_horizontal( xx1, xx2 );
 	set_vertical( yy1, yy2 );
