@@ -245,18 +245,16 @@ int safemain( int argc, char **argv )
 	auto win = app->new_window();
 	win->set_title( app->active_platform() );
 
-	auto label1 = std::make_shared<gui::label>( "Hello", base::alignment::TOP_LEFT );
-	label1->set_color( gl::red );
-	auto label2 = std::make_shared<gui::label>( "World", base::alignment::BOTTOM_RIGHT );
-	label2->set_color( gl::green );
+//	auto label1 = std::make_shared<gui::label>( "Hello", base::alignment::TOP_LEFT );
+//	label1->set_color( gl::red );
+//	auto label2 = std::make_shared<gui::label>( "World", base::alignment::BOTTOM_RIGHT );
+//	label2->set_color( gl::green );
 	auto button = std::make_shared<gui::button>( "Click Me" );
-	button->set_expansion_flex( 1.0 );
+	button->set_expansion_flex( 0.0 );
 
-	auto box = std::make_shared<gui::box>();
+	auto box = std::make_shared<gui::box>( base::alignment::BOTTOM );
 	box->set_padding( 12, 12, 5, 5 );
 	box->set_spacing( 8, 0 );
-	box->add( label1 );
-	box->add( label2 );
 	box->add( button );
 	win->set_widget( box );
 

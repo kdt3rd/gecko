@@ -27,6 +27,12 @@ widget::~widget( void )
 
 ////////////////////////////////////////
 
+void widget::build( gl::api &ogl )
+{
+}
+
+////////////////////////////////////////
+
 void widget::paint( gl::api &ogl )
 {
 }
@@ -35,7 +41,8 @@ void widget::paint( gl::api &ogl )
 
 bool widget::mouse_press( const base::point &p, int button )
 {
-	unused( p, button );
+	unused( p );
+	unused( button );
 	return false;
 }
 
@@ -43,7 +50,8 @@ bool widget::mouse_press( const base::point &p, int button )
 
 bool widget::mouse_release( const base::point &p, int button )
 {
-	unused( p, button );
+	unused( p );
+   	unused( button );
 	return false;
 }
 

@@ -149,7 +149,7 @@ std::shared_ptr<script::font> application::get_font( const std::string &family, 
 
 std::shared_ptr<script::font> application::get_default_font( void )
 {
-	return _fmgr->get_font( "Lucida Grande", "Regular", 14.0 );
+	return _fmgr->get_font( "Roboto", "Regular", 12.0 );
 }
 
 ////////////////////////////////////////

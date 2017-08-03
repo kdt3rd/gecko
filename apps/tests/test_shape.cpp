@@ -30,7 +30,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	win->acquire();
 
 	gl::api ogl;
-	ogl.setup_debugging();
+//	ogl.setup_debugging();
 
 	draw::shape star;
 	{
@@ -60,20 +60,45 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	draw::quadrant rect;
 	{
 		draw::path path;
-		path.rounded_rect( { -10.F, -10.F }, 20.F, 20.F, 8.F );
+		path.rectangle( { -10.F, -10.F }, 20.F, 20.F );
+
+		draw::polylines shade;
+		path.replay( shade );
 
 		draw::paint paint;
-		paint.set_stroke( gl::white, 2.F );
+		float fade = 0.1;
+		std::vector<float> gauss( 50 );
+		for ( size_t i = 0; i < gauss.size(); ++i )
+		{
+			float o = float(i)/float(gauss.size()-1);
+			o = exp( - 5.F * o * o );
+			gauss[i] = o;
+			std::cout << i << ' ' << o << std::endl;
+		}
 
-		rect.create( ogl, path, paint );
+		for ( size_t i = 0; i < gauss.size() - 1; ++i )
+			gauss[i] -= gauss[i+1];
+
+		for ( size_t i = 0; i < gauss.size(); ++i )
+		{
+			float o = gauss[i] * fade;
+			paint.set_fill_color( { 0.0, 0.0, 0.0, o } );
+			draw::polylines s = shade.offset( i, 0, 3 );
+			rect.add( ogl, s, paint );
+		}
+
+		paint.set_stroke( gl::black, 0 );
+		paint.set_fill_color( gl::white );
+		rect.add( ogl, path, paint );
 		rect.shape_size( 10.F, 10.F );
-		rect.resize( { -50.F, -25.F, 100.F, 50.F } );
+		rect.set_position( -50.F, -25.F );
+		rect.set_size( 100.F, 50.F );
 	}
 
 	// View/projection Matrix
 	float angle = 0.F;
 	gl::matrix4 local = gl::matrix4::translation( 200, 200 );
-	ogl.clear_color( { 0.15, 0.15, 0.15 } );
+	ogl.clear_color( { 0.93, 0.93, 0.93 } );
 
 	win->release();
 
@@ -87,11 +112,11 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		ogl.set_model( rotate * local );
 
 		ogl.clear();
-		star.draw( ogl );
+//		star.draw( ogl );
 		rect.draw( ogl );
-		angle += 1.0_deg;
-		while ( angle > 360.0_deg )
-			angle -= 360.0_deg;
+//		angle += 1.0_deg;
+//		while ( angle > 360.0_deg )
+//			angle -= 360.0_deg;
 
 		// Cause a redraw to continue the animation
 		win->invalidate( base::rect() );

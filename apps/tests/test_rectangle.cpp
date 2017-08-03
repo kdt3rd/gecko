@@ -44,7 +44,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		ogl.set_projection( gl::matrix4::ortho( 0, static_cast<float>( win->width() ), 0, static_cast<float>( win->height() ) ) );
 
 		// Draw the rectangle
-		rect.resize( 50, 50, w, 100 );
+		rect.set_position( 50, 50 );
+		rect.set_size( w, 100 );
 		rect.draw( ogl );
 
 		// Cause a redraw to continue the animation

@@ -8,6 +8,7 @@
 #pragma once
 
 #include "widget.h"
+#include <gl/api.h>
 #include <layout/grid_layout.h>
 #include <layout/box_layout.h>
 #include <layout/tree_layout.h>
@@ -22,6 +23,12 @@ template<typename TheLayout>
 class container : public widget
 {
 public:
+	template<typename ...Args>
+	container( Args ...args )
+		: _layout( std::forward<Args>( args )... )
+	{
+	}
+
 	~container( void )
 	{
 	}
@@ -37,6 +44,22 @@ public:
 	{
 		_layout.set_extent( extent() );
 		_layout.compute_layout();
+	}
+
+	void build( gl::api &ogl ) override
+	{
+		for ( auto w: _widgets )
+			w->build( ogl );
+	}
+
+	void paint( gl::api &ogl ) override
+	{
+		ogl.push_scissor( x(), y(), width(), height() );
+		ogl.clear_color( { 0.19, 0.19, 0.19 } );
+		ogl.clear();
+		for ( auto w: _widgets )
+			w->paint( ogl );
+		ogl.pop_scissor();
 	}
 
 	bool mouse_press( const base::point &p, int button ) override
@@ -129,12 +152,6 @@ public:
 				return true;
 		}
 		return widget::text_input( c );
-	}
-
-	void paint( gl::api &ogl ) override
-	{
-		for ( auto w: _widgets )
-			w->paint( ogl );
 	}
 
 	template<typename ...Args>

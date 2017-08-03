@@ -82,6 +82,7 @@ void window::set_widget( const std::shared_ptr<widget> &w )
 		_widget->set_horizontal( 0.0, _window->width() - 1.0 );
 		_widget->set_vertical( 0.0, _window->height() - 1.0 );
 		_widget->compute_bounds();
+		_widget->build( _ogl );
 	} );
 }
 
@@ -127,7 +128,7 @@ void window::paint( void )
 	_ogl.viewport( 0, 0, w, h );
 	_ogl.enable( gl::capability::MULTISAMPLE );
 
-	_ogl.clear_color( { 0.15, 0.15, 0.15, 1 } );
+	_ogl.clear_color( { 0.13, 0.13, 0.13, 1 } );
 	_ogl.clear();
 	_ogl.set_projection( gl::matrix4::ortho( 0, w, 0, h ) );
 
