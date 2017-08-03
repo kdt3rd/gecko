@@ -1,4 +1,4 @@
 
 executable "transcode"
   source "main.cpp"
-  libs "media"
+  libs "image"
