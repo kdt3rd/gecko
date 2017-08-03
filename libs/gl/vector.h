@@ -27,6 +27,14 @@ public:
 	{
 	}
 
+	template<size_t M>
+	vector( const vector<M> &v )
+	{
+		static_assert( M <= N, "invalid constructor size" );
+		for ( size_t i = 0; i < M; ++i )
+			_data[i] = v[i];
+	}
+
 	/// @brief Constructor
 	vector( const std::array<float,N> &l )
 	{
@@ -42,7 +50,7 @@ public:
 	template<typename ...Args>
 	vector( Args ...args )
 	{
-		static_assert( sizeof...(Args) == N, "invalid initializer list" );
+		static_assert( sizeof...(Args) <= N, "invalid initializer list" );
 		setN( 0, args... );
 	}
 
@@ -129,16 +137,21 @@ public:
 	/// @param r distance of the point from the origin (radius).
 	/// @param a angle of the point, in radians.
 	template<typename F1, typename F2>
-	static vector<2> polar( F1 r, F2 a )
+	static vector polar( F1 r, F2 a )
 	{
 		static_assert( std::is_floating_point<F1>::value, "polar requires floating point type" );
 		static_assert( std::is_floating_point<F2>::value, "polar requires floating point type" );
-		return { static_cast<float>(r) * static_cast<float>( std::cos( a ) ), static_cast<float>(r) * static_cast<float>( std::sin( a ) ) };
+		vector result;
+		result[0] = static_cast<float>(r) * static_cast<float>( std::cos( a ) );
+		result[1] = static_cast<float>(r) * static_cast<float>( std::sin( a ) );
+		return result;
 	}
 
 private:
-	void setN( size_t )
+	void setN( size_t left )
 	{
+		for ( size_t i = left; i < N; ++i )
+			_data[i] = 0.0;
 		return;
 	}
 

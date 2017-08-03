@@ -16,11 +16,12 @@ local srcs = {
 
 local shaders = {
 	"color_mesh.vert";
-	"conical_gradient.frag";
-	"linear_gradient.frag";
 	"position_uv.vert";
 	"quadrant.vert";
+	"linear_gradient.frag";
 	"radial_gradient.frag";
+	"conical_gradient.frag";
+	"box_gradient.frag";
 	"simple.vert";
 	"single_color.frag";
 	"text_bitmap.frag";

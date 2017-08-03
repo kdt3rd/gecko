@@ -20,54 +20,58 @@ shape::shape( void )
 
 ////////////////////////////////////////
 
-void shape::create( gl::api &ogl, const path &p, const paint &c )
+void shape::add( gl::api &ogl, const polylines &lines, const paint &c )
 {
-	if ( p.empty() || c.empty() )
+
+	if ( lines.empty() || c.empty() )
 		return;
 
-	polylines lines;
-	p.replay( lines );
+	if ( c.has_fill() )
+	{
+		mesh m;
+		m.matrix = fill_mesh( ogl, m.msh, c, "position_uv.vert" );
+		m.topleft = m.msh.get_uniform_location( "top_left" );
+		m.tex = get_fill_texture( ogl, c );
 
-	// Setup the stroke rendering.
+		lines.filled( m.msh, "position" );
+		_meshes.push_back( std::move( m ) );
+	}
+
 	if ( c.get_stroke_width() != 0.0 )
 	{
-		_stroke_matrix_loc = stroke_mesh( ogl, _stroke, c );
-		lines.stroked( c.get_stroke_width() ).filled( _stroke, "position" );
+		mesh m;
+		m.matrix = stroke_mesh( ogl, m.msh, c, "position_uv.vert" );
+		m.topleft = m.msh.get_uniform_location( "top_left" );
+
+		lines.stroked( c.get_stroke_width() ).filled( m.msh, "position" );
+		_meshes.push_back( std::move( m ) );
 	}
-	else
-		_stroke.clear();
 
-	_fill_matrix_loc = fill_mesh( ogl, _fill, c );
-	_fill_texture = get_fill_texture( ogl, c );
-
-	if ( c.has_fill() )
-		lines.filled( _fill, "position" );
-	else
-		_fill.clear();
 }
 
 ////////////////////////////////////////
 
 void shape::draw( gl::api &ogl )
 {
-	// Draw fill
-	if ( _fill.valid() )
+	ogl.enable( gl::capability::BLEND );
+	glBlendEquation( GL_FUNC_ADD );
+	ogl.blend_func( gl::blend_style::SRC_ALPHA, gl::blend_style::ONE_MINUS_SRC_ALPHA );
+
+	for ( auto &m: _meshes )
 	{
-		gl::texture::binding t;
-		if ( _fill_texture )
-			t = _fill_texture->bind();
-		auto b = _fill.bind();
-		b.set_uniform( _fill_matrix_loc, ogl.current_matrix() );
-		b.draw();
+		if ( m.msh.valid() )
+		{
+			gl::texture::binding t;
+			if ( m.tex )
+				t = m.tex->bind();
+			auto b = m.msh.bind();
+			b.set_uniform( m.matrix, ogl.current_matrix() );
+			b.set_uniform( m.topleft, _top_left );
+			b.draw();
+		}
 	}
 
-	// Draw stroke
-	if ( _stroke.valid() )
-	{
-		auto b = _stroke.bind();
-		b.set_uniform( _stroke_matrix_loc, ogl.current_matrix() );
-		b.draw();
-	}
+	ogl.disable( gl::capability::BLEND );
 }
 
 ////////////////////////////////////////

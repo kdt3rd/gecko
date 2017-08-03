@@ -93,6 +93,11 @@ std::shared_ptr<gl::texture> drawable::get_fill_texture( gl::api &ogl, const pai
 		result = new_gradient( ogl, p.get_fill_conical_gradient() );
 		result->bind().set_wrapping( gl::wrapping::REPEAT );
 	}
+	else if ( p.has_fill_box() )
+	{
+		result = new_gradient( ogl, p.get_fill_box_gradient() );
+		result->bind().set_wrapping( gl::wrapping::CLAMP_TO_EDGE );
+	}
 	else if ( p.has_no_fill() )
 	{
 	}
@@ -125,8 +130,9 @@ gl::program::uniform drawable::fill_mesh( gl::api &ogl, gl::mesh &m, const paint
 		m.set_program( new_program( ogl, vert, "radial_gradient.frag", false ) );
 		m.get_program().use();
 		m.set_uniform( "txt", 0 );
-		m.set_uniform( "center", p.get_fill_radial_p1() );
-		m.set_uniform( "radius", p.get_fill_radial_r2() );
+		m.set_uniform( "center", p.get_fill_radial_center() );
+		m.set_uniform( "min_radius", p.get_fill_radial_r1() );
+		m.set_uniform( "max_radius", p.get_fill_radial_r2() );
 	}
 	else if ( p.has_fill_conical() )
 	{
@@ -134,6 +140,15 @@ gl::program::uniform drawable::fill_mesh( gl::api &ogl, gl::mesh &m, const paint
 		m.get_program().use();
 		m.set_uniform( "txt", 0 );
 		m.set_uniform( "center", p.get_fill_conical_center() );
+	}
+	else if ( p.has_fill_box() )
+	{
+		m.set_program( new_program( ogl, vert, "box_gradient.frag", false ) );
+		m.get_program().use();
+		m.set_uniform( "txt", 0 );
+		m.set_uniform( "point1", p.get_fill_box_point1() );
+		m.set_uniform( "point2", p.get_fill_box_point2() );
+		m.set_uniform( "radius", p.get_fill_box_radius() );
 	}
 	else if ( p.has_no_fill() )
 	{

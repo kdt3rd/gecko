@@ -45,7 +45,8 @@ public:
 
 	void draw( gl::api &ogl )
 	{
-		_rect.resize( this->x(), this->y(), this->width(), this->height() );
+		_rect.set_position( this->x(), this->y() );
+		_rect.set_size( this->width(), this->height() );
 		_rect.draw( ogl );
 //		ogl.save_matrix();
 //		ogl.translate( this->x(), this->y() );
@@ -97,7 +98,8 @@ public:
 
 	void draw( gl::api &ogl )
 	{
-		_rect.resize( this->x(), this->y(), this->width(), this->height() );
+		_rect.set_position( this->x(), this->y() );
+		_rect.set_size( this->width(), this->height() );
 		_rect.draw( ogl );
 //		ogl.save_matrix();
 //		ogl.translate( this->x(), this->y() );

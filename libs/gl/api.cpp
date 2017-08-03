@@ -172,9 +172,9 @@ void api::viewport( double xx, double yy, double ww, double hh )
 
 void api::push_scissor( double xx, double yy, double ww, double hh )
 {
-	_scissors.emplace_back( xx, yy, ww, hh );
 	if ( _scissors.empty() )
 		enable( capability::SCISSOR_TEST );
+	_scissors.emplace_back( xx, yy, ww, hh );
 	GLint x = static_cast<GLint>( std::lround( xx ) );
 	GLint y = static_cast<GLint>( std::lround( yy ) );
 	GLint w = static_cast<GLsizei>( std::lround( ww ) );

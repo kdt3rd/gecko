@@ -11,7 +11,7 @@
 namespace
 {
 	template<int n, typename T>
-	inline const gl::vec2 &pt( const T &t )
+	inline const draw::polyline::point &pt( const T &t )
 	{
 		return std::get<n>( t );
 	}
@@ -40,21 +40,21 @@ size_t circle_precision( float r )
 
 ////////////////////////////////////////
 
-void add_quadratic( const gl::vec2 &p1, const gl::vec2 &p2, const gl::vec2 &p3, polyline &line )
+void add_quadratic( const polyline::point &p1, const polyline::point &p2, const polyline::point &p3, polyline &line )
 {
-	using gl::vec2;
-	typedef std::tuple<vec2,vec2,vec2> curve;
+	using point = polyline::point;
+	typedef std::tuple<point,point,point> curve;
 	std::vector<curve> stack;
 	stack.reserve( 16 );
 	stack.emplace_back( p1, p2, p3 );
-	vec2 c0, c1, c2, c3;
+	point c0, c1, c2, c3;
 
 	while ( !stack.empty() )
 	{
 		curve &c = stack.back();
-		vec2 mid = ( pt<0>( c ) + pt<2>( c ) ) * 0.5F;
+		point mid = ( pt<0>( c ) + pt<2>( c ) ) * 0.5F;
 
-		if ( vec2::distance_squared( mid, pt<1>( c ) ) <= 0.01F )
+		if ( point::distance_squared( mid, pt<1>( c ) ) <= 0.01F )
 		{
 			line.push_back( pt<2>( c ) );
 			stack.pop_back();
@@ -74,14 +74,14 @@ void add_quadratic( const gl::vec2 &p1, const gl::vec2 &p2, const gl::vec2 &p3, 
 
 ////////////////////////////////////////
 
-void add_cubic( const gl::vec2 &p1, const gl::vec2 &p2, const gl::vec2 &p3, const gl::vec2 &p4, polyline &line )
+void add_cubic( const polyline::point &p1, const polyline::point &p2, const polyline::point &p3, const polyline::point &p4, polyline &line )
 {
-	using gl::vec2;
-	typedef std::tuple<vec2,vec2,vec2,vec2> curve;
+	using point = polyline::point;
+	typedef std::tuple<point,point,point,point> curve;
 	std::vector<curve> stack;
 	stack.reserve( 16 );
 	stack.emplace_back( p1, p2, p3, p4 );
-	vec2 p0, p01, p12, p23, p012, p123, p0123, d, d13, d23;
+	point p0, p01, p12, p23, p012, p123, p0123, d, d13, d23;
 	bool first = true;
 
 	while ( !stack.empty() )
@@ -118,24 +118,24 @@ void add_cubic( const gl::vec2 &p1, const gl::vec2 &p2, const gl::vec2 &p3, cons
 
 ////////////////////////////////////////
 
-void add_arc( const gl::vec2 &center, float radius, float a1, float a2, polyline &line )
+void add_arc( const polyline::point &center, float radius, float a1, float a2, polyline &line )
 {
-	using gl::vec2;
+	using point = polyline::point;
 
 	size_t n = circle_precision( radius );
 
 	float span = std::abs( std::fmod( ( a1 - a2 + PI ), 2.0F * PI ) - PI );
 	n = size_t( std::ceil( n * span / ( 2.0F * PI ) ) );
 
-	vec2 p = vec2::polar( radius, a1 ) + center;
-	if ( line.empty() || vec2::distance_squared( p, line.back() ) > 0.1F )
+	point p = point::polar( radius, a1 ) + center;
+	if ( line.empty() || point::distance_squared( p, line.back() ) > 0.1F )
 		line.push_back( p );
 
 	for ( size_t i = 1; i <= n; ++i )
 	{
 		float m = float(i) / float(n);
 		float a = a1 * ( 1.0F - m ) + a2 * m;
-		line.push_back( vec2::polar( radius, a ) + center );
+		line.push_back( point::polar( radius, a ) + center );
 	}
 }
 

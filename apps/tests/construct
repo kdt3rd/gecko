@@ -37,7 +37,6 @@ executable "test_triangle"
   libs{ platform, gl, draw }
   kind "app"
 executable( "test_layout", "test_layout.cpp", platform, draw, layout )
-executable( "test_shape", "test_shape.cpp", platform, draw, layout )
 
 executable( "segfault", "segfault.cpp" )
 

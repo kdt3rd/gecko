@@ -36,7 +36,7 @@ void polylines::new_polyline( void )
 
 ////////////////////////////////////////
 
-void polylines::move_to( const gl::vec2 &p )
+void polylines::move_to( const polyline::point &p )
 {
 	if ( _lines.empty() )
 		_lines.emplace_back();
@@ -48,7 +48,7 @@ void polylines::move_to( const gl::vec2 &p )
 
 ////////////////////////////////////////
 
-void polylines::line_to( const gl::vec2 &p )
+void polylines::line_to( const polyline::point &p )
 {
 	precondition( !_lines.empty(), "no point to start from" );
 	precondition( !_lines.back().empty(), "no point to start from" );
@@ -57,7 +57,7 @@ void polylines::line_to( const gl::vec2 &p )
 
 ////////////////////////////////////////
 
-void polylines::quadratic_to( const gl::vec2 &p1, const gl::vec2 &p2 )
+void polylines::quadratic_to( const polyline::point &p1, const polyline::point &p2 )
 {
 	precondition( !_lines.empty(), "no point to start from" );
 	precondition( !_lines.back().empty(), "no point to start from" );
@@ -66,7 +66,7 @@ void polylines::quadratic_to( const gl::vec2 &p1, const gl::vec2 &p2 )
 
 ////////////////////////////////////////
 
-void polylines::cubic_to( const gl::vec2 &p1, const gl::vec2 &p2, const gl::vec2 &p3 )
+void polylines::cubic_to( const polyline::point &p1, const polyline::point &p2, const polyline::point &p3 )
 {
 	precondition( !_lines.empty(), "no point to start from" );
 	precondition( !_lines.back().empty(), "no point to start from" );
@@ -75,7 +75,7 @@ void polylines::cubic_to( const gl::vec2 &p1, const gl::vec2 &p2, const gl::vec2
 
 ////////////////////////////////////////
 
-void polylines::arc_to( const gl::vec2 &center, float radius, float angle1, float angle2 )
+void polylines::arc_to( const polyline::point &center, float radius, float angle1, float angle2 )
 {
 	precondition( !_lines.empty(), "no point to start from" );
 	add_arc( center, radius, angle1, angle2, _lines.back() );
@@ -95,7 +95,7 @@ void polylines::arc_to( const point &center, const point &radius, float angle1, 
 
 ////////////////////////////////////////
 
-void polylines::add_point( const gl::vec2 &p )
+void polylines::add_point( const polyline::point &p )
 {
 	precondition( !_lines.empty(), "no point to start from" );
 	_lines.back().push_back( p );
@@ -112,7 +112,7 @@ void polylines::close( void )
 
 ////////////////////////////////////////
 
-polylines polylines::stroked( float width )
+polylines polylines::stroked( float width, float dx, float dy, float dz ) const
 {
 	using namespace draw::detail;
 	Path subj;
@@ -126,7 +126,7 @@ polylines polylines::stroked( float width )
 
 		subj.clear();
 		for ( const auto &p: line )
-			subj << IntPoint( static_cast<int>( p[0] * 100 + 0.5F ), static_cast<int>( p[1] * 100 + 0.5F ) );
+			subj << IntPoint( static_cast<int>( p[0] * 100 + 0.5F ), static_cast<int>( p[1] * 100 + 0.5F ), static_cast<int>( p[2] * 100 + 0.5F ) );
 
 		ClipperOffset co;
 		co.AddPath( subj, jtRound, line.closed() ? etClosedLine : etOpenRound );
@@ -137,7 +137,7 @@ polylines polylines::stroked( float width )
 		{
 			result.new_polyline();
 			for ( const auto &p: path )
-				result.add_point( { p.X / 100.F, p.Y / 100.F } );
+				result.add_point( { p.X / 100.F + dx, p.Y / 100.F + dy, p.Z / 100.F + dz } );
 			result.close();
 		}
 	}
@@ -147,7 +147,7 @@ polylines polylines::stroked( float width )
 
 ////////////////////////////////////////
 
-polylines polylines::offset( float width )
+polylines polylines::offset( float width, float dx, float dy, float dz ) const
 {
 	using namespace draw::detail;
 	Path subj;
@@ -156,21 +156,23 @@ polylines polylines::offset( float width )
 	polylines result;
 	for ( const auto &line: _lines )
 	{
+		if ( line.empty() )
+			continue;
+
 		subj.clear();
 		for ( const auto &p: line )
-			subj << IntPoint( static_cast<int>( p[0] * 100 + 0.5F ),
-							  static_cast<int>( p[1] * 100 + 0.5F ) );
+			subj << IntPoint( static_cast<int>( p[0] * 100 + 0.5F ), static_cast<int>( p[1] * 100 + 0.5F ), static_cast<int>( p[2] * 100 + 0.5F ) );
 
 		ClipperOffset co;
 		co.AddPath( subj, jtRound, line.closed() ? etClosedPolygon : etOpenRound );
+
 		solution.clear();
 		co.Execute( solution, width * 100 );
-
 		for ( const auto &path: solution )
 		{
 			result.new_polyline();
 			for ( const auto &p: path )
-				result.add_point( { p.X / 100.F, p.Y / 100.F } );
+				result.add_point( { p.X / 100.F + dx, p.Y / 100.F + dy, p.Z / 100.F + dz } );
 			result.close();
 		}
 	}
@@ -180,10 +182,11 @@ polylines polylines::offset( float width )
 
 ////////////////////////////////////////
 
-void polylines::filled( const std::function<void(float,float)> &add_point, const std::function<void(size_t,size_t,size_t)> &add_tri )
+void polylines::filled( const std::function<void(float,float)> &add_point, const std::function<void(size_t,size_t,size_t)> &add_tri ) const
 {
 	precondition( !_lines.empty(), "no polylines" );
 
+	// Simplify and clean up the polygons
 	using namespace draw::detail;
 	Paths solution;
 	{
@@ -205,12 +208,13 @@ void polylines::filled( const std::function<void(float,float)> &add_point, const
 		clip.Execute( ctUnion, solution );
 	}
 
+	// Tessellate into triangles
 	tessellator tess( add_point, add_tri );
 	for ( auto &poly: solution )
 	{
 		auto contour = tess.begin_contour();
 		for ( auto p: poly )
-			tess.contour_point( contour, p.X / 100.0, p.Y / 100.0 );
+			tess.contour_point( contour, p.X / 100.0, p.Y / 100.0, p.Z / 100.0 );
 		tess.end_contour( contour );
 	}
 
@@ -219,14 +223,14 @@ void polylines::filled( const std::function<void(float,float)> &add_point, const
 
 ////////////////////////////////////////
 
-void polylines::filled( gl::mesh &m, const std::string &attr )
+void polylines::filled( gl::mesh &m, const std::string &attr ) const
 {
-	gl::vertex_buffer_data<gl::vec2> points;
+	gl::vertex_buffer_data<polyline::point> points;
 	gl::element_buffer_data tris;
 
 	auto add_point = [&]( float cx, float cy )
 	{
-		points.push_back( { cx, cy } );
+		points.push_back( { cx, cy, 0 } ); // TODO handle Z
 	};
 
 	auto add_tri = [&]( size_t a, size_t b, size_t c )

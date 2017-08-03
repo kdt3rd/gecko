@@ -20,12 +20,13 @@ namespace draw
 class rectangle : public drawable
 {
 public:
-	rectangle( const gl::color &c );
+	rectangle( const gl::color &c = gl::white );
 	rectangle( float x, float y, float w, float h, const gl::color &c = gl::white );
 
 	void draw( gl::api &ogl ) override;
 
-	void resize( float x, float y, float w, float h );
+	void set_size( float w, float h );
+	void set_position( float x, float y );
 
 	void set_color( const gl::color &c )
 	{

@@ -32,6 +32,8 @@ public:
 	void set_font( const std::shared_ptr<script::font> &f ) { _text.set_font( f ); }
 	void set_align( base::alignment a ) { _align = a; }
 
+	void build( gl::api &ogl ) override;
+
 	void paint( gl::api &ogl ) override;
 
 	void compute_bounds( void ) override;
@@ -43,7 +45,7 @@ public:
 	base::signal<void(void)> when_activated;
 
 private:
-	draw::rectangle _rect = draw::rectangle( { 0.25, 0.25, 0.25 } );
+	draw::rectangle _rect;
 	draw::text _text;
 	base::alignment _align = base::alignment::LEFT;
 	bool _pressed = false;

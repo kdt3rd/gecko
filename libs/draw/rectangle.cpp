@@ -46,11 +46,18 @@ void rectangle::draw( gl::api &ogl )
 
 ////////////////////////////////////////
 
-void rectangle::resize( float x, float y, float w, float h )
+void rectangle::set_size( float w, float h )
 {
-	_rect = gl::matrix4::scaling( w, h );
-	_rect.translate_x( x );
-	_rect.translate_y( y );
+	_rect.get( 0, 0 ) = w;
+	_rect.get( 1, 1 ) = h;
+}
+
+////////////////////////////////////////
+
+void rectangle::set_position( float x, float y )
+{
+	_rect.get( 0, 3 ) = x;
+	_rect.get( 1, 3 ) = y;
 }
 
 ////////////////////////////////////////

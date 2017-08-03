@@ -11,21 +11,22 @@ out vec2 uv;
 
 void main()
 {
-	uv = position;
-	if ( uv.x < 0 )
-		uv.x += shape.x;
+	vec2 tmp = position;
+	if ( tmp.x < 0 )
+		tmp.x += shape.x;
 	else
-		uv.x += resize.x - shape.x;
+		tmp.x += resize.x - shape.x*2;
 
-	if ( uv.y < 0 )
-		uv.y += shape.y;
+	if ( tmp.y < 0 )
+		tmp.y += shape.y;
 	else
-		uv.y += resize.y - shape.y;
+		tmp.y += resize.y - shape.y*2;
 
-	uv += top_left;
+	tmp += top_left;
 
-	gl_Position.xy = uv;
+	gl_Position.xy = tmp;
 	gl_Position.zw = vec2( 0.0, 1.0 );
 	gl_Position = matrix * gl_Position;
+	uv = position;
 }
 
