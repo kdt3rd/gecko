@@ -19,14 +19,47 @@
 namespace media
 {
 
+class area_rect
+{
+public:
+	constexpr area_rect( void ) noexcept = default;
+	area_rect( int64_t x1, int64_t y1, int64_t x2, int64_t y2 )
+			: _x1( x1 ), _y1( y1 ), _x2( x2 ), _y2( y2 )
+	{
+		precondition( x2 >= x1, "Invalid x coordinate, x2 ({0}) >= x1({1})", x2, x1 );
+		precondition( y2 >= y1, "Invalid y coordinate, y2 ({0}) >= y1({1})", y2, y1 );
+	}
+	~area_rect( void ) = default;
+
+	constexpr bool valid( void ) const { return _x2 >= _x1; }
+	constexpr int64_t x1( void ) const { return _x1; }
+	constexpr int64_t y1( void ) const { return _y1; }
+	constexpr int64_t x2( void ) const { return _x2; }
+	constexpr int64_t y2( void ) const { return _y2; }
+
+	constexpr int64_t width( void ) const
+	{
+		return _x2 - _x1 + 1;
+	}
+
+	constexpr int64_t height( void ) const
+	{
+		return _y2 - _y1 + 1;
+	}
+private:
+	int64_t _x1 = 0;
+	int64_t _y1 = 0;
+	int64_t _x2 = -1;
+	int64_t _y2 = -1;
+};
+
 ////////////////////////////////////////
 
 class image_frame : public sample_data
 {
 public:
 	image_frame( int64_t x1, int64_t y1, int64_t x2, int64_t y2 )
-			: _x1( x1 ), _y1( y1 ), _x2( x2 ), _y2( y2 ),
-			  _width( x2 - x1 + 1 ), _height( y2 - y1 + 1 )
+			: _area( x1, y1, x2, y2 )
 	{
 	}
 	virtual ~image_frame( void );
@@ -35,8 +68,8 @@ public:
 
 	size_t add_channel( std::string n, image_buffer &i )
 	{
-		precondition( i.width() == _width, "invalid channel width {0} vs {1}", i.width(), _width );
-		precondition( i.height() == _height, "invalid channel height {0} vs {1}", i.height(), _height );
+		precondition( i.width() == width(), "invalid channel width {0} vs {1}", i.width(), width() );
+		precondition( i.height() == height(), "invalid channel height {0} vs {1}", i.height(), height() );
 		_names[std::move(n)] = _channels.size();
 		_channels.push_back( i );
 		return _channels.size() - 1;
@@ -44,16 +77,16 @@ public:
 
 	size_t add_channel( image_buffer &i )
 	{
-		precondition( i.width() == _width, "invalid channel width {0} vs {1}", i.width(), _width );
-		precondition( i.height() == _height, "invalid channel height {0} vs {1}", i.height(), _height );
+		precondition( i.width() == width(), "invalid channel width {0} vs {1}", i.width(), width() );
+		precondition( i.height() == height(), "invalid channel height {0} vs {1}", i.height(), height() );
 		_channels.push_back( i );
 		return _channels.size() - 1;
 	}
 
 	size_t add_channel( image_buffer &&i )
 	{
-		precondition( i.width() == _width, "invalid channel width {0} vs {1}", i.width(), _width );
-		precondition( i.height() == _height, "invalid channel height {0} vs {1}", i.height(), _height );
+		precondition( i.width() == width(), "invalid channel width {0} vs {1}", i.width(), width() );
+		precondition( i.height() == height(), "invalid channel height {0} vs {1}", i.height(), height() );
 		_channels.push_back( std::move( i ) );
 		return _channels.size() - 1;
 	}
@@ -63,19 +96,19 @@ public:
 		_names[std::move(name)] = chan;
 	}
 
-	int64_t x1( void ) const { return _x1; }
-	int64_t y1( void ) const { return _y1; }
-	int64_t x2( void ) const { return _x2; }
-	int64_t y2( void ) const { return _y2; }
+	int64_t x1( void ) const { return _area.x1(); }
+	int64_t y1( void ) const { return _area.y1(); }
+	int64_t x2( void ) const { return _area.x2(); }
+	int64_t y2( void ) const { return _area.y2(); }
 
 	int64_t width( void ) const
 	{
-		return _width;
+		return _area.width();
 	}
 
 	int64_t height( void ) const
 	{
-		return _height;
+		return _area.height();
 	}
 
 	size_t size( void ) const
@@ -155,12 +188,7 @@ private:
 		return true;
 	}
 
-	int64_t _x1 = 0;
-	int64_t _y1 = 0;
-	int64_t _x2 = 0;
-	int64_t _y2 = 0;
-	int64_t _width = 0;
-	int64_t _height = 0;
+	area_rect _area;
 	std::map<std::string,size_t> _names;
 	std::vector<image_buffer> _channels;
 	metadata _metadata;
