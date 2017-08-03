@@ -24,6 +24,8 @@ public:
 
 	~system( void );
 
+	bool is_working( void ) const override;
+
 	std::vector<std::shared_ptr<::platform::screen>> screens( void ) override;
 	std::shared_ptr<::platform::window> new_window( void ) override;
 

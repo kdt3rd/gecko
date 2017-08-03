@@ -54,6 +54,15 @@ system::~system( void )
 
 ////////////////////////////////////////
 
+bool
+system::is_working( void ) const
+{
+	return true;
+}
+
+
+////////////////////////////////////////
+
 std::vector<std::shared_ptr<::platform::screen>> system::screens( void )
 {
 	std::vector<std::shared_ptr<::platform::screen>> result;
