@@ -29,25 +29,25 @@ public:
 	/// @brief Move the cursor
 	/// Move the cursor to the given position
 	/// @param p desired position
-	void move_to( const gl::vec2 &p );
+	void move_to( const polyline::point &p );
 
 	/// @brief Add a line
 	/// draw a line to the given position
 	/// @param p desired position
-	void line_to( const gl::vec2 &p );
+	void line_to( const polyline::point &p );
 
-	void quadratic_to( const gl::vec2 &p1, const gl::vec2 &p2 );
+	void quadratic_to( const polyline::point &p1, const polyline::point &p2 );
 
-	void cubic_to( const gl::vec2 &p1, const gl::vec2 &p2, const gl::vec2 &p3 );
+	void cubic_to( const polyline::point &p1, const polyline::point &p2, const polyline::point &p3 );
 
-	void arc_to( const gl::vec2 &center, float radius, float angle1, float angle2 );
+	void arc_to( const polyline::point &center, float radius, float angle1, float angle2 );
 
-	void add_point( const gl::vec2 &p );
+	void add_point( const polyline::point &p );
 
 	void close( void );
 
-	polylines stroked( float width ) const;
-	polylines offset( float width ) const;
+	polylines stroked( float width, float dx = 0.0, float dy = 0.0, float dz = 0.0 ) const;
+	polylines offset( float width, float dx = 0.0, float dy = 0.0, float dz = 0.0 ) const;
 
 	void filled( const std::function<void(float,float)> &points, const std::function<void(size_t,size_t,size_t)> &tris ) const;
 	void filled( gl::mesh &mesh, const std::string &pos ) const;
@@ -90,6 +90,15 @@ inline std::ostream &operator<<( std::ostream &out, const polylines &p )
 	std::copy( p.begin(), p.end(), std::ostream_iterator<polyline>( out, "\n" ) );
 	return out;
 }
+
+////////////////////////////////////////
+
+/*
+polylines operator&( const polylines &a, const polylines &b );
+polylines operator|( const polylines &a, const polylines &b );
+polylines operator-( const polylines &a, const polylines &b );
+polylines operator^( const polylines &a, const polylines &b );
+*/
 
 ////////////////////////////////////////
 

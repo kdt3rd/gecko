@@ -117,7 +117,7 @@ matrix4 matrix4::rotation( const versor &v )
 	float x = v[1];
 	float y = v[2];
 	float z = v[3];
-	
+
 	return matrix4
 	{
 		1 - 2 * y * y - 2 * z * z,

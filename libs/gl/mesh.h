@@ -113,6 +113,9 @@ public:
 		return static_cast<bool>( _prog );
 	}
 
+	/// @brief Add points to draw.
+	void add_points( size_t count, size_t start_vertex = 0 );
+
 	/// @brief Add triangles to draw.
 	void add_triangles( size_t count, size_t start_vertex = 0 );
 

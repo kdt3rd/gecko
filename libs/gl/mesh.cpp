@@ -87,6 +87,13 @@ gl::program &mesh::get_program( void )
 
 ////////////////////////////////////////
 
+void mesh::add_points( size_t count, size_t start )
+{
+	_prims.emplace_back( primitive::POINTS, start, count );
+}
+
+////////////////////////////////////////
+
 void mesh::add_triangles( size_t count, size_t start )
 {
 	_prims.emplace_back( primitive::TRIANGLES, start, count );

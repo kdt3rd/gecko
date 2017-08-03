@@ -53,7 +53,7 @@ public:
 	~tessellator( void );
 
 	void *begin_contour( void );
-	void contour_point( void *&contour, double x, double y );
+	void contour_point( void *&contour, double x, double y, double z );
 	void end_contour( void *&contour );
 
 	void tessellate( void );

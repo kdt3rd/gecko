@@ -177,6 +177,50 @@ inline matrix4 operator*( const versor &a, const matrix4 &b )
 
 ////////////////////////////////////////
 
+/// @brief Multiply matrix and vector
+/// @relates gl::matrix4
+inline vec4 operator*( const matrix4 &a, const vec4 &b )
+{
+	vec4 result;
+	result[0] = a.col0() * b;
+	result[1] = a.col1() * b;
+	result[2] = a.col2() * b;
+	result[3] = a.col3() * b;
+	return result;
+}
+
+////////////////////////////////////////
+
+/// @brief Multiply matrix and vector
+/// @relates gl::matrix4
+inline vec4 operator*( const matrix4 &a, const vec3 &b3 )
+{
+	vec4 b = { b3[0], b3[1], b3[2], 1 };
+	vec4 result;
+	result[0] = a.col0() * b;
+	result[1] = a.col1() * b;
+	result[2] = a.col2() * b;
+	result[3] = a.col3() * b;
+	return result;
+}
+
+////////////////////////////////////////
+
+/// @brief Multiply matrix and vector
+/// @relates gl::matrix4
+inline vec2 operator*( const matrix4 &a, const vec2 &b2 )
+{
+	vec4 b = { b2[0], b2[1], 0, 1 };
+	vec4 result;
+	result[0] = a.col0() * b;
+	result[1] = a.col1() * b;
+	result[2] = a.col2() * b;
+	result[3] = a.col3() * b;
+	return { result[0] / result[3], result[1] / result[3] };
+}
+
+////////////////////////////////////////
+
 /// @brief Stream out a matrix
 /// @relates gl::matrix4
 std::ostream &operator<<( std::ostream &out, const matrix4 &m );

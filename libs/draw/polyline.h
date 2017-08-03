@@ -21,7 +21,7 @@ namespace draw
 class polyline
 {
 public:
-	using point = gl::vec2;
+	using point = gl::vec3;
 
 	void close( void )
 	{
@@ -102,7 +102,6 @@ public:
 		}
 	}
 
-
 private:
 	bool _closed = false;
 	std::vector<point> _points;
@@ -112,7 +111,7 @@ private:
 
 inline std::ostream &operator<<( std::ostream &out, const polyline &p )
 {
-	std::copy( p.begin(), p.end(), std::ostream_iterator<gl::vec2>( out, "; " ) );
+	std::copy( p.begin(), p.end(), std::ostream_iterator<polyline::point>( out, "; " ) );
 	return out;
 }
 

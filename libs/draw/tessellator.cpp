@@ -275,6 +275,11 @@ public:
 		return _y;
 	}
 
+	double z( void ) const
+	{
+		return _z;
+	}
+
 	void set_x( double x )
 	{
 		_x = x;
@@ -285,14 +290,20 @@ public:
 		_y = y;
 	}
 
-	void set( double x, double y )
+	void set_z( double z )
+	{
+		_z = z;
+	}
+
+	void set( double x, double y, double z )
 	{
 		_x = x;
 		_y = y;
+		_z = z;
 	}
 
 private:
-	double _x, _y; // projection onto the sweep plane
+	double _x, _y, _z; // projection onto the sweep plane
 };
 
 class face : public geom_base<face>
@@ -1696,7 +1707,7 @@ void *tessellator::begin_contour( void )
 	return nullptr;
 }
 
-void tessellator::contour_point( void *&contour, double x, double y )
+void tessellator::contour_point( void *&contour, double x, double y, double z )
 {
 	half_edge *e = reinterpret_cast<half_edge *>( contour );
 	bool first = ( e == nullptr );
@@ -1717,7 +1728,7 @@ void tessellator::contour_point( void *&contour, double x, double y )
 
 	// The new vertex is now e->Org.
 	vertex *v = e->org();
-	v->set( x, y );
+	v->set( x, y, z );
 
 	// The winding of an edge says how the winding number changes as we
 	// cross from the edge''s right face to its left face.  We add the
@@ -2211,7 +2222,7 @@ bool tessellator::check_for_intersect( active_region *regUp )
 		// (If we had perfect numerical precision, this would never happen
 		// in the first place).  The easiest and safest thing to do is
 		// replace the intersection by tess->event.
-		isect.set( _event->x(), _event->y() );
+		isect.set( _event->x(), _event->y(), _event->z() );
 	}
 	// Similarly, if the computed intersection lies to the right of the
 	// rightmost origin (which should rarely happen), it can cause
@@ -2221,7 +2232,7 @@ bool tessellator::check_for_intersect( active_region *regUp )
 	orgMin = VertLeq( orgUp, orgLo ) ? orgUp : orgLo;
 	if ( VertLeq( orgMin, &isect ) )
 	{
-		isect.set( orgMin->x(), orgMin->y() );
+		isect.set( orgMin->x(), orgMin->y(), orgMin->z() );
 	}
 
 	if ( VertEq( &isect, orgUp ) || VertEq( &isect, orgLo ) )
@@ -2273,13 +2284,13 @@ bool tessellator::check_for_intersect( active_region *regUp )
 		{
 			regUp->above()->dirty = regUp->dirty = true;
 			_mesh->split_edge( eUp->sym() );
-			eUp->org()->set( _event->x(), _event->y() );
+			eUp->org()->set( _event->x(), _event->y(), _event->z() );
 		}
 		if ( EdgeSign( dstLo, _event, &isect ) <= 0 )
 		{
 			regUp->dirty = regLo->dirty = true;
 			_mesh->split_edge( eLo->sym() );
-			eLo->org()->set( _event->x(), _event->y() );
+			eLo->org()->set( _event->x(), _event->y(), _event->z() );
 		}
 		// leave the rest for ConnectRightVertex
 		return false;
@@ -2297,7 +2308,7 @@ bool tessellator::check_for_intersect( active_region *regUp )
 	_mesh->splice( eLo->oprev(), eUp );
 
 	vertex *v = eUp->org();
-	v->set( isect.x(), isect.y() );
+	v->set( isect.x(), isect.y(), isect.z() );
 
 	_pq.push( v );
 	get_intersect_data( v, orgUp, dstUp, orgLo, dstLo );
@@ -2678,8 +2689,8 @@ void tessellator::sweep_event( vertex *vEvent )
 void tessellator::add_sentinel( double xmin, double xmax, double y )
 {
 	half_edge *e = _mesh->make_edge();
-	e->org()->set( xmax, y );
-	e->dst()->set( xmin, y );
+	e->org()->set( xmax, y, 0 );
+	e->dst()->set( xmin, y, 0 );
 
 	_event = e->dst();
 
@@ -2839,7 +2850,7 @@ void tessellator::get_intersect_data( vertex *isect,
 {
 	double weights[4];
 
-	isect->set( 0, 0 );
+	isect->set( 0, 0, 0 );
 	VertexWeights( isect, orgUp, dstUp, &weights[0] );
 	VertexWeights( isect, orgLo, dstLo, &weights[2] );
 }
