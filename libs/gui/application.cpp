@@ -111,7 +111,12 @@ void application::exit( int code )
 
 void application::push( void )
 {
-	stack.push_back( shared_from_this() );
+#if __cplusplus >= 201703
+	stack.emplace_back( weak_from_this() );
+#else
+	std::shared_ptr<application> v = shared_from_this();
+	stack.emplace_back( v );
+#endif
 }
 
 ////////////////////////////////////////
