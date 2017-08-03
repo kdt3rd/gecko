@@ -19,6 +19,14 @@ location_exception::location_exception( const char *file, int line )
 	_msg = str.str();
 }
 
+////////////////////////////////////////
+
+const char *
+location_exception::what( void ) const noexcept
+{
+	return _msg.c_str();
+}
+
 
 ////////////////////////////////////////
 
