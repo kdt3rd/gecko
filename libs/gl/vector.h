@@ -50,7 +50,7 @@ public:
 	template<typename ...Args>
 	vector( Args ...args )
 	{
-		static_assert( sizeof...(Args) == N, "invalid initializer list" );
+		static_assert( sizeof...(Args) <= N, "invalid initializer list" );
 		setN( 0, args... );
 	}
 
@@ -148,8 +148,10 @@ public:
 	}
 
 private:
-	void setN( size_t )
+	void setN( size_t left )
 	{
+		for ( size_t i = left; i < N; ++i )
+			_data[i] = 0.0;
 		return;
 	}
 

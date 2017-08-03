@@ -37,8 +37,7 @@ slider::~slider( void )
 void slider::set_range( double min, double max )
 {
 	precondition( min < max, "invalid range" );
-	if ( ! std::equal_to<double>()(_min, min) ||
-		 ! std::equal_to<double>()(_max, max) )
+	if ( ! std::equal_to<double>()(_min, min) || ! std::equal_to<double>()(_max, max) )
 	{
 		_min = min;
 		_max = max;
@@ -60,58 +59,39 @@ void slider::set_value( double v )
 
 ////////////////////////////////////////
 
-void slider::paint( const std::shared_ptr<draw::canvas> &canvas )
+void slider::build( gl::api &ogl )
 {
-	if ( !_groove )
-	{
-		base::path path;
-		path.rounded_rect( { 0, 0 }, { 20, 7 }, 2 );
+	gl::color c{ 0.26, 0.26, 0.26 };
+	_groove.set_color( c );
 
-		base::paint paint;
-		paint.set_fill_color( { 0.27, 0.27, 0.27 } );
+	draw::path handle;
+	handle.circle( { 0, 0 }, _handle );
 
-		_groove = std::make_shared<draw::stretchable>();
-		_groove->create( canvas, path, paint, { 10, 3.5 } );
-	}
+	draw::paint paint;
+	paint.set_fill_color( c );
 
-	if ( !_knob )
-	{
-		base::path path;
-		path.circle( { 10, 10 }, 9 );
-
-		base::paint paint;
-		paint.set_fill_color( { 0.57, 0.57, 0.57 } );
-
-		_knob = std::make_shared<draw::stretchable>();
-		_knob->create( canvas, path, paint, { 10, 10 } );
-	}
-
-	base::rect r = *this;
-
-	{
-		double rad = this->radius();
-		double h = this->height() - 7;
-		base::rect tmp( *this );
-		tmp.trim( rad, rad, h/2, h/2 );
-		_groove->set( canvas, tmp );
-		_groove->draw( *canvas );
-	}
-
-	{
-		double rad = 9.0;
-		base::rect tmp( rad * 2, rad * 2 );
-		tmp.set_center( { r.x( _value, rad ), r.y( 0.5, rad ) } );
-
-		_knob->set( canvas, tmp );
-		_knob->draw( *canvas );
-	}
+	_knob.add( ogl, handle, paint );
 }
 
 ////////////////////////////////////////
 
-void slider::compute_minimum( void )
+void slider::paint( gl::api &ogl )
 {
-	set_minimum( 17.0 * 2.0, 17.0 );
+	double ypos = y() + height()/2.0;
+
+	_groove.set_position( x(), ypos - 1 );
+	_groove.set_size( width(), 2 );
+	_groove.draw( ogl );
+
+	_knob.set_position( x( _value, _handle ), ypos );
+	_knob.draw( ogl );
+}
+
+////////////////////////////////////////
+
+void slider::compute_bounds( void )
+{
+	set_minimum( 24.0 * 2.0, 24.0 );
 }
 
 ////////////////////////////////////////

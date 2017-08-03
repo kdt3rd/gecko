@@ -15,12 +15,12 @@ void main()
 	if ( tmp.x < 0 )
 		tmp.x += shape.x;
 	else
-		tmp.x += resize.x - shape.x;
+		tmp.x += resize.x - shape.x*2;
 
 	if ( tmp.y < 0 )
 		tmp.y += shape.y;
 	else
-		tmp.y += resize.y - shape.y;
+		tmp.y += resize.y - shape.y*2;
 
 	tmp += top_left;
 

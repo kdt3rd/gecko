@@ -10,8 +10,10 @@
 #include "drawable.h"
 #include "path.h"
 #include "paint.h"
+#include "polylines.h"
 #include <gl/mesh.h>
 #include <gl/api.h>
+#include <list>
 
 namespace draw
 {
@@ -22,23 +24,59 @@ class shape : public drawable
 {
 public:
 	shape( void );
-
-	void create( gl::api &ogl, const path &p, const paint &c );
-
-	void create( gl::api &ogl, const path &p, const gl::color &c )
+	shape( float x, float y )
 	{
-		create( ogl, p, paint( c ) );
+		set_position( x, y );
+	}
+
+	void add( gl::api &ogl, const polylines &p, const paint &c );
+
+	void add( gl::api &ogl, const polylines &p, const gl::color &c )
+	{
+		add( ogl, p, paint( c, 1.F ) );
+	}
+
+	void add( gl::api &ogl, const path &p, const paint &c )
+	{
+		if ( p.empty() || c.empty() )
+			return;
+
+		polylines lines;
+		p.replay( lines );
+		add( ogl, lines, c );
+	}
+
+	void add( gl::api &ogl, const path &p, const gl::color &c )
+	{
+		add( ogl, p, paint( c, 1.F ) );
+	}
+
+	void clear( void )
+	{
+		_meshes.clear();
 	}
 
 	void draw( gl::api &ogl ) override;
 
-private:
+	void set_position( float x, float y )
+	{
+		_top_left.set( x, y );
+	}
 
-	gl::mesh _stroke;
-	gl::mesh _fill;
-	std::shared_ptr<gl::texture> _fill_texture;
-	gl::program::uniform _stroke_matrix_loc;
-	gl::program::uniform _fill_matrix_loc;
+private:
+	gl::vec2 _top_left;
+
+	struct mesh
+	{
+		gl::mesh msh;
+		std::shared_ptr<gl::texture> tex;
+		gl::program::uniform matrix;
+		gl::program::uniform shape;
+		gl::program::uniform resize;
+		gl::program::uniform topleft;
+	};
+
+	std::list<mesh> _meshes;
 };
 
 ////////////////////////////////////////

@@ -8,5 +8,6 @@ lib = library "gui"
 	  "container.cpp",
 	  "label.cpp",
 	  "button.cpp",
+	  "slider.cpp",
   }
   libs{ "platform", "draw", "layout", "utf" }
