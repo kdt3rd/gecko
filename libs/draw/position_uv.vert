@@ -8,9 +8,9 @@ out vec2 uv;
 
 void main()
 {
+	uv = position;
 	gl_Position.xy = position;
 	gl_Position.zw = vec2( 0.0, 1.0 );
 	gl_Position = matrix * gl_Position;
-	uv = position;
 }
 

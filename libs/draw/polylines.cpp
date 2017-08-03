@@ -230,7 +230,7 @@ void polylines::filled( gl::mesh &m, const std::string &attr ) const
 
 	auto add_point = [&]( float cx, float cy )
 	{
-		points.push_back( { cx, cy } );
+		points.push_back( { cx, cy, 0 } ); // TODO handle Z
 	};
 
 	auto add_tri = [&]( size_t a, size_t b, size_t c )

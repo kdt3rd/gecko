@@ -20,74 +20,64 @@ quadrant::quadrant( void )
 
 ////////////////////////////////////////
 
-void quadrant::create( gl::api &ogl, const polylines &lines, const paint &c )
+void quadrant::add( gl::api &ogl, const polylines &lines, const paint &c )
 {
+
 	if ( lines.empty() || c.empty() )
 		return;
 
-	// Setup the stroke rendering.
-	if ( c.get_stroke_width() != 0.0 )
-	{
-		_stroke_matrix_loc = stroke_mesh( ogl, _stroke, c, "quadrant.vert" );
-		_stroke_shape_loc = _stroke.get_uniform_location( "shape" );
-		_stroke_resize_loc = _stroke.get_uniform_location( "resize" );
-		_stroke_topleft_loc = _stroke.get_uniform_location( "top_left" );
-
-		lines.stroked( c.get_stroke_width() ).filled( _stroke, "position" );
-	}
-	else
-		_stroke.clear();
-
 	if ( c.has_fill() )
 	{
-		_fill_matrix_loc = fill_mesh( ogl, _fill, c, "quadrant.vert" );
-		_fill_shape_loc = _fill.get_uniform_location( "shape" );
-		_fill_resize_loc = _fill.get_uniform_location( "resize" );
-		_fill_topleft_loc = _fill.get_uniform_location( "top_left" );
-		_fill_texture = get_fill_texture( ogl, c );
+		mesh m;
+		m.matrix = fill_mesh( ogl, m.msh, c, "quadrant.vert" );
+		m.shape = m.msh.get_uniform_location( "shape" );
+		m.resize = m.msh.get_uniform_location( "resize" );
+		m.topleft = m.msh.get_uniform_location( "top_left" );
+		m.tex = get_fill_texture( ogl, c );
 
-		lines.filled( _fill, "position" );
+		lines.filled( m.msh, "position" );
+		_meshes.push_back( std::move( m ) );
 	}
-	else
-		_fill.clear();
+
+	if ( c.get_stroke_width() != 0.0 )
+	{
+		mesh m;
+		m.matrix = stroke_mesh( ogl, m.msh, c, "quadrant.vert" );
+		m.shape = m.msh.get_uniform_location( "shape" );
+		m.resize = m.msh.get_uniform_location( "resize" );
+		m.topleft = m.msh.get_uniform_location( "top_left" );
+
+		lines.stroked( c.get_stroke_width() ).filled( m.msh, "position" );
+		_meshes.push_back( std::move( m ) );
+	}
+
 }
 
 ////////////////////////////////////////
 
 void quadrant::draw( gl::api &ogl )
 {
-	// Draw fill
-	if ( _fill.valid() )
+	ogl.enable( gl::capability::BLEND );
+	glBlendEquation( GL_FUNC_ADD );
+	ogl.blend_func( gl::blend_style::SRC_ALPHA, gl::blend_style::ONE_MINUS_SRC_ALPHA );
+
+	for ( auto &m: _meshes )
 	{
-		gl::texture::binding t;
-		if ( _fill_texture )
-			t = _fill_texture->bind();
-		auto b = _fill.bind();
-		b.set_uniform( _fill_matrix_loc, ogl.current_matrix() );
-		b.set_uniform( _fill_shape_loc, _shape );
-		b.set_uniform( _fill_resize_loc, _resize );
-		b.set_uniform( _fill_topleft_loc, _top_left );
-		b.draw();
+		if ( m.msh.valid() )
+		{
+			gl::texture::binding t;
+			if ( m.tex )
+				t = m.tex->bind();
+			auto b = m.msh.bind();
+			b.set_uniform( m.matrix, ogl.current_matrix() );
+			b.set_uniform( m.shape, _shape );
+			b.set_uniform( m.resize, _resize );
+			b.set_uniform( m.topleft, _top_left );
+			b.draw();
+		}
 	}
 
-	// Draw stroke
-	if ( _stroke.valid() )
-	{
-		auto b = _stroke.bind();
-		b.set_uniform( _stroke_matrix_loc, ogl.current_matrix() );
-		b.set_uniform( _stroke_shape_loc, _shape );
-		b.set_uniform( _stroke_resize_loc, _resize );
-		b.set_uniform( _stroke_topleft_loc, _top_left );
-		b.draw();
-	}
-}
-
-////////////////////////////////////////
-
-void quadrant::resize( const base::rect &r )
-{
-	_top_left.set( r.x(), r.y() );
-	_resize.set( r.width(), r.height() );
+	ogl.disable( gl::capability::BLEND );
 }
 
 ////////////////////////////////////////

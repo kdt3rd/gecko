@@ -13,6 +13,7 @@
 #include "polylines.h"
 #include <gl/mesh.h>
 #include <gl/api.h>
+#include <list>
 
 namespace draw
 {
@@ -23,27 +24,37 @@ class quadrant : public drawable
 {
 public:
 	quadrant( void );
-
-	void create( gl::api &ogl, const polylines &p, const paint &c );
-
-	void create( gl::api &ogl, const polylines &p, const gl::color &c )
+	quadrant( float x, float y, float w, float h )
 	{
-		create( ogl, p, paint( c, 1.F ) );
+		set_position( x, y );
+		set_size( w, h );
 	}
 
-	void create( gl::api &ogl, const path &p, const paint &c )
+	void add( gl::api &ogl, const polylines &p, const paint &c );
+
+	void add( gl::api &ogl, const polylines &p, const gl::color &c )
+	{
+		add( ogl, p, paint( c, 1.F ) );
+	}
+
+	void add( gl::api &ogl, const path &p, const paint &c )
 	{
 		if ( p.empty() || c.empty() )
 			return;
 
 		polylines lines;
 		p.replay( lines );
-		create( ogl, lines, c );
+		add( ogl, lines, c );
 	}
 
-	void create( gl::api &ogl, const path &p, const gl::color &c )
+	void add( gl::api &ogl, const path &p, const gl::color &c )
 	{
-		create( ogl, p, paint( c, 1.F ) );
+		add( ogl, p, paint( c, 1.F ) );
+	}
+
+	void clear( void )
+	{
+		_meshes.clear();
 	}
 
 	void draw( gl::api &ogl ) override;
@@ -53,24 +64,32 @@ public:
 		_shape.set( w, h );
 	}
 
-	void resize( const base::rect &r );
+	void set_size( float w, float h )
+	{
+		_resize.set( w, h );
+	}
+
+	void set_position( float x, float y )
+	{
+		_top_left.set( x, y );
+	}
 
 private:
 	gl::vec2 _shape;
 	gl::vec2 _resize;
 	gl::vec2 _top_left;
 
-	gl::mesh _stroke;
-	gl::mesh _fill;
-	std::shared_ptr<gl::texture> _fill_texture;
-	gl::program::uniform _stroke_matrix_loc;
-	gl::program::uniform _stroke_shape_loc;
-	gl::program::uniform _stroke_resize_loc;
-	gl::program::uniform _stroke_topleft_loc;
-	gl::program::uniform _fill_matrix_loc;
-	gl::program::uniform _fill_shape_loc;
-	gl::program::uniform _fill_resize_loc;
-	gl::program::uniform _fill_topleft_loc;
+	struct mesh
+	{
+		gl::mesh msh;
+		std::shared_ptr<gl::texture> tex;
+		gl::program::uniform matrix;
+		gl::program::uniform shape;
+		gl::program::uniform resize;
+		gl::program::uniform topleft;
+	};
+
+	std::list<mesh> _meshes;
 };
 
 ////////////////////////////////////////
