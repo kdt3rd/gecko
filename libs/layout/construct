@@ -9,5 +9,6 @@ lib = library "layout"
 	  "field_layout.cpp";
 	  "form_layout.cpp";
 	  "grid_layout.cpp";
+	  "overlap_layout.cpp";
   }
   libs "base"
