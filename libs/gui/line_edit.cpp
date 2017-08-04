@@ -16,6 +16,10 @@ namespace gui
 
 line_edit::line_edit( void )
 {
+	_text.set_font( application::current()->get_default_font() );
+	_text.set_color( gl::white );
+	_line.set_color( { 0.26, 0.26, 0.26 } );
+	_marker.set_color( { 0.5, 0.5, 0.5 } );
 }
 
 ////////////////////////////////////////
@@ -36,8 +40,10 @@ line_edit::~line_edit( void )
 
 void line_edit::paint( gl::api &ogl )
 {
-	_line.set_position( x(), y() + height() - 1.5 );
+	_line.set_position( x(), y() + height() - 1.5F );
 	_line.set_size( width(), 2 );
+	_text.set_position( x(), y() + height() - 2.F );
+
 	_line.draw( ogl );
 	_text.draw( ogl );
 
@@ -63,7 +69,6 @@ void line_edit::compute_bounds( void )
 
 bool line_edit::key_press( platform::scancode c )
 {
-	std::cout << "Key press!" << std::endl;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-enum"
 	switch ( c )

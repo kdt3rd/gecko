@@ -27,6 +27,10 @@ public:
 	void set_font( const std::shared_ptr<script::font> &font );
 	void set_text( const std::string &utf8 );
 	void set_position( const gl::vec2 &p );
+	void set_position( float x, float y )
+	{
+		set_position( gl::vec2( x, y ) );
+	}
 	void set_position( const base::point &p )
 	{
 		set_position( gl::vec2( p.x(), p.y() ) );
