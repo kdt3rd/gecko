@@ -63,8 +63,19 @@ void path::quadratic_to( const gl::vec2 &p1, const gl::vec2 &p2 )
 void path::cubic_to( const gl::vec2 &p1, const gl::vec2 &p2, const gl::vec2 &p3 )
 {
 	add( p1, p2, p3 );
+	_last2 = p2;
 	_last = p3;
 	_actions.push_back( action::CUBIC );
+}
+
+////////////////////////////////////////
+
+void path::cubic_to( const gl::vec2 &p2, const gl::vec2 &p3 )
+{
+	gl::vec2 p1 = _last;
+	if ( !_actions.empty() && _actions.back() == action::CUBIC )
+		p1 = _last * 2.F - _last2;
+	cubic_to( p1, p2, p3 );
 }
 
 ////////////////////////////////////////

@@ -48,11 +48,23 @@ public:
 	/// @brief Line from the current position to p.
 	void line_to( const gl::vec2 &p );
 
+	void horizontal_to( float x )
+	{
+		line_to( { x, _last[1] } );
+	}
+
+	void vertical_to( float y )
+	{
+		line_to( { _last[0], y } );
+	}
+
 	/// @brief Quadratic curve from the current position to p2.
 	void quadratic_to( const gl::vec2 &p1, const gl::vec2 &p2 );
 
 	/// @brief Cubic curve from the current position to p3.
 	void cubic_to( const gl::vec2 &p1, const gl::vec2 &p2, const gl::vec2 &p3 );
+
+	void cubic_to( const gl::vec2 &p2, const gl::vec2 &p3 );
 
 //	void arc_to( const gl::vec2 &p1, const &gl::vec2 &p2, float r );
 
@@ -65,11 +77,22 @@ public:
 	/// @brief Line by a delta.
 	void line_by( const gl::vec2 &p ) { line_to( next_point( p ) ); }
 
+	void horizontal_by( float x )
+	{
+		line_by( { x, 0 } );
+	}
+
+	void vertical_by( float y )
+	{
+		line_by( { 0, y } );
+	}
+
 	/// @brief Quadratic curve relative to current position.
 	void quadratic_by( const gl::vec2 &p1, const gl::vec2 &p2 ) { quadratic_to( next_point( p1 ), next_point( p2 ) ); }
 
 	/// @brief Cubic curve relative to current position.
 	void cubic_by( const gl::vec2 &p1, const gl::vec2 &p2, const gl::vec2 &p3 ) { cubic_to( next_point( p1 ), next_point( p2 ), next_point( p3 ) ); }
+	void cubic_by( const gl::vec2 &p2, const gl::vec2 &p3 ) { cubic_to( next_point( p2 ), next_point( p3 ) ); }
 
 //	void arc_by( const gl::vec2 &p1, const &gl::vec2 &p2, float r ) { arc_to( next_point( p1 ), next_point( p2 ), r ); }
 
@@ -204,6 +227,7 @@ private:
 
 	std::size_t _start = 0;
 	gl::vec2 _last = { 0, 0 };
+	gl::vec2 _last2 = { 0, 0 };
 	std::vector<float> _data;
 	std::vector<action> _actions;
 };

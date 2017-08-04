@@ -83,6 +83,12 @@ public:
 		return _points[i];
 	}
 
+	void set_depth( float z )
+	{
+		for ( auto &p: _points )
+			p[2] = z;
+	}
+
 	void save_svg_polyline( std::ostream &out, float width = 1.0, const std::string &color = "black" )
 	{
 		if ( _closed )
@@ -112,6 +118,8 @@ private:
 inline std::ostream &operator<<( std::ostream &out, const polyline &p )
 {
 	std::copy( p.begin(), p.end(), std::ostream_iterator<polyline::point>( out, "; " ) );
+	if ( p.closed() )
+		out << "closed";
 	return out;
 }
 

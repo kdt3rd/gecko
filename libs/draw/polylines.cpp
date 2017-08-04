@@ -28,9 +28,7 @@ polylines::polylines( void )
 
 void polylines::new_polyline( void )
 {
-	if ( _lines.empty() )
-		_lines.emplace_back();
-	if ( !_lines.back().empty() )
+	if ( _lines.empty() || !_lines.back().empty() )
 		_lines.emplace_back();
 }
 
@@ -38,11 +36,7 @@ void polylines::new_polyline( void )
 
 void polylines::move_to( const polyline::point &p )
 {
-	if ( _lines.empty() )
-		_lines.emplace_back();
-	if ( !_lines.back().empty() )
-		_lines.emplace_back();
-
+	new_polyline();
 	_lines.back().push_back( p );
 }
 
@@ -107,7 +101,6 @@ void polylines::close( void )
 {
 	precondition( !_lines.empty(), "no polyline to close" );
 	_lines.back().close();
-	_lines.emplace_back();
 }
 
 ////////////////////////////////////////

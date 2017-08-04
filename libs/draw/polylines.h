@@ -46,6 +46,26 @@ public:
 
 	void close( void );
 
+	void push_back( polyline &&p )
+	{
+		_lines.emplace_back( std::move( p ) );
+	}
+
+	size_t size( void )
+	{
+		return _lines.size();
+	}
+
+	const polyline &operator[]( size_t i ) const
+	{
+		return _lines[i];
+	}
+
+	polyline &operator[]( size_t i )
+	{
+		return _lines[i];
+	}
+
 	polylines stroked( float width, float dx = 0.0, float dy = 0.0, float dz = 0.0 ) const;
 	polylines offset( float width, float dx = 0.0, float dy = 0.0, float dz = 0.0 ) const;
 
