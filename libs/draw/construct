@@ -1,6 +1,7 @@
 
 local srcs = {
 	"gradient.cpp";
+	"colors.cpp";
 	"paint.cpp";
 	"path.cpp";
 	"polylines.cpp";

@@ -178,6 +178,26 @@ void color::set_hsl( float h, float s, float l )
 
 ////////////////////////////////////////
 
+float color::relative_luminance( void ) const
+{
+	float r, g, b;
+	get_lin( r, g, b );
+	return std::max( 0.F, 0.2126F * r + 0.7152F * g + 0.0722F * b );
+}
+
+////////////////////////////////////////
+
+float color::contrast_ratio( const gl::color &c2 ) const
+{
+	float l1 = relative_luminance() + 0.005F;
+	float l2 = c2.relative_luminance() + 0.005F;
+	if ( l2 < l1 )
+		std::swap( l1, l2 );
+	return l1 / l2;
+}
+
+////////////////////////////////////////
+
 color color::desaturate( float amt )
 {
 	float l, a, b;

@@ -12,6 +12,7 @@
 #include <base/alignment.h>
 #include <gl/color.h>
 #include <draw/text.h>
+#include <draw/rectangle.h>
 
 namespace gui
 {
@@ -29,12 +30,19 @@ public:
 	void set_color( const gl::color &c ) { _text.set_color( c ); }
 	void set_font( const std::shared_ptr<script::font> &f ) { _text.set_font( f ); }
 	void set_align( base::alignment a ) { _align = a; }
+	void set_bg( const gl::color &c )
+	{
+		_bg.set_color( c );
+		_draw_bg = c.alpha() > 0.F;
+	}
 
 	void paint( gl::api &ogl ) override;
 
 	void compute_bounds( void ) override;
 
 private:
+	bool _draw_bg = false;
+	draw::rectangle _bg;
 	draw::text _text;
 	base::alignment _align = base::alignment::LEFT;
 };

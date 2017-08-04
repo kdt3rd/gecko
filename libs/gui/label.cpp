@@ -38,6 +38,12 @@ label::~label( void )
 
 void label::paint( gl::api &ogl )
 {
+	if ( _draw_bg )
+	{
+		_bg.set_position( x(), y() );
+		_bg.set_size( width(), height() );
+		_bg.draw( ogl );
+	}
 	const auto &f = _text.get_font();
 	if ( f )
 	{
@@ -51,9 +57,12 @@ void label::paint( gl::api &ogl )
 void label::compute_bounds( void )
 {
 	const auto &f = _text.get_font();
-	script::font_extents fex = f->extents();
-	script::text_extents tex = f->extents( _text.get_text() );
-	set_minimum( tex.x_advance, std::max( 24.0, fex.height + 2.0 ) );
+	if ( f )
+	{
+		script::font_extents fex = f->extents();
+		script::text_extents tex = f->extents( _text.get_text() );
+		set_minimum( tex.x_advance, std::max( 24.0, fex.height + 2.0 ) );
+	}
 }
 
 ////////////////////////////////////////

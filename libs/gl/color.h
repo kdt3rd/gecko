@@ -94,6 +94,12 @@ public:
 	/// @brief Set the color values in the HSL color space
 	void set_hsl( float h, float s, float l );
 
+	/// @brief Get the relative luminance
+	float relative_luminance( void ) const;
+
+	/// @brief Get the contrast ratio between 2 colors.
+	float contrast_ratio( const gl::color &c2 ) const;
+
 	/// @brief Desaturate the color
 	///
 	/// The amount should be between 0.0 and 1.0.
@@ -110,23 +116,28 @@ public:
 	/// @brief Mix two colors together
 	static color mix( const color &a, const color &b, float m = 0.5 );
 
+	static gl::color make8( uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255 )
+	{
+		return gl::color( r / 255.F, g / 255.F, b / 255.F, a / 255.F );
+	}
+
 private:
 	float _r = 0.0, _g = 0.0, _b = 0.0, _a = 0.0;
 };
 
 ////////////////////////////////////////
 
-constexpr color transparent( 0, 0, 0, 0 );
-constexpr color white( 1, 1, 1 );
-constexpr color black( 0, 0, 0 );
-constexpr color grey( 0.5, 0.5, 0.5 );
-constexpr color gray( 0.5, 0.5, 0.5 );
-constexpr color red( 1, 0, 0 );
-constexpr color green( 0, 1, 0 );
-constexpr color blue( 0, 0, 1 );
-constexpr color yellow( 1, 1, 0 );
-constexpr color magenta( 1, 0, 1 );
-constexpr color cyan( 0, 1, 1 );
+constexpr color transparent( 0.F, 0.F, 0.F, 0.F );
+constexpr color white( 1.F, 1.F, 1.F );
+constexpr color black( 0.F, 0.F, 0.F );
+constexpr color grey( 0.5F, 0.5F, 0.5F );
+constexpr color gray( 0.5F, 0.5F, 0.5F );
+constexpr color red( 1.F, 0.F, 0.F );
+constexpr color green( 0.F, 1.F, 0.F );
+constexpr color blue( 0.F, 0.F, 1.F );
+constexpr color yellow( 1.F, 1.F, 0.F );
+constexpr color magenta( 1.F, 0.F, 1.F );
+constexpr color cyan( 0.F, 1.F, 1.F );
 
 ////////////////////////////////////////
 

@@ -46,6 +46,11 @@ public:
 		_layout.compute_layout();
 	}
 
+	TheLayout &layout( void )
+	{
+		return _layout;
+	}
+
 	void build( gl::api &ogl ) override
 	{
 		for ( auto w: _widgets )
