@@ -119,6 +119,20 @@ public:
 		_data[14] += dz;
 	}
 
+	void translate( float dx, float dy, float dz = 0.F )
+	{
+		_data[12] += dx;
+		_data[13] += dy;
+		_data[14] += dz;
+	}
+
+	void scale( float sx, float sy, float sz = 1.F )
+	{
+		_data[0] *= sx;
+		_data[5] *= sy;
+		_data[10] *= sz;
+	}
+
 	/// @brief Construct identity matrix
 	static matrix4 identity( void )
 	{

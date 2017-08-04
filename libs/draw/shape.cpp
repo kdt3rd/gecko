@@ -30,7 +30,6 @@ void shape::add( gl::api &ogl, const polylines &lines, const paint &c )
 	{
 		mesh m;
 		m.matrix = fill_mesh( ogl, m.msh, c, "position_uv.vert" );
-		m.topleft = m.msh.get_uniform_location( "top_left" );
 		m.tex = get_fill_texture( ogl, c );
 
 		lines.filled( m.msh, "position" );
@@ -41,7 +40,6 @@ void shape::add( gl::api &ogl, const polylines &lines, const paint &c )
 	{
 		mesh m;
 		m.matrix = stroke_mesh( ogl, m.msh, c, "position_uv.vert" );
-		m.topleft = m.msh.get_uniform_location( "top_left" );
 
 		lines.stroked( c.get_stroke_width() ).filled( m.msh, "position" );
 		_meshes.push_back( std::move( m ) );
@@ -57,6 +55,10 @@ void shape::draw( gl::api &ogl )
 	glBlendEquation( GL_FUNC_ADD );
 	ogl.blend_func( gl::blend_style::SRC_ALPHA, gl::blend_style::ONE_MINUS_SRC_ALPHA );
 
+	ogl.save_matrix();
+	ogl.model_matrix().scale( _resize[0] / _shape[0], _resize[1] / _shape[1] );
+	ogl.model_matrix().translate( _top_left[0], _top_left[1] );
+
 	for ( auto &m: _meshes )
 	{
 		if ( m.msh.valid() )
@@ -66,10 +68,11 @@ void shape::draw( gl::api &ogl )
 				t = m.tex->bind();
 			auto b = m.msh.bind();
 			b.set_uniform( m.matrix, ogl.current_matrix() );
-			b.set_uniform( m.topleft, _top_left );
 			b.draw();
 		}
 	}
+
+	ogl.restore_matrix();
 
 	ogl.disable( gl::capability::BLEND );
 }

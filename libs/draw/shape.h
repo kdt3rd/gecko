@@ -63,17 +63,26 @@ public:
 		_top_left.set( x, y );
 	}
 
+	void set_size( float w, float h )
+	{
+		_resize.set( w, h );
+	}
+
+	void shape_size( float w, float h )
+	{
+		_shape.set( w, h );
+	}
+
 private:
-	gl::vec2 _top_left;
+	gl::vec2 _shape = { 10.F, 10.F };
+	gl::vec2 _resize = { 10.F, 10.F };
+	gl::vec2 _top_left = { 0.F, 0.F };
 
 	struct mesh
 	{
 		gl::mesh msh;
 		std::shared_ptr<gl::texture> tex;
 		gl::program::uniform matrix;
-		gl::program::uniform shape;
-		gl::program::uniform resize;
-		gl::program::uniform topleft;
 	};
 
 	std::list<mesh> _meshes;

@@ -117,6 +117,13 @@ public:
 		return _matrix.back();
 	}
 
+	/// @brief Get the current matrix.
+	matrix4 &model_matrix( void )
+	{
+		precondition( !_matrix.empty(), "no matrix available" );
+		return _matrix.back();
+	}
+
 	void set_model( const matrix4 &m )
 	{
 		precondition( !_matrix.empty(), "no matrix available" );
