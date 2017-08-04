@@ -98,7 +98,7 @@ void viewer::paint( const std::shared_ptr<draw::canvas> &c )
 
 	_prog->set_uniform( "mvpMatrix", c->current_matrix() );
 	_prog->set_uniform( "winW", width() );
-	_prog->set_uniform( "winH", width() );
+	_prog->set_uniform( "winH", height() );
 	_prog->set_uniform( "wipeX", 0.5 );
 	_prog->set_uniform( "wipeY", 0.5 );
 	_prog->set_uniform( "texMatA", matA.inverted() );

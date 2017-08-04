@@ -34,7 +34,7 @@ std::vector<platform> &platform::init( void )
 
 	static std::vector<platform> plat
 	{
-		platform( "cocoa", "gl", [] { return std::make_shared<cocoa::system>(); } ),
+		platform( "cocoa", "gl", [](const std::string &d) { return std::make_shared<cocoa::system>(d); } ),
 //	platform( "dummy", "dummy", [] { return std::make_shared<dummy::system>(); } )
 	};
 

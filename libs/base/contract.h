@@ -46,10 +46,7 @@ public:
 	}
 
 	/// @brief Get the exception message
-	const char *what( void ) const noexcept override
-	{
-		return _msg.c_str();
-	}
+	const char *what( void ) const noexcept override;
 
 private:
 	int _line;

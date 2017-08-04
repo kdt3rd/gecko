@@ -13,6 +13,9 @@
 #include <media/reader.h>
 #include <media/writer.h>
 #include <media/sample.h>
+#include <image/plane_ops.h>
+#include <image/media_io.h>
+#include <image/threading.h>
 #include <sstream>
 #include <iostream>
 #include <typeindex>
@@ -72,12 +75,35 @@ int safemain( int argc, char *argv[] )
 			for ( int64_t f = vt->begin(); f <= vt->end(); ++f )
 			{
 				media::sample s( f, vt->rate() );
-			
+
 				auto curFrm = s( vt );
 				if ( f == vt->begin() )
 					std::cout << " size: " << curFrm->width() << " x " << curFrm->height() << ", " << curFrm->size() << " channels" << std::endl;
 
-				oc.video_tracks()[ovt]->store( f, curFrm );
+				using namespace image;
+				image_buf img = extract_frame( *curFrm, { "R", "G", "B" } );
+				int origw = img.width();
+				int origh = img.height();
+				int neww = origw / 2;
+				int newh = origh / 2;
+				for ( size_t p = 0; p != img.size(); ++p )
+				{
+					img[p] = resize_bicubic( img[p], neww, newh );
+//					plane tmpBil = resize_bilinear( img[p], neww, newh );
+//					plane tmpBic = resize_bicubic( img[p], neww, newh );
+//					plane tmpPt = resize_point( img[p], neww, newh );
+//					plane origSzBic = resize_bicubic( tmpBic, origw, origh );
+//					plane origSzBil = resize_bilinear( tmpBil, origw, origh );
+//					plane origSzPt = resize_point( tmpPt, origw, origh );
+//					img[p] = ( origSzBic - origSzPt ) * 100;
+//					img[p] = origSzBic;
+//					img[p] = origSzBil;
+//					img[p] = origSzPt;
+				}
+				
+
+				oc.video_tracks()[ovt]->store( f, to_frame( img, { "R", "G", "B" }, "f16" )  );
+//				oc.video_tracks()[ovt]->store( f, curFrm );
 			}
 			++ovt;
 		}
