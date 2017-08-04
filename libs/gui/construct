@@ -9,5 +9,8 @@ lib = library "gui"
 	  "label.cpp",
 	  "button.cpp",
 	  "slider.cpp",
+	  "line_edit.cpp",
+	  "checkbox.cpp",
+	  "radio_button.cpp",
   }
   libs{ "platform", "draw", "layout", "utf" }

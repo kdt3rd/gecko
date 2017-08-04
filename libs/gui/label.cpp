@@ -53,7 +53,7 @@ void label::compute_bounds( void )
 	const auto &f = _text.get_font();
 	script::font_extents fex = f->extents();
 	script::text_extents tex = f->extents( _text.get_text() );
-	set_minimum( tex.x_advance, fex.height );
+	set_minimum( tex.x_advance, std::max( 24.0, fex.height + 2.0 ) );
 }
 
 ////////////////////////////////////////

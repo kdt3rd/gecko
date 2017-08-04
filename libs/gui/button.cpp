@@ -19,7 +19,7 @@ namespace gui
 button::button( void )
 	: _rect( { 0.26, 0.26, 0.26 } )
 {
-	set_maximum_height( 20 );
+	set_maximum_height( 24 );
 }
 
 ////////////////////////////////////////
@@ -84,7 +84,7 @@ void button::compute_bounds( void )
 	const auto &f = _text.get_font();
 	script::font_extents fex = f->extents();
 	script::text_extents tex = f->extents( _text.get_text() );
-	set_minimum( tex.x_advance + 20, fex.height + 10 );
+	set_minimum( tex.x_advance + 10.0, std::max( 24.0, fex.height + 2.0 ) );
 }
 
 ////////////////////////////////////////

@@ -43,6 +43,11 @@ public:
 		return _utf8;
 	}
 
+	std::string &get_text( void )
+	{
+		return _utf8;
+	}
+
 	void draw( gl::api &ogl ) override;
 
 private:
