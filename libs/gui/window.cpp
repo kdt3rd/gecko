@@ -119,8 +119,6 @@ window::bound_context window::bind( void )
 
 void window::paint( void )
 {
-	_window->acquire();
-
 	double w = _window->width();
 	double h = _window->height();
 
@@ -144,8 +142,6 @@ void window::paint( void )
 			_widget->paint( _ogl );
 		} );
 	}
-
-	_window->release();
 }
 
 ////////////////////////////////////////
