@@ -6,6 +6,7 @@
 //
 
 #include "widget.h"
+#include <base/animation.h>
 #include <base/contract.h>
 
 ////////////////////////////////////////
@@ -103,6 +104,42 @@ bool widget::text_input( char32_t c )
 	return false;
 }
 
+////////////////////////////////////////
+
+bool widget::update_layout( double duration )
+{
+	precondition( _area, "null area" );
+	bool result = false;
+	if ( distance( *_area ) > 0.001 )
+	{
+		if ( _anim_time < 0.0 )
+		{
+			_anim_start = *this;
+			_anim_time = 0.0;
+		}
+		_anim_time += 16.66666;
+
+		if ( _anim_time > duration )
+		{
+			set_position( _area->position() );
+			set_extent( _area->extent() );
+			_anim_time = -1.0;
+		}
+		else
+		{
+			base::point tl = base::ease( _anim_start.top_left(), _area->top_left(), _anim_time, duration );
+			base::point br = base::ease( _anim_start.bottom_right(), _area->bottom_right(), _anim_time, duration );
+			set_x1( tl.x() );
+			set_y1( tl.y() );
+			set_x2( br.x() );
+			set_y2( br.y() );
+			result = true;
+		}
+	}
+	else
+		_anim_time = -1.0;
+	return result;
+}
 ////////////////////////////////////////
 
 }

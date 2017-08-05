@@ -53,7 +53,8 @@ int safemain( int argc, char **argv )
 		box->set_padding( 12, 12, 5, 5 );
 		box->set_spacing( 8, 2 );
 		box->add( label );
-		box->add( button );
+		size_t n = box->add( button );
+		button->when_activated.connect( [=]( void ) { box->remove( n ); box->remove( n + 1 ); } );
 		box->add( slider );
 		box->add( cbox );
 		box->add( rbutton );

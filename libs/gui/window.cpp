@@ -140,7 +140,8 @@ void window::paint( void )
 			_widget->set_size( w, h );
 			_widget->layout_target()->set_size( w, h );
 			_widget->layout_target()->compute_layout();
-			_widget->update_layout();
+			if ( _widget->update_layout( 250.0 ) )
+				_widget->invalidate();
 			_widget->paint( _ogl );
 		} );
 	}
@@ -156,7 +157,7 @@ void window::resized( double w, double h )
 			_widget->set( { 0.0, 0.0 }, { w, h } );
 			_widget->layout_target()->set( { 0.0, 0.0 }, { w, h } );
 			_widget->layout_target()->compute_layout();
-			_widget->update_layout();
+			_widget->update_layout( 0.0 );
 			_widget->invalidate();
 		} );
 }

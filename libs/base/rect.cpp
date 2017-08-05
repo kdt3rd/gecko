@@ -73,5 +73,16 @@ void rect::include( rect &other )
 
 ////////////////////////////////////////
 
+double rect::distance( rect &other ) const
+{
+	double d1 = base::point::distance( top_left(), other.top_left() );
+	double d2 = base::point::distance( top_right(), other.top_right() );
+	double d3 = base::point::distance( bottom_left(), other.bottom_left() );
+	double d4 = base::point::distance( bottom_right(), other.bottom_right() );
+	return std::max( std::max( d1, d2 ), std::max( d3, d4 ) );
+}
+
+////////////////////////////////////////
+
 }
 

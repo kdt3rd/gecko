@@ -201,6 +201,8 @@ public:
 
 	void include( rect &other );
 
+	double distance( rect &other ) const;
+
 	bool empty( void ) const
 	{
 		return _extent.empty();

@@ -56,11 +56,7 @@ public:
 		return _area;
 	}
 
-	virtual void update_layout( void )
-	{
-		precondition( _area, "null area" );
-		set( _area->position(), _area->extent() );
-	}
+	virtual bool update_layout( double duration );
 
 protected:
 	template<typename D>
@@ -85,6 +81,8 @@ protected:
 
 private:
 	std::shared_ptr<layout::area> _area;
+	base::rect _anim_start;
+	double _anim_time;
 };
 
 ////////////////////////////////////////

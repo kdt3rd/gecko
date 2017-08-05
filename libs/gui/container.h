@@ -148,10 +148,16 @@ public:
 	}
 
 	template<typename ...Args>
-	void add( const std::shared_ptr<widget> &w, Args ...args )
+	size_t add( const std::shared_ptr<widget> &w, Args ...args )
 	{
 		_widgets.push_back( w );
 		_layout->add( w->layout_target(), std::forward<Args>( args )... );
+		return _widgets.size() - 1;
+	}
+
+	void remove( size_t w )
+	{
+		_widgets.erase( _widgets.begin() + w );
 	}
 
 	void set_padding( double l, double r, double t, double b )
@@ -164,11 +170,12 @@ public:
 		_layout->set_spacing( h, v );
 	}
 
-	void update_layout( void ) override
+	bool update_layout( double duration ) override
 	{
-		widget::update_layout();
+		bool result = widget::update_layout( duration );
 		for ( auto w: _widgets )
-			w->update_layout();
+			result = w->update_layout( duration ) | result;
+		return result;
 	}
 
 protected:
