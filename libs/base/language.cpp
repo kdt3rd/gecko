@@ -33,7 +33,7 @@ BOOL CALLBACK LocalIterFunc(LPWSTR pStr, DWORD dwFlags, LPARAM lparam)
 
 void extractLocales()
 {
-	EnumSystemLocalesEx( &LocalIterFunc, 0, NULL, NULL );
+	EnumSystemLocalesEx( &LocalIterFunc, 0, 0, NULL );
 
 	for ( const auto &l: locales )
 		std::wcout << l << std::endl;
