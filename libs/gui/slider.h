@@ -68,7 +68,6 @@ private:
 	draw::shape _knob;
 
 	bool _tracking = false;
-	bool _pressed = false;
 	double _handle = 8.0;
 	double _start = 0.0;
 	double _value = 0.5;

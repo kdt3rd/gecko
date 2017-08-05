@@ -20,6 +20,7 @@
 #include <gui/checkbox.h>
 #include <gui/radio_button.h>
 #include <gui/line_edit.h>
+#include <gui/scroll_bar.h>
 #include <base/contract.h>
 #include <draw/icons.h>
 
@@ -47,16 +48,18 @@ int safemain( int argc, char **argv )
 		auto cbox = std::make_shared<gui::checkbox>();
 		auto rbutton = std::make_shared<gui::radio_button>();
 		auto ledit = std::make_shared<gui::line_edit>();
+		auto sbar = std::make_shared<gui::scroll_bar>();
 
 		auto box = std::make_shared<gui::box>( base::alignment::BOTTOM );
 		box->set_padding( 12, 12, 5, 5 );
-		box->set_spacing( 8, 0 );
+		box->set_spacing( 8, 2 );
 		box->add( label );
 		box->add( button );
 		box->add( slider );
 		box->add( cbox );
 		box->add( rbutton );
 		box->add( ledit );
+		box->add( sbar );
 
 		win->set_widget( box );
 	} );

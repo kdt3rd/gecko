@@ -109,7 +109,6 @@ bool slider::mouse_press( const base::point &p, int /*button*/ )
 			if ( dist < _handle )
 			{
 				_tracking = true;
-				_pressed = true;
 				_start = p.x();
 				invalidate(); // TODO invalidate only handle.
 				return true;
@@ -143,7 +142,6 @@ bool slider::mouse_release( const base::point &p, int /*button*/ )
 {
 	if ( _tracking )
 	{
-		_pressed = false;
 		_tracking = false;
 		double z1 = x1() + _handle;
 		double z2 = x2() - _handle;
