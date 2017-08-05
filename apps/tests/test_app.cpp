@@ -35,7 +35,6 @@ int safemain( int argc, char **argv )
 {
 	app = std::make_shared<gui::application>();
 	app->push();
-//	app->set_style( std::make_shared<gui::dark_style>() );
 
 	auto win = app->new_window();
 	win->set_title( app->active_platform() );

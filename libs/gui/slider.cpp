@@ -71,6 +71,8 @@ void slider::build( gl::api &ogl )
 	paint.set_fill_color( s.dominant_color() );
 
 	_knob.add( ogl, handle, paint );
+
+	layout_target()->set_minimum( 24.0 * 2.0, 24.0 );
 }
 
 ////////////////////////////////////////
@@ -85,13 +87,6 @@ void slider::paint( gl::api &ogl )
 
 	_knob.set_position( x( _value, _handle ), ypos );
 	_knob.draw( ogl );
-}
-
-////////////////////////////////////////
-
-void slider::compute_bounds( void )
-{
-	set_minimum( 24.0 * 2.0, 24.0 );
 }
 
 ////////////////////////////////////////

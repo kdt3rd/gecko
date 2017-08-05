@@ -62,6 +62,11 @@ void scroll_bar::build( gl::api &ogl )
 	const style &s = context::current().get_style();
 	_groove.set_color( s.disabled_text( s.background_color() ) );
 	_knob.set_color( s.dominant_color() );
+
+	if ( _horizontal )
+		layout_target()->set_minimum( 45.0, 15.0 );
+	else
+		layout_target()->set_minimum( 15.0, 45.0 );
 }
 
 ////////////////////////////////////////
@@ -88,16 +93,6 @@ void scroll_bar::paint( gl::api &ogl )
 		_knob.set_size( width(), h );
 		_knob.draw( ogl );
 	}
-}
-
-////////////////////////////////////////
-
-void scroll_bar::compute_bounds( void )
-{
-	if ( _horizontal )
-		set_minimum( 45.0, 15.0 );
-	else
-		set_minimum( 15.0, 45.0 );
 }
 
 ////////////////////////////////////////

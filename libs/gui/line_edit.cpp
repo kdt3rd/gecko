@@ -37,10 +37,15 @@ line_edit::~line_edit( void )
 void line_edit::build( gl::api &ogl )
 {
 	const style &s = context::current().get_style();
+	const auto &f = s.body_font();
 
-	_text.set_font( s.body_font() );
+	script::font_extents fex = f->extents();
+	script::text_extents tex = f->extents( _text.get_text() );
+	layout_target()->set_minimum( tex.x_advance + 4, fex.height - fex.descent + 2  );
+
+	_text.set_font( f );
 	_text.set_color( s.primary_text( s.background_color() ) );
-	_prompt.set_font( s.body_font() );
+	_prompt.set_font( f );
 	_prompt.set_color( s.disabled_text( s.background_color() ) );
 	_line.set_color( s.dominant_color() );
 	_marker.set_color( s.dominant_color() );
@@ -68,15 +73,6 @@ void line_edit::paint( gl::api &ogl )
 	_marker.set_position( x() + 2.F + tex.x_advance - 0.5F, y() + height() + fex.descent - fex.ascent );
 	_marker.set_size( 1.5F, fex.ascent - fex.descent );
 	_marker.draw( ogl );
-}
-
-////////////////////////////////////////
-
-void line_edit::compute_bounds( void )
-{
-	script::font_extents fex = _text.get_font()->extents();
-	script::text_extents tex = _text.get_font()->extents( _text.get_text() );
-	set_minimum( tex.x_advance + 4, fex.height - fex.descent + 2  );
 }
 
 ////////////////////////////////////////

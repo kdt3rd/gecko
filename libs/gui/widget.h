@@ -10,6 +10,7 @@
 #include <type_traits>
 #include <layout/area.h>
 #include <platform/keyboard.h>
+#include <base/contract.h>
 #include "context.h"
 
 namespace gl
@@ -22,10 +23,11 @@ namespace gui
 
 ////////////////////////////////////////
 
-class widget : public layout::area
+class widget : public base::rect
 {
 public:
 	widget( void );
+	widget( std::unique_ptr<layout::area> &&a );
 	virtual ~widget( void );
 
 	virtual void build( gl::api &ogl );
@@ -49,6 +51,17 @@ public:
 		context::current().invalidate( *this );
 	}
 
+	const std::shared_ptr<layout::area> &layout_target( void ) const
+	{
+		return _area;
+	}
+
+	virtual void update_layout( void )
+	{
+		precondition( _area, "null area" );
+		set( _area->position(), _area->extent() );
+	}
+
 protected:
 	template<typename D>
 	void callback_helper( const std::function<void(void)> &cb, D &d )
@@ -69,6 +82,9 @@ protected:
 		auto cb = [this]() { invalidate(); };
 		callback_helper( cb, args... );
 	}
+
+private:
+	std::shared_ptr<layout::area> _area;
 };
 
 ////////////////////////////////////////

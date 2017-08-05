@@ -37,9 +37,13 @@ label::~label( void )
 void label::build( gl::api &ogl )
 {
 	const style &s = context::current().get_style();
+	const auto &f = s.body_font();
 
-	_text.set_font( s.body_font() );
+	script::font_extents fex = f->extents();
+	script::text_extents tex = f->extents( _text.get_text() );
+	layout_target()->set_minimum( tex.x_advance, std::max( 24.0, fex.height + 2.0 ) );
 
+	_text.set_font( f );
 	if ( _bg_color.alpha() > 0.0 )
 		_text.set_color( s.primary_text( _bg_color ) );
 	else
@@ -61,19 +65,6 @@ void label::paint( gl::api &ogl )
 	{
 		_text.set_position( f->align_text( _text.get_text(), *this, _align ) );
 		_text.draw( ogl );
-	}
-}
-
-////////////////////////////////////////
-
-void label::compute_bounds( void )
-{
-	const auto &f = _text.get_font();
-	if ( f )
-	{
-		script::font_extents fex = f->extents();
-		script::text_extents tex = f->extents( _text.get_text() );
-		set_minimum( tex.x_advance, std::max( 24.0, fex.height + 2.0 ) );
 	}
 }
 

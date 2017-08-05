@@ -40,8 +40,6 @@ public:
 
 	void paint( gl::api &ogl ) override;
 
-	void compute_bounds( void ) override;
-
 private:
 	gl::color _bg_color;
 	draw::rectangle _bg;

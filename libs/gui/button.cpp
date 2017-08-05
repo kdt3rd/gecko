@@ -19,7 +19,6 @@ namespace gui
 button::button( void )
 	: _rect( { 0.26, 0.26, 0.26 } )
 {
-	set_maximum_height( 24 );
 }
 
 ////////////////////////////////////////
@@ -59,8 +58,14 @@ void button::set_pressed( bool p )
 void button::build( gl::api &ogl )
 {
 	style &s = context::current().get_style();
+	const auto &f = s.body_font();
 
-	_text.set_font( s.body_font() );
+	script::font_extents fex = f->extents();
+	script::text_extents tex = f->extents( _text.get_text() );
+	layout_target()->set_minimum( tex.x_advance + 10.0, std::max( 24.0, fex.height + 2.0 ) );
+	layout_target()->set_maximum_height( 24 );
+
+	_text.set_font( f );
 }
 
 ////////////////////////////////////////
@@ -79,16 +84,6 @@ void button::paint( gl::api &ogl )
 		_text.set_position( f->align_text( _text.get_text(), lbox, _align ) );
 		_text.draw( ogl );
 	}
-}
-
-////////////////////////////////////////
-
-void button::compute_bounds( void )
-{
-	const auto &f = _text.get_font();
-	script::font_extents fex = f->extents();
-	script::text_extents tex = f->extents( _text.get_text() );
-	set_minimum( tex.x_advance + 10.0, std::max( 24.0, fex.height + 2.0 ) );
 }
 
 ////////////////////////////////////////

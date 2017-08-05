@@ -53,8 +53,6 @@ public:
 	void build( gl::api &ogl ) override;
 	void paint( gl::api &ogl ) override;
 
-	void compute_bounds( void ) override;
-
 	bool mouse_press( const base::point &p, int button ) override;
 	bool mouse_move( const base::point &p ) override;
 	bool mouse_release( const base::point &p, int button ) override;

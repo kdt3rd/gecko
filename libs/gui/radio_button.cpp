@@ -44,6 +44,9 @@ void radio_button::build( gl::api &ogl )
 	_checked.shape_size( 24, 24 );
 	_unchecked.set_size( 24, 24 );
 	_checked.set_size( 24, 24 );
+
+	layout_target()->set_minimum( 24, 24 );
+	layout_target()->set_maximum( 24, 24 );
 }
 
 ////////////////////////////////////////
@@ -59,14 +62,6 @@ void radio_button::paint( gl::api &ogl )
 		_checked.draw( ogl );
 	else
 		_unchecked.draw( ogl );
-}
-
-////////////////////////////////////////
-
-void radio_button::compute_bounds( void )
-{
-	set_minimum( 24, 24 );
-	set_maximum( 24, 24 );
 }
 
 ////////////////////////////////////////

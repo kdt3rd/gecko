@@ -33,8 +33,6 @@ public:
 	void build( gl::api &ogl ) override;
 	void paint( gl::api &ogl ) override;
 
-	void compute_bounds( void ) override;
-
 	bool key_press( platform::scancode c ) override;
 
 	bool text_input( char32_t c ) override;

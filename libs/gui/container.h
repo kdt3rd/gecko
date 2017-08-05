@@ -25,30 +25,18 @@ class container : public widget
 public:
 	template<typename ...Args>
 	container( Args ...args )
-		: _layout( std::forward<Args>( args )... )
+		: widget( std::unique_ptr<TheLayout>( new TheLayout( std::forward<Args>( args )... ) ) )
 	{
+		_layout = std::dynamic_pointer_cast<TheLayout>( layout_target() );
 	}
 
 	~container( void )
 	{
 	}
 
-	void compute_bounds( void ) override
-	{
-		_layout.compute_bounds();
-		this->set_minimum( _layout.minimum_size() );
-		this->set_maximum( _layout.maximum_size() );
-	}
-
-	void compute_layout( void ) override
-	{
-		_layout.set_extent( extent() );
-		_layout.compute_layout();
-	}
-
 	TheLayout &layout( void )
 	{
-		return _layout;
+		return *_layout;
 	}
 
 	void build( gl::api &ogl ) override
@@ -163,21 +151,28 @@ public:
 	void add( const std::shared_ptr<widget> &w, Args ...args )
 	{
 		_widgets.push_back( w );
-		_layout.add( w, std::forward<Args>( args )... );
+		_layout->add( w->layout_target(), std::forward<Args>( args )... );
 	}
 
 	void set_padding( double l, double r, double t, double b )
 	{
-		_layout.set_padding( l, r, t, b );
+		_layout->set_padding( l, r, t, b );
 	}
 
 	void set_spacing( double h, double v )
 	{
-		_layout.set_spacing( h, v );
+		_layout->set_spacing( h, v );
+	}
+
+	void update_layout( void ) override
+	{
+		widget::update_layout();
+		for ( auto w: _widgets )
+			w->update_layout();
 	}
 
 protected:
-	TheLayout _layout;
+	std::shared_ptr<TheLayout> _layout;
 	std::vector<std::shared_ptr<widget>> _widgets;
 	std::shared_ptr<widget> _mouse_grab;
 	std::shared_ptr<widget> _key_focus;

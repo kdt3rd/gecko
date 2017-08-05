@@ -45,6 +45,10 @@ void checkbox::build( gl::api &ogl )
 	_checked.shape_size( 24, 24 );
 	_unchecked.set_size( 24, 24 );
 	_checked.set_size( 24, 24 );
+
+	auto &l = layout_target();
+	l->set_minimum( 24, 24 );
+	l->set_maximum( 24, 24 );
 }
 
 ////////////////////////////////////////
@@ -60,14 +64,6 @@ void checkbox::paint( gl::api &ogl )
 		_checked.draw( ogl );
 	else
 		_unchecked.draw( ogl );
-}
-
-////////////////////////////////////////
-
-void checkbox::compute_bounds( void )
-{
-	set_minimum( 24, 24 );
-	set_maximum( 24, 24 );
 }
 
 ////////////////////////////////////////

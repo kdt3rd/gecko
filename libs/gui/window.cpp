@@ -80,9 +80,9 @@ void window::set_widget( const std::shared_ptr<widget> &w )
 	{
 		_widget = w;
 		_widget->build( _ogl );
-		_widget->set_horizontal( 0.0, _window->width() - 1.0 );
-		_widget->set_vertical( 0.0, _window->height() - 1.0 );
-		_widget->compute_bounds();
+		_widget->layout_target()->compute_bounds();
+		_widget->layout_target()->set_horizontal( 0.0, _window->width() - 1.0 );
+		_widget->layout_target()->set_vertical( 0.0, _window->height() - 1.0 );
 	} );
 }
 
@@ -136,9 +136,11 @@ void window::paint( void )
 	{
 		in_context( [&,this]
 		{
-			_widget->compute_bounds();
+			_widget->layout_target()->compute_bounds();
 			_widget->set_size( w, h );
-			_widget->compute_layout();
+			_widget->layout_target()->set_size( w, h );
+			_widget->layout_target()->compute_layout();
+			_widget->update_layout();
 			_widget->paint( _ogl );
 		} );
 	}
@@ -151,9 +153,10 @@ void window::resized( double w, double h )
 	if ( _widget )
 		in_context( [&,this]
 		{
-			_widget->set_horizontal( 0.0, w - 1.0 );
-			_widget->set_vertical( 0.0, h - 1.0 );
-			_widget->compute_layout();
+			_widget->set( { 0.0, 0.0 }, { w, h } );
+			_widget->layout_target()->set( { 0.0, 0.0 }, { w, h } );
+			_widget->layout_target()->compute_layout();
+			_widget->update_layout();
 			_widget->invalidate();
 		} );
 }

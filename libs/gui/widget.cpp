@@ -17,6 +17,14 @@ namespace gui
 
 widget::widget( void )
 {
+	_area = std::make_shared<layout::area>();
+}
+
+////////////////////////////////////////
+
+widget::widget( std::unique_ptr<layout::area> &&a )
+	: _area( std::move( a ) )
+{
 }
 
 ////////////////////////////////////////

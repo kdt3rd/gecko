@@ -52,8 +52,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		{
 			auto swatch = std::make_shared<gui::label>();
 			swatch->set_bg( pal[i] );
-			swatch->set_minimum( 24, 24 );
-			swatch->set_expansion_flex( 1.0 );
+			swatch->layout_target()->set_minimum( 24, 24 );
+			swatch->layout_target()->set_expansion_flex( 1.0 );
 			grid->add( swatch, i+1, n );
 		}
 	}
