@@ -33,31 +33,31 @@ namespace
 #if defined( __x86_64__ ) || defined( _M_X64 ) || defined( __X86__ ) || defined( __i386__ ) || defined( i386 ) || defined( _M_IX86 ) || defined( __386__ )
 # define IS_INTEL_ISH 1
 # ifdef _WIN32
-inline unsigned int pullMaxID( unsigned int idx, std::array<unsigned int, 4> &regs )
+inline unsigned int pullMaxID( unsigned int idx, std::array<unsigned int, 4> &regs ) noexcept
 {
 	__cpuid( (int *)regs.data(), 0 );
 	return regs[0];
 }
-inline void pullID( unsigned int idx, std::array<unsigned int, 4> &regs )
+inline void pullID( unsigned int idx, std::array<unsigned int, 4> &regs ) noexcept
 {
 	__cpuidex( (int *)regs.data(), idx, 0 );
 }
-inline void pullID( unsigned int idx, unsigned int count, std::array<unsigned int, 4> &regs )
+inline void pullID( unsigned int idx, unsigned int count, std::array<unsigned int, 4> &regs ) noexcept
 {
 	__cpuidex( (int *)regs.data(), idx, count );
 }
 
 # else
 
-inline void pullID( unsigned int idx, std::array<unsigned int, 4> &regs )
+inline void pullID( unsigned int idx, std::array<unsigned int, 4> &regs ) noexcept
 {
 	__get_cpuid( idx, &regs[0], &regs[1], &regs[2], &regs[3] );
 }
-inline void pullID( unsigned int idx, unsigned int count, std::array<unsigned int, 4> &regs )
+inline void pullID( unsigned int idx, unsigned int count, std::array<unsigned int, 4> &regs ) noexcept
 {
 	__cpuid_count( idx, count, regs[0], regs[1], regs[2], regs[3] );
 }
-inline unsigned int pullMaxID( unsigned int idx, std::array<unsigned int, 4> &regs )
+inline unsigned int pullMaxID( unsigned int idx, std::array<unsigned int, 4> &regs ) noexcept
 {
 	pullID( idx, regs );
 	return regs[0];
@@ -69,10 +69,10 @@ inline unsigned int pullMaxID( unsigned int idx, std::array<unsigned int, 4> &re
 
 struct CPUFeatureStore
 {
-	CPUFeatureStore( void )
+	CPUFeatureStore( void ) noexcept
 	{
 #if IS_INTEL_ISH
-		std::array<unsigned int, 4> regs;
+		std::array<unsigned int, 4> regs{ { 0, 0, 0, 0} };
 		unsigned int maxFeat = pullMaxID( 0, regs );
 
 		_amd = regs[2] == 0x444D4163;
@@ -110,7 +110,7 @@ struct CPUFeatureStore
 				}
 			}
 
-			_cache_line_bits = ( ( regs[1] >> 8) & 0xFF ) * 8;
+			_cache_line_bits = static_cast<size_t>( ( regs[1] >> 8) & 0xFF ) * 8;
 		}
 
 		if ( maxFeat >= 7 )
@@ -150,7 +150,7 @@ struct CPUFeatureStore
 			{
 				pullID( 0x80000005, regs );
 				_l1_data_line_size = regs[2] & 0xFF;
-				_l1_data_cache = (regs[2] >> 24) * 1024;
+				_l1_data_cache = static_cast<size_t>(regs[2] >> 24) * 1024;
 				_l1_assoc = (regs[2] >> 16) & 0xFF;
 				_l1_instr_line_size = regs[3] & 0xFF;
 				_l1_instr_cache = (regs[3] >> 24) * 1024;
@@ -160,7 +160,7 @@ struct CPUFeatureStore
 			{
 				pullID( 0x80000006, regs );
 				_l2_data_line_size = regs[2] & 0xFF;
-				_l2_data_cache = ( regs[2] >> 16 ) * 1024;
+				_l2_data_cache = static_cast<size_t>( regs[2] >> 16 ) * 1024;
 				_l2_assoc = ( regs[2] >> 12 ) & 0xF;
 				switch ( _l2_assoc )
 				{
@@ -182,7 +182,7 @@ struct CPUFeatureStore
 						break;
 				}
 				_l3_data_line_size = regs[3] & 0xFF;
-				_l3_data_cache = ( regs[3] >> 18 ) * 512 * 1024;
+				_l3_data_cache = static_cast<size_t>( regs[3] >> 18 ) * 512 * 1024;
 				_l3_assoc = ( regs[3] >> 12 ) & 0xF;
 				switch ( _l3_assoc )
 				{
@@ -729,8 +729,14 @@ struct CPUFeatureStore
 #endif
 };
 
-static CPUFeatureStore theFeatures;
+const CPUFeatureStore &
+theFeatures( void )
+{
+	static CPUFeatureStore tfs;
+	return tfs;
 }
+
+} // anon namespace
 
 
 ////////////////////////////////////////
@@ -740,18 +746,18 @@ namespace base
 {
 
 const char *cpu::vendor( void ) 
-{ return theFeatures._vendor; }
+{ return theFeatures()._vendor; }
 
 const char *cpu::brand( void )
-{ return theFeatures._brand; }
+{ return theFeatures()._brand; }
 
 void
 cpu::output( std::ostream &os )
 {
-	if ( theFeatures._brand[0] != '\0' )
-		os << theFeatures._brand << " (" << theFeatures._vendor << ")";
+	if ( theFeatures()._brand[0] != '\0' )
+		os << theFeatures()._brand << " (" << theFeatures()._vendor << ")";
 	else
-		os << theFeatures._vendor;
+		os << theFeatures()._vendor;
 
 #if IS_INTEL_ISH
 	os << "\n  features [";
@@ -825,25 +831,25 @@ cpu::output( std::ostream &os )
 
 ////////////////////////////////////////
 
-bool cpu::is_intel( void ) { return theFeatures._intel; }
-bool cpu::is_amd( void ) { return theFeatures._amd; }
+bool cpu::is_intel( void ) { return theFeatures()._intel; }
+bool cpu::is_amd( void ) { return theFeatures()._amd; }
 
-size_t cpu::cache_line_bits( void ) { return theFeatures._cache_line_bits; }
+size_t cpu::cache_line_bits( void ) { return theFeatures()._cache_line_bits; }
 
-size_t cpu::l1_instruction_cache( void ) { return theFeatures._l1_instr_cache; }
-size_t cpu::l1_instruction_line_size( void ) { return theFeatures._l1_instr_line_size; }
-size_t cpu::l1_instruction_associativity( void ) { return theFeatures._l1_instr_assoc; }
+size_t cpu::l1_instruction_cache( void ) { return theFeatures()._l1_instr_cache; }
+size_t cpu::l1_instruction_line_size( void ) { return theFeatures()._l1_instr_line_size; }
+size_t cpu::l1_instruction_associativity( void ) { return theFeatures()._l1_instr_assoc; }
 
-size_t cpu::l1_data_cache( void ) { return theFeatures._l1_data_cache; }
-size_t cpu::l1_data_line_size( void ) { return theFeatures._l1_data_line_size; }
-size_t cpu::l1_associativity( void ) { return theFeatures._l1_assoc; }
-size_t cpu::l2_data_cache( void ) { return theFeatures._l2_data_cache; }
-size_t cpu::l2_data_line_size( void ) { return theFeatures._l2_data_line_size; }
-size_t cpu::l2_associativity( void ) { return theFeatures._l2_assoc; }
-size_t cpu::l3_data_cache( void ) { return theFeatures._l3_data_cache; }
-size_t cpu::l3_data_line_size( void ) { return theFeatures._l3_data_line_size; }
-size_t cpu::l3_associativity( void ) { return theFeatures._l3_assoc; }
-size_t cpu::prefetch( void ) { return theFeatures._prefetch_size; }
+size_t cpu::l1_data_cache( void ) { return theFeatures()._l1_data_cache; }
+size_t cpu::l1_data_line_size( void ) { return theFeatures()._l1_data_line_size; }
+size_t cpu::l1_associativity( void ) { return theFeatures()._l1_assoc; }
+size_t cpu::l2_data_cache( void ) { return theFeatures()._l2_data_cache; }
+size_t cpu::l2_data_line_size( void ) { return theFeatures()._l2_data_line_size; }
+size_t cpu::l2_associativity( void ) { return theFeatures()._l2_assoc; }
+size_t cpu::l3_data_cache( void ) { return theFeatures()._l3_data_cache; }
+size_t cpu::l3_data_line_size( void ) { return theFeatures()._l3_data_line_size; }
+size_t cpu::l3_associativity( void ) { return theFeatures()._l3_assoc; }
+size_t cpu::prefetch( void ) { return theFeatures()._prefetch_size; }
 
 ////////////////////////////////////////
 
@@ -851,75 +857,75 @@ bool cpu::has_simd( void ) { return highest_simd() != simd_feature::NONE; }
 
 #if IS_INTEL_ISH
 // intel added fast unaligned loads with nehalem, which added POPCNT, in case the misaligned SSE flag isn't set
-bool cpu::fast_unaligned_load( void ) { return has_misaligned_sse() || ( theFeatures._intel && has_POPCNT() ); }
-bool cpu::has_misaligned_sse( void ) { return theFeatures._feat81_ECX[7]; }
-bool cpu::has_MMX( void ) { return theFeatures._feat1_EDX[23]; }
-bool cpu::has_MMX_EXT( void ) { return theFeatures._amd && theFeatures._feat81_EDX[22]; }
-bool cpu::has_SSE( void ) { return theFeatures._feat1_EDX[25]; }
-bool cpu::has_SSE2( void ) { return theFeatures._feat1_EDX[26]; }
-bool cpu::has_SSE3( void ) { return theFeatures._feat1_ECX[0]; }
-bool cpu::has_SSSE3( void ) { return theFeatures._feat1_ECX[9]; }
-bool cpu::has_SSE41( void ) { return theFeatures._feat1_ECX[19]; }
-bool cpu::has_SSE42( void ) { return theFeatures._feat1_ECX[20]; }
-bool cpu::has_SSE4a( void ) { return theFeatures._amd && theFeatures._feat81_ECX[6]; }
-bool cpu::has_3DNOW( void ) { return theFeatures._amd && theFeatures._feat81_EDX[31]; }
-bool cpu::has_3DNOW_EXT( void ) { return theFeatures._amd && theFeatures._feat81_EDX[30]; }
-bool cpu::has_AVX( void ) { return theFeatures._feat1_ECX[28]; }
-bool cpu::has_AVX2( void ) { return theFeatures._feat7_EBX[5]; }
-bool cpu::has_AVX512F( void ) { return theFeatures._feat7_EBX[16]; }
-bool cpu::has_AVX512DQ( void ) { return theFeatures._feat7_EBX[17]; }
-bool cpu::has_AVX512PF( void ) { return theFeatures._feat7_EBX[26]; }
-bool cpu::has_AVX512ER( void ) { return theFeatures._feat7_EBX[27]; }
-bool cpu::has_AVX512CD( void ) { return theFeatures._feat7_EBX[28]; }
-bool cpu::has_AVX512BW( void ) { return theFeatures._feat7_EBX[30]; }
-bool cpu::has_AVX512VL( void ) { return theFeatures._feat7_EBX[31]; }
-bool cpu::has_AVX512BMI( void ) { return theFeatures._feat7_ECX[1]; }
+bool cpu::fast_unaligned_load( void ) { return has_misaligned_sse() || ( theFeatures()._intel && has_POPCNT() ); }
+bool cpu::has_misaligned_sse( void ) { return theFeatures()._feat81_ECX[7]; }
+bool cpu::has_MMX( void ) { return theFeatures()._feat1_EDX[23]; }
+bool cpu::has_MMX_EXT( void ) { return theFeatures()._amd && theFeatures()._feat81_EDX[22]; }
+bool cpu::has_SSE( void ) { return theFeatures()._feat1_EDX[25]; }
+bool cpu::has_SSE2( void ) { return theFeatures()._feat1_EDX[26]; }
+bool cpu::has_SSE3( void ) { return theFeatures()._feat1_ECX[0]; }
+bool cpu::has_SSSE3( void ) { return theFeatures()._feat1_ECX[9]; }
+bool cpu::has_SSE41( void ) { return theFeatures()._feat1_ECX[19]; }
+bool cpu::has_SSE42( void ) { return theFeatures()._feat1_ECX[20]; }
+bool cpu::has_SSE4a( void ) { return theFeatures()._amd && theFeatures()._feat81_ECX[6]; }
+bool cpu::has_3DNOW( void ) { return theFeatures()._amd && theFeatures()._feat81_EDX[31]; }
+bool cpu::has_3DNOW_EXT( void ) { return theFeatures()._amd && theFeatures()._feat81_EDX[30]; }
+bool cpu::has_AVX( void ) { return theFeatures()._feat1_ECX[28]; }
+bool cpu::has_AVX2( void ) { return theFeatures()._feat7_EBX[5]; }
+bool cpu::has_AVX512F( void ) { return theFeatures()._feat7_EBX[16]; }
+bool cpu::has_AVX512DQ( void ) { return theFeatures()._feat7_EBX[17]; }
+bool cpu::has_AVX512PF( void ) { return theFeatures()._feat7_EBX[26]; }
+bool cpu::has_AVX512ER( void ) { return theFeatures()._feat7_EBX[27]; }
+bool cpu::has_AVX512CD( void ) { return theFeatures()._feat7_EBX[28]; }
+bool cpu::has_AVX512BW( void ) { return theFeatures()._feat7_EBX[30]; }
+bool cpu::has_AVX512VL( void ) { return theFeatures()._feat7_EBX[31]; }
+bool cpu::has_AVX512BMI( void ) { return theFeatures()._feat7_ECX[1]; }
 
-bool cpu::has_FMA( void ) { return theFeatures._feat1_ECX[12]; }
-bool cpu::has_FMA4( void ) { return theFeatures._feat81_ECX[16]; }
+bool cpu::has_FMA( void ) { return theFeatures()._feat1_ECX[12]; }
+bool cpu::has_FMA4( void ) { return theFeatures()._feat81_ECX[16]; }
 
-bool cpu::has_PCLMULQDQ( void ) { return theFeatures._feat1_ECX[1]; }
-bool cpu::has_MONITOR( void ) { return theFeatures._feat1_ECX[3]; }
-bool cpu::has_CMPXCHG16B( void ) { return theFeatures._feat1_ECX[13]; }
-bool cpu::has_PDCM( void ) { return theFeatures._feat1_ECX[15]; }
-bool cpu::has_DCA( void ) { return theFeatures._feat1_ECX[18]; }
-bool cpu::has_MOVBE( void ) { return theFeatures._feat1_ECX[22]; }
-bool cpu::has_POPCNT( void ) { return theFeatures._feat1_ECX[23]; }
-bool cpu::has_AES( void ) { return theFeatures._feat1_ECX[25]; }
-bool cpu::has_XSAVE( void ) { return theFeatures._feat1_ECX[26]; }
-bool cpu::has_OSXSAVE( void ) { return theFeatures._feat1_ECX[27]; }
-bool cpu::has_F16C( void ) { return theFeatures._feat1_ECX[29]; }
-bool cpu::has_RDRAND( void ) { return theFeatures._feat1_ECX[30]; }
+bool cpu::has_PCLMULQDQ( void ) { return theFeatures()._feat1_ECX[1]; }
+bool cpu::has_MONITOR( void ) { return theFeatures()._feat1_ECX[3]; }
+bool cpu::has_CMPXCHG16B( void ) { return theFeatures()._feat1_ECX[13]; }
+bool cpu::has_PDCM( void ) { return theFeatures()._feat1_ECX[15]; }
+bool cpu::has_DCA( void ) { return theFeatures()._feat1_ECX[18]; }
+bool cpu::has_MOVBE( void ) { return theFeatures()._feat1_ECX[22]; }
+bool cpu::has_POPCNT( void ) { return theFeatures()._feat1_ECX[23]; }
+bool cpu::has_AES( void ) { return theFeatures()._feat1_ECX[25]; }
+bool cpu::has_XSAVE( void ) { return theFeatures()._feat1_ECX[26]; }
+bool cpu::has_OSXSAVE( void ) { return theFeatures()._feat1_ECX[27]; }
+bool cpu::has_F16C( void ) { return theFeatures()._feat1_ECX[29]; }
+bool cpu::has_RDRAND( void ) { return theFeatures()._feat1_ECX[30]; }
 
-bool cpu::has_MSR( void ) { return theFeatures._feat1_EDX[5]; }
-bool cpu::has_CX8( void ) { return theFeatures._feat1_EDX[8]; }
-bool cpu::has_SEP( void ) { return theFeatures._feat1_EDX[11]; }
-bool cpu::has_CMOV( void ) { return theFeatures._feat1_EDX[15]; }
-bool cpu::has_CLFSH( void ) { return theFeatures._feat1_EDX[19]; }
-bool cpu::has_FXSR( void ) { return theFeatures._feat1_EDX[24]; }
+bool cpu::has_MSR( void ) { return theFeatures()._feat1_EDX[5]; }
+bool cpu::has_CX8( void ) { return theFeatures()._feat1_EDX[8]; }
+bool cpu::has_SEP( void ) { return theFeatures()._feat1_EDX[11]; }
+bool cpu::has_CMOV( void ) { return theFeatures()._feat1_EDX[15]; }
+bool cpu::has_CLFSH( void ) { return theFeatures()._feat1_EDX[19]; }
+bool cpu::has_FXSR( void ) { return theFeatures()._feat1_EDX[24]; }
 
-bool cpu::has_FSGSBASE( void ) { return theFeatures._feat7_EBX[0]; }
-bool cpu::has_BMI1( void ) { return theFeatures._feat7_EBX[3]; }
-bool cpu::has_HLE( void ) { return theFeatures._intel && theFeatures._feat7_EBX[4]; }
-bool cpu::has_BMI2( void ) { return theFeatures._feat7_EBX[8]; }
-bool cpu::has_ERMS( void ) { return theFeatures._feat7_EBX[9]; }
-bool cpu::has_INVPCID( void ) { return theFeatures._feat7_EBX[10]; }
-bool cpu::has_RTM( void ) { return theFeatures._intel && theFeatures._feat7_EBX[11]; }
-bool cpu::has_RDSEED( void ) { return theFeatures._feat7_EBX[18]; }
-bool cpu::has_ADX( void ) { return theFeatures._feat7_EBX[19]; }
-bool cpu::has_SHA( void ) { return theFeatures._feat7_EBX[29]; }
+bool cpu::has_FSGSBASE( void ) { return theFeatures()._feat7_EBX[0]; }
+bool cpu::has_BMI1( void ) { return theFeatures()._feat7_EBX[3]; }
+bool cpu::has_HLE( void ) { return theFeatures()._intel && theFeatures()._feat7_EBX[4]; }
+bool cpu::has_BMI2( void ) { return theFeatures()._feat7_EBX[8]; }
+bool cpu::has_ERMS( void ) { return theFeatures()._feat7_EBX[9]; }
+bool cpu::has_INVPCID( void ) { return theFeatures()._feat7_EBX[10]; }
+bool cpu::has_RTM( void ) { return theFeatures()._intel && theFeatures()._feat7_EBX[11]; }
+bool cpu::has_RDSEED( void ) { return theFeatures()._feat7_EBX[18]; }
+bool cpu::has_ADX( void ) { return theFeatures()._feat7_EBX[19]; }
+bool cpu::has_SHA( void ) { return theFeatures()._feat7_EBX[29]; }
 
-bool cpu::has_AMD_PREFETCHW( void ) { return theFeatures._feat81_ECX[8]; }
-bool cpu::has_PREFETCHWT1( void ) { return theFeatures._feat7_ECX[0]; }
+bool cpu::has_AMD_PREFETCHW( void ) { return theFeatures()._feat81_ECX[8]; }
+bool cpu::has_PREFETCHWT1( void ) { return theFeatures()._feat7_ECX[0]; }
 
-bool cpu::has_LAHF( void ) { return theFeatures._feat81_ECX[0]; }
-bool cpu::has_LZCNT( void ) { return theFeatures._intel && theFeatures._feat81_ECX[5]; }
-bool cpu::has_ABM( void ) { return theFeatures._amd && theFeatures._feat81_ECX[5]; }
-bool cpu::has_XOP( void ) { return theFeatures._amd && theFeatures._feat81_ECX[11]; }
-bool cpu::has_TBM( void ) { return theFeatures._amd && theFeatures._feat81_ECX[21]; }
+bool cpu::has_LAHF( void ) { return theFeatures()._feat81_ECX[0]; }
+bool cpu::has_LZCNT( void ) { return theFeatures()._intel && theFeatures()._feat81_ECX[5]; }
+bool cpu::has_ABM( void ) { return theFeatures()._amd && theFeatures()._feat81_ECX[5]; }
+bool cpu::has_XOP( void ) { return theFeatures()._amd && theFeatures()._feat81_ECX[11]; }
+bool cpu::has_TBM( void ) { return theFeatures()._amd && theFeatures()._feat81_ECX[21]; }
 
-bool cpu::has_SYSCALL( void ) { return theFeatures._feat81_EDX[11]; }
-bool cpu::has_RDTSCP( void ) { return theFeatures._feat81_EDX[27]; }
+bool cpu::has_SYSCALL( void ) { return theFeatures()._feat81_EDX[11]; }
+bool cpu::has_RDTSCP( void ) { return theFeatures()._feat81_EDX[27]; }
 #else
 bool cpu::fast_unaligned_load( void ) { return false; }
 bool cpu::has_misaligned_sse( void ) { return false; }
