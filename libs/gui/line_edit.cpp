@@ -16,29 +16,34 @@ namespace gui
 
 line_edit::line_edit( void )
 {
-	const style &s = context::current().get_style();
-	_text.set_font( application::current()->get_default_font() );
-	_text.set_color( s.primary_text( s.background_color() ) );
-	_prompt.set_font( application::current()->get_default_font() );
 	_prompt.set_text( "Type here" );
-	_prompt.set_color( s.disabled_text( s.background_color() ) );
-	_line.set_color( s.dominant_color() );
-	_marker.set_color( s.dominant_color() );
 }
 
 ////////////////////////////////////////
 
-line_edit::line_edit( std::string l, const std::shared_ptr<script::font> &f )
-	: _text( f, l )
+line_edit::line_edit( std::string l )
+	: _text( l )
 {
-	const style &s = context::current().get_style();
-	_text.set_color( s.primary_text( s.background_color() ) );
 }
 
 ////////////////////////////////////////
 
 line_edit::~line_edit( void )
 {
+}
+
+////////////////////////////////////////
+
+void line_edit::build( gl::api &ogl )
+{
+	const style &s = context::current().get_style();
+
+	_text.set_font( s.body_font() );
+	_text.set_color( s.primary_text( s.background_color() ) );
+	_prompt.set_font( s.body_font() );
+	_prompt.set_color( s.disabled_text( s.background_color() ) );
+	_line.set_color( s.dominant_color() );
+	_marker.set_color( s.dominant_color() );
 }
 
 ////////////////////////////////////////

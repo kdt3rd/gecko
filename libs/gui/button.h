@@ -23,7 +23,7 @@ class button : public widget
 {
 public:
 	button( void );
-	button( std::string l, base::alignment a = base::alignment::CENTER, const std::shared_ptr<script::font> &f = application::current()->get_default_font() );
+	button( std::string l, base::alignment a = base::alignment::CENTER );
 	~button( void );
 
 	void set_pressed( bool p );

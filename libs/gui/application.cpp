@@ -72,7 +72,9 @@ application::~application( void )
 std::shared_ptr<window> application::new_window( void )
 {
 	auto w = _impl->sys->new_window();
-	return std::make_shared<window>( w );
+	auto result = std::make_shared<window>( w );
+	result->get_style().set_font_manager( _fmgr );
+	return result;
 }
 
 ////////////////////////////////////////
@@ -148,13 +150,6 @@ std::set<std::string> application::get_font_styles( const std::string &family )
 std::shared_ptr<script::font> application::get_font( const std::string &family, const std::string &style, double pixsize )
 {
 	return _fmgr->get_font( family, style, pixsize );
-}
-
-////////////////////////////////////////
-
-std::shared_ptr<script::font> application::get_default_font( void )
-{
-	return _fmgr->get_font( "Arial", "Bold", 12.0 );
 }
 
 ////////////////////////////////////////

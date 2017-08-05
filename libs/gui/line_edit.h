@@ -21,7 +21,7 @@ class line_edit : public widget
 {
 public:
 	line_edit( void );
-	line_edit( std::string l, const std::shared_ptr<script::font> &f = application::current()->get_default_font() );
+	line_edit( std::string l );
 	~line_edit( void );
 
 	const std::string &text( void ) const { return _text.get_text(); }
@@ -30,6 +30,7 @@ public:
 
 	void set_font( std::shared_ptr<script::font> &f ) { _text.set_font( f ); _prompt.set_font( f ); }
 
+	void build( gl::api &ogl ) override;
 	void paint( gl::api &ogl ) override;
 
 	void compute_bounds( void ) override;

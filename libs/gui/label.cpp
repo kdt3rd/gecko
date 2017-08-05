@@ -20,10 +20,9 @@ label::label( void )
 
 ////////////////////////////////////////
 
-label::label( std::string l, base::alignment a, const std::shared_ptr<script::font> &f )
+label::label( std::string l, base::alignment a )
 	: _align( a )
 {
-	_text.set_font( f );
 	_text.set_text( l );
 }
 
@@ -38,6 +37,9 @@ label::~label( void )
 void label::build( gl::api &ogl )
 {
 	const style &s = context::current().get_style();
+
+	_text.set_font( s.body_font() );
+
 	if ( _bg_color.alpha() > 0.0 )
 		_text.set_color( s.primary_text( _bg_color ) );
 	else

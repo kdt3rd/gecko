@@ -22,6 +22,7 @@ class text : public drawable
 public:
 	text( void );
 	text( const std::shared_ptr<script::font> &font );
+	text( const std::string &utf8 );
 	text( const std::shared_ptr<script::font> &font, const std::string &utf8 );
 
 	void set_font( const std::shared_ptr<script::font> &font );

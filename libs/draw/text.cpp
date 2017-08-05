@@ -30,6 +30,13 @@ text::text( const std::shared_ptr<script::font> &font )
 
 ////////////////////////////////////////
 
+text::text( const std::string &utf8 )
+	: _utf8( utf8 )
+{
+}
+
+////////////////////////////////////////
+
 text::text( const std::shared_ptr<script::font> &font, const std::string &utf8 )
 	: _font( font ), _utf8( utf8 )
 {

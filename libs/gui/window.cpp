@@ -79,10 +79,10 @@ void window::set_widget( const std::shared_ptr<widget> &w )
 	in_context( [&,this]
 	{
 		_widget = w;
+		_widget->build( _ogl );
 		_widget->set_horizontal( 0.0, _window->width() - 1.0 );
 		_widget->set_vertical( 0.0, _window->height() - 1.0 );
 		_widget->compute_bounds();
-		_widget->build( _ogl );
 	} );
 }
 

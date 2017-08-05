@@ -12,6 +12,17 @@ namespace gui
 
 ////////////////////////////////////////
 
+void style::set_font_manager( const std::shared_ptr<script::font_manager> &fmgr )
+{
+	_fmgr = fmgr;
+	_display = _fmgr->get_font( "Arial", "Bold", 24.0 );
+	_title = _fmgr->get_font( "Arial", "Bold", 16.0 );
+	_body = _fmgr->get_font( "Arial", "Bold", 12.0 );
+	_caption = _fmgr->get_font( "Arial", "Bold", 10.0 );
+}
+
+////////////////////////////////////////
+
 gl::color style::primary_text( gl::color bg ) const
 {
 	float w = bg.distance( gl::white );
