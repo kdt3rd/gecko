@@ -22,6 +22,7 @@
 #include <layout/form_layout.h>
 #include <layout/field_layout.h>
 #include <layout/grid_layout.h>
+#include <layout/scroll_layout.h>
 
 namespace
 {
@@ -231,9 +232,28 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	grid->add_child( make_simple( gl::red ), 1, 1, 1, 1 );
 	center->add_child( grid );
 
-	auto spring = std::make_shared<simple>( gl::color( 0.85, 0.85, 0.85 ) );
-	spring->set_expansion_flex( 1.0 );
-	center->add_child( spring );
+	auto scroll = std::make_shared<terminal_widget<layout::scroll_layout>>( gl::black );
+	{
+		auto m = std::make_shared<simple>( gl::grey );
+		auto h = std::make_shared<simple>( gl::blue );
+		auto v = std::make_shared<simple>( gl::blue );
+		auto c = std::make_shared<simple>( gl::red );
+		h->set_minimum( 15, 15 );
+		v->set_minimum( 15, 15 );
+		c->set_minimum( 15, 15 );
+		scroll->set_main( m );
+		scroll->set_hscroll( h );
+		scroll->set_vscroll( v );
+		scroll->set_corner( c );
+		scroll->draw_subchild( m );
+		scroll->draw_subchild( h );
+		scroll->draw_subchild( v );
+		scroll->draw_subchild( c );
+		scroll->set_expansion_flex( 1.0 );
+		scroll->set_padding( 5, 5, 5, 5 );
+		scroll->set_spacing( 5, 5 );
+	}
+	center->add_child( scroll );
 
 	root.compute_bounds();
 	win->set_minimum_size( root.minimum_width(), root.minimum_height() );
