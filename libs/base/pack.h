@@ -88,7 +88,7 @@ public:
 	int width( void ) const { return _width; }
 
 	/// @brief Height of the packing area
-	int height( void ) const { return _width; }
+	int height( void ) const { return _height; }
 
 	/// @brief Reset to pack into the given area
 	void reset( int w, int h, bool allowFlipped );
