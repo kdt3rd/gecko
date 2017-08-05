@@ -4,14 +4,6 @@ local wayland = subdir "wayland";
 local cocoa = subdir "cocoa";
 local mswin = subdir "mswin";
 
-function combine(a, b)
-	local r = a;
-	for i, v in ipairs(b) do
-		table.insert(r, v);
-	end
-	return r
-end
-
 lib = library "platform"
   source{
 		"platform.cpp";
