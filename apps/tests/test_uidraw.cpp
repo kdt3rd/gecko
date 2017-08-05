@@ -135,6 +135,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 
 		ogl.clear();
 		ogl.viewport( 0, 0, win->width(), win->height() );
+		ogl.enable( gl::capability::BLEND );
+		ogl.blend_func( gl::blend_style::SRC_ALPHA, gl::blend_style::ONE_MINUS_SRC_ALPHA );
 
 		{
 			auto bound = star.bind();
