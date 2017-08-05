@@ -21,6 +21,8 @@ public:
 	system( const std::string & );
 	virtual ~system( void );
 
+	virtual bool is_working( void ) const override { return true; }
+
 	virtual std::vector<std::shared_ptr<::platform::screen>> screens( void ) { return _screens; }
 	virtual std::shared_ptr<::platform::window> new_window( void );
 	virtual std::shared_ptr<::platform::dispatcher> get_dispatcher( void );
