@@ -31,9 +31,13 @@ radio_button::~radio_button( void )
 
 void radio_button::build( gl::api &ogl )
 {
+	const style &s = context::current().get_style();
+
 	draw::paint c;
-	c.set_fill_color( { 0.26, 0.26, 0.26 } );
+	c.set_fill_color( s.secondary_text( s.background_color() ) );
 	_unchecked.add( ogl, draw::iconRadioButtonEmpty(), c );
+
+	c.set_fill_color( s.dominant_color() );
 	_checked.add( ogl, draw::iconRadioButtonChecked(), c );
 
 	_unchecked.shape_size( 24, 24 );

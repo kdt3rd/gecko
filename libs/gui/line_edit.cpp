@@ -16,18 +16,23 @@ namespace gui
 
 line_edit::line_edit( void )
 {
+	const style &s = context::current().get_style();
 	_text.set_font( application::current()->get_default_font() );
-	_text.set_color( gl::white );
-	_line.set_color( { 0.26, 0.26, 0.26 } );
-	_marker.set_color( { 0.5, 0.5, 0.5 } );
+	_text.set_color( s.primary_text( s.background_color() ) );
+	_prompt.set_font( application::current()->get_default_font() );
+	_prompt.set_text( "Type here" );
+	_prompt.set_color( s.disabled_text( s.background_color() ) );
+	_line.set_color( s.dominant_color() );
+	_marker.set_color( s.dominant_color() );
 }
 
 ////////////////////////////////////////
 
-line_edit::line_edit( std::string l, const gl::color &c, const std::shared_ptr<script::font> &f )
+line_edit::line_edit( std::string l, const std::shared_ptr<script::font> &f )
 	: _text( f, l )
 {
-	_text.set_color( c );
+	const style &s = context::current().get_style();
+	_text.set_color( s.primary_text( s.background_color() ) );
 }
 
 ////////////////////////////////////////
@@ -40,19 +45,23 @@ line_edit::~line_edit( void )
 
 void line_edit::paint( gl::api &ogl )
 {
-	_line.set_position( x(), y() + height() - 1.5F );
-	_line.set_size( width(), 2 );
-	_text.set_position( x(), y() + height() - 2.F );
+	script::font_extents fex = _text.get_font()->extents();
+	_line.set_position( x(), y() + height() - 1.F );
+	_line.set_size( width(), 1.5F );
+	_text.set_position( x() + 2.F, y() + height() + fex.descent );
+	_prompt.set_position( x() + 2.F, y() + height() + fex.descent );
 
 	_line.draw( ogl );
-	_text.draw( ogl );
+	if ( _text.get_text().empty() )
+		_prompt.draw( ogl );
+	else
+		_text.draw( ogl );
 
 	const std::string &str = _text.get_text();
-//	script::font_extents fex = _text.get_font()->extents();
 	script::text_extents tex = _text.get_font()->extents( str.substr( 0, _cursor ) );
 
-	_marker.set_position( x() + tex.x_advance, y() );
-	_marker.set_size( 2, height() );
+	_marker.set_position( x() + 2.F + tex.x_advance - 0.5F, y() + height() + fex.descent - fex.ascent );
+	_marker.set_size( 1.5F, fex.ascent - fex.descent );
 	_marker.draw( ogl );
 }
 
@@ -62,7 +71,7 @@ void line_edit::compute_bounds( void )
 {
 	script::font_extents fex = _text.get_font()->extents();
 	script::text_extents tex = _text.get_font()->extents( _text.get_text() );
-	set_minimum( tex.x_advance + 4, fex.height + 4 );
+	set_minimum( tex.x_advance + 4, fex.height - fex.descent + 2  );
 }
 
 ////////////////////////////////////////

@@ -60,7 +60,7 @@ public:
 	void paint( gl::api &ogl ) override
 	{
 		ogl.push_scissor( x(), y(), width(), height() );
-		ogl.clear_color( { 0.19, 0.19, 0.19 } );
+		ogl.clear_color( context::current().get_style().background_color() );
 		ogl.clear();
 		for ( auto w: _widgets )
 			w->paint( ogl );

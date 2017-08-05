@@ -79,8 +79,6 @@ void text::draw( gl::api &ogl )
 			std::shared_ptr<gl::texture> texture = x->second.texture;
 
 			gl::matrix4 local = gl::matrix4::translation( _pos[0], _pos[1] );
-			ogl.enable( gl::capability::BLEND );
-			ogl.blend_func( gl::blend_style::SRC_ALPHA, gl::blend_style::ONE_MINUS_SRC_ALPHA );
 
 			auto txt = texture->bind();
 
@@ -89,8 +87,6 @@ void text::draw( gl::api &ogl )
 			b.set_uniform( _col_pos, _color );
 			b.set_uniform( _tex_pos, static_cast<int>( txt.unit() ) );
 			b.draw();
-
-			ogl.disable( gl::capability::BLEND );
 		}
 	}
 }

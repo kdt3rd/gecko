@@ -69,7 +69,7 @@ private:
 
 	bool _tracking = false;
 	bool _pressed = false;
-	double _handle = 6.0;
+	double _handle = 8.0;
 	double _start = 0.0;
 	double _value = 0.5;
 	double _min = 0.0, _max = 1.0;

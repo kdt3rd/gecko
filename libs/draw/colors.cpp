@@ -43,7 +43,7 @@ const std::vector<std::string> &palette_names( void )
 
 ////////////////////////////////////////
 
-const std::array<gl::color,10> &palette( const std::string &name )
+const palette &get_palette( const std::string &name )
 {
 	if ( name == "Red" ) return red;
 	if ( name == "Pink" ) return pink;
@@ -69,7 +69,7 @@ const std::array<gl::color,10> &palette( const std::string &name )
 
 ////////////////////////////////////////
 
-const std::array<gl::color,10> red =
+const palette red =
 {{
 	gl::color::make8( 0xFF, 0xEB, 0xEE ),
 	gl::color::make8( 0xFF, 0xCD, 0xD2 ),
@@ -85,7 +85,7 @@ const std::array<gl::color,10> red =
 
 ////////////////////////////////////////
 
-const std::array<gl::color,10> pink =
+const palette pink =
 {{
 	gl::color::make8( 0xFC, 0xE4, 0xEC ),
 	gl::color::make8( 0xF8, 0xBB, 0xD0 ),
@@ -101,7 +101,7 @@ const std::array<gl::color,10> pink =
 
 ////////////////////////////////////////
 
-const std::array<gl::color,10> purple =
+const palette purple =
 {{
 	gl::color::make8( 0xF3, 0xE5, 0xF5 ),
 	gl::color::make8( 0xE1, 0xBE, 0xE7 ),
@@ -117,7 +117,7 @@ const std::array<gl::color,10> purple =
 
 ////////////////////////////////////////
 
-const std::array<gl::color,10> deep_purple =
+const palette deep_purple =
 {{
 	gl::color::make8( 0xED, 0xE7, 0xF6 ),
 	gl::color::make8( 0xD1, 0xC4, 0xE9 ),
@@ -133,7 +133,7 @@ const std::array<gl::color,10> deep_purple =
 
 ////////////////////////////////////////
 
-const std::array<gl::color,10> indigo =
+const palette indigo =
 {{
 	gl::color::make8( 0xE8, 0xEA, 0xF6 ),
 	gl::color::make8( 0xC5, 0xCA, 0xE9 ),
@@ -149,7 +149,7 @@ const std::array<gl::color,10> indigo =
 
 ////////////////////////////////////////
 
-const std::array<gl::color,10> blue =
+const palette blue =
 {{
 	gl::color::make8( 0xE3, 0xF2, 0xFD ),
 	gl::color::make8( 0xBB, 0xDE, 0xFB ),
@@ -165,7 +165,7 @@ const std::array<gl::color,10> blue =
 
 ////////////////////////////////////////
 
-const std::array<gl::color,10> light_blue =
+const palette light_blue =
 {{
 	gl::color::make8( 0xE1, 0xF5, 0xFE ),
 	gl::color::make8( 0xB3, 0xE5, 0xFC ),
@@ -181,7 +181,7 @@ const std::array<gl::color,10> light_blue =
 
 ////////////////////////////////////////
 
-const std::array<gl::color,10> cyan =
+const palette cyan =
 {{
 	gl::color::make8( 0xE0, 0xF7, 0xFA ),
 	gl::color::make8( 0xB2, 0xEB, 0xF2 ),
@@ -197,7 +197,7 @@ const std::array<gl::color,10> cyan =
 
 ////////////////////////////////////////
 
-const std::array<gl::color,10> teal =
+const palette teal =
 {{
 	gl::color::make8( 0xE0, 0xF2, 0xF1 ),
 	gl::color::make8( 0xB2, 0xDF, 0xDB ),
@@ -213,7 +213,7 @@ const std::array<gl::color,10> teal =
 
 ////////////////////////////////////////
 
-const std::array<gl::color,10> green =
+const palette green =
 {{
 	gl::color::make8( 0xE8, 0xF5, 0xE9 ),
 	gl::color::make8( 0xC8, 0xE6, 0xC9 ),
@@ -229,7 +229,7 @@ const std::array<gl::color,10> green =
 
 ////////////////////////////////////////
 
-const std::array<gl::color,10> light_green =
+const palette light_green =
 {{
 	gl::color::make8( 0xF1, 0xF8, 0xE9 ),
 	gl::color::make8( 0xDC, 0xED, 0xC8 ),
@@ -245,7 +245,7 @@ const std::array<gl::color,10> light_green =
 
 ////////////////////////////////////////
 
-const std::array<gl::color,10> lime =
+const palette lime =
 {{
 	gl::color::make8( 0xF9, 0xFB, 0xE7 ),
 	gl::color::make8( 0xF0, 0xF4, 0xC3 ),
@@ -261,7 +261,7 @@ const std::array<gl::color,10> lime =
 
 ////////////////////////////////////////
 
-const std::array<gl::color,10> yellow =
+const palette yellow =
 {{
 	gl::color::make8( 0xFF, 0xFD, 0xE7 ),
 	gl::color::make8( 0xFF, 0xF9, 0xC4 ),
@@ -277,7 +277,7 @@ const std::array<gl::color,10> yellow =
 
 ////////////////////////////////////////
 
-const std::array<gl::color,10> amber =
+const palette amber =
 {{
 	gl::color::make8( 0xFF, 0xF8, 0xE1 ),
 	gl::color::make8( 0xFF, 0xEC, 0xB3 ),
@@ -293,7 +293,7 @@ const std::array<gl::color,10> amber =
 
 ////////////////////////////////////////
 
-const std::array<gl::color,10> orange =
+const palette orange =
 {{
 	gl::color::make8( 0xFF, 0xF3, 0xE0 ),
 	gl::color::make8( 0xFF, 0xE0, 0xB2 ),
@@ -309,7 +309,7 @@ const std::array<gl::color,10> orange =
 
 ////////////////////////////////////////
 
-const std::array<gl::color,10> deep_orange =
+const palette deep_orange =
 {{
 	gl::color::make8( 0xFB, 0xE9, 0xE7 ),
 	gl::color::make8( 0xFF, 0xCC, 0xBC ),
@@ -325,7 +325,7 @@ const std::array<gl::color,10> deep_orange =
 
 ////////////////////////////////////////
 
-const std::array<gl::color,10> brown =
+const palette brown =
 {{
 	gl::color::make8( 0xEF, 0xEB, 0xE9 ),
 	gl::color::make8( 0xD7, 0xCC, 0xC8 ),
@@ -341,7 +341,7 @@ const std::array<gl::color,10> brown =
 
 ////////////////////////////////////////
 
-const std::array<gl::color,10> blue_grey =
+const palette blue_grey =
 {{
 	gl::color::make8( 0xEC, 0xEF, 0xF1 ),
 	gl::color::make8( 0xCF, 0xD8, 0xDC ),
@@ -357,7 +357,7 @@ const std::array<gl::color,10> blue_grey =
 
 ////////////////////////////////////////
 
-const std::array<gl::color,10> grey =
+const palette grey =
 {{
 	gl::color::make8( 0xFA, 0xFA, 0xFA ),
 	gl::color::make8( 0xF5, 0xF5, 0xF5 ),

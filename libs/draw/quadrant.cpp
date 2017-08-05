@@ -57,10 +57,6 @@ void quadrant::add( gl::api &ogl, const polylines &lines, const paint &c )
 
 void quadrant::draw( gl::api &ogl )
 {
-	ogl.enable( gl::capability::BLEND );
-	glBlendEquation( GL_FUNC_ADD );
-	ogl.blend_func( gl::blend_style::SRC_ALPHA, gl::blend_style::ONE_MINUS_SRC_ALPHA );
-
 	for ( auto &m: _meshes )
 	{
 		if ( m.msh.valid() )
@@ -76,8 +72,6 @@ void quadrant::draw( gl::api &ogl )
 			b.draw();
 		}
 	}
-
-	ogl.disable( gl::capability::BLEND );
 }
 
 ////////////////////////////////////////

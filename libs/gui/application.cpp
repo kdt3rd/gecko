@@ -154,7 +154,7 @@ std::shared_ptr<script::font> application::get_font( const std::string &family, 
 
 std::shared_ptr<script::font> application::get_default_font( void )
 {
-	return _fmgr->get_font( "Arial", "Regular", 12.0 );
+	return _fmgr->get_font( "Arial", "Bold", 12.0 );
 }
 
 ////////////////////////////////////////

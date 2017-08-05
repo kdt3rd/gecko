@@ -9,6 +9,7 @@
 
 #include <base/scope_guard.h>
 #include <base/rect.h>
+#include "style.h"
 
 namespace gui
 {
@@ -28,11 +29,15 @@ public:
 
 	virtual void invalidate( const base::rect &r ) = 0;
 
-	static context &current( void );
+	const style &get_style( void ) const
+	{
+		return _style;
+	}
 
-protected:
-	void push_context( void );
-	void pop_context( void );
+	style &get_style( void )
+	{
+		return _style;
+	}
 
 	template<typename func>
 	void in_context( const func &f )
@@ -42,7 +47,13 @@ protected:
 		f();
 	}
 
-private:
+	static context &current( void );
+
+protected:
+	void push_context( void );
+	void pop_context( void );
+
+	style _style;
 };
 
 ////////////////////////////////////////

@@ -3,6 +3,7 @@ lib = library "gui"
   source{
 	  "application.cpp",
 	  "context.cpp",
+	  "style.cpp",
 	  "window.cpp",
 	  "widget.cpp",
 	  "container.cpp",

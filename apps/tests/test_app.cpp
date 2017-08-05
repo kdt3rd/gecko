@@ -39,24 +39,27 @@ int safemain( int argc, char **argv )
 	auto win = app->new_window();
 	win->set_title( app->active_platform() );
 
-	auto label = std::make_shared<gui::label>( "Hello World", base::alignment::LEFT );
-	auto button = std::make_shared<gui::button>( "Click Me" );
-	auto slider = std::make_shared<gui::slider>();
-	auto cbox = std::make_shared<gui::checkbox>();
-	auto rbutton = std::make_shared<gui::radio_button>();
-	auto ledit = std::make_shared<gui::line_edit>();
+	win->in_context( [&]( void )
+	{
+		auto label = std::make_shared<gui::label>( "Hello World", base::alignment::LEFT );
+		auto button = std::make_shared<gui::button>( "Click Me" );
+		auto slider = std::make_shared<gui::slider>();
+		auto cbox = std::make_shared<gui::checkbox>();
+		auto rbutton = std::make_shared<gui::radio_button>();
+		auto ledit = std::make_shared<gui::line_edit>();
 
-	auto box = std::make_shared<gui::box>( base::alignment::BOTTOM );
-	box->set_padding( 12, 12, 5, 5 );
-	box->set_spacing( 8, 0 );
-	box->add( label );
-	box->add( button );
-	box->add( slider );
-	box->add( cbox );
-	box->add( rbutton );
-	box->add( ledit );
+		auto box = std::make_shared<gui::box>( base::alignment::BOTTOM );
+		box->set_padding( 12, 12, 5, 5 );
+		box->set_spacing( 8, 0 );
+		box->add( label );
+		box->add( button );
+		box->add( slider );
+		box->add( cbox );
+		box->add( rbutton );
+		box->add( ledit );
 
-	win->set_widget( box );
+		win->set_widget( box );
+	} );
 
 	win->show();
 	int code = app->run();

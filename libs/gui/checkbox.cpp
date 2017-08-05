@@ -31,9 +31,14 @@ checkbox::~checkbox( void )
 
 void checkbox::build( gl::api &ogl )
 {
+	const style &s = context::current().get_style();
+
 	draw::paint c;
-	c.set_fill_color( { 0.26, 0.26, 0.26 } );
+
+	c.set_fill_color( s.secondary_text( s.background_color() ) );
 	_unchecked.add( ogl, draw::iconCheckBoxEmpty(), c );
+
+	c.set_fill_color( s.dominant_color() );
 	_checked.add( ogl, draw::iconCheckBoxChecked(), c );
 
 	_unchecked.shape_size( 24, 24 );

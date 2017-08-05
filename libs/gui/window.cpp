@@ -127,8 +127,10 @@ void window::paint( void )
 	_ogl.reset();
 	_ogl.viewport( 0, 0, w, h );
 	_ogl.enable( gl::capability::MULTISAMPLE );
+	_ogl.enable( gl::capability::BLEND );
+    _ogl.blend_func( gl::blend_style::SRC_ALPHA, gl::blend_style::ONE_MINUS_SRC_ALPHA );
 
-	_ogl.clear_color( { 0.13, 0.13, 0.13, 1 } );
+	_ogl.clear_color( _style.background_color() );
 	_ogl.clear();
 	_ogl.set_projection( gl::matrix4::ortho( 0, w, 0, h ) );
 

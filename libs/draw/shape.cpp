@@ -51,10 +51,6 @@ void shape::add( gl::api &ogl, const polylines &lines, const paint &c )
 
 void shape::draw( gl::api &ogl )
 {
-	ogl.enable( gl::capability::BLEND );
-	glBlendEquation( GL_FUNC_ADD );
-	ogl.blend_func( gl::blend_style::SRC_ALPHA, gl::blend_style::ONE_MINUS_SRC_ALPHA );
-
 	ogl.save_matrix();
 	ogl.model_matrix().scale( _resize[0] / _shape[0], _resize[1] / _shape[1] );
 	ogl.model_matrix().translate( _top_left[0], _top_left[1] );
@@ -73,8 +69,6 @@ void shape::draw( gl::api &ogl )
 	}
 
 	ogl.restore_matrix();
-
-	ogl.disable( gl::capability::BLEND );
 }
 
 ////////////////////////////////////////

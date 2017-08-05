@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2014 Ian Godin
+// Copyright (c) 2017 Ian Godin
 // All rights reserved.
 // Copyrights licensed under the MIT License.
 // See the accompanying LICENSE.txt file for terms
@@ -12,14 +12,74 @@ namespace gui
 
 ////////////////////////////////////////
 
-style::style( void )
+gl::color style::primary_text( gl::color bg ) const
 {
+	float w = bg.distance( gl::white );
+	float b = bg.distance( gl::black );
+	if ( w > b )
+		return gl::color( 1, 1, 1, 1.00 );
+	else
+		return gl::color( 0, 0, 0, 0.87 );
 }
 
 ////////////////////////////////////////
 
-style::~style( void )
+gl::color style::secondary_text( gl::color bg ) const
 {
+	float w = bg.distance( gl::white );
+	float b = bg.distance( gl::black );
+	if ( w > b )
+		return gl::color( 1, 1, 1, 0.70 );
+	else
+		return gl::color( 0, 0, 0, 0.54 );
+}
+
+////////////////////////////////////////
+
+gl::color style::disabled_text( gl::color bg ) const
+{
+	float w = bg.distance( gl::white );
+	float b = bg.distance( gl::black );
+	if ( w > b )
+		return gl::color( 1, 1, 1, 0.50 );
+	else
+		return gl::color( 0, 0, 0, 0.38 );
+}
+
+////////////////////////////////////////
+
+gl::color style::divider( gl::color bg ) const
+{
+	float w = bg.distance( gl::white );
+	float b = bg.distance( gl::black );
+	if ( w > b )
+		return gl::color( 1, 1, 1, 0.12 );
+	else
+		return gl::color( 0, 0, 0, 0.12 );
+}
+
+////////////////////////////////////////
+
+gl::color style::active_icon( gl::color bg ) const
+{
+	float w = bg.distance( gl::white );
+	float b = bg.distance( gl::black );
+	if ( w > b )
+		return gl::color( 1, 1, 1, 1.00 );
+	else
+		return gl::color( 0, 0, 0, 0.54 );
+}
+
+////////////////////////////////////////
+
+gl::color style::inactive_icon( gl::color bg ) const
+{
+	float w = bg.distance( gl::white );
+	float b = bg.distance( gl::black );
+	if ( w > b )
+		return gl::color( 1, 1, 1, 0.50 );
+	else
+		return gl::color( 0, 0, 0, 0.38 );
 }
 
 ////////////////////////////////////////

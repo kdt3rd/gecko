@@ -24,12 +24,14 @@ button::button( void )
 
 ////////////////////////////////////////
 
-button::button( std::string l, base::alignment a, const gl::color &c, const std::shared_ptr<script::font> &f )
-	: _rect( { 0.26, 0.26, 0.26 } ), _align( a )
+button::button( std::string l, base::alignment a, const std::shared_ptr<script::font> &f )
+	: _align( a )
 {
+	gl::color bg = context::current().get_style().dominant_color();
+	_rect.set_color( bg );
 	_text.set_font( f );
 	_text.set_text( l );
-	_text.set_color( c );
+	_text.set_color( context::current().get_style().primary_text( bg ) );
 }
 
 ////////////////////////////////////////
@@ -46,9 +48,9 @@ void button::set_pressed( bool p )
 	{
 		_pressed = p;
 		if ( _pressed )
-			_rect.set_color( { 0.19, 0.19, 0.19 } );
+			_rect.set_color( context::current().get_style().dominant_light() );
 		else
-			_rect.set_color( { 0.26, 0.26, 0.26 } );
+			_rect.set_color( context::current().get_style().dominant_color() );
 		invalidate();
 	}
 }

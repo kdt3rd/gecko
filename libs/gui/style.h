@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2014 Ian Godin
+// Copyright (c) 2017 Ian Godin
 // All rights reserved.
 // Copyrights licensed under the MIT License.
 // See the accompanying LICENSE.txt file for terms
@@ -7,9 +7,8 @@
 
 #pragma once
 
-#include <memory>
-#include <string>
-#include <script/font.h>
+#include <gl/color.h>
+#include <draw/colors.h>
 
 namespace gui
 {
@@ -19,27 +18,83 @@ namespace gui
 class style
 {
 public:
-	style( void );
-	virtual ~style( void );
+	gl::color background_color( void ) const
+	{
+		return _bg;
+	}
 
-	virtual std::shared_ptr<script::font> default_font( bool bold = false ) = 0;
+	gl::color dominant_light( void ) const
+	{
+		return _dominant[0];
+	}
 
-	virtual void background( gl::api &ogl ) = 0;
-	virtual const gl::color &label_color( void ) = 0;
+	gl::color dominant_color( void ) const
+	{
+		return _dominant[1];
+	}
 
-	virtual base::size button_size( const base::size &content ) = 0;
-	virtual base::rect button_content( const base::rect &size ) = 0;
-	virtual void button_frame( const std::shared_ptr<draw::canvas> &c, const base::rect &r, bool pressed ) = 0;
+	gl::color dominant_dark( void ) const
+	{
+		return _dominant[2];
+	}
 
-	virtual void line_edit_frame( const std::shared_ptr<draw::canvas> &c, const base::rect &r, bool focused ) = 0;
+	gl::color accent_color( void ) const
+	{
+		return _accent;
+	}
 
-	virtual double slider_size( const base::rect &r ) = 0;
-	virtual void slider_groove( const std::shared_ptr<draw::canvas> &c, const base::rect &rect ) = 0;
-	virtual void slider_button( const std::shared_ptr<draw::canvas> &c, const base::rect &r, bool pressed, double val ) = 0;
+	gl::color primary_text( gl::color bg ) const;
+	gl::color secondary_text( gl::color bg ) const;
+	gl::color disabled_text( gl::color bg ) const;
 
-	virtual void text_cursor( const std::shared_ptr<draw::canvas> &c, const base::point &p, double h ) = 0;
+	gl::color divider( gl::color bg ) const;
+
+	gl::color active_icon( gl::color bg ) const;
+	gl::color inactive_icon( gl::color bg ) const;
+
+	size_t version( void ) const
+	{
+		return _version;
+	}
+
+	void set_background_color( const gl::color &c )
+	{
+		_bg = c;
+		++_version;
+	}
+
+	void set_dominant_light( const gl::color &c )
+	{
+		_dominant[0] = c;
+		++_version;
+	}
+
+	void set_dominant_normal( const gl::color &c )
+	{
+		_dominant[1] = c;
+		++_version;
+	}
+
+	void set_dominant_dark( const gl::color &c )
+	{
+		_dominant[3] = c;
+		++_version;
+	}
+
+	void set_accent_color( const gl::color &c )
+	{
+		_accent = c;
+		++_version;
+	}
+
+private:
+	size_t _version = 0;
+	gl::color _bg = gl::white;
+	gl::color _dominant[3] = { draw::indigo[2], draw::indigo[5], draw::indigo[9] };
+	gl::color _accent = draw::orange[5];
 };
 
 ////////////////////////////////////////
 
 }
+

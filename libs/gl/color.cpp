@@ -62,6 +62,24 @@ namespace gl
 
 ////////////////////////////////////////
 
+void color::get_srgb( float &r, float &g, float &b ) const
+{
+	r = _r;
+	g = _g;
+	b = _b;
+}
+
+////////////////////////////////////////
+
+void color::set_srgb( float r, float g, float b )
+{
+	_r = r;
+	_g = g;
+	_b = b;
+}
+
+////////////////////////////////////////
+
 void color::get_lin( float &r, float &g, float &b ) const
 {
 	r = toLin( _r );
@@ -126,7 +144,7 @@ void color::get_hsl( float &h, float &s, float &l ) const
 	else
 	{
 		float d = max - min;
-		s = l > 0.5F ? ( d / ( 2.0F - max - min ) ) : ( d / ( max + min ) );
+		s = d / ( 1.F - std::abs( 2.F * l - 1.F ) );
 		if ( std::equal_to<float>()( max, _r ) )
 			h = ( _g - _b ) / d  + ( _g < _b ? 6.0F : 0.0F );
 		else if ( std::equal_to<float>()( max, _g ) )
@@ -191,9 +209,25 @@ float color::contrast_ratio( const gl::color &c2 ) const
 {
 	float l1 = relative_luminance() + 0.005F;
 	float l2 = c2.relative_luminance() + 0.005F;
-	if ( l2 < l1 )
+	if ( l1 < l2 )
 		std::swap( l1, l2 );
 	return l1 / l2;
+}
+
+////////////////////////////////////////
+
+float color::distance( const gl::color &c2 ) const
+{
+	float l1, a1, b1;
+	get_lab( l1, a1, b1 );
+	float l2, a2, b2;
+	c2.get_lab( l2, a2, b2 );
+
+	float ld = l1 - l2;
+	float ad = a1 - a2;
+	float bd = b1 - b2;
+
+	return std::sqrt( ld*ld + ad*ad + bd*bd );
 }
 
 ////////////////////////////////////////
@@ -242,6 +276,24 @@ color color::mix( const color &a, const color &b, float m )
 	};
 }
 
+////////////////////////////////////////
+
+color color::mix_rgb( const color &a, const color &b, float m )
+{
+	float n = 1.0F - m;
+	float ra, ga, ba;
+	float rb, gb, bb;
+
+	a.get_srgb( ra, ga, ba );
+	b.get_srgb( rb, gb, bb );
+	return {
+		space::SRGB,
+		ra * n + rb * m,
+		ga * n + gb * m,
+		ba * n + bb * m,
+		a.alpha() * n + b.alpha() * m
+	};
+}
 
 ////////////////////////////////////////
 

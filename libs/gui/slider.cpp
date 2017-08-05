@@ -61,14 +61,14 @@ void slider::set_value( double v )
 
 void slider::build( gl::api &ogl )
 {
-	gl::color c{ 0.26, 0.26, 0.26 };
-	_groove.set_color( c );
+	const style &s = context::current().get_style();
+	_groove.set_color( s.secondary_text( s.background_color() ) );
 
 	draw::path handle;
 	handle.circle( { 0, 0 }, _handle );
 
 	draw::paint paint;
-	paint.set_fill_color( c );
+	paint.set_fill_color( s.dominant_color() );
 
 	_knob.add( ogl, handle, paint );
 }

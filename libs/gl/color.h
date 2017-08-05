@@ -77,6 +77,12 @@ public:
 	}
 
 	/// @brief Get the linear color values
+	void get_srgb( float &r, float &g, float &b ) const;
+
+	/// @brief Set the color values in the linear color space
+	void set_srgb( float r, float g, float b );
+
+	/// @brief Get the linear color values
 	void get_lin( float &r, float &g, float &b ) const;
 
 	/// @brief Set the color values in the linear color space
@@ -100,6 +106,8 @@ public:
 	/// @brief Get the contrast ratio between 2 colors.
 	float contrast_ratio( const gl::color &c2 ) const;
 
+	float distance( const gl::color &c2 ) const;
+
 	/// @brief Desaturate the color
 	///
 	/// The amount should be between 0.0 and 1.0.
@@ -115,6 +123,9 @@ public:
 
 	/// @brief Mix two colors together
 	static color mix( const color &a, const color &b, float m = 0.5 );
+
+	/// @brief Mix two colors together
+	static color mix_rgb( const color &a, const color &b, float m = 0.5 );
 
 	static gl::color make8( uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255 )
 	{

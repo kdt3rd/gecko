@@ -23,7 +23,7 @@ class label : public widget
 {
 public:
 	label( void );
-	label( std::string l, base::alignment a = base::alignment::LEFT, const gl::color &c = gl::white, const std::shared_ptr<script::font> &f = application::current()->get_default_font() );
+	label( std::string l, base::alignment a = base::alignment::LEFT, const std::shared_ptr<script::font> &f = application::current()->get_default_font() );
 	~label( void );
 
 	void set_text( const std::string &utf8 ) { _text.set_text( utf8 ); }
@@ -32,16 +32,18 @@ public:
 	void set_align( base::alignment a ) { _align = a; }
 	void set_bg( const gl::color &c )
 	{
+		_bg_color = c;
 		_bg.set_color( c );
-		_draw_bg = c.alpha() > 0.F;
 	}
+
+	void build( gl::api &ogl ) override;
 
 	void paint( gl::api &ogl ) override;
 
 	void compute_bounds( void ) override;
 
 private:
-	bool _draw_bg = false;
+	gl::color _bg_color;
 	draw::rectangle _bg;
 	draw::text _text;
 	base::alignment _align = base::alignment::LEFT;
