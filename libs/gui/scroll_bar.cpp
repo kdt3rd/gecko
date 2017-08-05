@@ -29,7 +29,7 @@ void scroll_bar::set_value( double v )
 {
 	_value = v;
 	fix_value();
-	when_changed( v );
+	when_changing( v );
 	invalidate();
 }
 
@@ -39,7 +39,7 @@ void scroll_bar::set_handle( double h )
 {
 	_handle = h;
 	fix_value();
-	when_changed( v );
+	when_changing( _value );
 	invalidate();
 }
 
@@ -51,7 +51,7 @@ void scroll_bar::set_range( double min, double max )
 	_min = min;
 	_max = max;
 	fix_value();
-	when_changed( v );
+	when_changing( _value );
 	invalidate();
 }
 
@@ -146,7 +146,7 @@ bool scroll_bar::mouse_move( const base::point &p )
 			x += delta;
 			_value = translate_to_full_w( x );
 			fix_value();
-			when_changed( _value );
+			when_changing( _value );
 			invalidate();
 		}
 		else
@@ -157,7 +157,7 @@ bool scroll_bar::mouse_move( const base::point &p )
 			y += delta;
 			_value = translate_to_full_h( y );
 			fix_value();
-			when_changed( _value );
+			when_changing( _value );
 			invalidate();
 		}
 		return true;
