@@ -21,6 +21,7 @@
 #include <gui/radio_button.h>
 #include <gui/line_edit.h>
 #include <gui/scroll_bar.h>
+#include <gui/scroll_area.h>
 #include <base/contract.h>
 #include <draw/icons.h>
 
@@ -48,6 +49,10 @@ int safemain( int argc, char **argv )
 		auto rbutton = std::make_shared<gui::radio_button>();
 		auto ledit = std::make_shared<gui::line_edit>();
 		auto sbar = std::make_shared<gui::scroll_bar>();
+		auto sarea = std::make_shared<gui::scroll_area>();
+		auto center = std::make_shared<gui::label>( "Scroll!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!END", base::alignment::CENTER );
+		sarea->set_widget( center );
+		sarea->layout_target()->set_expansion_flex( 1.0 );
 
 		auto box = std::make_shared<gui::box>( base::alignment::BOTTOM );
 		box->set_padding( 12, 12, 5, 5 );
@@ -60,6 +65,7 @@ int safemain( int argc, char **argv )
 		box->add( rbutton );
 		box->add( ledit );
 		box->add( sbar );
+		box->add( sarea );
 
 		win->set_widget( box );
 	} );

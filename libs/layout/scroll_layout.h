@@ -22,6 +22,11 @@ public:
 
 	void compute_layout( void ) override;
 
+	void set_sublayout( const std::shared_ptr<area> &a )
+	{
+		_sublayout = a;
+	}
+
 	void set_main( const std::shared_ptr<area> &a )
 	{
 		_main = a;
@@ -43,6 +48,7 @@ public:
 	}
 
 private:
+	std::weak_ptr<area> _sublayout;
 	std::weak_ptr<area> _main;
 	std::weak_ptr<area> _hscroll;
 	std::weak_ptr<area> _vscroll;

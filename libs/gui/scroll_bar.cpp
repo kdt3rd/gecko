@@ -29,7 +29,7 @@ scroll_bar::~scroll_bar( void )
 void scroll_bar::set_value( double v )
 {
 	_value = v;
-	update_value();
+	update_value( _value );
 }
 
 ////////////////////////////////////////
@@ -38,7 +38,9 @@ void scroll_bar::set_handle( double h )
 {
 	precondition( h > 0.0, "invalid scroll bar handle size" );
 	_handle = h;
-	update_value();
+	if ( _handle > _max - _min )
+		_handle = _max - _min;
+	update_value( _value );
 }
 
 ////////////////////////////////////////
@@ -53,9 +55,12 @@ void scroll_bar::set_page( double p )
 void scroll_bar::set_range( double min, double max )
 {
 	precondition( min < max, "invalid range" );
-	_min = min;
-	_max = max;
-	update_value();
+	if ( min != _min || max != _max )
+	{
+		_min = min;
+		_max = max;
+		update_value( _value );
+	}
 }
 
 ////////////////////////////////////////
@@ -117,18 +122,16 @@ bool scroll_bar::mouse_press( const base::point &p, int button )
 			else if ( p.x() < x1 )
 			{
 				if ( _page > 0.0 )
-					_value -= _page;
+					update_value( _value - _page );
 				else
-					_value -= _handle/2.0;
-				update_value();
+					update_value( _value - _handle/2.0 );
 			}
 			else if ( p.x() > x2 )
 			{
 				if ( _page > 0.0 )
-					_value += _page;
+					update_value( _value + _page );
 				else
-					_value += _handle/2.0;
-				update_value();
+					update_value( _value + _handle/2.0 );
 			}
 		}
 		else
@@ -144,18 +147,16 @@ bool scroll_bar::mouse_press( const base::point &p, int button )
 			else if ( p.y() < y1 )
 			{
 				if ( _page > 0.0 )
-					_value -= _page;
+					update_value( _value - _page );
 				else
-					_value -= _handle/2.0;
-				update_value();
+					update_value( _value - _handle/2.0 );
 			}
 			else if ( p.y() > y2 )
 			{
 				if ( _page > 0.0 )
-					_value += _page;
+					update_value( _value + _page );
 				else
-					_value += _handle/2.0;
-				update_value();
+					update_value( _value + _handle/2.0 );
 			}
 		}
 	}
@@ -174,8 +175,7 @@ bool scroll_bar::mouse_move( const base::point &p )
 			_start = p.x();
 			double x = translate_from_full_w( _value );
 			x += delta;
-			_value = translate_to_full_w( x );
-			update_value();
+			update_value( translate_to_full_w( x ) );
 		}
 		else
 		{
@@ -183,8 +183,7 @@ bool scroll_bar::mouse_move( const base::point &p )
 			_start = p.y();
 			double y = translate_from_full_h( _value );
 			y += delta;
-			_value = translate_to_full_h( y );
-			update_value();
+			update_value( translate_to_full_h( y ) );
 		}
 		return true;
 	}
@@ -205,8 +204,10 @@ bool scroll_bar::mouse_release( const base::point &p, int button )
 
 ////////////////////////////////////////
 
-void scroll_bar::update_value( void )
+void scroll_bar::update_value( double v )
 {
+	bool changed = ( v != _value );
+	_value = v;
 	if ( _value < _min )
 	{
 		if ( _bounded )
@@ -218,6 +219,7 @@ void scroll_bar::update_value( void )
 			else
 				_min = _value - _handle/2.0;
 		}
+		changed = true;
 	}
 	if ( _value > _max - _handle )
 	{
@@ -230,9 +232,13 @@ void scroll_bar::update_value( void )
 			else
 				_max = _value + _handle + _handle/2.0;
 		}
+		changed = true;
 	}
-	when_changing( _value );
-	invalidate();
+	if ( changed )
+	{
+		when_changing( _value );
+		invalidate();
+	}
 }
 
 ////////////////////////////////////////

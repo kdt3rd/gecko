@@ -22,6 +22,11 @@ public:
 	scroll_bar( bool bounded = true );
 	~scroll_bar( void );
 
+	double value( void )
+	{
+		return _value;
+	}
+
 	void set_horizontal( void )
 	{
 		_horizontal = true;
@@ -47,7 +52,7 @@ public:
 	base::signal<void(double)> when_changing;
 
 private:
-	void update_value( void );
+	void update_value( double v );
 
 	double translate_to_full_w( double v )
 	{
@@ -71,8 +76,8 @@ private:
 
 	double _start = 0.0;
 
-	double _value = 45.0;
-	double _handle = 10.0;
+	double _value = 0.0;
+	double _handle = 20.0;
 	double _page = 0.0;
 	double _min = 0.0, _max = 100.0;
 
