@@ -41,7 +41,7 @@ void line_edit::build( gl::api &ogl )
 
 	script::font_extents fex = f->extents();
 	script::text_extents tex = f->extents( _text.get_text() );
-	layout_target()->set_minimum( tex.x_advance + 4, fex.height - fex.descent + 2  );
+	layout_target()->set_minimum( tex.width + 4, fex.height - fex.descent + 2  );
 
 	_text.set_font( f );
 	_text.set_color( s.primary_text( s.background_color() ) );
@@ -70,7 +70,7 @@ void line_edit::paint( gl::api &ogl )
 	const std::string &str = _text.get_text();
 	script::text_extents tex = _text.get_font()->extents( str.substr( 0, _cursor ) );
 
-	_marker.set_position( x() + 2.F + tex.x_advance - 0.5F, y() + height() + fex.descent - fex.ascent );
+	_marker.set_position( x() + 2.F + tex.width - 0.5F, y() + height() + fex.descent - fex.ascent );
 	_marker.set_size( 1.5F, fex.ascent - fex.descent );
 	_marker.draw( ogl );
 }

@@ -60,12 +60,11 @@ font::extents( const std::string &utf8 )
 			retval.x_bearing = gext.x_bearing;
 
 		retval.y_bearing = std::max( retval.y_bearing, gext.y_bearing );
-		retval.width -= k;
 		retval.x_advance -= k;
-		retval.width += gext.x_bearing + gext.width;
 		retval.height = std::max( retval.height, gext.height );
 		retval.x_advance += gext.x_advance;
 		retval.y_advance += gext.y_advance;
+		retval.width = retval.x_advance - gext.x_advance + gext.x_bearing + gext.width;
 
 		prev = ccode;
 	}
@@ -171,7 +170,7 @@ base::point font::align_text( const std::string &utf8, const base::rect &r, base
 	rect.set_y2( std::floor( r.y2() ) );
 
 	if ( utf8.empty() )
-		return { 0.0, 0.0 };
+		return { rect.x(), rect.y() };
 
 	// TODO: add multi-line support?
 
@@ -213,13 +212,13 @@ base::point font::align_text( const std::string &utf8, const base::rect &r, base
 		case base::alignment::RIGHT:
 		case base::alignment::TOP_RIGHT:
 		case base::alignment::BOTTOM_RIGHT:
-			x = rect.x2() - tex.width - tex.x_bearing;
+			x = rect.x2() - tex.width;
 			break;
 
 		case base::alignment::CENTER:
 		case base::alignment::TOP:
 		case base::alignment::BOTTOM:
-			x = rect.x1() + std::round( ( rect.width() - tex.width - tex.x_bearing ) / 2.0 );
+			x = rect.x1() + std::round( ( rect.width() - tex.width ) / 2.0 );
 			break;
 	}
 

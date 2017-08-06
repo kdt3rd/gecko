@@ -152,6 +152,7 @@ void window::paint( void )
 void window::resized( double w, double h )
 {
 	if ( _widget )
+	{
 		in_context( [&,this]
 		{
 			_widget->set( { 0.0, 0.0 }, { w, h } );
@@ -160,6 +161,7 @@ void window::resized( double w, double h )
 			_widget->update_layout( 0.0 );
 			_widget->invalidate();
 		} );
+	}
 }
 
 ////////////////////////////////////////
