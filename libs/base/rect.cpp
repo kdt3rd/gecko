@@ -60,7 +60,7 @@ void rect::grow( coord_type left, coord_type right, coord_type top, coord_type b
 
 ////////////////////////////////////////
 
-void rect::include( rect &other )
+void rect::include( const rect &other )
 {
 	coord_type xx1 = std::min( x1(), other.x1() );
 	coord_type yy1 = std::min( y1(), other.y1() );
@@ -73,7 +73,7 @@ void rect::include( rect &other )
 
 ////////////////////////////////////////
 
-double rect::distance( rect &other ) const
+double rect::distance( const rect &other ) const
 {
 	double d1 = base::point::distance( top_left(), other.top_left() );
 	double d2 = base::point::distance( top_right(), other.top_right() );
@@ -84,5 +84,24 @@ double rect::distance( rect &other ) const
 
 ////////////////////////////////////////
 
+void rect::clip( const rect &other )
+{
+	coord_type xx1 = std::max( x1(), other.x1() );
+	coord_type yy1 = std::max( y1(), other.y1() );
+	coord_type xx2 = std::min( x2(), other.x2() );
+	coord_type yy2 = std::min( y2(), other.y2() );
+
+	if ( xx1 < xx2 )
+		set_horizontal( xx1, xx2 );
+	else
+		set_horizontal( xx1, xx1 );
+
+	if ( yy1 < yy2 )
+		set_vertical( yy1, yy2 );
+	else
+		set_vertical( yy1, yy1 );
+}
+
+////////////////////////////////////////
 }
 

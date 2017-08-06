@@ -199,9 +199,11 @@ public:
 	/// @brief Grow the rectangle
 	void grow( coord_type left, coord_type right, coord_type top, coord_type bottom );
 
-	void include( rect &other );
+	void include( const rect &other );
 
-	double distance( rect &other ) const;
+	double distance( const rect &other ) const;
+
+	void clip( const rect &other );
 
 	bool empty( void ) const
 	{
