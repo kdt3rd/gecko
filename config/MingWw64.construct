@@ -61,6 +61,10 @@ add_toolset "mingw-w64-gcc"
 			  cmd={};
 			  app={"-mwindows"};
 		  };
+		  os_version={
+			  default={};
+			  vista={"-DWINVER=0x0600"};
+		  };
 		  vectorize={
 			  none={};
 			  native={"-mtune=native", "-march=native"};
@@ -79,6 +83,7 @@ add_toolset "mingw-w64-gcc"
 		  language="C99";
 		  threads="off";
 		  style="default";
+		  os_version="default";
 		  vectorize="none";
 	  };
 	  dependencies={
@@ -129,6 +134,10 @@ add_toolset "mingw-w64-gcc"
 			  cmd={};
 			  app={"-mwindows"};
 		  };
+		  os_version={
+			  default={};
+			  vista={"-DWINVER=0x0600"};
+		  };
 		  vectorize={
 			  none={};
 			  native={"-mtune=native", "-march=native"};
@@ -147,6 +156,7 @@ add_toolset "mingw-w64-gcc"
 		  language="c++";
 		  threads="off";
 		  style="default";
+		  os_version="default";
 		  vectorize="none";
 	  };
 	  dependencies={
@@ -188,6 +198,10 @@ add_toolset "mingw-w64-gcc"
 			  default={};
 			  cmd={};
 			  app={"-mwindows"};
+		  };
+		  os_version={
+			  default={};
+			  vista={"-DWINVER=0x0600"};
 		  };
 		  vectorize={
 			  none={};
@@ -243,6 +257,10 @@ add_toolset "mingw-w64-gcc"
 			  cmd={};
 			  app={"-mwindows"};
 		  };
+		  os_version={
+			  default={};
+			  vista={"-DWINVER=0x0600"};
+		  };
 		  vectorize={
 			  none={};
 			  native={"-mtune=native", "-march=native"};
@@ -260,6 +278,7 @@ add_toolset "mingw-w64-gcc"
 		  language="c++";
 		  threads="off";
 		  style="default";
+		  os_version="default";
 		  vectorize="none";
 	  };
 	  flag_prefixes={
