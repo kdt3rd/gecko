@@ -165,7 +165,7 @@ void api::viewport( double xx, double yy, double ww, double hh )
 	GLint y = static_cast<GLint>( std::lround( yy ) );
 	GLint w = static_cast<GLsizei>( std::lround( ww ) );
 	GLint h = static_cast<GLsizei>( std::lround( hh ) );
-	_viewport.set( { x, y }, { w, h } );
+	_viewport.set( { std::round( xx ), std::round( yy ) }, { std::round( ww ), std::round( hh ) } );
 	glViewport( x, y, w, h );
 }
 
