@@ -31,8 +31,8 @@ scroll_area::scroll_area( bool hscroll, bool vscroll, bool bounded )
 		_layout->set_vscroll( _vscroll->layout_target() );
 	}
 
-	_main = std::make_shared<layout::area>();
-	_layout->set_main( _main );
+	_main = std::make_shared<widget>();
+	_layout->set_main( _main->layout_target() );
 }
 
 ////////////////////////////////////////
@@ -182,6 +182,7 @@ bool scroll_area::update_layout( double duration )
 		result = _hscroll->update_layout( duration ) | result;
 	if ( _vscroll )
 		result = _vscroll->update_layout( duration ) | result;
+	result = _main->update_layout( duration ) | result;
 
 	if ( _widget )
 	{
