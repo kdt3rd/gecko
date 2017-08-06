@@ -20,6 +20,7 @@ if toolset_active( "mingw-w64-archiver" ) and toolset_active( "mingw-w64-gcc" ) 
 	  skip_on_error( true )
       optimization "optdebug"
       warnings "most"
+	  style "app"
       --os_version "vista"
       defines { "NDEBUG", "_USE_MATH_DEFINES", "WINVER=0x0600" }
 

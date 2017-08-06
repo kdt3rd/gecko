@@ -5,10 +5,11 @@
 // See the accompanying LICENSE.txt file for terms
 //
 
+#include "dispatcher.h"
+
 #include <iostream>
 #include <stdlib.h>
 #include <base/contract.h>
-#include "dispatcher.h"
 #include <windows.h>
 
 namespace {
@@ -48,9 +49,9 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam )
 		}
 
 		default:
-            return DefWindowProc( hwnd, msg, wParam, lParam );
+			break;
     }
-    return 0;
+	return DefWindowProc( hwnd, msg, wParam, lParam );
 }
 
 }
@@ -67,7 +68,7 @@ dispatcher::dispatcher( const std::shared_ptr<keyboard> &k, const std::shared_pt
 {
 	WNDCLASSEX wc;
 	wc.cbSize        = sizeof(WNDCLASSEX);
-    wc.style         = 0;
+    wc.style         = CS_OWNDC|CS_HREDRAW|CS_VREDRAW;
     wc.lpfnWndProc   = WndProc;
     wc.cbClsExtra    = 0;
     wc.cbWndExtra    = 0;
@@ -75,19 +76,21 @@ dispatcher::dispatcher( const std::shared_ptr<keyboard> &k, const std::shared_pt
     wc.hIcon         = LoadIcon( NULL, IDI_APPLICATION );
     wc.hCursor       = LoadCursor( NULL, IDC_ARROW );
     wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
-    wc.lpszMenuName  = NULL;
+    wc.lpszMenuName  = "WindowMenu";
     wc.lpszClassName = "WindowClass";
     wc.hIconSm       = LoadIcon( NULL, IDI_APPLICATION );
 
-	ATOM ret = RegisterClassEx( &wc );
-	if ( !ret )
-		throw std::runtime_error( "window registration failed" );
+	_normal_window_class = RegisterClassEx( &wc );
+	if ( _normal_window_class == 0 )
+		throw_lasterror( "window class registration failed" );
 }
 
 ////////////////////////////////////////
 
 dispatcher::~dispatcher( void )
 {
+	if ( _normal_window_class != 0 )
+		UnregisterClass( "WindowClass", GetModuleHandle( NULL ) );
 }
 
 ////////////////////////////////////////

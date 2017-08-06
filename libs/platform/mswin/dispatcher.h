@@ -25,8 +25,8 @@ public:
 	dispatcher( const std::shared_ptr<keyboard> &k, const std::shared_ptr<mouse> &m );
 	virtual ~dispatcher( void );
 
-	int execute( void );
-	void exit( int code );
+	int execute( void ) override;
+	void exit( int code ) override;
 
 	void add_window( const std::shared_ptr<window> &win );
 
@@ -34,6 +34,8 @@ private:
 	int _exit_code = 0;
 	std::shared_ptr<keyboard> _keyboard;
 	std::shared_ptr<mouse> _mouse;
+
+	ATOM _normal_window_class = 0;
 };
 
 ////////////////////////////////////////
