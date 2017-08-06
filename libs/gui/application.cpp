@@ -45,7 +45,7 @@ application::application( const std::string &p, const std::string &r )
 				if ( sys->is_working() )
 				{
 					_platform = plat.name() + "+" + plat.renderer();
-					_impl->sys = plat.create();
+					_impl->sys = sys;
 					_impl->dispatch = _impl->sys->get_dispatcher();
 					break;
 				}
