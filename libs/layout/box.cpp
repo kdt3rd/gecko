@@ -5,7 +5,7 @@
 // See the accompanying LICENSE.txt file for terms
 //
 
-#include "box_layout.h"
+#include "box.h"
 #include <base/contract.h>
 
 namespace layout

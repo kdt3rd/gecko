@@ -5,7 +5,7 @@
 // See the accompanying LICENSE.txt file for terms
 //
 
-#include "grid_layout.h"
+#include "grid.h"
 #include <base/contract.h>
 
 namespace layout

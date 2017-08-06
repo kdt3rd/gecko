@@ -5,8 +5,8 @@
 // See the accompanying LICENSE.txt file for terms
 //
 
-#include "form_layout.h"
-#include "field_layout.h"
+#include "form.h"
+#include "field.h"
 #include <base/contract.h>
 
 namespace layout

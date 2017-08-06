@@ -5,7 +5,7 @@
 // See the accompanying LICENSE.txt file for terms
 //
 
-#include "packing_layout.h"
+#include "packing.h"
 #include <base/contract.h>
 #include <base/reverse.h>
 

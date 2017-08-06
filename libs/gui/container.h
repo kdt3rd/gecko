@@ -9,9 +9,9 @@
 
 #include "widget.h"
 #include <gl/api.h>
-#include <layout/grid_layout.h>
-#include <layout/box_layout.h>
-#include <layout/tree_layout.h>
+#include <layout/grid.h>
+#include <layout/box.h>
+#include <layout/tree.h>
 #include <map>
 
 namespace gui

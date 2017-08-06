@@ -9,7 +9,7 @@
 
 #include "widget.h"
 #include "scroll_bar.h"
-#include <layout/scroll_layout.h>
+#include <layout/scroll.h>
 
 namespace gui
 {

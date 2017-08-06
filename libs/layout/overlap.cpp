@@ -5,7 +5,7 @@
 // See the accompanying LICENSE.txt file for terms
 //
 
-#include "overlap_layout.h"
+#include "overlap.h"
 #include <base/contract.h>
 
 namespace layout

@@ -16,13 +16,13 @@
 #include <base/timer.h>
 #include <base/function_traits.h>
 #include <draw/rectangle.h>
-#include <layout/packing_layout.h>
-#include <layout/box_layout.h>
-#include <layout/tree_layout.h>
-#include <layout/form_layout.h>
-#include <layout/field_layout.h>
-#include <layout/grid_layout.h>
-#include <layout/scroll_layout.h>
+#include <layout/packing.h>
+#include <layout/box.h>
+#include <layout/tree.h>
+#include <layout/form.h>
+#include <layout/field.h>
+#include <layout/grid.h>
+#include <layout/scroll.h>
 
 namespace
 {

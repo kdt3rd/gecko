@@ -8,7 +8,7 @@
 #pragma once
 
 #include "composite.h"
-#include <layout/grid_layout.h>
+#include <layout/grid.h>
 
 namespace gui
 {
