@@ -14,7 +14,7 @@ namespace layout
 
 ////////////////////////////////////////
 
-form_layout::form_layout( const std::shared_ptr<area> &layout )
+form::form( const std::shared_ptr<area> &layout )
 	: _layout( layout )
 {
 	precondition( layout, "null layout" );
@@ -22,14 +22,14 @@ form_layout::form_layout( const std::shared_ptr<area> &layout )
 
 ////////////////////////////////////////
 
-void form_layout::add( const std::shared_ptr<field_layout> &f )
+void form::add( const std::shared_ptr<field> &f )
 {
 	_fields.push_back( f );
 }
 
 ////////////////////////////////////////
 
-void form_layout::compute_bounds( void )
+void form::compute_bounds( void )
 {
 	// Compute the size of the fields
 	double minw = 0.0;
@@ -50,7 +50,7 @@ void form_layout::compute_bounds( void )
 
 ////////////////////////////////////////
 
-void form_layout::compute_layout( void )
+void form::compute_layout( void )
 {
 	_layout->set( { x1() + _pad[0], y1() + _pad[2] }, { width() - _pad[0] - _pad[1], height() - _pad[2] - _pad[3] } );
 	_layout->compute_layout();

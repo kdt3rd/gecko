@@ -13,7 +13,7 @@ namespace layout
 
 ////////////////////////////////////////
 
-void scroll_layout::compute_bounds( void )
+void scroll::compute_bounds( void )
 {
 	std::shared_ptr<area> m = _main.lock();
 	std::shared_ptr<area> h = _hscroll.lock();
@@ -53,7 +53,7 @@ void scroll_layout::compute_bounds( void )
 
 ////////////////////////////////////////
 
-void scroll_layout::compute_layout( void )
+void scroll::compute_layout( void )
 {
 	std::shared_ptr<area> m = _main.lock();
 	std::shared_ptr<area> h = _hscroll.lock();

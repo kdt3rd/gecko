@@ -20,11 +20,11 @@ namespace layout
 /// @brief Layout that strings areas in a line.
 ///
 /// This layout puts all areas side by side in a particular direction.
-class box_layout : public layout
+class box : public layout
 {
 public:
 	/// @brief Default constructor.
-	box_layout( base::alignment direction = base::alignment::RIGHT );
+	box( base::alignment direction = base::alignment::RIGHT );
 
 	/// @brief Add an area.
 	/// @param a Area to add.

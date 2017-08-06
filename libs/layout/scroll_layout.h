@@ -15,7 +15,7 @@ namespace layout
 
 ////////////////////////////////////////
 
-class scroll_layout : public layout
+class scroll : public layout
 {
 public:
 	void compute_bounds( void ) override;

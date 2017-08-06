@@ -15,10 +15,10 @@ namespace layout
 ////////////////////////////////////////
 
 /// @brief Layout which vertically aligns two areas.
-class field_layout : public layout
+class field : public layout
 {
 public:
-	field_layout( const std::shared_ptr<area> &l, const std::shared_ptr<area> &e );
+	field( const std::shared_ptr<area> &l, const std::shared_ptr<area> &e );
 
 	double field_minimum_width( void );
 

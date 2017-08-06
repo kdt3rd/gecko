@@ -13,7 +13,7 @@ namespace layout
 
 ////////////////////////////////////////
 
-size_t grid_layout::add_columns( size_t n, double flex, int32_t pri )
+size_t grid::add_columns( size_t n, double flex, int32_t pri )
 {
 	size_t result = _cols.size();
 	for ( size_t i = 0; i < n; ++i )
@@ -28,7 +28,7 @@ size_t grid_layout::add_columns( size_t n, double flex, int32_t pri )
 
 ////////////////////////////////////////
 
-size_t grid_layout::add_rows( size_t n, double flex, int32_t pri )
+size_t grid::add_rows( size_t n, double flex, int32_t pri )
 {
 	size_t result = _rows.size();
 	for ( size_t i = 0; i < n; ++i )
@@ -43,14 +43,14 @@ size_t grid_layout::add_rows( size_t n, double flex, int32_t pri )
 
 ////////////////////////////////////////
 
-void grid_layout::add( const std::shared_ptr<area> &a, size_t x, size_t y, size_t w, size_t h )
+void grid::add( const std::shared_ptr<area> &a, size_t x, size_t y, size_t w, size_t h )
 {
 	_areas.emplace_back( a, x, y, w, h );
 }
 
 ////////////////////////////////////////
 
-void grid_layout::compute_bounds( void )
+void grid::compute_bounds( void )
 {
 	// TODO Compute maximum size for grid.
 
@@ -123,7 +123,7 @@ void grid_layout::compute_bounds( void )
 
 ////////////////////////////////////////
 
-void grid_layout::compute_layout( void )
+void grid::compute_layout( void )
 {
 	// Set columns to minimum size and add any extra space
 	std::list<std::shared_ptr<area>> tmp;

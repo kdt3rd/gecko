@@ -13,7 +13,7 @@ namespace layout
 
 ////////////////////////////////////////
 
-box_layout::box_layout( base::alignment direction )
+box::box( base::alignment direction )
 	: _align( direction )
 {
 	precondition( direction != base::alignment::CENTER, "invalid direction for box layout" );
@@ -21,7 +21,7 @@ box_layout::box_layout( base::alignment direction )
 
 ////////////////////////////////////////
 
-void box_layout::compute_bounds( void )
+void box::compute_bounds( void )
 {
 	// Clean up areas that have been deleted.
 	_areas.remove_if( []( const std::weak_ptr<area> &a ) { return a.expired(); } );
@@ -118,7 +118,7 @@ void box_layout::compute_bounds( void )
 
 ////////////////////////////////////////
 
-void box_layout::compute_layout( void )
+void box::compute_layout( void )
 {
 	double x = 0.0, y = 0.0;
 	double dx = 0.0, dy = 0.0;

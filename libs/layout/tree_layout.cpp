@@ -7,7 +7,7 @@ namespace layout
 
 ////////////////////////////////////////
 
-void tree_layout::compute_bounds( void )
+void tree::compute_bounds( void )
 {
 	auto g = _groove.lock();
 	auto t = _title.lock();
@@ -31,7 +31,7 @@ void tree_layout::compute_bounds( void )
 		if ( a )
 		{
 			a->compute_bounds();
-			if ( std::dynamic_pointer_cast<tree_layout>( a ) )
+			if ( std::dynamic_pointer_cast<tree>( a ) )
 			{
 				minw = std::max( minw, a->minimum_width() );
 				maxw = std::max( maxw, a->maximum_width() );
@@ -70,7 +70,7 @@ void tree_layout::compute_bounds( void )
 
 ////////////////////////////////////////
 
-void tree_layout::compute_layout( void )
+void tree::compute_layout( void )
 {
 	auto g = _groove.lock();
 	auto t = _title.lock();
@@ -105,7 +105,7 @@ void tree_layout::compute_layout( void )
 		auto a = w.lock();
 		if ( a )
 		{
-			if ( std::dynamic_pointer_cast<tree_layout>( a ) )
+			if ( std::dynamic_pointer_cast<tree>( a ) )
 			{
 				a->set( { x1() + x, y1() + y }, { cw, a->minimum_height() } );
 				a->compute_layout();

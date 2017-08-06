@@ -14,13 +14,13 @@ namespace layout
 
 ////////////////////////////////////////
 
-packing_layout::packing_layout( void )
+packing::packing( void )
 {
 }
 
 ////////////////////////////////////////
 
-void packing_layout::add( const std::shared_ptr<area> &a, base::alignment where )
+void packing::add( const std::shared_ptr<area> &a, base::alignment where )
 {
 	precondition( _areas.empty() || _areas.back()._align != base::alignment::CENTER, "center packing must be used last" );
 	_areas.emplace_back( a, where );
@@ -28,7 +28,7 @@ void packing_layout::add( const std::shared_ptr<area> &a, base::alignment where 
 
 ////////////////////////////////////////
 
-void packing_layout::compute_bounds( void )
+void packing::compute_bounds( void )
 {
 	base::rect min;
 	base::rect max;
@@ -147,7 +147,7 @@ void packing_layout::compute_bounds( void )
 
 ////////////////////////////////////////
 
-void packing_layout::compute_layout( void )
+void packing::compute_layout( void )
 {
 	// Clean up areas that have been deleted.
 	_areas.remove_if( []( const section &s ) { return s._area.expired(); } );

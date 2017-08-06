@@ -15,7 +15,7 @@ namespace layout
 
 ////////////////////////////////////////
 
-class grid_layout : public layout
+class grid : public layout
 {
 public:
 	size_t add_columns( size_t n, double flex = 1.0, int32_t pri = 0 );

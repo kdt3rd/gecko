@@ -22,11 +22,11 @@ namespace layout
 /// This layout puts it's areas along the sides in the order added.
 /// The widget will fill the selectd side, but will be at minimum size in the orthogonal direction.
 /// The last area can be put in the center, taking the rest of the unused space.
-class packing_layout : public layout
+class packing : public layout
 {
 public:
 	/// @brief Default constructor.
-	packing_layout( void );
+	packing( void );
 
 	/// @brief Add area to one side.
 	//

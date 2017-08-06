@@ -13,14 +13,14 @@ namespace layout
 
 ////////////////////////////////////////
 
-field_layout::field_layout( const std::shared_ptr<area> &l, const std::shared_ptr<area> &e )
+field::field( const std::shared_ptr<area> &l, const std::shared_ptr<area> &e )
 	: _label( l ), _field( e )
 {
 }
 
 ////////////////////////////////////////
 
-double field_layout::field_minimum_width( void )
+double field::field_minimum_width( void )
 {
 	auto f = _field.lock();
 	if ( f )
@@ -33,7 +33,7 @@ double field_layout::field_minimum_width( void )
 
 ////////////////////////////////////////
 
-void field_layout::compute_bounds( void )
+void field::compute_bounds( void )
 {
 	auto l = _label.lock();
 	auto f = _field.lock();
@@ -73,7 +73,7 @@ void field_layout::compute_bounds( void )
 
 ////////////////////////////////////////
 
-void field_layout::compute_layout( void )
+void field::compute_layout( void )
 {
 	auto l = _label.lock();
 	auto f = _field.lock();

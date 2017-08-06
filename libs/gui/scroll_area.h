@@ -39,7 +39,7 @@ private:
 	bool _tracking = false;
 	base::point _track;
 
-	std::shared_ptr<layout::scroll_layout> _layout;
+	std::shared_ptr<layout::scroll> _layout;
 	std::shared_ptr<widget> _main;
 	std::shared_ptr<widget> _widget;
 	std::shared_ptr<scroll_bar> _hscroll;

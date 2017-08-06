@@ -20,11 +20,11 @@ namespace layout
 /// @brief Layout that strings areas in a line.
 ///
 /// This layout puts all areas side by side in a particular direction.
-class overlap_layout : public layout
+class overlap : public layout
 {
 public:
 	/// @brief Default constructor.
-	overlap_layout( void );
+	overlap( void );
 
 	/// @brief Add an area.
 	/// @param a Area to add.

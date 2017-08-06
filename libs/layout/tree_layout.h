@@ -8,19 +8,19 @@ namespace layout
 
 ////////////////////////////////////////
 
-class tree_layout : public layout
+class tree : public layout
 {
 public:
-	tree_layout( void )
+	tree( void )
 	{
 	}
 
-	tree_layout( const std::shared_ptr<area> &g, const std::shared_ptr<area> &t )
+	tree( const std::shared_ptr<area> &g, const std::shared_ptr<area> &t )
 		: _groove( g ), _title( t )
 	{
 	}
 
-	tree_layout( double i, const std::shared_ptr<area> &t )
+	tree( double i, const std::shared_ptr<area> &t )
 		: _title( t ), _indent( i )
 	{
 	}

@@ -15,9 +15,9 @@ namespace gui
 ////////////////////////////////////////
 
 choices::choices( void )
-	: composite( std::unique_ptr<layout::grid_layout>( new layout::grid_layout ) )
+	: composite( std::unique_ptr<layout::grid>( new layout::grid ) )
 {
-	_layout = std::dynamic_pointer_cast<layout::grid_layout>( layout_target() );
+	_layout = std::dynamic_pointer_cast<layout::grid>( layout_target() );
 	_layout->set_spacing( 3, 3 );
 	_layout->add_columns( 1, 0.0 );
 	_layout->add_columns( 1, 1.0 );

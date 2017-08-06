@@ -31,7 +31,7 @@ protected:
 	void choose( size_t c );
 
 private:
-	std::shared_ptr<layout::grid_layout> _layout;
+	std::shared_ptr<layout::grid> _layout;
 	std::vector<std::shared_ptr<label>> _labels;
 	std::vector<std::shared_ptr<radio_button>> _radios;
 };

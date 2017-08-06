@@ -187,13 +187,13 @@ protected:
 
 ////////////////////////////////////////
 
-extern template class container<layout::grid_layout>;
-extern template class container<layout::box_layout>;
-extern template class container<layout::tree_layout>;
+extern template class container<layout::grid>;
+extern template class container<layout::box>;
+extern template class container<layout::tree>;
 
-typedef container<layout::grid_layout> grid;
-typedef container<layout::box_layout> box;
-typedef container<layout::tree_layout> tree;
+typedef container<layout::grid> grid;
+typedef container<layout::box> box;
+typedef container<layout::tree> tree;
 
 ////////////////////////////////////////
 

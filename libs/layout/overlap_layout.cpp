@@ -13,13 +13,13 @@ namespace layout
 
 ////////////////////////////////////////
 
-overlap_layout::overlap_layout( void )
+overlap::overlap( void )
 {
 }
 
 ////////////////////////////////////////
 
-void overlap_layout::compute_bounds( void )
+void overlap::compute_bounds( void )
 {
 	// Clean up areas that have been deleted.
 	_areas.remove_if( []( const std::weak_ptr<area> &a ) { return a.expired(); } );
@@ -59,7 +59,7 @@ void overlap_layout::compute_bounds( void )
 
 ////////////////////////////////////////
 
-void overlap_layout::compute_layout( void )
+void overlap::compute_layout( void )
 {
 	double x = this->x() + _pad[0];
 	double y = this->y() + _pad[2];

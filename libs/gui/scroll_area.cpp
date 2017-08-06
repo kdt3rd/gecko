@@ -13,9 +13,9 @@ namespace gui
 ////////////////////////////////////////
 
 scroll_area::scroll_area( bool hscroll, bool vscroll, bool bounded )
-	: widget( std::unique_ptr<layout::scroll_layout>( new layout::scroll_layout ) )
+	: widget( std::unique_ptr<layout::scroll>( new layout::scroll ) )
 {
-	_layout = std::dynamic_pointer_cast<layout::scroll_layout>( layout_target() );
+	_layout = std::dynamic_pointer_cast<layout::scroll>( layout_target() );
 
 	if ( hscroll )
 	{

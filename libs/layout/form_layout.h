@@ -12,16 +12,16 @@
 namespace layout
 {
 
-class field_layout;
+class field;
 
 ////////////////////////////////////////
 
-class form_layout : public layout
+class form : public layout
 {
 public:
-	form_layout( const std::shared_ptr<area> &sublayout );
+	form( const std::shared_ptr<area> &sublayout );
 
-	void add( const std::shared_ptr<field_layout> &field );
+	void add( const std::shared_ptr<field> &field );
 
 	/// @brief Compute the minimum size of this layout.
 	void compute_bounds( void ) override;
@@ -31,7 +31,7 @@ public:
 
 private:
 	std::shared_ptr<area> _layout;
-	std::list<std::shared_ptr<field_layout>> _fields;
+	std::list<std::shared_ptr<field>> _fields;
 	double _min_field_w = 0.0;
 };
 
