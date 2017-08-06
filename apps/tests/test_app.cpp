@@ -18,7 +18,7 @@
 #include <gui/button.h>
 #include <gui/slider.h>
 #include <gui/checkbox.h>
-#include <gui/radio_button.h>
+#include <gui/choices.h>
 #include <gui/line_edit.h>
 #include <gui/scroll_bar.h>
 #include <gui/scroll_area.h>
@@ -46,7 +46,10 @@ int safemain( int argc, char **argv )
 		auto button = std::make_shared<gui::button>( "Click Me" );
 		auto slider = std::make_shared<gui::slider>();
 		auto cbox = std::make_shared<gui::checkbox>();
-		auto rbutton = std::make_shared<gui::radio_button>();
+		auto choices = std::make_shared<gui::choices>();
+		choices->add_choice( "Choice 1" );
+		choices->add_choice( "Choice 2" );
+		choices->add_choice( "Choice 3" );
 		auto ledit = std::make_shared<gui::line_edit>();
 		auto sbar = std::make_shared<gui::scroll_bar>();
 		auto sarea = std::make_shared<gui::scroll_area>();
@@ -62,7 +65,7 @@ int safemain( int argc, char **argv )
 		button->when_activated.connect( [=]( void ) { box->remove( n ); box->remove( n + 1 ); } );
 		box->add( slider );
 		box->add( cbox );
-		box->add( rbutton );
+		box->add( choices );
 		box->add( ledit );
 		box->add( sbar );
 		box->add( sarea );

@@ -5,45 +5,37 @@
 // See the accompanying LICENSE.txt file for terms
 //
 
+#pragma once
+
 #include "widget.h"
-#include <base/signal.h>
-#include <draw/shape.h>
 
 namespace gui
 {
 
 ////////////////////////////////////////
 
-class radio_button : public widget
+class composite : public widget
 {
 public:
-	radio_button( void );
-	~radio_button( void );
+	using widget::widget;
 
 	void build( gl::api &ogl ) override;
-
 	void paint( gl::api &ogl ) override;
 
 	bool mouse_press( const base::point &p, int button ) override;
 	bool mouse_release( const base::point &p, int button ) override;
 	bool mouse_move( const base::point &p ) override;
+	bool mouse_wheel( int amount ) override;
+	bool key_press( platform::scancode c ) override;
+	bool key_release( platform::scancode c ) override;
+	bool text_input( char32_t c ) override;
 
-	bool is_checked( void ) const
-	{
-		return _state;
-	}
+	bool update_layout( double duration ) override;
 
-	void set_state( bool s );
+protected:
+	std::shared_ptr<widget> _mouse_grab;
 
-	base::signal<void(void)> when_selected;
-
-public:
-	draw::shape _checked;
-	draw::shape _unchecked;
-
-	bool _state = false;
-	bool _tracking = false;
-	bool _current = false;
+	virtual void for_subwidgets( const std::function<void(const std::shared_ptr<widget> &)> &f ) = 0;
 };
 
 ////////////////////////////////////////

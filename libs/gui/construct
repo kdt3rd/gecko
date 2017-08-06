@@ -15,5 +15,7 @@ lib = library "gui"
 	  "radio_button.cpp";
 	  "scroll_bar.cpp";
 	  "scroll_area.cpp";
+	  "choices.cpp";
+	  "composite.cpp";
   }
   libs{ "platform", "draw", "layout", "utf" }

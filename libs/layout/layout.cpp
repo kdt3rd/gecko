@@ -35,6 +35,16 @@ void layout::expand_width( std::list<std::shared_ptr<area>> &lst, double extra )
 				extra -= used;
 			} while ( used > 0.0 && extra > 0.0 );
 		}
+		else
+		{
+			if ( !work.empty() )
+			{
+				double grow = extra / work.size();
+				for ( auto &a: work )
+					a->set_width( a->width() + grow );
+				extra = 0.0;
+			}
+		}
 		work.clear();
 	}
 }
@@ -69,6 +79,16 @@ void layout::expand_height( std::list<std::shared_ptr<area>> &lst, double extra 
 					used += a->expand_height( extra, overall_flex );
 				extra -= used;
 			} while ( used > 0.0 && extra > 0.0 );
+		}
+		else
+		{
+			if ( !work.empty() )
+			{
+				double grow = extra / work.size();
+				for ( auto &a: work )
+					a->set_height( a->height() + grow );
+				extra = 0.0;
+			}
 		}
 		work.clear();
 	}

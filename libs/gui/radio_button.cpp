@@ -19,6 +19,8 @@ namespace gui
 
 radio_button::radio_button( void )
 {
+	layout_target()->set_minimum( 24, 24 );
+	layout_target()->set_maximum( 24, 24 );
 }
 
 ////////////////////////////////////////
@@ -34,7 +36,7 @@ void radio_button::build( gl::api &ogl )
 	const style &s = context::current().get_style();
 
 	draw::paint c;
-	c.set_fill_color( s.secondary_text( s.background_color() ) );
+	c.set_fill_color( s.active_icon( s.background_color() ) );
 	_unchecked.add( ogl, draw::iconRadioButtonEmpty(), c );
 
 	c.set_fill_color( s.dominant_color() );
@@ -44,9 +46,6 @@ void radio_button::build( gl::api &ogl )
 	_checked.shape_size( 24, 24 );
 	_unchecked.set_size( 24, 24 );
 	_checked.set_size( 24, 24 );
-
-	layout_target()->set_minimum( 24, 24 );
-	layout_target()->set_maximum( 24, 24 );
 }
 
 ////////////////////////////////////////
@@ -120,7 +119,7 @@ void radio_button::set_state( bool s )
 	{
 		_state = s;
 		if ( _state )
-			when_selected( _state );
+			when_selected();
 	}
 }
 

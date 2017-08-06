@@ -35,7 +35,7 @@ void checkbox::build( gl::api &ogl )
 
 	draw::paint c;
 
-	c.set_fill_color( s.secondary_text( s.background_color() ) );
+	c.set_fill_color( s.active_icon( s.background_color() ) );
 	_unchecked.add( ogl, draw::iconCheckBoxEmpty(), c );
 
 	c.set_fill_color( s.dominant_color() );

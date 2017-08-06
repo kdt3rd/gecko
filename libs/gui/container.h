@@ -173,7 +173,7 @@ public:
 	bool update_layout( double duration ) override
 	{
 		bool result = widget::update_layout( duration );
-		for ( auto w: _widgets )
+		for ( auto &w: _widgets )
 			result = w->update_layout( duration ) | result;
 		return result;
 	}

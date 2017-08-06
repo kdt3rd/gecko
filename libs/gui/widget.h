@@ -23,7 +23,7 @@ namespace gui
 
 ////////////////////////////////////////
 
-class widget : public base::rect
+class widget : public base::rect, public std::enable_shared_from_this<widget>
 {
 public:
 	widget( void );
@@ -31,8 +31,8 @@ public:
 	virtual ~widget( void );
 
 	virtual void build( gl::api &ogl );
-
 	virtual void paint( gl::api &ogl );
+
 	virtual bool mouse_press( const base::point &p, int button );
 	virtual bool mouse_release( const base::point &p, int button );
 	virtual bool mouse_move( const base::point &p );
