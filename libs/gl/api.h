@@ -242,6 +242,7 @@ public:
 	void setup_debugging( void );
 
 private:
+	base::rect _viewport;
 	std::vector<matrix4> _matrix;
 	matrix4 _view;
 	matrix4 _projection;
