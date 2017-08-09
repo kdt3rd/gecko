@@ -6,7 +6,7 @@
 //
 
 #include "font_manager.h"
-#include "font.h"
+#include <script/freetype2/font.h>
 
 #include <iostream>
 #include <stdexcept>
@@ -157,11 +157,11 @@ font_manager::get_font( const std::string &family, const std::string &style, dou
 			FT_Face ftface;
 			auto error = FT_New_Face( _impl->ftlib, reinterpret_cast<const char*>( filename ), fontid, &ftface );
 			if ( error )
-				throw std::runtime_error( font::errorstr( error ) );
+				throw std::runtime_error( script::freetype2::font::errorstr( error ) );
 
 			try
 			{
-				ret = std::make_shared<script::fontconfig::font>( ftface, family, style, pixsize );
+				ret = std::make_shared<script::freetype2::font>( ftface, family, style, pixsize );
 			}
 			catch ( ... )
 			{

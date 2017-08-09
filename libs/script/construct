@@ -24,7 +24,7 @@ lib = library "script"
 	  system="Linux";
 	  source={
 		  "fontconfig/font_manager.cpp",
-		  "fontconfig/font.cpp",
+		  "freetype2/font.cpp",
 		  "linux.cpp",
 	  };
 	  libs={"freetype2", "fontconfig"};
@@ -33,10 +33,10 @@ lib = library "script"
 	  system="Windows";
 	  source={
 		  "mswin/font_manager.cpp",
-		  "mswin/font.cpp",
+		  "freetype2/font.cpp",
 		  "mswin.cpp",
 	  };
-	  libs={"gdi32"};
+	  libs={"freetype2", "bzip2", "gdi32"};
   }
   -- can also call optional_source all at once as on giant table
   libs{ "base", "utf" }

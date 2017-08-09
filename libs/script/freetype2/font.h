@@ -22,7 +22,7 @@
 ////////////////////////////////////////
 
 
-namespace script { namespace fontconfig
+namespace script { namespace freetype2
 {
 
 /// @brief Font subclass for freetype.
@@ -30,7 +30,7 @@ namespace script { namespace fontconfig
 class font : public ::script::font
 {
 public:
-	font( FT_Face face, std::string fam, std::string style, double pixsize );
+	font( FT_Face face, std::string fam, std::string style, double pixsize, const std::shared_ptr<uint8_t []> &ttfData = std::shared_ptr<uint8_t []>() );
 	~font( void );
 
 	double kerning( char32_t c1, char32_t c2 ) override;
@@ -42,7 +42,9 @@ protected:
 
 private:
 	FT_Face _face;
+	std::shared_ptr<uint8_t []> _font_data;
 };
 
-} }
+} // namespace freetype2
+} // namespace script
 

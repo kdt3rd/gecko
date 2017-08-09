@@ -37,14 +37,14 @@ const struct {
 
 }
 
-namespace script { namespace fontconfig
+namespace script { namespace freetype2
 {
 
 ////////////////////////////////////////
 
-font::font( FT_Face face, std::string fam, std::string style, double pixsize )
-		: script::font( std::move( fam ), std::move( style ), pixsize ),
-		  _face( face )
+font::font( FT_Face face, std::string fam, std::string style, double pixsize, const std::shared_ptr<uint8_t []> &ttfData )
+	: script::font( std::move( fam ), std::move( style ), pixsize ),
+	_face( face ), _font_data( ttfData )
 {
 	auto err = FT_Select_Charmap( _face, FT_ENCODING_UNICODE );
 	if ( err )
