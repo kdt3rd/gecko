@@ -193,7 +193,7 @@ font_manager::get_font( const std::string &family, const std::string &style, dou
 
 			try
 			{
-				ret = std::make_shared<script::freetype2::font>( ftface, family, style, pixsize );
+				ret = std::make_shared<script::freetype2::font>( ftface, family, style, pixsize, ttfData );
 			}
 			catch ( ... )
 			{
