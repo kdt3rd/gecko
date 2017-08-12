@@ -99,10 +99,6 @@ window::window( EGLDisplay disp, struct wl_compositor *comp, struct wl_shell *sh
 	_egl_surface = eglCreateWindowSurface( disp, config, (EGLNativeWindowType)_egl_win, NULL );
 	eglMakeCurrent( disp, _egl_surface, _egl_surface, _egl_context );
 
-	int err = gl3wInit();
-	if ( err != 0 )
-		throw std::runtime_error( "failed to intialize gl3w" );
-
 	std::cout << "OpenGL:\n\tvendor " << glGetString( GL_VENDOR )
 			  << "\n\trenderer " << glGetString( GL_RENDERER )
 			  << "\n\tversion " << glGetString( GL_VERSION )

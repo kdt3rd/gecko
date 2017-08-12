@@ -13,5 +13,5 @@ extra_source = optional_source{
 		"dispatcher.cpp";
 	};
 	defines = {"HAVE_XLIB"};
-	libs = {"x11", "gl"};
+	libs = {"x11"};
 };

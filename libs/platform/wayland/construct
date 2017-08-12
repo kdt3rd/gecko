@@ -13,5 +13,5 @@ extra_source = optional_source{
 		"dispatcher.cpp";
 	};
 	defines = {"HAVE_WAYLAND"};
-	libs = {"wayland-client", "wayland-egl", "egl", "gl"};
+	libs = {"wayland-client", "wayland-egl", "egl"};
 };

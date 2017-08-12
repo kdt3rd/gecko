@@ -8,7 +8,7 @@
 #pragma once
 
 #include <base/size.h>
-#include <base/point.h>
+#include <base/rect.h>
 
 namespace platform
 {
@@ -22,18 +22,30 @@ class screen
 {
 public:
 	/// @brief Constructor.
+	///
+	/// TODO: add methods to query color management (i.e. ICM under
+	/// windows), change the resolution / display rate on the fly,
+	/// etc.
 	screen( void );
 
 	/// @brief Destructor.
 	virtual ~screen( void );
 
+	/// @brief default state
+	///
+	/// @return Bool indicating whether this screen should be
+	/// considered the 'default' screen
 	virtual bool is_default( void ) const = 0;
+
+	virtual double refresh_rate( void ) const = 0;
 
 	/// @brief Screen bounds.
 	///
-	/// The bounds (size) of the screen.
+	/// The bounds (size) of the screen, either the full (avail ==
+	/// false) or the available user space (avail == true)
+	/// 
 	/// @return The size of the screen
-	virtual base::size bounds( void ) const = 0;
+	virtual base::rect bounds( bool avail ) const = 0;
 
 	/// @brief Screen DPI
 	///

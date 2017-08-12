@@ -28,12 +28,16 @@ public:
 		return static_cast<bool>( _display );
 	}
 
+	opengl_query gl_proc_address( void ) override;
+
 	std::vector<std::shared_ptr<::platform::screen>> screens( void ) override
 	{
 		return _screens;
 	}
 
 	std::shared_ptr<::platform::window> new_window( void ) override;
+
+	void destroy_window( const std::shared_ptr<::platform::window> &w ) override;
 
 	std::shared_ptr<::platform::dispatcher> get_dispatcher( void ) override;
 	std::shared_ptr<::platform::keyboard> get_keyboard( void ) override;

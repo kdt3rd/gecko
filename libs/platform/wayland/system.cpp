@@ -9,6 +9,7 @@
 #include "screen.h"
 #include "window.h"
 #include "dispatcher.h"
+#include <gl/opengl.h>
 
 #include <platform/platform.h>
 #include <base/contract.h>
@@ -77,6 +78,7 @@ namespace wayland
 system::system( const std::string &d )
 		: ::platform::system( "wayland", "Wayland/EGL" )
 {
+	// TODO: dynamically load libEGL.so
 	const char *dname = nullptr;
 	if ( ! d.empty() )
 		dname = d.c_str();
@@ -123,6 +125,11 @@ system::system( const std::string &d )
 		_dispatcher = std::make_shared<dispatcher>( _display, _keyboard, _mouse );
 		// _dispatcher->add_waitable( _keyboard );
 		// _dispatcher->add_waitable( _mouse );
+
+		int err = gl3wInit2( eglGetProcAddress );
+		if ( err != 0 )
+			throw std::runtime_error( "failed to intialize EGL" );
+
 	}
 }
 
@@ -134,11 +141,28 @@ system::~system( void )
 
 ////////////////////////////////////////
 
+system::opengl_query
+system::gl_proc_address( void )
+{
+	return (system::opengl_query)eglGetProcAddress;
+}
+
+////////////////////////////////////////
+
 std::shared_ptr<::platform::window> system::new_window( void )
 {
 	auto ret = std::make_shared<window>( _egl_disp, _compositor, _shell );
 	_dispatcher->add_window( ret );
 	return ret;
+}
+
+////////////////////////////////////////
+
+void
+system::destroy_window( const std::shared_ptr<::platform::window> &w )
+{
+	auto x = std::static_pointer_cast<window>( w );
+	_dispatcher->remove_window( x );
 }
 
 ////////////////////////////////////////

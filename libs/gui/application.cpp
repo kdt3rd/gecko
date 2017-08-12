@@ -9,6 +9,7 @@
 #include "window.h"
 #include <platform/platform.h>
 #include <platform/system.h>
+#include <platform/window.h>
 #include <script/font_manager.h>
 #include <base/contract.h>
 
@@ -28,12 +29,12 @@ struct application::impl
 
 ////////////////////////////////////////
 
-application::application( const std::string &p, const std::string &r )
+application::application( const std::string &display, const std::string &p, const std::string &r )
 	: _impl( new application::impl )
 {
 	auto const &platforms = platform::platform::list();
 	if ( platforms.empty() )
-		throw std::runtime_error( "no platforms available" );
+		throw_runtime( "no platforms available" );
 
 	for ( const auto &plat: platforms )
 	{
@@ -41,7 +42,7 @@ application::application( const std::string &p, const std::string &r )
 		{
 			if ( r.empty() || ( plat.renderer() == r ) )
 			{
-				auto sys = plat.create();
+				auto sys = plat.create( display );
 				if ( sys->is_working() )
 				{
 					_platform = plat.name() + "+" + plat.renderer();
@@ -59,6 +60,22 @@ application::application( const std::string &p, const std::string &r )
 	_fmgr = script::font_manager::common();
 	if ( !_fmgr )
 		throw std::runtime_error( "no font manager available" );
+
+	auto scr = _impl->sys->screens();
+	if ( ! scr.empty() )
+	{
+		auto dpi = scr.front()->dpi();
+		_fmgr->load_dpi( static_cast<int>( dpi.w() ),
+						 static_cast<int>( dpi.h() ) );
+	}
+	
+	auto tmpw = _impl->sys->new_window();
+	tmpw->acquire();
+	GLint mw = 1024;
+	glGetIntegerv( GL_MAX_TEXTURE_SIZE, &mw );
+	_fmgr->max_glyph_store( mw, mw );
+	_impl->sys->destroy_window( tmpw );
+	tmpw->release();
 }
 
 ////////////////////////////////////////
@@ -149,7 +166,9 @@ std::set<std::string> application::get_font_styles( const std::string &family )
 
 std::shared_ptr<script::font> application::get_font( const std::string &family, const std::string &style, double pixsize )
 {
-	return _fmgr->get_font( family, style, pixsize );
+	auto r = _fmgr->get_font( family, style, pixsize );
+
+	return r;
 }
 
 ////////////////////////////////////////

@@ -21,13 +21,17 @@ public:
 	system( const std::string & );
 	virtual ~system( void );
 
-	virtual bool is_working( void ) const override { return true; }
+	bool is_working( void ) const override { return true; }
 
-	virtual std::vector<std::shared_ptr<::platform::screen>> screens( void ) { return _screens; }
-	virtual std::shared_ptr<::platform::window> new_window( void );
-	virtual std::shared_ptr<::platform::dispatcher> get_dispatcher( void );
-	virtual std::shared_ptr<::platform::keyboard> get_keyboard( void );
-	virtual std::shared_ptr<::platform::mouse> get_mouse( void );
+	opengl_query gl_proc_address( void ) override;
+
+	std::vector<std::shared_ptr<::platform::screen>> screens( void ) override { return _screens; }
+	std::shared_ptr<::platform::window> new_window( void ) override;
+	void destroy_window( const std::shared_ptr<::platform::window> &w ) override;
+
+	std::shared_ptr<::platform::dispatcher> get_dispatcher( void ) override;
+	std::shared_ptr<::platform::keyboard> get_keyboard( void ) override;
+	std::shared_ptr<::platform::mouse> get_mouse( void ) override;
 
 private:
 	std::shared_ptr<dispatcher> _dispatcher;

@@ -17,20 +17,8 @@ lib = library "gl"
 	"mesh.cpp";
   }
   external_lib{
-	  lib="libpng";
-	  required=true;
-	  source={"png_image.cpp"};
+         lib="libpng";
+         required=true;
+         source={"png_image.cpp"};
   }
   libs "base"
-  system_libs{
-	  system="Linux",
-	  libs={"gl", "dl"}
-  }
-  system_libs{
-	  system="Darwin",
-	  libs={"OpenGL"}
-  }
-  system_libs{
-	  system="Windows",
-	  libs={"opengl32"}
-  }

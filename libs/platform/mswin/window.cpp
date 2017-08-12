@@ -68,9 +68,6 @@ window::window( void )
 	HGLRC tempOpenGLContext = wglCreateContext( _hdc );
 	wglMakeCurrent( _hdc, tempOpenGLContext );
 
-	if ( gl3wInit() != 0 )
-		throw std::runtime_error( "glew init failed" );
-
 	int attributes[] = {
 		WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
 		WGL_CONTEXT_MINOR_VERSION_ARB, 3,
@@ -104,6 +101,8 @@ window::window( void )
 
 window::~window( void )
 {
+	if ( _hwnd )
+		DestroyWindow( _hwnd );
 }
 
 ////////////////////////////////////////

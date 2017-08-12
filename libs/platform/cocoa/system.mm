@@ -9,11 +9,43 @@
 #include "screen.h"
 #include "window.h"
 #include "dispatcher.h"
+#include <gl/gl3w.h>
+
+#include <mutex>
+#include <stdexcept>
+#include <dlfcn.h>
 
 #include <base/contract.h>
-#include <stdexcept>
 
 #include <Cocoa/Cocoa.h>
+
+namespace
+{
+void *libgl = nullptr;
+std::once_flag opengl_init_flag;
+
+void shutdown_libgl(void)
+{
+	if ( libgl )
+		dlclose( libgl );
+}
+
+void init_libgl(void)
+{
+	libgl = dlopen( "/System/Library/Frameworks/OpenGL.framework/OpenGL", RTLD_GLOBAL | RTLD_LAZY );
+	atexit( shutdown_libgl );
+}
+
+platform::system::opengl_func_ptr
+queryGL( const char *f )
+{
+	if ( libgl )
+		return (platform::system::opengl_func_ptr) dlsym( libgl, f );
+
+	return nullptr;
+}
+
+} // empty namespace
 
 namespace platform { namespace cocoa
 {
@@ -23,6 +55,8 @@ namespace platform { namespace cocoa
 system::system( const std::string & )
 	: platform::system( "cocoa", "Cocoa" )
 {
+	std::call_once( opengl_init_flag, [](){ init_libgl(); } );
+
     [NSAutoreleasePool new];
     [NSApplication sharedApplication];
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
@@ -44,6 +78,9 @@ system::system( const std::string & )
 	_dispatcher = std::make_shared<dispatcher>( _keyboard, _mouse );
 
     [NSApp activateIgnoringOtherApps:YES];
+
+	if ( ! gl3wInit2( queryGL ) )
+		throw_runtime( "Unable to initialize OpenGL" );
 }
 
 ////////////////////////////////////////
@@ -60,6 +97,13 @@ system::is_working( void ) const
 	return true;
 }
 
+////////////////////////////////////////
+
+system::opengl_query
+system::gl_proc_address( void )
+{
+	return queryGL;
+}
 
 ////////////////////////////////////////
 
@@ -87,6 +131,15 @@ std::shared_ptr<platform::window> system::new_window( void )
 
 ////////////////////////////////////////
 
+void
+system::destroy_window( const std::shared_ptr<window> &w )
+{
+	auto x = std::static_pointer_cast<window>( w );
+	_dispatcher->remove_window( x );
+}
+
+////////////////////////////////////////
+
 std::shared_ptr<platform::dispatcher> system::get_dispatcher( void )
 {
 	return _dispatcher;
@@ -108,5 +161,6 @@ std::shared_ptr<platform::mouse> system::get_mouse( void )
 
 ////////////////////////////////////////
 
-} }
+} // namespace cocoa
+} // namespace platform
 

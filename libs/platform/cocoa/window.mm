@@ -38,7 +38,7 @@ window::window( void )
 
 window::~window( void )
 {
-	std::cout << "Popup window deleted" << std::endl;
+	std::cout << "window deleted" << std::endl;
 }
 
 ////////////////////////////////////////

@@ -215,6 +215,13 @@ void dispatcher::add_window( const std::shared_ptr<window> &w )
 ////////////////////////////////////////
 
 void
+dispatcher::remove_window( const std::shared_ptr<window> &w )
+{
+}
+
+////////////////////////////////////////
+
+void
 dispatcher::wake_up_executor( void )
 {
 	if ( _wait_pipe[1] >= 0 )

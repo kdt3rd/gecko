@@ -209,6 +209,18 @@ void dispatcher::add_window( const std::shared_ptr<window> &w )
 ////////////////////////////////////////
 
 void
+dispatcher::remove_window( const std::shared_ptr<window> &w )
+{
+	w->hide();
+	if ( w->closed )
+		w->closed();
+
+	_windows.erase( w->id() );
+}
+
+////////////////////////////////////////
+
+void
 dispatcher::wake_up_executor( void )
 {
 	if ( _wait_pipe[1] >= 0 )
@@ -223,83 +235,61 @@ dispatcher::wake_up_executor( void )
 bool
 dispatcher::drain_xlib_events( void )
 {
-	bool done = false;
+	bool done = _windows.empty();
 	XEvent event;
 	while ( ! done && XPending( _display.get() ) )
 	{
 		XNextEvent( _display.get(), &event );
+		auto x = _windows.find( event.xany.window );
+		if ( x == _windows.end() )
+			continue;
+		auto &w = x->second;
+
 		switch ( event.type )
 		{
 			case Expose:
-			{
 				if ( event.xexpose.count == 0 )
-				{
-					auto win = _windows[event.xexpose.window];
-					win->expose_event();
-				}
+					w->expose_event();
 				break;
-			}
 
 			case ConfigureNotify:
-			{
-				auto w = _windows[event.xconfigure.window];
-				if ( w )
-				{
-					w->move_event( event.xconfigure.x, event.xconfigure.y );
-					w->resize_event( event.xconfigure.width, event.xconfigure.height );
-				}
+				w->move_event( event.xconfigure.x, event.xconfigure.y );
+				w->resize_event( event.xconfigure.width, event.xconfigure.height );
 				break;
-			}
 
 			case DestroyNotify:
-			{
-				auto w = _windows[event.xdestroywindow.window];
-				w->closed();
+				if ( w->closed )
+					w->closed();
+				_windows.erase( w->id() );
+				done = _windows.empty();
 				break;
-			}
 
 			case MapNotify:
-			{
-				auto w = _windows[event.xmap.window];
 				if ( w->shown )
 					w->shown();
 				if ( w->restored )
 					w->restored();
 				break;
-			}
 
 			case UnmapNotify:
-			{
-				auto w = _windows[event.xunmap.window];
-				if ( w )
-				{
-					if ( w->hidden )
-						w->hidden();
-					if ( w->minimized )
-						w->minimized();
-				}
+				if ( w->hidden )
+					w->hidden();
+				if ( w->minimized )
+					w->minimized();
 				break;
-			}
 
 			case EnterNotify:
-			{
-				auto w = _windows[event.xcrossing.window];
 				if ( w->entered )
 					w->entered();
 				break;
-			}
 
 			case LeaveNotify:
-			{
-				auto w = _windows[event.xcrossing.window];
 				if ( w->exited )
 					w->exited();
 				break;
-			}
 
 			case KeyPress:
 			{
-				auto w = _windows[event.xkey.window];
 				char keybuf[32];
 				std::unique_ptr<char[]> tmpbuf;
 				char *keyptr = keybuf;
@@ -362,15 +352,12 @@ dispatcher::drain_xlib_events( void )
 			}
 
 			case KeyRelease:
-			{
-				auto w = _windows[event.xkey.window];
 				if ( w->key_released )
 				{
 					platform::scancode sc = _keyboard->get_scancode( event.xkey );
 					w->key_released( _keyboard, sc );
 				}
 				break;
-			}
 
 			case KeymapNotify:
 			{
@@ -386,8 +373,6 @@ dispatcher::drain_xlib_events( void )
 			}
 
 			case ButtonPress:
-			{
-				auto w = _windows[event.xbutton.window];
 				switch ( event.xbutton.button )
 				{
 					case 1:
@@ -408,11 +393,8 @@ dispatcher::drain_xlib_events( void )
 						break;
 				}
 				break;
-			}
 
 			case ButtonRelease:
-			{
-				auto w = _windows[event.xbutton.window];
 				switch ( event.xbutton.button )
 				{
 					case 1:
@@ -427,31 +409,25 @@ dispatcher::drain_xlib_events( void )
 						break;
 				}
 				break;
-			}
 
 			case MotionNotify:
-			{
-				auto w = _windows[event.xmotion.window];
 				if ( w->mouse_moved )
 					w->mouse_moved( _mouse, { double(event.xmotion.x), double(event.xmotion.y) } );
 				break;
-			}
 
 			case VisibilityNotify:
 			case ReparentNotify:
 				break;
 
 			case ClientMessage:
-			{
-				auto w = _windows[event.xclient.window];
 				if ( Atom(event.xclient.data.l[0]) == _atom_delete_window )
 				{
-					w->hide();
+					if ( w->closed )
+						w->closed();
 					_windows.erase( w->id() );
 					done = _windows.empty();
 				}
 				break;
-			}
 
 			default:
 				std::cout << "Unknown event: " << uint32_t( event.type ) << std::endl;

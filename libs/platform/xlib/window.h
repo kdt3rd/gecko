@@ -15,6 +15,8 @@
 namespace platform { namespace xlib
 {
 
+class system;
+
 ////////////////////////////////////////
 
 /// @brief Xlib implementation of platform::window.
@@ -22,7 +24,7 @@ class window : public ::platform::window
 {
 public:
 	/// @brief Constrcutor
-	window( const std::shared_ptr<Display> &dpy );
+	window( system &s, const std::shared_ptr<Display> &dpy );
 	~window( void );
 
 	void raise( void ) override;
@@ -72,6 +74,8 @@ private:
 	bool _popup = false;
 
 	GLXContext _glc;
+	void (*_glc_makecurrent)( Display *, GLXDrawable, GLXContext ) = nullptr;
+	void (*_glc_swapbuffers)( Display *, GLXDrawable ) = nullptr;
 };
 
 ////////////////////////////////////////

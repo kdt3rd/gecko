@@ -21,7 +21,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	auto screens = sys->screens();
 
 	for ( auto scr: screens )
-		std::cout << "Screen " << scr->bounds() << ' ' << scr->dpi() << std::endl;
+		std::cout << "Screen full " << scr->bounds( false ) << " active " << scr->bounds( true ) << " dpi " << scr->dpi() << " refresh " << scr->refresh_rate() << (scr->is_default() ? " DEFAULT" : " ALT") << std::endl;
 
 	auto win = sys->new_window();
 	win->set_title( "Hello World" );

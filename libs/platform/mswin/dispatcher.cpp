@@ -158,5 +158,13 @@ void dispatcher::add_window( const std::shared_ptr<window> &win )
 
 ////////////////////////////////////////
 
+void
+dispatcher::remove_window( const std::shared_ptr<window> &win )
+{
+	windows.erase( win->id() );
+}
+
+////////////////////////////////////////
+
 } }
 

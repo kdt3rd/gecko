@@ -40,6 +40,8 @@ public:
 	/// Add a window for the dispatcher to handle events.
 	void add_window( const std::shared_ptr<window> &w );
 
+	void remove_window( const std::shared_ptr<window> &w );
+
 private:
 	void wake_up_executor( void );
 	bool drain_wayland_events( void );

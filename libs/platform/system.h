@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <type_traits>
 
 #include "screen.h"
 #include "window.h"
@@ -29,6 +30,9 @@ namespace platform
 class system
 {
 public:
+	using opengl_func_ptr = void (*)( void );
+	using opengl_query = opengl_func_ptr (*)( const char * );
+
 	/// @brief Constructor.
 	///
 	/// Construct a system with the given name/description.
@@ -54,6 +58,8 @@ public:
 	/// @return Description of the system
 	const std::string &description( void ) const { return _desc; }
 
+	virtual opengl_query gl_proc_address( void ) = 0;
+
 	/// @brief Return screens available to the system.
 	///
 	/// Returns a vector of screens available to the system.
@@ -65,6 +71,13 @@ public:
 	/// Creates a new window.  Newly created windows are hidden and of size 0x0.
 	/// @return A new window
 	virtual std::shared_ptr<window> new_window( void ) = 0;
+
+	/// @brief Forcibly destroy a window.
+	///
+	/// This is meant to be used when closing a window manually,
+	/// either due to a user hotkey or anything that isn't the user
+	/// closing the window using the window manager
+	virtual void destroy_window( const std::shared_ptr<window> &w ) = 0;
 
 	/// @brief Get the dispatcher.
 	///

@@ -29,6 +29,7 @@ public:
 	void exit( int code ) override;
 
 	void add_window( const std::shared_ptr<window> &win );
+	void remove_window( const std::shared_ptr<window> &win );
 
 private:
 	int _exit_code = 0;

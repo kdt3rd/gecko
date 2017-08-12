@@ -34,6 +34,7 @@ public:
 	void remove_waitable( const std::shared_ptr<waitable> &w ) override;
 
 	void add_window( const std::shared_ptr<window> &w );
+	void remove_window( const std::shared_ptr<window> &w );
 
 private:
 	int _exit_code = 0;

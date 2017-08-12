@@ -29,7 +29,9 @@ class menu;
 class application : public std::enable_shared_from_this<application>
 {
 public:
-	application( const std::string &platform = std::string(), const std::string &render = std::string() );
+	application( const std::string &display = std::string(),
+				 const std::string &platform = std::string(),
+				 const std::string &render = std::string() );
 	~application( void );
 
 	const std::string &active_platform( void ) { return _platform; }

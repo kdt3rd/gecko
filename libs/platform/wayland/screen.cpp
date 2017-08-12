@@ -35,16 +35,23 @@ bool screen::is_default( void ) const
 
 ////////////////////////////////////////
 
-base::size screen::bounds( void ) const
+double screen::refresh_rate( void ) const
 {
-	return { 1024.0, 720.0 };
+	return 30.0;
+}
+
+////////////////////////////////////////
+
+base::rect screen::bounds( bool active ) const
+{
+	return base::rect( 0.0, 0.0, 1024.0, 720.0 );
 }
 
 ////////////////////////////////////////
 
 base::size screen::dpi( void ) const
 {
-	return { 99.0, 99.0 };
+	return { 95.0, 95.0 };
 }
 
 ////////////////////////////////////////

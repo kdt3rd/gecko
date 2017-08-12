@@ -14,12 +14,10 @@
 #include <base/contract.h>
 #include <base/scope_guard.h>
 #include <stdexcept>
-
 #include <gl/check.h>
+#include "system.h"
 
 namespace {
-
-typedef GLXContext (*glXCreateContextAttribsARBProc)(Display*, GLXFBConfig, GLXContext, Bool, const int*);
 
 const int visual_attribs[] =
 {
@@ -78,39 +76,53 @@ namespace platform { namespace xlib
 
 ////////////////////////////////////////
 
-window::window( const std::shared_ptr<Display> &dpy )
+window::window( system &s, const std::shared_ptr<Display> &dpy )
 	: _display( dpy )
 {
 	precondition( _display, "null display" );
 
 	Display *disp = _display.get();
 
+	auto query = s.gl_proc_address();
+
+	using glXQueryVersionProc = Bool (*)( Display *, int *, int * );
+	auto glxVerFunc = reinterpret_cast<glXQueryVersionProc>( query( "glXQueryVersion" ) );
+	if ( ! glxVerFunc  )
+		throw_runtime( "Unable to find glXQueryVersion" );
 	// Check GLX version.  Version 1.3 is needed for FBConfig
 	int glx_major, glx_minor;
-	if ( !glXQueryVersion( disp, &glx_major, &glx_minor ) )
-		throw std::runtime_error( "glx query version failed" );
+	if ( !glxVerFunc( disp, &glx_major, &glx_minor ) )
+		throw_runtime( "glx query version failed" );
 	if ( ( ( glx_major == 1 ) && ( glx_minor < 3 ) ) || ( glx_major < 1 ) )
-		throw std::runtime_error( "glx too old" );
+		throw_runtime( "glx too old" );
+
+	auto glxChooseFBFunc = reinterpret_cast<PFNGLXCHOOSEFBCONFIGPROC>( query( "glXChooseFBConfig" ) );
+	if ( ! glxChooseFBFunc )
+		throw_runtime( "Unable to find glXChooseFBConfig" );
+	auto glxGetVis = reinterpret_cast<PFNGLXGETVISUALFROMFBCONFIGPROC>( query( "glXGetVisualFromFBConfig" ) );
+	if ( ! glxGetVis )
+		throw_runtime( "Unable to find glXGetVisualFromFBConfig" );
+	PFNGLXGETFBCONFIGATTRIBPROC glxGetFBAttr = (PFNGLXGETFBCONFIGATTRIBPROC) query( "glXGetFBConfigAttrib" );
 
 	// Get the framebuffer configs
 	int fbcount;
-	GLXFBConfig* fbc = glXChooseFBConfig( disp, DefaultScreen( disp ), visual_attribs, &fbcount );
+	GLXFBConfig* fbc = glxChooseFBFunc( disp, DefaultScreen( disp ), visual_attribs, &fbcount );
 	if ( fbc == nullptr )
-		throw std::runtime_error( "failed to get GL framebuffer configs" );
+		throw_runtime( "failed to get GL framebuffer configs" );
 	on_scope_exit { XFree( fbc ); };
 
 	// Find the best framebuffer
 	int best_fbc = -1, best_num_samp = -1;
 	for ( int i = 0; i < fbcount; ++i )
 	{
-		XVisualInfo *vi = glXGetVisualFromFBConfig( disp, fbc[i] );
+		XVisualInfo *vi = glxGetVis( disp, fbc[i] );
 		on_scope_exit { XFree( vi ); };
 
 		if ( vi != nullptr )
 		{
 			int samp_buf, samples;
-			glXGetFBConfigAttrib( disp, fbc[i], GLX_SAMPLE_BUFFERS, &samp_buf );
-			glXGetFBConfigAttrib( disp, fbc[i], GLX_SAMPLES, &samples );
+			glxGetFBAttr( disp, fbc[i], GLX_SAMPLE_BUFFERS, &samp_buf );
+			glxGetFBAttr( disp, fbc[i], GLX_SAMPLES, &samples );
 			if ( best_fbc < 0 || ( samp_buf && samples > best_num_samp ) )
 				best_fbc = i, best_num_samp = samples;
 		}
@@ -118,7 +130,7 @@ window::window( const std::shared_ptr<Display> &dpy )
 
 	GLXFBConfig bestFbc = fbc[ best_fbc ];
 
-	XVisualInfo *vi = glXGetVisualFromFBConfig( disp, bestFbc );
+	XVisualInfo *vi = glxGetVis( disp, bestFbc );
 	if ( vi == nullptr )
 		throw std::runtime_error( "no glx visual found" );
 	on_scope_exit { XFree( vi ); };
@@ -142,10 +154,10 @@ window::window( const std::shared_ptr<Display> &dpy )
 
 	// NOTE: It is not necessary to create or make current to a context before
 	// calling glXGetProcAddressARB
-	auto glXCreateContextAttribsARB = reinterpret_cast<glXCreateContextAttribsARBProc>( glXGetProcAddressARB( reinterpret_cast<const GLubyte *>( "glXCreateContextAttribsARB" ) ) );
+	auto glXCreateContextAttribsARB = reinterpret_cast<PFNGLXCREATECONTEXTATTRIBSARBPROC>( query( "glXCreateContextAttribsARB" ) );
 
 	if ( ! glXCreateContextAttribsARB )
-		throw std::runtime_error( "unable to retrieve the OpenGL glXCreateContextAttribsARB" );
+		throw_runtime( "unable to retrieve the OpenGL glXCreateContextAttribsARB" );
 
 	// If it does, try to get a GL 4.0 context!
 	int atrributes[] =
@@ -160,20 +172,23 @@ window::window( const std::shared_ptr<Display> &dpy )
 	if ( ! _glc )
 		throw std::runtime_error( "Unable to create OpenGL context" );
 
-	glXMakeCurrent( disp, _win, _glc );
+	_glc_makecurrent = reinterpret_cast<void (*)(Display *, GLXDrawable, GLXContext )>( query( "glXMakeCurrent" ) );
+	if ( ! _glc_makecurrent )
+		throw_runtime( "unable to retrieve glXMakeCurrent" );
+	_glc_swapbuffers = reinterpret_cast<void (*)(Display *, GLXDrawable )>( query( "glXSwapBuffers" ) );
+	if ( ! _glc_swapbuffers )
+		throw_runtime( "unable to retrieve glXSwapBuffers" );
 
-	int err = gl3wInit();
-	if ( err != 0 )
-		throw std::runtime_error( "failed to intialize gl3w" );
+	acquire();
 
 	if ( !gl3wIsSupported( 3, 3 ) )
 		throw std::runtime_error( "opengl 3.3 not supported" );
 
-	std::cout << "OpenGL:\n\tvendor " << glGetString( GL_VENDOR )
-			  << "\n\trenderer " << glGetString( GL_RENDERER )
-			  << "\n\tversion " << glGetString( GL_VERSION )
-			  << "\n\tshader language " << glGetString( GL_SHADING_LANGUAGE_VERSION )
-			  << "\n\n" << std::endl;
+//	std::cout << "OpenGL:\n\tvendor " << glGetString( GL_VENDOR )
+//			  << "\n\trenderer " << glGetString( GL_RENDERER )
+//			  << "\n\tversion " << glGetString( GL_VERSION )
+//			  << "\n\tshader language " << glGetString( GL_SHADING_LANGUAGE_VERSION )
+//			  << "\n\n" << std::endl;
 
 //	int extCount;
 //	glGetIntegerv(GL_NUM_EXTENSIONS, &extCount);
@@ -190,6 +205,8 @@ window::window( const std::shared_ptr<Display> &dpy )
 
 window::~window( void )
 {
+	if ( _win != 0 )
+		XDestroyWindow( _display.get(), _win );
 }
 
 ////////////////////////////////////////
@@ -290,14 +307,14 @@ void window::invalidate( const base::rect & /*r*/ )
 
 void window::acquire( void )
 {
-	glXMakeCurrent( _display.get(), _win, _glc );
+	_glc_makecurrent( _display.get(), _win, _glc );
 }
 
 ////////////////////////////////////////
 
 void window::release( void )
 {
-	glXMakeCurrent( _display.get(), None, nullptr );
+	_glc_makecurrent( _display.get(), None, nullptr );
 }
 
 ////////////////////////////////////////
@@ -348,9 +365,9 @@ void window::expose_event( void )
 	acquire();
 	if ( exposed )
 		exposed();
-	glXSwapBuffers( _display.get(), _win );
-	glFlush();
-	XFlush( _display.get() );
+	_glc_swapbuffers( _display.get(), _win );
+//	glFlush();
+//	XFlush( _display.get() );
 	release();
 }
 

@@ -38,4 +38,4 @@ lib = library "platform"
 		  libs=mswin.extra_libs;
 	  },
   }
-  libs{ "utf", "base" }
+  libs{ "utf", "gl", "base" }
