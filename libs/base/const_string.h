@@ -87,7 +87,7 @@ public:
 	constexpr const_string( const const_string & ) noexcept = default;
 	constexpr const_string( const_string && ) noexcept = default;
 	const_string &operator=( const const_string & ) noexcept = default;
-	const_string &operator=( const_string && ) noexcept = default;
+	const_string &operator=( const_string && ) noexcept = default; // NOLINT
 
 	/// @brief cast operator to std::basic_string
 	constexpr operator std::basic_string<charT, traitsT>( void ) const { return to_string(); } // NOLINT
