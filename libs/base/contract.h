@@ -29,9 +29,9 @@ public:
 
 	~location_exception( void ) override = default;
 	location_exception( const location_exception &e ) = default;
-	location_exception( location_exception &&e ) noexcept = default;
+	location_exception( location_exception &&e ) noexcept(true) = default;
 	location_exception &operator=( const location_exception &e ) = default;
-	location_exception &operator=( location_exception &&e ) noexcept = default;
+	location_exception &operator=( location_exception &&e ) noexcept(true) = default;
 
 	/// @brief Get the source file location.
 	const char *file( void ) const
@@ -67,9 +67,9 @@ class precondition_error : public std::logic_error
 public:
 	~precondition_error( void ) override = default;
 	precondition_error( const precondition_error &e ) = default;
-	precondition_error( precondition_error &&e ) noexcept = default;
+	precondition_error( precondition_error &&e ) noexcept(true) = default;
 	precondition_error &operator=( const precondition_error &e ) = default;
-	precondition_error &operator=( precondition_error &&e ) noexcept = default;
+	precondition_error &operator=( precondition_error &&e ) noexcept(true) = default;
 	using std::logic_error::logic_error;
 };
 
@@ -81,9 +81,9 @@ class postcondition_error : public std::logic_error
 public:
 	~postcondition_error( void ) override = default;
 	postcondition_error( const postcondition_error &e ) = default;
-	postcondition_error( postcondition_error &&e ) noexcept = default;
+	postcondition_error( postcondition_error &&e ) noexcept(true) = default;
 	postcondition_error &operator=( const postcondition_error &e ) = default;
-	postcondition_error &operator=( postcondition_error &&e ) noexcept = default;
+	postcondition_error &operator=( postcondition_error &&e ) noexcept(true) = default;
 	using std::logic_error::logic_error;
 };
 
@@ -133,10 +133,24 @@ public:
 #define throw_not_yet() \
 	throw_location( std::logic_error( "not yet implemented" ) )
 
+#ifdef _WIN32
+/// @brief Throw the last system error using format
+/// @sa base::format
+/// custom for windows, assumes windows.h has previously
+/// been included
+# define throw_lasterror( ... ) \
+	throw_location( std::system_error( GetLastError(), std::generic_category(), base::format( __VA_ARGS__ ) ) )
 /// @brief Throw a errno error using format
 /// @sa base::format
-#define throw_errno( ... ) \
+/// windows puts errno errors in the generic category
+# define throw_errno( ... ) \
+	throw_location( std::system_error( errno, std::generic_category(), base::format( __VA_ARGS__ ) ) )
+#else
+/// @brief Throw a errno error using format
+/// @sa base::format
+# define throw_errno( ... ) \
 	throw_location( std::system_error( errno, std::system_category(), base::format( __VA_ARGS__ ) ) )
+#endif
 
 /// @brief If check is not true, throw a precondition_error
 #define precondition( check, ... ) \
