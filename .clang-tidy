@@ -1,5 +1,5 @@
 ---
-Checks:          '*,-modernize-use-auto,-modernize-redundant-void-arg,-google-readability-braces-around-statements,-readability-braces-around-statements,-llvm-include-order,-llvm-header-guard,-google-runtime-references,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-readability-named-parameter,-modernize-raw-string-literal,-cppcoreguidelines-pro-bounds-array-to-pointer-decay'
+Checks:          '*,-modernize-use-auto,-modernize-redundant-void-arg,-google-readability-braces-around-statements,-readability-braces-around-statements,-llvm-include-order,-llvm-header-guard,-google-runtime-references,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-readability-named-parameter,-modernize-raw-string-literal,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-constant-array-index'
 WarningsAsErrors: ''
 HeaderFilterRegex: '.*'
 AnalyzeTemporaryDtors: false
