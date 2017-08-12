@@ -24,40 +24,42 @@
 namespace
 {
 
-struct font_info_cache
+//struct font_info_cache
+//{
+//	struct family_info
+//	{
+//		ENUMLOGFONTEXDV logical_font_info;
+//		NEWTEXTMETRICEX text_metrics;
+//	};
+//	struct family_data
+//	{
+//		std::map<uint8_t, std::vector<family_info>> charset_info;
+//		std::set<std::string> styles;
+//	};
+//
+//	std::map<std::string, family_data> avail_fonts;
+//};
+
+int CALLBACK queryFamilies( const LOGFONT *info,
+							const TEXTMETRIC * /*metrics*/,
+							DWORD /*fonttype*/,
+							LPARAM userdata )
 {
-	struct family_info
-	{
-		ENUMLOGFONTEXDV logical_font_info;
-		NEWTEXTMETRICEX text_metrics;
-	};
-	struct family_data
-	{
-		std::map<uint8_t, std::vector<family_info>> charset_info;
-		std::set<std::string> styles;
-	};
+	// do we care about true type or anything for real?
+	std::set<std::string> *famlist = reinterpret_cast<std::set<std::string> *>( userdata );
+	famlist->insert( std::string( reinterpret_cast<const char *>( info->lfFaceName ) ) );
+	return 1;
+}
 
-	std::map<std::string, family_data> avail_fonts;
-};
-
-int CALLBACK fontlistCallback( const LOGFONT *info,
-							   const TEXTMETRIC *metrics,
-							   DWORD fonttype,
-							   LPARAM userdata )
+int CALLBACK queryStyles( const LOGFONT *info,
+						  const TEXTMETRIC * /*metrics*/,
+						  DWORD /*fonttype*/,
+						  LPARAM userdata )
 {
-	if ( ( fonttype & TRUETYPE_FONTTYPE ) != 0 )
-	{
-		const ENUMLOGFONTEXDV *exinfo = reinterpret_cast<const ENUMLOGFONTEXDV *>( info );
-		const NEWTEXTMETRICEX *ntmetrics = reinterpret_cast<const NEWTEXTMETRICEX *>( metrics );
-		font_info_cache *cache = reinterpret_cast<font_info_cache *>( userdata );
-
-		auto &cacheinfo = cache->avail_fonts[info->lfFaceName];
-		auto &cset = cacheinfo.charset_info[info->lfCharSet];
-		cset.emplace_back();
-		cset.back().logical_font_info = *exinfo;
-		cset.back().text_metrics = *ntmetrics;
-		cacheinfo.styles.insert( std::string( reinterpret_cast<const char *>( exinfo->elfEnumLogfontEx.elfStyle ) ) );
-	}
+	// do we care about true type or anything for real?
+	std::set<std::string> *styleList = reinterpret_cast<std::set<std::string> *>( userdata );
+	const ENUMLOGFONTEXDV *exinfo = reinterpret_cast<const ENUMLOGFONTEXDV *>( info );
+	styleList->insert( std::string( reinterpret_cast<const char *>( exinfo->elfEnumLogfontEx.elfStyle ) ) );
 	return 1;
 }
 
@@ -68,7 +70,6 @@ namespace script { namespace mswin
 
 struct font_manager::pimpl
 {
-	font_info_cache font_cache;
 	FT_Library ftlib;
 };
 
@@ -79,23 +80,6 @@ font_manager::font_manager( void )
 {
 	if ( FT_Init_FreeType( &(_impl->ftlib) ) != 0 )
 		throw std::runtime_error( "freetype initialization failed" );
-
-	HDC dc = CreateDC( TEXT("DISPLAY"), NULL, NULL, NULL );
-	if ( dc == NULL )
-		throw_lasterror( "unable to create device for text query" );
-	on_scope_exit{ DeleteDC( dc ); };
-
-	LOGFONT fquery;
-	fquery.lfCharSet = DEFAULT_CHARSET;
-	fquery.lfFaceName[0] = '\0';
-	fquery.lfPitchAndFamily = 0;
-
-	EnumFontFamiliesEx( dc, &fquery, &fontlistCallback, reinterpret_cast<LPARAM>( &(_impl->font_cache) ), 0 );
-
-	std::cout << "Available font families:\n";
-	for ( auto &fams: _impl->font_cache.avail_fonts )
-		std::cout << "  " << fams.first << '\n';
-	std::cout << std::endl;
 }
 
 ////////////////////////////////////////
@@ -111,11 +95,24 @@ font_manager::~font_manager( void )
 
 std::set<std::string> font_manager::get_families( void )
 {
+	HDC dc = CreateCompatibleDC( NULL );
+	if ( dc == NULL )
+		throw_lasterror( "unable to create device for text query" );
+	on_scope_exit{ DeleteDC( dc ); };
+
+	// This does not seem to return any font 'aliases' (i.e. Arial under wine)...
+
+	LOGFONT fquery;
+	fquery.lfCharSet = DEFAULT_CHARSET;
+	fquery.lfFaceName[0] = '\0';
+	fquery.lfPitchAndFamily = 0;
+	
 	std::set<std::string> ret;
 
-	for ( const auto &f: _impl->font_cache.avail_fonts )
-		ret.insert( f.first );
+	EnumFontFamiliesEx( dc, &fquery, queryFamilies, reinterpret_cast<LPARAM>( &ret ), 0 );
 
+	// TODO: should we cache this? if we do, we have to monitor when
+	// things change... let's assume it won't be called that often.
 	return ret;
 }
 
@@ -123,11 +120,26 @@ std::set<std::string> font_manager::get_families( void )
 
 std::set<std::string> font_manager::get_styles( const std::string &family )
 {
-	auto f = _impl->font_cache.avail_fonts.find( family );
-	if ( f != _impl->font_cache.avail_fonts.end() )
-		return f->second.styles;
+	HDC dc = CreateCompatibleDC( NULL );
+	if ( dc == NULL )
+		throw_lasterror( "unable to create device for text query" );
+	on_scope_exit{ DeleteDC( dc ); };
 
+	LOGFONT fquery;
+	fquery.lfCharSet = DEFAULT_CHARSET;
+	fquery.lfFaceName[0] = '\0';
+	if ( ! family.empty() )
+	{
+		size_t last = std::min( size_t(LF_FACESIZE - 1), family.size() );
+		strncpy( fquery.lfFaceName, family.c_str(), last );
+		fquery.lfFaceName[last] = '\0';
+	}
+	fquery.lfPitchAndFamily = 0;
+	
 	std::set<std::string> ret;
+
+	EnumFontFamiliesEx( dc, &fquery, queryStyles, reinterpret_cast<LPARAM>( &ret ), 0 );
+
 	return ret;
 }
 
@@ -140,72 +152,82 @@ font_manager::get_font( const std::string &family, const std::string &style, dou
 
 	std::shared_ptr<script::font> ret;
 
-	// TODO: make this logic more fuzzy - there is font
-	// matching logic we could use...
-	auto f = _impl->font_cache.avail_fonts.find( family );
-	if ( f != _impl->font_cache.avail_fonts.end() )
+	HDC dc = CreateCompatibleDC( NULL );
+	if ( dc == NULL )
+		throw_lasterror( "unable to create device for text query" );
+	on_scope_exit{ DeleteDC( dc ); };
+
+	LOGFONT fquery = {0};
+	fquery.lfCharSet = DEFAULT_CHARSET;
+//	fquery.lfHeight = static_cast<int>( pixsize );
+	fquery.lfHeight = - MulDiv( static_cast<int>( pixsize ), GetDeviceCaps( dc, LOGPIXELSY ), 72 );
+	fquery.lfWidth = 0;
+	fquery.lfWeight = FW_DONTCARE;
+
+	// TODO: is there a better way to do this???
+	if ( ! style.empty() )
 	{
-//		HDC dc = CreateDC( TEXT("DISPLAY"), NULL, NULL, NULL );
-//		if ( dc == NULL )
-//			throw_lasterror( "unable to create device for text query" );
-//		on_scope_exit{ DeleteDC( dc ); };
-		std::cout << "Need to determine charset from language in order to choose the appropriate font..." << std::endl;
-
-		auto fci = f->second.charset_info.find( uint8_t(0) );
-		if ( fci != f->second.charset_info.end() )
+		static const std::map<std::string, LONG> styleToWeight
 		{
-			auto &faminfo = fci->second;
-			HFONT fnt = NULL;
-			for ( const auto &lf: faminfo )
-			{
-				if ( style == reinterpret_cast<const char *>( lf.logical_font_info.elfEnumLogfontEx.elfStyle ) )
-				{
-					fnt = CreateFontIndirectEx( &(lf.logical_font_info) );
-					break;
-				}
-			}
+			{ "Extra Light", FW_EXTRALIGHT },
+			{ "Ultra Light", FW_ULTRALIGHT },
+			{ "Thin", FW_THIN },
+			{ "Light", FW_LIGHT },
+			{ "Normal", FW_NORMAL },
+			{ "Regular", FW_REGULAR },
+			{ "Medium", FW_MEDIUM },
+			{ "Semi Bold", FW_SEMIBOLD },
+			{ "Demi Bold", FW_DEMIBOLD },
+			{ "Bold", FW_BOLD },
+			{ "Extra Bold", FW_EXTRABOLD },
+			{ "Ultra Bold", FW_ULTRABOLD },
+			{ "Heavy", FW_HEAVY },
+			{ "Black", FW_BLACK }
+		};
 
-			if ( fnt == NULL )
-				throw_runtime( "Found font family '{0}' and charset, but unable to find style '{1}'", family, style );
-
-			HDC dc = CreateDC( TEXT("DISPLAY"), NULL, NULL, NULL );
-			if ( dc == NULL )
-				throw_lasterror( "unable to create device for text query" );
-			on_scope_exit{ DeleteDC( dc ); };
-
-			SelectObject( dc, fnt );
-
-			DWORD ttfsz = GetFontData( dc, 0, 0, NULL, 0 );
-			if ( ttfsz == GDI_ERROR )
-				throw_lasterror( "unable to retrieve font data size" );
-
-			std::cout << "font data is: " << ttfsz << " bytes" << std::endl;
-			std::shared_ptr<uint8_t []> ttfData( new uint8_t[ttfsz + 1] );
-
-			ttfsz = GetFontData( dc, 0, 0, ttfData.get(), ttfsz );
-			if ( ttfsz == GDI_ERROR )
-				throw_lasterror( "unable to retrieve font data" );
-
-			FT_Face ftface;
-			auto error = FT_New_Memory_Face( _impl->ftlib, reinterpret_cast<const FT_Byte *>( ttfData.get() ), static_cast<FT_Long>( ttfsz ), 0, &ftface );
-			if ( error )
-				throw std::runtime_error( script::freetype2::font::errorstr( error ) );
-
-			try
-			{
-				ret = std::make_shared<script::freetype2::font>( ftface, family, style, pixsize, ttfData );
-			}
-			catch ( ... )
-			{
-				FT_Done_Face( ftface );
-			}
-			
-		}
-		else
-			throw_runtime( "Found font family '{0}', but no default char set", family );
+		auto stw = styleToWeight.find( style );
+		if ( stw != styleToWeight.end() )
+			fquery.lfWeight = stw->second;
 	}
-	else
-		throw_runtime( "Unable to find font family '{0}'", family );
+
+	if ( ! family.empty() )
+	{
+		size_t last = std::min( size_t(LF_FACESIZE - 1), family.size() );
+		strncpy( fquery.lfFaceName, family.c_str(), last );
+		fquery.lfFaceName[last] = '\0';
+	}
+
+	HFONT fnt = CreateFontIndirect( &fquery );
+	if ( fnt == NULL )
+		throw_lasterror( "Unable to create font with family '{0}', style '{1}'", family, style );
+
+	SelectObject( dc, fnt );
+
+	DWORD ttfsz = GetFontData( dc, 0, 0, NULL, 0 );
+	if ( ttfsz == GDI_ERROR )
+		throw_lasterror( "unable to retrieve font data size" );
+
+	std::shared_ptr<uint8_t []> ttfData( new uint8_t[ttfsz + 1] );
+	ttfsz = GetFontData( dc, 0, 0, ttfData.get(), ttfsz );
+	if ( ttfsz == GDI_ERROR )
+		throw_lasterror( "unable to retrieve font data" );
+
+	FT_Face ftface;
+	auto error = FT_New_Memory_Face( _impl->ftlib, reinterpret_cast<const FT_Byte *>( ttfData.get() ), static_cast<FT_Long>( ttfsz ), 0, &ftface );
+	if ( error )
+		throw std::runtime_error( script::freetype2::font::errorstr( error ) );
+
+	try
+	{
+		ret = std::make_shared<script::freetype2::font>( ftface, family, style, pixsize, ttfData );
+		ret->load_dpi( _dpi_h, _dpi_v );
+		ret->max_glyph_store( _max_glyph_w, _max_glyph_h );
+	}
+	catch ( ... )
+	{
+		FT_Done_Face( ftface );
+		throw;
+	}
 
 	return ret;
 }
