@@ -60,13 +60,10 @@ font::font( FT_Face face, std::string fam, std::string style, double pixsize, co
 			throw std::runtime_error( "Unable to select any character map" );
 	}
 
-	std::cout << "Need to add global DPI accessor somehow (multiple screens?)" << std::endl;
-	static const int theDPI = 95;
-
 	if ( FT_IS_SCALABLE( _face ) )
 	{
 		err = FT_Set_Char_Size( _face, static_cast<int>( pixsize * 64.0 ), 0,
-								theDPI, theDPI );
+								_dpi_h, _dpi_v );
 		if ( err )
 			throw std::runtime_error( "Unable to set character size" );
 	}

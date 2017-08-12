@@ -8,7 +8,7 @@
 #include "font.h"
 #include <cwchar>
 #include <limits>
-#include <stdexcept>
+#include <base/contract.h>
 
 namespace script
 {
@@ -312,19 +312,31 @@ font::bump_glyph_store_size( void )
 {
 	int nPackW = _glyph_pack.width();
 	int nPackH = _glyph_pack.height();
+	bool didBump = false;
 	if ( nPackW == 0 )
+	{
+		didBump = true;
 		nPackW = 256;
-	else if ( nPackW <= nPackH )
-		nPackW *= 2;
+		nPackH = 256;
+	}
+	else
+	{
+		int newW = std::min( _max_glyph_w, nPackW * 2 );
+		didBump = newW != nPackW;
+		nPackW = newW;
+	}
 
 	if ( nPackH == 0 )
 		nPackH = 256;
-	else if ( nPackH <= nPackW )
-		nPackH *= 2;
+	else if ( ! didBump )
+	{
+		int newH = std::min( _max_glyph_h, nPackH * 2 );
+		didBump = newH != nPackH;
+		nPackH = newH;
+	}
 
-	std::cout << "Need to know the max texture size at some point, using 1024 for now as max, cur size: " << nPackW << ", " << nPackH << std::endl;
-	if ( nPackW > 1024 || nPackH > 1024 )
-		throw std::runtime_error( "Max font cache size reached" );
+	if ( ! didBump )
+		throw_runtime( "Max font cache size reached" );
 
 	_glyph_pack.reset( nPackW, nPackH, true );
 

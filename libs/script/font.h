@@ -40,6 +40,9 @@ public:
 	/// @brief Style of the font.
 	inline const std::string &style( void ) const { return _style; }
 
+	void load_dpi( int h, int v ) { _dpi_h = h; _dpi_v = v; }
+	void max_glyph_store( int w, int h ) { _max_glyph_w = w; _max_glyph_h = h; }
+
 	/// @brief Size of the font.
 	inline double size( void ) const { return _size; }
 
@@ -130,6 +133,8 @@ protected:
 	uint32_t _glyph_version = 0;
 	base::pack _glyph_pack;
 	std::vector<uint8_t> _glyph_bitmap;
+	int _max_glyph_w = 2048;
+	int _max_glyph_h = 2048;
 
 	std::vector<float> _glyph_coords;
 
@@ -139,6 +144,8 @@ protected:
 	std::string _family;
 	std::string _style;
 	double _size;
+	int _dpi_h = 95;
+	int _dpi_v = 95;
 };
 
 ////////////////////////////////////////

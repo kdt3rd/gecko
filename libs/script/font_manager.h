@@ -29,6 +29,9 @@ public:
 	/// @brief Destructor.
 	virtual ~font_manager( void );
 
+	void load_dpi( int h, int v ) { _dpi_h = h; _dpi_v = v; }
+	void max_glyph_store( int w, int h ) { _max_glyph_w = w; _max_glyph_h = h; }
+
 	/// @brief List of families.
 	///
 	/// Get a list of families of all managed fonts.
@@ -54,6 +57,12 @@ public:
 	static const std::vector<std::shared_ptr<font_manager>> &list( void );
 
 	static std::shared_ptr<font_manager> common( void );
+
+protected:
+	int _max_glyph_w = 2048;
+	int _max_glyph_h = 2048;
+	int _dpi_h = 95;
+	int _dpi_v = 95;
 
 private:
 	static void init( void );
