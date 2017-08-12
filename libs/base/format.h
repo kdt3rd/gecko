@@ -138,7 +138,7 @@ private:
 	template <typename CharT, size_t I, size_t N>
 	struct get_arg
 	{
-		typedef get_arg<CharT,I+1,N-1> base_class;
+		using base_class = get_arg<CharT,I+1,N-1>;
 
 		template<typename Tuple>
 		static void output( std::basic_ostream<CharT> &out, const Tuple &t, size_t x )
