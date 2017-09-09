@@ -38,12 +38,22 @@ bool screen::is_default( void ) const
 
 ////////////////////////////////////////
 
-base::size screen::bounds( void ) const
+double screen::refresh_rate( void ) const
 {
-	NSScreen *scr = (NSScreen *)_nsscreen;
+	// TODO: implement. Look at CVDisplayLink?
+	return 30.0;
+}
+
+
+////////////////////////////////////////
+
+base::rect screen::bounds( bool avail ) const
+{
+	NSScreen *scr = reinterpret_cast<NSScreen *>( _nsscreen );
 	NSRect b = [scr frame];
-	float scale = [scr backingScaleFactor];
-	return { b.size.width * scale, b.size.height * scale };
+	auto scale = [scr backingScaleFactor];
+	// TODO: show avail or not
+	return { 0.0, 0.0, b.size.width * scale, b.size.height * scale };
 }
 
 ////////////////////////////////////////

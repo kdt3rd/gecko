@@ -122,6 +122,20 @@ std::vector<std::shared_ptr<::platform::screen>> system::screens( void )
 
 ////////////////////////////////////////
 
+std::shared_ptr<menu> system::new_system_menu( void )
+{
+	return std::shared_ptr<menu>();
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<tray> system::new_system_tray_item( void )
+{
+	return std::shared_ptr<tray>();
+}
+
+////////////////////////////////////////
+
 std::shared_ptr<platform::window> system::new_window( void )
 {
 	auto ret = std::make_shared<::platform::cocoa::window>();
@@ -132,7 +146,7 @@ std::shared_ptr<platform::window> system::new_window( void )
 ////////////////////////////////////////
 
 void
-system::destroy_window( const std::shared_ptr<window> &w )
+system::destroy_window( const std::shared_ptr<::platform::window> &w )
 {
 	auto x = std::static_pointer_cast<window>( w );
 	_dispatcher->remove_window( x );

@@ -28,6 +28,9 @@ public:
 
 	opengl_query gl_proc_address( void ) override;
 
+	std::shared_ptr<menu> new_system_menu( void ) override;
+	std::shared_ptr<tray> new_system_tray_item( void ) override;
+
 	std::vector<std::shared_ptr<::platform::screen>> screens( void ) override;
 	std::shared_ptr<::platform::window> new_window( void ) override;
 	void destroy_window( const std::shared_ptr<::platform::window> &w ) override;

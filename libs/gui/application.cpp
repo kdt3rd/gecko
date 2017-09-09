@@ -10,6 +10,7 @@
 #include <platform/platform.h>
 #include <platform/system.h>
 #include <platform/window.h>
+#include <platform/dispatcher.h>
 #include <script/font_manager.h>
 #include <base/contract.h>
 

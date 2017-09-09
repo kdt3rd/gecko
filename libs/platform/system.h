@@ -11,16 +11,22 @@
 #include <vector>
 #include <memory>
 #include <type_traits>
+#include <functional>
 
+// these are only partly needed by this header, but let's make it easier for
+// people so they only have to include one header for now...
 #include "screen.h"
+#include "timer.h"
 #include "window.h"
 #include "dispatcher.h"
-#include "keyboard.h"
-#include "mouse.h"
-#include "timer.h"
 
 namespace platform
 {
+
+class keyboard;
+class mouse;
+class tray;
+class menu;
 
 ////////////////////////////////////////
 
@@ -65,6 +71,28 @@ public:
 	/// Returns a vector of screens available to the system.
 	/// @return Vector of screens
 	virtual std::vector<std::shared_ptr<screen>> screens( void ) = 0;
+
+	/// @brief Creates a new system-level menu item.
+	///
+	/// Some systems allow a system level menu. for example, on OS/X,
+	/// this will be the main menu across the top of the screen. Under
+	/// some linux configurations (i.e. ubuntu unity), this is
+	/// similar. Windows does not have this concept, and so would
+	/// return null
+	///
+	/// @return a pointer to they system menu item. Implementations
+	/// are allowed to return null
+	virtual std::shared_ptr<menu> new_system_menu( void ) = 0;
+
+	/// @brief Return a reference to a system tray, if it exists on
+	/// the system.
+	///
+	/// Many systems allow an application to register a system tray
+	/// icon, which can have menus and other behaviors.
+	///
+	/// @return new tray object. This may be null if the system tray
+	/// is not available for the current system
+	virtual std::shared_ptr<tray> new_system_tray_item( void ) = 0;
 
 	/// @brief Create a new window.
 	///

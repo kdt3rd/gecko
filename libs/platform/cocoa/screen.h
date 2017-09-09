@@ -26,7 +26,9 @@ public:
 
 	bool is_default( void ) const override;
 
-	base::size bounds( void ) const override;
+	double refresh_rate( void ) const override;
+
+	base::rect bounds( bool avail ) const override;
 	base::size dpi( void ) const override;
 
 private:

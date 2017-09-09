@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include <platform/window.h>
 
 namespace platform { namespace cocoa
@@ -61,7 +63,7 @@ public:
 
 private:
 	struct objcwrapper;
-	objcwrapper *_impl;
+	std::unique_ptr<objcwrapper> _impl;
 
 	double _last_w = 0.0, _last_h = 0.0;
 };

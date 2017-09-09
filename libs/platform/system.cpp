@@ -6,7 +6,12 @@
 //
 
 #include "system.h"
+
 #include <base/contract.h>
+
+#include "dispatcher.h"
+#include "timer.h"
+
 
 namespace platform
 {

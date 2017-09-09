@@ -20,9 +20,9 @@ namespace platform { namespace cocoa
 
 struct window::objcwrapper
 {
-	NSWindow *win;
-	NSOpenGLView *view;
-	CGContext *ctxt;
+	NSWindow *win = nullptr;
+	NSOpenGLView *view = nullptr;
+	CGContext *ctxt = nullptr;
 };
 
 ////////////////////////////////////////
@@ -30,15 +30,12 @@ struct window::objcwrapper
 window::window( void )
 	: _impl( new objcwrapper )
 {
-	_impl->win = nullptr;
-	_impl->ctxt = nullptr;
 }
 
 ////////////////////////////////////////
 
 window::~window( void )
 {
-	std::cout << "window deleted" << std::endl;
 }
 
 ////////////////////////////////////////
@@ -73,7 +70,6 @@ void window::show( void )
 
 void window::hide( void )
 {
-	std::cout << "Popup window hidden" << std::endl;
 	[_impl->win orderOut:nil];
 }
 
