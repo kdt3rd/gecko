@@ -1,6 +1,7 @@
 
 lib = library "base"
   source{
+	"any.cpp";
 	"env.cpp";
 	"format.cpp";
 	"compiler_abi.cpp";

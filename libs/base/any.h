@@ -23,7 +23,7 @@ namespace base
 class bad_any_cast : public std::runtime_error
 {
 public:
-	~bad_any_cast( void ) override = default;
+	~bad_any_cast( void ) override;
 	bad_any_cast( const bad_any_cast & ) = default;
 	bad_any_cast( bad_any_cast && ) = default;
 	bad_any_cast &operator=( const bad_any_cast & ) = default;
@@ -190,7 +190,7 @@ private:
 	{
 	public:
 		any_base( void ) = default;
-	    virtual ~any_base( void ) = default;
+	    virtual ~any_base( void );
 		any_base( const any_base & ) = delete;
 		any_base &operator=( const any_base & ) = delete;
 		any_base( any_base && ) = delete;

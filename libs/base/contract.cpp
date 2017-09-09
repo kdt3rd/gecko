@@ -27,6 +27,17 @@ location_exception::what( void ) const noexcept
 	return _msg.c_str();
 }
 
+////////////////////////////////////////
+
+precondition_error::~precondition_error( void )
+{
+}
+
+////////////////////////////////////////
+
+postcondition_error::~postcondition_error( void )
+{
+}
 
 ////////////////////////////////////////
 

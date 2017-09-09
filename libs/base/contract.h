@@ -65,7 +65,7 @@ void print_exception( std::ostream &out, const std::exception &e, int level = 0 
 class precondition_error : public std::logic_error
 {
 public:
-	~precondition_error( void ) override = default;
+	~precondition_error( void ) override;
 	precondition_error( const precondition_error &e ) = default;
 	precondition_error( precondition_error &&e ) noexcept(true) = default;
 	precondition_error &operator=( const precondition_error &e ) = default;
@@ -79,7 +79,7 @@ public:
 class postcondition_error : public std::logic_error
 {
 public:
-	~postcondition_error( void ) override = default;
+	~postcondition_error( void ) override;
 	postcondition_error( const postcondition_error &e ) = default;
 	postcondition_error( postcondition_error &&e ) noexcept(true) = default;
 	postcondition_error &operator=( const postcondition_error &e ) = default;
