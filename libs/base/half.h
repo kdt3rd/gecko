@@ -1014,11 +1014,15 @@ namespace base
 			{
 				unsigned int m = arg.data_ & 0x7FFF;
 				if(m >= 0x7C00 || !m)
-					return *exp = 0, arg;
+				{
+					*exp = 0;
+					return arg;
+				}
 				int e = m >> 10;
 				if(!e)
 					for(m<<=1; m<0x400; m<<=1,--e) ;
-				return *exp = e-14, half(half::binary, static_cast<uint16>((arg.data_&0x8000)|0x3800|(m&0x3FF)));
+				*exp = e-14;
+				return half(half::binary, static_cast<uint16>((arg.data_&0x8000)|0x3800|(m&0x3FF)));
 			}
 
 			/// Decompression implementation.
@@ -1029,9 +1033,17 @@ namespace base
 			{
 				unsigned int e = arg.data_ & 0x7C00;
 				if(e > 0x6000)
-					return *iptr = arg, (e==0x7C00&&(arg.data_&0x3FF)) ? arg : half(half::binary, arg.data_&0x8000);
+				{
+					*iptr = arg;
+					return (e==0x7C00&&(arg.data_&0x3FF)) ? arg : half(half::binary, arg.data_&0x8000);
+				}
+
 				if(e < 0x3C00)
-					return iptr->data_ = arg.data_ & 0x8000, arg;
+				{
+					iptr->data_ = arg.data_ & 0x8000;
+					return arg;
+				}
+
 				e >>= 10;
 				unsigned int mask = (1<<(25-e)) - 1, m = arg.data_ & mask;
 				iptr->data_ = arg.data_ & ~mask;
