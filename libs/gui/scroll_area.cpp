@@ -179,14 +179,14 @@ bool scroll_area::update_layout( double duration )
 	bool result = widget::update_layout( duration );
 
 	if ( _hscroll )
-		result = _hscroll->update_layout( duration ) | result;
+		result = _hscroll->update_layout( duration ) || result;
 	if ( _vscroll )
-		result = _vscroll->update_layout( duration ) | result;
-	result = _main->update_layout( duration ) | result;
+		result = _vscroll->update_layout( duration ) || result;
+	result = _main->update_layout( duration ) || result;
 
 	if ( _widget )
 	{
-		result = _widget->update_layout( duration ) | result;
+		result = _widget->update_layout( duration ) || result;
 		update_widget();
 	}
 
