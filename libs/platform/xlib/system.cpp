@@ -16,6 +16,8 @@
 #include <stdexcept>
 
 #include <platform/platform.h>
+#include <platform/menu.h>
+#include <platform/tray.h>
 #include <base/contract.h>
 #include <base/env.h>
 
@@ -148,6 +150,22 @@ system::opengl_query
 system::gl_proc_address( void )
 {
 	return queryGL;
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<::platform::menu>
+system::new_system_menu( void )
+{
+	return std::make_shared<::platform::menu>();
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<::platform::tray>
+system::new_system_tray_item( void )
+{
+	return std::make_shared<::platform::tray>();
 }
 
 ////////////////////////////////////////

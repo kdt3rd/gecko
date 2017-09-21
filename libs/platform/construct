@@ -11,6 +11,8 @@ lib = library "platform"
 		"screen.cpp";
 		"window.cpp";
 		"timer.cpp";
+		"menu.cpp";
+		"tray.cpp";
 		"keyboard.cpp";
 		"mouse.cpp";
 		"dispatcher.cpp";

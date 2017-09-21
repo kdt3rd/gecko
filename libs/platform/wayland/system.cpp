@@ -12,6 +12,8 @@
 #include <gl/opengl.h>
 
 #include <platform/platform.h>
+#include <platform/menu.h>
+#include <platform/tray.h>
 #include <base/contract.h>
 #include <stdexcept>
 #include <cstring>
@@ -145,6 +147,22 @@ system::opengl_query
 system::gl_proc_address( void )
 {
 	return (system::opengl_query)eglGetProcAddress;
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<::platform::menu>
+system::new_system_menu( void )
+{
+	return std::make_shared<::platform::menu>();
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<::platform::tray>
+system::new_system_tray_item( void )
+{
+	return std::make_shared<::platform::tray>();
 }
 
 ////////////////////////////////////////

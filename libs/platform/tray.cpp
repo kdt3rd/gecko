@@ -1,24 +1,25 @@
 //
-// Copyright (c) 2013-2017 Ian Godin and Kimball Thurston
+// Copyright (c) 2017 Kimball Thurston
 // All rights reserved.
 // Copyrights licensed under the MIT License.
 // See the accompanying LICENSE.txt file for terms
 //
 
-#pragma once
+#include "tray.h"
 
 ////////////////////////////////////////
-
 namespace platform
 {
 
-class tray
+////////////////////////////////////////
+
+tray::~tray( void )
 {
-public:
-	tray( void ) = default;
-	virtual ~tray( void );
+}
 
-};
+////////////////////////////////////////
 
-} // namespace platform
+} // platform
+
+
 
