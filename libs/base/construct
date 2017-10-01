@@ -8,6 +8,7 @@ lib = library "base"
 	"contract.cpp";
 	"cpu_features.cpp";
 	"half.cpp";
+	"loadable.cpp";
 	"rect.cpp";
 	"string_util.cpp";
 	"string_variable_util.cpp";
