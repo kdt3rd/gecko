@@ -76,7 +76,7 @@ graph::get_value( node_id n )
 	on_scope_exit{ --_computing; };
 
 	any &v = _nodes[n].value();
-	if ( v.empty() )
+	if ( ! v.has_value() )
 		return process( n );
 
 	return v;
@@ -132,8 +132,12 @@ graph::copy_node( const graph &o, node_id n )
 			if ( &srcReg != &_ops )
 			{
 				hash h;
-				if ( ! cur.value().empty() )
-					cur.value().binary_stream( h );
+				if ( cur.value().has_value() )
+				{
+					size_t b = cur.value().size();
+					const void *ptr = any_cast<const void *>( &cur.value() );
+					h.add( ptr, b );
+				}
 
 				opid = _ops.find( srcReg[opid].name() );
 				nnode = add_node( opid, cur.value(), cur.dims(), inputs, h );
@@ -216,8 +220,7 @@ graph::clean_graph( void )
 			}
 
 			// if we have a value, clean up any remaining inputs as a first step
-			bool hasValue = ! n.value().empty();
-			if ( hasValue )
+			if ( n.value().has_value() )
 			{
 				size_t nInputs = n.input_size();
 				for ( size_t i = 0; i != nInputs; ++i )
@@ -242,7 +245,7 @@ graph::clean_graph( void )
 			for ( size_t o = 0, nO = n.output_size(); o != nO; ++o )
 			{
 				node_id onid = n.output( o );
-				if ( _nodes[onid].value().empty() && toDel.find( onid ) == toDel.end() )
+				if ( !_nodes[onid].value().has_value() && toDel.find( onid ) == toDel.end() )
 					++validOuts;
 			}
 
@@ -338,16 +341,16 @@ static void emit_node( std::ostream &os, int indent, const registry &ops, node_i
 	else
 	{
 		os << "N " << n;
-		if ( ! curN.value().empty() )
+		if ( curN.value().has_value() )
 		{
 			const engine::any &v = curN.value();
-			if ( v.is_type<float>() )
+			if ( v.type() == typeid(float) )
 				os << "\\nfloat " << base::any_cast<float>( v );
-			else if ( v.is_type<int>() )
+			else if ( v.type() == typeid(int) )
 				os << "\\nint " << base::any_cast<int>( v );
-			else if ( v.is_type<int64_t>() )
+			else if ( v.type() == typeid(int64_t) )
 				os << "\\nint64_t " << base::any_cast<int64_t>( v );
-			else if ( v.is_type<double>() )
+			else if ( v.type() == typeid(double) )
 				os << "\\ndouble " << base::any_cast<double>( v );
 			else
 				os << "\\n" << esc_dot( ops[curN.op()].name() ) << " (" << esc_dot( base::demangle( ops[curN.op()].function().result_type() ) );
@@ -362,7 +365,7 @@ static void emit_node( std::ostream &os, int indent, const registry &ops, node_i
 	{
 		if ( isSGoutput )
 			os << ", style=filled, fillcolor=\"#BBDDFF\"";
-		else if ( ! curN.value().empty() )
+		else if ( curN.value().has_value() )
 			os << ", style=filled, fillcolor=\"#DDFFFF\"";
 		else
 			os << ", style=filled, fillcolor=\"#DDDDFF\"";
@@ -371,7 +374,7 @@ static void emit_node( std::ostream &os, int indent, const registry &ops, node_i
 		os << ", style=filled, fillcolor=\"#BBDDDD\"";
 	else if ( curN.output_size() == 0 )
 		os << ", style=filled, fillcolor=\"#FFDDDD\"";
-	else if ( ! curN.value().empty() )
+	else if ( curN.value().has_value() )
 		os << ", style=filled, fillcolor=\"#DDFFDD\"";
 
 	os << "];\n";
@@ -522,7 +525,7 @@ graph::process( node_id nid )
 		{
 			node_id in = curN.input( i );
 			precondition( in != nullnode, "input prematurely cleaned" );
-			if ( ! _nodes[in].value().empty() )
+			if ( _nodes[in].value().has_value() )
 				continue;
 
 			if ( _process_list.find( in ) == _process_list.end() )
@@ -542,7 +545,7 @@ graph::process( node_id nid )
 		node &curN = _nodes[c];
 		if ( curN.op() == nullop )
 			continue;
-		if ( ! curN.value().empty() )
+		if ( curN.value().has_value() )
 			continue;
 
 //		std::cout << "  computing node " << c << std::endl;
@@ -559,7 +562,7 @@ graph::process( node_id nid )
 			bool haveAllValues = true;
 			for ( auto sginn: sg.inputs() )
 			{
-				if ( _nodes[sginn].value().empty() )
+				if ( ! _nodes[sginn].value().has_value() )
 				{
 					std::cout << "  subgroup " << sgi << " input node " << sginn << " missing value" << std::endl;
 					haveAllValues = false;
@@ -710,7 +713,7 @@ graph::move_constants( void )
 	node_id N = static_cast<node_id>( _nodes.size() );
 	for ( ; curPos != N; ++curPos )
 	{
-		if ( _nodes[curPos].value().empty() )
+		if ( ! _nodes[curPos].value().has_value() )
 			break;
 		++curConstantPos;
 	}
@@ -722,7 +725,7 @@ graph::move_constants( void )
 		if ( cur.op() == nullop )
 			continue;
 
-		if ( _nodes[curPos].value().empty() )
+		if ( ! _nodes[curPos].value().has_value() )
 			continue;
 
 		if ( curPos != curConstantPos )
@@ -756,7 +759,7 @@ graph::apply_grouping( void )
 		if ( cur.op() == nullop )
 			continue;
 		// and nodes with values
-		if ( ! cur.value().empty() )
+		if ( cur.value().has_value() )
 			continue;
 
 		const op &curOp = _ops[cur.op()];
@@ -896,7 +899,7 @@ graph::apply_grouping( void )
 				{
 					node_id curIn = cur.input( i );
 					node &curInN = _nodes[curIn];
-					if ( curInN.value().is_null() )
+					if ( ! curInN.value().has_value() )
 					{
 						if ( soloIn == size_t(-1) )
 							soloIn = i;
@@ -1331,7 +1334,7 @@ graph::update_hash_map( void )
 	std::map<hash::value, node_id> nh2nmap;
 	for ( node_id nid = 0, N = static_cast<node_id>( _nodes.size() ); nid != N; ++nid )
 	{
-		if ( _nodes[nid].op() == nullop && _nodes[nid].value().empty() )
+		if ( _nodes[nid].op() == nullop && ! _nodes[nid].value().has_value() )
 		{
 //			std::cout << "ignoring null op " << nid << " in update_hash_map" << std::endl;
 			continue;

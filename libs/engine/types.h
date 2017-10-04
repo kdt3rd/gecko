@@ -26,16 +26,7 @@ inline std::ostream &operator<<( std::ostream &os, const hash::value &v )
 }
 
 using any = base::any;
-template <typename T>
-T any_cast( const any &a )
-{
-	return a.as<T>();
-}
-template <typename T>
-T any_cast( any &a )
-{
-	return a.as<T>();
-}
+using base::any_cast;
 
 /// Storage type for storing the dimensions of a particular processing node
 ///

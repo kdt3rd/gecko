@@ -127,7 +127,7 @@ struct arg_type_adapter<scanline &>
 	static inline type get( std::vector<plane_scan_binder> &b, std::vector<scanline> &s, size_t i, const engine::any &v, engine::node_id n, engine::subgroup &sg, engine::subgroup_function *sgf, std::vector<std::shared_ptr<engine::subgroup_function>> &funcs )
 	{
 		precondition( i != size_t(-1), "item with binder has not binder" );
-		if ( ! v.empty() )
+		if ( v.has_value() )
 			b[i] = plane_scan_binder( base::any_cast<const plane &>( v ), s[i] );
 		else
 		{
@@ -162,7 +162,7 @@ struct arg_type_adapter<const scanline &>
 	static inline type get( std::vector<plane_scan_binder> &b, std::vector<scanline> &s, size_t i, const engine::any &v, engine::node_id n, engine::subgroup &sg, engine::subgroup_function *sgf, std::vector<std::shared_ptr<engine::subgroup_function>> &funcs )
 	{
 		precondition( i != size_t(-1), "item with binder has not binder" );
-		if ( ! v.empty() )
+		if ( v.has_value() )
 			b[i] = plane_scan_binder( base::any_cast<const plane &>( v ), s[i] );
 		else
 		{

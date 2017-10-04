@@ -73,7 +73,7 @@ computed_base::pending( void ) const
 	if ( _graph )
 	{
 		const node &n = (*_graph)[_id];
-		if ( n.value().empty() )
+		if ( ! n.value().has_value() )
 			return true;
 	}
 
