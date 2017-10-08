@@ -89,28 +89,28 @@ void shared_reader( base::shared_mutex &m )
 
 void ev_1( base::event &e1, base::event &e2 )
 {
-	std::cout << "ev_1 waiting e1" << std::endl;
+//	std::cout << "ev_1 waiting e1" << std::endl;
 	e1.wait();
-	std::cout << "ev_1 lower e1" << std::endl;
+//	std::cout << "ev_1 lower e1" << std::endl;
 	e1.lower();
-	std::cout << "ev_1 raise e2" << std::endl;
+//	std::cout << "ev_1 raise e2" << std::endl;
 	e2.raise();
-	std::cout << "ev_1 waiting e1" << std::endl;
+//	std::cout << "ev_1 waiting e1" << std::endl;
 	e1.wait();
-	std::cout << "ev_1 done" << std::endl;
+//	std::cout << "ev_1 done" << std::endl;
 }
 
 void ev_2( base::event &e1, base::event &e2 )
 {
-	std::cout << "ev_2 raising e1" << std::endl;
+//	std::cout << "ev_2 raising e1" << std::endl;
 	e1.raise();
-	std::cout << "ev_2 waiting e2" << std::endl;
+//	std::cout << "ev_2 waiting e2" << std::endl;
 	e2.wait();
-	std::cout << "ev_2 lower e2" << std::endl;
+//	std::cout << "ev_2 lower e2" << std::endl;
 	e2.lower();
-	std::cout << "ev_2 raise e1" << std::endl;
+//	std::cout << "ev_2 raise e1" << std::endl;
 	e1.raise();
-	std::cout << "ev_2 done" << std::endl;
+//	std::cout << "ev_2 done" << std::endl;
 }
 
 void auto_e1( base::auto_reset_event &e1, base::auto_reset_event &e2 )
