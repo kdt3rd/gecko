@@ -1,4 +1,5 @@
 
+AddUnitTest( "any.cpp", "base" )
 AddUnitTest( "filesystem.cpp", "base" )
 AddUnitTest( "cmdline.cpp", "base", { "hello", "test_file" } )
 AddUnitTest( "exception.cpp", "base" )

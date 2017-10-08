@@ -108,7 +108,6 @@ private:
 
 		static inline void *apply( val_op o, const any *v, any *a, const std::type_info *tinfo )
 		{
-			auto p = static_cast<const T *>( v->_store.buffer() );
 			switch ( o )
 			{
 				case val_op::tinfo:
@@ -119,21 +118,30 @@ private:
 
 				case val_op::get:
 					if ( tinfo && *tinfo == typeid(T) )
+					{
+						auto p = static_cast<const T *>( v->_store.buffer() );
 						return const_cast<T *>( p );
+					}
 					return nullptr;
 
 				case val_op::copy:
+				{
+					auto p = static_cast<const T *>( v->_store.buffer() );
 					create( *a, *p );
 					break;
+				}
 
 				case val_op::destroy:
 					destroy( *const_cast<any *>( v ) );
 					break;
 
 				case val_op::move:
+				{
+					auto p = static_cast<const T *>( v->_store.buffer() );
 					create( *a, std::move( *const_cast<T *>( p ) ) );
 					destroy( *const_cast<any *>( v ) );
 					break;
+				}
 			}
 			return nullptr;
 		}
@@ -173,14 +181,14 @@ private:
 				case val_op::get:
 					if ( tinfo && *tinfo == typeid(T) )
 					{
-						auto p = static_cast<const T *>( v->_store.buffer() );
+						auto p = static_cast<const T *>( v->_store.ptr );
 						return const_cast<T *>( p );
 					}
 					return nullptr;
 
 				case val_op::copy:
 				{
-					auto p = static_cast<const T *>( v->_store.buffer() );
+					auto p = static_cast<const T *>( v->_store.ptr );
 					create( *a, *p );
 					break;
 				}
@@ -241,6 +249,8 @@ public:
 	template <typename T, typename Tp = decay<T>, typename = typename std::enable_if<std::is_copy_constructible<Tp>::value && !std::is_same<Tp, any>::value>::type>
 		inline any( T &&val ) // NOLINT
 	{
+		static_assert( (std::is_same<processor<Tp>, local_store<Tp> >::value && sizeof(Tp) <= (3 * sizeof(void *))) ||
+					   (std::is_same<processor<Tp>, heap_store<Tp> >::value && sizeof(Tp) > (3 * sizeof(void *))), "wrong processor chosen" );
 		processor<Tp>::create( *this, std::forward<T>( val ) );
 	}
 
@@ -354,13 +364,13 @@ protected:
 	template <typename T>
 	const T *as( void ) const noexcept
 	{
-		return static_cast<const T *>( this->call_proc( val_op::get ) );
+		return static_cast<const T *>( this->call_proc( val_op::get, nullptr, &typeid(T) ) );
 	}
 
 	template <typename T>
 	T *as( void ) noexcept
 	{
-		return static_cast<T *>( this->call_proc( val_op::get ) );
+		return static_cast<T *>( this->call_proc( val_op::get, nullptr, &typeid(T) ) );
 	}
 };
 
@@ -379,19 +389,19 @@ inline any make_any( std::initializer_list<U> il, Args &&... args )
 template <class T>
 inline T any_cast( const any &a )
 {
-	auto p = any_cast<typename std::add_const<typename std::remove_reference<T>::type>::type>( &a );
-	if ( p == nullptr )
-		throw_bad_any_cast();
-	return *p;
+	auto p = any_cast<typename std::remove_cv<typename std::remove_reference<T>::type>::type>( &a );
+	if ( p )
+		return static_cast<T>( *p );
+	throw_bad_any_cast();
 }
 
 template <class T>
 inline T any_cast( any &a )
 {
-	auto p = any_cast<typename std::remove_reference<T>::type>( &a );
-	if ( p == nullptr )
-		throw_bad_any_cast();
-	return *p;
+	auto p = any_cast<typename std::remove_cv<typename std::remove_reference<T>::type>::type>( &a );
+	if ( p )
+		return static_cast<T>( *p );
+	throw_bad_any_cast();
 }
 
 namespace detail
@@ -428,7 +438,7 @@ inline T any_cast( any &&a )
 template <class T>
 inline const T *any_cast( const any *a ) noexcept
 {
-	if ( a == nullptr || ! a->is_typed( typeid(T) ) )
+	if ( a == nullptr )
 		return nullptr;
 	return a->as<T>();
 }
@@ -436,7 +446,7 @@ inline const T *any_cast( const any *a ) noexcept
 template <class T>
 inline T *any_cast( any *a ) noexcept
 {
-	if ( a == nullptr || ! a->is_typed( typeid(T) ) )
+	if ( a == nullptr )
 		return nullptr;
 	return a->as<T>();
 }
