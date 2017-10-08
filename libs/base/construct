@@ -10,6 +10,7 @@ lib = library "base"
 	"half.cpp";
 	"loadable.cpp";
 	"rect.cpp";
+	"shared_mutex.cpp";
 	"string_util.cpp";
 	"string_variable_util.cpp";
 	"variable_set.cpp";
