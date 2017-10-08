@@ -249,8 +249,6 @@ public:
 	template <typename T, typename Tp = decay<T>, typename = typename std::enable_if<std::is_copy_constructible<Tp>::value && !std::is_same<Tp, any>::value>::type>
 		inline any( T &&val ) // NOLINT
 	{
-		static_assert( (std::is_same<processor<Tp>, local_store<Tp> >::value && sizeof(Tp) <= (3 * sizeof(void *))) ||
-					   (std::is_same<processor<Tp>, heap_store<Tp> >::value && sizeof(Tp) > (3 * sizeof(void *))), "wrong processor chosen" );
 		processor<Tp>::create( *this, std::forward<T>( val ) );
 	}
 
