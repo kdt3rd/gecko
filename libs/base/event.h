@@ -52,6 +52,7 @@ private:
 #ifdef _WIN32
 	HANDLE _event;
 #else
+	// could use eventfd if we want to be able to wait on this in the future...
 	std::mutex _mutex;
 	std::condition_variable _cond;
 	bool _state;
