@@ -60,6 +60,32 @@ using u32cstring = const_string<char32_t>;
 template <class charT, typename traitsT>
 class const_string
 {
+	template <typename S, bool = false>
+	struct ctor_helper
+	{
+		template <typename V>
+		static constexpr std::size_t length( const V *str )
+		{
+			return traitsT::length( str );
+		}
+	};
+	template <typename S>
+	struct ctor_helper<S, true>
+	{
+		template <typename V, std::size_t N>
+		static constexpr std::size_t length( const V (&str)[N] )
+		{
+			return N - 1;
+		}
+	};
+	template <typename S>
+	static constexpr std::size_t ctor_len( S &&s )
+	{
+		using Y = typename std::remove_reference<S>::type;
+		using help = ctor_helper<Y, std::is_array<Y>::value && std::is_const<Y>::value>;
+		return help::length( std::forward<S>( s ) );
+	}
+
 public:
 	using traits_type = traitsT;
 	using value_type = typename traitsT::char_type;
@@ -69,18 +95,25 @@ public:
 
 	static const size_type npos = static_cast<size_type>(-1);
 
-	constexpr const_string( void ) = default;
-	// NB: this can fail with constructs char buf[128]; - it's not
-	// actually only string literals even tho it is constexpr :(
-	template <std::size_t N>
-	constexpr const_string( const value_type (&s)[N] ) // NOLINT
-	: _str( s ), _sz( N - 1 ) {}
-	constexpr const_string( const value_type *s, size_type N ) : _str( s ), _sz( N ) {}
+	constexpr const_string( void ) noexcept = default;
+	constexpr const_string( const value_type *s, size_type N ) noexcept : _str( s ), _sz( N ) {}
 	template <typename allocTs>
-	constexpr const_string( const std::basic_string<charT, traitsT, allocTs> &s ) // NOLINT
+	constexpr const_string( const std::basic_string<charT, traitsT, allocTs> &s ) noexcept // NOLINT
 	: _str( s.data() ), _sz( s.size() ) {}
-	constexpr const_string( const value_type *s ) // NOLINT
-	: _str( s ), _sz( traits_type::length( s ) ) {}
+	/// NB: this will give probably unexpected results for values of
+	/// const char buf[1024] = { "foo" };
+	/// const_string foo( buf );
+	/// -> the string length will be 1023
+	/// however
+	/// const char foo[] = { "foo" };
+	/// will work as expected
+	/// also
+	/// char buf[50]
+	/// should be correctly handled (and run strlen)
+	template <typename S, typename = typename std::enable_if<std::is_same<typename std::decay<typename std::remove_reference<S>::type>::type, value_type *>::value ||
+															 std::is_same<typename std::decay<typename std::remove_reference<S>::type>::type, const value_type *>::value, int>::type >
+	constexpr const_string( S &&s ) noexcept // NOLINT
+	: _str( s ), _sz( ctor_len( std::forward<S>( s ) ) ) {}
 
 	~const_string( void ) = default;
 
@@ -145,33 +178,9 @@ public:
 				 compare_priv( begin(), s.begin(), s.size(), 1 ) );
 	}
 
-	template <size_t N>
-	constexpr int
-	compare( const value_type (&s)[N] ) const
-	{
-		return ( size() <= (N-1) ?
-				 compare_priv( begin(), s, size(), size() == (N-1) ? 0 : -1 ) :
-				 compare_priv( begin(), s, (N-1), 1 ) );
-	}
-
-	template <typename allocT>
-	constexpr int
-	compare( const std::basic_string<value_type,traits_type, allocT> &s ) const
-	{
-		return ( size() <= s.size() ?
-				 compare_priv( begin(), s.data(), size(), size() == s.size() ? 0 : -1 ) :
-				 compare_priv( begin(), s.data(), s.size(), 1 ) );
-	}
-
 	constexpr int compare( size_type pos, size_type n, const const_string &s ) const
 	{
 		return substr( pos, n ).compare( s );
-	}
-
-	template <std::size_t N>
-	constexpr int compare( size_type pos, size_type n, const value_type (&s)[N] ) const
-	{
-		return substr( pos, n ).compare( const_string( s, N - 1 ) );
 	}
 
 	constexpr int compare( size_type pos, size_type n, const value_type *s ) const
@@ -266,67 +275,39 @@ operator==( const const_string<charT, traitsT> &lhs, const const_string<charT, t
 	return lhs.compare( rhs ) == 0;
 }
 
+template <typename charT, typename traitsT, typename S>
+inline constexpr bool
+operator==( const const_string<charT, traitsT> &lhs, S &&rhs )
+{
+	return lhs.compare( const_string<charT, traitsT>( std::forward<S>( rhs ) ) ) == 0;
+}
+
+template <typename charT, typename traitsT, typename S>
+inline constexpr bool
+operator==( S &&lhs, const const_string<charT, traitsT> &rhs )
+{
+	return rhs.compare( const_string<charT, traitsT>( std::forward<S>( lhs ) ) ) == 0;
+}
+
 template <typename charT, typename traitsT>
 inline constexpr bool
-operator!=( const_string<charT, traitsT> lhs, const_string<charT, traitsT> rhs )
+operator!=( const const_string<charT, traitsT> &lhs, const const_string<charT, traitsT> &rhs )
 {
 	return lhs.compare( rhs ) != 0;
 }
 
-template <typename charT, typename traitsT, std::size_t N>
+template <typename charT, typename traitsT, typename S>
 inline constexpr bool
-operator==( const const_string<charT, traitsT> &lhs, const charT (&rhs)[N] )
+operator!=( const const_string<charT, traitsT> &lhs, S &&rhs )
 {
-	return lhs.compare( rhs ) == 0;
+	return lhs.compare( const_string<charT, traitsT>( std::forward<S>( rhs ) ) ) != 0;
 }
 
-template <typename charT, typename traitsT, std::size_t N>
+template <typename charT, typename traitsT, typename S>
 inline constexpr bool
-operator==( const charT (&lhs)[N], const const_string<charT, traitsT> &rhs )
+operator!=( S &&lhs, const const_string<charT, traitsT> &rhs )
 {
-	return rhs.compare( lhs ) == 0;
-}
-
-template <typename charT, typename traitsT, typename allocT>
-inline constexpr bool
-operator==( const std::basic_string<charT, traitsT, allocT> &lhs, const const_string<charT, traitsT> &rhs )
-{
-	return rhs.compare( lhs ) == 0;
-}
-
-template <typename charT, typename traitsT, typename allocT>
-inline constexpr bool
-operator==( const const_string<charT, traitsT> &lhs, const std::basic_string<charT, traitsT, allocT> &rhs )
-{
-	return lhs.compare( rhs ) == 0;
-}
-
-template <typename charT, typename traitsT, std::size_t N>
-inline constexpr bool
-operator!=( const const_string<charT, traitsT> &lhs, const charT (&rhs)[N] )
-{
-	return !( lhs == rhs );
-}
-
-template <typename charT, typename traitsT, std::size_t N>
-inline constexpr bool
-operator!=( const charT (&lhs)[N], const const_string<charT, traitsT> &rhs )
-{
-	return !( rhs == lhs );
-}
-
-template <typename charT, typename traitsT, typename allocT>
-inline constexpr bool
-operator!=( const std::basic_string<charT, traitsT, allocT> &lhs, const const_string<charT, traitsT> &rhs )
-{
-	return !( rhs == lhs );
-}
-
-template <typename charT, typename traitsT, typename allocT>
-inline constexpr bool
-operator!=( const const_string<charT, traitsT> &lhs, const std::basic_string<charT, traitsT, allocT> &rhs )
-{
-	return !( lhs == rhs );
+	return rhs.compare( const_string<charT, traitsT>( std::forward<S>( lhs ) ) ) != 0;
 }
 
 

@@ -18,6 +18,7 @@
 
 #include "const_string.h"
 #include "string_split.h"
+#include "likely.h"
 
 namespace base
 {
@@ -31,27 +32,14 @@ std::string rtrim( const std::string &str, const std::string &ws = " \t\n\r" );
 
 ////////////////////////////////////////
 
-
+// TODO: generalize to arbitrary string types...
 std::string replace( std::string &&str, char c, const std::string &replacement );
 std::string replace( std::string &&str, char c, const cstring &replacement );
-template <std::size_t N>
-inline std::string replace( std::string &&str, char c, const char (&repl)[N] )
+template <typename S, typename = typename std::enable_if<std::is_same<typename std::decay<typename std::remove_reference<S>::type>::type, char *>::value ||
+														 std::is_same<typename std::decay<typename std::remove_reference<S>::type>::type, const char *>::value, int>::type>
+inline std::string replace( std::string &&str, char c, S &&replacement )
 {
-	return replace( std::move( str ), c, cstring( repl ) );
-}
-
-inline std::string replace( const std::string &str, char c, const std::string &replacement )
-{
-	return replace( std::string( str ), c, replacement );
-}
-inline std::string replace( const std::string &str, char c, const cstring &replacement )
-{
-	return replace( std::string( str ), c, replacement );
-}
-template <std::size_t N>
-inline std::string replace( const std::string &str, char c, const char (&repl)[N] )
-{
-	return replace( std::string( str ), c, cstring( repl ) );
+	return replace( std::move( str ), c, cstring( std::forward<S>( replacement ) ) );
 }
 
 inline std::string replace( std::string &&str, std::initializer_list<std::pair<char,cstring>> r )
@@ -114,35 +102,22 @@ template <typename stringT>
 inline bool begins_with( const stringT &s,
 						 const const_string<typename stringT::value_type, typename stringT::traits_type> &start )
 {
-	if ( start.empty() )
+	if ( unlikely( start.empty() ) )
 		return true;
 
 	// need this one for begins_with with a static char * second arg
 	return s.compare( 0, start.size(), start.data(), start.size() ) == 0;
 }
 
+// need to have this one to avoid an extra strlen call since specific
+// template rules will pick the above version for 2 const_strings because
+// b is more specific
 template <typename charT, typename traitsT>
-inline bool begins_with( const const_string<charT, traitsT> &s,
-						 const const_string<charT, traitsT> &start )
+constexpr inline bool begins_with( const const_string<charT, traitsT> &s,
+								   const const_string<charT, traitsT> &start )
 {
-	if ( start.empty() )
-		return true;
-
-	// need to have this one to avoid an extra strlen call since specific
-	// template rules will pick the above version for 2 const_strings because
-	// b is more specific
-	return s.compare( 0, start.size(), start, 0, start.size() ) == 0;
+	return ( unlikely( start.empty() ) ) ? true : ( s.compare( 0, start.size(), start, 0, start.size() ) == 0 );
 }
-
-template <typename charT, typename traitsT, template<typename X, typename Y> class stringT, std::size_t N>
-inline bool begins_with( const stringT<charT, traitsT> &s,
-						 const charT (&start)[N] )
-{
-	// define this overload since not all compiler version seem able
-	// to emit an implicit conversion to const_string :(
-	return s.compare( 0, N - 1, start, 0, N - 1 ) == 0;
-}
-
 
 ////////////////////////////////////////
 
@@ -150,10 +125,10 @@ template <typename stringT>
 inline bool ends_with( const stringT &s,
 					   const stringT &end )
 {
-	if ( end.empty() )
+	if ( unlikely( end.empty() ) )
 		return true;
 
-	if ( s.size() < end.size() )
+	if ( unlikely( s.size() < end.size() ) )
 		return false;
 
 	return s.compare( s.size() - end.size(), end.size(), end ) == 0;
@@ -163,26 +138,21 @@ template <typename stringT>
 inline bool ends_with( const stringT &s,
 					   const const_string<typename stringT::value_type, typename stringT::traits_type> &end )
 {
-	if ( end.empty() )
+	if ( unlikely( end.empty() ) )
 		return true;
 
-	if ( s.size() < end.size() )
+	if ( unlikely( s.size() < end.size() ) )
 		return false;
 
 	return s.compare( s.size() - end.size(), end.size(), end.data(), end.size() ) == 0;
 }
 
 template <typename CharT, typename TraitsT>
-inline bool ends_with( const const_string<CharT, TraitsT> &s,
+constexpr inline bool ends_with( const const_string<CharT, TraitsT> &s,
 					   const const_string<CharT, TraitsT> &end )
 {
-	if ( end.empty() )
-		return true;
-
-	if ( s.size() < end.size() )
-		return false;
-
-	return s.compare( s.size() - end.size(), end.size(), end ) == 0;
+	return ( unlikely( end.empty() ) ) ? true : ( unlikely( s.size() < end.size() ) ) ? false :
+		( s.compare( s.size() - end.size(), end.size(), end ) == 0 );
 }
 
 ////////////////////////////////////////
@@ -192,9 +162,7 @@ constexpr size_t length( const const_string<char> &s )
 	return s.size();
 }
 
-
 ////////////////////////////////////////
-
 
 /// @brief locale-specific comparison of strings
 template <typename stringT>
@@ -215,7 +183,8 @@ inline int collate( const stringT &a,
 					  b.data(), b.data() + b.size() );
 }
 
-/// @brief locale-specific case insensitive comparison
+// TODO: can we do this without the string duplication? Seems like it should
+// be possible if we subclass std::collate...
 template <typename charT, typename traitsT, typename allocT>
 inline int icollate( std::basic_string<charT, traitsT, allocT> a,
 					 std::basic_string<charT, traitsT, allocT> b,
@@ -233,15 +202,15 @@ inline int icollate( std::basic_string<charT, traitsT, allocT> a,
 	return ret;
 }
 
-template <typename charT, typename traitsT, typename allocT, std::size_t Bsz>
+template <typename charT, typename traitsT, typename allocT>
 inline int icollate( std::basic_string<charT, traitsT, allocT> a,
-					 const charT (&b)[Bsz],
+					 const const_string<charT, traitsT> &b,
 					 const std::locale &loc = std::locale() )
 {
-	return icollate( std::move( a ), std::basic_string<charT, traitsT, allocT>( b, Bsz - 1 ), loc );
+	return icollate( std::move( a ), std::basic_string<charT, traitsT, allocT>( b.begin(), b.end() ), loc );
 }
 
-template <typename charT, typename traitsT, typename allocT, std::size_t Bsz>
+template <typename charT, typename traitsT, typename allocT>
 inline int icollate( std::basic_string<charT, traitsT, allocT> a,
 					 const charT *b,
 					 const std::locale &loc = std::locale() )
@@ -273,7 +242,7 @@ inline stringT to_lower( const stringT &str, const std::locale &loc = std::local
 	stringT ret = str;
 	std::transform( ret.begin(), ret.end(), ret.begin(),
 					[&](typename stringT::value_type v) { return f.tolower( v ); } );
-	return std::move( ret );
+	return ret;
 }
 
 
@@ -287,7 +256,7 @@ inline stringT to_upper( const stringT &str, const std::locale &loc = std::local
 	stringT ret = str;
 	std::transform( ret.begin(), ret.end(), ret.begin(),
 					[&](typename stringT::value_type v) { return f.toupper( v ); } );
-	return std::move( ret );
+	return ret;
 }
 
 ////////////////////////////////////////

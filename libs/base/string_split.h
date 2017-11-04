@@ -12,9 +12,7 @@
 #include <string>
 #include <iostream>
 
-
 ////////////////////////////////////////
-
 
 namespace base
 {
@@ -25,9 +23,7 @@ namespace base
 // separator characters
 ////////////////////////////////////////////////////////////////////////////////
 
-
 ////////////////////////////////////////
-
 
 template <typename stringT, typename Delim, typename Inserter>
 inline void
@@ -94,9 +90,7 @@ split( std::vector<stringT> &ret, const stringT &str, const stringT &sep, bool s
 	split( str, sep, std::back_inserter( ret ), skip_empty );
 }
 
-
 ////////////////////////////////////////
-
 
 template <typename stringT>
 inline void
@@ -107,9 +101,7 @@ split( std::vector<stringT> &ret, const stringT &str,
 	split( ret, str, stringT( sep ), skip_empty );
 }
 
-
 ////////////////////////////////////////
-
 
 template <typename stringT>
 inline std::vector<stringT>
@@ -120,29 +112,10 @@ split( const stringT &str, const stringT &sep, bool skip_empty = false )
 		split( str, sep[0], std::back_inserter( retval ), skip_empty );
 	else
 		split( str, sep, std::back_inserter( retval ), skip_empty );
-	return std::move( retval );
+	return retval;
 }
 
-
 ////////////////////////////////////////
-
-
-template <typename stringT, std::size_t sepSz>
-inline std::vector<stringT>
-split( const stringT &str, const typename stringT::value_type (&sep)[sepSz],
-	   bool skip_empty = false )
-{
-	std::vector<stringT> retval;
-	if ( sepSz == 2 )
-		split( str, sep[0], std::back_inserter( retval ), skip_empty );
-	else
-		split( str, stringT( sep, sepSz - 1 ), std::back_inserter( retval ), skip_empty );
-	return std::move( retval );
-}
-
-
-////////////////////////////////////////
-
 
 template <typename stringT>
 inline std::vector<stringT>
@@ -152,9 +125,7 @@ split( const stringT &str, const typename stringT::value_type *sep,
 	return split( str, stringT( sep ), skip_empty );
 }
 
-
 ////////////////////////////////////////
-
 
 template <typename stringT>
 inline void
@@ -166,9 +137,7 @@ split( std::vector<stringT> &ret, const stringT &str,
 	split( str, sep, std::back_inserter( ret ), skip_empty );
 }
 
-
 ////////////////////////////////////////
-
 
 template <typename stringT>
 inline std::vector<stringT>
@@ -177,12 +146,10 @@ split( const stringT &str, typename stringT::value_type sep,
 {
 	std::vector<stringT> ret;
 	split( str, sep, std::back_inserter( ret ), skip_empty );
-	return std::move( ret );
+	return ret;
 }
 
-
 ////////////////////////////////////////
-
 
 } // namespace base
 
