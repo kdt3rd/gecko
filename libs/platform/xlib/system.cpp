@@ -8,14 +8,18 @@
 #include "system.h"
 #include "screen.h"
 #include "window.h"
+#include "cursor.h"
 #include "dispatcher.h"
 #include <gl/opengl.h>
+#include <X11/Xcursor/Xcursor.h>
+#include <X11/cursorfont.h>
 
 #include <dlfcn.h>
 #include <mutex>
 #include <stdexcept>
 
 #include <platform/platform.h>
+#include <platform/scancode.h>
 #include <platform/menu.h>
 #include <platform/tray.h>
 #include <base/contract.h>
@@ -97,6 +101,9 @@ namespace platform { namespace xlib
 system::system( const std::string &d )
 		: ::platform::system( "x11", "X11/XLib" )
 {
+	// TODO: do we want this or not????
+	//XInitThreads();
+
 	std::call_once( opengl_init_flag, [](){ init_opengl(); } );
 
 	const char *dname = nullptr;
@@ -123,14 +130,15 @@ system::system( const std::string &d )
 	for ( int i = 0; i < ScreenCount( _display.get() ); ++i )
 		_screens[0] = std::make_shared<screen>( _display, i );
 
-	// don't have a good way to identify individual keyboards
-	// in raw xlib?
+	// TODO: look at using libinput even for xlib?
+	// don't have a good way to identify individual keyboards / mice
+	// in raw xlib? maybe it doesn't matter...
 	_keyboard = std::make_shared<keyboard>();
-	// don't have a good way to identify individual keyboards
-	// in raw xlib?
 	_mouse = std::make_shared<mouse>();
 
 	_dispatcher = std::make_shared<dispatcher>( _display, _keyboard, _mouse );
+	// keyboard and mouse are event sources, but we don't wait on
+	// their input under xlib - the events are delivered to the dispatcher...
 //	_dispatcher->add_waitable( _keyboard );
 //	_dispatcher->add_waitable( _mouse );
 
@@ -150,6 +158,136 @@ system::opengl_query
 system::gl_proc_address( void )
 {
 	return queryGL;
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<::platform::cursor>
+system::new_cursor( void )
+{
+	throw_not_yet();
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<::platform::cursor>
+system::builtin_cursor( standard_cursor sc )
+{
+	auto lc = _cursors.find( sc );
+	if ( lc == _cursors.end() )
+	{
+		std::cout << "Current cursor theme: '" << XcursorGetTheme( _display.get() ) << "'" << std::endl;
+		const char *cname = nullptr;
+		unsigned int cchar = 0;
+		switch ( sc )
+		{
+			case standard_cursor::DEFAULT: cname = "default"; cchar = XC_X_cursor; break;
+			case standard_cursor::TEXT: cname = "text"; cchar = XC_xterm; break;
+			case standard_cursor::URL_LINK_POINTER: cname = "pointer"; cchar = XC_hand1; break;
+			case standard_cursor::HELP: cname = "help"; cchar = XC_question_arrow; break;
+			case standard_cursor::CONTEXT_MENU: cname = "context-menu"; cchar = XC_arrow; break;
+			case standard_cursor::PROGRESS: cname = "progress"; cchar = XC_coffee_mug; break;
+			case standard_cursor::WAIT: cname = "wait"; cchar = XC_watch; break;
+			case standard_cursor::DND_COPY: cname = "copy"; cchar = XC_arrow; break;
+			case standard_cursor::DND_ALIAS: cname = "alias"; cchar = XC_arrow; break;
+			case standard_cursor::DND_NO_DROP: cname = "no-drop"; cchar = XC_arrow; break;
+			case standard_cursor::NOT_ALLOWED: cname = "not-allowed"; cchar = XC_pirate; break;
+			case standard_cursor::ALL_SCROLL: cname = "all-scroll"; cchar = XC_arrow; break;
+			case standard_cursor::RESIZE_ROW: cname = "row-resize"; cchar = XC_arrow; break;
+			case standard_cursor::RESIZE_COL: cname = "col-resize"; cchar = XC_arrow; break;
+			case standard_cursor::RESIZE_EAST: cname = "e-resize"; cchar = XC_right_side; break;
+			case standard_cursor::RESIZE_NORTH_EAST: cname = "ne-resize"; cchar = XC_top_right_corner; break;
+			case standard_cursor::RESIZE_NORTH: cname = "n-resize"; cchar = XC_top_side; break;
+			case standard_cursor::RESIZE_NORTH_WEST: cname = "nw-resize"; cchar = XC_top_left_corner; break;
+			case standard_cursor::RESIZE_WEST: cname = "w-resize"; cchar = XC_left_side; break;
+			case standard_cursor::RESIZE_SOUTH_WEST: cname = "sw-resize"; cchar = XC_bottom_left_corner; break;
+			case standard_cursor::RESIZE_SOUTH: cname = "s-resize"; cchar = XC_bottom_side; break;
+			case standard_cursor::RESIZE_SOUTH_EAST: cname = "se-resize"; cchar = XC_bottom_right_corner; break;
+			case standard_cursor::RESIZE_EAST_WEST: cname = "ew-resize"; cchar = XC_sb_h_double_arrow; break;
+			case standard_cursor::RESIZE_NORTH_SOUTH: cname = "ns-resize"; cchar = XC_sb_v_double_arrow; break;
+			case standard_cursor::RESIZE_NORTH_EAST_SOUTH_WEST: cname = "nesw-resize"; cchar = XC_arrow; break;
+			case standard_cursor::RESIZE_NORTH_WEST_SOUTH_EAST: cname = "nwse-resize"; cchar = XC_arrow; break;
+			case standard_cursor::VERTICAL_TEXT: cname = "vertical-text"; cchar = XC_arrow; break;
+			case standard_cursor::CROSSHAIR: cname = "crosshair"; cchar = XC_crosshair; break;
+			case standard_cursor::CELL: cname = "cell"; cchar = XC_arrow; break;
+
+			default: cname = "default"; cchar = XC_arrow; break;
+		}
+
+		Cursor c = XcursorLibraryLoadCursor( _display.get(), cname );
+		if ( c == None )
+			c = XCreateFontCursor( _display.get(), cchar );
+
+		auto r = std::make_shared<::platform::xlib::cursor>( c );
+		_cursors[sc] = r;
+		return r;
+	}
+	return lc->second;
+}
+
+////////////////////////////////////////
+
+void
+system::set_selection( const std::string &data )
+{
+}
+
+////////////////////////////////////////
+
+void
+system::set_selection( const std::vector<uint8_t> &data,
+					   const std::vector<std::string> &avail_mime_types,
+					   const std::function<std::vector<uint8_t> (const std::vector<uint8_t> &, const std::string &)> &convert )
+{
+}
+
+////////////////////////////////////////
+
+void
+system::clear_selection( void )
+{
+}
+
+////////////////////////////////////////
+
+std::vector<std::string>
+system::query_selection_types( void )
+{
+	return std::vector<std::string>();
+}
+
+////////////////////////////////////////
+
+std::vector<uint8_t>
+system::query_selection( const std::string &type )
+{
+	return std::vector<uint8_t>();
+}
+
+////////////////////////////////////////
+
+void
+system::begin_drag( const std::vector<uint8_t> &data,
+					const std::vector<std::string> &avail_mime_types,
+					const std::function<std::vector<uint8_t> (const std::vector<uint8_t> &, const std::string &)> &convert,
+					const std::shared_ptr<::platform::cursor> &cursor )
+{
+}
+
+////////////////////////////////////////
+
+std::vector<std::string>
+system::query_available_drop_types( void )
+{
+	return std::vector<std::string>();
+}
+
+////////////////////////////////////////
+
+std::vector<uint8_t>
+system::accept_drop( const std::string &type )
+{
+	return std::vector<uint8_t>();
 }
 
 ////////////////////////////////////////
@@ -205,6 +343,77 @@ std::shared_ptr<::platform::keyboard> system::get_keyboard( void )
 std::shared_ptr<::platform::mouse> system::get_mouse( void )
 {
 	return _mouse;
+}
+
+////////////////////////////////////////
+
+uint8_t
+system::modifier_state( void )
+{
+	char keys[32];
+	memset( keys, 0, sizeof(keys) );
+
+	XQueryKeymap( _display.get(), keys );
+
+	uint8_t r = 0;
+	static_assert( modifier::LEFT_CTRL == 0x01 &&
+				   modifier::LEFT_SHIFT == 0x02 &&
+				   modifier::LEFT_ALT == 0x04 &&
+				   modifier::LEFT_META == 0x08 &&
+				   modifier::RIGHT_CTRL == 0x10 &&
+				   modifier::RIGHT_SHIFT == 0x20 &&
+				   modifier::RIGHT_ALT == 0x40 &&
+				   modifier::RIGHT_META == 0x80, "Modifiers incorrectly mapped" );
+
+	static const KeySym modkeys[8] = {
+		XK_Control_L, XK_Shift_L, XK_Alt_L, XK_Super_L,
+		XK_Control_R, XK_Shift_R, XK_Alt_R, XK_Super_R 
+	};
+	for ( uint8_t i = 0; i < 8; ++i )
+	{
+		KeyCode kc = XKeysymToKeycode( _display.get(), modkeys[i] );
+		if ( ( ( keys[kc >> 3] >> (kc & 7) ) & 1 ) != 0 )
+			r |= (1 << i);
+	}
+	return r;
+}
+
+////////////////////////////////////////
+
+bool
+system::query_mouse( uint8_t &buttonMask, uint8_t &modifiers, int &x, int &y,int &screen )
+{
+	Window rt, child;
+	int rx, ry, wx, wy;
+	unsigned int mask;
+
+	for ( int s = 0, nS = ScreenCount( _display.get() ); s < nS; ++s )
+	{
+		if ( XQueryPointer( _display.get(), RootWindow( _display.get(), s ), &rt, &child,
+							&rx, &ry, &wx, &wy, &mask ) == True )
+		{
+			buttonMask = ((mask & Button1Mask) != 0) ? 0x01 : 0;
+			buttonMask |= ((mask & Button2Mask) != 0) ? 0x02 : 0;
+			buttonMask |= ((mask & Button3Mask) != 0) ? 0x04 : 0;
+			buttonMask |= ((mask & Button4Mask) != 0) ? 0x08 : 0;
+			buttonMask |= ((mask & Button5Mask) != 0) ? 0x10 : 0;
+
+			modifiers = ( (((mask & ControlMask) != 0) ? 0x01 : 0) |
+						  (((mask & ShiftMask) != 0) ? 0x02 : 0) );
+			// the rest are Mod[1-5]Mask....
+
+			x = rx;
+			y = ry;
+			screen = s;
+			return true;
+		}
+	}
+	buttonMask = 0;
+	modifiers = 0;
+	x = 0;
+	y = 0;
+	screen = -1;
+	return false;
 }
 
 ////////////////////////////////////////

@@ -165,6 +165,13 @@ bool window::is_visible( void )
 
 ////////////////////////////////////////
 
+void
+window::fullscreen( bool fs )
+{
+}
+
+////////////////////////////////////////
+
 /*
 rect window::geometry( void )
 {
@@ -271,6 +278,14 @@ void window::expose_event( void )
 	//glFlush();
 	//XFlush( _display.get() );
 	release();
+}
+
+////////////////////////////////////////
+
+void
+window::make_current( const std::shared_ptr<::platform::cursor> & )
+{
+	throw_not_yet();
 }
 
 ////////////////////////////////////////

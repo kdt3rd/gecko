@@ -10,17 +10,22 @@
 #include <string>
 #include <memory>
 #include <functional>
+#include <stack>
 #include <base/rect.h>
 #include "mouse.h"
 #include "keyboard.h"
+#include "scancode.h"
+#include "event_target.h"
 
 namespace platform
 {
 
+class cursor;
+
 ////////////////////////////////////////
 
 /// @brief A rectangular area of the screen.
-class window
+class window : public event_target
 {
 public:
 	/// @brief Constructor.
@@ -28,6 +33,18 @@ public:
 
 	/// @brief Destructor.
 	virtual ~window( void );
+
+	bool process_event( event_source &src, const event &e ) override;
+
+	/// @brief Set a cursor as the default for the window
+	///
+	/// This is the cursor that is displayed if no other cursor is pushed
+	///
+	void set_default_cursor( const std::shared_ptr<cursor> &c );
+	/// @brief Set a new cursor for the window, storing them as a stack
+	void push_cursor( const std::shared_ptr<cursor> &c );
+	/// @brief restore the previous cursor
+	void pop_cursor( void );
 
 	/// @brief Raise the window.
 	///
@@ -58,6 +75,11 @@ public:
 	///
 	/// @return Whether the window is visible or not
 	virtual bool is_visible( void ) = 0;
+
+	/// @brief Make the window fullscreen.
+	///
+	/// Make the window fullscreen.
+	virtual void fullscreen( bool fs ) = 0;
 
 //	virtual rect geometry( void ) = 0;
 
@@ -102,39 +124,39 @@ public:
 	/// @brief Action for mouse press events.
 	///
 	/// Callback action for mouse button press events.
-	std::function<void( const std::shared_ptr<mouse> &, const base::point &, int )> mouse_pressed;
+	std::function<void( event_source &, const base::point &, int )> mouse_pressed;
 
 	/// @brief Action for mouse release events.
 	///
 	/// Callback action for mouse button release events.
-	std::function<void( const std::shared_ptr<mouse> &, const base::point &, int )> mouse_released;
+	std::function<void( event_source &, const base::point &, int )> mouse_released;
 
 	/// @brief Actionfor mouse motion events.
 	///
 	/// Callback action for mouse motion events.
-	std::function<void( const std::shared_ptr<mouse> &, const base::point & )> mouse_moved;
+	std::function<void( event_source &, const base::point & )> mouse_moved;
 
 	/// @brief Action for mouse wheel events.
 	///
 	/// Callback action for mouse wheel events.
-	std::function<void( const std::shared_ptr<mouse> &, int )> mouse_wheel;
+	std::function<void( event_source &, int )> mouse_wheel;
 
 	/// @brief Action for key press events.
 	///
 	/// Callback action for key press events.
-	std::function<void( const std::shared_ptr<keyboard> &, scancode )> key_pressed;
+	std::function<void( event_source &, scancode )> key_pressed;
 
 	/// @brief Action for key release events.
 	///
 	/// Callback action for key release events.
-	std::function<void( const std::shared_ptr<keyboard> &, scancode )> key_released;
+	std::function<void( event_source &, scancode )> key_released;
 
 	/// @brief Action for text entered events.
 	///
 	/// Callback action for text entered events.
-	std::function<void( const std::shared_ptr<keyboard> &, char32_t )> text_entered;
+	std::function<void( event_source &, char32_t )> text_entered;
 
-	std::function<void( void )> closed;
+	std::function<bool( bool )> closed;
 	std::function<void( void )> shown;
 	std::function<void( void )> hidden;
 	std::function<void( void )> minimized;
@@ -148,6 +170,17 @@ public:
 
 	virtual double width( void ) = 0;
 	virtual double height( void ) = 0;
+
+protected:
+	virtual void make_current( const std::shared_ptr<cursor> & ) = 0;
+
+	virtual void expose_event( void ) = 0;
+	virtual void move_event( double x, double y ) = 0;
+	virtual void resize_event( double w, double h ) = 0;
+
+private:
+	std::stack< std::shared_ptr<cursor> > _cursors;
+	std::shared_ptr<cursor> _default_cursor;
 };
 
 ////////////////////////////////////////

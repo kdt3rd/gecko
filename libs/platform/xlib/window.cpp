@@ -15,7 +15,10 @@
 #include <base/scope_guard.h>
 #include <stdexcept>
 #include <gl/check.h>
+#include <X11/Xutil.h>
+
 #include "system.h"
+#include "cursor.h"
 
 namespace {
 
@@ -253,8 +256,17 @@ void window::hide( void )
 
 bool window::is_visible( void )
 {
-	// TODO fix this
-	return true;
+	XWindowAttributes attr;	  
+	XGetWindowAttributes( _display.get(), _win, &attr );
+	return (attr.map_state == IsViewable);
+}
+
+////////////////////////////////////////
+
+void
+window::fullscreen( bool fs )
+{
+	// look at ghost - need to handle netwm method and motif method...
 }
 
 ////////////////////////////////////////
@@ -369,6 +381,24 @@ void window::expose_event( void )
 //	glFlush();
 //	XFlush( _display.get() );
 	release();
+}
+
+////////////////////////////////////////
+
+void window::make_current( const std::shared_ptr<::platform::cursor> &c )
+{
+	if ( c )
+	{
+		auto xc = static_cast<::platform::xlib::cursor *>( c.get() );
+		XDefineCursor( _display.get(), _win, xc->handle() );
+	}
+	else
+	{
+		// no cursor - just inherit parent window cursor
+		XUndefineCursor( _display.get(), _win );
+	}
+
+	XFlush( _display.get() );
 }
 
 ////////////////////////////////////////

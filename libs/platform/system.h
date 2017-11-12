@@ -15,6 +15,7 @@
 
 // these are only partly needed by this header, but let's make it easier for
 // people so they only have to include one header for now...
+#include "cursor.h"
 #include "screen.h"
 #include "timer.h"
 #include "window.h"
@@ -72,6 +73,64 @@ public:
 	/// @return Vector of screens
 	virtual std::vector<std::shared_ptr<screen>> screens( void ) = 0;
 
+	/// @brief Creates a new cursor.
+	///
+	/// This can be assigned to be active when over a window (instead
+	/// of the default) or be pushed and popped as a global thing
+	/// (i.e. during drag and drop or something).
+	///
+	virtual std::shared_ptr<cursor> new_cursor( void ) = 0;
+
+	/// @brief retrieve a pre-built cursor
+	///
+	/// this uses the system theme as appropriate
+	/// TODO: add ability to query and switch themes
+	virtual std::shared_ptr<cursor> builtin_cursor( standard_cursor sc ) = 0;
+
+	/// @group selection interface
+
+	/// @brief simple string selection handling
+	///
+	/// This sets a string as the available selection to the system
+	virtual void set_selection( const std::string &data ) = 0;
+	/// @brief mime-type based selection handling
+	///
+	/// This allows for rich selection transfer between applications
+	/// it is expected that the function will remain valid until one
+	/// of a few conditions happens:
+	///  - @sa clear_selection is called
+	///  - another selection is set
+	///  - the system exits
+	virtual void set_selection( const std::vector<uint8_t> &data,
+								const std::vector<std::string> &avail_mime_types,
+								const std::function<std::vector<uint8_t> (const std::vector<uint8_t> &, const std::string &)> &convert ) = 0;
+
+	/// @brief clear selection
+	virtual void clear_selection( void ) = 0;
+	/// @brief query selection types available for pasting
+	virtual std::vector<std::string> query_selection_types( void ) = 0;
+	/// @brief request the specific type for pasting, returning the data
+	virtual std::vector<uint8_t> query_selection( const std::string &type ) = 0;
+	/// @endgroup
+
+	/// @group Drag and Drop interface
+
+	/// @brief begin a drag motion.
+	///
+	/// Event processing continues as normal, but this routine will
+	/// not return until the user releases the mouse button.
+	virtual void begin_drag( const std::vector<uint8_t> &data,
+							 const std::vector<std::string> &avail_mime_types,
+							 const std::function<std::vector<uint8_t> (const std::vector<uint8_t> &, const std::string &)> &convert,
+							 const std::shared_ptr<cursor> &cursor = std::shared_ptr<cursor>() ) = 0;
+
+	/// @brief query available mime types in response to a drop request event
+	virtual std::vector<std::string> query_available_drop_types( void ) = 0;
+	/// @brief accept a drop of a particular type in response to a drop request event
+	virtual std::vector<uint8_t> accept_drop( const std::string &type ) = 0;
+
+	/// @endgroup
+
 	/// @brief Creates a new system-level menu item.
 	///
 	/// Some systems allow a system level menu. for example, on OS/X,
@@ -124,6 +183,18 @@ public:
 	/// Get the main system mouse.
 	/// @return The mouse
 	virtual std::shared_ptr<mouse> get_mouse( void ) = 0;
+
+	/// @brief queries the current keyboard modifiers
+	///
+	/// Returns a mask that is the logical or of the modifiers defined
+	/// in scancode.h
+	virtual uint8_t modifier_state( void ) = 0;
+
+	/// @brief queries the current mouse position
+	///
+	/// This should only generally be necessary outside of the event
+	/// system.
+	virtual bool query_mouse( uint8_t &buttonMask, uint8_t &modifiers, int &x, int &y, int &screen ) = 0;
 
 	/// @brief creates a generic timer.
 	///

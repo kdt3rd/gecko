@@ -40,11 +40,11 @@ public:
 	}
 
 	template<typename func>
-	void in_context( const func &f )
+	void in_context( func &&f )
 	{
 		push_context();
 		on_scope_exit { pop_context(); };
-		f();
+		std::forward<func>(f)();
 	}
 
 	static context &current( void );

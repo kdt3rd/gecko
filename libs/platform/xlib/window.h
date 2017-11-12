@@ -35,6 +35,8 @@ public:
 	void hide( void ) override;
 	bool is_visible( void ) override;
 
+	void fullscreen( bool fs ) override;
+
 //	rect geometry( void ) override;
 //	void set_position( double x, double y ) override;
 	void move( double x, double y ) override;
@@ -58,9 +60,12 @@ public:
 	double width( void ) override { return _last_w; }
 	double height( void )  override { return _last_h; }
 
-	void expose_event( void );
-	void move_event( double x, double y );
-	void resize_event( double w, double h );
+protected:
+	void make_current( const std::shared_ptr<::platform::cursor> & );
+
+	void expose_event( void ) override;
+	void move_event( double x, double y ) override;
+	void resize_event( double w, double h ) override;
 
 private:
 	std::shared_ptr<Display> _display;
@@ -72,6 +77,7 @@ private:
 
 	bool _invalid = false;
 	bool _popup = false;
+	bool _fullscreen = false;
 
 	GLXContext _glc;
 	void (*_glc_makecurrent)( Display *, GLXDrawable, GLXContext ) = nullptr;

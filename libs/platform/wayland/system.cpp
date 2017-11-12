@@ -151,6 +151,87 @@ system::gl_proc_address( void )
 
 ////////////////////////////////////////
 
+std::shared_ptr<::platform::cursor>
+system::new_cursor( void )
+{
+	throw_not_yet();
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<::platform::cursor>
+system::builtin_cursor( standard_cursor sc )
+{
+	throw_not_yet();
+}
+
+////////////////////////////////////////
+
+void
+system::set_selection( const std::string &data )
+{
+}
+
+////////////////////////////////////////
+
+void
+system::set_selection( const std::vector<uint8_t> &data,
+					   const std::vector<std::string> &avail_mime_types,
+					   const std::function<std::vector<uint8_t> (const std::vector<uint8_t> &, const std::string &)> &convert )
+{
+}
+
+////////////////////////////////////////
+
+void
+system::clear_selection( void )
+{
+}
+
+////////////////////////////////////////
+
+std::vector<std::string>
+system::query_selection_types( void )
+{
+	return std::vector<std::string>();
+}
+
+////////////////////////////////////////
+
+std::vector<uint8_t>
+system::query_selection( const std::string &type )
+{
+	return std::vector<uint8_t>();
+}
+
+////////////////////////////////////////
+
+void
+system::begin_drag( const std::vector<uint8_t> &data,
+					const std::vector<std::string> &avail_mime_types,
+					const std::function<std::vector<uint8_t> (const std::vector<uint8_t> &, const std::string &)> &convert,
+					const std::shared_ptr<::platform::cursor> &cursor )
+{
+}
+
+////////////////////////////////////////
+
+std::vector<std::string>
+system::query_available_drop_types( void )
+{
+	return std::vector<std::string>();
+}
+
+////////////////////////////////////////
+
+std::vector<uint8_t>
+system::accept_drop( const std::string &type )
+{
+	return std::vector<uint8_t>();
+}
+
+////////////////////////////////////////
+
 std::shared_ptr<::platform::menu>
 system::new_system_menu( void )
 {
@@ -202,6 +283,27 @@ std::shared_ptr<::platform::keyboard> system::get_keyboard( void )
 std::shared_ptr<::platform::mouse> system::get_mouse( void )
 {
 	return _mouse;
+}
+
+////////////////////////////////////////
+
+uint8_t
+system::modifier_state( void )
+{
+	return 0;
+}
+
+////////////////////////////////////////
+
+bool
+system::query_mouse( uint8_t &buttonMask, uint8_t &modifiers, int &x, int &y,int &screen )
+{
+	buttonMask = 0;
+	modifiers = 0;
+	x = 0;
+	y = 0;
+	screen = -1;
+	return false;
 }
 
 ////////////////////////////////////////

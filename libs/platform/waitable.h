@@ -8,6 +8,7 @@
 #pragma once
 #include <cstdint>
 #include <chrono>
+#include "event_source.h"
 
 ////////////////////////////////////////
 
@@ -24,7 +25,7 @@ namespace platform
 /// events, derive from this base class, and then the system event
 /// dispatcher has a list of these to be able to control the central
 /// 'wait' loop.
-class waitable
+class waitable : public event_source
 {
 public:
 	typedef std::chrono::high_resolution_clock clock;
@@ -34,12 +35,6 @@ public:
 	waitable( void );
 	virtual ~waitable( void );
 
-	/// @brief start will be called by the dispatcher when this
-	/// waitable is finished being registered.
-	///
-	/// This should be thread safe as necessary
-	virtual void start( void ) = 0;
-
 	/// This can be called by anyone to cancel this waitable as a
 	/// source. This may trigger the dispatcher to wake up.  This may
 	/// only be used by USB devices and similar when they are
@@ -47,12 +42,6 @@ public:
 	///
 	/// This should be thread safe as necessary
 	virtual void cancel( void ) = 0;
-
-	/// This will be called by the dispatcher when it is exiting to
-	/// allow the waitable to perform any cleanup as necessary
-	///
-	/// This should be thread safe as necessary
-	virtual void shutdown( void ) = 0;
 
 	/// @brief Used to query waitable object
 	///

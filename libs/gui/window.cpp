@@ -22,13 +22,13 @@ window::window( const std::shared_ptr<platform::window> &win )
 	precondition( bool(_window), "null window" );
 	_window->exposed = [this] ( void ) { paint(); };
 	_window->resized = [this] ( double w, double h ) { resized( w, h ); };
-	_window->mouse_pressed = [this]( const std::shared_ptr<platform::mouse> &, const base::point &p, int b ) { mouse_press( p, b ); };
-	_window->mouse_released = [this]( const std::shared_ptr<platform::mouse> &, const base::point &p, int b ) { mouse_release( p, b ); };
-	_window->mouse_moved = [this]( const std::shared_ptr<platform::mouse> &, const base::point &p ) { mouse_moved( p ); };
-	_window->mouse_wheel = [this]( const std::shared_ptr<platform::mouse> &, int i ) { mouse_wheel( i ); };
-	_window->key_pressed = [this]( const std::shared_ptr<platform::keyboard> &, const platform::scancode &c ) { key_pressed( c ); };
-	_window->key_released = [this]( const std::shared_ptr<platform::keyboard> &, const platform::scancode &c ) { key_released( c ); };
-	_window->text_entered = [this]( const std::shared_ptr<platform::keyboard> &, const char32_t &c ) { text_entered( c ); };
+	_window->mouse_pressed = [this]( platform::event_source &, const base::point &p, int b ) { mouse_press( p, b ); };
+	_window->mouse_released = [this]( platform::event_source &, const base::point &p, int b ) { mouse_release( p, b ); };
+	_window->mouse_moved = [this]( platform::event_source &, const base::point &p ) { mouse_moved( p ); };
+	_window->mouse_wheel = [this]( platform::event_source &, int i ) { mouse_wheel( i ); };
+	_window->key_pressed = [this]( platform::event_source &, const platform::scancode &c ) { key_pressed( c ); };
+	_window->key_released = [this]( platform::event_source &, const platform::scancode &c ) { key_released( c ); };
+	_window->text_entered = [this]( platform::event_source &, const char32_t &c ) { text_entered( c ); };
 }
 
 ////////////////////////////////////////

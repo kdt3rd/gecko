@@ -5,13 +5,14 @@
 extra_source = optional_source{
 	system="Linux";
 	source={
-		"system.cpp";
-		"screen.cpp";
-		"window.cpp";
+		"cursor.cpp";
+		"dispatcher.cpp";
 		"keyboard.cpp";
 		"mouse.cpp";
-		"dispatcher.cpp";
+		"screen.cpp";
+		"system.cpp";
+		"window.cpp";
 	};
 	defines = {"HAVE_XLIB"};
-	libs = {"x11"};
+	libs = {"x11", "Xcursor"};
 };
