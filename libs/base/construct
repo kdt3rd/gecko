@@ -16,6 +16,7 @@ lib = library "base"
 	"string_variable_util.cpp";
 	"variable_set.cpp";
 	"pack.cpp";
+	"pipe.cpp";
 	"sha160.cpp";
 	"sha256.cpp";
 	"skein512.cpp";
