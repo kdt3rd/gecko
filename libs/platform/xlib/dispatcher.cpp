@@ -997,7 +997,7 @@ void dispatcher::dispatchSelectionNotify( const std::shared_ptr<window> &w, XEve
 					if ( reqTypes.empty() )
 					{
 						static std::vector<std::string> knownTypes{
-							"UTF8_STRING", "text/plain;charset=utf-8", "STRING",
+							"UTF8_STRING", "text/plain;charset=utf-8", "STRING", "text/plain",
 							"TEXT", "COMPOUND_TEXT" };
 						for ( size_t k = 0; k != knownTypes.size(); ++k )
 						{
