@@ -13,7 +13,7 @@ local layout = l.layout.lib
 local gui = l.gui.lib
 
 executable( "test_signal", "test_signal.cpp", base )
-executable( "test_spectral", "test_spectral.cpp", base )
+--executable( "test_spectral", "test_spectral.cpp", base )
 executable( "test_platform", "test_platform.cpp", platform, gl )
 executable( "test_draw", "test_draw.cpp", platform, draw )
 executable( "test_rectangle", "test_rectangle.cpp", platform, draw )
