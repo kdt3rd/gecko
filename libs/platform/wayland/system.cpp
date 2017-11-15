@@ -190,18 +190,18 @@ system::clear_selection( void )
 
 ////////////////////////////////////////
 
-std::vector<std::string>
-system::query_selection_types( void )
+std::pair<std::vector<uint8_t>, std::string>
+system::query_selection( bool mouseSel, const std::vector<std::string> &reqTypes )
 {
-	return std::vector<std::string>();
+	return std::make_pair( std::vector<uint8_t>(), std::string() );
 }
 
 ////////////////////////////////////////
 
-std::vector<uint8_t>
-system::query_selection( const std::string &type )
+std::pair<std::vector<uint8_t>, std::string>
+system::query_selection( const std::string &clipboardName, const std::vector<std::string> &reqTypes )
 {
-	return std::vector<uint8_t>();
+	return std::make_pair( std::vector<uint8_t>(), std::string() );
 }
 
 ////////////////////////////////////////

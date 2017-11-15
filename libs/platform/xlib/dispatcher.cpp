@@ -12,11 +12,13 @@
 #include <X11/Xlib.h>
 #include <X11/XKBlib.h>
 #include <X11/Xutil.h>
+#include <X11/Xatom.h>
 #include <X11/keysym.h>
 #include <X11/XF86keysym.h>
 #include <base/contract.h>
 #include <base/pointer.h>
 #include <base/meta.h>
+#include <base/scope_guard.h>
 #include <utf/utf.h>
 #include <utf/utfcat.h>
 #include <sys/select.h>
@@ -297,13 +299,167 @@ int dispatcher::execute( void )
 	XFlush( _display.get() );
 	_exit_code = 0;
 	_exit_requested.store( false );
+	run_event_loop_until( &_exit_requested );
+
+	return _exit_code;
+}
+
+////////////////////////////////////////
+
+void dispatcher::exit( int code )
+{
+	_exit_code = code;
+	_exit_requested.store( true );
+}
+
+////////////////////////////////////////
+
+void
+dispatcher::add_waitable( const std::shared_ptr<waitable> &w )
+{
+	::platform::dispatcher::add_waitable( w );
+	wake_up_executor();
+}
+
+////////////////////////////////////////
+
+void
+dispatcher::remove_waitable( const std::shared_ptr<waitable> &w )
+{
+	::platform::dispatcher::remove_waitable( w );
+	wake_up_executor();
+}
+
+////////////////////////////////////////
+
+void dispatcher::add_window( const std::shared_ptr<window> &w )
+{
+	_windows[w->id()] = w;
+	XSetWMProtocols( _display.get(), w->id(), &_atom_delete_window, 1 );
+
+	// Create an input context.
+	if ( _xim )
+	{
+		auto xic = XCreateIC( _xim,
+							  XNClientWindow, w->id(),
+							  XNFocusWindow, w->id(), 
+							  XNInputStyle, XIMPreeditNothing | XIMStatusNothing,
+							  nullptr );
+		if ( !xic )
+			throw_runtime( "failed to create input context" );
+		w->set_input_context( xic );
+	}
+}
+
+////////////////////////////////////////
+
+void
+dispatcher::remove_window( const std::shared_ptr<window> &w )
+{
+	if ( _xim )
+		XUnsetICFocus( w->input_context() );
+
+	w->hide();
+	if ( w->closed )
+		w->closed( false );
+
+	_windows.erase( w->id() );
+}
+
+////////////////////////////////////////
+
+std::pair<std::vector<uint8_t>, std::string>
+dispatcher::query_selection( bool mouseSel, const std::vector<std::string> &reqTypes )
+{
+	if ( _sel_targets == None )
+		_sel_targets = XInternAtom( _display.get(), "TARGETS", False );
+
+	Atom sel = None;
+	if ( mouseSel )
+	{
+		if ( _sel_primary == None )
+			_sel_primary = XInternAtom( _display.get(), "PRIMARY", False );
+		sel = _sel_primary;
+	}
+	else
+	{
+		if ( _sel_clip == None )
+			_sel_clip = XInternAtom( _display.get(), "CLIPBOARD", False );
+		sel = _sel_clip;
+	}
+
+	std::vector<uint8_t> r;
+	std::string rtype;
+	if ( _sel_targets != None && sel != None )
+	{
+		std::atomic<bool> fin{ false };
+		_sel_stack.emplace( &r, &rtype, &reqTypes, &fin, sel );
+		on_scope_exit{ _sel_stack.pop(); };
+
+		XConvertSelection( _display.get(), sel, _sel_targets, sel, _clipboard_win, CurrentTime );
+		run_event_loop_until( &fin );
+	}
+	else
+		throw_runtime( "Unable to retrieve clipboard atoms" );
+
+	return std::make_pair( std::move( r ), std::move( rtype ) );
+}
+
+////////////////////////////////////////
+
+
+std::pair<std::vector<uint8_t>, std::string>
+dispatcher::query_selection( const std::string &clipboardName, const std::vector<std::string> &reqTypes )
+{
+	if ( _sel_targets == None )
+		_sel_targets = XInternAtom( _display.get(), "TARGETS", False );
+	Atom sel = None;
+	auto i = _sel_custom_clips.find( clipboardName );
+	if ( i == _sel_custom_clips.end() )
+	{
+		sel = XInternAtom( _display.get(), clipboardName.c_str(), False );
+		_sel_custom_clips[clipboardName] = sel;
+	}
+	else
+		sel = i->second;
+
+	std::vector<uint8_t> r;
+	std::string rtype;
+	if ( _sel_targets != None && sel != None )
+	{
+		std::atomic<bool> fin{ false };
+		_sel_stack.emplace( &r, &rtype, &reqTypes, &fin, sel );
+		on_scope_exit{ _sel_stack.pop(); };
+
+		XConvertSelection( _display.get(), sel, _sel_targets, sel, _clipboard_win, CurrentTime );
+		run_event_loop_until( &fin );
+	}
+	else
+		throw_runtime( "Unable to retrieve clipboard atoms" );
+
+	return std::make_pair( std::move( r ), std::move( rtype ) );
+}
+
+////////////////////////////////////////
+
+void
+dispatcher::wake_up_executor( void )
+{
+	_wait_pipe.write( "x", 1 );
+}
+
+////////////////////////////////////////
+
+void
+dispatcher::run_event_loop_until( std::atomic<bool> *end )
+{
 	int xFD = ConnectionNumber( _display.get() );
 	fd_set waitreadobjs;
 	std::map<int, std::shared_ptr<waitable>> waitmap;
 	std::vector<std::shared_ptr<waitable>> firenow;
 	std::vector<std::shared_ptr<waitable>> timeouts;
 	struct timeval tv;
-	while ( ! _exit_requested.load() )
+	while ( ! end->load(std::memory_order_relaxed) )
 	{
 		firenow.clear();
 		waitmap.clear();
@@ -386,78 +542,6 @@ int dispatcher::execute( void )
 		if ( drain_xlib_events() )
 			break;
 	}
-
-	return _exit_code;
-}
-
-////////////////////////////////////////
-
-void dispatcher::exit( int code )
-{
-	_exit_code = code;
-	_exit_requested.store( true );
-}
-
-////////////////////////////////////////
-
-void
-dispatcher::add_waitable( const std::shared_ptr<waitable> &w )
-{
-	::platform::dispatcher::add_waitable( w );
-	wake_up_executor();
-}
-
-////////////////////////////////////////
-
-void
-dispatcher::remove_waitable( const std::shared_ptr<waitable> &w )
-{
-	::platform::dispatcher::remove_waitable( w );
-	wake_up_executor();
-}
-
-////////////////////////////////////////
-
-void dispatcher::add_window( const std::shared_ptr<window> &w )
-{
-	_windows[w->id()] = w;
-	XSetWMProtocols( _display.get(), w->id(), &_atom_delete_window, 1 );
-
-	// Create an input context.
-	if ( _xim )
-	{
-		auto xic = XCreateIC( _xim,
-							  XNClientWindow, w->id(),
-							  XNFocusWindow, w->id(), 
-							  XNInputStyle, XIMPreeditNothing | XIMStatusNothing,
-							  nullptr );
-		if ( !xic )
-			throw_runtime( "failed to create input context" );
-		w->set_input_context( xic );
-	}
-}
-
-////////////////////////////////////////
-
-void
-dispatcher::remove_window( const std::shared_ptr<window> &w )
-{
-	if ( _xim )
-		XUnsetICFocus( w->input_context() );
-
-	w->hide();
-	if ( w->closed )
-		w->closed( false );
-
-	_windows.erase( w->id() );
-}
-
-////////////////////////////////////////
-
-void
-dispatcher::wake_up_executor( void )
-{
-	_wait_pipe.write( "x", 1 );
 }
 
 ////////////////////////////////////////
@@ -486,6 +570,39 @@ dispatcher::drain_xlib_events( void )
 	}
 
 	return _windows.empty();
+}
+
+////////////////////////////////////////
+
+dispatcher::Property
+dispatcher::read_property( Atom sel )
+{
+	Property r;
+	Atom actual_type;
+	int actual_format;
+	unsigned long nitems;
+	unsigned long bytes_after;
+	unsigned char *ret = nullptr;
+
+	int read_bytes = 1024;
+	do
+	{
+		if ( ret != nullptr )
+		{
+			XFree( ret );
+			ret = nullptr;
+		}
+		XGetWindowProperty( _display.get(), _clipboard_win, sel, 0, read_bytes, False, AnyPropertyType,
+							&actual_type, &actual_format, &nitems, &bytes_after, &ret );
+		read_bytes *= 2;
+	} while ( bytes_after != 0 );
+
+	r.data = ret;
+	r.format = actual_format;
+	r.nitems = nitems;
+	r.type = actual_type;
+	std::cout << "read property: fmt " << r.format << " nitems " << r.nitems << " type " << XGetAtomName( _display.get(), r.type ) << std::endl;
+	return r;
 }
 
 ////////////////////////////////////////
@@ -827,6 +944,116 @@ void dispatcher::dispatchSelectionRequest( const std::shared_ptr<window> &w, XEv
 
 void dispatcher::dispatchSelectionNotify( const std::shared_ptr<window> &w, XEvent &event )
 {
+	Atom targ = event.xselection.target;
+	std::cout << "selection notify:\n  requestor 0x" << std::hex << event.xselection.requestor << std::dec
+			  << "\n  sel atom '" << XGetAtomName( _display.get(), event.xselection.selection )
+			  << "'\n  targ atom '" << XGetAtomName( _display.get(), targ )
+			  << "'\n  prop atom '" << XGetAtomName( _display.get(), event.xselection.property )
+			  << "'" << std::endl;
+
+	if ( _sel_stack.empty() )
+		return;
+
+	SelectionRequestInfo &req = _sel_stack.top();
+	if ( event.xselection.property == None )
+	{
+		// unable to convert or no selection (no sel if targ == _sel_targets)
+		// but we don't care either way, just clear and finish...
+		req.result->clear();
+		req.resulttype->clear();
+		req.fin->store( true, std::memory_order_relaxed );
+	}
+	else
+	{
+		Property prop = read_property( req.sel );
+		on_scope_exit{ if ( prop.data ) XFree( prop.data ); };
+
+		auto &reqTypes = *(req.reqTypes);
+		if ( targ == _sel_targets && ! req.sent_request )
+		{
+			req.sent_request = true;
+			if ( ( prop.type != XA_ATOM && prop.type != _sel_targets ) || prop.format != 32 )
+			{
+				req.resulttype->assign( "STRING" );
+				if ( reqTypes.empty() )
+					req.requested = XA_STRING;
+				else if ( std::find( reqTypes.begin(), reqTypes.end(), *(req.resulttype) ) != reqTypes.end() )
+					req.requested = XA_STRING;
+				else
+					req.requested = None;
+			}
+			else
+			{
+				Atom *alist = reinterpret_cast<Atom *>( prop.data );
+				req.requested = None;
+				size_t bIdx = size_t(-1);
+				for ( int i = 0; i < prop.nitems; ++i )
+				{
+					char *anameptr = XGetAtomName( _display.get(), alist[i] );
+					if ( ! anameptr )
+						continue;
+
+					std::cout << "available paste type: '" << anameptr << "'" << std::endl;
+					if ( reqTypes.empty() )
+					{
+						static std::vector<std::string> knownTypes{
+							"UTF8_STRING", "text/plain;charset=utf-8", "STRING",
+							"TEXT", "COMPOUND_TEXT" };
+						for ( size_t k = 0; k != knownTypes.size(); ++k )
+						{
+							if ( knownTypes[k].compare( anameptr ) == 0 )
+							{
+								if ( k < bIdx )
+								{
+									req.resulttype->assign( anameptr );
+									req.requested = alist[i];
+									bIdx = k;
+								}
+								break;
+							}
+						}
+					}
+					else
+					{
+						for ( size_t r = 0; r != reqTypes.size(); ++r )
+						{
+							if ( reqTypes[r].compare( anameptr ) == 0 )
+							{
+								if ( r < bIdx )
+								{
+									req.requested = alist[i];
+									bIdx = r;
+								}
+								break;
+							}
+						}
+					}
+				}
+				if ( bIdx != size_t(-1) && ! reqTypes.empty() )
+					req.resulttype->assign( reqTypes[bIdx] );
+			}
+
+			if ( req.requested == None )
+			{
+				req.result->clear();
+				req.resulttype->clear();
+				req.fin->store( true, std::memory_order_relaxed );
+			}
+			else
+			{
+				std::cout << "requesting type: " << *(req.resulttype) << std::endl;
+				XConvertSelection( _display.get(), req.sel, req.requested, req.sel, _clipboard_win, CurrentTime );
+			}
+		}
+		else if ( targ == req.requested )
+		{
+			// got our data
+			req.result->clear();
+			if ( prop.data )
+				req.result->insert( req.result->begin(), prop.data, prop.data + (prop.nitems * prop.format / 8) );
+			req.fin->store( true, std::memory_order_relaxed );
+		}
+	}
 }
 
 ////////////////////////////////////////

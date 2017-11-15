@@ -104,6 +104,10 @@ window::process_event( event_source &src, const event &e )
 			break;
 
 		case event_type::KEYBOARD_DOWN:
+			if ( e.has_control_mod() && e.key().keys[0] == scancode::KEY_V )
+			{
+				std::cout << "GACK: need to be able to get the system to handle ctrl-v paste requests" << std::endl;
+			}
 			if ( key_pressed )
 				key_pressed( src, e.key().keys[0] );
 			break;

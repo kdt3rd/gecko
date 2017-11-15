@@ -49,8 +49,8 @@ public:
 						const std::function<std::vector<uint8_t> (const std::vector<uint8_t> &, const std::string &)> &convert ) override;
 
 	void clear_selection( void ) override;
-	std::vector<std::string> query_selection_types( void ) override;
-	std::vector<uint8_t> query_selection( const std::string &type ) override;
+	std::pair<std::vector<uint8_t>, std::string> query_selection( bool mouseSel, const std::vector<std::string> &reqTypes = std::vector<std::string>() ) override;
+	std::pair<std::vector<uint8_t>, std::string> query_selection( const std::string &clipboardName, const std::vector<std::string> &reqTypes = std::vector<std::string>() ) override;
 
 	void begin_drag( const std::vector<uint8_t> &data,
 					 const std::vector<std::string> &avail_mime_types,

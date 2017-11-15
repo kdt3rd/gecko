@@ -7,6 +7,8 @@
 
 #include <iostream>
 #include "line_edit.h"
+#include "application.h"
+#include <platform/system.h>
 #include <utf/utf.h>
 
 namespace gui
@@ -167,6 +169,49 @@ bool line_edit::text_input( char32_t c )
 
 	return false;
 }
+
+////////////////////////////////////////
+
+bool
+line_edit::mouse_press( const base::point &p, int button )
+{
+	if ( button == 2 )
+	{
+		auto paste = application::current()->get_system()->query_selection( true );
+		if ( ! paste.second.empty() )
+		{
+			std::cout << "recv paste: " << paste.first.size() << " bytes of type '" << paste.second << "'" << std::endl;
+
+			if ( paste.second == "UTF8_STRING" || paste.second == "text/plain;charset=utf-8" )
+			{
+				std::string &t = _text.get_text();
+				_cursor = std::min( _cursor, t.size() );
+				std::cout << "need to validate incoming utf8: ";
+				for ( auto &x: paste.first )
+					std::cout << x;
+				std::cout << std::endl;
+				t.insert( t.begin() + _cursor, paste.first.begin(), paste.first.end() );
+				_cursor += paste.first.size();
+			}
+			else
+			{
+				std::string tmp( _text.get_text() );
+				_cursor = std::min( _cursor, tmp.size() );
+
+				std::insert_iterator<std::string> it( tmp, tmp.begin() + long(_cursor) );
+				for ( auto &x: paste.first )
+					_cursor += utf::convert_utf8( x, it );
+
+				_text.set_text( tmp );
+				
+			}
+			invalidate();
+		}
+		return true;
+	}
+	return widget::mouse_press( p, button );
+}
+
 
 ////////////////////////////////////////
 

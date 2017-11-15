@@ -108,9 +108,17 @@ public:
 	/// @brief clear selection
 	virtual void clear_selection( void ) = 0;
 	/// @brief query selection types available for pasting
-	virtual std::vector<std::string> query_selection_types( void ) = 0;
-	/// @brief request the specific type for pasting, returning the data
-	virtual std::vector<uint8_t> query_selection( const std::string &type ) = 0;
+	///
+	/// on platforms where it makes sense, mouseSel is the mouse selection,
+	/// compared to just querying the normal clipboard
+	///
+	/// if the reqTypes is empty, a generic string is requested
+	/// if one of the reqTypes is not available, then an empty result is returned
+	/// otherwise, the first type encountered is returned
+	virtual std::pair<std::vector<uint8_t>, std::string> query_selection( bool mouseSel, const std::vector<std::string> &reqTypes = std::vector<std::string>() ) = 0;
+	/// @brief same as other @sa query_selection, but with a custom clipboard name
+	virtual std::pair<std::vector<uint8_t>, std::string> query_selection( const std::string &clipboardName, const std::vector<std::string> &reqTypes = std::vector<std::string>() ) = 0;
+
 	/// @endgroup
 
 	/// @group Drag and Drop interface

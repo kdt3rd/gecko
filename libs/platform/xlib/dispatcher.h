@@ -11,6 +11,9 @@
 #include <map>
 #include <atomic>
 #include <array>
+#include <vector>
+#include <stack>
+#include <string>
 #include <platform/dispatcher.h>
 #include <base/pipe.h>
 #include "window.h"
@@ -44,9 +47,22 @@ public:
 
 	void remove_window( const std::shared_ptr<window> &w );
 
+	std::pair<std::vector<uint8_t>, std::string> query_selection( bool mouseSel, const std::vector<std::string> &reqTypes = std::vector<std::string>() );
+	std::pair<std::vector<uint8_t>, std::string> query_selection( const std::string &clipboardName, const std::vector<std::string> &reqTypes = std::vector<std::string>() );
+
 private:
 	void wake_up_executor( void );
+	void run_event_loop_until( std::atomic<bool> *b );
 	bool drain_xlib_events( void );
+
+	struct Property
+	{
+		unsigned char *data = nullptr;
+		int format = 0;
+		int nitems = 0;
+		Atom type = None;
+	};
+	Property read_property( Atom sel );
 
 	void dispatchKeyPress( const std::shared_ptr<window> &w, XEvent &event );
 	void dispatchKeyRelease( const std::shared_ptr<window> &w, XEvent &event );
@@ -103,6 +119,32 @@ private:
 
 	Window _clipboard_win = 0;
 	std::map<Window, std::shared_ptr<window>> _windows;
+
+	Atom _sel_targets = None;
+	Atom _sel_primary = None;
+	Atom _sel_clip = None;
+	std::map<std::string, Atom> _sel_custom_clips;
+
+	// probably shouldn't allow a stack, but who knows...
+	struct SelectionRequestInfo
+	{
+		SelectionRequestInfo( void ) = default;
+		SelectionRequestInfo( std::vector<uint8_t> *r, std::string *rt, const std::vector<std::string> *rqt, std::atomic<bool> *f, Atom s ) : result( r ), resulttype( rt ), reqTypes( rqt ), fin( f ), sel( s ), requested( None ), sent_request( false ) {}
+		
+		~SelectionRequestInfo( void ) = default;
+		SelectionRequestInfo( const SelectionRequestInfo & ) = default;
+		SelectionRequestInfo( SelectionRequestInfo && ) = default;
+		SelectionRequestInfo &operator=( const SelectionRequestInfo & ) = default;
+		SelectionRequestInfo &operator=( SelectionRequestInfo && ) = default;
+		std::vector<uint8_t> *result = nullptr;
+		std::string *resulttype = nullptr;
+		const std::vector<std::string> *reqTypes = nullptr;
+		std::atomic<bool> *fin = nullptr;
+		Atom sel = None;
+		Atom requested = None;
+		bool sent_request = false;
+	};
+	std::stack<SelectionRequestInfo> _sel_stack;
 };
 
 ////////////////////////////////////////

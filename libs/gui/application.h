@@ -17,6 +17,11 @@ class font;
 class font_manager;
 }
 
+namespace platform
+{
+class system;
+}
+
 namespace gui
 {
 
@@ -49,6 +54,8 @@ public:
 	std::set<std::string> get_font_families( void );
 	std::set<std::string> get_font_styles( const std::string &family );
 	std::shared_ptr<script::font> get_font( const std::string &family, const std::string &style, double pixsize );
+
+	std::shared_ptr<platform::system> get_system( void );
 
 	static std::shared_ptr<application> current( void );
 

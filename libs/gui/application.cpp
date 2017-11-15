@@ -174,6 +174,13 @@ std::shared_ptr<script::font> application::get_font( const std::string &family, 
 
 ////////////////////////////////////////
 
+std::shared_ptr<platform::system> application::get_system( void )
+{
+	return _impl->sys;
+}
+
+////////////////////////////////////////
+
 std::shared_ptr<application> application::current( void )
 {
 	precondition( !stack.empty(), "getting empty stack" );
