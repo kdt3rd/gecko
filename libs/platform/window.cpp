@@ -7,6 +7,7 @@
 
 #include "window.h"
 #include "event.h"
+#include "system.h"
 #include <base/contract.h>
 
 namespace platform
@@ -106,7 +107,8 @@ window::process_event( const event &e )
 		case event_type::KEYBOARD_DOWN:
 			if ( e.has_control_mod() && e.key().keys[0] == scancode::KEY_V )
 			{
-				std::cout << "GACK: need to be able to get the system to handle ctrl-v paste requests" << std::endl;
+				auto sel = e.sys().query_selection( selection_type::CLIPBOARD );
+				std::cout << "Paste: '" << sel.second << "':\n" << reinterpret_cast<const char *>( sel.first.data() ) << std::endl;
 			}
 			if ( key_pressed )
 				key_pressed( e.source(), e.key().keys[0] );

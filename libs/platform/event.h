@@ -148,6 +148,8 @@ public:
 	static inline event window( system *sys, event_source *src, event_type et, int32_t x, int32_t y, int32_t w, int32_t h )
 	{
 		event r;
+		r._system = sys;
+		r._source = src;
 		r._type = et;
 		r._data.window = { x, y, w, h };
 		r._modifiers = 0;
@@ -157,6 +159,8 @@ public:
 	static inline event key( system *sys, event_source *src, event_type et, int32_t x, int32_t y, scancode kc, uint8_t mods )
 	{
 		event r;
+		r._system = sys;
+		r._source = src;
 		r._type = et;
 		r._data.key.x = x;
 		r._data.key.y = y;
@@ -173,6 +177,8 @@ public:
 	static inline event mouse( system *sys, event_source *src, event_type et, int32_t x, int32_t y, int32_t b, uint8_t mods )
 	{
 		event r;
+		r._system = sys;
+		r._source = src;
 		r._type = et;
 		r._data.mouse.x = x;
 		r._data.mouse.y = y;
@@ -184,6 +190,8 @@ public:
 	static inline event text( system *sys, event_source *src, event_type et, int32_t x, int32_t y, char32_t c, uint8_t mods )
 	{
 		event r;
+		r._system = sys;
+		r._source = src;
 		r._type = et;
 		r._data.text.x = x;
 		r._data.text.y = y;
@@ -195,6 +203,8 @@ public:
 	static inline event hid( system *sys, event_source *src, event_type et, int32_t elt, int32_t pos, uint8_t mods )
 	{
 		event r;
+		r._system = sys;
+		r._source = src;
 		r._type = et;
 		r._data.hid.element = elt;
 		r._data.hid.position = pos;
@@ -205,6 +215,8 @@ public:
 	static inline event user( system *sys, event_source *src, uint32_t id, void *data )
 	{
 		event r;
+		r._system = sys;
+		r._source = src;
 		r._type = USER_EVENT;
 		r._data.user.id = id;
 		r._data.user.data = data;
