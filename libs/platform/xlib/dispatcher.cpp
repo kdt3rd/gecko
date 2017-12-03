@@ -211,8 +211,8 @@ namespace platform { namespace xlib
 
 ////////////////////////////////////////
 
-dispatcher::dispatcher( const std::shared_ptr<Display> &dpy, const std::shared_ptr<keyboard> &k, const std::shared_ptr<mouse> &m )
-	: _wait_pipe( true, false ), _display( dpy ), _keyboard( k ), _mouse( m )
+dispatcher::dispatcher( ::platform::system *sys, const std::shared_ptr<Display> &dpy, const std::shared_ptr<keyboard> &k, const std::shared_ptr<mouse> &m )
+	: _system( sys ), _wait_pipe( true, false ), _display( dpy ), _keyboard( k ), _mouse( m )
 {
 	for ( auto &x: _dispatch )
 		x = &dispatcher::dispatchUNKNOWN;
@@ -368,35 +368,55 @@ dispatcher::remove_window( const std::shared_ptr<window> &w )
 
 ////////////////////////////////////////
 
-std::pair<std::vector<uint8_t>, std::string>
-dispatcher::query_selection( bool mouseSel, const std::vector<std::string> &reqTypes )
+void
+dispatcher::set_selection( selection sel )
 {
-	if ( _sel_targets == None )
-		_sel_targets = XInternAtom( _display.get(), "TARGETS", False );
+	initSelectionAtoms();
 
-	Atom sel = None;
-	if ( mouseSel )
+	_sel = std::move( sel );
+	// TBD: do we need this ever, or are we always time independent?
+	_sel_time = CurrentTime;
+	Atom selA = getSelectionAtom( _sel.which_clip(), _sel.custom_clipboard() );
+	_sel_avail_types.clear();
+	_sel_avail_types.reserve( sel.available_mime_types().size() );
+	for ( auto &mt: sel.available_mime_types() )
 	{
-		if ( _sel_primary == None )
-			_sel_primary = XInternAtom( _display.get(), "PRIMARY", False );
-		sel = _sel_primary;
+		Atom mta;
+		auto mti = _sel_type_pool.find( mt );
+		if ( mti == _sel_type_pool.end() )
+		{
+			mta = XInternAtom( _display.get(), mt.c_str(), False );
+			_sel_type_pool[mt] = mta;
+		}
+		else
+		{
+			mta = mti->second;
+		}
+		_sel_avail_types.push_back( mta );
 	}
-	else
-	{
-		if ( _sel_clip == None )
-			_sel_clip = XInternAtom( _display.get(), "CLIPBOARD", False );
-		sel = _sel_clip;
-	}
+
+	XSetSelectionOwner( _display.get(), selA, _clipboard_win, _sel_time );
+}
+
+////////////////////////////////////////
+
+std::pair<std::vector<uint8_t>, std::string>
+dispatcher::query_selection( selection_type sel,
+							 const std::vector<std::string> &allowedTypes,
+							 const std::string &clipboardName )
+{
+	initSelectionAtoms();
+	Atom selA = getSelectionAtom( sel, clipboardName );
 
 	std::vector<uint8_t> r;
 	std::string rtype;
-	if ( _sel_targets != None && sel != None )
+	if ( _sel_targets != None && selA != None )
 	{
 		std::atomic<bool> fin{ false };
-		_sel_stack.emplace( &r, &rtype, &reqTypes, &fin, sel );
+		_sel_stack.emplace( &r, &rtype, &allowedTypes, &fin, selA );
 		on_scope_exit{ _sel_stack.pop(); };
 
-		XConvertSelection( _display.get(), sel, _sel_targets, sel, _clipboard_win, CurrentTime );
+		XConvertSelection( _display.get(), selA, _sel_targets, selA, _clipboard_win, CurrentTime );
 		run_event_loop_until( &fin );
 	}
 	else
@@ -407,31 +427,23 @@ dispatcher::query_selection( bool mouseSel, const std::vector<std::string> &reqT
 
 ////////////////////////////////////////
 
-
 std::pair<std::vector<uint8_t>, std::string>
-dispatcher::query_selection( const std::string &clipboardName, const std::vector<std::string> &reqTypes )
+dispatcher::query_selection( selection_type sel,
+							 const selection_type_function &chooseMimeType,
+							 const std::string &clipboardName )
 {
-	if ( _sel_targets == None )
-		_sel_targets = XInternAtom( _display.get(), "TARGETS", False );
-	Atom sel = None;
-	auto i = _sel_custom_clips.find( clipboardName );
-	if ( i == _sel_custom_clips.end() )
-	{
-		sel = XInternAtom( _display.get(), clipboardName.c_str(), False );
-		_sel_custom_clips[clipboardName] = sel;
-	}
-	else
-		sel = i->second;
+	initSelectionAtoms();
+	Atom selA = getSelectionAtom( sel, clipboardName );
 
 	std::vector<uint8_t> r;
 	std::string rtype;
-	if ( _sel_targets != None && sel != None )
+	if ( _sel_targets != None && selA != None )
 	{
 		std::atomic<bool> fin{ false };
-		_sel_stack.emplace( &r, &rtype, &reqTypes, &fin, sel );
+		_sel_stack.emplace( &r, &rtype, &chooseMimeType, &fin, selA );
 		on_scope_exit{ _sel_stack.pop(); };
 
-		XConvertSelection( _display.get(), sel, _sel_targets, sel, _clipboard_win, CurrentTime );
+		XConvertSelection( _display.get(), selA, _sel_targets, selA, _clipboard_win, CurrentTime );
 		run_event_loop_until( &fin );
 	}
 	else
@@ -607,6 +619,53 @@ dispatcher::read_property( Atom sel )
 
 ////////////////////////////////////////
 
+void
+dispatcher::initSelectionAtoms( void )
+{
+	if ( _sel_targets == None )
+		_sel_targets = XInternAtom( _display.get(), "TARGETS", False );
+	if ( _sel_multiple == None )
+		_sel_multiple = XInternAtom( _display.get(), "MULTIPLE", False );
+	if ( _sel_incr == None )
+		_sel_incr = XInternAtom( _display.get(), "INCR", False );
+	if ( _sel_timestamp == None )
+		_sel_timestamp = XInternAtom( _display.get(), "TIMESTAMP", False );
+	if ( _sel_primary == None )
+		_sel_primary = XInternAtom( _display.get(), "PRIMARY", False );
+	if ( _sel_clip == None )
+		_sel_clip = XInternAtom( _display.get(), "CLIPBOARD", False );
+}
+
+////////////////////////////////////////
+
+Atom
+dispatcher::getSelectionAtom( selection_type sel, const std::string &clipboardName )
+{
+	Atom selA = None;
+	switch ( sel )
+	{
+		case selection_type::MOUSE: selA = _sel_primary; break;
+		case selection_type::CLIPBOARD: selA = _sel_clip; break;
+		case selection_type::CUSTOM:
+		{
+			precondition( ! clipboardName.empty(), "valid clipboard name required for custom selection type" );
+			auto i = _sel_custom_clips.find( clipboardName );
+			if ( i == _sel_custom_clips.end() )
+			{
+				selA = XInternAtom( _display.get(), clipboardName.c_str(), False );
+				_sel_custom_clips[clipboardName] = selA;
+			}
+			else
+				selA = i->second;
+			break;
+		}
+	}
+	return selA;
+}
+
+
+////////////////////////////////////////
+
 void dispatcher::dispatchKeyPress( const std::shared_ptr<window> &w, XEvent &event )
 {
 	if ( ! w )
@@ -665,8 +724,9 @@ void dispatcher::dispatchKeyPress( const std::shared_ptr<window> &w, XEvent &eve
 	uint8_t mods = ( (((event.xkey.state & ControlMask) != 0) ? 0x01 : 0) |
 					 (((event.xkey.state & ShiftMask) != 0) ? 0x02 : 0) );
 
-	w->process_event( *_keyboard,
-					  event::key( event_type::KEYBOARD_DOWN, event.xkey.x, event.xkey.y,
+	w->process_event( event::key( _system, _keyboard.get(),
+								  event_type::KEYBOARD_DOWN,
+								  event.xkey.x, event.xkey.y,
 								  sc, mods ) );
 
 	if ( keyptr && length > 0 )
@@ -677,8 +737,9 @@ void dispatcher::dispatchKeyPress( const std::shared_ptr<window> &w, XEvent &eve
 		{
 			// why only graphic? Why not formatting as well?
 			if ( utf::is_graphic( *it ) )
-				w->process_event( *_keyboard,
-								  event::text( event_type::TEXT_ENTERED, event.xkey.x, event.xkey.y,
+				w->process_event( event::text( _system, _keyboard.get(),
+											   event_type::TEXT_ENTERED,
+											   event.xkey.x, event.xkey.y,
 											   *it, mods ) );
 		}
 	}
@@ -693,8 +754,9 @@ void dispatcher::dispatchKeyRelease( const std::shared_ptr<window> &w, XEvent &e
 		uint8_t mods = ( (((event.xkey.state & ControlMask) != 0) ? 0x01 : 0) |
 						 (((event.xkey.state & ShiftMask) != 0) ? 0x02 : 0) );
 
-		w->process_event( *_keyboard,
-						  event::key( event_type::KEYBOARD_UP, event.xkey.x, event.xkey.y,
+		w->process_event( event::key( _system, _keyboard.get(),
+									  event_type::KEYBOARD_UP,
+									  event.xkey.x, event.xkey.y,
 									  get_scancode( event.xkey ), mods ) );
 	}
 }
@@ -709,11 +771,14 @@ void dispatcher::dispatchButtonPress( const std::shared_ptr<window> &w, XEvent &
 						 (((event.xbutton.state & ShiftMask) != 0) ? 0x02 : 0) );
 
 		if ( event.xbutton.button == 4 )
-			w->process_event( *_mouse, event::hid( event_type::MOUSE_WHEEL, 4, 1, mods ) );
+			w->process_event( event::hid( _system, _mouse.get(), event_type::MOUSE_WHEEL, 4, 1, mods ) );
 		else if ( event.xbutton.button == 5 )
-			w->process_event( *_mouse, event::hid( event_type::MOUSE_WHEEL, 5, -1, mods ) );
+			w->process_event( event::hid( _system, _mouse.get(), event_type::MOUSE_WHEEL, 5, -1, mods ) );
 		else
-			w->process_event( *_mouse, event::mouse( event_type::MOUSE_DOWN, event.xbutton.x, event.xbutton.y, int(event.xbutton.button), mods ) );
+			w->process_event( event::mouse( _system, _mouse.get(),
+											event_type::MOUSE_DOWN,
+											event.xbutton.x, event.xbutton.y,
+											int(event.xbutton.button), mods ) );
 	}
 }
 
@@ -727,7 +792,10 @@ void dispatcher::dispatchButtonRelease( const std::shared_ptr<window> &w, XEvent
 		{
 			uint8_t mods = ( (((event.xbutton.state & ControlMask) != 0) ? 0x01 : 0) |
 							 (((event.xbutton.state & ShiftMask) != 0) ? 0x02 : 0) );
-			w->process_event( *_mouse, event::mouse( event_type::MOUSE_UP, event.xbutton.x, event.xbutton.y, int(event.xbutton.button), mods ) );
+			w->process_event( event::mouse( _system, _mouse.get(),
+											event_type::MOUSE_UP,
+											event.xbutton.x, event.xbutton.y,
+											int(event.xbutton.button), mods ) );
 		}
 	}
 }
@@ -740,7 +808,8 @@ void dispatcher::dispatchMotionNotify( const std::shared_ptr<window> &w, XEvent 
 	{
 		uint8_t mods = ( (((event.xbutton.state & ControlMask) != 0) ? 0x01 : 0) |
 						 (((event.xbutton.state & ShiftMask) != 0) ? 0x02 : 0) );
-		w->process_event( *_mouse, event::mouse( event_type::MOUSE_MOVE, event.xbutton.x, event.xbutton.y, 0, mods ) );
+		w->process_event( event::mouse( _system, _mouse.get(), event_type::MOUSE_MOVE,
+										event.xbutton.x, event.xbutton.y, 0, mods ) );
 	}
 }
 
@@ -758,7 +827,8 @@ void dispatcher::dispatchEnterNotify( const std::shared_ptr<window> &w, XEvent &
 		uint8_t mods = ( (((event.xcrossing.state & ControlMask) != 0) ? 0x01 : 0) |
 						 (((event.xcrossing.state & ShiftMask) != 0) ? 0x02 : 0) );
 		_ext_events->grab( w );
-		w->process_event( *_mouse, event::mouse( event_type::MOUSE_ENTER, event.xcrossing.x, event.xcrossing.y, 0, mods ) );
+		w->process_event( event::mouse( _system, _mouse.get(), event_type::MOUSE_ENTER,
+										event.xcrossing.x, event.xcrossing.y, 0, mods ) );
 	}
 }
 
@@ -776,7 +846,8 @@ void dispatcher::dispatchLeaveNotify( const std::shared_ptr<window> &w, XEvent &
 	{
 		uint8_t mods = ( (((event.xcrossing.state & ControlMask) != 0) ? 0x01 : 0) |
 						 (((event.xcrossing.state & ShiftMask) != 0) ? 0x02 : 0) );
-		w->process_event( *_mouse, event::mouse( event_type::MOUSE_LEAVE, event.xcrossing.x, event.xcrossing.y, 0, mods ) );
+		w->process_event( event::mouse( _system, _mouse.get(), event_type::MOUSE_LEAVE,
+										event.xcrossing.x, event.xcrossing.y, 0, mods ) );
 	}
 }
 
@@ -807,7 +878,10 @@ void dispatcher::dispatchKeymapNotify( const std::shared_ptr<window> &w, XEvent 
 void dispatcher::dispatchExpose( const std::shared_ptr<window> &w, XEvent &event )
 {
 	if ( event.xexpose.count == 0 && w )
-		w->process_event( *_ext_events, event::window( event_type::WINDOW_EXPOSED, event.xexpose.x, event.xexpose.y, event.xexpose.width, event.xexpose.height ) );
+		w->process_event( event::window( _system, _ext_events.get(),
+										 event_type::WINDOW_EXPOSED,
+										 event.xexpose.x, event.xexpose.y,
+										 event.xexpose.width, event.xexpose.height ) );
 }
 
 ////////////////////////////////////////
@@ -842,7 +916,8 @@ void dispatcher::dispatchDestroyNotify( const std::shared_ptr<window> &w, XEvent
 	{
 		if ( _xim )
 			XUnsetICFocus( w->input_context() );
-		w->process_event( *_ext_events, event::window( event_type::WINDOW_DESTROYED, 0, 0, 0, 0 ) );
+		w->process_event( event::window( _system, _ext_events.get(),
+										 event_type::WINDOW_DESTROYED, 0, 0, 0, 0 ) );
 		_windows.erase( w->id() );
 	}
 }
@@ -855,8 +930,10 @@ void dispatcher::dispatchUnmapNotify( const std::shared_ptr<window> &w, XEvent &
 	{
 		if ( _xim )
 			XUnsetICFocus( w->input_context() );
-		w->process_event( *_ext_events, event::window( event_type::WINDOW_HIDDEN, 0, 0, 0, 0 ) );
-		w->process_event( *_ext_events, event::window( event_type::WINDOW_MINIMIZED, 0, 0, 0, 0 ) );
+		w->process_event( event::window( _system, _ext_events.get(),
+										 event_type::WINDOW_HIDDEN, 0, 0, 0, 0 ) );
+		w->process_event( event::window( _system, _ext_events.get(),
+										 event_type::WINDOW_MINIMIZED, 0, 0, 0, 0 ) );
 		// add icccm for minimized state storage?
 	}
 }
@@ -867,8 +944,10 @@ void dispatcher::dispatchMapNotify( const std::shared_ptr<window> &w, XEvent &ev
 {
 	if ( w )
 	{
-		w->process_event( *_ext_events, event::window( event_type::WINDOW_SHOWN, 0, 0, 0, 0 ) );
-		w->process_event( *_ext_events, event::window( event_type::WINDOW_RESTORED, 0, 0, 0, 0 ) );
+		w->process_event( event::window( _system, _ext_events.get(),
+										 event_type::WINDOW_SHOWN, 0, 0, 0, 0 ) );
+		w->process_event( event::window( _system, _ext_events.get(),
+										 event_type::WINDOW_RESTORED, 0, 0, 0, 0 ) );
 	}
 }
 
@@ -889,7 +968,10 @@ void dispatcher::dispatchReparentNotify( const std::shared_ptr<window> &w, XEven
 void dispatcher::dispatchConfigureNotify( const std::shared_ptr<window> &w, XEvent &event )
 {
 	if ( w )
-		w->process_event( *_ext_events, event::window( event_type::WINDOW_MOVE_RESIZE, event.xconfigure.x, event.xconfigure.y, event.xconfigure.width, event.xconfigure.height ) );
+		w->process_event( event::window( _system, _ext_events.get(),
+										 event_type::WINDOW_MOVE_RESIZE,
+										 event.xconfigure.x, event.xconfigure.y,
+										 event.xconfigure.width, event.xconfigure.height ) );
 }
 
 ////////////////////////////////////////
@@ -926,18 +1008,84 @@ void dispatcher::dispatchCirculateRequest( const std::shared_ptr<window> &w, XEv
 
 void dispatcher::dispatchPropertyNotify( const std::shared_ptr<window> &w, XEvent &event )
 {
+	if ( _sel_stack.empty() )
+		return;
+
+	SelectionRequestInfo &req = _sel_stack.top();
+	if ( req.incr_request && event.xproperty.state == PropertyNewValue && event.xproperty.atom == req.sel )
+	{
+		Property prop = read_property( req.sel );
+		on_scope_exit{ if ( prop.data ) XFree( prop.data ); };
+
+		size_t len = (prop.nitems * prop.format / 8);
+		// got our data
+		if ( prop.data && len > 0 )
+			req.result->insert( req.result->end(), prop.data, prop.data + len );
+
+		if ( len == 0 )
+			req.fin->store( true, std::memory_order_relaxed );
+		XDeleteProperty( _display.get(), _clipboard_win, req.sel );
+	}
 }
 
 ////////////////////////////////////////
 
 void dispatcher::dispatchSelectionClear( const std::shared_ptr<window> &w, XEvent &event )
 {
+	std::cout << "clear selection..." << std::endl;
+	_sel.clear();
 }
 
 ////////////////////////////////////////
 
 void dispatcher::dispatchSelectionRequest( const std::shared_ptr<window> &w, XEvent &event )
 {
+	initSelectionAtoms();
+
+//	Window owner = event.xselectionrequest.owner;
+	Atom sel = event.xselectionrequest.selection;
+	Atom targ = event.xselectionrequest.target;
+	Atom prop = event.xselectionrequest.property;
+	Window req = event.xselectionrequest.requestor;
+	Time timestamp = event.xselectionrequest.time;
+	Display *disp = event.xselectionrequest.display;
+
+	std::cout << "a selection request has arrived..." << std::endl;
+
+	XEvent s;
+	s.xselection.type = SelectionNotify;
+	s.xselection.requestor = req;
+	s.xselection.selection = sel;
+	s.xselection.target = targ;
+	s.xselection.property = None; // unless changed, this is a refusal
+	s.xselection.time = timestamp;
+
+	if ( targ == _sel_targets )
+	{
+		XChangeProperty( disp, req, prop, XA_ATOM, 32, PropModeReplace,
+						 reinterpret_cast<unsigned char *>( _sel_avail_types.data() ),
+						 _sel_avail_types.size() );
+		s.xselection.property = prop;
+	}
+	else if ( targ == _sel_timestamp )
+	{
+		XChangeProperty( disp, req, prop, XA_ATOM, 32, PropModeReplace,
+						 reinterpret_cast<unsigned char *>( &_sel_time ),
+						 1 );
+		s.xselection.property = prop;
+	}
+	else
+	{
+		auto x = _sel_type_pool.find( targ );
+		if ( x != _sel_type_pool.end() )
+		{
+			const auto &seldata = _sel.as( x->first );
+			// TODO: handle BadAlloc and send w/ INCR?
+			XChangeProperty( disp, req, prop, targ, 8, PropModeReplace,
+							 seldata.data(), seldata.size() );
+		}
+	}
+	XSendEvent( disp, req, True, 0, &s );
 }
 
 ////////////////////////////////////////
@@ -962,97 +1110,42 @@ void dispatcher::dispatchSelectionNotify( const std::shared_ptr<window> &w, XEve
 		req.result->clear();
 		req.resulttype->clear();
 		req.fin->store( true, std::memory_order_relaxed );
+		return;
 	}
-	else
+
+	Property prop = read_property( req.sel );
+	on_scope_exit{ if ( prop.data ) XFree( prop.data ); };
+
+	if ( prop.type == _sel_incr )
 	{
-		Property prop = read_property( req.sel );
-		on_scope_exit{ if ( prop.data ) XFree( prop.data ); };
+		std::cout << "Handling large bytes " << prop.format << ", items " << prop.nitems << " expected bytes: " << reinterpret_cast<int *>(prop.data)[0] << std::endl;
+		req.incr_request = true;
+	}
 
-		auto &reqTypes = *(req.reqTypes);
-		if ( targ == _sel_targets && ! req.sent_request )
+	if ( targ == _sel_targets && ! req.sent_request )
+	{
+		if ( fill_requested( req, prop ) )
 		{
-			req.sent_request = true;
-			if ( ( prop.type != XA_ATOM && prop.type != _sel_targets ) || prop.format != 32 )
-			{
-				req.resulttype->assign( "STRING" );
-				if ( reqTypes.empty() )
-					req.requested = XA_STRING;
-				else if ( std::find( reqTypes.begin(), reqTypes.end(), *(req.resulttype) ) != reqTypes.end() )
-					req.requested = XA_STRING;
-				else
-					req.requested = None;
-			}
-			else
-			{
-				Atom *alist = reinterpret_cast<Atom *>( prop.data );
-				req.requested = None;
-				size_t bIdx = size_t(-1);
-				for ( int i = 0; i < prop.nitems; ++i )
-				{
-					char *anameptr = XGetAtomName( _display.get(), alist[i] );
-					if ( ! anameptr )
-						continue;
-
-					std::cout << "available paste type: '" << anameptr << "'" << std::endl;
-					if ( reqTypes.empty() )
-					{
-						static std::vector<std::string> knownTypes{
-							"UTF8_STRING", "text/plain;charset=utf-8", "STRING", "text/plain",
-							"TEXT", "COMPOUND_TEXT" };
-						for ( size_t k = 0; k != knownTypes.size(); ++k )
-						{
-							if ( knownTypes[k].compare( anameptr ) == 0 )
-							{
-								if ( k < bIdx )
-								{
-									req.resulttype->assign( anameptr );
-									req.requested = alist[i];
-									bIdx = k;
-								}
-								break;
-							}
-						}
-					}
-					else
-					{
-						for ( size_t r = 0; r != reqTypes.size(); ++r )
-						{
-							if ( reqTypes[r].compare( anameptr ) == 0 )
-							{
-								if ( r < bIdx )
-								{
-									req.requested = alist[i];
-									bIdx = r;
-								}
-								break;
-							}
-						}
-					}
-				}
-				if ( bIdx != size_t(-1) && ! reqTypes.empty() )
-					req.resulttype->assign( reqTypes[bIdx] );
-			}
-
-			if ( req.requested == None )
-			{
-				req.result->clear();
-				req.resulttype->clear();
-				req.fin->store( true, std::memory_order_relaxed );
-			}
-			else
-			{
-				std::cout << "requesting type: " << *(req.resulttype) << std::endl;
-				XConvertSelection( _display.get(), req.sel, req.requested, req.sel, _clipboard_win, CurrentTime );
-			}
-		}
-		else if ( targ == req.requested )
-		{
-			// got our data
+			std::cout << "requesting type: " << *(req.resulttype) << std::endl;
 			req.result->clear();
-			if ( prop.data )
-				req.result->insert( req.result->begin(), prop.data, prop.data + (prop.nitems * prop.format / 8) );
-			req.fin->store( true, std::memory_order_relaxed );
+			XConvertSelection( _display.get(), req.sel, req.requested, req.sel, _clipboard_win, CurrentTime );
 		}
+	}
+	else if ( targ == req.requested )
+	{
+		size_t len = (prop.nitems * prop.format / 8);
+		// got our data
+		if ( prop.data && len > 0 )
+			req.result->insert( req.result->end(), prop.data, prop.data + len );
+		if ( req.incr_request )
+		{
+			// do we also need to trigger something in propertynotify when the property is re-created?????
+			if ( len == 0 )
+				req.fin->store( true, std::memory_order_relaxed );
+			XDeleteProperty( _display.get(), _clipboard_win, req.sel );
+		}
+		else
+			req.fin->store( true, std::memory_order_relaxed );
 	}
 }
 
@@ -1071,9 +1164,10 @@ void dispatcher::dispatchClientMessage( const std::shared_ptr<window> &w, XEvent
 	{
 		bool doWinClose = true;
 		if ( evatom == _atom_quit_app )
-			doWinClose = w->process_event( *_ext_events, event::window( event_type::WINDOW_CLOSE_REQUEST, 0, 0, 0, 0 ) );
+			doWinClose = w->process_event( event::window( _system, _ext_events.get(), event_type::WINDOW_CLOSE_REQUEST, 0, 0, 0, 0 ) );
 		else
-			w->process_event( *_ext_events, event::window( event_type::WINDOW_DESTROYED, 0, 0, 0, 0 ) );
+			w->process_event( event::window( _system, _ext_events.get(),
+											 event_type::WINDOW_DESTROYED, 0, 0, 0, 0 ) );
 
 		if ( doWinClose )
 		{
@@ -1105,8 +1199,124 @@ void dispatcher::dispatchUNKNOWN( const std::shared_ptr<window> &w, XEvent &even
 {
 }
 
+////////////////////////////////////////
+
+bool
+dispatcher::fill_requested( SelectionRequestInfo &req, const Property &prop )
+{
+	static std::vector<std::string> knownTypes{
+		"UTF8_STRING", "text/plain;charset=utf-8", "STRING", "C_STRING", "text/plain",
+			"TEXT", "COMPOUND_TEXT" };
+
+	req.sent_request = true;
+	req.requested = None;
+
+	Atom *alist = reinterpret_cast<Atom *>( prop.data );
+
+	if ( ( prop.type != XA_ATOM && prop.type != _sel_targets ) || prop.format != 32 )
+	{
+		if ( req.reqTypes )
+		{
+			auto &reqTypes = *(req.reqTypes);
+			req.resulttype->assign( "text/plain" );
+			if ( reqTypes.empty() )
+				req.requested = XA_STRING;
+			else if ( std::find( reqTypes.begin(), reqTypes.end(), *(req.resulttype) ) != reqTypes.end() )
+				req.requested = XA_STRING;
+		}
+		else if ( req.reqTypeFunc )
+		{
+			std::vector<std::string> tmp{ 1, "text/plain" };
+			(*req.resulttype) = (*req.reqTypeFunc)( tmp );
+			req.requested = ( req.resulttype->empty() ) ? None : XA_STRING;
+		}
+	}
+	else if ( req.reqTypes )
+	{
+		auto &reqTypes = *(req.reqTypes);
+
+		size_t bIdx = size_t(-1);
+		for ( int i = 0; i < prop.nitems; ++i )
+		{
+			char *anameptr = XGetAtomName( _display.get(), alist[i] );
+			if ( ! anameptr )
+				continue;
+
+			if ( reqTypes.empty() )
+			{
+				for ( size_t k = 0; k != knownTypes.size(); ++k )
+				{
+					if ( knownTypes[k].compare( anameptr ) == 0 )
+					{
+						if ( k < bIdx )
+						{
+							req.resulttype->assign( anameptr );
+							req.requested = alist[i];
+							bIdx = k;
+						}
+						break;
+					}
+				}
+			}
+			else
+			{
+				for ( size_t r = 0; r != reqTypes.size(); ++r )
+				{
+					if ( reqTypes[r].compare( anameptr ) == 0 )
+					{
+						if ( r < bIdx )
+						{
+							req.requested = alist[i];
+							bIdx = r;
+						}
+						break;
+					}
+				}
+			}
+		}
+		if ( bIdx != size_t(-1) && ! reqTypes.empty() )
+			req.resulttype->assign( reqTypes[bIdx] );
+	}
+	else if ( req.reqTypeFunc )
+	{
+		std::vector<std::string> names;
+		// stash this off to avoid roundtrips to the server
+		std::map<std::string, Atom> namemap;
+		names.reserve( prop.nitems );
+		for ( int i = 0; i < prop.nitems; ++i )
+		{
+			char *anameptr = XGetAtomName( _display.get(), alist[i] );
+			if ( ! anameptr )
+				continue;
+
+			names.emplace_back( anameptr );
+			namemap[names.back()] = alist[i];
+		}
+
+		(*req.resulttype) = (*req.reqTypeFunc)( names );
+		if ( ! req.resulttype->empty() )
+		{
+			auto i = namemap.find( (*req.resulttype) );
+			if ( i != namemap.end() )
+			{
+				req.requested = i->second;
+			}
+		}
+	}
+
+	if ( req.requested == None )
+	{
+		req.result->clear();
+		req.resulttype->clear();
+		req.fin->store( true, std::memory_order_relaxed );
+		return false;
+	}
+
+	return true;
+}
 
 ////////////////////////////////////////
 
-} }
+} // namespace xlib
+} // namespace platform
 

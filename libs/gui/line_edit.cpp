@@ -177,12 +177,12 @@ line_edit::mouse_press( const base::point &p, int button )
 {
 	if ( button == 2 )
 	{
-		auto paste = application::current()->get_system()->query_selection( true );
+		auto paste = application::current()->get_system()->query_selection( platform::selection_type::MOUSE );
 		if ( ! paste.second.empty() )
 		{
 			std::cout << "recv paste: " << paste.first.size() << " bytes of type '" << paste.second << "'" << std::endl;
 
-			if ( paste.second == "UTF8_STRING" || paste.second == "text/plain;charset=utf-8" )
+			if ( paste.second == "text/plain;charset=utf-8" )
 			{
 				std::string &t = _text.get_text();
 				_cursor = std::min( _cursor, t.size() );

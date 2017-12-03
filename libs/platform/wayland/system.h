@@ -39,23 +39,22 @@ public:
 	std::shared_ptr<::platform::cursor> new_cursor( void ) override;
 	std::shared_ptr<::platform::cursor> builtin_cursor( standard_cursor sc ) override;
 
-	void set_selection( const std::string &data ) override;
-	void set_selection( const std::vector<uint8_t> &data,
-						const std::vector<std::string> &avail_mime_types,
-						const std::function<std::vector<uint8_t> (const std::vector<uint8_t> &, const std::string &)> &convert ) override;
+	void set_selection( selection sel ) override;
 
-	void clear_selection( void ) override;
+	std::pair<std::vector<uint8_t>, std::string> query_selection( selection_type sel,
+																  const std::vector<std::string> &allowedMimeTypes = std::vector<std::string>(),
+																  const std::string &clipboardName = std::string() ) override;
+	std::pair<std::vector<uint8_t>, std::string> query_selection( selection_type sel,
+																  const selection_type_function &chooseMimeType,
+																  const std::string &clipboardName = std::string() ) override;
 
-	std::pair<std::vector<uint8_t>, std::string> query_selection( bool mouseSel, const std::vector<std::string> &reqTypes = std::vector<std::string>() ) override;
-	std::pair<std::vector<uint8_t>, std::string> query_selection( const std::string &clipboardName, const std::vector<std::string> &reqTypes = std::vector<std::string>() ) override;
+	const std::vector<std::string> &default_string_types( void ) override;
+	selection_type_function default_string_selector( void ) override;
+	mime_converter default_string_converter( void ) override;
 
-	void begin_drag( const std::vector<uint8_t> &data,
-					 const std::vector<std::string> &avail_mime_types,
-					 const std::function<std::vector<uint8_t> (const std::vector<uint8_t> &, const std::string &)> &convert,
+	void begin_drag( selection sel,
 					 const std::shared_ptr<::platform::cursor> &cursor = std::shared_ptr<::platform::cursor>() ) override;
-
-	std::vector<std::string> query_available_drop_types( void ) override;
-	std::vector<uint8_t> accept_drop( const std::string &type ) override;
+	std::pair<std::vector<uint8_t>, std::string> query_drop( const selection_type_function &chooseMimeType = selection_type_function() ) override;
 
 	std::shared_ptr<::platform::menu> new_system_menu( void ) override;
 	std::shared_ptr<::platform::tray> new_system_tray_item( void ) override;

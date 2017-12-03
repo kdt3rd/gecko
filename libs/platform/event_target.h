@@ -15,7 +15,6 @@ namespace platform
 {
 
 class event;
-class event_source;
 
 ///
 /// @brief Class event_target provides...
@@ -31,7 +30,7 @@ public:
 
 	virtual ~event_target( void );
 
-	virtual bool process_event( event_source &, const event & ) = 0;
+	virtual bool process_event( const event & ) = 0;
 
 private:
 };

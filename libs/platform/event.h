@@ -17,6 +17,9 @@
 namespace platform
 {
 
+class system;
+class event_source;
+
 enum event_type : uint8_t
 {
 	WINDOW_SHOWN,
@@ -139,7 +142,10 @@ public:
 	const hid_info &hid( void ) const { return _data.hid; }
 	const user_info &user( void ) const { return _data.user; }
 
-	static inline event window( event_type et, int32_t x, int32_t y, int32_t w, int32_t h )
+	system &sys( void ) const { return *_system; }
+	event_source &source( void ) const { return *_source; }
+
+	static inline event window( system *sys, event_source *src, event_type et, int32_t x, int32_t y, int32_t w, int32_t h )
 	{
 		event r;
 		r._type = et;
@@ -148,7 +154,7 @@ public:
 		return r;
 	}
 
-	static inline event key( event_type et, int32_t x, int32_t y, scancode kc, uint8_t mods )
+	static inline event key( system *sys, event_source *src, event_type et, int32_t x, int32_t y, scancode kc, uint8_t mods )
 	{
 		event r;
 		r._type = et;
@@ -164,7 +170,7 @@ public:
 		return r;
 	}
 
-	static inline event mouse( event_type et, int32_t x, int32_t y, int32_t b, uint8_t mods )
+	static inline event mouse( system *sys, event_source *src, event_type et, int32_t x, int32_t y, int32_t b, uint8_t mods )
 	{
 		event r;
 		r._type = et;
@@ -175,7 +181,7 @@ public:
 		return r;
 	}
 
-	static inline event text( event_type et, int32_t x, int32_t y, char32_t c, uint8_t mods )
+	static inline event text( system *sys, event_source *src, event_type et, int32_t x, int32_t y, char32_t c, uint8_t mods )
 	{
 		event r;
 		r._type = et;
@@ -186,7 +192,7 @@ public:
 		return r;
 	}
 
-	static inline event hid( event_type et, int32_t elt, int32_t pos, uint8_t mods )
+	static inline event hid( system *sys, event_source *src, event_type et, int32_t elt, int32_t pos, uint8_t mods )
 	{
 		event r;
 		r._type = et;
@@ -196,8 +202,21 @@ public:
 		return r;
 	}
 
+	static inline event user( system *sys, event_source *src, uint32_t id, void *data )
+	{
+		event r;
+		r._type = USER_EVENT;
+		r._data.user.id = id;
+		r._data.user.data = data;
+		return r;
+	}
+
 	static uint32_t register_user_event( const std::string &name );
+
 private:
+	system *_system = nullptr;
+	event_source *_source = nullptr;
+
 	union
 	{
 		window_info window;

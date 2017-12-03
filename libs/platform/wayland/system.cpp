@@ -15,6 +15,7 @@
 #include <platform/menu.h>
 #include <platform/tray.h>
 #include <base/contract.h>
+#include <base/string_util.h>
 #include <stdexcept>
 #include <cstring>
 
@@ -168,30 +169,16 @@ system::builtin_cursor( standard_cursor sc )
 ////////////////////////////////////////
 
 void
-system::set_selection( const std::string &data )
-{
-}
-
-////////////////////////////////////////
-
-void
-system::set_selection( const std::vector<uint8_t> &data,
-					   const std::vector<std::string> &avail_mime_types,
-					   const std::function<std::vector<uint8_t> (const std::vector<uint8_t> &, const std::string &)> &convert )
-{
-}
-
-////////////////////////////////////////
-
-void
-system::clear_selection( void )
+system::set_selection( selection sel )
 {
 }
 
 ////////////////////////////////////////
 
 std::pair<std::vector<uint8_t>, std::string>
-system::query_selection( bool mouseSel, const std::vector<std::string> &reqTypes )
+system::query_selection( selection_type sel,
+						 const std::vector<std::string> &allowedMimeTypes,
+						 const std::string &clipboardName )
 {
 	return std::make_pair( std::vector<uint8_t>(), std::string() );
 }
@@ -199,35 +186,71 @@ system::query_selection( bool mouseSel, const std::vector<std::string> &reqTypes
 ////////////////////////////////////////
 
 std::pair<std::vector<uint8_t>, std::string>
-system::query_selection( const std::string &clipboardName, const std::vector<std::string> &reqTypes )
+system::query_selection( selection_type sel,
+						 const selection_type_function &chooseMimeType,
+						 const std::string &clipboardName )
 {
 	return std::make_pair( std::vector<uint8_t>(), std::string() );
 }
 
 ////////////////////////////////////////
 
+const std::vector<std::string> &
+system::default_string_types( void )
+{
+	static std::vector<std::string> xlibTypes{ "text/plain;charset=utf-8", "text/plain" };
+	return xlibTypes;
+}
+
+////////////////////////////////////////
+
+selection_type_function
+system::default_string_selector( void )
+{
+	auto selFun = [](const std::vector<std::string> &l) -> std::string 
+		{
+			std::string ret{ "text/plain;charset=utf-8" };
+			if ( std::find( l.begin(), l.end(), ret ) != l.end() )
+				return ret;
+			ret = "text/plain";
+			if ( std::find( l.begin(), l.end(), ret ) != l.end() )
+				return ret;
+			return std::string();
+		};
+	return selection_type_function{ selFun };
+}
+
+////////////////////////////////////////
+
+system::mime_converter
+system::default_string_converter( void )
+{
+	auto convFun = [](const std::vector<uint8_t> &d, const std::string &cur, const std::string &to) -> std::vector<uint8_t> 
+		{
+			if ( base::begins_with( cur, "text/plain" ) )
+			{
+				if ( base::begins_with( to, "text/plain" ) )
+					return d;
+			}
+			return std::vector<uint8_t>();
+		};
+	return mime_converter{ convFun };
+}
+
+////////////////////////////////////////
+
 void
-system::begin_drag( const std::vector<uint8_t> &data,
-					const std::vector<std::string> &avail_mime_types,
-					const std::function<std::vector<uint8_t> (const std::vector<uint8_t> &, const std::string &)> &convert,
+system::begin_drag( selection sel,
 					const std::shared_ptr<::platform::cursor> &cursor )
 {
 }
 
 ////////////////////////////////////////
 
-std::vector<std::string>
-system::query_available_drop_types( void )
+std::pair<std::vector<uint8_t>, std::string>
+system::query_drop( const selection_type_function &chooseMimeType )
 {
-	return std::vector<std::string>();
-}
-
-////////////////////////////////////////
-
-std::vector<uint8_t>
-system::accept_drop( const std::string &type )
-{
-	return std::vector<uint8_t>();
+	return std::make_pair( std::vector<uint8_t>(), std::string() );
 }
 
 ////////////////////////////////////////

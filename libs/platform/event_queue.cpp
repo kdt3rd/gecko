@@ -97,9 +97,9 @@ event_queue::drain( const std::shared_ptr<event_target> &et )
 	{
 		auto &cur = _events.front();
 		if ( cur.first )
-			cur.first->process_event( *this, cur.second );
+			cur.first->process_event( cur.second );
 		else if ( et )
-			et->process_event( *this, cur.second );
+			et->process_event( cur.second );
 		_events.pop_front();
 	}
 

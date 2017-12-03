@@ -20,6 +20,7 @@
 #include "timer.h"
 #include "window.h"
 #include "dispatcher.h"
+#include "selection.h"
 
 namespace platform
 {
@@ -89,35 +90,48 @@ public:
 
 	/// @group selection interface
 
-	/// @brief simple string selection handling
+	/// @brief selection handling
 	///
-	/// This sets a string as the available selection to the system
-	virtual void set_selection( const std::string &data ) = 0;
-	/// @brief mime-type based selection handling
-	///
-	/// This allows for rich selection transfer between applications
-	/// it is expected that the function will remain valid until one
-	/// of a few conditions happens:
-	///  - @sa clear_selection is called
-	///  - another selection is set
-	///  - the system exits
-	virtual void set_selection( const std::vector<uint8_t> &data,
-								const std::vector<std::string> &avail_mime_types,
-								const std::function<std::vector<uint8_t> (const std::vector<uint8_t> &, const std::string &)> &convert ) = 0;
+	/// This should provide a selection object to the rest of the system
+	virtual void set_selection( selection sel ) = 0;
 
-	/// @brief clear selection
-	virtual void clear_selection( void ) = 0;
-	/// @brief query selection types available for pasting
+	/// @brief query system selection
 	///
-	/// on platforms where it makes sense, mouseSel is the mouse selection,
-	/// compared to just querying the normal clipboard
+	/// when the selection type @param sel is custom, this indicates use of a
+	/// custom clipboard name, at which point the clipboardName must
+	/// be provided. otherwise, it may be left at default.
 	///
-	/// if the reqTypes is empty, a generic string is requested
-	/// if one of the reqTypes is not available, then an empty result is returned
-	/// otherwise, the first type encountered is returned
-	virtual std::pair<std::vector<uint8_t>, std::string> query_selection( bool mouseSel, const std::vector<std::string> &reqTypes = std::vector<std::string>() ) = 0;
-	/// @brief same as other @sa query_selection, but with a custom clipboard name
-	virtual std::pair<std::vector<uint8_t>, std::string> query_selection( const std::string &clipboardName, const std::vector<std::string> &reqTypes = std::vector<std::string>() ) = 0;
+	/// if the @param allowedMimeTypes list is empty, a utf-8 string
+	/// will be requested.
+	///
+	/// @return the selection present in the indicated selection type
+	/// or clipboard, along with the selected mime type.
+	///
+	virtual std::pair<std::vector<uint8_t>, std::string> query_selection( selection_type sel,
+																		  const std::vector<std::string> &allowedMimeTypes = std::vector<std::string>(),
+																		  const std::string &clipboardName = std::string() ) = 0;
+
+	/// @brief query system selection
+	///
+	/// Similar to @sa query_selection, but instead of providing a
+	/// list of allowed mime types, allows dynamic selection of mime
+	/// type based on what is in the selection.
+	///
+	/// @return the selection present in the indicated selection type
+	/// or clipboard, along with the selected mime type.
+	///
+	virtual std::pair<std::vector<uint8_t>, std::string> query_selection( selection_type sel,
+																		  const selection_type_function &mimeSelector,
+																		  const std::string &clipboardName = std::string() ) = 0;
+
+	/// @brief provides a list of mime types and synonyms common to the platform
+	virtual const std::vector<std::string> &default_string_types( void ) = 0;
+	/// @brief provides a default function to select a utf8 string
+	virtual selection_type_function default_string_selector( void ) = 0;
+
+	using mime_converter = selection::mime_converter;
+	/// @brief provides a default function to handle a utf8 string
+	virtual mime_converter default_string_converter( void ) = 0;
 
 	/// @endgroup
 
@@ -127,15 +141,11 @@ public:
 	///
 	/// Event processing continues as normal, but this routine will
 	/// not return until the user releases the mouse button.
-	virtual void begin_drag( const std::vector<uint8_t> &data,
-							 const std::vector<std::string> &avail_mime_types,
-							 const std::function<std::vector<uint8_t> (const std::vector<uint8_t> &, const std::string &)> &convert,
+	virtual void begin_drag( selection sel,
 							 const std::shared_ptr<cursor> &cursor = std::shared_ptr<cursor>() ) = 0;
 
 	/// @brief query available mime types in response to a drop request event
-	virtual std::vector<std::string> query_available_drop_types( void ) = 0;
-	/// @brief accept a drop of a particular type in response to a drop request event
-	virtual std::vector<uint8_t> accept_drop( const std::string &type ) = 0;
+	virtual std::pair<std::vector<uint8_t>, std::string> query_drop( const selection_type_function &chooseMimeType = selection_type_function() ) = 0;
 
 	/// @endgroup
 

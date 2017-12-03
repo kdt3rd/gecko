@@ -34,7 +34,7 @@ public:
 	/// @brief Destructor.
 	virtual ~window( void );
 
-	bool process_event( event_source &src, const event &e ) override;
+	bool process_event( const event &e ) override;
 
 	/// @brief Set a cursor as the default for the window
 	///

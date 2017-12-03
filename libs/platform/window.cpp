@@ -26,7 +26,7 @@ window::~window( void )
 ////////////////////////////////////////
 
 bool
-window::process_event( event_source &src, const event &e )
+window::process_event( const event &e )
 {
 	switch ( e.type() )
 	{
@@ -82,19 +82,19 @@ window::process_event( event_source &src, const event &e )
 
 		case event_type::MOUSE_MOVE:
 			if ( mouse_moved )
-				mouse_moved( src, base::point( e.mouse().x, e.mouse().y ) );
+				mouse_moved( e.source(), base::point( e.mouse().x, e.mouse().y ) );
 			break;
 		case event_type::MOUSE_DOWN:
 			if ( mouse_pressed )
-				mouse_pressed( src, base::point( e.mouse().x, e.mouse().y ), e.mouse().button );
+				mouse_pressed( e.source(), base::point( e.mouse().x, e.mouse().y ), e.mouse().button );
 			break;
 		case event_type::MOUSE_UP:
 			if ( mouse_released )
-				mouse_released( src, base::point( e.mouse().x, e.mouse().y ), e.mouse().button );
+				mouse_released( e.source(), base::point( e.mouse().x, e.mouse().y ), e.mouse().button );
 			break;
 		case event_type::MOUSE_WHEEL:
 			if ( mouse_wheel )
-				mouse_wheel( src, e.hid().position );
+				mouse_wheel( e.source(), e.hid().position );
 			break;
 
 		case event_type::DND_ENTER:
@@ -109,21 +109,21 @@ window::process_event( event_source &src, const event &e )
 				std::cout << "GACK: need to be able to get the system to handle ctrl-v paste requests" << std::endl;
 			}
 			if ( key_pressed )
-				key_pressed( src, e.key().keys[0] );
+				key_pressed( e.source(), e.key().keys[0] );
 			break;
 		case event_type::KEYBOARD_UP:
 			if ( key_released )
-				key_released( src, e.key().keys[0] );
+				key_released( e.source(), e.key().keys[0] );
 			break;
 
 		case event_type::KEYBOARD_REPEAT:
 			if ( key_pressed )
-				key_pressed( src, e.key().keys[0] );
+				key_pressed( e.source(), e.key().keys[0] );
 			break;
 
 		case event_type::TEXT_ENTERED:
 			if ( text_entered )
-				text_entered( src, e.text().text );
+				text_entered( e.source(), e.text().text );
 			break;
 
 		case event_type::TABLET_DOWN:
