@@ -93,7 +93,7 @@ pipe::readable( void ) const
 ////////////////////////////////////////
 
 intptr_t
-writable( void ) const
+pipe::writable( void ) const
 {
 #ifdef _WIN32
 	return reinterpret_cast<intptr_t>( _p[1] );
