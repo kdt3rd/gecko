@@ -13,6 +13,7 @@
 #include <base/cpu_features.h>
 #include <base/contract.h>
 #include <cfloat>
+#include <math.h>
 
 ////////////////////////////////////////
 

@@ -14,6 +14,7 @@
 #include <cmath>
 #include <algorithm>
 #include <vector>
+#include <math.h>
 
 #ifdef __SSE__
 # if defined(LINUX) || defined(__linux__)
