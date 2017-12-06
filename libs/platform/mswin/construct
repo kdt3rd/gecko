@@ -9,4 +9,4 @@ extra_source = optional_source{
 		"dispatcher.cpp",
 	}
 }
-extra_libs = {"gdi32", "gdiplus"}
+extra_libs = {"opengl32", "gdi32", "gdiplus"}

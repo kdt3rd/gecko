@@ -49,7 +49,7 @@ event_queue::shutdown( void )
 
 ////////////////////////////////////////
 
-intptr_t
+waitable::wait
 event_queue::poll_object( void )
 {
 	return _pipe.readable();

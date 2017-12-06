@@ -101,13 +101,12 @@ int dispatcher::execute( void )
 		struct timeval *tvptr = nullptr;
 		for ( auto &w: _waitables )
 		{
-			intptr_t oid = w->poll_object();
-			if ( oid != intptr_t(-1) )
+			int oid = w->poll_object().waitable();
+			if ( oid != -1 )
 			{
-				int objfd = static_cast<int>( oid );
-				waitmap[objfd] = w;
-				FD_SET( objfd, &waitreadobjs );
-				nWaits = std::max( nWaits, objfd );
+				waitmap[oid] = w;
+				FD_SET( oid, &waitreadobjs );
+				nWaits = std::max( nWaits, oid );
 			}
 			waitable::duration when;
 			if ( w->poll_timeout( when, curt ) )

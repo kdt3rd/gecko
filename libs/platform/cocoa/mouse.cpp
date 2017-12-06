@@ -42,9 +42,10 @@ void mouse::shutdown( void )
 
 ////////////////////////////////////////
 
-intptr_t mouse::poll_object( void )
+waitable::wait
+mouse::poll_object( void )
 {
-	return intptr_t(-1);
+	return INVALID_WAIT;
 }
 
 ////////////////////////////////////////

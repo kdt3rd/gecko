@@ -141,6 +141,14 @@ bool window::is_visible( void )
 
 ////////////////////////////////////////
 
+void
+window::fullscreen( bool fs )
+{
+	std::cout << "implement window::fullscreen" << std::endl;
+}
+
+////////////////////////////////////////
+
 /*
 rect window::geometry( void )
 {
@@ -220,6 +228,13 @@ void window::update_position( void )
 	std::cout << "window resized to: " << _last_w << " x " << _last_h << " (" << pos.left << ", " << pos.top << " " << pos.right << ", " << pos.bottom << ")" << std::endl;
 }
 
+////////////////////////////////////////
+
+void
+window::make_current( const std::shared_ptr<cursor> &c )
+{
+	std::cout << "NYI: make_current( cursor )" << std::endl;
+}
 
 ////////////////////////////////////////
 
@@ -233,6 +248,24 @@ void window::expose_event( void )
 //	wglSwapLayerBuffers( _hdc, WGL_SWAP_MAIN_PLANE );
 	SwapBuffers( _hdc );
 	release();
+}
+
+////////////////////////////////////////
+
+void
+window::move_event( double x, double y )
+{
+	_last_x = x;
+	_last_y = y;
+}
+
+////////////////////////////////////////
+
+void
+window::resize_event( double w, double h )
+{
+	_last_w = w;
+	_last_h = h;
 }
 
 ////////////////////////////////////////

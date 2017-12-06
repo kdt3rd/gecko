@@ -44,9 +44,10 @@ void keyboard::shutdown( void )
 
 ////////////////////////////////////////
 
-intptr_t keyboard::poll_object( void )
+waitable::wait
+keyboard::poll_object( void )
 {
-	return intptr_t(-1);
+	return INVALID_WAIT;
 }
 
 ////////////////////////////////////////

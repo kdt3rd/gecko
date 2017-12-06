@@ -142,7 +142,7 @@ platform::scancode get_scancode( XKeyEvent &ev, KeySym symbol )
 			{ XK_F22, platform::scancode::KEY_F22 },
 			{ XK_F23, platform::scancode::KEY_F23 },
 			{ XK_F24, platform::scancode::KEY_F24 },
-//	{ XK_Execute, platform::scancode::KEY_EXECUTE},
+//	{ XK_Execute, platform::scancode::KEY_EXEC},
 			{ XK_Help, platform::scancode::KEY_HELP },
 			{ XK_Menu, platform::scancode::KEY_MENU },
 			{ XK_Select, platform::scancode::KEY_SELECT },
@@ -476,7 +476,7 @@ dispatcher::run_event_loop_until( std::atomic<bool> *end )
 		firenow.clear();
 		waitmap.clear();
 		timeouts.clear();
-		int wpFD = static_cast<int>( _wait_pipe.readable() );
+		int wpFD = _wait_pipe.readable().waitable();
 		int nWaits = std::max( wpFD, xFD );
 		FD_ZERO( &waitreadobjs );
 		FD_SET( xFD, &waitreadobjs );
@@ -488,13 +488,12 @@ dispatcher::run_event_loop_until( std::atomic<bool> *end )
 		struct timeval *tvptr = nullptr;
 		for ( auto &w: _waitables )
 		{
-			intptr_t oid = w->poll_object();
-			if ( oid != intptr_t(-1) )
+			int oid = w->poll_object().waitable();
+			if ( oid != -1 )
 			{
-				int objfd = static_cast<int>( oid );
-				waitmap[objfd] = w;
-				FD_SET( objfd, &waitreadobjs );
-				nWaits = std::max( nWaits, objfd );
+				waitmap[oid] = w;
+				FD_SET( oid, &waitreadobjs );
+				nWaits = std::max( nWaits, oid );
 			}
 			waitable::duration when;
 			if ( w->poll_timeout( when, curt ) )

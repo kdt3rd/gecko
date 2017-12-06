@@ -99,10 +99,10 @@ timer::shutdown( void )
 
 ////////////////////////////////////////
 
-intptr_t
+waitable::wait
 timer::poll_object( void )
 {
-	return intptr_t(-1);
+	return INVALID_WAIT;
 }
 
 ////////////////////////////////////////

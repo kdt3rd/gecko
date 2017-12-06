@@ -44,7 +44,7 @@ public:
 	void cancel( void ) final;
 	void shutdown( void ) final;
 
-	intptr_t poll_object( void ) final;
+	wait poll_object( void ) final;
 	bool poll_timeout( duration &when, const time_point &curtime ) final;
 
 	void emit( const time_point &curtime ) final;

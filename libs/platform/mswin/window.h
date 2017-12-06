@@ -28,6 +28,8 @@ public:
 	void hide( void ) override;
 	bool is_visible( void ) override;
 
+	void fullscreen( bool fs ) override;
+
 //	rect geometry( void ) override;
 //	void set_position( double x, double y ) override;
 	void move( double x, double y ) override;
@@ -51,8 +53,12 @@ public:
 
 	double width( void ) override { return _last_w; }
 	double height( void )  override { return _last_h; }
-
-	void expose_event( void );
+	// TODO: restore this once we are dispatching events
+//protected:
+	void make_current( const std::shared_ptr<cursor> &c ) override;
+	void expose_event( void ) override;
+	void move_event( double x, double y ) override;
+	void resize_event( double w, double h ) override;
 
 private:
 	HWND _hwnd;

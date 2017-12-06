@@ -9,6 +9,7 @@
 #include "screen.h"
 #include "window.h"
 #include "dispatcher.h"
+#include <gl/opengl.h>
 
 #include <mutex>
 
@@ -54,6 +55,7 @@ BOOL CALLBACK monitorEnumCB( HMONITOR hMon,
 	std::vector<std::shared_ptr<::platform::screen>> *sl =
 		reinterpret_cast<std::vector<std::shared_ptr<::platform::screen>> *>( userdata );
 	sl->emplace_back( std::make_shared<platform::mswin::screen>( hMon ) );
+	return true;
 }
 
 }
@@ -90,6 +92,119 @@ system::opengl_query
 system::gl_proc_address( void )
 {
 	return queryGL;
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<cursor>
+system::new_cursor( void )
+{
+	std::cout << "implement new_cursor" << std::endl;
+	return std::shared_ptr<cursor>();
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<cursor>
+system::builtin_cursor( standard_cursor sc )
+{
+	std::cout << "implement builtin_cursor" << std::endl;
+	return std::shared_ptr<cursor>();
+}
+
+////////////////////////////////////////
+
+void
+system::set_selection( selection sel )
+{
+	std::cout << "implement set_selection" << std::endl;
+}
+
+////////////////////////////////////////
+
+std::pair<std::vector<uint8_t>, std::string>
+system::query_selection( selection_type sel,
+						 const std::vector<std::string> &allowedMimeTypes,
+						 const std::string &clipboardName )
+{
+	std::cout << "implement query_selection" << std::endl;
+	return std::make_pair( std::vector<uint8_t>(), std::string() );
+}
+
+////////////////////////////////////////
+
+std::pair<std::vector<uint8_t>, std::string>
+system::query_selection( selection_type sel,
+						 const selection_type_function &mimeSelector,
+						 const std::string &clipboardName )
+{
+	std::cout << "implement query_selection" << std::endl;
+	return std::make_pair( std::vector<uint8_t>(), std::string() );
+}
+
+////////////////////////////////////////
+
+const std::vector<std::string> &
+system::default_string_types( void )
+{
+	static std::vector<std::string> mswinTypes{ "text/plain;charset=utf-8", "text/plain" };
+	std::cout << "implement default_string_types" << std::endl;
+	return mswinTypes;
+}
+
+////////////////////////////////////////
+
+selection_type_function
+system::default_string_selector( void )
+{
+	auto selFun = [](const std::vector<std::string> &l) -> std::string 
+		{
+			std::string ret{ "text/plain;charset=utf-8" };
+			if ( std::find( l.begin(), l.end(), ret ) != l.end() )
+				return ret;
+			ret = "text/plain";
+			if ( std::find( l.begin(), l.end(), ret ) != l.end() )
+				return ret;
+			return std::string();
+		};
+	std::cout << "implement default_string_selector" << std::endl;
+	return selection_type_function{ selFun };
+}
+
+////////////////////////////////////////
+
+system::mime_converter
+system::default_string_converter( void )
+{
+	auto convFun = [](const std::vector<uint8_t> &d, const std::string &cur, const std::string &to) -> std::vector<uint8_t> 
+		{
+			if ( base::begins_with( cur, "text/plain" ) )
+			{
+				if ( base::begins_with( to, "text/plain" ) )
+					return d;
+			}
+			return std::vector<uint8_t>();
+		};
+	std::cout << "implement default_string_converter" << std::endl;
+	return mime_converter{ convFun };
+}
+
+////////////////////////////////////////
+
+void
+system::begin_drag( selection sel,
+					const std::shared_ptr<cursor> &cursor )
+{
+	std::cout << "implement begin_drag" << std::endl;
+}
+
+////////////////////////////////////////
+
+std::pair<std::vector<uint8_t>, std::string>
+system::query_drop( const selection_type_function &chooseMimeType )
+{
+	std::cout << "implement query_drop" << std::endl;
+	return std::make_pair( std::vector<uint8_t>(), std::string() );
 }
 
 ////////////////////////////////////////
@@ -145,6 +260,29 @@ std::shared_ptr<platform::keyboard> system::get_keyboard( void )
 std::shared_ptr<platform::mouse> system::get_mouse( void )
 {
 	return _mouse;
+}
+
+////////////////////////////////////////
+
+uint8_t
+system::modifier_state( void )
+{
+	std::cout << "implement modifier_state" << std::endl;
+	return 0;
+}
+
+////////////////////////////////////////
+
+bool
+system::query_mouse( uint8_t &buttonMask, uint8_t &modifiers, int &x, int &y, int &screen )
+{
+	std::cout << "implement query_mouse" << std::endl;
+	buttonMask = 0;
+	modifiers = 0;
+	x = 0;
+	y = 0;
+	screen = 0;
+	return false;
 }
 
 ////////////////////////////////////////
