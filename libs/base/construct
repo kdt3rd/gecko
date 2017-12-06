@@ -37,6 +37,7 @@ lib = library "base"
 	"user_info.cpp";
 	"thread_pool.cpp";
 	"thread_util.cpp";
+	"wait.cpp";
   }
   optional_source{
 	  {

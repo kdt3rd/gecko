@@ -9,9 +9,7 @@
 
 #include <cstdint>
 #include <sys/types.h>
-#ifdef _WIN32
-# include <windows.h>
-#endif
+#include "wait.h"
 
 ////////////////////////////////////////
 
@@ -24,6 +22,8 @@ namespace base
 class pipe
 {
 public:
+	using handle = wait::wait_type;
+
 	/// @brief construct a pipe object
 	///
 	/// A pipe object has a read and a write file descriptor which are connected.
@@ -38,8 +38,11 @@ public:
 	pipe &operator=( pipe && );
 	~pipe( void );
 
-	intptr_t readable( void ) const;
-	intptr_t writable( void ) const;
+	// TODO: convert intptr_t to a central waitable type
+	// in base such that this can be inlined and just return
+	// the native type so casts aren't needed everywhere...
+	wait readable( void ) const { return wait( _p[0] ); }
+	wait writable( void ) const { return wait( _p[1] ); }
 
 	ssize_t read( void *d, size_t n );
 	ssize_t write( const void *d, size_t n );
@@ -48,11 +51,7 @@ public:
 	void shutdownWrite( void );
 
 private:
-#ifdef _WIN32
-	HANDLE _p[2];
-#else
-	int _p[2];
-#endif
+	handle _p[2];
 };
 
 } // namespace base
