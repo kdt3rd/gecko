@@ -83,7 +83,8 @@ void *
 loadable::symbol( const const_string<char> &symName, const cstring &symVersion )
 {
 #ifdef _WIN32
-	return GetProcAddress( reinterpret_cast<HMODULE>( _dso.get() ), symName.c_str() );
+	auto r = GetProcAddress( reinterpret_cast<HMODULE>( _dso.get() ), symName.c_str() );
+	return reinterpret_cast<void *>( r );
 #else
 	if ( symVersion.empty() )
 		return dlsym( _dso.get(), symName.c_str() );
@@ -96,9 +97,13 @@ loadable::symbol( const const_string<char> &symName, const cstring &symVersion )
 void *
 loadable::find_app_symbol( const cstring &symName, const cstring &symVersion )
 {
+#ifdef _WIN32
+	return reinterpret_cast<void *>( GetProcAddress( GetModuleHandle( NULL ), symName.c_str() ) );
+#else
 	if ( symVersion.empty() )
 		return dlsym( RTLD_DEFAULT, symName.c_str() );
 	return dlvsym( RTLD_DEFAULT, symName.c_str(), symVersion.c_str() );
+#endif
 }
 
 ////////////////////////////////////////
@@ -106,9 +111,13 @@ loadable::find_app_symbol( const cstring &symName, const cstring &symVersion )
 void *
 loadable::find_next_symbol( const cstring &symName, const cstring &symVersion )
 {
+#ifdef _WIN32
+	return find_app_symbol( symName, symVersion );
+#else
 	if ( symVersion.empty() )
 		return dlsym( RTLD_NEXT, symName.c_str() );
 	return dlvsym( RTLD_NEXT, symName.c_str(), symVersion.c_str() );
+#endif
 }
 
 ////////////////////////////////////////

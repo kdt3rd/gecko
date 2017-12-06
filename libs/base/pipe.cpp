@@ -8,9 +8,7 @@
 #include "pipe.h"
 #include "contract.h"
 #include "utility.h"
-#ifdef _WIN32
-# include <windows.h>
-#else
+#ifndef _WIN32
 # include <sys/types.h>
 # include <sys/stat.h>
 # include <fcntl.h>
@@ -26,11 +24,14 @@ namespace base
 
 pipe::pipe( bool isPrivate, bool blocking )
 {
+#ifdef _WIN32
+	_p[0] = INVALID_HANDLE_VALUE;
+	_p[1] = INVALID_HANDLE_VALUE;
+	if ( ! CreatePipe( &_p[0], &_p[1], NULL, 0 ) )
+		throw_lasterror( "Unable to create pipe object" );
+#else
 	_p[0] = -1;
 	_p[1] = -1;
-#ifdef _WIN32
-	XXXXXX_TODO_XXXXXXXX;
-#else
 	int flags = 0;
 	if ( isPrivate )
 		flags = O_CLOEXEC;
@@ -47,18 +48,21 @@ pipe::pipe( bool isPrivate, bool blocking )
 
 pipe::~pipe( void )
 {
-	if ( _p[0] >= 0 )
-		::close( _p[0] );
-	if ( _p[1] >= 0 )
-		::close( _p[1] );
+	shutdownRead();
+	shutdownWrite();
 }
 
 ////////////////////////////////////////
 
 pipe::pipe( pipe &&o )
 {
+#ifdef _WIN32
+	_p[0] = exchange( o._p[0], INVALID_HANDLE_VALUE );
+	_p[1] = exchange( o._p[1], INVALID_HANDLE_VALUE );
+#else
 	_p[0] = exchange( o._p[0], -1 );
 	_p[1] = exchange( o._p[1], -1 );
+#endif
 }
 
 ////////////////////////////////////////
@@ -76,9 +80,46 @@ pipe::operator=( pipe &&o )
 
 ////////////////////////////////////////
 
+intptr_t
+pipe::readable( void ) const
+{
+#ifdef _WIN32
+	return reinterpret_cast<intptr_t>( _p[0] );
+#else
+	return _p[0];
+#endif
+}
+
+////////////////////////////////////////
+
+intptr_t
+writable( void ) const
+{
+#ifdef _WIN32
+	return reinterpret_cast<intptr_t>( _p[1] );
+#else
+	return _p[1];
+#endif
+}
+
+////////////////////////////////////////
+
 ssize_t
 pipe::read( void *d, size_t n )
 {
+	ssize_t nr = 0;
+#ifdef _WIN32
+	if ( readable() == INVALID_HANDLE_VALUE )
+		return -1;
+	DWORD nToR = static_cast<DWORD>( n );
+	DWORD nar = 0;
+	if ( ReadFile( readable(), d, nToR, &nar, NULL ) )
+	{
+		nr = static_cast<ssize_t>( nar );
+	}
+	else
+		throw_lasterror( "Unable to read {0} bytes from the pipe", n );
+#else
 	if ( readable() < 0 )
 		return -1;
 
@@ -87,7 +128,7 @@ pipe::read( void *d, size_t n )
 	while ( n > 0 )
 	{
 		ssize_t nar = ::read( readable(), dPtr, n );
-		if ( nr < 0 )
+		if ( nar < 0 )
 		{
 			if ( errno == EINTR )
 				continue;
@@ -99,6 +140,7 @@ pipe::read( void *d, size_t n )
 		n -= nar;
 		dPtr += nar;
 	}
+#endif
 
 	return nr;
 }
@@ -108,11 +150,23 @@ pipe::read( void *d, size_t n )
 ssize_t
 pipe::write( const void *d, size_t n )
 {
+	ssize_t totW = 0;
+#ifdef _WIN32
+	if ( writable() == INVALID_HANDLE_VALUE )
+		return -1;
+	DWORD nToW = static_cast<DWORD>( n );
+	DWORD naw = 0;
+	if ( WriteFile( writable(), d, nToW, &naw, NULL ) )
+	{
+		totW = static_cast<ssize_t>( naw );
+	}
+	else
+		throw_lasterror( "Unable to read {0} bytes from the pipe", n );
+#else
 	if ( writable() < 0 )
 		return -1;
 
 	const uint8_t *dPtr = reinterpret_cast<const uint8_t *>( d );
-	ssize_t totW = 0;
 	while ( n > 0 )
 	{
 		ssize_t nw = ::write( writable(), dPtr, n );
@@ -126,6 +180,8 @@ pipe::write( const void *d, size_t n )
 		dPtr += nw;
 		totW += nw;
 	}
+#endif
+
 	return totW;
 }
 
@@ -134,11 +190,19 @@ pipe::write( const void *d, size_t n )
 void
 pipe::shutdownRead( void )
 {
+#ifdef _WIN32
+	if ( _p[0] != INVALID_HANDLE_VALUE )
+	{
+		::CloseHandle( _p[0] );
+		_p[0] = INVALID_HANDLE_VALUE;
+	}
+#else
 	if ( _p[0] >= 0 )
 	{
 		::close( _p[0] );
 		_p[0] = -1;
 	}
+#endif
 }
 
 ////////////////////////////////////////
@@ -146,11 +210,19 @@ pipe::shutdownRead( void )
 void
 pipe::shutdownWrite( void )
 {
+#ifdef _WIN32
+	if ( _p[1] != INVALID_HANDLE_VALUE )
+	{
+		::CloseHandle( _p[1] );
+		_p[1] = INVALID_HANDLE_VALUE;
+	}
+#else
 	if ( _p[1] >= 0 )
 	{
 		::close( _p[1] );
 		_p[1] = -1;
 	}
+#endif
 }
 
 ////////////////////////////////////////

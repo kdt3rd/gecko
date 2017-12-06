@@ -197,7 +197,7 @@ inline void
 simple_semaphore::signal( int num )
 {
 #ifdef _WIN32
-	ReleaseSemaphore( _sema, num, NULL );
+	ReleaseSemaphore( _sem, num, NULL );
 #elif defined(__MACH__)
 	while ( num-- > 0 )
 		semaphore_signal( _sem );

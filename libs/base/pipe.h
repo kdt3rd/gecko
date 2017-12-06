@@ -9,6 +9,9 @@
 
 #include <cstdint>
 #include <sys/types.h>
+#ifdef _WIN32
+# include <windows.h>
+#endif
 
 ////////////////////////////////////////
 
@@ -35,8 +38,8 @@ public:
 	pipe &operator=( pipe && );
 	~pipe( void );
 
-	intptr_t readable( void ) const { return _p[0]; }
-	intptr_t writable( void ) const { return _p[1]; }
+	intptr_t readable( void ) const;
+	intptr_t writable( void ) const;
 
 	ssize_t read( void *d, size_t n );
 	ssize_t write( const void *d, size_t n );
