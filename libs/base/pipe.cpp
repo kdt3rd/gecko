@@ -123,7 +123,6 @@ pipe::read( void *d, size_t n )
 	if ( readable() < 0 )
 		return -1;
 
-	ssize_t nr = 0;
 	uint8_t *dPtr = reinterpret_cast<uint8_t *>( d );
 	while ( n > 0 )
 	{
