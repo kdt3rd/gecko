@@ -17,8 +17,8 @@ namespace gui
 ////////////////////////////////////////
 
 widget::widget( void )
+	: _area{ std::make_shared<layout::area>() }
 {
-	_area = std::make_shared<layout::area>();
 }
 
 ////////////////////////////////////////

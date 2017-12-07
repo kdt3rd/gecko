@@ -1,12 +1,13 @@
 extra_source = optional_source{
 	system="Windows",
 	source={
-		"system.cpp",
-		"screen.cpp",
-		"window.cpp",
+		"dispatcher.cpp",
 		"keyboard.cpp",
 		"mouse.cpp",
-		"dispatcher.cpp",
+		"opengl.cpp",
+		"screen.cpp",
+		"system.cpp",
+		"window.cpp",
 	}
 }
 extra_libs = {"opengl32", "gdi32", "gdiplus"}

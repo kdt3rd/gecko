@@ -9,7 +9,6 @@
 #include <windows.h>
 #include "scope_guard.h"
 #include "contract.h"
-#include "win32_system_error.h"
 
 ////////////////////////////////////////
 
@@ -29,11 +28,11 @@ win32_file_system::current_path( void ) const
 		std::unique_ptr<TCHAR[]> tmp( new TCHAR[len + 1] );
 		len = GetCurrentDirectory( len + 1, tmp.get() );
 		if ( len == 0 )
-			throw_win32_error( "Unable to retrieve current directory" );
+			throw_lasterror( "Unable to retrieve current directory" );
 		return uri( tmp.get() );
 	}
 	else if ( len == 0 )
-		throw_win32_error( "Unable to retrieve current directory" );
+		throw_lasterror( "Unable to retrieve current directory" );
 
 	return uri( buf );
 }

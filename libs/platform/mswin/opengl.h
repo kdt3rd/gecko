@@ -7,10 +7,22 @@
 
 #pragma once
 
-#include "contract.h"
 #include <windows.h>
+#include <gl/opengl.h>
+#include "system.h"
 
 ////////////////////////////////////////
 
-#define throw_win32_error( ... ) \
-	throw_location( std::system_error( GetLastError(), std::generic_category(), base::format( __VA_ARGS__ ) ) )
+namespace platform
+{
+namespace mswin
+{
+
+platform::system::opengl_func_ptr queryGL( const char *f );
+HGLRC createOGLContext( HDC dc );
+
+} // namespace mswin
+} // namespace platform
+
+
+

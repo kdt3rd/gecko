@@ -16,7 +16,6 @@
 #ifdef _WIN32
 # include <winsock2.h>
 # include <ws2tcpip.h>
-# include <base/win32_system_error.h>
 #else
 # include <sys/ioctl.h>
 # include <sys/types.h>
@@ -250,7 +249,7 @@ size_t tcp_socket::bytes_waiting( void )
 #ifdef _WIN32
 	u_long n = 0;
 	if ( ioctlsocket( _socket, FIONREAD, &n ) != 0 )
-		throw_win32_error( "bytes/ioctl" );
+		throw_lasterror( "bytes/ioctl" );
 #else
     int n = 0;
     if ( ioctl( _socket, FIONREAD, &n ) != 0 )
