@@ -38,6 +38,10 @@ window::window( void )
 	_hrc = createOGLContext( _hdc );
 
 	wglMakeCurrent( _hdc, _hrc );
+
+	if ( !gl3wIsSupported( 3, 3 ) )
+		throw_runtime( "OpenGL 3.3 not supported" );
+
 	update_position();
 	//wglCreateLayerContext
 
