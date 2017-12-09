@@ -66,6 +66,7 @@ void choices::choose( size_t c )
 		auto &r = _radios[i];
 		r->set_state( i == c );
 	}
+	when_activated( c );
 }
 
 ////////////////////////////////////////

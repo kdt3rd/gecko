@@ -9,6 +9,7 @@
 
 #include "composite.h"
 #include <layout/grid.h>
+#include <base/signal.h>
 
 namespace gui
 {
@@ -24,6 +25,8 @@ public:
 	choices( void );
 
 	void add_choice( const std::string &label );
+
+	base::signal<void(size_t)> when_activated;
 
 protected:
 	void for_subwidgets( const std::function<void(const std::shared_ptr<widget>&)> &f ) override;
