@@ -115,6 +115,20 @@ std::shared_ptr<menu> application::new_menu( void )
 
 ////////////////////////////////////////
 
+std::shared_ptr<cursor> application::new_cursor( void )
+{
+	return _impl->sys->new_cursor();
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<cursor> application::builtin_cursor( standard_cursor sc )
+{
+	return _impl->sys->builtin_cursor( sc );
+}
+
+////////////////////////////////////////
+
 int application::run( void )
 {
 	return _impl->dispatch->execute();

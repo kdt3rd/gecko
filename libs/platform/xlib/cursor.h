@@ -31,7 +31,7 @@ public:
 	cursor &operator=( const cursor &c ) = delete;
 	cursor &operator=( cursor &&c ) = delete;
 
-	virtual ~cursor( void );
+	~cursor( void ) override;
 
 	bool supports_color( void ) const override;
 	bool supports_animation( void ) const override;

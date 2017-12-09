@@ -10,6 +10,7 @@
 #include "context.h"
 #include <base/scope_guard.h>
 #include <platform/keyboard.h>
+#include <platform/cursor.h>
 #include <gl/api.h>
 #include <memory>
 
@@ -32,6 +33,10 @@ public:
 	virtual ~window( void );
 
 	void set_title( const std::string &t );
+
+	void set_default_cursor( const std::shared_ptr<platform::cursor> &c );
+	void push_cursor( const std::shared_ptr<platform::cursor> &c );
+	void pop_cursor( void );
 
 	void show( void );
 	void hide( void );

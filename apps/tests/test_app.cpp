@@ -25,6 +25,8 @@
 #include <base/contract.h>
 #include <draw/icons.h>
 
+#include <platform/platform.h>
+
 namespace {
 
 static constexpr double padding = 12;
@@ -38,6 +40,7 @@ int safemain( int argc, char **argv )
 	app->push();
 
 	auto win = app->new_window();
+	win->set_default_cursor( app->builtin_cursor( gui::standard_cursor::DEFAULT ) );
 	win->set_title( app->active_platform() );
 
 	win->in_context( [&]( void )
@@ -50,6 +53,25 @@ int safemain( int argc, char **argv )
 		choices->add_choice( "Choice 1" );
 		choices->add_choice( "Choice 2" );
 		choices->add_choice( "Choice 3" );
+		choices->when_activated.connect( [&](size_t c) 
+										 {
+											 win->pop_cursor();
+											 switch ( c )
+											 {
+												 case 0:
+													 win->push_cursor( app->builtin_cursor( gui::standard_cursor::CROSSHAIR ) );
+													 break;
+												 case 1:
+													 win->push_cursor( app->builtin_cursor( gui::standard_cursor::RESIZE_ROW ) );
+													 break;
+												 case 2:
+													 win->push_cursor( app->builtin_cursor( gui::standard_cursor::TEXT ) );
+													 break;
+												 default:
+													 break;
+											 }
+										 }
+										 );
 		auto ledit = std::make_shared<gui::line_edit>();
 		auto sbar = std::make_shared<gui::scroll_bar>();
 		auto sarea = std::make_shared<gui::scroll_area>();

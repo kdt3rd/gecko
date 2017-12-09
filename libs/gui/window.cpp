@@ -46,6 +46,30 @@ void window::set_title( const std::string &t )
 
 ////////////////////////////////////////
 
+void
+window::set_default_cursor( const std::shared_ptr<platform::cursor> &c )
+{
+	_window->set_default_cursor( c );
+}
+
+////////////////////////////////////////
+
+void
+window::push_cursor( const std::shared_ptr<platform::cursor> &c )
+{
+	_window->push_cursor( c );
+}
+
+////////////////////////////////////////
+
+void
+window::pop_cursor( void )
+{
+	_window->pop_cursor();
+}
+
+////////////////////////////////////////
+
 void window::show( void )
 {
 	_window->show();

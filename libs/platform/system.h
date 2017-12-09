@@ -32,9 +32,10 @@ class menu;
 
 ////////////////////////////////////////
 
-/// @brief Abstract class representing a system.
+/// @brief Abstract class representing a GUI system backend.
 ///
-/// A system can enumerate screens, create windows, and dispatch events from user interations and timers.
+/// A system can enumerate screens, create windows, and dispatch
+/// events from user interations and timers.
 class system
 {
 public:

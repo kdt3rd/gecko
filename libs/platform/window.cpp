@@ -108,7 +108,8 @@ window::process_event( const event &e )
 			if ( e.has_control_mod() && e.key().keys[0] == scancode::KEY_V )
 			{
 				auto sel = e.sys().query_selection( selection_type::CLIPBOARD );
-				std::cout << "Paste: '" << sel.second << "':\n" << reinterpret_cast<const char *>( sel.first.data() ) << std::endl;
+				std::string val{ sel.first.begin(), sel.first.end() };
+				std::cout << "Paste: '" << sel.second << "':\n" << val << std::endl;
 			}
 			if ( key_pressed )
 				key_pressed( e.source(), e.key().keys[0] );
@@ -173,8 +174,11 @@ window::push_cursor( const std::shared_ptr<cursor> &c )
 void
 window::pop_cursor( void )
 {
-	precondition( ! _cursors.empty(), "un-matched pair of push / pop cursor stack" );
-	_cursors.pop();
+	// let's be a bit more forgiving
+	//precondition( ! _cursors.empty(), "un-matched pair of push / pop cursor stack" );
+	if ( ! _cursors.empty() )
+		_cursors.pop();
+
 	if ( _cursors.empty() )
 		make_current( _default_cursor );
 	else

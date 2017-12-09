@@ -177,7 +177,7 @@ system::builtin_cursor( standard_cursor sc )
 	auto lc = _cursors.find( sc );
 	if ( lc == _cursors.end() )
 	{
-		std::cout << "Current cursor theme: '" << XcursorGetTheme( _display.get() ) << "'" << std::endl;
+//		std::cout << "Current cursor theme: '" << XcursorGetTheme( _display.get() ) << "'" << std::endl;
 		const char *cname = nullptr;
 		unsigned int cchar = 0;
 		switch ( sc )

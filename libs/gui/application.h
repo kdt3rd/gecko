@@ -10,6 +10,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <platform/cursor.h>
 
 namespace script
 {
@@ -28,6 +29,8 @@ namespace gui
 class window;
 class popup;
 class menu;
+using cursor = platform::cursor;
+using standard_cursor = platform::standard_cursor;
 
 ////////////////////////////////////////
 
@@ -44,6 +47,9 @@ public:
 	std::shared_ptr<window> new_window( void );
 	std::shared_ptr<popup> new_popup( void );
 	std::shared_ptr<menu> new_menu( void );
+
+	std::shared_ptr<cursor> new_cursor( void );
+	std::shared_ptr<cursor> builtin_cursor( standard_cursor sc );
 
 	int run( void );
 	void exit( int code );
