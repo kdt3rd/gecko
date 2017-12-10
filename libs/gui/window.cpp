@@ -21,10 +21,10 @@ window::window( const std::shared_ptr<platform::window> &win )
 {
 	precondition( bool(_window), "null window" );
 	_window->exposed = [this] ( void ) { paint(); };
-	_window->resized = [this] ( double w, double h ) { resized( w, h ); };
-	_window->mouse_pressed = [this]( platform::event_source &, const base::point &p, int b ) { mouse_press( p, b ); };
-	_window->mouse_released = [this]( platform::event_source &, const base::point &p, int b ) { mouse_release( p, b ); };
-	_window->mouse_moved = [this]( platform::event_source &, const base::point &p ) { mouse_moved( p ); };
+	_window->resized = [this] ( platform::coord_type w, platform::coord_type h ) { resized( coord_type( w ), coord_type( h ) ); };
+	_window->mouse_pressed = [this]( platform::event_source &, const platform::point &p, int b ) { mouse_press( point( p ), b ); };
+	_window->mouse_released = [this]( platform::event_source &, const platform::point &p, int b ) { mouse_release( point( p ), b ); };
+	_window->mouse_moved = [this]( platform::event_source &, const platform::point &p ) { mouse_moved( point( p ) ); };
 	_window->mouse_wheel = [this]( platform::event_source &, int i ) { mouse_wheel( i ); };
 	_window->key_pressed = [this]( platform::event_source &, const platform::scancode &c ) { key_pressed( c ); };
 	_window->key_released = [this]( platform::event_source &, const platform::scancode &c ) { key_released( c ); };
@@ -84,14 +84,14 @@ void window::hide( void )
 
 ////////////////////////////////////////
 
-void window::move( double x, double y )
+void window::move( coord_type x, coord_type y )
 {
 	_window->move( x, y );
 }
 
 ////////////////////////////////////////
 
-void window::resize( double w, double h )
+void window::resize( coord_type w, coord_type h )
 {
 	_window->resize( w, h );
 }
@@ -112,23 +112,23 @@ void window::set_widget( const std::shared_ptr<widget> &w )
 
 ////////////////////////////////////////
 
-double window::width( void ) const
+coord_type window::width( void ) const
 {
 	return _window->width();
 }
 
 ////////////////////////////////////////
 
-double window::height( void ) const
+coord_type window::height( void ) const
 {
 	return _window->height();
 }
 
 ////////////////////////////////////////
 
-void window::invalidate( const base::rect &r )
+void window::invalidate( const rect &r )
 {
-	_window->invalidate( r );
+	_window->invalidate( platform::rect( r.round() ) );
 }
 
 ////////////////////////////////////////
@@ -143,8 +143,8 @@ window::bound_context window::bind( void )
 
 void window::paint( void )
 {
-	double w = _window->width();
-	double h = _window->height();
+	coord_type w = _window->width();
+	coord_type h = _window->height();
 
 	_ogl.reset();
 	_ogl.viewport( 0, 0, w, h );
@@ -173,7 +173,7 @@ void window::paint( void )
 
 ////////////////////////////////////////
 
-void window::resized( double w, double h )
+void window::resized( coord_type w, coord_type h )
 {
 	if ( _widget )
 	{
@@ -190,7 +190,7 @@ void window::resized( double w, double h )
 
 ////////////////////////////////////////
 
-void window::mouse_press( const base::point &p, int b )
+void window::mouse_press( const point &p, int b )
 {
 	if ( _widget )
 		in_context( [&,this] { _widget->mouse_press( p, b ); } );
@@ -198,7 +198,7 @@ void window::mouse_press( const base::point &p, int b )
 
 ////////////////////////////////////////
 
-void window::mouse_release( const base::point &p, int b )
+void window::mouse_release( const point &p, int b )
 {
 	if ( _widget )
 		in_context( [&,this] { _widget->mouse_release( p, b ); } );
@@ -206,7 +206,7 @@ void window::mouse_release( const base::point &p, int b )
 
 ////////////////////////////////////////
 
-void window::mouse_moved( const base::point &p )
+void window::mouse_moved( const point &p )
 {
 	if ( _widget )
 		in_context( [&,this] { _widget->mouse_move( p ); } );

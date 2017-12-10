@@ -95,7 +95,7 @@ public:
 
 	uint8_t modifier_state( void ) override;
 
-	bool query_mouse( uint8_t &buttonMask, uint8_t &modifiers, int &x, int &y, int &screen ) override;
+	bool query_mouse( uint8_t &buttonMask, uint8_t &modifiers, coord_type &x, coord_type &y, int &screen ) override;
 
 private:
 	std::shared_ptr<dispatcher> _dispatcher;

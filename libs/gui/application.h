@@ -11,6 +11,7 @@
 #include <set>
 #include <string>
 #include <platform/cursor.h>
+#include "types.h"
 
 namespace script
 {
@@ -59,7 +60,7 @@ public:
 
 	std::set<std::string> get_font_families( void );
 	std::set<std::string> get_font_styles( const std::string &family );
-	std::shared_ptr<script::font> get_font( const std::string &family, const std::string &style, double pixsize );
+	std::shared_ptr<script::font> get_font( const std::string &family, const std::string &style, coord_type pixsize );
 
 	std::shared_ptr<platform::system> get_system( void );
 

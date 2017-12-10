@@ -126,7 +126,7 @@ screen::refresh_rate( void ) const
 
 ////////////////////////////////////////
 
-base::rect screen::bounds( bool avail ) const
+rect screen::bounds( bool avail ) const
 {
 	if ( avail )
 	{
@@ -137,17 +137,17 @@ base::rect screen::bounds( bool avail ) const
 		int actualFormat;
 		long *workarea = nullptr;
 		bool success = false;
-		base::rect ret;
+		rect ret;
 		if ( XGetWindowProperty( _display.get(), root, hints, 0, 4, False,
 								 XA_CARDINAL, &actualType, &actualFormat, &nitems, &bytesLeft,
 								 (unsigned char**)&workarea ) == Success )
 		{
 			if ( actualType == XA_CARDINAL && actualFormat == 32 && nitems == 4 )
 			{
-				ret = base::rect( static_cast<double>( workarea[0] ),
-								  static_cast<double>( workarea[1] ),
-								  static_cast<double>( workarea[2] ),
-								  static_cast<double>( workarea[3] ) );
+				ret = rect( static_cast<coord_type>( workarea[0] ),
+							static_cast<coord_type>( workarea[1] ),
+							static_cast<coord_type>( workarea[2] ),
+							static_cast<coord_type>( workarea[3] ) );
 				success = true;
             }
 			if ( workarea )
@@ -163,19 +163,19 @@ base::rect screen::bounds( bool avail ) const
 		int nsizes = 0;
 		xrrsz *sizes = xrandr_getsizes( _display.get(), _screen, &nsizes );
 		if ( sizes )
-			return base::rect( 0.0, 0.0,
-							   static_cast<double>(sizes[0].w),
-							   static_cast<double>(sizes[0].h) );
+			return rect( coord_type( 0 ), coord_type( 0 ),
+							   static_cast<coord_type>(sizes[0].w),
+							   static_cast<coord_type>(sizes[0].h) );
 	}
 
-	return base::rect( 0.0, 0.0,
-					   static_cast<double>( DisplayWidth( _display.get(), _screen ) ),
-					   static_cast<double>( DisplayHeight( _display.get(), _screen ) ) );
+	return rect( coord_type( 0 ), coord_type( 0 ),
+				 static_cast<coord_type>( DisplayWidth( _display.get(), _screen ) ),
+				 static_cast<coord_type>( DisplayHeight( _display.get(), _screen ) ) );
 }
 
 ////////////////////////////////////////
 
-base::size screen::dpi( void ) const
+base::dsize screen::dpi( void ) const
 {
 	if ( xrandr_getsizes )
 	{

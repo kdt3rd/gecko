@@ -63,16 +63,16 @@ void color_picker::paint( const std::shared_ptr<draw::canvas> &canvas )
 
 ////////////////////////////////////////
 
-bool color_picker::mouse_press( const base::point &p, int b )
+bool color_picker::mouse_press( const point &p, int b )
 {
 	if ( b == 1 )
 	{
-		double r = base::point::distance( p, center() ) / radius();
+		coord_type r = point::distance( p, center() ) / radius();
 		if ( r > 0.70 && r < 0.95 )
 		{
 			_tracking = true;
-			base::point d = p.delta( center() );
-			double h = std::atan2( d.y(), d.x() );
+			point d = p.delta( center() );
+			coord_type h = std::atan2( d.y(), d.x() );
 			_current.set_hsl( h, 1.0, 0.5 );
 			return mouse_move( p );
 		}
@@ -83,7 +83,7 @@ bool color_picker::mouse_press( const base::point &p, int b )
 
 ////////////////////////////////////////
 
-bool color_picker::mouse_release( const base::point &p, int b )
+bool color_picker::mouse_release( const point &p, int b )
 {
 	if ( _tracking && b == 1 )
 	{
@@ -95,12 +95,12 @@ bool color_picker::mouse_release( const base::point &p, int b )
 
 ////////////////////////////////////////
 
-bool color_picker::mouse_move( const base::point &p )
+bool color_picker::mouse_move( const point &p )
 {
 	if ( _tracking )
 	{
-		base::point d = p.delta( center() );
-		double h = std::atan2( d.y(), d.x() );
+		point d = p.delta( center() );
+		coord_type h = std::atan2( d.y(), d.x() );
 		_current.set_hsl( h, 1.0, 0.5 );
 		invalidate();
 		return true;

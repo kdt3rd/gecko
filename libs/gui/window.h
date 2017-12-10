@@ -41,27 +41,27 @@ public:
 	void show( void );
 	void hide( void );
 
-	void move( double x, double y );
-	void resize( double w, double h );
+	void move( coord_type x, coord_type y );
+	void resize( coord_type w, coord_type h );
 
 	void set_widget( const std::shared_ptr<widget> &w );
 	std::shared_ptr<widget> get_widget( void ) { return _widget; }
 
-	double width( void ) const;
-	double height( void ) const;
+	coord_type width( void ) const;
+	coord_type height( void ) const;
 
-	void invalidate( const base::rect &r ) override;
+	void invalidate( const rect &r ) override;
 
 	typedef base::scope_guard<std::function<void(void)>> bound_context;
 	bound_context bind( void );
 
 protected:
 	void paint( void );
-	void resized( double w, double h );
+	void resized( coord_type w, coord_type h );
 
-	void mouse_press( const base::point &p, int button );
-	void mouse_release( const base::point &p, int button );
-	void mouse_moved( const base::point &p );
+	void mouse_press( const point &p, int button );
+	void mouse_release( const point &p, int button );
+	void mouse_moved( const point &p );
 	void mouse_wheel( int amount );
 
 	void key_pressed( platform::scancode c );

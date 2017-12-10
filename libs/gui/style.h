@@ -10,6 +10,7 @@
 #include <gl/color.h>
 #include <draw/colors.h>
 #include <script/font_manager.h>
+#include "types.h"
 
 namespace gui
 {

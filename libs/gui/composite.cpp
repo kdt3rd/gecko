@@ -34,7 +34,7 @@ void composite::paint( gl::api &ogl )
 
 ////////////////////////////////////////
 
-bool composite::mouse_press( const base::point &p, int button )
+bool composite::mouse_press( const point &p, int button )
 {
 	if ( _mouse_grab )
 		return _mouse_grab->mouse_press( p, button );
@@ -55,7 +55,7 @@ bool composite::mouse_press( const base::point &p, int button )
 
 ////////////////////////////////////////
 
-bool composite::mouse_move( const base::point &p )
+bool composite::mouse_move( const point &p )
 {
 	bool result = false;
 	if ( _mouse_grab )
@@ -73,7 +73,7 @@ bool composite::mouse_move( const base::point &p )
 
 ////////////////////////////////////////
 
-bool composite::mouse_release( const base::point &p, int button )
+bool composite::mouse_release( const point &p, int button )
 {
 	bool result = false;
 	if ( _mouse_grab )

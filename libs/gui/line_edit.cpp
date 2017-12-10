@@ -173,7 +173,7 @@ bool line_edit::text_input( char32_t c )
 ////////////////////////////////////////
 
 bool
-line_edit::mouse_press( const base::point &p, int button )
+line_edit::mouse_press( const point &p, int button )
 {
 	if ( button == 2 )
 	{

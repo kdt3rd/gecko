@@ -13,7 +13,7 @@ namespace gui
 
 ////////////////////////////////////////
 
-background_color::background_color( const base::color &c, const std::shared_ptr<widget> &w )
+background_color::background_color( const color &c, const std::shared_ptr<widget> &w )
 	: background( w ), _color( std::move( c ) )
 {
 }

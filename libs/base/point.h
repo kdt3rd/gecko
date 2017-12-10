@@ -17,16 +17,22 @@ namespace base
 ////////////////////////////////////////
 
 /// @brief Point.
-//template <typename T>
+template <typename T = double>
 class point
 {
 public:
-//	typedef T coord_type;
-	typedef double coord_type;
+	static_assert( std::is_arithmetic<T>::value, "point should be a signed value" );
+	static_assert( std::is_signed<T>::value, "point should be a signed value" );
+	typedef T coord_type;
 
 	/// @brief Default constructor.
 	/// Create the point (0,0) (the origin).
 	constexpr point( void ) = default;
+	constexpr point( const point & ) = default;
+	constexpr point( point && ) noexcept = default;
+	point &operator=( const point & ) = default;
+	point &operator=( point && ) noexcept = default;
+	~point( void ) = default;
 
 	/// @brief Point constructor.
 	constexpr point( coord_type xx, coord_type yy )
@@ -34,20 +40,21 @@ public:
 	{
 	}
 
-	/// @brief Copy constructor.
-	constexpr point( const point &p ) = default;
+	/// @brief construct a point with a differently typed point.
+	///
+	/// Requires explicit construction to avoid blind conversion
+	template <typename U>
+	explicit constexpr point( const point<U> &o )
+		: _x( static_cast<coord_type>( o.x() ) ),
+		  _y( static_cast<coord_type>( o.y() ) )
+	{}
 
-	/// @brief Move constructor.
-	constexpr point( point &&p ) noexcept = default;
-
-	/// @brief Destructor.
-	~point( void ) = default;
-
-	/// @brief Copy assignment.
-	point &operator=( const point &p ) = default;
-
-	/// @brief Move assignment.
-	point &operator=( point &&p ) noexcept = default;
+	/// @brief explicit cast operator
+	///
+	/// This enables conversion to a different point type, but
+	/// requires explicit programmer specification of such.
+	template <typename U>
+	explicit inline operator point<U>() const { return point<U>( *this ); }
 
 	/// @brief X coordinate of the point.
 	constexpr coord_type x( void ) const { return _x; }
@@ -123,7 +130,9 @@ public:
 	}
 
 	/// @brief Calculate the distance between points p1 and p2.
-	static inline double distance( const point &p1, const point &p2 )
+	static inline
+	typename std::conditional<sizeof(coord_type) <= sizeof(double), double, long double>::type
+	distance( const point &p1, const point &p2 )
 	{
 		return std::sqrt( distance_squared( p1, p2 ) );
 	}
@@ -176,7 +185,8 @@ private:
 ////////////////////////////////////////
 
 /// @brief Output operator for point.
-inline std::ostream &operator<<( std::ostream &out, const point &p )
+template <typename T>
+inline std::ostream &operator<<( std::ostream &out, const point<T> &p )
 {
 	out << p.x() << ',' << p.y();
 	return out;
@@ -185,11 +195,16 @@ inline std::ostream &operator<<( std::ostream &out, const point &p )
 ////////////////////////////////////////
 
 /// @brief Scale point p by v.
-template <typename F>
-inline point operator*( F v, const point &p )
+template <typename F, typename T>
+inline point<T> operator*( F v, const point<T> &p )
 {
-	return p * static_cast<point::coord_type>( v );
+	return p * static_cast<typename point<T>::coord_type>( v );
 }
+
+using fpoint = point<float>;
+using dpoint = point<double>;
+using ipoint = point<int32_t>;
+using lpoint = point<int64_t>;
 
 ////////////////////////////////////////
 

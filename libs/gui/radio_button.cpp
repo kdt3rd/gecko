@@ -65,7 +65,7 @@ void radio_button::paint( gl::api &ogl )
 
 ////////////////////////////////////////
 
-bool radio_button::mouse_press( const base::point &p, int button )
+bool radio_button::mouse_press( const point &p, int button )
 {
 	unused( button );
 
@@ -80,7 +80,7 @@ bool radio_button::mouse_press( const base::point &p, int button )
 
 ////////////////////////////////////////
 
-bool radio_button::mouse_release( const base::point &p, int button )
+bool radio_button::mouse_release( const point &p, int button )
 {
 	unused( button );
 
@@ -97,7 +97,7 @@ bool radio_button::mouse_release( const base::point &p, int button )
 
 ////////////////////////////////////////
 
-bool radio_button::mouse_move( const base::point &p )
+bool radio_button::mouse_move( const point &p )
 {
 	if ( _tracking )
 	{

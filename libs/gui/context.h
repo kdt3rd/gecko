@@ -27,7 +27,7 @@ public:
 	context &operator=( const context & ) = delete;
 	context &operator=( context && ) = delete;
 
-	virtual void invalidate( const base::rect &r ) = 0;
+	virtual void invalidate( const rect &r ) = 0;
 
 	const style &get_style( void ) const
 	{

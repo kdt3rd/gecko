@@ -412,7 +412,7 @@ system::modifier_state( void )
 ////////////////////////////////////////
 
 bool
-system::query_mouse( uint8_t &buttonMask, uint8_t &modifiers, int &x, int &y,int &screen )
+system::query_mouse( uint8_t &buttonMask, uint8_t &modifiers, coord_type &x, coord_type &y,int &screen )
 {
 	Window rt, child;
 	int rx, ry, wx, wy;

@@ -17,9 +17,9 @@
 namespace
 {
 
-base::color bg { 0.13, 0.13, 0.13 };
-base::color fg { 1.0, 1.0, 1.0 };
-base::color button_bg { 0.27, 0.27, 0.27 };
+gui::color bg { 0.13, 0.13, 0.13 };
+gui::color fg { 1.0, 1.0, 1.0 };
+gui::color button_bg { 0.27, 0.27, 0.27 };
 
 }
 
@@ -65,16 +65,16 @@ void dark_style::background( const std::shared_ptr<draw::canvas> &c )
 
 ////////////////////////////////////////
 
-const base::color &dark_style::label_color( void )
+const color &dark_style::label_color( void )
 {
 	return fg;
 }
 
 ////////////////////////////////////////
 
-base::size dark_style::button_size( const base::size &content )
+size dark_style::button_size( const size &content )
 {
-	base::size full( content );
+	size full( content );
 	full.grow( 12, 6 );
 	full.ceil();
 	full.set_height( std::max( full.h(), 21.0 ) );
@@ -83,16 +83,16 @@ base::size dark_style::button_size( const base::size &content )
 
 ////////////////////////////////////////
 
-base::rect dark_style::button_content( const base::rect &full )
+rect dark_style::button_content( const rect &full )
 {
-	base::rect content( full );
+	rect content( full );
 	content.shrink( 6, 6, 3, 3 );
 	return content;
 }
 
 ////////////////////////////////////////
 
-void dark_style::button_frame( const std::shared_ptr<draw::canvas> &c, const base::rect &r, bool pressed )
+void dark_style::button_frame( const std::shared_ptr<draw::canvas> &c, const rect &r, bool pressed )
 {
 	construct( c );
 	if ( pressed )
@@ -109,7 +109,7 @@ void dark_style::button_frame( const std::shared_ptr<draw::canvas> &c, const bas
 
 ////////////////////////////////////////
 
-void dark_style::line_edit_frame( const std::shared_ptr<draw::canvas> &c, const base::rect &r, bool focused )
+void dark_style::line_edit_frame( const std::shared_ptr<draw::canvas> &c, const rect &r, bool focused )
 {
 	construct( c );
 	_line_edit_frame->set( c, r );
@@ -118,20 +118,20 @@ void dark_style::line_edit_frame( const std::shared_ptr<draw::canvas> &c, const 
 
 ////////////////////////////////////////
 
-double dark_style::slider_size( const base::rect &rect )
+coord_type dark_style::slider_size( const rect &rect )
 {
 	return rect.radius();
 }
 
 ////////////////////////////////////////
 
-void dark_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const base::rect &rect )
+void dark_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const rect &rect )
 {
 	construct( c );
 
-	double rad = slider_size( rect );
-	double h = rect.height() - 7;
-	base::rect tmp( rect );
+	coord_type rad = slider_size( rect );
+	coord_type h = rect.height() - 7;
+	rect tmp( rect );
 	tmp.trim( rad, rad, h/2, h/2 );
 
 	_slider_groove->set( c, tmp );
@@ -140,12 +140,12 @@ void dark_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const ba
 
 ////////////////////////////////////////
 
-void dark_style::slider_button( const std::shared_ptr<draw::canvas> &c, const base::rect &r, bool pressed, double val )
+void dark_style::slider_button( const std::shared_ptr<draw::canvas> &c, const rect &r, bool pressed, coord_type val )
 {
 	construct( c );
 
-	double rad = 9.0; //r.radius();
-	base::rect tmp( rad * 2, rad * 2 );
+	coord_type rad = 9.0; //r.radius();
+	rect tmp( rad * 2, rad * 2 );
 	tmp.set_center( { r.x( val, rad ), r.y( 0.5, rad ) } );
 
 	_slider_button->set( c, tmp );
@@ -154,11 +154,11 @@ void dark_style::slider_button( const std::shared_ptr<draw::canvas> &c, const ba
 
 ////////////////////////////////////////
 
-void dark_style::text_cursor( const std::shared_ptr<draw::canvas> &c, const base::point &p, double h )
+void dark_style::text_cursor( const std::shared_ptr<draw::canvas> &c, const point &p, coord_type h )
 {
 	construct( c );
 
-	base::rect tmp( p - base::point( 0, h ), 2, h );
+	rect tmp( p - point( 0, h ), 2, h );
 
 	_text_cursor->set( c, tmp );
 	_text_cursor->draw( *c );

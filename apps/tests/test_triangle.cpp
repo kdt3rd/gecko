@@ -98,7 +98,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	win->release();
 
 	auto animtimer = sys->create_timer();
-	animtimer->elapsed = [&]() { win->invalidate( base::rect() ); };
+	animtimer->elapsed = [&]() { win->invalidate( platform::rect() ); };
 	animtimer->reset_repeat( 0.1 );
 	sys->get_dispatcher()->add_waitable( animtimer );
 	animtimer->activate( true );

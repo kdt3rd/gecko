@@ -27,9 +27,9 @@ public:
 	void build( gl::api &ogl ) override;
 	void paint( gl::api &ogl ) override;
 
-	bool mouse_press( const base::point &p, int button ) override;
-	bool mouse_release( const base::point &p, int button ) override;
-	bool mouse_move( const base::point &p ) override;
+	bool mouse_press( const point &p, int button ) override;
+	bool mouse_release( const point &p, int button ) override;
+	bool mouse_move( const point &p ) override;
 
 	bool update_layout( double duration ) override;
 
@@ -37,7 +37,7 @@ private:
 	void update_widget( void );
 
 	bool _tracking = false;
-	base::point _track;
+	point _track;
 
 	std::shared_ptr<layout::scroll> _layout;
 	std::shared_ptr<widget> _main;

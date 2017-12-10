@@ -25,9 +25,9 @@ public:
 	void compute_minimum( void ) override;
 	void compute_layout( void ) override;
 
-	bool mouse_press( const base::point &p, int button ) override;
-	bool mouse_release( const base::point &p, int button ) override;
-	bool mouse_move( const base::point &p ) override;
+	bool mouse_press( const point &p, int button ) override;
+	bool mouse_release( const point &p, int button ) override;
+	bool mouse_move( const point &p ) override;
 
 	void paint( const std::shared_ptr<draw::canvas> &c ) override;
 

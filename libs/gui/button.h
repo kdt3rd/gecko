@@ -36,11 +36,11 @@ public:
 
 	void paint( gl::api &ogl ) override;
 
-	bool mouse_press( const base::point &p, int button ) override;
-	bool mouse_release( const base::point &p, int button ) override;
-	bool mouse_move( const base::point &p ) override;
+	bool mouse_press( const point &p, int button ) override;
+	bool mouse_release( const point &p, int button ) override;
+	bool mouse_move( const point &p ) override;
 
-	base::signal<void(void)> when_activated;
+	signal<void(void)> when_activated;
 
 private:
 	draw::rectangle _rect;

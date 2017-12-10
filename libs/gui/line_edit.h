@@ -37,7 +37,7 @@ public:
 
 	bool text_input( char32_t c ) override;
 
-	bool mouse_press( const base::point &p, int button ) override;
+	bool mouse_press( const point &p, int button ) override;
 
 private:
 	draw::rectangle _line;

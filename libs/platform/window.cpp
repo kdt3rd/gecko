@@ -63,14 +63,14 @@ window::process_event( const event &e )
 			expose_event();
 			break;
 		case event_type::WINDOW_MOVED:
-			move_event( static_cast<double>( e.window().x ) , static_cast<double>( e.window().y ) );
+			move_event( e.window().x, e.window().y );
 			break;
 		case event_type::WINDOW_RESIZED:
-			resize_event( static_cast<double>( e.window().width ) , static_cast<double>( e.window().height ) );
+			resize_event( e.window().width, e.window().height );
 			break;
 		case event_type::WINDOW_MOVE_RESIZE:
-			move_event( static_cast<double>( e.window().x ) , static_cast<double>( e.window().y ) );
-			resize_event( static_cast<double>( e.window().width ) , static_cast<double>( e.window().height ) );
+			move_event( e.window().x, e.window().y );
+			resize_event( e.window().width, e.window().height );
 			break;
 		case event_type::MOUSE_ENTER:
 			if ( entered )
@@ -83,15 +83,15 @@ window::process_event( const event &e )
 
 		case event_type::MOUSE_MOVE:
 			if ( mouse_moved )
-				mouse_moved( e.source(), base::point( e.mouse().x, e.mouse().y ) );
+				mouse_moved( e.source(), point( e.mouse().x, e.mouse().y ) );
 			break;
 		case event_type::MOUSE_DOWN:
 			if ( mouse_pressed )
-				mouse_pressed( e.source(), base::point( e.mouse().x, e.mouse().y ), e.mouse().button );
+				mouse_pressed( e.source(), point( e.mouse().x, e.mouse().y ), e.mouse().button );
 			break;
 		case event_type::MOUSE_UP:
 			if ( mouse_released )
-				mouse_released( e.source(), base::point( e.mouse().x, e.mouse().y ), e.mouse().button );
+				mouse_released( e.source(), point( e.mouse().x, e.mouse().y ), e.mouse().button );
 			break;
 		case event_type::MOUSE_WHEEL:
 			if ( mouse_wheel )

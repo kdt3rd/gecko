@@ -49,7 +49,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		rect.draw( ogl );
 
 		// Cause a redraw to continue the animation
-		win->invalidate( base::rect() );
+		win->invalidate( platform::rect() );
 
 		w += dw;
 		if ( w > 200 )

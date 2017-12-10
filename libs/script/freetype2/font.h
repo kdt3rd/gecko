@@ -33,7 +33,7 @@ public:
 	font( FT_Face face, std::string fam, std::string style, double pixsize, const std::shared_ptr<uint8_t []> &ttfData = std::shared_ptr<uint8_t []>() );
 	~font( void );
 
-	double kerning( char32_t c1, char32_t c2 ) override;
+	extent_type kerning( char32_t c1, char32_t c2 ) override;
 
 	static const char *errorstr( FT_Error err );
 

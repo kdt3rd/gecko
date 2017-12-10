@@ -11,6 +11,7 @@
 #include <string>
 
 #include "scancode.h"
+#include "types.h"
 
 ////////////////////////////////////////
 
@@ -91,33 +92,36 @@ class event
 public:
 	struct window_info
 	{
-		int32_t x, y;
-		int32_t width, height;
+		coord_type x, y;
+		coord_type width, height;
 	};
 	struct mouse_info
 	{
-		int32_t x, y;
-		int32_t button;
+		coord_type x, y;
+		coord_type button;
 	};
 	struct key_info
 	{
-		int32_t x, y; // pointer position
+		coord_type x, y; // pointer position
 		scancode keys[6]; // per usb spec, if > 6 keys down, all report overflow...
 	};
 	struct text_info
 	{
-		int32_t x, y; // pointer position
+		coord_type x, y; // pointer position
 		char32_t text;
 	};
 	struct tablet_info
 	{
-		int32_t x, y;
+		coord_type x, y;
 		int16_t button; // TODO: do we need to differentiate pad ring / buttons from tool buttons?
 		int16_t pressure; // negative indicates distance
 		int16_t angle;
 	};
 	struct hid_info
 	{
+		// TODO: is negative useful for element or should this be
+		// uint32_t, w/ uint32_t(-1) meaning something special (all,
+		// none, unknown)?
 		int32_t element; // which one of the buttons / dials / thingies
 		int32_t position; // what's the detent / delta
 	};
@@ -145,7 +149,7 @@ public:
 	system &sys( void ) const { return *_system; }
 	event_source &source( void ) const { return *_source; }
 
-	static inline event window( system *sys, event_source *src, event_type et, int32_t x, int32_t y, int32_t w, int32_t h )
+	static inline event window( system *sys, event_source *src, event_type et, coord_type x, coord_type y, coord_type w, coord_type h )
 	{
 		event r;
 		r._system = sys;
@@ -156,7 +160,7 @@ public:
 		return r;
 	}
 
-	static inline event key( system *sys, event_source *src, event_type et, int32_t x, int32_t y, scancode kc, uint8_t mods )
+	static inline event key( system *sys, event_source *src, event_type et, coord_type x, coord_type y, scancode kc, uint8_t mods )
 	{
 		event r;
 		r._system = sys;
@@ -165,6 +169,7 @@ public:
 		r._data.key.x = x;
 		r._data.key.y = y;
 		r._data.key.keys[0] = kc;
+		// TODO: enable this to be filled in
 		r._data.key.keys[1] = scancode::KEY_NO_EVENT;
 		r._data.key.keys[2] = scancode::KEY_NO_EVENT;
 		r._data.key.keys[3] = scancode::KEY_NO_EVENT;
@@ -174,7 +179,7 @@ public:
 		return r;
 	}
 
-	static inline event mouse( system *sys, event_source *src, event_type et, int32_t x, int32_t y, int32_t b, uint8_t mods )
+	static inline event mouse( system *sys, event_source *src, event_type et, coord_type x, coord_type y, coord_type b, uint8_t mods )
 	{
 		event r;
 		r._system = sys;
@@ -187,7 +192,7 @@ public:
 		return r;
 	}
 
-	static inline event text( system *sys, event_source *src, event_type et, int32_t x, int32_t y, char32_t c, uint8_t mods )
+	static inline event text( system *sys, event_source *src, event_type et, coord_type x, coord_type y, char32_t c, uint8_t mods )
 	{
 		event r;
 		r._system = sys;

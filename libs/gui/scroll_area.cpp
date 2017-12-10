@@ -81,7 +81,7 @@ void scroll_area::paint( gl::api &ogl )
 		{
 			ogl.save_matrix();
 			{
-				double dx = 0.0, dy = 0.0;
+				coord_type dx = coord_type( 0 ), dy = coord_type( 0 );
 				if ( _hscroll )
 					dx = _hscroll->value();
 				if ( _vscroll )
@@ -98,7 +98,7 @@ void scroll_area::paint( gl::api &ogl )
 
 ////////////////////////////////////////
 
-bool scroll_area::mouse_press( const base::point &p, int button )
+bool scroll_area::mouse_press( const point &p, int button )
 {
 	bool result = false;
 	if ( !result && _hscroll )
@@ -123,7 +123,7 @@ bool scroll_area::mouse_press( const base::point &p, int button )
 
 ////////////////////////////////////////
 
-bool scroll_area::mouse_release( const base::point &p, int button )
+bool scroll_area::mouse_release( const point &p, int button )
 {
 	bool result = false;
 	if ( !result && _hscroll )
@@ -147,7 +147,7 @@ bool scroll_area::mouse_release( const base::point &p, int button )
 
 ////////////////////////////////////////
 
-bool scroll_area::mouse_move( const base::point &p )
+bool scroll_area::mouse_move( const point &p )
 {
 	bool result = false;
 	if ( !result && _hscroll )

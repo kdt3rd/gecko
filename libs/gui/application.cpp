@@ -179,11 +179,9 @@ std::set<std::string> application::get_font_styles( const std::string &family )
 
 ////////////////////////////////////////
 
-std::shared_ptr<script::font> application::get_font( const std::string &family, const std::string &style, double pixsize )
+std::shared_ptr<script::font> application::get_font( const std::string &family, const std::string &style, coord_type pixsize )
 {
-	auto r = _fmgr->get_font( family, style, pixsize );
-
-	return r;
+	return _fmgr->get_font( family, style, pixsize );
 }
 
 ////////////////////////////////////////

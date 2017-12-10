@@ -43,7 +43,7 @@ void form::compute_bounds( void )
 	// Now compute the sub-layout bounds.
 	_layout->compute_bounds();
 
-	base::size pads( _pad[0] + _pad[1], _pad[2] + _pad[3] );
+	base::dsize pads( _pad[0] + _pad[1], _pad[2] + _pad[3] );
 	set_minimum( _layout->minimum_size() + pads );
 	set_maximum( _layout->maximum_size() + pads );
 }

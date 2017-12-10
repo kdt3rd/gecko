@@ -159,31 +159,31 @@ void api::depth_func( depth_test t )
 
 ////////////////////////////////////////
 
-void api::viewport( double xx, double yy, double ww, double hh )
+void api::viewport( float xx, float yy, float ww, float hh )
 {
-	GLint x = static_cast<GLint>( std::lround( xx ) );
-	GLint y = static_cast<GLint>( std::lround( yy ) );
-	GLint w = static_cast<GLsizei>( std::lround( ww ) );
-	GLint h = static_cast<GLsizei>( std::lround( hh ) );
-	_viewport.set( { std::round( xx ), std::round( yy ) }, { std::round( ww ), std::round( hh ) } );
+	GLint x = static_cast<GLint>( std::floor( xx ) );
+	GLint y = static_cast<GLint>( std::floor( yy ) );
+	GLsizei w = static_cast<GLsizei>( std::ceil( ww + xx - float(x) ) );
+	GLsizei h = static_cast<GLsizei>( std::ceil( hh + yy - float(y) ) );
+	_viewport.set( x, y, w, h );
 	glViewport( x, y, w, h );
 }
 
 ////////////////////////////////////////
 
-void api::push_scissor( double xx, double yy, double ww, double hh )
+void api::push_scissor( float xx, float yy, float ww, float hh )
 {
-	base::rect r( xx, _viewport.height() - yy - hh, ww, hh );
+	base::frect r( xx, _viewport.height() - yy - hh, ww, hh );
 	if ( _scissors.empty() )
 		enable( capability::SCISSOR_TEST );
 	else
 		r.clip( _scissors.back() );
 
 	_scissors.emplace_back( r );
-	GLint x = static_cast<GLint>( std::lround( r.x() ) );
-	GLint y = static_cast<GLint>( std::lround( r.y() ) );
-	GLint w = static_cast<GLsizei>( std::lround( r.width() ) );
-	GLint h = static_cast<GLsizei>( std::lround( r.height() ) );
+	GLint x = static_cast<GLint>( std::floor( r.x() ) );
+	GLint y = static_cast<GLint>( std::floor( r.y() ) );
+	GLsizei w = static_cast<GLsizei>( std::ceil( r.width() + r.x() - float(x) ) );
+	GLsizei h = static_cast<GLsizei>( std::ceil( r.height() + r.y() - float(y) ) );
 	glScissor( x, y, w, h );
 }
 
@@ -197,11 +197,11 @@ void api::pop_scissor( void )
 		disable( capability::SCISSOR_TEST );
 	else
 	{
-		const base::rect &r = _scissors.back();
-		GLint x = static_cast<GLint>( std::lround( r.x() ) );
-		GLint y = static_cast<GLint>( std::lround( r.y() ) );
-		GLint w = static_cast<GLsizei>( std::lround( r.width() ) );
-		GLint h = static_cast<GLsizei>( std::lround( r.height() ) );
+		const base::frect &r = _scissors.back();
+		GLint x = static_cast<GLint>( std::floor( r.x() ) );
+		GLint y = static_cast<GLint>( std::floor( r.y() ) );
+		GLsizei w = static_cast<GLsizei>( std::ceil( r.width() + r.x() - float(x) ) );
+		GLsizei h = static_cast<GLsizei>( std::ceil( r.height() + r.y() - float(y) ) );
 		glScissor( x, y, w, h );
 	}
 }

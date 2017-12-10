@@ -23,25 +23,25 @@ namespace gui
 
 ////////////////////////////////////////
 
-class widget : public base::rect, public std::enable_shared_from_this<widget>
+class widget : public rect, public std::enable_shared_from_this<widget>
 {
 public:
 	widget( void );
-	widget( std::unique_ptr<layout::area> &&a );
+	explicit widget( std::unique_ptr<layout::area> &&a );
 	virtual ~widget( void );
 
 	virtual void build( gl::api &ogl );
 	virtual void paint( gl::api &ogl );
 
-	virtual bool mouse_press( const base::point &p, int button );
-	virtual bool mouse_release( const base::point &p, int button );
-	virtual bool mouse_move( const base::point &p );
+	virtual bool mouse_press( const point &p, int button );
+	virtual bool mouse_release( const point &p, int button );
+	virtual bool mouse_move( const point &p );
 	virtual bool mouse_wheel( int a );
 	virtual bool key_press( platform::scancode c );
 	virtual bool key_release( platform::scancode c );
 	virtual bool text_input( char32_t c );
 
-	void invalidate( const base::rect &r )
+	void invalidate( const rect &r )
 	{
 		context::current().invalidate( r );
 	}
@@ -81,7 +81,7 @@ protected:
 
 private:
 	std::shared_ptr<layout::area> _area;
-	base::rect _anim_start;
+	rect _anim_start;
 	double _anim_time;
 };
 

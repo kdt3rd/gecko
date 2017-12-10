@@ -119,19 +119,19 @@ rect window::geometry( void )
 
 ////////////////////////////////////////
 
-void window::move( double x, double y )
+void window::move( coord_type x, coord_type y )
 {
 }
 
 ////////////////////////////////////////
 
-void window::resize( double w, double h )
+void window::resize( coord_type w, coord_type h )
 {
 }
 
 ////////////////////////////////////////
 
-void window::set_minimum_size( double w, double h )
+void window::set_minimum_size( coord_type w, coord_type h )
 {
 }
 
@@ -149,7 +149,7 @@ void window::set_popup( void )
 
 ////////////////////////////////////////
 
-void window::invalidate( const base::rect &r )
+void window::invalidate( const rect &r )
 {
 	RECT rect = { LONG( std::floor( r.x1() ) ), LONG( std::floor( r.y1() ) ), LONG( std::ceil( r.x2() ) ), LONG( std::ceil( r.y2() ) ) };
 	if ( rect.left == rect.top &&
@@ -215,7 +215,7 @@ void window::expose_event( void )
 ////////////////////////////////////////
 
 void
-window::move_event( double x, double y )
+window::move_event( coord_type x, coord_type y )
 {
 	_last_x = x;
 	_last_y = y;
@@ -224,7 +224,7 @@ window::move_event( double x, double y )
 ////////////////////////////////////////
 
 void
-window::resize_event( double w, double h )
+window::resize_event( coord_type w, coord_type h )
 {
 	_last_w = w;
 	_last_h = h;

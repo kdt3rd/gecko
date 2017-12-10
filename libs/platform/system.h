@@ -213,7 +213,7 @@ public:
 	///
 	/// This should only generally be necessary outside of the event
 	/// system.
-	virtual bool query_mouse( uint8_t &buttonMask, uint8_t &modifiers, int &x, int &y, int &screen ) = 0;
+	virtual bool query_mouse( uint8_t &buttonMask, uint8_t &modifiers, coord_type &x, coord_type &y, int &screen ) = 0;
 
 	/// @brief creates a generic timer.
 	///

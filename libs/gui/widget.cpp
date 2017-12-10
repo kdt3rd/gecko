@@ -48,7 +48,7 @@ void widget::paint( gl::api &ogl )
 
 ////////////////////////////////////////
 
-bool widget::mouse_press( const base::point &p, int button )
+bool widget::mouse_press( const point &p, int button )
 {
 	unused( p );
 	unused( button );
@@ -57,7 +57,7 @@ bool widget::mouse_press( const base::point &p, int button )
 
 ////////////////////////////////////////
 
-bool widget::mouse_release( const base::point &p, int button )
+bool widget::mouse_release( const point &p, int button )
 {
 	unused( p );
    	unused( button );
@@ -66,7 +66,7 @@ bool widget::mouse_release( const base::point &p, int button )
 
 ////////////////////////////////////////
 
-bool widget::mouse_move( const base::point &p )
+bool widget::mouse_move( const point &p )
 {
 	unused( p );
 	return false;
@@ -127,8 +127,8 @@ bool widget::update_layout( double duration )
 		}
 		else
 		{
-			base::point tl = base::ease( _anim_start.top_left(), _area->top_left(), _anim_time, duration );
-			base::point br = base::ease( _anim_start.bottom_right(), _area->bottom_right(), _anim_time, duration );
+			point tl = base::ease( _anim_start.top_left(), _area->top_left(), _anim_time, duration );
+			point br = base::ease( _anim_start.bottom_right(), _area->bottom_right(), _anim_time, duration );
 			set_x1( tl.x() );
 			set_y1( tl.y() );
 			set_x2( br.x() );

@@ -27,9 +27,9 @@ public:
 
 	double refresh_rate( void ) const override;
 
-	base::rect bounds( bool active ) const override;
+	rect bounds( bool active ) const override;
 
-	base::size dpi( void ) const override;
+	base::dsize dpi( void ) const override;
 
 private:
 };

@@ -11,7 +11,8 @@
 #include <memory>
 #include <functional>
 #include <stack>
-#include <base/rect.h>
+
+#include "types.h"
 #include "mouse.h"
 #include "keyboard.h"
 #include "scancode.h"
@@ -90,23 +91,23 @@ public:
 	/// Move the window to the given position.
 	/// @param x New x position of the window
 	/// @param y New y position of the window
-	virtual void move( double x, double y ) = 0;
-	void move( const base::point &p ) { move( p.x(), p.y() ); }
+	virtual void move( coord_type x, coord_type y ) = 0;
+	void move( const point &p ) { move( p.x(), p.y() ); }
 
 	/// @brief Resize the window.
 	///
 	/// Resize the window to the given size.
 	/// @param w New width of the window
 	/// @param h New height of the window
-	virtual void resize( double w, double h ) = 0;
-	void resize( const base::size &s ) { resize( s.w(), s.h() ); }
+	virtual void resize( coord_type w, coord_type h ) = 0;
+	void resize( const size &s ) { resize( s.w(), s.h() ); }
 
 	/// @brief Set minimum window size.
 	///
 	/// The window will not be allowed to resize smaller than the minimum given.
 	/// @param w Minimum width for the window
 	/// @param h Minimum height for the window
-	virtual void set_minimum_size( double w, double h ) = 0;
+	virtual void set_minimum_size( coord_type w, coord_type h ) = 0;
 
 	/// @brief Set the window title.
 	///
@@ -114,7 +115,7 @@ public:
 	/// @param t The window title
 	virtual void set_title( const std::string &t ) = 0;
 
-	virtual void invalidate( const base::rect &r ) = 0;
+	virtual void invalidate( const rect &r ) = 0;
 
 //	virtual void set_icon( const icon &i );
 
@@ -124,17 +125,17 @@ public:
 	/// @brief Action for mouse press events.
 	///
 	/// Callback action for mouse button press events.
-	std::function<void( event_source &, const base::point &, int )> mouse_pressed;
+	std::function<void( event_source &, const point &, int )> mouse_pressed;
 
 	/// @brief Action for mouse release events.
 	///
 	/// Callback action for mouse button release events.
-	std::function<void( event_source &, const base::point &, int )> mouse_released;
+	std::function<void( event_source &, const point &, int )> mouse_released;
 
 	/// @brief Actionfor mouse motion events.
 	///
 	/// Callback action for mouse motion events.
-	std::function<void( event_source &, const base::point & )> mouse_moved;
+	std::function<void( event_source &, const point & )> mouse_moved;
 
 	/// @brief Action for mouse wheel events.
 	///
@@ -163,20 +164,20 @@ public:
 	std::function<void( void )> maximized;
 	std::function<void( void )> restored;
 	std::function<void( void )> exposed;
-	std::function<void( double, double )> moved;
-	std::function<void( double, double )> resized;
+	std::function<void( coord_type, coord_type )> moved;
+	std::function<void( coord_type, coord_type )> resized;
 	std::function<void( void )> entered;
 	std::function<void( void )> exited;
 
-	virtual double width( void ) = 0;
-	virtual double height( void ) = 0;
+	virtual coord_type width( void ) = 0;
+	virtual coord_type height( void ) = 0;
 
 protected:
 	virtual void make_current( const std::shared_ptr<cursor> & ) = 0;
 
 	virtual void expose_event( void ) = 0;
-	virtual void move_event( double x, double y ) = 0;
-	virtual void resize_event( double w, double h ) = 0;
+	virtual void move_event( coord_type x, coord_type y ) = 0;
+	virtual void resize_event( coord_type w, coord_type h ) = 0;
 
 private:
 	std::stack< std::shared_ptr<cursor> > _cursors;

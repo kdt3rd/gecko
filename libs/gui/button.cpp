@@ -79,7 +79,7 @@ void button::paint( gl::api &ogl )
 	const auto &f = _text.get_font();
 	if ( f )
 	{
-		base::rect lbox = *this;
+		rect lbox = *this;
 		lbox.shrink( 10, 10, 5, 5 );
 		_text.set_position( f->align_text( _text.get_text(), lbox, _align ) );
 		_text.draw( ogl );
@@ -88,7 +88,7 @@ void button::paint( gl::api &ogl )
 
 ////////////////////////////////////////
 
-bool button::mouse_press( const base::point &p, int button )
+bool button::mouse_press( const point &p, int button )
 {
 	unused( button );
 
@@ -102,7 +102,7 @@ bool button::mouse_press( const base::point &p, int button )
 
 ////////////////////////////////////////
 
-bool button::mouse_release( const base::point &p, int button )
+bool button::mouse_release( const point &p, int button )
 {
 	unused( button );
 
@@ -119,7 +119,7 @@ bool button::mouse_release( const base::point &p, int button )
 
 ////////////////////////////////////////
 
-bool button::mouse_move( const base::point &p )
+bool button::mouse_move( const point &p )
 {
 	if ( _tracking )
 	{

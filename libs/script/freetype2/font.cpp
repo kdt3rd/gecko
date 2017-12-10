@@ -133,7 +133,7 @@ font::~font( void )
 
 ////////////////////////////////////////
 
-double
+extent_type
 font::kerning( char32_t c1, char32_t c2 )
 {
 	FT_Vector kerning;

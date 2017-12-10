@@ -137,7 +137,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 			angle -= 360.0_deg;
 
 		// Cause a redraw to continue the animation
-		win->invalidate( base::rect() );
+		win->invalidate( platform::rect() );
 	};
 
 	// Key to take a screenshot.

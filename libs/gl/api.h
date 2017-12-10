@@ -88,10 +88,10 @@ public:
 	void depth_func( depth_test t );
 
 	/// @brief Set the viewport coordinates.
-	void viewport( double x, double y, double w, double h );
+	void viewport( float x, float y, float w, float h );
 
 	/// @brief Set the viewport coordinates.
-	void push_scissor( double x, double y, double w, double h );
+	void push_scissor( float x, float y, float w, float h );
 
 	void pop_scissor( void );
 
@@ -242,11 +242,11 @@ public:
 	void setup_debugging( void );
 
 private:
-	base::rect _viewport;
+	base::irect _viewport;
 	std::vector<matrix4> _matrix;
 	matrix4 _view;
 	matrix4 _projection;
-	std::vector<base::rect> _scissors;
+	std::vector<base::frect> _scissors;
 };
 
 ////////////////////////////////////////

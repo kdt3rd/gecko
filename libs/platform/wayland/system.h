@@ -67,7 +67,7 @@ public:
 	std::shared_ptr<::platform::mouse> get_mouse( void ) override;
 
 	uint8_t modifier_state( void ) override;
-	bool query_mouse( uint8_t &buttonMask, uint8_t &modifiers, int &x, int &y, int &screen ) override;
+	bool query_mouse( uint8_t &buttonMask, uint8_t &modifiers, coord_type &x, coord_type &y, int &screen ) override;
 
 	void set_compositor( struct wl_compositor *c ) { _compositor = c; }
 	void set_shell( struct wl_shell *s ) { _shell = s; }

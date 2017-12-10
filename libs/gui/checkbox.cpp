@@ -68,7 +68,7 @@ void checkbox::paint( gl::api &ogl )
 
 ////////////////////////////////////////
 
-bool checkbox::mouse_press( const base::point &p, int button )
+bool checkbox::mouse_press( const point &p, int button )
 {
 	unused( button );
 
@@ -83,7 +83,7 @@ bool checkbox::mouse_press( const base::point &p, int button )
 
 ////////////////////////////////////////
 
-bool checkbox::mouse_release( const base::point &p, int button )
+bool checkbox::mouse_release( const point &p, int button )
 {
 	unused( button );
 
@@ -100,7 +100,7 @@ bool checkbox::mouse_release( const base::point &p, int button )
 
 ////////////////////////////////////////
 
-bool checkbox::mouse_move( const base::point &p )
+bool checkbox::mouse_move( const point &p )
 {
 	if ( _tracking )
 	{
