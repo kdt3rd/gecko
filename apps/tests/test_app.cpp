@@ -45,54 +45,56 @@ int safemain( int argc, char **argv )
 
 	win->in_context( [&]( void )
 	{
-		auto label = std::make_shared<gui::label>( "Hello World", base::alignment::LEFT );
-		auto button = std::make_shared<gui::button>( "Click Me" );
-		auto slider = std::make_shared<gui::slider>();
-		auto cbox = std::make_shared<gui::checkbox>();
-		auto choices = std::make_shared<gui::choices>();
-		choices->add_choice( "Choice 1" );
-		choices->add_choice( "Choice 2" );
-		choices->add_choice( "Choice 3" );
-		choices->when_activated.connect( [&](size_t c) 
-										 {
-											 win->pop_cursor();
-											 switch ( c )
-											 {
-												 case 0:
-													 win->push_cursor( app->builtin_cursor( gui::standard_cursor::CROSSHAIR ) );
-													 break;
-												 case 1:
-													 win->push_cursor( app->builtin_cursor( gui::standard_cursor::RESIZE_ROW ) );
-													 break;
-												 case 2:
-													 win->push_cursor( app->builtin_cursor( gui::standard_cursor::TEXT ) );
-													 break;
-												 default:
-													 break;
-											 }
-										 }
-										 );
-		auto ledit = std::make_shared<gui::line_edit>();
-		auto sbar = std::make_shared<gui::scroll_bar>();
-		auto sarea = std::make_shared<gui::scroll_area>();
-		auto center = std::make_shared<gui::label>( "Scroll!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!END", base::alignment::CENTER );
+		using namespace gui;
+		auto l = label( "Hello World", alignment::LEFT );
+		auto b = button( "Click Me" );
+		auto sl = slider();
+		auto cbox = checkbox();
+		auto ch = choices();
+		ch->add_choice( "Choice 1" );
+		ch->add_choice( "Choice 2" );
+		ch->add_choice( "Choice 3" );
+		ch->when_activated.connect( [&](size_t c) 
+									{
+										win->pop_cursor();
+										switch ( c )
+										{
+											case 0:
+												win->push_cursor( app->builtin_cursor( gui::standard_cursor::CROSSHAIR ) );
+												break;
+											case 1:
+												win->push_cursor( app->builtin_cursor( gui::standard_cursor::RESIZE_ROW ) );
+												break;
+											case 2:
+												win->push_cursor( app->builtin_cursor( gui::standard_cursor::TEXT ) );
+												break;
+											default:
+												break;
+										}
+									}
+									);
+		auto ledit = line_edit();
+		auto sbar = scroll_bar();
+		auto sarea = scroll_area();
+		auto center = label( "Scroll!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!END", alignment::CENTER );
+
 		sarea->set_widget( center );
 		sarea->layout_target()->set_expansion_flex( 1.0 );
 
-		auto box = std::make_shared<gui::box>( base::alignment::BOTTOM );
-		box->set_padding( 12, 12, 5, 5 );
-		box->set_spacing( 8, 2 );
-		box->add( label );
-		size_t n = box->add( button );
-		button->when_activated.connect( [=]( void ) { box->remove( n ); box->remove( n + 1 ); } );
-		box->add( slider );
-		box->add( cbox );
-		box->add( choices );
-		box->add( ledit );
-		box->add( sbar );
-		box->add( sarea );
+		auto bx = box( alignment::BOTTOM );
+		bx->set_padding( 12, 12, 5, 5 );
+		bx->set_spacing( 8, 2 );
+		bx->add( l );
+		size_t n = bx->add( b );
+		b->when_activated.connect( [=]( void ) { bx->remove( n ); bx->remove( n + 1 ); } );
+		bx->add( sl );
+		bx->add( cbox );
+		bx->add( ch );
+		bx->add( ledit );
+		bx->add( sbar );
+		bx->add( sarea );
 
-		win->set_widget( box );
+		win->set_widget( bx );
 	} );
 
 	win->show();

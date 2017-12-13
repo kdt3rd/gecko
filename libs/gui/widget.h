@@ -12,6 +12,7 @@
 #include <platform/keyboard.h>
 #include <base/contract.h>
 #include "context.h"
+#include "widget_ptr.h"
 
 namespace gl
 {

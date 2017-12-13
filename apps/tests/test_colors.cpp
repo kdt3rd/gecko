@@ -26,7 +26,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	auto &names = draw::palette_names();
 
 	// Create a grid of colors
-	auto grid = std::make_shared<gui::grid>();
+	auto grid = gui::grid();
 	grid->layout().add_columns( 11 );
 //	grid->layout().add_columns( 1, 0.0 );
 //	grid->layout().add_columns( 10, 0.0 );
@@ -36,7 +36,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 
 	for ( size_t n = 0; n < names.size(); ++n )
 	{
-		grid->add( std::make_shared<gui::label>( names[n] ), 0, n );
+		grid->add( gui::label( names[n] ), 0, n );
 		auto &pal = draw::get_palette( names[n] );
 		if ( n == 0 )
 		{
@@ -50,7 +50,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		}
 		for ( size_t i = 0; i < pal.size(); ++i )
 		{
-			auto swatch = std::make_shared<gui::label>();
+			auto swatch = gui::label();
 			swatch->set_bg( pal[i] );
 			swatch->layout_target()->set_minimum( 24, 24 );
 			swatch->layout_target()->set_expansion_flex( 1.0 );

@@ -17,7 +17,7 @@ namespace gui
 
 ////////////////////////////////////////
 
-radio_button::radio_button( void )
+radio_button_w::radio_button_w( void )
 {
 	layout_target()->set_minimum( 24, 24 );
 	layout_target()->set_maximum( 24, 24 );
@@ -25,13 +25,13 @@ radio_button::radio_button( void )
 
 ////////////////////////////////////////
 
-radio_button::~radio_button( void )
+radio_button_w::~radio_button_w( void )
 {
 }
 
 ////////////////////////////////////////
 
-void radio_button::build( gl::api &ogl )
+void radio_button_w::build( gl::api &ogl )
 {
 	const style &s = context::current().get_style();
 
@@ -50,7 +50,7 @@ void radio_button::build( gl::api &ogl )
 
 ////////////////////////////////////////
 
-void radio_button::paint( gl::api &ogl )
+void radio_button_w::paint( gl::api &ogl )
 {
 	_checked.set_position( x(), y() );
 	_unchecked.set_position( x(), y() );
@@ -65,7 +65,7 @@ void radio_button::paint( gl::api &ogl )
 
 ////////////////////////////////////////
 
-bool radio_button::mouse_press( const point &p, int button )
+bool radio_button_w::mouse_press( const point &p, int button )
 {
 	unused( button );
 
@@ -80,7 +80,7 @@ bool radio_button::mouse_press( const point &p, int button )
 
 ////////////////////////////////////////
 
-bool radio_button::mouse_release( const point &p, int button )
+bool radio_button_w::mouse_release( const point &p, int button )
 {
 	unused( button );
 
@@ -97,7 +97,7 @@ bool radio_button::mouse_release( const point &p, int button )
 
 ////////////////////////////////////////
 
-bool radio_button::mouse_move( const point &p )
+bool radio_button_w::mouse_move( const point &p )
 {
 	if ( _tracking )
 	{
@@ -113,7 +113,7 @@ bool radio_button::mouse_move( const point &p )
 
 ////////////////////////////////////////
 
-void radio_button::set_state( bool s )
+void radio_button_w::set_state( bool s )
 {
 	if ( _state != s )
 	{

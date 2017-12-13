@@ -48,17 +48,17 @@ protected:
 ////////////////////////////////////////
 
 template<typename TheLayout>
-class container : public base_container
+class container_w : public base_container
 {
 public:
-	template<typename ...Args>
-	container( Args ...args )
+	template<typename... Args>
+	container_w( Args &&... args )
 		: base_container( std::unique_ptr<TheLayout>( new TheLayout( std::forward<Args>( args )... ) ) )
 	{
 		_layout = std::dynamic_pointer_cast<TheLayout>( layout_target() );
 	}
 
-	~container( void )
+	~container_w( void )
 	{
 	}
 
@@ -68,9 +68,17 @@ public:
 	}
 
 	template<typename ...Args>
-	size_t add( const std::shared_ptr<widget> &w, Args ...args )
+	size_t add( const std::shared_ptr<widget> &w, Args && ... args )
 	{
 		_widgets.push_back( w );
+		_layout->add( w->layout_target(), std::forward<Args>( args )... );
+		return _widgets.size() - 1;
+	}
+
+	template<typename W, typename ...Args>
+	size_t add( const widget_ptr<W> &w, Args && ... args )
+	{
+		_widgets.push_back( static_cast<std::shared_ptr<W>>( w ) );
 		_layout->add( w->layout_target(), std::forward<Args>( args )... );
 		return _widgets.size() - 1;
 	}
@@ -91,13 +99,17 @@ protected:
 
 ////////////////////////////////////////
 
-extern template class container<layout::grid>;
-extern template class container<layout::box>;
-extern template class container<layout::tree>;
+extern template class container_w<layout::grid>;
+extern template class container_w<layout::box>;
+extern template class container_w<layout::tree>;
 
-using grid = container<layout::grid>;
-using box = container<layout::box>;
-using tree = container<layout::tree>;
+using grid_w = container_w<layout::grid>;
+using box_w = container_w<layout::box>;
+using tree_w = container_w<layout::tree>;
+
+using grid = widget_ptr<grid_w>;
+using box = widget_ptr<box_w>;
+using tree = widget_ptr<tree_w>;
 
 ////////////////////////////////////////
 

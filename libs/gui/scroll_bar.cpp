@@ -13,20 +13,20 @@ namespace gui
 
 ////////////////////////////////////////
 
-scroll_bar::scroll_bar( bool bounded )
+scroll_bar_w::scroll_bar_w( bool bounded )
 	: _bounded( bounded )
 {
 }
 
 ////////////////////////////////////////
 
-scroll_bar::~scroll_bar( void )
+scroll_bar_w::~scroll_bar_w( void )
 {
 }
 
 ////////////////////////////////////////
 
-void scroll_bar::set_value( scroll_value v )
+void scroll_bar_w::set_value( value_type v )
 {
 	_value = v;
 	update_value( _value );
@@ -34,7 +34,7 @@ void scroll_bar::set_value( scroll_value v )
 
 ////////////////////////////////////////
 
-void scroll_bar::set_handle( scroll_value h )
+void scroll_bar_w::set_handle( value_type h )
 {
 	precondition( h > 0.0, "invalid scroll bar handle size" );
 	_handle = h;
@@ -45,14 +45,14 @@ void scroll_bar::set_handle( scroll_value h )
 
 ////////////////////////////////////////
 
-void scroll_bar::set_page( scroll_value p )
+void scroll_bar_w::set_page( value_type p )
 {
 	_page = p;
 }
 
 ////////////////////////////////////////
 
-void scroll_bar::set_range( scroll_value min, scroll_value max )
+void scroll_bar_w::set_range( value_type min, value_type max )
 {
 	precondition( min < max, "invalid range" );
 	if ( min != _min || max != _max )
@@ -65,7 +65,7 @@ void scroll_bar::set_range( scroll_value min, scroll_value max )
 
 ////////////////////////////////////////
 
-void scroll_bar::build( gl::api &ogl )
+void scroll_bar_w::build( gl::api &ogl )
 {
 	const style &s = context::current().get_style();
 	_groove.set_color( s.disabled_text( s.background_color() ) );
@@ -79,7 +79,7 @@ void scroll_bar::build( gl::api &ogl )
 
 ////////////////////////////////////////
 
-void scroll_bar::paint( gl::api &ogl )
+void scroll_bar_w::paint( gl::api &ogl )
 {
 	_groove.set_position( x(), y() );
 	_groove.set_size( width(), height() );
@@ -87,16 +87,16 @@ void scroll_bar::paint( gl::api &ogl )
 
 	if ( _horizontal )
 	{
-		scroll_value x = translate_from_full_w( _value );
-		scroll_value w = _handle * width() / ( _max - _min );
+		value_type x = translate_from_full_w( _value );
+		value_type w = _handle * width() / ( _max - _min );
 		_knob.set_position( x, y() );
 		_knob.set_size( w, height() );
 		_knob.draw( ogl );
 	}
 	else
 	{
-		scroll_value y = translate_from_full_h( _value );
-		scroll_value h = _handle * height() / ( _max - _min );
+		value_type y = translate_from_full_h( _value );
+		value_type h = _handle * height() / ( _max - _min );
 		_knob.set_position( x(), y );
 		_knob.set_size( width(), h );
 		_knob.draw( ogl );
@@ -105,14 +105,14 @@ void scroll_bar::paint( gl::api &ogl )
 
 ////////////////////////////////////////
 
-bool scroll_bar::mouse_press( const point &p, int button )
+bool scroll_bar_w::mouse_press( const point &p, int button )
 {
 	if ( contains( p ) )
 	{
 		if ( _horizontal )
 		{
-			scroll_value x1 = translate_from_full_w( _value );
-			scroll_value x2 = translate_from_full_w( _value + _handle );
+			value_type x1 = translate_from_full_w( _value );
+			value_type x2 = translate_from_full_w( _value + _handle );
 			if ( p.x() >= x1 && p.x() <= x2 )
 			{
 				_tracking = true;
@@ -136,8 +136,8 @@ bool scroll_bar::mouse_press( const point &p, int button )
 		}
 		else
 		{
-			scroll_value y1 = translate_from_full_h( _value );
-			scroll_value y2 = translate_from_full_h( _value + _handle );
+			value_type y1 = translate_from_full_h( _value );
+			value_type y2 = translate_from_full_h( _value + _handle );
 			if ( p.y() >= y1 && p.y() <= y2 )
 			{
 				_tracking = true;
@@ -165,23 +165,23 @@ bool scroll_bar::mouse_press( const point &p, int button )
 
 ////////////////////////////////////////
 
-bool scroll_bar::mouse_move( const point &p )
+bool scroll_bar_w::mouse_move( const point &p )
 {
 	if ( _tracking )
 	{
 		if ( _horizontal )
 		{
-			scroll_value delta = p.x() - _start;
+			value_type delta = p.x() - _start;
 			_start = p.x();
-			scroll_value x = translate_from_full_w( _value );
+			value_type x = translate_from_full_w( _value );
 			x += delta;
 			update_value( translate_to_full_w( x ) );
 		}
 		else
 		{
-			scroll_value delta = p.y() - _start;
+			value_type delta = p.y() - _start;
 			_start = p.y();
-			scroll_value y = translate_from_full_h( _value );
+			value_type y = translate_from_full_h( _value );
 			y += delta;
 			update_value( translate_to_full_h( y ) );
 		}
@@ -192,7 +192,7 @@ bool scroll_bar::mouse_move( const point &p )
 
 ////////////////////////////////////////
 
-bool scroll_bar::mouse_release( const point &p, int button )
+bool scroll_bar_w::mouse_release( const point &p, int button )
 {
 	if ( _tracking )
 	{
@@ -204,7 +204,7 @@ bool scroll_bar::mouse_release( const point &p, int button )
 
 ////////////////////////////////////////
 
-void scroll_bar::update_value( scroll_value v )
+void scroll_bar_w::update_value( value_type v )
 {
 	bool changed = ( v != _value );
 	_value = v;

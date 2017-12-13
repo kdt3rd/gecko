@@ -14,11 +14,11 @@ namespace gui
 
 ////////////////////////////////////////
 
-class checkbox : public widget
+class checkbox_w : public widget
 {
 public:
-	checkbox( void );
-	~checkbox( void );
+	checkbox_w( void );
+	~checkbox_w( void );
 
 	void build( gl::api &ogl ) override;
 
@@ -47,6 +47,8 @@ public:
 };
 
 ////////////////////////////////////////
+
+using checkbox = widget_ptr<checkbox_w>;
 
 }
 

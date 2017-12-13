@@ -19,12 +19,12 @@ namespace gui
 
 ////////////////////////////////////////
 
-class button : public widget
+class button_w : public widget
 {
 public:
-	button( void );
-	button( std::string l, base::alignment a = base::alignment::CENTER );
-	~button( void );
+	button_w( void );
+	button_w( std::string l, base::alignment a = base::alignment::CENTER );
+	~button_w( void );
 
 	void set_pressed( bool p );
 	void set_text( const std::string &utf8 ) { _text.set_text( utf8 ); }
@@ -36,8 +36,8 @@ public:
 
 	void paint( gl::api &ogl ) override;
 
-	bool mouse_press( const point &p, int button ) override;
-	bool mouse_release( const point &p, int button ) override;
+	bool mouse_press( const point &p, int b ) override;
+	bool mouse_release( const point &p, int b ) override;
 	bool mouse_move( const point &p ) override;
 
 	signal<void(void)> when_activated;
@@ -51,6 +51,8 @@ private:
 };
 
 ////////////////////////////////////////
+
+using button = widget_ptr<button_w>;
 
 }
 

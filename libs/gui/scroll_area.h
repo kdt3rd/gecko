@@ -16,13 +16,15 @@ namespace gui
 
 ////////////////////////////////////////
 
-class scroll_area : public widget
+class scroll_area_w : public widget
 {
 public:
-	scroll_area( bool hscroll = true, bool vscroll = true, bool bounded = true );
-	~scroll_area( void );
+	scroll_area_w( bool hscroll = true, bool vscroll = true, bool bounded = true );
+	~scroll_area_w( void );
 
 	void set_widget( const std::shared_ptr<widget> &v );
+	template <typename Y>
+	inline void set_widget( const widget_ptr<Y> &w ) { set_widget( static_cast<std::shared_ptr<Y>>( w ) ); }
 
 	void build( gl::api &ogl ) override;
 	void paint( gl::api &ogl ) override;
@@ -42,11 +44,13 @@ private:
 	std::shared_ptr<layout::scroll> _layout;
 	std::shared_ptr<widget> _main;
 	std::shared_ptr<widget> _widget;
-	std::shared_ptr<scroll_bar> _hscroll;
-	std::shared_ptr<scroll_bar> _vscroll;
+	std::shared_ptr<scroll_bar_w> _hscroll;
+	std::shared_ptr<scroll_bar_w> _vscroll;
 };
 
 ////////////////////////////////////////
+
+using scroll_area = widget_ptr<scroll_area_w>;
 
 }
 

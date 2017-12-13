@@ -16,27 +16,27 @@ namespace gui
 
 ////////////////////////////////////////
 
-line_edit::line_edit( void )
+line_edit_w::line_edit_w( void )
 {
 	_prompt.set_text( "Type here" );
 }
 
 ////////////////////////////////////////
 
-line_edit::line_edit( std::string l )
+line_edit_w::line_edit_w( std::string l )
 	: _text( l )
 {
 }
 
 ////////////////////////////////////////
 
-line_edit::~line_edit( void )
+line_edit_w::~line_edit_w( void )
 {
 }
 
 ////////////////////////////////////////
 
-void line_edit::build( gl::api &ogl )
+void line_edit_w::build( gl::api &ogl )
 {
 	const style &s = context::current().get_style();
 	const auto &f = s.body_font();
@@ -55,7 +55,7 @@ void line_edit::build( gl::api &ogl )
 
 ////////////////////////////////////////
 
-void line_edit::paint( gl::api &ogl )
+void line_edit_w::paint( gl::api &ogl )
 {
 	script::font_extents fex = _text.get_font()->extents();
 	_line.set_position( x(), y() + height() - 1.F );
@@ -79,7 +79,7 @@ void line_edit::paint( gl::api &ogl )
 
 ////////////////////////////////////////
 
-bool line_edit::key_press( platform::scancode c )
+bool line_edit_w::key_press( platform::scancode c )
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-enum"
@@ -150,7 +150,7 @@ bool line_edit::key_press( platform::scancode c )
 
 ////////////////////////////////////////
 
-bool line_edit::text_input( char32_t c )
+bool line_edit_w::text_input( char32_t c )
 {
 	if ( utf::is_graphic( c ) )
 	{
@@ -173,7 +173,7 @@ bool line_edit::text_input( char32_t c )
 ////////////////////////////////////////
 
 bool
-line_edit::mouse_press( const point &p, int button )
+line_edit_w::mouse_press( const point &p, int button )
 {
 	if ( button == 2 )
 	{

@@ -14,11 +14,11 @@ namespace gui
 
 ////////////////////////////////////////
 
-class radio_button : public widget
+class radio_button_w : public widget
 {
 public:
-	radio_button( void );
-	~radio_button( void );
+	radio_button_w( void );
+	~radio_button_w( void );
 
 	void build( gl::api &ogl ) override;
 
@@ -47,6 +47,8 @@ public:
 };
 
 ////////////////////////////////////////
+
+using radio_button = widget_ptr<radio_button_w>;
 
 }
 

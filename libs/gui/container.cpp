@@ -174,9 +174,9 @@ void base_container::remove( size_t w )
 
 ////////////////////////////////////////
 
-template class container<layout::grid>;
-template class container<layout::box>;
-template class container<layout::tree>;
+template class container_w<layout::grid>;
+template class container_w<layout::box>;
+template class container_w<layout::tree>;
 
 ////////////////////////////////////////
 

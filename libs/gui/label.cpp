@@ -14,13 +14,13 @@ namespace gui
 
 ////////////////////////////////////////
 
-label::label( void )
+label_w::label_w( void )
 {
 }
 
 ////////////////////////////////////////
 
-label::label( std::string l, base::alignment a )
+label_w::label_w( std::string l, base::alignment a )
 	: _align( a )
 {
 	_text.set_text( l );
@@ -28,13 +28,13 @@ label::label( std::string l, base::alignment a )
 
 ////////////////////////////////////////
 
-label::~label( void )
+label_w::~label_w( void )
 {
 }
 
 ////////////////////////////////////////
 
-void label::build( gl::api &ogl )
+void label_w::build( gl::api &ogl )
 {
 	const style &s = context::current().get_style();
 	const auto &f = s.body_font();
@@ -52,7 +52,7 @@ void label::build( gl::api &ogl )
 
 ////////////////////////////////////////
 
-void label::paint( gl::api &ogl )
+void label_w::paint( gl::api &ogl )
 {
 	if ( _bg_color.alpha() > 0.0 )
 	{

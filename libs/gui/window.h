@@ -8,6 +8,7 @@
 #pragma once
 
 #include "context.h"
+#include "widget_ptr.h"
 #include <base/scope_guard.h>
 #include <platform/keyboard.h>
 #include <platform/cursor.h>
@@ -21,8 +22,6 @@ namespace platform
 
 namespace gui
 {
-
-class widget;
 
 ////////////////////////////////////////
 
@@ -45,6 +44,8 @@ public:
 	void resize( coord_type w, coord_type h );
 
 	void set_widget( const std::shared_ptr<widget> &w );
+	template <typename Y>
+	inline void set_widget( const widget_ptr<Y> &w ) { set_widget( static_cast<std::shared_ptr<Y>>( w ) ); }
 	std::shared_ptr<widget> get_widget( void ) { return _widget; }
 
 	coord_type width( void ) const;
