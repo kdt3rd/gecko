@@ -1,13 +1,23 @@
 gecko
 =====
 
-Gecko is a c++11 framework with a number of applications. It has
-several libraries which serve as the basis for an (envisioned) suite
-of applications.
+Gecko is a c++11 framework. Contained in it are support libraries, a
+GUI toolkit, media I/O framework and image processing toolbox based on
+years of production experience in the visual effects and post
+production community.
 
-This utilizes c++11 and relatively modern STL components, but does not
-live on the bleeding edge of compiler support. It should compile with
-a compiler equivalent to gcc 4.8 or newer.
+Built on those libraries will be a number of applications.
+
+Every attempt will be made to pay attention to the VFX Reference
+Platform and not exceed the features of C++ or compiler support for
+the current year. However, the project leaders do not have the support
+infrastructure to test all variants of platforms.
+
+It is primarily being written to run on a linux platform, with an
+Apple laptop being the second, and finally Windows support. Windows
+support will primarily be tested via cross-compiling from windows
+using the MingW infrastructure then running under wine. Any other
+testing is of course welcome.
 
 Libraries
 ---------
@@ -16,7 +26,7 @@ Libraries
 - color: library to implement color description and color science math
 - draw: core OpenGL drawing utilities
 - gl: abstraction around OpenGL
-- gui: widgets [currently inactive]
+- gui: widgets [active development]
 - image: image processing operations
 - imgproc: start to a compiler language similar in vein to halide
 - layout: layout engine for GUI
@@ -57,11 +67,11 @@ can be tricky. But there are libraries that gecko depends on - it
 doesn't make sense to reinvent everything, just the components that
 are interesting to play with.
 
-gecko uses OpenGL for UI components, and a set of media libraries to
-read images (currently, just OpenEXR and TIFF - OpenImageIO does not
-currently allow the kind of media and frame buffer access
-desired). See libs/media/construct. Additionally, it uses zlib to
-compress the UTF tables in libs/utf.
+gecko currently uses OpenGL for UI components, and a set of media
+libraries to read images (currently, just OpenEXR and TIFF -
+OpenImageIO does not currently allow the kind of media and frame
+buffer access desired). See libs/media/construct. Additionally, it
+uses zlib to compress the UTF tables in libs/utf.
 
 constructor is a makefile / ninja build file generator, much like
 cmake. Why not use cmake? Well, constructor attempts to simplify the

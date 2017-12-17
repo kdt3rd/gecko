@@ -1,0 +1,137 @@
+<meta charset="utf-8"  emacsmode="-*- markdown -*-" >
+<link rel="stylesheet" href="https://casual-effects.com/markdeep/latest/apidoc.css?">
+**Gecko GUI Design**
+
+The GUI system attempts to learn from the success of Qt and gtk, yet
+retain the simplicity of things like fltk. Further, there are no
+license restrictions to worry about with gecko.
+
+Rather than derive a GUI "window" from the actual operating
+abstraction of a window, the gecko GUI library is based on containment
+of a platform abstraction, and the platform abstraction provides a
+window to a gui window. This is done to enable a more flexible
+arrangement of the gui infrastructure. For example, one could imagine
+a professional monitor setup where some on-screen are desired to be
+built, but a normal operating system window running the main UI. This
+should lower the overall code requirements to build such a setup.
+
+There are a few main components to building out the user interface
+libraries. First, everything will leverage various classes in base, as
+is to be expected. Next, there is `platform` and `script`. `script` is
+kepts separate from platform, even though it has a cross-platform
+component to it, however it is envisioned that other, non-GUI,
+routines will want to use it for rendering text, such as compositing
+slates in a visual effects pipeline. However, `platform` holds the
+majority of classes abstracting platform-specific API from the rest of
+the system, whether that be Xlib/xcb, wayland, Cocoa, MS Windows, or
+whatever platform arises in the future. 
+
+The `platform` layer is currently expected to create an OpenGL
+context, however, that is only a convenience, and is meant to be
+hidden largely by the `draw` library. Eventually, this may be
+refactored into a general rendering engine, such that running
+applications over the network work more transparently without having
+to use VNC or whatever. Anyway, the `draw` library is currently
+tightly coupled with the `gl` library, which is there to manage OpenGL
+concepts, and to provide dynamic discovery of OpenGL functions based
+on extensions present, tetc.
+
+Finally, this brings us to the `gui` library. This is the heart of
+user interface elements, buttons, line edit widgets, scroll bars,
+etc. This also has the "application" layer that is meant to act as the
+global arbiter of information and actions across multiple windows.
+
+Platform
+========
+
+The `platform` library is meant to abstract away the rest of the code
+base from the operating system specific nature of user interface
+presentation.
+
+Concepts that need to be thought about:
+- receiving events and transforming them to a generic representation
+  * mouse events
+  * keyboard input (transforming it to UTF-8 as appropriate, as well
+    as the raw keyboard for non-text entry event handling)
+  * windowing events
+  * generic USB HID events (tablet, 3-D space ball, color panels,
+    etc.), with a plugin api as necessary
+  * generic user-defined events, dispatched and delivered across UI
+    elements using the central event dispatch (NB: must be thread safe!)
+- creating windows
+  * normal windows
+  * popup / transient windows (menus, tooltips, notifications)
+  * dialog windows
+  * embedded UI areas for external programs
+  * fullscreen windows (same as normal windows?)
+- accelerators
+  * global
+  * per window
+- task bar / tray objects
+- system menus (mostly for OS/X support where there is a top menu)
+  except this enables centralized accelerator dispatch
+- drag and drop
+- cut and paste
+- timers
+- vertical retrace delay event handling (OpenGL extensions to read up
+  on: GLX INTEL swap event, GLX NV delay before swap, GLX SGI swap
+  control, GLX EXT swap control) for accurate playback
+- query / accessor for drawing / rendering capabilities
+- audio capture and output
+  
+The primary drawing API being used initially is OpenGL. This makes it
+easier to provide GLSL shaders for color management in viewers and
+such.
+
+However, alternate rendering API should be implemented eventually, to
+support remote rendering of interfaces when possible.
+
+GUI
+===
+
+The `gui` library represents the actual widgets, and an application
+class that eases the global nature of the definition of user
+interfaces. By instantiating an application, and pushing it to make
+the current one, this avoids having to pass the application all
+throughout the functions, only to be used in some deep corner to
+retrieve preferences.
+
+The API enables widgets to be created in a natural constructor /
+function style manner, creating pointer references to underlying
+widgets without having lots of std::make_shared everywhere
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+int main()
+{
+    using namespace gui;
+    application app;
+    app.push();
+
+    auto win = app.new_window();
+
+    auto l = label( "Hello World", alignment::LEFT );
+	auto c = choices();
+	c->add_choice( "Choice 1" );
+	c->add_choice( "Choice 2" );
+	c->add_choice( "Choice 3" );
+	c->when_activated.connect( [&](size_t i) { std::cout << "Chose item " << i << std::endl; } );
+    auto box = box( alignment::BOTTOM );
+	box->set_padding( 12, 12, 5, 5 );
+	box->set_spacing( 8, 2 );
+	box->add( l );
+	box->add( c );
+    win->set_widget( box );
+    win->show();
+
+    app.run();
+    app.pop();
+    return 0;
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+<script>markdeepOptions={tocStyle:'medium'};</script>
+<!-- Markdeep: -->
+<style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style>
+<script src="markdeep.min.js"></script>
+<script src="https://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
+<script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>

@@ -1,0 +1,427 @@
+<meta charset="utf-8"  emacsmode="-*- markdown -*-" >
+<link rel="stylesheet" href="https://casual-effects.com/markdeep/latest/apidoc.css?">
+**Gecko Engine Design**
+
+Introduction
+========================================
+
+Modern media production for movies and film has become increasingly
+complex. While we don't want to copy anything just because that's the
+way it has always been, it seems like there are some fundamental
+concepts that have proven to handle the complexity of a modern
+production pipeline.
+
+All facilities need some sort of production tracking system that
+tracks the state of each shot. People collaborate all day every day,
+although most of the time, a person is responsible for the tasks they
+are assigned, so it is not that they are constantly editing each
+other's data while collaborating, but rather seeing what each other
+are doing, and perhaps sharing snippets, or certainly notes, but the
+actual data flow tends to be relatively linear through departments,
+with hopefully not too much "send it back upstream to fix". This being
+said, it would be interesting to have a system where chunks of a
+flowgraph could be handled by different people and rolled up into a
+master script automagically, and with versioning.
+
+Switching topics slightly, but at larger facilities especially, but
+even small facilities can use it if it exists, automation is king. For
+example, if a lighter creates a new version of a scene, and starts a
+render, there's a new version of that element created, where hopefully
+the file names are auto-versioned, and then when the render finishes,
+there is some logic that triggers any post processing of the shot, and
+finally a composite (pre/slap-comp or if a (different) user has set up
+the comp script, the actual current composite) is automatically
+rendered as well.
+
+All this is tracked in some form of an asset management and project
+management system such that review / playback systems can easily query
+for available versions, and enable dailies sessions to review the
+changes, make notes / recordings for iteration (attached as a layer
+onto the relevant footage).
+
+As such, this toolset needs to help the user navigate all this. There
+are some concepts that should probably end up in the object design so
+they are implicitly supported. However, it can't be so rigid that if a
+different methodology arises, this feels clunky. To that end, we need
+to discuss two intertwined things. Project structure, and presentation
+to the user.
+
+Toolset and Scoping
+========================================
+
+So, what is the "production chain"? First, a list of production chain
+tasks and elements that sound vaguely interesting. The location and
+grouping can of course be debated who does what, but the concepts are
+the important part.
+
+1. Story Development
+   a. Pre-visualization
+   b. Storyboarding
+   c. Script writing
+2. Production Tracking
+   a. Shot Breakdowns
+3. On-set Filming
+   a. VFX Captures
+   b. Primary photography
+   c. On-set color timing / processing?
+4. Post production
+   a. VFX producion
+      1. 3D
+      2. compositing
+5. Post production
+   a. Editorial
+   a. Final color timing
+
+So, looking at the above, it seems we can start to also build a mental
+picture of the concepts involved in flowing this work through. To that
+end, let us dive in:
+
+- A project has shots.
+- Shots have breakdowns of elements. 
+- People are assigned to elements and shots.
+- Shots also have assembly, meaning the composite in a VFX world.
+- All these have due dates, notes, versions, milestones
+- Editorial defines / manipulates shots
+- Shot also has other final step modifications applied, such as color
+grading, audio mixing which are usually performed as one step looking
+at all the shots at once
+
+when elements are being created, they may be 3D geometry rendered,
+simulated effects such as water, or other simple particle systems. In
+a modern environment, these all intermix and share a camera. They also
+generally have real-world numbers applied to them, such that they are
+all at the correct scale. This has grown to include deep data, where a
+particular element may be kept as separate ranges of color values
+through depth and post assembled to more accurately composite values
+in depth.
+
+So, logically, a compositor is a series of layers, but it's not a
+simple stack implying depth ordering. Historically, there have been 2
+types of interfaces for this sort of task: a stack or layer based
+UI. This is still visible in products like Photoshop or After Effects
+from Adobe. The other form of interface is a "node-based" flowgraph,
+often called a DAG (for directed acyclic graph). Within both of those,
+systems are further distinguished by interactive (flame/inferno)
+vs. "desktop", (shake/chalice/nuke).
+
+One thing that was very successful in the system built for Lowry
+Digital was the timeline -> shot based view with a "template" graph
+that could be assigned to different shots. This was successful for
+that work style, allowing artists to see the shot in context, and
+assign the same processing to cut-back edits and the like. Some
+elements of that should probably be recreated for above. At the same
+time, when doing complex tasks like working VFX, it would be nice to
+zoom in a bit and not have the UI cluttered with the timeline or
+multi-graph management.
+
+In a VFX environment, there is a desire for a template-based solution
+for automated tasks. Additionally, pre-baked snippets of graphs are
+very useful. Finally, if a "slap-comp" can be defined as a starting
+place, that saves setup time. With deep compositing, that is in many
+ways trivial since ordering of layers does not matter, but this may be
+an area where an after effects style tree / stacking system makes a
+bit of sense? Then, when talking about the real-time applications like
+color grading systems, the user should spend minimal time picking an
+operation to apply and connecting it up, so again, some form of stack
+of operations makes sense.
+
+The stack and tree are just special cases of the directed graph. The
+majority of applications also enforce that this is an acyclic
+graph. This seems like a good error prevention mechanism, however
+there are several image processing techniques that would heavily
+benefit from a "loop" object. Given that this is a special case use,
+it can probably be represented as a single node with a sub-graph that
+represents the loop body.
+
+Futher, Nuke has proven that 3D integration into a compositing package
+is critical. It has changed the landscape in terms of what people
+accomplish in compositing. And nuke didn't just put in 3D in the sense
+of pulling in a camera and then allowing you to place cards, you can
+import geometry, lights, materials, define renderers, and define
+multiple scene graphs. This probably isn't the end of what could be
+done, and so this system should endeavour to not care what type of
+data is being processed. Nuke's 3D viewer isn't as good as Maya or
+other 3D packages, and it gets bogged down horribly with large geo,
+but that's just mechanical. The idea is sound, and works incredibly
+well for little effects up through to projections for set
+extensions. massive geo, not so great. But that should be a UI
+problem, so we must ensure this system can do these things and
+more. It would be great to have a package that is nuke and katana as
+one but with a real timeline. Not sure we should target more than that
+at this point, although we should make sure the core engine doesn't
+prevent more.
+
+Data Types
+========================================
+
+Data that flows through the flow graph should be allowed to be any
+type of data. To that end, there are probably categories of data, as
+well as type conversion rules. The categories or classes would allow
+any sub-type of that to be connected in as an input accepting that
+class. Type conversions allow adaptation / casting of one data type
+into another (i.e. atoi(string) to convert a string to an integer).
+
+Sample data types (all of these can be time varying or uniform,
+although it probably doesn't make sense for some to be uniform):
+  - numbers - bool, (unsigned) ints (32/64?), float, double
+  - arrays of numbers / arrays
+     * colors
+     * spectra
+	 * points
+	 * matrices
+     * lookup function / table (i.e. OCIO LUT)
+  - strings
+  - time (shot detector returns a list of times?)
+  - image
+  - plane
+	 * we probably want arbitrary data types with auto promotion -
+       while float is easy to write to, having a 64K lut to do 16->16
+       processing is still WAY more efficient than doing the math,
+       when you can do that
+  - can we have other semantic groupings of planes than "color",
+    "color + alpha", "motion"? How do we do that and provide the right
+    interface to the user such that they can keep track?
+  - camera
+  - geometry
+     * curves
+     * implicits
+     * instancing.... hmmm
+     * nurbs
+     * particles
+     * polygons
+     * subdiv surf
+     * volumes
+     * elements / assets (named groups of geo)
+  - 1D animation curve
+  - track data
+  - primvars / attributes (rendering)
+  - audio
+  - 2D curve / splines (roto)
+  - paint (list of strokes, brushes)
+  - shader (this list is from prman, missing any?)
+     * displacement
+     * material
+     * patterns
+        - image texture
+        - procedural texture
+        - manifolds
+        - colors
+        - bump
+        - geometry
+        - script (i.e. OSL)
+        - misc utility
+        - bake (i.e. cache)
+  - lights
+     * just emissive geo?
+  - metadata
+     * OpenEXR attributes
+	 * XMP
+	 * EXIF
+	 * generic name/value pair
+  - options - very much like metadata, but a set list, as in options
+    you might set for a renderer?
+  - user defined...
+
+Project
+========================================
+
+
+Multiple Things, one pipe
+========================================
+
+Being able to pack multiple sets of images into one chain, and process
+all or any part of those can greatly simplify graphs. There are two
+forms of this - multiple images (i.e. AOVs from a renderer), and
+multiple views or cameras (i.e. left, right, center)
+
+Additionally, geometry, and specifically, assemblies of geo into a
+layout can benefit from this same abstraction, where by someone doing
+layout of multiple objects in a scene can group multiple elements,
+then transform them as one
+
+Node Graph Brainstorms
+========================================
+
+If you zoom in far enough, should you be able to see the primary
+controls of the node on the node itself (see Blender's material editor
+and their compositing graph). For simple graphs, this is great, but as
+things get complex, the detail should zoom down and disappear and go
+to a minimalistic node.
+
+Additionally, it would be nice as you drag one end of a connection if
+minimally sized nodes would grow lumps or connection points as you get
+close to them or over them to facilitate connecting to the desired
+input.
+
+Paste Bin / Library
+========================================
+
+Having a little area that can be hot keyed or be a tiled window that
+enables one to place little snippets of graphs, and optionally share
+them with others would be very handy.
+
+Processing
+========================================
+
+A node that is presented to the user is not directly responsible for
+rendering. It should only be a script (probably python) that declares
+the inputs, outputs, etc. and then has a function that generates an op
+tree for actual processing. TODO: Should it just be a chunk of json /
+yaml and have python script actions?
+
+Additionally, by having node definitions and the UI for them be based
+on a script language enables easier version management for the
+nodes. It also potentially allows something like live-group from
+katana like behavior effectively for free. TODO: how do we manage
+operation versioning separately from node versioning???
+
+Finally, a core feature must be interactivity, so the ability to have
+a progressive render, and have things respond as the user drags the
+mouse, is critical. This means that the user interface must be
+divorced from the processing. This falls naturally into the
+methodology we had a Lowry, where the nodes generated an op graph that
+didn't have evaluation logic in it, but was a snapshot in time of the
+graph represented which can be handed off to an execution
+engine. Further, the cancellation logic can then be in the execution
+engine, making operations as simple as possible - really nothing more
+than a function, and probably some flags to figure out how it likes to
+process data, and what inputs could be aliased with it's output.
+
+Ideally, the idea of node vs. op separation also enables re-use of the
+built-in / provided basic operations in building nodes. These builtins
+can be hyper-optimized as necessary, or have the appropriate
+intrinsics for code generation or whatever, in addition to having tons
+of logic for peephole optimizations. Additionally, a language to build
+new operators (well, and the core ones as well) would enable automatic
+targeting of CPU / GPU / whatever compute.
+
+Further, it seems attractive if we could find a way where the builtin
+operators are defined in terms of the fundamental type they are
+modifying (float, color, matrix), and the acceleration structure
+(scanline, plane, image) is separate. This would allow the same
+operator definition to be transparently used in 1D, 2D, 3D, whatever
+processing, as appropriate. This is basically what halide does,
+however halide is designed around building a single scheduler, then
+recompiling. We also probably can't use halide since this needs to not
+be magical instantiation c++, but rather more dynamic and interface
+with user plugins or expressions. However, we can probably talk at the
+same layer below the c++ interface in halide? If halide doesn't
+support that kind of negotiation, we can emit our own code gen and
+make it so. In this, we want to have a dynamic scheduler as much as
+possible, and if we do have a JIT component, it needs to re-act at
+user speeds to changes as discussed above. One possibility in this is
+to auto-group things into the acceleration structures based on
+heuristics, and then compile those groups ala halide and just cache
+that bit, and optimize the top level graph as a hopefully smaller set
+of groups for memory.
+
+Can we make it easy for people to just use GLSL or other simple
+languages to define operators? If we have a cross compiler, why not?
+We could take glsl, python, C if we want. This makes a ton of sense
+for types that the system *knows* about.
+
+However, for user registered types, perhaps another layer needs to be
+exposed to feed the code gen. Or just say "you have the source code,
+have at it to optimize". So maybe that it isn't supported to write a
+script-based operator and they have to write a proper plugin at that
+point, in order to add a new type. Once they've exposed ops from that,
+they are then available in the python node for use...
+
+Processing Generality and Data Flow
+----------------------------------------
+
+We have  some kinds of information that want to flow "down" the tree
+(where the end output is at the "bottom"), and some that pulls from
+there and passes a request upwards. The easiest example is a user
+selects a node and (somehow) indicates that node should be
+"viewed". The UI probably has a current frame that the user is editing
+or viewing at that moment. So that is information flowing up the
+tree. Further, when looking at an image, that implies that they are
+viewing some set of planes of that image (i.e. RGB, or if they switch
+to A, just the A). So the requested set of planes needs to head up the
+graph as well. In addition, for efficiency when dealing with large 8K
+or 10K images, what area of the available image area they are zoomed
+to?
+
+But to answer these latter questions, information has to flow down the
+tree - what planes are available (based on the source, and any
+manipulations in the middle), what is the active data window, what is
+the canonical image window, what is the current outside (the active
+area) pixel value. And so on.
+
+For 3D, there is the scene, what elements can be expanded / evaluated
+to (potentially) produce sub elements, etc.
+
+For now, we will skip the pass of collapsing transforms, etc. as being
+related to optimization, not germain to the understanding of the
+graph.
+
+However, for generality, it seems like the information flowing "up"
+the tree should be packaged in a context. There are some things such
+as time, whether to cancel evaluation, etc. that will be global -
+every operator must understand them. However, for many requests, a
+specific context request should be available, stored in an any
+variable or something such that the process(context) function can be a
+single API, but can pass the values it needs to. Another approach
+would be to have specific process functions for each data type
+negotiated, but that seems less flexible, and how much would it really
+save? anyway, an image request would add an any chunk containing roi,
+planes requested, a progressive update functions, etc.
+
+NB: Metadata also needs to flow down, but it is editable, and would
+want to have nodes to do so, but seems like a special type since so
+many expressions refer to it in a modern / automated pipeline
+
+Metadata
+----------------------------------------
+
+Metadata has become less meta, and more required. As such, there
+should be operators that operate on metadata, but metadata should also
+be an implicit pipe that is available in all nodes as well.
+
+Camera data, other pipeline settings, all these things are commonly
+sampled in node expressions to control processing, etc.
+
+Intermediate Execution
+----------------------------------------
+
+Some thought should be spent to make intermediate evaluation a
+"thing", where as a writer of a node, one can say "if x is true, then
+do y, but do not evaluate x". A crude sample of this is Nuke's Keymix
+node where it evaluates only where the alpha is not 0.
+
+Another example might be to guide colorspace conversion based on EXIF
+data arriving from the input. Or another, more complex example, might
+be to say "give me the bounding box of the input geometry", then based
+on the result of that and asking for the camera and a frustum check,
+control the tesselation of the geometry, swap materials, or other
+similar simplification for downstream rendering.
+
+
+Flexibility
+========================================
+
+Plugins
+----------------------------------------
+
+Plugins should be supported. OpenFX is actually used by people, so use
+that as one basis, then also need to support native plugins in order
+to be able to register new types and ops.
+
+register new type:
+  - define type
+  - define converters
+  - define peephole optimizations
+  - define operations exposed in the node scripts
+
+Speed
+========================================
+
+CPU, GPU, yes!
+
+<script>markdeepOptions={tocStyle:'medium'};</script>
+<!-- Markdeep: -->
+<style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style>
+<script src="markdeep.min.js"></script>
+<script src="https://casual-effects.com/markdeep/latest/markdeep.min.js"></script>
+<script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
