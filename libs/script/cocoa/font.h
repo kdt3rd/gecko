@@ -23,7 +23,7 @@ public:
 	font( void *font, std::string fam, std::string style, double pixsize );
 	~font( void );
 
-	double kerning( char32_t c1, char32_t c2 ) override;
+	extent_type kerning( char32_t c1, char32_t c2 ) override;
 
 protected:
 	const text_extents &get_glyph( char32_t char_code ) override;

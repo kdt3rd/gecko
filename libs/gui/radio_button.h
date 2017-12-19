@@ -14,19 +14,19 @@ namespace gui
 
 ////////////////////////////////////////
 
-class radio_button : public widget
+class radio_button_w : public widget
 {
 public:
-	radio_button( void );
-	~radio_button( void );
+	radio_button_w( void );
+	~radio_button_w( void );
 
 	void build( gl::api &ogl ) override;
 
 	void paint( gl::api &ogl ) override;
 
-	bool mouse_press( const base::point &p, int button ) override;
-	bool mouse_release( const base::point &p, int button ) override;
-	bool mouse_move( const base::point &p ) override;
+	bool mouse_press( const point &p, int button ) override;
+	bool mouse_release( const point &p, int button ) override;
+	bool mouse_move( const point &p ) override;
 
 	bool is_checked( void ) const
 	{
@@ -35,7 +35,7 @@ public:
 
 	void set_state( bool s );
 
-	base::signal<void(void)> when_selected;
+	signal<void(void)> when_selected;
 
 public:
 	draw::shape _checked;
@@ -47,6 +47,8 @@ public:
 };
 
 ////////////////////////////////////////
+
+using radio_button = widget_ptr<radio_button_w>;
 
 }
 

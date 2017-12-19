@@ -99,12 +99,6 @@ inline spooky_hash &operator <<( spooky_hash &h, const char *s )
 	return h;
 }
 
-template <std::size_t N>
-inline spooky_hash &operator <<( spooky_hash &h, const char (&s)[N] )
-{
-	h << cstring( s, N );
-	return h;
-}
 spooky_hash &operator <<( spooky_hash &h, const spooky_hash &x );
 
 template <typename V>

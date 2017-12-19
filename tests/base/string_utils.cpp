@@ -84,6 +84,7 @@ int safemain( int argc, char *argv[] )
 
 	strtest["cstring"] = [&]( void )
 	{
+		static_assert( base::cstring( "foobar" ) == "foobar", "compile time constexpr check" );
 		base::cstring x( ":foo" );
 		strtest.test( base::cstring( "foobar" ) == "foobar", "base::cstring::operator==" );
 		strtest.test( x.find_first_not_of( ':', 0 ) == 1, "base::cstring::find_first_not_of" );

@@ -10,11 +10,18 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <platform/cursor.h>
+#include "types.h"
 
 namespace script
 {
 class font;
 class font_manager;
+}
+
+namespace platform
+{
+class system;
 }
 
 namespace gui
@@ -23,6 +30,8 @@ namespace gui
 class window;
 class popup;
 class menu;
+using cursor = platform::cursor;
+using standard_cursor = platform::standard_cursor;
 
 ////////////////////////////////////////
 
@@ -40,6 +49,9 @@ public:
 	std::shared_ptr<popup> new_popup( void );
 	std::shared_ptr<menu> new_menu( void );
 
+	std::shared_ptr<cursor> new_cursor( void );
+	std::shared_ptr<cursor> builtin_cursor( standard_cursor sc );
+
 	int run( void );
 	void exit( int code );
 
@@ -48,7 +60,9 @@ public:
 
 	std::set<std::string> get_font_families( void );
 	std::set<std::string> get_font_styles( const std::string &family );
-	std::shared_ptr<script::font> get_font( const std::string &family, const std::string &style, double pixsize );
+	std::shared_ptr<script::font> get_font( const std::string &family, const std::string &style, coord_type pixsize );
+
+	std::shared_ptr<platform::system> get_system( void );
 
 	static std::shared_ptr<application> current( void );
 

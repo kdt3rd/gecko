@@ -74,13 +74,13 @@ int safemain( int argc, char *argv[] )
 	test["star"] = [&]( void )
 	{
 		using namespace base::math;
-		base::point center { 500, 500 };
+		base::dpoint center { 500, 500 };
 		double side = 450;
-		std::vector<base::point> points;
+		std::vector<base::dpoint> points;
 		size_t p = 5;
 		size_t q = 2;
 		for ( size_t i = 0; i < p; ++i )
-			points.push_back( center + base::point::polar( side, 360_deg * double(i) / double(p) ) );
+			points.push_back( center + base::dpoint::polar( side, 360_deg * double(i) / double(p) ) );
 
 		base::path path;
 		size_t i = q % points.size();

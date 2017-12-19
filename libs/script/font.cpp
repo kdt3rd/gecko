@@ -15,7 +15,7 @@ namespace script
 
 ////////////////////////////////////////
 
-font::font( std::string fam, std::string sty, double sz )
+font::font( std::string fam, std::string sty, extent_type sz )
 	: _family( std::move(fam) ), _style( std::move(sty) ), _size( sz )
 {
 }
@@ -54,7 +54,7 @@ font::extents( const std::string &utf8 )
 			break;
 
 		const text_extents &gext = get_glyph( static_cast<char32_t>( ccode ) );
-		double k = kerning( static_cast<char32_t>( prev ), static_cast<char32_t>( ccode ) );
+		extent_type k = kerning( static_cast<char32_t>( prev ), static_cast<char32_t>( ccode ) );
 
 		if ( prev == L'\0' )
 			retval.x_bearing = gext.x_bearing;
@@ -76,9 +76,9 @@ font::extents( const std::string &utf8 )
 
 void
 font::render(
-	const std::function<void(float,float,float,float)> &add_point,
+	const std::function<void(coord_type,coord_type,coord_type,coord_type)> &add_point,
 	const std::function<void(size_t,size_t,size_t)> &add_tri,
-	const base::point &start, const std::string &utf8 )
+	coord_type startX, coord_type startY, const std::string &utf8 )
 {
 	if ( utf8.empty() )
 		return;
@@ -109,12 +109,12 @@ font::render(
 		get_glyph( static_cast<char32_t>( ccode ) );
 
 	wchar_t prev = L'\0';
-	double curposX = 0.0;
+	extent_type curposX = startX;
 	size_t points = 0;
 	for ( wchar_t ccode: tmp )
 	{
 		const text_extents &gext = get_glyph( static_cast<char32_t>( ccode ) );
-		double k = kerning( static_cast<char32_t>( prev ), static_cast<char32_t>( ccode ) );
+		extent_type k = kerning( static_cast<char32_t>( prev ), static_cast<char32_t>( ccode ) );
 		curposX -= k;
 
 		auto idx_base_i = _glyph_index_offset.find( static_cast<char32_t>( ccode ) );
@@ -126,25 +126,25 @@ font::render(
 			if ( ( idx_base / 2 + 3 ) > static_cast<size_t>( std::numeric_limits<uint16_t>::max() ) )
 				throw std::runtime_error( "String too long for OpenGL ES" );
 
-			double upperY = start.y() - gext.y_bearing;
-			double lowerY = upperY + gext.height;
-			double leftX = curposX + gext.x_bearing;
-			double rightX = leftX + gext.width;
+			extent_type upperY = startY - gext.y_bearing;
+			extent_type lowerY = upperY + gext.height;
+			extent_type leftX = curposX + gext.x_bearing;
+			extent_type rightX = leftX + gext.width;
 
 			add_point(
-				static_cast<float>( leftX ), static_cast<float>( upperY ),
+				static_cast<coord_type>( leftX ), static_cast<coord_type>( upperY ),
 				_glyph_coords[coordOff + 0], _glyph_coords[coordOff + 1] );
 
 			add_point(
-				static_cast<float>( rightX ), static_cast<float>( upperY ),
+				static_cast<coord_type>( rightX ), static_cast<coord_type>( upperY ),
 				_glyph_coords[coordOff + 2], _glyph_coords[coordOff + 3] );
 
 			add_point(
-				static_cast<float>( rightX ), static_cast<float>( lowerY ),
+				static_cast<coord_type>( rightX ), static_cast<coord_type>( lowerY ),
 				_glyph_coords[coordOff + 4], _glyph_coords[coordOff + 5] );
 
 			add_point(
-				static_cast<float>( leftX ), static_cast<float>( lowerY ),
+				static_cast<coord_type>( leftX ), static_cast<coord_type>( lowerY ),
 				_glyph_coords[coordOff + 6], _glyph_coords[coordOff + 7] );
 
 			points += 4;
@@ -161,13 +161,14 @@ font::render(
 
 ////////////////////////////////////////
 
-base::point font::align_text( const std::string &utf8, const base::rect &r, base::alignment a )
+std::pair<extent_type, extent_type>
+font::align_text( const std::string &utf8, extent_type x1, extent_type y1, extent_type x2, extent_type y2, base::alignment a )
 {
-	base::rect rect;
-	rect.set_x1( std::ceil( r.x1() ) );
-	rect.set_y1( std::ceil( r.y1() ) );
-	rect.set_x2( std::floor( r.x2() ) );
-	rect.set_y2( std::floor( r.y2() ) );
+	base::rect<extent_type> rect;
+	rect.set_x1( std::ceil( x1 ) );
+	rect.set_y1( std::ceil( y1 ) );
+	rect.set_x2( std::floor( x2 ) );
+	rect.set_y2( std::floor( y2 ) );
 
 	if ( utf8.empty() )
 		return { rect.x(), rect.y() };
@@ -177,8 +178,8 @@ base::point font::align_text( const std::string &utf8, const base::rect &r, base
 	font_extents fex = extents();
 	text_extents tex = extents( utf8 );
 
-	double y = 0.0, x = 0.0;
-	double textHeight = fex.ascent - fex.descent;
+	extent_type y = 0.0, x = 0.0;
+	extent_type textHeight = fex.ascent - fex.descent;
 
 	switch ( a )
 	{
@@ -242,8 +243,8 @@ font::add_glyph( char32_t char_code, const uint8_t *glData, int glPitch, int w, 
 	_glyph_index_offset[char_code] = _glyph_coords.size();
 	int bmW = _glyph_pack.width();
 	int bmH = _glyph_pack.height();
-	double texNormW = static_cast<double>( bmW );
-	double texNormH = static_cast<double>( bmH );
+	extent_type texNormW = static_cast<extent_type>( bmW );
+	extent_type texNormH = static_cast<extent_type>( bmH );
 
 	if ( gA.flipped( w + 1, h + 1 ) )
 	{
@@ -263,10 +264,10 @@ font::add_glyph( char32_t char_code, const uint8_t *glData, int glPitch, int w, 
 				bmData[destY*bmW + destX] = glData[x*glPitch + srcX];
 		}
 
-		float leftX = static_cast<float>( static_cast<double>(gA.x) / texNormW );
-		float topY = static_cast<float>( static_cast<double>(gA.y) / texNormH );
-		float rightX = static_cast<float>( static_cast<double>(gA.x + h) / texNormW );
-		float bottomY = static_cast<float>( static_cast<double>(gA.y + w) / texNormH );
+		coord_type leftX = static_cast<coord_type>( static_cast<extent_type>(gA.x) / texNormW );
+		coord_type topY = static_cast<coord_type>( static_cast<extent_type>(gA.y) / texNormH );
+		coord_type rightX = static_cast<coord_type>( static_cast<extent_type>(gA.x + h) / texNormW );
+		coord_type bottomY = static_cast<coord_type>( static_cast<extent_type>(gA.y + w) / texNormH );
 
 		_glyph_coords.push_back( leftX );
 		_glyph_coords.push_back( bottomY );
@@ -288,10 +289,10 @@ font::add_glyph( char32_t char_code, const uint8_t *glData, int glPitch, int w, 
 		}
 
 		// things go in naturally, upper left of bitmap is at x, y
-		float leftX = static_cast<float>( static_cast<double>(gA.x) / texNormW );
-		float topY = static_cast<float>( static_cast<double>(gA.y) / texNormH );
-		float rightX = static_cast<float>( static_cast<double>(gA.x + w) / texNormW );
-		float bottomY = static_cast<float>( static_cast<double>(gA.y + h) / texNormH );
+		coord_type leftX = static_cast<coord_type>( static_cast<extent_type>(gA.x) / texNormW );
+		coord_type topY = static_cast<coord_type>( static_cast<extent_type>(gA.y) / texNormH );
+		coord_type rightX = static_cast<coord_type>( static_cast<extent_type>(gA.x + w) / texNormW );
+		coord_type bottomY = static_cast<coord_type>( static_cast<extent_type>(gA.y + h) / texNormH );
 
 		_glyph_coords.push_back( leftX );
 		_glyph_coords.push_back( topY );

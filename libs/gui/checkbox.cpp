@@ -17,19 +17,19 @@ namespace gui
 
 ////////////////////////////////////////
 
-checkbox::checkbox( void )
+checkbox_w::checkbox_w( void )
 {
 }
 
 ////////////////////////////////////////
 
-checkbox::~checkbox( void )
+checkbox_w::~checkbox_w( void )
 {
 }
 
 ////////////////////////////////////////
 
-void checkbox::build( gl::api &ogl )
+void checkbox_w::build( gl::api &ogl )
 {
 	const style &s = context::current().get_style();
 
@@ -53,7 +53,7 @@ void checkbox::build( gl::api &ogl )
 
 ////////////////////////////////////////
 
-void checkbox::paint( gl::api &ogl )
+void checkbox_w::paint( gl::api &ogl )
 {
 	_checked.set_position( x(), y() );
 	_unchecked.set_position( x(), y() );
@@ -68,7 +68,7 @@ void checkbox::paint( gl::api &ogl )
 
 ////////////////////////////////////////
 
-bool checkbox::mouse_press( const base::point &p, int button )
+bool checkbox_w::mouse_press( const point &p, int button )
 {
 	unused( button );
 
@@ -83,7 +83,7 @@ bool checkbox::mouse_press( const base::point &p, int button )
 
 ////////////////////////////////////////
 
-bool checkbox::mouse_release( const base::point &p, int button )
+bool checkbox_w::mouse_release( const point &p, int button )
 {
 	unused( button );
 
@@ -100,7 +100,7 @@ bool checkbox::mouse_release( const base::point &p, int button )
 
 ////////////////////////////////////////
 
-bool checkbox::mouse_move( const base::point &p )
+bool checkbox_w::mouse_move( const point &p )
 {
 	if ( _tracking )
 	{
@@ -116,7 +116,7 @@ bool checkbox::mouse_move( const base::point &p )
 
 ////////////////////////////////////////
 
-void checkbox::set_state( bool s )
+void checkbox_w::set_state( bool s )
 {
 	if ( _state != s )
 	{

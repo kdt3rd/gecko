@@ -9,6 +9,7 @@
 
 #include <base/size.h>
 #include <base/rect.h>
+#include "types.h"
 
 namespace platform
 {
@@ -45,13 +46,13 @@ public:
 	/// false) or the available user space (avail == true)
 	/// 
 	/// @return The size of the screen
-	virtual base::rect bounds( bool avail ) const = 0;
+	virtual rect bounds( bool avail ) const = 0;
 
 	/// @brief Screen DPI
 	///
 	/// Returns the horizontal and vertical DPI for the screen
 	/// @return The size of the screen
-	virtual base::size dpi( void ) const = 0;
+	virtual base::dsize dpi( void ) const = 0;
 };
 
 ////////////////////////////////////////

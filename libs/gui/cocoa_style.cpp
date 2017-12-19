@@ -17,9 +17,9 @@
 namespace
 {
 
-base::color bg { 0.9294, 0.9294, 0.9294 };
+gui::color bg { 0.9294, 0.9294, 0.9294 };
 
-base::color border1 { 0.6039, 0.6039, 0.6039 };
+gui::color border1 { 0.6039, 0.6039, 0.6039 };
 base::gradient grad1
 {
 	{ 0.00, { 1.0000, 1.0000, 1.0000 } },
@@ -31,7 +31,7 @@ base::gradient grad1
 	{ 1.00, { 0.9490, 0.9490, 0.9490 } },
 };
 
-base::color border2 { 0.3059, 0.2863, 0.4314 };
+gui::color border2 { 0.3059, 0.2863, 0.4314 };
 base::gradient grad2
 {
 	{ 0.00, { 0.7804, 0.8039, 0.8275 } },
@@ -85,9 +85,9 @@ void cocoa_style::background( const std::shared_ptr<draw::canvas> &c )
 
 ////////////////////////////////////////
 
-base::size cocoa_style::button_size( const base::size &content )
+size cocoa_style::button_size( const size &content )
 {
-	base::size full( content );
+	size full( content );
 	full.grow( 12, 6 );
 	full.ceil();
 	full.set_height( std::max( full.h(), 21.0 ) );
@@ -96,16 +96,16 @@ base::size cocoa_style::button_size( const base::size &content )
 
 ////////////////////////////////////////
 
-base::rect cocoa_style::button_content( const base::rect &full )
+rect cocoa_style::button_content( const rect &full )
 {
-	base::rect content( full );
+	rect content( full );
 	content.shrink( 6, 6, 3, 3 );
 	return content;
 }
 
 ////////////////////////////////////////
 
-void cocoa_style::button_frame( const std::shared_ptr<draw::canvas> &c, const base::rect &r, bool pressed )
+void cocoa_style::button_frame( const std::shared_ptr<draw::canvas> &c, const rect &r, bool pressed )
 {
 	construct( c );
 	if ( pressed )
@@ -122,7 +122,7 @@ void cocoa_style::button_frame( const std::shared_ptr<draw::canvas> &c, const ba
 
 ////////////////////////////////////////
 
-void cocoa_style::line_edit_frame( const std::shared_ptr<draw::canvas> &c, const base::rect &r, bool focused )
+void cocoa_style::line_edit_frame( const std::shared_ptr<draw::canvas> &c, const rect &r, bool focused )
 {
 	construct( c );
 	_line_edit_frame->set( c, r );
@@ -131,20 +131,20 @@ void cocoa_style::line_edit_frame( const std::shared_ptr<draw::canvas> &c, const
 
 ////////////////////////////////////////
 
-double cocoa_style::slider_size( const base::rect &rect )
+coord_type cocoa_style::slider_size( const rect &rect )
 {
 	return rect.radius();
 }
 
 ////////////////////////////////////////
 
-void cocoa_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const base::rect &rect )
+void cocoa_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const rect &rect )
 {
 	construct( c );
 
-	double rad = slider_size( rect );
-	double h = rect.height() - 7;
-	base::rect tmp( rect );
+	coord_type rad = slider_size( rect );
+	coord_type h = rect.height() - 7;
+	rect tmp( rect );
 	tmp.trim( rad, rad, h/2, h/2 );
 
 	_slider_groove->set( c, tmp );
@@ -153,12 +153,12 @@ void cocoa_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const b
 
 ////////////////////////////////////////
 
-void cocoa_style::slider_button( const std::shared_ptr<draw::canvas> &c, const base::rect &r, bool pressed, double val )
+void cocoa_style::slider_button( const std::shared_ptr<draw::canvas> &c, const rect &r, bool pressed, coord_type val )
 {
 	construct( c );
 
-	double rad = 9.0; //r.radius();
-	base::rect tmp( rad * 2, rad * 2 );
+	coord_type rad = 9.0; //r.radius();
+	rect tmp( rad * 2, rad * 2 );
 	tmp.set_center( { r.x( val, rad ), r.y( 0.5, rad ) } );
 
 	_slider_button->set( c, tmp );
@@ -167,11 +167,11 @@ void cocoa_style::slider_button( const std::shared_ptr<draw::canvas> &c, const b
 
 ////////////////////////////////////////
 
-void cocoa_style::text_cursor( const std::shared_ptr<draw::canvas> &c, const base::point &p, double h )
+void cocoa_style::text_cursor( const std::shared_ptr<draw::canvas> &c, const point &p, coord_type h )
 {
 	construct( c );
 
-	base::rect tmp( p - base::point( 0, h ), 2, h );
+	rect tmp( p - point( 0, h ), 2, h );
 
 	_text_cursor->set( c, tmp );
 	_text_cursor->draw( *c );

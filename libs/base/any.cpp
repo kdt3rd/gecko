@@ -18,8 +18,9 @@ bad_any_cast::~bad_any_cast( void )
 
 ////////////////////////////////////////
 
-any::any_base::~any_base( void )
+const char *bad_any_cast::what() const noexcept
 {
+	return "bad any cast";
 }
 
 } // base namespace

@@ -55,7 +55,7 @@
 /// set to infinity) and is the fastest rounding mode possible. It can even be set to `std::numeric_limits<float>::round_style`
 /// to synchronize the rounding mode with that of the underlying single-precision implementation.
 #ifndef HALF_ROUND_STYLE
-	#define HALF_ROUND_STYLE	-1			// = std::round_indeterminate
+# define HALF_ROUND_STYLE	(-1)			// = std::round_indeterminate
 #endif
 
 /// Tie-breaking behaviour for round to nearest.
@@ -64,7 +64,7 @@
 /// thus equal to the round() function), but can be redefined to `1` (before including half.hpp) if more IEEE-conformant
 /// behaviour is needed.
 #ifndef HALF_ROUND_TIES_TO_EVEN
-	#define HALF_ROUND_TIES_TO_EVEN	1		// ties away from zero
+# define HALF_ROUND_TIES_TO_EVEN	(1)		// ties away from zero
 #endif
 
 /// Value signaling overflow.
@@ -76,28 +76,28 @@
 /// This symbol is only defined if the fma() function generally executes as fast as, or faster than, a separate
 /// half-precision multiplication followed by an addition. Due to the internal single-precision implementation of all
 /// arithmetic operations, this is in fact always the case.
-#define FP_FAST_FMAH	1
+#define FP_FAST_FMAH	(1)
 
 #ifndef FP_ILOGB0
-	#define FP_ILOGB0		INT_MIN
+# define FP_ILOGB0		(INT_MIN)
 #endif
 #ifndef FP_ILOGBNAN
-	#define FP_ILOGBNAN		INT_MAX
+# define FP_ILOGBNAN	(INT_MAX)
 #endif
 #ifndef FP_SUBNORMAL
-	#define FP_SUBNORMAL	0
+# define FP_SUBNORMAL	(0)
 #endif
 #ifndef FP_ZERO
-	#define FP_ZERO			1
+# define FP_ZERO		(1)
 #endif
 #ifndef FP_NAN
-	#define FP_NAN			2
+# define FP_NAN			(2)
 #endif
 #ifndef FP_INFINITE
-	#define FP_INFINITE		3
+# define FP_INFINITE	(3)
 #endif
 #ifndef FP_NORMAL
-	#define FP_NORMAL		4
+# define FP_NORMAL		(4)
 #endif
 
 namespace base
@@ -118,13 +118,13 @@ namespace base
 		template<typename T> struct is_float : std::is_floating_point<T> {};
 
 		/// Unsigned integer of (at least) 16 bits width.
-		typedef std::uint_least16_t uint16;
+		using uint16 = std::uint_least16_t;
 
 		/// Unsigned integer of (at least) 32 bits width.
-		typedef std::uint_least32_t uint32;
+		using uint32 = std::uint_least32_t;
 
 		/// Fastest signed integer capable of holding all values of type uint16.
-		typedef std::int_fast32_t int17;
+		using int17 = std::int_fast32_t;
 
 		/// Tag type for binary construction.
 		struct binary_t {};
@@ -151,20 +151,20 @@ namespace base
 		/// `type` member equivalent to \a T.
 		/// \tparam T type to return
 		template<typename T,typename,typename=void,typename=void> struct enable {};
-		template<typename T> struct enable<T,half,void,void> { typedef T type; };
-		template<typename T> struct enable<T,expr,void,void> { typedef T type; };
-		template<typename T> struct enable<T,half,half,void> { typedef T type; };
-		template<typename T> struct enable<T,half,expr,void> { typedef T type; };
-		template<typename T> struct enable<T,expr,half,void> { typedef T type; };
-		template<typename T> struct enable<T,expr,expr,void> { typedef T type; };
-		template<typename T> struct enable<T,half,half,half> { typedef T type; };
-		template<typename T> struct enable<T,half,half,expr> { typedef T type; };
-		template<typename T> struct enable<T,half,expr,half> { typedef T type; };
-		template<typename T> struct enable<T,half,expr,expr> { typedef T type; };
-		template<typename T> struct enable<T,expr,half,half> { typedef T type; };
-		template<typename T> struct enable<T,expr,half,expr> { typedef T type; };
-		template<typename T> struct enable<T,expr,expr,half> { typedef T type; };
-		template<typename T> struct enable<T,expr,expr,expr> { typedef T type; };
+		template<typename T> struct enable<T,half,void,void> { using type = T; };
+		template<typename T> struct enable<T,expr,void,void> { using type = T; };
+		template<typename T> struct enable<T,half,half,void> { using type = T; };
+		template<typename T> struct enable<T,half,expr,void> { using type = T; };
+		template<typename T> struct enable<T,expr,half,void> { using type = T; };
+		template<typename T> struct enable<T,expr,expr,void> { using type = T; };
+		template<typename T> struct enable<T,half,half,half> { using type = T; };
+		template<typename T> struct enable<T,half,half,expr> { using type = T; };
+		template<typename T> struct enable<T,half,expr,half> { using type = T; };
+		template<typename T> struct enable<T,half,expr,expr> { using type = T; };
+		template<typename T> struct enable<T,expr,half,half> { using type = T; };
+		template<typename T> struct enable<T,expr,half,expr> { using type = T; };
+		template<typename T> struct enable<T,expr,expr,half> { using type = T; };
+		template<typename T> struct enable<T,expr,expr,expr> { using type = T; };
 
 		/// Return type for specialized generic 2-argument half-precision functions.
 		/// This class template has to be specialized for each valid combination of argument types to provide a corresponding
@@ -172,7 +172,7 @@ namespace base
 		/// \tparam T first argument type
 		/// \tparam U first argument type
 		template<typename T,typename U> struct result : enable<expr,T,U> {};
-		template<> struct result<half,half> { typedef half type; };
+		template<> struct result<half,half> { using type = half; };
 
 		/// \name Classification helpers
 		/// \{
@@ -548,7 +548,7 @@ namespace base
 		template<typename> struct unary_specialized;
 		template<typename,typename> struct binary_specialized;
 		template<typename,typename,std::float_round_style> struct half_caster;
-	}
+	} // namespace detail
 
 	/// @brief Half-precision floating point type.
 	/// This class implements an IEEE-conformant half-precision floating point type with the usual arithmetic operators and
@@ -583,9 +583,7 @@ namespace base
 		static constexpr detail::binary_t binary = detail::binary_t();
 
 		/// Default constructor.
-		/// This initializes the half to 0. Although this does not match the builtin types' default-initialization semantics
-		/// and may be less efficient than no initialization, it is needed to provide proper value-initialization semantics.
-		constexpr half() : data_() {}
+		constexpr half() = default;
 
 		/// Copy constructor.
 		/// \param rhs half expression to copy from
@@ -606,7 +604,7 @@ namespace base
 		/// Assignment operator.
 		/// \param rhs half expression to copy from
 		/// \return reference to this half
-		half& operator=(detail::expr rhs) { return *this = static_cast<float>(rhs); }
+		half& operator=(detail::expr rhs) { return this->operator=( static_cast<float>(rhs) ); }
 
 		/// Arithmetic assignment.
 		/// \tparam T type of concrete half expression
@@ -681,7 +679,9 @@ namespace base
 
 	private:
 		/// Internal binary representation
-		detail::uint16 data_;
+		/// This initializes the half to 0. Although this does not match the builtin types' default-initialization semantics
+		/// and may be less efficient than no initialization, it is needed to provide proper value-initialization semantics.
+		detail::uint16 data_ = 0;
 	};
 
 	namespace detail
@@ -1399,7 +1399,7 @@ namespace base
 			static_assert(std::is_arithmetic<U>::value, "half_cast from non-arithmetic type unsupported");
 
 
-			typedef half type;
+			using type = half;
 			static constexpr half cast(U arg) { return cast_impl(arg, is_float<U>()); }
 
 		private:
@@ -1410,7 +1410,7 @@ namespace base
 		{
 			static_assert(std::is_arithmetic<T>::value, "half_cast to non-arithmetic type unsupported");
 
-			typedef T type;
+			using type = T;
 			template<typename U> static constexpr T cast(U arg) { return cast_impl(arg, is_float<T>()); }
 
 		private:
@@ -1420,7 +1420,7 @@ namespace base
 		template<typename T,std::float_round_style R> struct half_caster<T,expr,R> : public half_caster<T,half,R> {};
 		template<std::float_round_style R> struct half_caster<half,half,R>
 		{
-			typedef half type;
+			using type = half;
 			static constexpr half cast(half arg) { return arg; }
 		};
 		template<std::float_round_style R> struct half_caster<half,expr,R> : public half_caster<half,half,R> {};
@@ -2263,7 +2263,7 @@ namespace base
 	using detail::isunordered;
 
 	using detail::half_cast;
-}
+} // namespace base
 
 /// Half literal.
 /// While this returns an actual half-precision value, half literals can unfortunately not be constant expressions due
@@ -2373,7 +2373,7 @@ namespace std
 		typedef base::half argument_type;
 
 		/// Function return type.
-		typedef size_t result_type;
+		using result_type = size_t;
 
 		/// Compute hash function.
 		/// \param arg half to hash
@@ -2384,5 +2384,5 @@ namespace std
 
 	template<> struct is_floating_point<base::half> : std::true_type {};
 	template<> struct is_unsigned<base::half> : std::false_type {};
-}
+} // namespace std
 

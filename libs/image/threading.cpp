@@ -46,19 +46,26 @@ namespace image
 ////////////////////////////////////////
 
 threading::threading( int tCount )
-	: _shutdown( false ), _count( tCount )
+	: _count( tCount ), _shutdown( false )
 {
 	size_t n = 0;
 	if ( tCount > 0 )
 	{
 		n = static_cast<size_t>( tCount );
 		std::cout << "Starting " << n << " threads for image processing..." << std::endl;
-		std::lock_guard<std::mutex> lk( std::mutex );
+//		std::lock_guard<std::mutex> lk( std::mutex );
 		_threads.resize( n );
+		_dispatch.reset( new dispatch_logic[n] );
 		for ( size_t i = 0; i != n; ++i )
 		{
-			_threads[i] = std::thread( &threading::bee, this, i );
+			_dispatch[i].f = nullptr;
+			_dispatch[i].start = 0;
+			_dispatch[i].end = 0;
+			_dispatch[i].dispatch_mode.store( kDispatchEmpty );
 		}
+
+		for ( size_t i = 0; i != n; ++i )
+			_threads[i] = std::thread( &threading::bee, this, i );
 	}
 }
 
@@ -75,37 +82,70 @@ threading::dispatch( const std::function<void(size_t, int, int)> &f, int start, 
 {
 	precondition( N > 0, "attempt to dispatch with no items ({0}) to process", N );
 
-	int nT = _count.load();
-	if ( nT == 0 )
-	{
-		f( 0, start, start + N );
-		return;
-	}
-
-	int nPer = ( N + ( nT - 1 ) ) / nT;
+	// TODO: do we want to oversubscribe a bit, or only dispatch n-1
+	// threads?  right now, it's simpler to oversubscribe, although we
+	// could adjust count if that turns to be an issue
+	
+//	int nPer = ( N + ( nT - 1 ) ) / nT;
+	int nPer = ( N + _count ) / ( _count + 1 );
 	int curS = start;
 	int endV = start + N;
-	std::atomic<int> funcCount( 0 );
-	std::unique_lock<std::mutex> lk( _mutex );
-	while ( curS < endV )
+
+	// TODO: change this to enable other things to be in flight
+	// when this comes in, allowing us to do recursive evaluation...
+	// at that point, this code should call participate...
+	size_t curIdx = 0;
+	while ( ( curS + nPer ) < endV )
 	{
-		int curE = curS + nPer;
-		if ( curE > endV )
-			curE = endV;
-		func_to_apply fa;
-		fa.f = f;
-		fa.start = curS;
-		fa.end = curE;
-		fa.counter = &funcCount;
-		_funcs.emplace_back( fa );
-
-		funcCount.fetch_add( 1, std::memory_order_relaxed );
-		curS = curE;
+		int chunkE = curS + nPer;
+		auto &disp = _dispatch[curIdx];
+		disp.start = curS;
+		disp.end = chunkE;
+		disp.f = &f;
+		disp.dispatch_mode.store( kDispatchReady );
+		_thread_sema.signal();
+		curS = chunkE;
+		++curIdx;
 	}
+	if ( curS < endV )
+		f( curIdx, curS, endV );
 
-	_cond.notify_all();
-	while ( funcCount.load() != 0 )
-		_wait_cond.wait( lk );
+	while ( curIdx > 0 )
+	{
+		_wait_sema.wait();
+		--curIdx;
+	}
+}
+
+////////////////////////////////////////
+
+bool
+threading::participate( size_t tIdx )
+{
+	bool check = true;
+	while ( check )
+	{
+		check = false;
+		for ( size_t j = 0, N = static_cast<size_t>( _count ); j < N; ++j )
+		{
+			auto &x = _dispatch[j];
+			int s = x.dispatch_mode.load( std::memory_order_relaxed );
+			if ( s == kDispatchReady )
+			{
+				check = true;
+				int ns = kDispatchInProcess;
+				if ( x.dispatch_mode.compare_exchange_weak( s, ns, std::memory_order_release, std::memory_order_relaxed ) )
+				{
+					(*(x.f))( tIdx, x.start, x.end );
+					ns = kDispatchEmpty;
+					x.dispatch_mode.compare_exchange_strong( s, ns );
+					_wait_sema.signal();
+					return true;
+				}
+			}
+		}
+	}
+	return false;
 }
 
 ////////////////////////////////////////
@@ -114,7 +154,7 @@ void
 threading::shutdown( void )
 {
 	_shutdown = true;
-	_cond.notify_all();
+	_thread_sema.signal( _count );
 	for ( auto &t: _threads )
 		t.join();
 }
@@ -142,38 +182,15 @@ threading::init( int count )
 void
 threading::bee( size_t tIdx )
 {
-	std::unique_lock<std::mutex> lk( _mutex );
 	while ( true )
 	{
-		while ( _funcs.empty() )
-		{
-			if ( _shutdown )
-				return;
+		if ( _shutdown )
+			break;
 
-			_cond.wait( lk );
-		}
+		if ( participate( tIdx ) )
+			continue;
 
-		func_to_apply fa = _funcs.front();
-		_funcs.pop_front();
-
-		lk.unlock();
-		try
-		{
-			fa.f( tIdx, fa.start, fa.end );
-		}
-		catch ( std::exception &e )
-		{
-			lk.lock();
-			base::print_exception( std::cerr, e );
-			lk.unlock();
-		}
-
-		if ( fa.counter->fetch_sub( 1, std::memory_order_release ) == 1 )
-		{
-			std::atomic_thread_fence( std::memory_order_acquire );
-			_wait_cond.notify_all();
-		}
-		lk.lock();
+		_thread_sema.wait();
 	}
 }
 

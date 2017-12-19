@@ -15,7 +15,10 @@
 #include <base/scope_guard.h>
 #include <stdexcept>
 #include <gl/check.h>
+#include <X11/Xutil.h>
+
 #include "system.h"
+#include "cursor.h"
 
 namespace {
 
@@ -253,8 +256,17 @@ void window::hide( void )
 
 bool window::is_visible( void )
 {
-	// TODO fix this
-	return true;
+	XWindowAttributes attr;	  
+	XGetWindowAttributes( _display.get(), _win, &attr );
+	return (attr.map_state == IsViewable);
+}
+
+////////////////////////////////////////
+
+void
+window::fullscreen( bool fs )
+{
+	// look at ghost - need to handle netwm method and motif method...
 }
 
 ////////////////////////////////////////
@@ -267,21 +279,23 @@ rect window::geometry( void )
 
 ////////////////////////////////////////
 
-void window::move( double x, double y )
+void window::move( coord_type x, coord_type y )
 {
-	XMoveWindow( _display.get(), _win, int( x + 0.5 ), int( y + 0.5 ) );
+	XMoveWindow( _display.get(), _win, static_cast<int>( x ), static_cast<int>( y ) );
 }
 
 ////////////////////////////////////////
 
-void window::resize( double w, double h )
+void window::resize( coord_type w, coord_type h )
 {
-	XResizeWindow( _display.get(), _win, static_cast<unsigned int>( std::max( 0.0, w ) + 0.5 ), static_cast<unsigned int>( std::max( 0.0, h ) + 0.5 ) );
+	XResizeWindow( _display.get(), _win,
+				   static_cast<unsigned int>( w ),
+				   static_cast<unsigned int>( h ) );
 }
 
 ////////////////////////////////////////
 
-void window::set_minimum_size( double /*w*/, double /*h*/ )
+void window::set_minimum_size( coord_type /*w*/, coord_type /*h*/ )
 {
 }
 
@@ -294,10 +308,11 @@ void window::set_title( const std::string &t )
 
 ////////////////////////////////////////
 
-void window::invalidate( const base::rect & /*r*/ )
+void window::invalidate( const rect & /*r*/ )
 {
 	if ( !_invalid )
 	{
+		// TODO
 		XClearArea( _display.get(), _win, 0, 0, 0, 0, True );
 		_invalid = true;
 	}
@@ -326,7 +341,7 @@ Window window::id( void ) const
 
 ////////////////////////////////////////
 
-void window::move_event( double x, double y )
+void window::move_event( coord_type x, coord_type y )
 {
 	int16_t tx = static_cast<int16_t>( x );
 	int16_t ty = static_cast<int16_t>( y );
@@ -341,7 +356,7 @@ void window::move_event( double x, double y )
 
 ////////////////////////////////////////
 
-void window::resize_event( double w, double h )
+void window::resize_event( coord_type w, coord_type h )
 {
 	uint16_t tw = static_cast<uint16_t>( w );
 	uint16_t th = static_cast<uint16_t>( h );
@@ -369,6 +384,24 @@ void window::expose_event( void )
 //	glFlush();
 //	XFlush( _display.get() );
 	release();
+}
+
+////////////////////////////////////////
+
+void window::make_current( const std::shared_ptr<::platform::cursor> &c )
+{
+	if ( c )
+	{
+		auto xc = static_cast<::platform::xlib::cursor *>( c.get() );
+		XDefineCursor( _display.get(), _win, xc->handle() );
+	}
+	else
+	{
+		// no cursor - just inherit parent window cursor
+		XUndefineCursor( _display.get(), _win );
+	}
+
+	XFlush( _display.get() );
 }
 
 ////////////////////////////////////////

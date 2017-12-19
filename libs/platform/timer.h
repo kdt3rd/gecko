@@ -71,7 +71,7 @@ public:
 	/// @sa waitable::shutdown
 	void shutdown( void ) override;
 	/// @sa waitable::poll_object
-	intptr_t poll_object( void ) override;
+	wait poll_object( void ) override;
 	/// @sa waitable::poll_timeout
 	bool poll_timeout( duration &when, const time_point &curtime ) override;
 	/// @sa waitable::emit

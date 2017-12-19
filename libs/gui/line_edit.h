@@ -17,12 +17,12 @@ namespace gui
 
 ////////////////////////////////////////
 
-class line_edit : public widget
+class line_edit_w : public widget
 {
 public:
-	line_edit( void );
-	line_edit( std::string l );
-	~line_edit( void );
+	line_edit_w( void );
+	line_edit_w( std::string l );
+	~line_edit_w( void );
 
 	const std::string &text( void ) const { return _text.get_text(); }
 	void set_text( const std::string &t ) { _text.set_text( t ); }
@@ -37,6 +37,8 @@ public:
 
 	bool text_input( char32_t c ) override;
 
+	bool mouse_press( const point &p, int button ) override;
+
 private:
 	draw::rectangle _line;
 	draw::rectangle _marker;
@@ -46,6 +48,8 @@ private:
 };
 
 ////////////////////////////////////////
+
+using line_edit = widget_ptr<line_edit_w>;
 
 }
 

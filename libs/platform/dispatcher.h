@@ -10,9 +10,12 @@
 #include <vector>
 #include <memory>
 #include "waitable.h"
+#include "event_source.h"
 
 namespace platform
 {
+
+class event_queue;
 
 ////////////////////////////////////////
 
@@ -54,6 +57,7 @@ public:
 
 protected:
 	std::vector<std::shared_ptr<waitable>> _waitables;
+	std::shared_ptr<event_queue> _ext_events;
 };
 
 ////////////////////////////////////////

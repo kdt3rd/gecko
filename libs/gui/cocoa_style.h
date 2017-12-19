@@ -26,18 +26,18 @@ public:
 
 	void background( const std::shared_ptr<draw::canvas> &c ) override;
 
-	base::size button_size( const base::size &content ) override;
-	base::rect button_content( const base::rect &size ) override;
+	size button_size( const size &content ) override;
+	rect button_content( const rect &size ) override;
 
-	void button_frame( const std::shared_ptr<draw::canvas> &c, const base::rect &r, bool pressed ) override;
+	void button_frame( const std::shared_ptr<draw::canvas> &c, const rect &r, bool pressed ) override;
 
-	void line_edit_frame( const std::shared_ptr<draw::canvas> &c, const base::rect &r, bool focused ) override;
+	void line_edit_frame( const std::shared_ptr<draw::canvas> &c, const rect &r, bool focused ) override;
 
-	double slider_size( const base::rect &rect ) override;
-	void slider_groove( const std::shared_ptr<draw::canvas> &c, const base::rect &rect ) override;
-	void slider_button( const std::shared_ptr<draw::canvas> &c, const base::rect &r, bool pressed, double val ) override;
+	coord_type slider_size( const rect &rect ) override;
+	void slider_groove( const std::shared_ptr<draw::canvas> &c, const rect &rect ) override;
+	void slider_button( const std::shared_ptr<draw::canvas> &c, const rect &r, bool pressed, coord_type val ) override;
 
-	virtual void text_cursor( const std::shared_ptr<draw::canvas> &c, const base::point &p, double h );
+	virtual void text_cursor( const std::shared_ptr<draw::canvas> &c, const point &p, coord_type h );
 
 private:
 	void construct( const std::shared_ptr<draw::canvas> &c );
@@ -52,7 +52,7 @@ private:
 	std::shared_ptr<draw::stretchable> _line_edit_frame;
 	std::shared_ptr<draw::stretchable> _text_cursor;
 
-//	typedef std::tuple<base::size,bool> button_key;
+//	typedef std::tuple<size,bool> button_key;
 //	std::map<button_key,std::shared_ptr<draw::drawable>> _button_cache;
 
 	std::shared_ptr<gl::texture> _grad1;

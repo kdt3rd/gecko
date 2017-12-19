@@ -26,11 +26,12 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam )
 	if ( !win )
 		return DefWindowProc( hwnd, msg, wParam, lParam );
 
+	// TODO: translate to dispatch events
     switch(msg)
     {
         case WM_CLOSE:
             DestroyWindow( hwnd );
-			win->closed();
+			win->closed( false );
 			break;
 
         case WM_DESTROY:

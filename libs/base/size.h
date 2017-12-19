@@ -19,44 +19,66 @@ namespace base
 ////////////////////////////////////////
 
 /// @brief Width and height
+template <typename T>
 class size
 {
 public:
-	/// @brief Default constructor
-	constexpr size( void )
-	{
-	}
+	static_assert( std::is_arithmetic<T>::value, "size should be a signed value" );
+	typedef T coord_type;
+	
+	constexpr size( void ) = default;
+	constexpr size( const size & ) = default;
+	constexpr size( size && ) noexcept = default;
+	size &operator=( const size & ) = default;
+	size &operator=( size && ) noexcept = default;
+	~size( void ) = default;
 
 	/// @brief Constructor with width and height
-	constexpr size( double ww, double hh )
+	constexpr size( coord_type ww, coord_type hh )
 		: _w( ww ), _h( hh )
 	{
 	}
 
+	/// @brief construct a point with a differently typed point.
+	///
+	/// Requires explicit construction to avoid blind conversion
+	template <typename U>
+	explicit constexpr size( const size<U> &o )
+		: _w( static_cast<coord_type>( o.w() ) ),
+		  _h( static_cast<coord_type>( o.h() ) )
+	{}
+
+	/// @brief explicit cast operator
+	///
+	/// This enables conversion to a different size type, but
+	/// requires explicit programmer specification of such.
+	template <typename U>
+	explicit inline operator size<U>() const { return size<U>( *this ); }
+
 	/// @brief Width
-	constexpr double w( void ) const { return _w; }
+	constexpr coord_type w( void ) const { return _w; }
 
 	/// @brief Height
-	constexpr double h( void ) const { return _h; }
+	constexpr coord_type h( void ) const { return _h; }
 
 	/// @brief Set the width and height
-	void set( double ww, double hh )
+	void set( coord_type ww, coord_type hh )
 	{
 		_w = ww;
 		_h = hh;
 	}
 
 	/// @brief Set the width
-	void set_width( double ww ) { _w = ww; }
+	void set_width( coord_type ww ) { _w = ww; }
 
 	/// @brief Set the height
-	void set_height( double hh ) { _h = hh; }
+	void set_height( coord_type hh ) { _h = hh; }
 
 	/// @brief Shrink width and height
-	void shrink( double dw, double dh ) { _w -= dw; _h -= dh; }
+	void shrink( coord_type dw, coord_type dh ) { _w -= dw; _h -= dh; }
 
 	/// @brief Grow width and height
-	void grow( double dw, double dh ) { _w += dw; _h += dh; }
+	void grow( coord_type dw, coord_type dh ) { _w += dw; _h += dh; }
 
 	/// @brief Add two sizes together
 	size operator+( const size &s ) const
@@ -67,7 +89,14 @@ public:
 	/// @brief less than operator
 	bool operator<( const size &o ) const
 	{
-		return _w < o._w || ( std::equal_to<double>()( _w, o._w ) && _h < o._h );
+		return _w < o._w || ( std::equal_to<coord_type>()( _w, o._w ) && _h < o._h );
+	}
+
+	/// @brief Round size up to nearest integer based on half-way
+	void round( void )
+	{
+		_w = std::lround( _w );
+		_h = std::lround( _h );
 	}
 
 	/// @brief Round size up to nearest integer
@@ -100,88 +129,27 @@ public:
 
 	bool empty( void ) const
 	{
-		return _w <= 0.0 && _h <= 0.0;
+		return _w <= coord_type( 0 ) && _h <= coord_type( 0 );
 	}
 
 private:
-	double _w = 0.0, _h = 0.0;
+	coord_type _w = coord_type( 0 ), _h = coord_type( 0 );
 };
 
 ////////////////////////////////////////
 
 /// @brief Stream out a size object
-inline std::ostream &operator<<( std::ostream &out, const size &s )
+template <typename T>
+inline std::ostream &operator<<( std::ostream &out, const size<T> &s )
 {
 	out << s.w() << 'x' << s.h();
 	return out;
 }
 
-////////////////////////////////////////
-
-/// @brief Width and height (integer)
-class isize
-{
-public:
-	/// @brief Default constructor
-	constexpr isize( void )
-	{
-	}
-
-	/// @brief Constructor with width and height
-	constexpr isize( int64_t ww, int64_t hh )
-		: _w( ww ), _h( hh )
-	{
-	}
-
-	/// @brief Width
-	constexpr int64_t w( void ) const { return _w; }
-
-	/// @brief Height
-	constexpr int64_t h( void ) const { return _h; }
-
-	/// @brief Set the width and height
-	void set( int64_t ww, int64_t hh )
-	{
-		_w = ww;
-		_h = hh;
-	}
-
-	/// @brief Set the width
-	void set_width( int64_t ww ) { _w = ww; }
-
-	/// @brief Set the height
-	void set_height( int64_t hh ) { _h = hh; }
-
-	/// @brief Shrink width and height
-	void shrink( int64_t dw, int64_t dh ) { _w -= dw; _h -= dh; }
-
-	/// @brief Grow width and height
-	void grow( int64_t dw, int64_t dh ) { _w += dw; _h += dh; }
-
-	/// @brief Add two sizes together
-	isize operator+( const isize &s ) const
-	{
-		return { _w + s._w, _h + s._h };
-	}
-
-	/// @brief Add two sizes together
-	bool operator<( const isize &o ) const
-	{
-		return _w < o._w || ( _w == o._w && _h < o._h );
-	}
-
-private:
-	int64_t _w = 0, _h = 0;
-};
-
-////////////////////////////////////////
-
-/// @brief Stream out a integer size object
-inline std::ostream &operator<<( std::ostream &out, const isize &s )
-{
-	out << s.w() << 'x' << s.h();
-	return out;
-}
+using fsize = size<float>;
+using dsize = size<double>;
+using isize = size<int32_t>;
+using lsize = size<int64_t>;
 
 ////////////////////////////////////////
 

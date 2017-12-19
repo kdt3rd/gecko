@@ -30,8 +30,7 @@ void packing::add( const std::shared_ptr<area> &a, base::alignment where )
 
 void packing::compute_bounds( void )
 {
-	base::rect min;
-	base::rect max;
+	base::drect bmin, bmax;
 
 	// To compute the minimum size, we build backwards from the inside out.
 	for ( auto &s: base::reverse( _areas ) )
@@ -43,106 +42,106 @@ void packing::compute_bounds( void )
 			switch ( s._align )
 			{
 				case base::alignment::CENTER:
-					min.set_size( a->minimum_size() );
-					max.set_size( a->maximum_size() );
+					bmin.set_size( a->minimum_size() );
+					bmax.set_size( a->maximum_size() );
 					break;
 
 				case base::alignment::TOP:
-					if ( !min.empty() )
-						min.grow( 0, 0, _spacing[1], 0 );
-					if ( !max.empty() )
-						max.grow( 0, 0, _spacing[1], 0 );
-					min.grow( 0, 0, a->minimum_height(), 0 );
-					max.grow( 0, 0, a->maximum_height(), 0 );
-					if ( min.width() < a->minimum_width() )
-						min.set_width( a->minimum_width() );
-					if ( max.width() < a->maximum_width() )
-						max.set_width( a->maximum_width() );
+					if ( !bmin.empty() )
+						bmin.grow( 0, 0, _spacing[1], 0 );
+					if ( !bmax.empty() )
+						bmax.grow( 0, 0, _spacing[1], 0 );
+					bmin.grow( 0, 0, a->minimum_height(), 0 );
+					bmax.grow( 0, 0, a->maximum_height(), 0 );
+					if ( bmin.width() < a->minimum_width() )
+						bmin.set_width( a->minimum_width() );
+					if ( bmax.width() < a->maximum_width() )
+						bmax.set_width( a->maximum_width() );
 					break;
 
 				case base::alignment::TOP_LEFT:
-					if ( !min.empty() )
-						min.grow( _spacing[0], 0, _spacing[1], 0 );
-					if ( !max.empty() )
-						max.grow( _spacing[0], 0, _spacing[1], 0 );
-					min.grow( a->minimum_width(), 0, a->minimum_height(), 0 );
-					max.grow( a->maximum_width(), 0, a->maximum_height(), 0 );
+					if ( !bmin.empty() )
+						bmin.grow( _spacing[0], 0, _spacing[1], 0 );
+					if ( !bmax.empty() )
+						bmax.grow( _spacing[0], 0, _spacing[1], 0 );
+					bmin.grow( a->minimum_width(), 0, a->minimum_height(), 0 );
+					bmax.grow( a->maximum_width(), 0, a->maximum_height(), 0 );
 					break;
 
 				case base::alignment::TOP_RIGHT:
-					if ( !min.empty() )
-						min.grow( 0, _spacing[0], _spacing[1], 0 );
-					if ( !max.empty() )
-						max.grow( 0, _spacing[0], _spacing[1], 0 );
-					min.grow( 0, a->minimum_width(), a->minimum_height(), 0 );
-					max.grow( 0, a->maximum_width(), a->maximum_height(), 0 );
+					if ( !bmin.empty() )
+						bmin.grow( 0, _spacing[0], _spacing[1], 0 );
+					if ( !bmax.empty() )
+						bmax.grow( 0, _spacing[0], _spacing[1], 0 );
+					bmin.grow( 0, a->minimum_width(), a->minimum_height(), 0 );
+					bmax.grow( 0, a->maximum_width(), a->maximum_height(), 0 );
 					break;
 
 				case base::alignment::BOTTOM:
-					if ( !min.empty() )
-						min.grow( 0, 0, 0, _spacing[1] );
-					if ( !max.empty() )
-						max.grow( 0, 0, 0, _spacing[1] );
-					min.grow( 0, 0, 0, a->minimum_height() );
-					max.grow( 0, 0, 0, a->maximum_height() );
-					if ( min.width() < a->minimum_width() )
-						min.set_width( a->minimum_width() );
-					if ( max.width() < a->maximum_width() )
-						max.set_width( a->maximum_width() );
+					if ( !bmin.empty() )
+						bmin.grow( 0, 0, 0, _spacing[1] );
+					if ( !bmax.empty() )
+						bmax.grow( 0, 0, 0, _spacing[1] );
+					bmin.grow( 0, 0, 0, a->minimum_height() );
+					bmax.grow( 0, 0, 0, a->maximum_height() );
+					if ( bmin.width() < a->minimum_width() )
+						bmin.set_width( a->minimum_width() );
+					if ( bmax.width() < a->maximum_width() )
+						bmax.set_width( a->maximum_width() );
 					break;
 
 				case base::alignment::BOTTOM_RIGHT:
-					if ( !min.empty() )
-						min.grow( 0, _spacing[0], 0, _spacing[1] );
-					if ( !max.empty() )
-						max.grow( 0, _spacing[0], 0, _spacing[1] );
-					min.grow( 0, a->minimum_width(), 0, a->minimum_height() );
-					max.grow( 0, a->maximum_width(), 0, a->maximum_height() );
+					if ( !bmin.empty() )
+						bmin.grow( 0, _spacing[0], 0, _spacing[1] );
+					if ( !bmax.empty() )
+						bmax.grow( 0, _spacing[0], 0, _spacing[1] );
+					bmin.grow( 0, a->minimum_width(), 0, a->minimum_height() );
+					bmax.grow( 0, a->maximum_width(), 0, a->maximum_height() );
 					break;
 
 				case base::alignment::BOTTOM_LEFT:
-					if ( !min.empty() )
-						min.grow( _spacing[0], 0, 0, _spacing[1] );
-					if ( !max.empty() )
-						max.grow( _spacing[0], 0, 0, _spacing[1] );
-					min.grow( a->minimum_width(), 0, 0, a->minimum_height() );
-					max.grow( a->maximum_width(), 0, 0, a->maximum_height() );
+					if ( !bmin.empty() )
+						bmin.grow( _spacing[0], 0, 0, _spacing[1] );
+					if ( !bmax.empty() )
+						bmax.grow( _spacing[0], 0, 0, _spacing[1] );
+					bmin.grow( a->minimum_width(), 0, 0, a->minimum_height() );
+					bmax.grow( a->maximum_width(), 0, 0, a->maximum_height() );
 					break;
 
 				case base::alignment::RIGHT:
-					if ( !min.empty() )
-						min.grow( 0, _spacing[0], 0, 0 );
-					if ( !max.empty() )
-						max.grow( 0, _spacing[0], 0, 0 );
-					min.grow( 0, a->minimum_width(), 0, 0 );
-					max.grow( 0, a->maximum_width(), 0, 0 );
-					if ( min.height() < a->minimum_height() )
-						min.set_height( a->minimum_height() );
-					if ( max.height() < a->maximum_height() )
-						max.set_height( a->maximum_height() );
+					if ( !bmin.empty() )
+						bmin.grow( 0, _spacing[0], 0, 0 );
+					if ( !bmax.empty() )
+						bmax.grow( 0, _spacing[0], 0, 0 );
+					bmin.grow( 0, a->minimum_width(), 0, 0 );
+					bmax.grow( 0, a->maximum_width(), 0, 0 );
+					if ( bmin.height() < a->minimum_height() )
+						bmin.set_height( a->minimum_height() );
+					if ( bmax.height() < a->maximum_height() )
+						bmax.set_height( a->maximum_height() );
 					break;
 
 				case base::alignment::LEFT:
-					if ( !min.empty() )
-						min.grow( _spacing[0], 0, 0, 0 );
-					if ( !max.empty() )
-						max.grow( _spacing[0], 0, 0, 0 );
-					min.grow( a->minimum_width(), 0, 0, 0 );
-					max.grow( a->maximum_width(), 0, 0, 0 );
-					if ( min.height() < a->minimum_height() )
-						min.set_height( a->minimum_height() );
-					if ( max.height() < a->maximum_height() )
-						max.set_height( a->maximum_height() );
+					if ( !bmin.empty() )
+						bmin.grow( _spacing[0], 0, 0, 0 );
+					if ( !bmax.empty() )
+						bmax.grow( _spacing[0], 0, 0, 0 );
+					bmin.grow( a->minimum_width(), 0, 0, 0 );
+					bmax.grow( a->maximum_width(), 0, 0, 0 );
+					if ( bmin.height() < a->minimum_height() )
+						bmin.set_height( a->minimum_height() );
+					if ( bmax.height() < a->maximum_height() )
+						bmax.set_height( a->maximum_height() );
 					break;
 			}
 		}
 	}
 
-	min.grow( _pad[0], _pad[1], _pad[2], _pad[3] );
-	max.grow( _pad[0], _pad[1], _pad[2], _pad[3] );
+	bmin.grow( _pad[0], _pad[1], _pad[2], _pad[3] );
+	bmax.grow( _pad[0], _pad[1], _pad[2], _pad[3] );
 
-	set_minimum( min.width(), min.height() );
-	set_maximum( max.width(), max.height() );
+	set_minimum( bmin.width(), bmin.height() );
+	set_maximum( bmax.width(), bmax.height() );
 }
 
 ////////////////////////////////////////

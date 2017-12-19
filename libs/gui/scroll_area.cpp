@@ -12,21 +12,21 @@ namespace gui
 
 ////////////////////////////////////////
 
-scroll_area::scroll_area( bool hscroll, bool vscroll, bool bounded )
+scroll_area_w::scroll_area_w( bool hscroll, bool vscroll, bool bounded )
 	: widget( std::unique_ptr<layout::scroll>( new layout::scroll ) )
 {
 	_layout = std::dynamic_pointer_cast<layout::scroll>( layout_target() );
 
 	if ( hscroll )
 	{
-		_hscroll = std::make_shared<scroll_bar>( bounded );
+		_hscroll = std::make_shared<scroll_bar_w>( bounded );
 		_hscroll->set_horizontal();
 		_layout->set_hscroll( _hscroll->layout_target() );
 	}
 
 	if ( vscroll )
 	{
-		_vscroll = std::make_shared<scroll_bar>( bounded );
+		_vscroll = std::make_shared<scroll_bar_w>( bounded );
 		_vscroll->set_vertical();
 		_layout->set_vscroll( _vscroll->layout_target() );
 	}
@@ -37,13 +37,13 @@ scroll_area::scroll_area( bool hscroll, bool vscroll, bool bounded )
 
 ////////////////////////////////////////
 
-scroll_area::~scroll_area( void )
+scroll_area_w::~scroll_area_w( void )
 {
 }
 
 ////////////////////////////////////////
 
-void scroll_area::set_widget( const std::shared_ptr<widget> &v )
+void scroll_area_w::set_widget( const std::shared_ptr<widget> &v )
 {
 	_widget = v;
 	_layout->set_sublayout( _widget->layout_target() );
@@ -52,7 +52,7 @@ void scroll_area::set_widget( const std::shared_ptr<widget> &v )
 
 ////////////////////////////////////////
 
-void scroll_area::build( gl::api &ogl )
+void scroll_area_w::build( gl::api &ogl )
 {
 	if ( _hscroll )
 		_hscroll->build( ogl );
@@ -66,7 +66,7 @@ void scroll_area::build( gl::api &ogl )
 
 ////////////////////////////////////////
 
-void scroll_area::paint( gl::api &ogl )
+void scroll_area_w::paint( gl::api &ogl )
 {
 	if ( _hscroll )
 		_hscroll->paint( ogl );
@@ -81,7 +81,7 @@ void scroll_area::paint( gl::api &ogl )
 		{
 			ogl.save_matrix();
 			{
-				double dx = 0.0, dy = 0.0;
+				coord_type dx = coord_type( 0 ), dy = coord_type( 0 );
 				if ( _hscroll )
 					dx = _hscroll->value();
 				if ( _vscroll )
@@ -98,7 +98,7 @@ void scroll_area::paint( gl::api &ogl )
 
 ////////////////////////////////////////
 
-bool scroll_area::mouse_press( const base::point &p, int button )
+bool scroll_area_w::mouse_press( const point &p, int button )
 {
 	bool result = false;
 	if ( !result && _hscroll )
@@ -123,7 +123,7 @@ bool scroll_area::mouse_press( const base::point &p, int button )
 
 ////////////////////////////////////////
 
-bool scroll_area::mouse_release( const base::point &p, int button )
+bool scroll_area_w::mouse_release( const point &p, int button )
 {
 	bool result = false;
 	if ( !result && _hscroll )
@@ -147,7 +147,7 @@ bool scroll_area::mouse_release( const base::point &p, int button )
 
 ////////////////////////////////////////
 
-bool scroll_area::mouse_move( const base::point &p )
+bool scroll_area_w::mouse_move( const point &p )
 {
 	bool result = false;
 	if ( !result && _hscroll )
@@ -174,7 +174,7 @@ bool scroll_area::mouse_move( const base::point &p )
 
 ////////////////////////////////////////
 
-bool scroll_area::update_layout( double duration )
+bool scroll_area_w::update_layout( double duration )
 {
 	bool result = widget::update_layout( duration );
 
@@ -195,7 +195,7 @@ bool scroll_area::update_layout( double duration )
 
 ////////////////////////////////////////
 
-void scroll_area::update_widget( void )
+void scroll_area_w::update_widget( void )
 {
 	if ( _widget )
 	{

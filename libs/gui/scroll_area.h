@@ -16,20 +16,22 @@ namespace gui
 
 ////////////////////////////////////////
 
-class scroll_area : public widget
+class scroll_area_w : public widget
 {
 public:
-	scroll_area( bool hscroll = true, bool vscroll = true, bool bounded = true );
-	~scroll_area( void );
+	scroll_area_w( bool hscroll = true, bool vscroll = true, bool bounded = true );
+	~scroll_area_w( void );
 
 	void set_widget( const std::shared_ptr<widget> &v );
+	template <typename Y>
+	inline void set_widget( const widget_ptr<Y> &w ) { set_widget( static_cast<std::shared_ptr<Y>>( w ) ); }
 
 	void build( gl::api &ogl ) override;
 	void paint( gl::api &ogl ) override;
 
-	bool mouse_press( const base::point &p, int button ) override;
-	bool mouse_release( const base::point &p, int button ) override;
-	bool mouse_move( const base::point &p ) override;
+	bool mouse_press( const point &p, int button ) override;
+	bool mouse_release( const point &p, int button ) override;
+	bool mouse_move( const point &p ) override;
 
 	bool update_layout( double duration ) override;
 
@@ -37,16 +39,18 @@ private:
 	void update_widget( void );
 
 	bool _tracking = false;
-	base::point _track;
+	point _track;
 
 	std::shared_ptr<layout::scroll> _layout;
 	std::shared_ptr<widget> _main;
 	std::shared_ptr<widget> _widget;
-	std::shared_ptr<scroll_bar> _hscroll;
-	std::shared_ptr<scroll_bar> _vscroll;
+	std::shared_ptr<scroll_bar_w> _hscroll;
+	std::shared_ptr<scroll_bar_w> _vscroll;
 };
 
 ////////////////////////////////////////
+
+using scroll_area = widget_ptr<scroll_area_w>;
 
 }
 

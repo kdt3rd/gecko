@@ -12,7 +12,10 @@
 #include <gl/opengl.h>
 
 #include <platform/platform.h>
+#include <platform/menu.h>
+#include <platform/tray.h>
 #include <base/contract.h>
+#include <base/string_util.h>
 #include <stdexcept>
 #include <cstring>
 
@@ -149,6 +152,125 @@ system::gl_proc_address( void )
 
 ////////////////////////////////////////
 
+std::shared_ptr<::platform::cursor>
+system::new_cursor( void )
+{
+	throw_not_yet();
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<::platform::cursor>
+system::builtin_cursor( standard_cursor sc )
+{
+	throw_not_yet();
+}
+
+////////////////////////////////////////
+
+void
+system::set_selection( selection sel )
+{
+}
+
+////////////////////////////////////////
+
+std::pair<std::vector<uint8_t>, std::string>
+system::query_selection( selection_type sel,
+						 const std::vector<std::string> &allowedMimeTypes,
+						 const std::string &clipboardName )
+{
+	return std::make_pair( std::vector<uint8_t>(), std::string() );
+}
+
+////////////////////////////////////////
+
+std::pair<std::vector<uint8_t>, std::string>
+system::query_selection( selection_type sel,
+						 const selection_type_function &chooseMimeType,
+						 const std::string &clipboardName )
+{
+	return std::make_pair( std::vector<uint8_t>(), std::string() );
+}
+
+////////////////////////////////////////
+
+const std::vector<std::string> &
+system::default_string_types( void )
+{
+	static std::vector<std::string> xlibTypes{ "text/plain;charset=utf-8", "text/plain" };
+	return xlibTypes;
+}
+
+////////////////////////////////////////
+
+selection_type_function
+system::default_string_selector( void )
+{
+	auto selFun = [](const std::vector<std::string> &l) -> std::string 
+		{
+			std::string ret{ "text/plain;charset=utf-8" };
+			if ( std::find( l.begin(), l.end(), ret ) != l.end() )
+				return ret;
+			ret = "text/plain";
+			if ( std::find( l.begin(), l.end(), ret ) != l.end() )
+				return ret;
+			return std::string();
+		};
+	return selection_type_function{ selFun };
+}
+
+////////////////////////////////////////
+
+system::mime_converter
+system::default_string_converter( void )
+{
+	auto convFun = [](const std::vector<uint8_t> &d, const std::string &cur, const std::string &to) -> std::vector<uint8_t> 
+		{
+			if ( base::begins_with( cur, "text/plain" ) )
+			{
+				if ( base::begins_with( to, "text/plain" ) )
+					return d;
+			}
+			return std::vector<uint8_t>();
+		};
+	return mime_converter{ convFun };
+}
+
+////////////////////////////////////////
+
+void
+system::begin_drag( selection sel,
+					const std::shared_ptr<::platform::cursor> &cursor )
+{
+}
+
+////////////////////////////////////////
+
+std::pair<std::vector<uint8_t>, std::string>
+system::query_drop( const selection_type_function &chooseMimeType )
+{
+	return std::make_pair( std::vector<uint8_t>(), std::string() );
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<::platform::menu>
+system::new_system_menu( void )
+{
+	return std::make_shared<::platform::menu>();
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<::platform::tray>
+system::new_system_tray_item( void )
+{
+	return std::make_shared<::platform::tray>();
+}
+
+////////////////////////////////////////
+
 std::shared_ptr<::platform::window> system::new_window( void )
 {
 	auto ret = std::make_shared<window>( _egl_disp, _compositor, _shell );
@@ -184,6 +306,27 @@ std::shared_ptr<::platform::keyboard> system::get_keyboard( void )
 std::shared_ptr<::platform::mouse> system::get_mouse( void )
 {
 	return _mouse;
+}
+
+////////////////////////////////////////
+
+uint8_t
+system::modifier_state( void )
+{
+	return 0;
+}
+
+////////////////////////////////////////
+
+bool
+system::query_mouse( uint8_t &buttonMask, uint8_t &modifiers, coord_type &x, coord_type &y,int &screen )
+{
+	buttonMask = 0;
+	modifiers = 0;
+	x = 0;
+	y = 0;
+	screen = -1;
+	return false;
 }
 
 ////////////////////////////////////////

@@ -17,62 +17,66 @@ namespace gui
 
 ////////////////////////////////////////
 
-class slider : public widget
+class slider_w : public widget
 {
 public:
-	slider( void );
-	slider( double v, double min = 0.0, double max = 1.0 );
-	~slider( void );
+	using value_type = coord_type;
+
+	slider_w( void );
+	slider_w( value_type v, value_type min = 0.0, value_type max = 1.0 );
+	~slider_w( void );
 
 	template<typename T>
 	typename std::enable_if<std::is_integral<T>::value, T>::type value( void ) const
 	{
-		double v = _value;
-		v = std::max( v, double( std::numeric_limits<T>::min() ) );
-		v = std::min( v, double( std::numeric_limits<T>::max() ) );
+		value_type v = _value;
+		v = std::max( v, value_type( std::numeric_limits<T>::min() ) );
+		v = std::min( v, value_type( std::numeric_limits<T>::max() ) );
 		return T( std::round( v ) );
 	}
 
 	template<typename T>
 	typename std::enable_if<std::is_floating_point<T>::value, T>::type value( void ) const
 	{
-		double v = _value;
-		v = std::max( v, double( std::numeric_limits<T>::min() ) );
-		v = std::min( v, double( std::numeric_limits<T>::max() ) );
+		value_type v = _value;
+		v = std::max( v, value_type( std::numeric_limits<T>::min() ) );
+		v = std::min( v, value_type( std::numeric_limits<T>::max() ) );
 		return v;
 	}
 
-	double value( void ) const
+	value_type value( void ) const
 	{
 		return _value;
 	}
 
-	void set_value( double v );
-	void set_range( double min, double max );
+	void set_value( value_type v );
+	void set_range( value_type min, value_type max );
 
 	void build( gl::api &ogl ) override;
 	void paint( gl::api &ogl ) override;
 
-	bool mouse_press( const base::point &p, int button ) override;
-	bool mouse_move( const base::point &p ) override;
-	bool mouse_release( const base::point &p, int button ) override;
+	bool mouse_press( const point &p, int button ) override;
+	bool mouse_move( const point &p ) override;
+	bool mouse_release( const point &p, int button ) override;
 
-	base::signal<void(double)> when_changing;
-	base::signal<void(double)> when_changed;
-	base::signal<void(double,double)> when_range_changed;
+	signal<void(value_type)> when_changing;
+	signal<void(value_type)> when_changed;
+	signal<void(value_type,value_type)> when_range_changed;
 
 private:
 	draw::rectangle _groove;
 	draw::shape _knob;
 
 	bool _tracking = false;
-	double _handle = 8.0;
-	double _start = 0.0;
-	double _value = 0.5;
-	double _min = 0.0, _max = 1.0;
+	value_type _handle = 8.0;
+	value_type _start = 0.0;
+	value_type _value = 0.5;
+	value_type _min = 0.0, _max = 1.0;
 };
 
 ////////////////////////////////////////
+
+using slider = widget_ptr<slider_w>;
 
 }
 

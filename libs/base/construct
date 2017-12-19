@@ -7,12 +7,15 @@ lib = library "base"
 	"compiler_abi.cpp";
 	"contract.cpp";
 	"cpu_features.cpp";
+	"event.cpp";
 	"half.cpp";
-	"rect.cpp";
+	"loadable.cpp";
+	"shared_mutex.cpp";
 	"string_util.cpp";
 	"string_variable_util.cpp";
 	"variable_set.cpp";
 	"pack.cpp";
+	"pipe.cpp";
 	"sha160.cpp";
 	"sha256.cpp";
 	"skein512.cpp";
@@ -33,6 +36,7 @@ lib = library "base"
 	"user_info.cpp";
 	"thread_pool.cpp";
 	"thread_util.cpp";
+	"wait.cpp";
   }
   optional_source{
 	  {

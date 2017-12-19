@@ -98,7 +98,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	win->release();
 
 	auto animtimer = sys->create_timer();
-	animtimer->elapsed = [&]() { win->invalidate( base::rect() ); };
+	animtimer->elapsed = [&]() { win->invalidate( platform::rect() ); };
 	animtimer->reset_repeat( 0.1 );
 	sys->get_dispatcher()->add_waitable( animtimer );
 	animtimer->activate( true );
@@ -127,7 +127,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	};
 
 	// Key to take a screenshot.
-	win->key_pressed = [&]( const std::shared_ptr<platform::keyboard> &, platform::scancode c )
+	win->key_pressed = [&]( platform::event_source &, platform::scancode c )
 	{
 		if ( c == platform::scancode::KEY_S )
 		{

@@ -144,7 +144,8 @@ public:
 
 	/// @brief Construct translation matrix
 	static matrix4 translation( float x, float y, float z = 0.0 );
-	static inline matrix4 translation( const base::point &p )
+	template <typename T>
+	static inline matrix4 translation( const base::point<T> &p )
 	{
 		return translation( static_cast<float>( p.x() ),
 							static_cast<float>( p.y() ) );

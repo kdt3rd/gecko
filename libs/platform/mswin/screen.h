@@ -28,9 +28,9 @@ public:
 
 	double refresh_rate( void ) const override;
 
-	base::rect bounds( bool avail ) const override;
+	rect bounds( bool avail ) const override;
 
-	base::size dpi( void ) const override;
+	base::dsize dpi( void ) const override;
 
 private:
 	HMONITOR _monitor;

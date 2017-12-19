@@ -66,7 +66,7 @@ screen::refresh_rate( void ) const
 
 ////////////////////////////////////////
 
-base::rect screen::bounds( bool avail ) const
+rect screen::bounds( bool avail ) const
 {
 	MONITORINFO mi;
 	mi.cbSize = sizeof(mi);
@@ -78,10 +78,10 @@ base::rect screen::bounds( bool avail ) const
 	else
 		sz = mi.rcMonitor;
 
-	return base::rect( static_cast<double>( sz.left ),
-					   static_cast<double>( sz.top ),
-					   static_cast<double>( sz.right - sz.left + 1 ),
-					   static_cast<double>( sz.bottom - sz.top + 1 ) );
+	return rect( static_cast<coord_type>( sz.left ),
+				 static_cast<coord_type>( sz.top ),
+				 static_cast<coord_type>( sz.right - sz.left + 1 ),
+				 static_cast<coord_type>( sz.bottom - sz.top + 1 ) );
 }
 
 ////////////////////////////////////////

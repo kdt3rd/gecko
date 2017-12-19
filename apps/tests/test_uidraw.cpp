@@ -155,11 +155,11 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		ogl.restore_matrix();
 
 		// Cause a redraw to continue the animation
-		win->invalidate( base::rect() );
+		win->invalidate( platform::rect() );
 	};
 
 	// Key to take a screenshot.
-	win->key_pressed = [&]( const std::shared_ptr<platform::keyboard> &, platform::scancode c )
+	win->key_pressed = [&]( platform::event_source &, platform::scancode c )
 	{
 		if ( c == platform::scancode::KEY_S )
 		{

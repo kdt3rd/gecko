@@ -32,9 +32,11 @@ public:
 	{
 		set_position( gl::vec2( x, y ) );
 	}
-	void set_position( const base::point &p )
+	template <typename T>
+	void set_position( const base::point<T> &p )
 	{
-		set_position( gl::vec2( p.x(), p.y() ) );
+		set_position( gl::vec2( static_cast<float>( p.x() ),
+								static_cast<float>( p.y() ) ) );
 	}
 	void set_color( const gl::color &c );
 

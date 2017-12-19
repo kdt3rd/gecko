@@ -11,245 +11,442 @@
 #include <utility>
 #include <algorithm>
 #include <typeinfo>
-#include <string>
-#include <cassert>
+#include <initializer_list>
 #include <memory>
+#include <stdexcept>
 #include "contract.h"
 #include "compiler_abi.h"
 
 namespace base
 {
 
-class bad_any_cast : public std::runtime_error
+class bad_any_cast : public std::bad_cast
 {
 public:
+	bad_any_cast( void ) = default;
 	~bad_any_cast( void ) override;
 	bad_any_cast( const bad_any_cast & ) = default;
 	bad_any_cast( bad_any_cast && ) = default;
 	bad_any_cast &operator=( const bad_any_cast & ) = default;
 	bad_any_cast &operator=( bad_any_cast && ) = default;
-	using std::runtime_error::runtime_error;
+
+	const char *what() const noexcept override;
 };
-#define throw_bad_any_cast( ... ) \
-	throw_location( base::bad_any_cast( base::format( __VA_ARGS__ ) ) )
+#define throw_bad_any_cast() \
+	throw_location( base::bad_any_cast() )
+
+template <typename T>
+struct in_place_type {};
+// need c++17 to have inline variables...
+//template <typename T>
+//inline constexpr in_place_type_t<T> in_place_type {};
 
 ////////////////////////////////////////
 
 /// @brief Holds a value of any type.
 ///
 /// This is similar to a void pointer (void *), but is type-safe.
-class any
+///
+/// This has been re-written to mimic the C++17 standard version as
+/// much as possible, such that when c++17 is a reality for most
+/// people, this can be easily swapped and replaced.
+///
+/// Unfortunately, both gcc and libcxx code is fully using the new std
+/// type_traits types, so can't be copied more directly
+class any final
 {
+private:
+	// rather than require a virtual base class and always requiring a
+	// new / delete, we burn a function pointer here, which should
+	// replace the vtable pointer and enable us to have small value
+	// optimization for free
+	
+	union val_storage
+	{
+		constexpr inline val_storage() : ptr(nullptr) {}
+		val_storage(const val_storage &) = delete;
+		val_storage(val_storage &&) = delete;
+
+		inline void *buffer( void ) noexcept { return &buf; }
+		inline const void *buffer( void ) const noexcept { return &buf; }
+
+		void *ptr;
+		// using 3 here to match libcxx, which enables this to cover shared_ptr,
+		// etc. which seems like a good idea, but then is a total of 4 pointers size
+		// for this object, so 32 bytes instead of just 24 bytes, so a vector of any
+		// will align onto 64 byte L1
+		std::aligned_storage<3 * sizeof(void *), alignof(void *)>::type buf;
+	};
+
+	template <typename T, typename safeT = std::is_nothrow_move_constructible<T>,
+			  bool fits = (sizeof(T) <= sizeof(val_storage)) && (alignof(T) <= alignof(val_storage))>
+		using internal_storage = std::integral_constant<bool, safeT::value && fits>;
+
+	enum class val_op
+	{
+		tinfo, get, copy, destroy, move, size
+	};
+
+	using proc_func = void * (*) ( val_op, const any *, any *, const std::type_info *tinfo );
+
+	template <typename T> struct local_store
+	{
+		template <typename ...Args>
+		static inline T &create( any &dest, Args &&... args )
+		{
+			T *r = ::new (dest._store.buffer()) T( std::forward<Args>(args)... );
+			dest._processor = &local_store::apply;
+			return *r;
+		}
+
+		static inline void destroy( any &t )
+		{
+			T *v = static_cast<T *>( t._store.buffer() );
+			v->~T();
+			t._processor = nullptr;
+		}
+
+		static inline void *apply( val_op o, const any *v, any *a, const std::type_info *tinfo )
+		{
+			switch ( o )
+			{
+				case val_op::tinfo:
+					return const_cast<void *>( static_cast<const void *>( &typeid( T ) ) );
+
+				case val_op::size:
+					return reinterpret_cast<void *>( uintptr_t( sizeof(T) ) );
+
+				case val_op::get:
+					if ( tinfo && *tinfo == typeid(T) )
+					{
+						auto p = static_cast<const T *>( v->_store.buffer() );
+						return const_cast<T *>( p );
+					}
+					return nullptr;
+
+				case val_op::copy:
+				{
+					auto p = static_cast<const T *>( v->_store.buffer() );
+					create( *a, *p );
+					break;
+				}
+
+				case val_op::destroy:
+					destroy( *const_cast<any *>( v ) );
+					break;
+
+				case val_op::move:
+				{
+					auto p = static_cast<const T *>( v->_store.buffer() );
+					create( *a, std::move( *const_cast<T *>( p ) ) );
+					destroy( *const_cast<any *>( v ) );
+					break;
+				}
+			}
+			return nullptr;
+		}
+	};
+
+	template <typename T> struct heap_store
+	{
+		template <typename ...Args>
+		static inline T &create( any &dest, Args &&... args )
+		{
+			// TODO: Understand why libcxx uses a std::allocator, puts
+			// memory in a unique_ptr and does in-place construction.
+			// gcc does not (yet, anyway)
+			// std::allocators seem only partly implemented in many c++11
+			T *r = new T( std::forward<Args>(args)... );
+			dest._store.ptr = r;
+			dest._processor = &heap_store::apply;
+			return *r;
+		}
+
+		static inline void destroy( any &t )
+		{
+			delete static_cast<T *>( t._store.ptr );
+			t._processor = nullptr;
+		}
+
+		static inline void *apply( val_op o, const any *v, any *a, const std::type_info *tinfo )
+		{
+			switch ( o )
+			{
+				case val_op::tinfo:
+					return const_cast<void *>( static_cast<const void *>( &typeid( T ) ) );
+
+				case val_op::size:
+					return reinterpret_cast<void *>( uintptr_t( sizeof(T) ) );
+
+				case val_op::get:
+					if ( tinfo && *tinfo == typeid(T) )
+					{
+						auto p = static_cast<const T *>( v->_store.ptr );
+						return const_cast<T *>( p );
+					}
+					return nullptr;
+
+				case val_op::copy:
+				{
+					auto p = static_cast<const T *>( v->_store.ptr );
+					create( *a, *p );
+					break;
+				}
+
+				case val_op::destroy:
+					destroy( *const_cast<any *>( v ) );
+					break;
+
+				case val_op::move:
+					// this is only called on empty / being-constructed objects
+					// so don't have to do all the steps expected
+					a->_store.ptr = const_cast<any *>( v )->_store.ptr;
+					a->_processor = &heap_store::apply;
+					const_cast<any *>( v )->_processor = nullptr;
+					break;
+			}
+			return nullptr;
+		}
+	};
+
+	proc_func _processor = nullptr;
+	val_storage _store;
+
+	inline void *call_proc( val_op op, any *o = nullptr, const std::type_info *tinfo = nullptr ) const
+	{
+		return _processor( op, this, o, tinfo );
+	}
+
 public:
 	/// @brief Decay type alias
-	template<class T> using decay = typename std::decay<T>::type;
+	template <typename T> using decay = typename std::decay<T>::type;
+	/// @brief processor table type alias
+	template <typename T> using processor = typename std::conditional< internal_storage<T>::value, local_store<T>, heap_store<T> >::type;
 
 	/// @brief Default constructor
 	/// It contains no value until one is assigned.
-	any( void ) = default;
-
-	~any( void ) = default;
-
-	/// @brief Constuct from the given r-value
 	///
-	/// Note that this is not explicit, such that any is implicitly
-	/// constructable from ... anything. However, as a result, we need
-	/// to define the following function taking a non-const reference
-	/// to avoid recursion...
-	template<typename U>
-	any( U &&value ) // NOLINT
-		: _ptr( new derived<decay<U>>( std::forward<U>( value ) ) )
+	/// This is defined as constexpr such that it is safe to use in
+	/// static non-local initialized objects (see cppreference.com or
+	/// other reference for discussion)
+	inline constexpr any( void ) noexcept : _processor( nullptr ) {}
+	inline ~any( void ) { reset(); }
+
+	inline any( const any &o )
+		 : _processor( nullptr )
 	{
+		if ( o.has_value() )
+			o.call_proc( val_op::copy, this, nullptr );
+	}
+	inline any( any &&o ) noexcept
+		: _processor( nullptr )
+	{
+		if ( o.has_value() )
+			o.call_proc( val_op::move, this );
 	}
 
-	/// @brief Copy constructor-ish to avoid by reference any recursion
-	any( any &that ) // NOLINT
-		: _ptr( that.clone() )
+	// allow auto construction of any other type except any (to prevent recursion)
+	template <typename T, typename Tp = decay<T>, typename = typename std::enable_if<std::is_copy_constructible<Tp>::value && !std::is_same<Tp, any>::value>::type>
+		inline any( T &&val ) // NOLINT
 	{
+		processor<Tp>::create( *this, std::forward<T>( val ) );
 	}
 
-	/// @brief Copy constructor
-	any( const any &that )
-		: _ptr( that.clone() )
+	///NB: we are not providing the exact in_place_t mechanism since
+	/// that involves manipulating the std namespace which would be
+	/// dangerous, but provide a similar mechanism in case anyone
+	/// needs it, should allow future search and replace quite easily.
+	template <typename T, typename ... Args, typename Tp = decay<T>, typename = typename std::enable_if<std::is_copy_constructible<Tp>::value && !std::is_same<Tp, any>::value>::type>
+	explicit inline any( in_place_type<T>, Args &&... args )
 	{
+		processor<Tp>::create( *this, std::forward<Args>( args )... );
+	}
+	
+	template <typename T, typename U, typename ... Args, typename Tp = decay<T>, typename = typename std::enable_if<std::is_copy_constructible<Tp>::value && !std::is_same<Tp, any>::value>::type>
+	explicit inline any( in_place_type<T>, std::initializer_list<U> il, Args &&... args )
+	{
+		processor<Tp>::create( *this, il, std::forward<Args>( args )... );
 	}
 
-	/// @brief Move constructor
-	any( any &&that )
-		: _ptr( std::move( that._ptr ) )
+	/// no side effects on exception
+	inline any &operator=( const any &o )
 	{
+		any( o ).swap( *this );
+		return *this;
 	}
 
-	/// @brief Is the any value not set?
-	bool is_null() const
+	inline any &operator=( any &&o ) noexcept
 	{
-		return !bool( _ptr );
+		any( std::move( o ) ).swap( *this );
+		return *this;
 	}
 
-	/// @brief Is the any value set?
-	bool not_null() const
+	template <typename T, typename Tp = decay<T>, typename = typename std::enable_if<std::is_copy_constructible<Tp>::value && !std::is_same<Tp, any>::value>::type>
+	inline any &operator=( T &&rhs )
 	{
-		return bool( _ptr );
+		any( std::forward<T>( rhs ) ).swap( *this );
+		return *this;
 	}
 
-	/// @brief any value set per c++14 function name
-	inline bool empty( void ) const
+	template <typename T, typename ... Args, typename Tp = decay<T>, typename = typename std::enable_if<std::is_constructible<Tp, Args...>::value && std::is_copy_constructible<Tp>::value >::type>
+	inline Tp &emplace( Args &&... args )
 	{
-		return ! bool( _ptr );
+		reset();
+		return processor<Tp>::create( *this, std::forward<Args>( args )... );
 	}
 
-	/// @brief Is the any value of type U?
-	template<class U>
-	bool is_type( void ) const
+	template <typename T, typename U, typename ... Args, typename Tp = decay<T>, typename = typename std::enable_if<std::is_constructible<Tp, Args...>::value && std::is_copy_constructible<Tp>::value >::type>
+	inline Tp &emplace( std::initializer_list<T> il, Args &&... args )
 	{
-	    using T = decay<U>;
-	    auto d = dynamic_cast<derived<T>*>( _ptr.get() );
-	    return bool( d );
+		reset();
+		return processor<Tp>::create( *this, il, std::forward<Args>( args )... );
+	}
+	
+	/// checks if the any object holds a value
+	inline bool has_value( void ) const noexcept { return _processor != nullptr; }
+
+	/// returns the c++ typeid of the contained object (or void if empty)
+	inline const std::type_info& type() const noexcept
+	{
+		if ( has_value() )
+			return *static_cast<const std::type_info *>( this->_processor( val_op::tinfo, nullptr, nullptr, nullptr ) );
+		return typeid(void);
 	}
 
-	/// @brief Access the any value as type U
-	template<class U>
-	decay<U> &as( void )
+	void reset( void ) noexcept
 	{
-	    using T = decay<U>;
-	    auto d = dynamic_cast<derived<T>*>( _ptr.get() );
-	    if ( !d )
+		if ( has_value() )
+			this->call_proc( val_op::destroy );
+	}
+
+	void swap( any &o ) noexcept
+	{
+		if ( this == &o )
+			return;
+
+		if ( has_value() && o.has_value() )
 		{
-			if ( empty() )
-				throw_bad_any_cast( "bad any_cast: request type {0} but any is empty", demangle( typeid(U) ) );
-			else
-				throw_bad_any_cast( "bad any_cast: request type {0} but ptr is type {1}", demangle( typeid(U) ), demangle( typeid(_ptr.get()) ) );
+			any tmp;
+			o.call_proc( val_op::move, &tmp );
+			this->call_proc( val_op::move, &o );
+			tmp.call_proc( val_op::move, this );
 		}
-
-		return d->_value;
+		else if ( has_value() )
+			this->call_proc( val_op::move, &o );
+		else if ( o.has_value() )
+			o.call_proc( val_op::move, this );
 	}
 
-	/// @brief Access the any value as type const U
-	template<class U>
-	const decay<U> &as( void ) const
+	/// NB: NON STANDARD INTERFACE
+	///
+	/// we currently use this to stream raw bytes to the hash function
+	/// in engine.
+	size_t size( void ) const noexcept
 	{
-	    typedef decay<U> T;
-	    auto d = dynamic_cast<derived<T>*>( _ptr.get() );
-	    if ( !d )
-		{
-			if ( empty() )
-				throw_bad_any_cast( "bad any_cast: request type {0} but any is empty", demangle( typeid(U) ) );
-			else
-				throw_bad_any_cast( "bad any_cast: request type {0} but ptr is type {1}", demangle( typeid(U) ), demangle( typeid(_ptr.get()) ) );
-		}
-
-		return d->_value;
+		if ( has_value() )
+			return reinterpret_cast<size_t>( this->call_proc( val_op::size ) );
+		return 0;
 	}
 
-	/// @brief Cast operator to type U
-	template<class U>
-	operator U() const
+protected:
+	template <typename T> friend const T *any_cast( const any * ) noexcept;
+	template <typename T> friend T *any_cast( any * ) noexcept;
+
+	inline bool is_typed( const std::type_info &t ) const
 	{
-	    return as<decay<U>>();
+		// TODO: safe to use pointer compare? probably not - could
+		// have any things from plugins or something in the future
+		return this->type() == t;
 	}
 
-	/// @brief Assignment operator
-	any &operator=( const any &a )
+	template <typename T>
+	const T *as( void ) const noexcept
 	{
-	    if ( _ptr == a._ptr )
-	        return *this;
-	    _ptr = a.clone();
-	    return *this;
+		return static_cast<const T *>( this->call_proc( val_op::get, nullptr, &typeid(T) ) );
 	}
 
-	/// @brief Assignment move operator
-	any &operator=( any &&a ) noexcept
+	template <typename T>
+	T *as( void ) noexcept
 	{
-		using std::swap;
-	    if ( _ptr == a._ptr )
-	        return *this;
-	    swap( _ptr, a._ptr );
-	    return *this;
+		return static_cast<T *>( this->call_proc( val_op::get, nullptr, &typeid(T) ) );
 	}
-
-	template <class S>
-	inline void binary_stream( S &s ) const
-	{
-		if ( _ptr )
-		{
-			size_t bytes = 0;
-			const void *rawPtr = _ptr->binary_stream_ptr( bytes );
-			s.add( rawPtr, bytes );
-		}
-		else
-			s << "<any: null>";
-	}
-
-	inline void swap( any &o )
-	{
-		std::swap( _ptr, o._ptr );
-	}
-
-private:
-	class any_base
-	{
-	public:
-		any_base( void ) = default;
-	    virtual ~any_base( void );
-		any_base( const any_base & ) = delete;
-		any_base &operator=( const any_base & ) = delete;
-		any_base( any_base && ) = delete;
-		any_base &operator=( any_base && ) = delete;
-
-		virtual std::unique_ptr<any_base> clone( void ) const = 0;
-		virtual const void *binary_stream_ptr( size_t &s ) const = 0;
-	};
-
-	template<typename T>
-	class derived : public any_base
-	{
-	public:
-	    template<typename U>
-		explicit derived( U &&value )
-			: _value( std::forward<U>( value ) )
-		{
-		}
-		derived( void ) = delete;
-		~derived( void ) override = default;
-		derived( const derived & ) = delete;
-		derived &operator=( const derived & ) = delete;
-		derived( derived && ) = delete;
-		derived &operator=( derived && ) = delete;
-
-		std::unique_ptr<any_base> clone( void ) const override
-		{
-			return std::unique_ptr<any_base>( new derived<T>( _value ) );
-		}
-
-		const void *binary_stream_ptr( size_t &s ) const override
-		{
-			s = sizeof(_value);
-			return &_value;
-		}
-
-	private:
-		friend class any;
-	    T _value;
-	};
-
-	std::unique_ptr<any_base> clone( void ) const
-	{
-		return _ptr ? _ptr->clone() : nullptr;
-	}
-
-	std::unique_ptr<any_base> _ptr;
 };
 
-template <class T>
-T any_cast( const any &a )
+template <typename T, typename ... Args>
+inline any make_any( Args &&... args )
 {
-	return a.as<T>();
+	return any( in_place_type<T>{}, std::forward<Args>( args )... );
+}
+
+template <typename T, typename U, typename ... Args>
+inline any make_any( std::initializer_list<U> il, Args &&... args )
+{
+	return any( in_place_type<T>{}, il, std::forward<Args>( args )... );
 }
 
 template <class T>
-T any_cast( any &a )
+inline T any_cast( const any &a )
 {
-	return a.as<T>();
+	auto p = any_cast<typename std::remove_cv<typename std::remove_reference<T>::type>::type>( &a );
+	if ( p )
+		return static_cast<T>( *p );
+	throw_bad_any_cast();
+}
+
+template <class T>
+inline T any_cast( any &a )
+{
+	auto p = any_cast<typename std::remove_cv<typename std::remove_reference<T>::type>::type>( &a );
+	if ( p )
+		return static_cast<T>( *p );
+	throw_bad_any_cast();
+}
+
+namespace detail
+{
+
+template <typename T>
+inline T any_cast_move_true( typename std::remove_reference<T>::type *p, std::true_type )
+{
+	return std::move( *p );
+}
+
+template <typename T>
+inline T any_cast_move_true( typename std::remove_reference<T>::type *p, std::false_type )
+{
+	return *p;
+}
+
+} // namespace detail
+
+template <class T>
+inline T any_cast( any &&a )
+{
+	using can_move = std::integral_constant<
+		bool,
+		std::is_move_constructible<T>::value
+		&& !std::is_lvalue_reference<T>::value>;
+
+	auto p = any_cast<typename std::remove_reference<T>::type>( &a );
+	if ( p == nullptr )
+		throw_bad_any_cast();
+	return detail::any_cast_move_true<T>( p, can_move() );
+}
+
+template <class T>
+inline const T *any_cast( const any *a ) noexcept
+{
+	if ( a == nullptr )
+		return nullptr;
+	return a->as<T>();
+}
+
+template <class T>
+inline T *any_cast( any *a ) noexcept
+{
+	if ( a == nullptr )
+		return nullptr;
+	return a->as<T>();
 }
 
 inline void swap( any &a, any &b )
@@ -267,7 +464,7 @@ namespace std
 
 inline void swap( base::any &a, base::any &b )
 {
-	base::swap( a, b );
+	a.swap( b );
 }
 
 } // namespace std

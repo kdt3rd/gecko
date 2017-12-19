@@ -7,6 +7,7 @@
 
 #include "dispatcher.h"
 #include <base/contract.h>
+#include "event_queue.h"
 
 namespace platform
 {
@@ -14,13 +15,20 @@ namespace platform
 ////////////////////////////////////////
 
 dispatcher::dispatcher( void )
+	: _ext_events( std::make_shared<event_queue>() )
 {
+	// TODO: this should normally be done via add_waitable but we're
+	// in the ctor, so virtual functions will be sliced...
+	_waitables.push_back( _ext_events );
+	_ext_events->start();
 }
 
 ////////////////////////////////////////
 
 dispatcher::~dispatcher( void )
 {
+	for ( auto &i: _waitables )
+		i->shutdown();
 }
 
 ////////////////////////////////////////
@@ -37,6 +45,7 @@ dispatcher::add_waitable( const std::shared_ptr<waitable> &w )
 	}
 
 	_waitables.push_back( w );
+	w->start();
 }
 
 ////////////////////////////////////////
@@ -48,6 +57,7 @@ dispatcher::remove_waitable( const std::shared_ptr<waitable> &w )
 	{
 		if ( (*i) == w )
 		{
+			w->shutdown();
 			_waitables.erase( i );
 			break;
 		}

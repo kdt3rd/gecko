@@ -32,27 +32,32 @@ public:
 	void hide( void ) override;
 	bool is_visible( void ) override;
 
+	void fullscreen( bool fs ) override;
+
 //	rect geometry( void ) override;
-//	void set_position( double x, double y ) override;
-	void move( double x, double y ) override;
-	void resize( double w, double h ) override;
-	void set_minimum_size( double w, double h ) override;
+//	void set_position( coord_type x, coord_type y ) override;
+	void move( coord_type x, coord_type y ) override;
+	void resize( coord_type w, coord_type h ) override;
+	void set_minimum_size( coord_type w, coord_type h ) override;
 
 	void set_title( const std::string &t ) override;
 //	void set_icon( const icon &i ) override;
 
-	void invalidate( const base::rect &r ) override;
+	void invalidate( const rect &r ) override;
 
 	/// @brief Acquire window to draw
 	void acquire( void ) override;
 	void release( void ) override;
 
-	double width( void ) override { return _last_w; }
-	double height( void )  override { return _last_h; }
+	coord_type width( void ) override { return _last_w; }
+	coord_type height( void )  override { return _last_h; }
 
 	void expose_event( void );
-	void move_event( double x, double y );
-	void resize_event( double w, double h );
+	void move_event( coord_type x, coord_type y );
+	void resize_event( coord_type w, coord_type h );
+
+protected:
+	void make_current( const std::shared_ptr<::platform::cursor> & );
 
 private:
 	int16_t _last_x = 0, _last_y = 0;

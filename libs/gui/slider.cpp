@@ -15,29 +15,29 @@ namespace gui
 
 ////////////////////////////////////////
 
-slider::slider( void )
+slider_w::slider_w( void )
 {
 }
 
 ////////////////////////////////////////
 
-slider::slider( double v, double min, double max )
+slider_w::slider_w( value_type v, value_type min, value_type max )
 	: _value( v ), _min( min ), _max( max )
 {
 }
 
 ////////////////////////////////////////
 
-slider::~slider( void )
+slider_w::~slider_w( void )
 {
 }
 
 ////////////////////////////////////////
 
-void slider::set_range( double min, double max )
+void slider_w::set_range( value_type min, value_type max )
 {
 	precondition( min < max, "invalid range" );
-	if ( ! std::equal_to<double>()(_min, min) || ! std::equal_to<double>()(_max, max) )
+	if ( ! std::equal_to<value_type>()(_min, min) || ! std::equal_to<value_type>()(_max, max) )
 	{
 		_min = min;
 		_max = max;
@@ -47,10 +47,10 @@ void slider::set_range( double min, double max )
 
 ////////////////////////////////////////
 
-void slider::set_value( double v )
+void slider_w::set_value( value_type v )
 {
 	v = std::max( _min, std::min( _max, v ) );
-	if ( ! std::equal_to<double>()(v, _value) )
+	if ( ! std::equal_to<value_type>()(v, _value) )
 	{
 		_value = v;
 		invalidate();
@@ -59,7 +59,7 @@ void slider::set_value( double v )
 
 ////////////////////////////////////////
 
-void slider::build( gl::api &ogl )
+void slider_w::build( gl::api &ogl )
 {
 	const style &s = context::current().get_style();
 	_groove.set_color( s.secondary_text( s.background_color() ) );
@@ -77,9 +77,9 @@ void slider::build( gl::api &ogl )
 
 ////////////////////////////////////////
 
-void slider::paint( gl::api &ogl )
+void slider_w::paint( gl::api &ogl )
 {
-	double ypos = y() + height()/2.0;
+	coord_type ypos = y() + height()/2.0;
 
 	_groove.set_position( x(), ypos - 1 );
 	_groove.set_size( width(), 2 );
@@ -91,16 +91,16 @@ void slider::paint( gl::api &ogl )
 
 ////////////////////////////////////////
 
-bool slider::mouse_press( const base::point &p, int /*button*/ )
+bool slider_w::mouse_press( const point &p, int /*button*/ )
 {
 	if ( contains( p ) )
 	{
-		double z1 = x1() + _handle;
-		double z2 = x2() - _handle;
+		value_type z1 = x1() + _handle;
+		value_type z2 = x2() - _handle;
 		if ( z1 < z2 )
 		{
-			double current = z1 + _value * ( z2 - z1 );
-			double dist = std::abs( p.x() - current );
+			value_type current = z1 + _value * ( z2 - z1 );
+			value_type dist = std::abs( p.x() - current );
 			if ( dist < _handle )
 			{
 				_tracking = true;
@@ -115,12 +115,12 @@ bool slider::mouse_press( const base::point &p, int /*button*/ )
 
 ////////////////////////////////////////
 
-bool slider::mouse_move( const base::point &p )
+bool slider_w::mouse_move( const point &p )
 {
 	if ( _tracking )
 	{
-		double z1 = x1() + _handle;
-		double z2 = x2() - _handle;
+		value_type z1 = x1() + _handle;
+		value_type z2 = x2() - _handle;
 		if ( z1 < z2 )
 			set_value( ( p.x() - z1 ) / ( z2 - z1 ) );
 		else
@@ -133,13 +133,13 @@ bool slider::mouse_move( const base::point &p )
 
 ////////////////////////////////////////
 
-bool slider::mouse_release( const base::point &p, int /*button*/ )
+bool slider_w::mouse_release( const point &p, int /*button*/ )
 {
 	if ( _tracking )
 	{
 		_tracking = false;
-		double z1 = x1() + _handle;
-		double z2 = x2() - _handle;
+		value_type z1 = x1() + _handle;
+		value_type z2 = x2() - _handle;
 		if ( z1 < z2 )
 			set_value( ( p.x() - z1 ) / ( z2 - z1 ) );
 		else

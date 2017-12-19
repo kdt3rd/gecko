@@ -11,17 +11,9 @@
 #include <stdexcept>
 
 #include <windows.h>
-#include <base/win32_system_error.h>
+#include <base/contract.h>
 
-#include <gl/opengl.h>
-
-namespace
-{
-	HGLRC WINAPI (*wglCreateContextAttribsARB)( HDC, HGLRC, const int * ) = nullptr;
-}
-
-// prescribed method to enable nvidia GPU on laptops w/ dual GPU
-//extern "C" { _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001; }
+#include "opengl.h"
 
 namespace platform { namespace mswin
 {
@@ -40,53 +32,15 @@ window::window( void )
 		NULL, NULL, hInstance, NULL );
 
 	if ( _hwnd == nullptr )
-		throw std::runtime_error( "window creation failed" );
+		throw_runtime( "window creation failed" );
 
-	_hdc = GetDC( _hwnd ); // Get the device context for our window
+	_hdc = GetDC( _hwnd );
+	_hrc = createOGLContext( _hdc );
 
-	// Create a new PIXELFORMATDESCRIPTOR (PFD)
-	PIXELFORMATDESCRIPTOR pfd;
-	memset( &pfd, 0, sizeof(PIXELFORMATDESCRIPTOR) );
-	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-	pfd.nVersion = 1;
-	pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW;
-	pfd.iPixelType = PFD_TYPE_RGBA;
-	pfd.cColorBits = 24;//32;
-	pfd.cDepthBits = 32;
-	pfd.iLayerType = PFD_MAIN_PLANE;
-
-   	// Check if our PFD is valid and get a pixel format back
-	int nPixelFormat = ChoosePixelFormat( _hdc, &pfd );
-	if ( nPixelFormat == 0 )
-		throw std::runtime_error( "pixel format failed" );
-
-   	// Try and set the pixel format based on our PFD
-	bool bResult = SetPixelFormat( _hdc, nPixelFormat, &pfd );
-	if ( !bResult )
-		throw std::runtime_error( "set pixel format failed" );
-
-	HGLRC tempOpenGLContext = wglCreateContext( _hdc );
-	wglMakeCurrent( _hdc, tempOpenGLContext );
-
-	int attributes[] = {
-		WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-		WGL_CONTEXT_MINOR_VERSION_ARB, 3,
-		WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
-		//WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-		0, 0
-	};
-
-	wglCreateContextAttribsARB = reinterpret_cast<decltype(wglCreateContextAttribsARB)>( wglGetProcAddress("wglCreateContextAttribsARB") );
-	if ( wglCreateContextAttribsARB == nullptr )
-		throw std::runtime_error( "wgl create context missing" );
-
-	_hrc = wglCreateContextAttribsARB( _hdc, NULL, attributes );
-	if ( _hrc == nullptr )
-		throw_win32_error( "unable to create OpenGL context" );
-
-	wglMakeCurrent( NULL, NULL );
-	wglDeleteContext( tempOpenGLContext );
 	wglMakeCurrent( _hdc, _hrc );
+
+	if ( !gl3wIsSupported( 3, 3 ) )
+		throw_runtime( "OpenGL 3.3 not supported" );
 
 	update_position();
 	//wglCreateLayerContext
@@ -101,6 +55,14 @@ window::window( void )
 
 window::~window( void )
 {
+	if ( _hrc )
+	{
+		HGLRC oldCtxt = wglGetCurrentContext();
+		if ( oldCtxt == _hrc )
+			wglMakeCurrent( _hdc, NULL );
+		wglDeleteContext( _hrc );
+	}
+
 	if ( _hwnd )
 		DestroyWindow( _hwnd );
 }
@@ -141,6 +103,14 @@ bool window::is_visible( void )
 
 ////////////////////////////////////////
 
+void
+window::fullscreen( bool fs )
+{
+	std::cout << "implement window::fullscreen" << std::endl;
+}
+
+////////////////////////////////////////
+
 /*
 rect window::geometry( void )
 {
@@ -149,19 +119,19 @@ rect window::geometry( void )
 
 ////////////////////////////////////////
 
-void window::move( double x, double y )
+void window::move( coord_type x, coord_type y )
 {
 }
 
 ////////////////////////////////////////
 
-void window::resize( double w, double h )
+void window::resize( coord_type w, coord_type h )
 {
 }
 
 ////////////////////////////////////////
 
-void window::set_minimum_size( double w, double h )
+void window::set_minimum_size( coord_type w, coord_type h )
 {
 }
 
@@ -179,7 +149,7 @@ void window::set_popup( void )
 
 ////////////////////////////////////////
 
-void window::invalidate( const base::rect &r )
+void window::invalidate( const rect &r )
 {
 	RECT rect = { LONG( std::floor( r.x1() ) ), LONG( std::floor( r.y1() ) ), LONG( std::ceil( r.x2() ) ), LONG( std::ceil( r.y2() ) ) };
 	if ( rect.left == rect.top &&
@@ -220,6 +190,13 @@ void window::update_position( void )
 	std::cout << "window resized to: " << _last_w << " x " << _last_h << " (" << pos.left << ", " << pos.top << " " << pos.right << ", " << pos.bottom << ")" << std::endl;
 }
 
+////////////////////////////////////////
+
+void
+window::make_current( const std::shared_ptr<cursor> &c )
+{
+	std::cout << "NYI: make_current( cursor )" << std::endl;
+}
 
 ////////////////////////////////////////
 
@@ -233,6 +210,24 @@ void window::expose_event( void )
 //	wglSwapLayerBuffers( _hdc, WGL_SWAP_MAIN_PLANE );
 	SwapBuffers( _hdc );
 	release();
+}
+
+////////////////////////////////////////
+
+void
+window::move_event( coord_type x, coord_type y )
+{
+	_last_x = x;
+	_last_y = y;
+}
+
+////////////////////////////////////////
+
+void
+window::resize_event( coord_type w, coord_type h )
+{
+	_last_w = w;
+	_last_h = h;
 }
 
 ////////////////////////////////////////

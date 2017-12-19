@@ -121,7 +121,7 @@ void text::update( void )
 			tris.push_back( a, b, c );
 		};
 
-		_font->render( add_point, add_tri, base::point( 0.0, 0.0 ), _utf8 );
+		_font->render( add_point, add_tri, 0.0, 0.0, _utf8 );
 	}
 
 	// Update the font texture if needed.

@@ -31,6 +31,12 @@ namespace script
 class font
 {
 public:
+	/// The type that is used for actual drawing and positioning. This
+	/// is currently a float, and passed to opengl as the same
+	/// (although this class doesn't use OpenGL). But this type is
+	/// here in case it needs to change in the future.
+	using coord_type = float;
+
 	/// @brief Destructor.
 	virtual ~font( void );
 
@@ -44,12 +50,12 @@ public:
 	void max_glyph_store( int w, int h ) { _max_glyph_w = w; _max_glyph_h = h; }
 
 	/// @brief Size of the font.
-	inline double size( void ) const { return _size; }
+	inline extent_type size( void ) const { return _size; }
 
 	/// @brief Accessor to check if triplet of values is this font.
-	inline bool matches( const std::string &f, const std::string &s, double sz ) const
+	inline bool matches( const std::string &f, const std::string &s, extent_type sz ) const
 	{
-		return family() == f && style() == s && std::abs( size() - sz ) < 0.000001;
+		return family() == f && style() == s && std::abs( size() - sz ) < extent_type(0.000001);
 	}
 
 	/// @brief The general size of the font.
@@ -72,16 +78,16 @@ public:
 	text_extents extents( const std::string &utf8 );
 
 	/// @brief Get kerning between two glyphs.
-	virtual double kerning( char32_t c1, char32_t c2 ) = 0;
+	virtual extent_type kerning( char32_t c1, char32_t c2 ) = 0;
 
 	/// @brief Renders the given text.
 	/// Given the start as the origin for the baseline, 'renders' the
 	/// given text by filling a set of output coordinates and vertex
 	/// indices to render.
 	void render(
-		const std::function<void(float,float,float,float)> &add_point,
+		const std::function<void(coord_type,coord_type,coord_type,coord_type)> &add_point,
 		const std::function<void(size_t,size_t,size_t)> &add_tri,
-		const base::point &start, const std::string &utf8 );
+		coord_type startX, coord_type startY, const std::string &utf8 );
 
 	/// @brief Glyph version.
 	/// Increments every time a glyph is loaded into the internal
@@ -100,7 +106,7 @@ public:
 	/// @brief Bitmap of glyphs.
 	const std::vector<uint8_t> &bitmap( void ) const { return _glyph_bitmap; }
 
-//	const std::vector<float> &glyph_coords( void ) const { return _glyph_coords; }
+//	const std::vector<coord_type> &glyph_coords( void ) const { return _glyph_coords; }
 
 	/// @brief Load a glyph.
 	void load_glyph( char32_t cc )
@@ -110,11 +116,17 @@ public:
 
 	void load_glyphs( const std::string &utf8 );
 
-	base::point align_text( const std::string &utf8, const base::rect &rect, base::alignment a );
+	std::pair<extent_type, extent_type> align_text( const std::string &utf8, extent_type x1, extent_type y1, extent_type x2, extent_type y2, base::alignment a );
+	template <typename T>
+	base::point<T> align_text( const std::string &utf8, const base::rect<T> &rect, base::alignment a )
+	{
+		auto e = align_text( utf8, rect.x1(), rect.y1(), rect.x2(), rect.y2(), a );
+		return base::point<T>( static_cast<T>( e.first ), static_cast<T>( e.second ) );
+	}
 
 protected:
 	/// @brief Construct a font.
-	font( std::string fam, std::string sty, double sz );
+	font( std::string fam, std::string sty, extent_type sz );
 
 	void add_glyph( char32_t char_code, const uint8_t *glData, int glPitch, int w, int h );
 
@@ -136,14 +148,14 @@ protected:
 	int _max_glyph_w = 2048;
 	int _max_glyph_h = 2048;
 
-	std::vector<float> _glyph_coords;
+	std::vector<coord_type> _glyph_coords;
 
 	std::map<char32_t, size_t> _glyph_index_offset;
 	std::map<char32_t, text_extents> _glyph_cache;
 
 	std::string _family;
 	std::string _style;
-	double _size;
+	extent_type _size;
 	int _dpi_h = 95;
 	int _dpi_v = 95;
 };

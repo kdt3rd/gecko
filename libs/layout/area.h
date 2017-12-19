@@ -20,10 +20,15 @@ namespace layout
 ///
 /// Represents an area, with a minimum size.
 /// Used by layouts and contains basic layout methods.
-class area : public base::rect
+class area : public base::rect<double>
 {
 public:
-	using base::rect::rect;
+	using base_type = base::rect<double>;
+	using coord_type = base_type::coord_type;
+	using point_type = base_type::point_type;
+	using size_type = base_type::size_type;
+
+	using base_type::rect;
 
 	/// @brief Default constructor.
 	area( void ) = default;
@@ -45,78 +50,78 @@ public:
 	/// @brief The minimum size of the area.
 	///
 	/// @return The minimum size.
-	base::size minimum_size( void ) const { return _min; }
+	size_type minimum_size( void ) const { return _min; }
 
 	/// @brief Minimum width.
 	///
 	/// The minimum width of the area.
 	/// @return The minimum width.
-	double minimum_width( void ) const { return _min.w(); }
+	coord_type minimum_width( void ) const { return _min.w(); }
 
 	/// @brief Minimum height.
 	///
 	/// The minimum height of the area.
 	/// @return The minimum height.
-	double minimum_height( void ) const { return _min.h(); }
+	coord_type minimum_height( void ) const { return _min.h(); }
 
 	/// @brief Set minimum size.
 	///
 	/// @param s The minimum size to set.
-	void set_minimum( const base::size &s ){ _min = s; }
+	void set_minimum( const size_type &s ){ _min = s; }
 
 	/// @brief Set minimum size.
 	///
 	/// @param w The minimum width.
 	/// @param h The minimum height.
-	void set_minimum( double w, double h ) { _min.set( w, h ); }
+	void set_minimum( coord_type w, coord_type h ) { _min.set( w, h ); }
 
 	/// @brief Set minimum width.
 	///
 	/// @param w The minimum width.
-	void set_minimum_width( double w ) { _min.set_width( w ); }
+	void set_minimum_width( coord_type w ) { _min.set_width( w ); }
 
 	/// @brief Set minimum height.
 	///
 	/// @param h The minimum height.
-	void set_minimum_height( double h ) { _min.set_height( h ); }
+	void set_minimum_height( coord_type h ) { _min.set_height( h ); }
 
 	/// @brief The maximum size of the area.
 	///
 	/// @return The maximum size.
-	base::size maximum_size( void ) const { return _max; }
+	size_type maximum_size( void ) const { return _max; }
 
 	/// @brief Maximum width.
 	///
 	/// The maximum width of the area.
 	/// @return The maximum width.
-	double maximum_width( void ) const { return _max.w(); }
+	coord_type maximum_width( void ) const { return _max.w(); }
 
 	/// @brief Maximum height.
 	///
 	/// The maximum height of the area.
 	/// @return The maximum height.
-	double maximum_height( void ) const { return _max.h(); }
+	coord_type maximum_height( void ) const { return _max.h(); }
 
 	/// @brief Set maximum size.
 	///
 	/// @param s The maximum size to set.
-	void set_maximum( const base::size &s ){ _max = s; }
+	void set_maximum( const size_type &s ){ _max = s; }
 
 	/// @brief Set maximum size.
 	///
 	/// @param w The maximum width.
 	/// @param h The maximum height.
-	void set_maximum( double w, double h ) { _max.set( w, h ); }
+	void set_maximum( coord_type w, coord_type h ) { _max.set( w, h ); }
 
 	/// @brief Set maximum width.
 	///
 	/// @param w The maximum width.
-	void set_maximum_width( double w ) { _max.set_width( w ); }
+	void set_maximum_width( coord_type w ) { _max.set_width( w ); }
 
 	/// @brief Set maximum height.
 	///
 	/// @param h The maximum height.
-	void set_maximum_height( double h ) { _max.set_height( h ); }
+	void set_maximum_height( coord_type h ) { _max.set_height( h ); }
 
 	/// @brief Priority for expanding areas.
 	///
@@ -127,9 +132,9 @@ public:
 	///
 	void set_expansion_priority( int32_t p ) { _priority = p; }
 
-	void set_expansion_flex( double f = 1.0 );
+	void set_expansion_flex( coord_type f = 1.0 );
 
-	double expansion_flex( void ) const { return _flex; }
+	coord_type expansion_flex( void ) const { return _flex; }
 
 	/// @brief Expand the width of the area.
 	///
@@ -137,7 +142,7 @@ public:
 	/// The area will not expand beyond it's maximum size.
 	/// @param w The maximum amount to expand by.
 	/// @return The amount of the space used by the expansion.
-	double expand_width( double w, double overall_flex );
+	coord_type expand_width( coord_type w, coord_type overall_flex );
 
 	/// @brief Expand the height of the area.
 	///
@@ -146,7 +151,7 @@ public:
 	/// The area will not expand beyond it's maximum size.
 	/// @param h The maximum amount to expand by.
 	/// @return The amount of the space used by the expansion.
-	double expand_height( double h, double overall_flex );
+	coord_type expand_height( coord_type h, coord_type overall_flex );
 
 	/// @brief Compute the maximum and minimum size of this area.
 	///
@@ -162,9 +167,9 @@ public:
 	virtual void compute_layout( void );
 
 private:
-	base::size _min = { 0.0, 0.0 };
-	base::size _max = { 1e6, 1e6 };
-	double _flex = 0.0;
+	size_type _min = { 0.0, 0.0 };
+	size_type _max = { 1e6, 1e6 };
+	coord_type _flex = 0.0;
 	int32_t _priority = 0;
 };
 

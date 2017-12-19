@@ -16,14 +16,14 @@ namespace gui
 
 ////////////////////////////////////////
 
-button::button( void )
+button_w::button_w( void )
 	: _rect( { 0.26, 0.26, 0.26 } )
 {
 }
 
 ////////////////////////////////////////
 
-button::button( std::string l, base::alignment a )
+button_w::button_w( std::string l, base::alignment a )
 	: _align( a )
 {
 	gl::color bg = context::current().get_style().dominant_color();
@@ -34,13 +34,13 @@ button::button( std::string l, base::alignment a )
 
 ////////////////////////////////////////
 
-button::~button( void )
+button_w::~button_w( void )
 {
 }
 
 ////////////////////////////////////////
 
-void button::set_pressed( bool p )
+void button_w::set_pressed( bool p )
 {
 	if ( p != _pressed )
 	{
@@ -55,7 +55,7 @@ void button::set_pressed( bool p )
 
 ////////////////////////////////////////
 
-void button::build( gl::api &ogl )
+void button_w::build( gl::api &ogl )
 {
 	style &s = context::current().get_style();
 	const auto &f = s.body_font();
@@ -70,7 +70,7 @@ void button::build( gl::api &ogl )
 
 ////////////////////////////////////////
 
-void button::paint( gl::api &ogl )
+void button_w::paint( gl::api &ogl )
 {
 	_rect.set_position( x(), y() );
 	_rect.set_size( width(), height() );
@@ -79,7 +79,7 @@ void button::paint( gl::api &ogl )
 	const auto &f = _text.get_font();
 	if ( f )
 	{
-		base::rect lbox = *this;
+		rect lbox = *this;
 		lbox.shrink( 10, 10, 5, 5 );
 		_text.set_position( f->align_text( _text.get_text(), lbox, _align ) );
 		_text.draw( ogl );
@@ -88,9 +88,9 @@ void button::paint( gl::api &ogl )
 
 ////////////////////////////////////////
 
-bool button::mouse_press( const base::point &p, int button )
+bool button_w::mouse_press( const point &p, int b )
 {
-	unused( button );
+	unused( b );
 
 	if ( contains( p ) )
 	{
@@ -102,9 +102,9 @@ bool button::mouse_press( const base::point &p, int button )
 
 ////////////////////////////////////////
 
-bool button::mouse_release( const base::point &p, int button )
+bool button_w::mouse_release( const point &p, int b )
 {
-	unused( button );
+	unused( b );
 
 	if ( _tracking )
 	{
@@ -119,7 +119,7 @@ bool button::mouse_release( const base::point &p, int button )
 
 ////////////////////////////////////////
 
-bool button::mouse_move( const base::point &p )
+bool button_w::mouse_move( const point &p )
 {
 	if ( _tracking )
 	{

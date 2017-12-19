@@ -7,6 +7,8 @@
 
 #include <iostream>
 #include "line_edit.h"
+#include "application.h"
+#include <platform/system.h>
 #include <utf/utf.h>
 
 namespace gui
@@ -14,27 +16,27 @@ namespace gui
 
 ////////////////////////////////////////
 
-line_edit::line_edit( void )
+line_edit_w::line_edit_w( void )
 {
 	_prompt.set_text( "Type here" );
 }
 
 ////////////////////////////////////////
 
-line_edit::line_edit( std::string l )
+line_edit_w::line_edit_w( std::string l )
 	: _text( l )
 {
 }
 
 ////////////////////////////////////////
 
-line_edit::~line_edit( void )
+line_edit_w::~line_edit_w( void )
 {
 }
 
 ////////////////////////////////////////
 
-void line_edit::build( gl::api &ogl )
+void line_edit_w::build( gl::api &ogl )
 {
 	const style &s = context::current().get_style();
 	const auto &f = s.body_font();
@@ -53,7 +55,7 @@ void line_edit::build( gl::api &ogl )
 
 ////////////////////////////////////////
 
-void line_edit::paint( gl::api &ogl )
+void line_edit_w::paint( gl::api &ogl )
 {
 	script::font_extents fex = _text.get_font()->extents();
 	_line.set_position( x(), y() + height() - 1.F );
@@ -77,7 +79,7 @@ void line_edit::paint( gl::api &ogl )
 
 ////////////////////////////////////////
 
-bool line_edit::key_press( platform::scancode c )
+bool line_edit_w::key_press( platform::scancode c )
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-enum"
@@ -148,7 +150,7 @@ bool line_edit::key_press( platform::scancode c )
 
 ////////////////////////////////////////
 
-bool line_edit::text_input( char32_t c )
+bool line_edit_w::text_input( char32_t c )
 {
 	if ( utf::is_graphic( c ) )
 	{
@@ -167,6 +169,49 @@ bool line_edit::text_input( char32_t c )
 
 	return false;
 }
+
+////////////////////////////////////////
+
+bool
+line_edit_w::mouse_press( const point &p, int button )
+{
+	if ( button == 2 )
+	{
+		auto paste = application::current()->get_system()->query_selection( platform::selection_type::MOUSE );
+		if ( ! paste.second.empty() )
+		{
+			std::cout << "recv paste: " << paste.first.size() << " bytes of type '" << paste.second << "'" << std::endl;
+
+			if ( paste.second == "text/plain;charset=utf-8" )
+			{
+				std::string &t = _text.get_text();
+				_cursor = std::min( _cursor, t.size() );
+				std::cout << "need to validate incoming utf8: ";
+				for ( auto &x: paste.first )
+					std::cout << x;
+				std::cout << std::endl;
+				t.insert( t.begin() + _cursor, paste.first.begin(), paste.first.end() );
+				_cursor += paste.first.size();
+			}
+			else
+			{
+				std::string tmp( _text.get_text() );
+				_cursor = std::min( _cursor, tmp.size() );
+
+				std::insert_iterator<std::string> it( tmp, tmp.begin() + long(_cursor) );
+				for ( auto &x: paste.first )
+					_cursor += utf::convert_utf8( x, it );
+
+				_text.set_text( tmp );
+				
+			}
+			invalidate();
+		}
+		return true;
+	}
+	return widget::mouse_press( p, button );
+}
+
 
 ////////////////////////////////////////
 

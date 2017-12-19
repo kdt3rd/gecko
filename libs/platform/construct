@@ -6,14 +6,22 @@ local mswin = subdir "mswin";
 
 lib = library "platform"
   source{
+		"cursor.cpp";
+		"dispatcher.cpp";
+		"event_source.cpp";
+--		"event.cpp";
+		"event_queue.cpp";
+		"event_target.cpp";
+		"keyboard.cpp";
+		"menu.cpp";
+		"mouse.cpp";
 		"platform.cpp";
-		"system.cpp";
 		"screen.cpp";
+		"selection.cpp";
+		"system.cpp";
 		"window.cpp";
 		"timer.cpp";
-		"keyboard.cpp";
-		"mouse.cpp";
-		"dispatcher.cpp";
+		"tray.cpp";
 		"waitable.cpp";
 		cocoa.extra_source;
 		mswin.extra_source;

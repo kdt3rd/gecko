@@ -32,7 +32,7 @@ static void shell_configure( void *data,
 							 int32_t width, int32_t height )
 {
 	platform::wayland::window *win = reinterpret_cast<platform::wayland::window *>( data );
-	win->resize_event( double( width ), double( height ) );
+	win->resize_event( platform::coord_type( width ), platform::coord_type( height ) );
 }
 
 static void shell_popup_done( void *data,
@@ -165,6 +165,13 @@ bool window::is_visible( void )
 
 ////////////////////////////////////////
 
+void
+window::fullscreen( bool fs )
+{
+}
+
+////////////////////////////////////////
+
 /*
 rect window::geometry( void )
 {
@@ -173,19 +180,19 @@ rect window::geometry( void )
 
 ////////////////////////////////////////
 
-void window::move( double x, double y )
+void window::move( coord_type x, coord_type y )
 {
 }
 
 ////////////////////////////////////////
 
-void window::resize( double w, double h )
+void window::resize( coord_type w, coord_type h )
 {
 }
 
 ////////////////////////////////////////
 
-void window::set_minimum_size( double /*w*/, double /*h*/ )
+void window::set_minimum_size( coord_type /*w*/, coord_type /*h*/ )
 {
 }
 
@@ -197,10 +204,11 @@ void window::set_title( const std::string &t )
 
 ////////////////////////////////////////
 
-void window::invalidate( const base::rect & /*r*/ )
+void window::invalidate( const rect & /*r*/ )
 {
 	if ( !_invalid )
 	{
+		// TODO
 		_invalid = true;
 		expose_event();
 	}
@@ -222,7 +230,7 @@ void window::release( void )
 
 ////////////////////////////////////////
 
-void window::move_event( double x, double y )
+void window::move_event( coord_type x, coord_type y )
 {
 	int16_t tx = static_cast<int16_t>( x );
 	int16_t ty = static_cast<int16_t>( y );
@@ -237,7 +245,7 @@ void window::move_event( double x, double y )
 
 ////////////////////////////////////////
 
-void window::resize_event( double w, double h )
+void window::resize_event( coord_type w, coord_type h )
 {
 	uint16_t tw = static_cast<uint16_t>( w );
 	uint16_t th = static_cast<uint16_t>( h );
@@ -271,6 +279,14 @@ void window::expose_event( void )
 	//glFlush();
 	//XFlush( _display.get() );
 	release();
+}
+
+////////////////////////////////////////
+
+void
+window::make_current( const std::shared_ptr<::platform::cursor> & )
+{
+	throw_not_yet();
 }
 
 ////////////////////////////////////////

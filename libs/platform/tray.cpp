@@ -5,12 +5,21 @@
 // See the accompanying LICENSE.txt file for terms
 //
 
-#pragma once
+#include "tray.h"
 
-#include "contract.h"
-#include <windows.h>
+////////////////////////////////////////
+namespace platform
+{
 
 ////////////////////////////////////////
 
-#define throw_win32_error( ... ) \
-	throw_location( std::system_error( GetLastError(), std::generic_category(), base::format( __VA_ARGS__ ) ) )
+tray::~tray( void )
+{
+}
+
+////////////////////////////////////////
+
+} // platform
+
+
+

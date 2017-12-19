@@ -8,6 +8,8 @@
 #pragma once
 #include <cstdint>
 #include <chrono>
+#include "event_source.h"
+#include <base/wait.h>
 
 ////////////////////////////////////////
 
@@ -24,21 +26,18 @@ namespace platform
 /// events, derive from this base class, and then the system event
 /// dispatcher has a list of these to be able to control the central
 /// 'wait' loop.
-class waitable
+class waitable : public event_source
 {
 public:
-	typedef std::chrono::high_resolution_clock clock;
-	typedef clock::time_point time_point;
-	typedef clock::duration duration;
+	using clock = std::chrono::high_resolution_clock;
+	using time_point = clock::time_point;
+	using duration = clock::duration;
+	// TODO: should we just use base::wait, or just the typedefs?
+	using wait = base::wait;
+	static const wait::wait_type INVALID_WAIT = base::wait::INVALID_WAIT;
 
 	waitable( void );
 	virtual ~waitable( void );
-
-	/// @brief start will be called by the dispatcher when this
-	/// waitable is finished being registered.
-	///
-	/// This should be thread safe as necessary
-	virtual void start( void ) = 0;
 
 	/// This can be called by anyone to cancel this waitable as a
 	/// source. This may trigger the dispatcher to wake up.  This may
@@ -48,22 +47,17 @@ public:
 	/// This should be thread safe as necessary
 	virtual void cancel( void ) = 0;
 
-	/// This will be called by the dispatcher when it is exiting to
-	/// allow the waitable to perform any cleanup as necessary
-	///
-	/// This should be thread safe as necessary
-	virtual void shutdown( void ) = 0;
-
 	/// @brief Used to query waitable object
 	///
-	/// This will be interpreted differently depending on the underlying system in place:
+	/// This will be interpreted differently depending on the
+	/// underlying system in place, but is meant to be the same things
+	/// that are used for select or WaitForSingleObject, etc. see
+	/// base/wait.h for more
 	///
-	/// Unix: this should be a file handle (int), or intptr_t(-1) if not file handle
-	/// OS/X: TODO: cocoa also a file handle? or an NSObject for a run loop source?
-	/// Windows: this should be a HANDLE, or INVALID_HANDLE_VALUE if not valid
+	/// if not valid, should be wait::INVALID_WAIT;
 	///
 	/// This should be thread safe as necessary
-	virtual intptr_t poll_object( void ) = 0; 
+	virtual wait poll_object( void ) = 0; 
 
 	/// @brief Used to query amount of time to wait between
 	///

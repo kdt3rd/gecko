@@ -42,14 +42,14 @@ double screen::refresh_rate( void ) const
 
 ////////////////////////////////////////
 
-base::rect screen::bounds( bool active ) const
+rect screen::bounds( bool active ) const
 {
-	return base::rect( 0.0, 0.0, 1024.0, 720.0 );
+	return rect( coord_type( 0 ), coord_type( 0 ), coord_type( 1024 ), coord_type( 720 ) );
 }
 
 ////////////////////////////////////////
 
-base::size screen::dpi( void ) const
+base::dsize screen::dpi( void ) const
 {
 	return { 95.0, 95.0 };
 }

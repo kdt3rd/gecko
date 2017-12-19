@@ -15,7 +15,7 @@ namespace platform
 class tray
 {
 public:
-	tray( void );
+	tray( void ) = default;
 	virtual ~tray( void );
 
 };

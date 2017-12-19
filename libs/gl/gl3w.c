@@ -30,6 +30,7 @@
 
 #include "gl3w.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 #define ARRAY_SIZE(x)	(sizeof(x) / sizeof((x)[0]))
 
@@ -734,6 +735,19 @@ union GL3WProcs gl3wProcs;
 static void load_procs(GL3WGetProcAddressProc proc)
 {
 	size_t i;
+	int missing = 0;
 	for (i = 0; i < ARRAY_SIZE(proc_names); i++)
+	{
 		gl3wProcs.ptr[i] = proc(proc_names[i]);
+		if ( ! gl3wProcs.ptr[i] )
+		{
+			++missing;
+			printf( "OpenGL Function '%s' not available\n", proc_names[i] );
+		}
+	}
+	if ( missing > 0 )
+	{
+		printf( "Total of %d OpenGL functions missing\n", missing);
+		
+	}
 }

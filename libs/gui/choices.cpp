@@ -14,7 +14,7 @@ namespace gui
 
 ////////////////////////////////////////
 
-choices::choices( void )
+choices_w::choices_w( void )
 	: composite( std::unique_ptr<layout::grid>( new layout::grid ) )
 {
 	_layout = std::dynamic_pointer_cast<layout::grid>( layout_target() );
@@ -25,12 +25,18 @@ choices::choices( void )
 
 ////////////////////////////////////////
 
-void choices::add_choice( const std::string &l )
+choices_w::~choices_w( void )
+{
+}
+
+////////////////////////////////////////
+
+void choices_w::add_choice( const std::string &l )
 {
 	size_t choice = _radios.size();
-	auto self = std::dynamic_pointer_cast<choices>( shared_from_this() );
-	_labels.emplace_back( std::make_shared<label>( l ) );
-	_radios.emplace_back( std::make_shared<radio_button>() );
+	auto self = std::dynamic_pointer_cast<choices_w>( shared_from_this() );
+	_labels.emplace_back( std::make_shared<label_w>( l ) );
+	_radios.emplace_back( std::make_shared<radio_button_w>() );
 	if ( choice == 0 )
 		_radios.back()->set_state( true );
 
@@ -49,7 +55,7 @@ void choices::add_choice( const std::string &l )
 
 ////////////////////////////////////////
 
-void choices::for_subwidgets( const std::function<void(const std::shared_ptr<widget>&)> &f )
+void choices_w::for_subwidgets( const std::function<void(const std::shared_ptr<widget>&)> &f )
 {
 	for ( auto &l: _labels )
 		f( l );
@@ -59,13 +65,14 @@ void choices::for_subwidgets( const std::function<void(const std::shared_ptr<wid
 
 ////////////////////////////////////////
 
-void choices::choose( size_t c )
+void choices_w::choose( size_t c )
 {
 	for ( size_t i = 0; i < _radios.size(); ++i )
 	{
 		auto &r = _radios[i];
 		r->set_state( i == c );
 	}
+	when_activated( c );
 }
 
 ////////////////////////////////////////
