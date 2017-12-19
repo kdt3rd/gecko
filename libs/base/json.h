@@ -180,7 +180,7 @@ public:
 		{
 			return _storage.get<X>();
 		}
-		catch ( std::bad_cast &e )
+		catch ( std::bad_cast & )
 		{
 			throw_runtime( "unable to extract type '{0}' from json entry, actual type is '{1}'", typeid(X).name(), _storage.type_name() );
 		}
@@ -197,7 +197,7 @@ public:
 		{
 			return _storage.get<X>();
 		}
-		catch ( std::bad_cast &e )
+		catch ( std::bad_cast & )
 		{
 			throw_runtime( "unable to extract type '{0}' from json entry, actual type is '{1}'", typeid(X).name(), _storage.type_name() );
 		}

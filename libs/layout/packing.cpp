@@ -169,8 +169,8 @@ void packing::compute_layout( void )
 				continue;
 			}
 
-			float aw = a->minimum_width();
-			float ah = a->minimum_height();
+			double aw = a->minimum_width();
+			double ah = a->minimum_height();
 			bool top = false;
 			bool bottom = false;
 			bool left = false;

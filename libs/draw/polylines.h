@@ -69,7 +69,7 @@ public:
 	polylines stroked( float width, float dx = 0.0, float dy = 0.0, float dz = 0.0 ) const;
 	polylines offset( float width, float dx = 0.0, float dy = 0.0, float dz = 0.0 ) const;
 
-	void filled( const std::function<void(float,float)> &points, const std::function<void(size_t,size_t,size_t)> &tris ) const;
+	void filled( const std::function<void(float,float)> &points, const std::function<void(uint32_t,uint32_t,uint32_t)> &tris ) const;
 	void filled( gl::mesh &mesh, const std::string &pos ) const;
 
 	std::vector<polyline>::iterator begin( void )

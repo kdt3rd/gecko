@@ -29,6 +29,9 @@
 */
 
 #ifndef __gl3w_h_
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreserved-id-macro"
+
 #define __gl3w_h_
 
 #include "glcorearb.h"
@@ -36,6 +39,8 @@
 #ifndef __gl_h_
 #define __gl_h_
 #endif
+
+#pragma GCC diagnostic pop
 
 #ifdef __cplusplus
 extern "C" {

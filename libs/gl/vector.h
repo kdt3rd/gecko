@@ -155,10 +155,10 @@ private:
 		return;
 	}
 
-	template<typename ...Args>
-	void setN( size_t n, float f, Args ...args )
+	template<typename T, typename ...Args>
+	void setN( size_t n, T f, Args ...args )
 	{
-		_data[n] = f;
+		_data[n] = static_cast<float>( f );
 		setN( n + 1, args... );
 	}
 

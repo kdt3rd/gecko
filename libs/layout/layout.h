@@ -17,6 +17,8 @@ namespace layout
 class layout : public area
 {
 public:
+	~layout( void ) override;
+
 	/// @brief Set padding amount.
 	void set_padding( double l, double r, double t, double b )
 	{

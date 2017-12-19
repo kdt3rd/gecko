@@ -36,7 +36,7 @@ void shape::add( gl::api &ogl, const polylines &lines, const paint &c )
 		_meshes.push_back( std::move( m ) );
 	}
 
-	if ( c.get_stroke_width() != 0.0 )
+	if ( c.get_stroke_width() > 0.F )
 	{
 		mesh m;
 		m.matrix = stroke_mesh( ogl, m.msh, c, "position_uv.vert" );

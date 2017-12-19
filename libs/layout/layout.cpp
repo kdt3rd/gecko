@@ -6,6 +6,12 @@ namespace layout
 
 ////////////////////////////////////////
 
+layout::~layout( void )
+{
+}
+
+////////////////////////////////////////
+
 void layout::expand_width( std::list<std::shared_ptr<area>> &lst, double extra )
 {
 	if ( extra <= 0.0 )

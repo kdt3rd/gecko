@@ -13,6 +13,12 @@ namespace layout
 
 ////////////////////////////////////////
 
+area::~area( void )
+{
+}
+
+////////////////////////////////////////
+
 void area::set_expansion_flex( double f )
 {
 	precondition( f >= 0.0, "invalid expansion flex" );

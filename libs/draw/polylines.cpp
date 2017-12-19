@@ -119,13 +119,13 @@ polylines polylines::stroked( float width, float dx, float dy, float dz ) const
 
 		subj.clear();
 		for ( const auto &p: line )
-			subj << IntPoint( static_cast<int>( p[0] * 100 + 0.5F ), static_cast<int>( p[1] * 100 + 0.5F ), static_cast<int>( p[2] * 100 + 0.5F ) );
+			subj << IntPoint( static_cast<int>( p[0] * 100.F + 0.5F ), static_cast<int>( p[1] * 100.F + 0.5F ), static_cast<int>( p[2] * 100.F + 0.5F ) );
 
 		ClipperOffset co;
 		co.AddPath( subj, jtRound, line.closed() ? etClosedLine : etOpenRound );
 
 		solution.clear();
-		co.Execute( solution, width * 50 );
+		co.Execute( solution, width * 50.F );
 		for ( auto path: solution )
 		{
 			result.new_polyline();
@@ -154,13 +154,13 @@ polylines polylines::offset( float width, float dx, float dy, float dz ) const
 
 		subj.clear();
 		for ( const auto &p: line )
-			subj << IntPoint( static_cast<int>( p[0] * 100 + 0.5F ), static_cast<int>( p[1] * 100 + 0.5F ), static_cast<int>( p[2] * 100 + 0.5F ) );
+			subj << IntPoint( static_cast<int>( p[0] * 100.F + 0.5F ), static_cast<int>( p[1] * 100.F + 0.5F ), static_cast<int>( p[2] * 100.F + 0.5F ) );
 
 		ClipperOffset co;
 		co.AddPath( subj, jtRound, line.closed() ? etClosedPolygon : etOpenRound );
 
 		solution.clear();
-		co.Execute( solution, width * 100 );
+		co.Execute( solution, width * 100.F );
 		for ( const auto &path: solution )
 		{
 			result.new_polyline();
@@ -175,7 +175,7 @@ polylines polylines::offset( float width, float dx, float dy, float dz ) const
 
 ////////////////////////////////////////
 
-void polylines::filled( const std::function<void(float,float)> &add_point, const std::function<void(size_t,size_t,size_t)> &add_tri ) const
+void polylines::filled( const std::function<void(float,float)> &add_point, const std::function<void(uint32_t,uint32_t,uint32_t)> &add_tri ) const
 {
 	precondition( !_lines.empty(), "no polylines" );
 
@@ -193,7 +193,7 @@ void polylines::filled( const std::function<void(float,float)> &add_point, const
 				{
 					subj.clear();
 					for ( const auto &p: line )
-						subj << IntPoint( static_cast<int>( p[0] * 100 + 0.5F ), static_cast<int>( p[1] * 100 + 0.5F ) );
+						subj << IntPoint( static_cast<int>( p[0] * 100.F + 0.5F ), static_cast<int>( p[1] * 100.F + 0.5F ) );
 					clip.AddPath( subj, ptSubject, line.closed() );
 				}
 			}
@@ -207,7 +207,7 @@ void polylines::filled( const std::function<void(float,float)> &add_point, const
 	{
 		auto contour = tess.begin_contour();
 		for ( auto p: poly )
-			tess.contour_point( contour, p.X / 100.0, p.Y / 100.0, p.Z / 100.0 );
+			tess.contour_point( contour, p.X / 100.F, p.Y / 100.F, p.Z / 100.F );
 		tess.end_contour( contour );
 	}
 
@@ -226,7 +226,7 @@ void polylines::filled( gl::mesh &m, const std::string &attr ) const
 		points.push_back( { cx, cy, 0 } ); // TODO handle Z
 	};
 
-	auto add_tri = [&]( size_t a, size_t b, size_t c )
+	auto add_tri = [&]( uint32_t a, uint32_t b, uint32_t c )
 	{
 		tris.push_back( a, b, c );
 	};
