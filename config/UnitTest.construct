@@ -1,11 +1,17 @@
 
-tests = item.new( "__unit_tests" )
-tests:force_tool( "<pseudo>" )
-tests:set_pseudo_target( "test" )
-tests:set_use_name_for_input( false )
-tests:set_default_target( false )
+local fasttests = item.new( "__fast_unit_tests" )
+fasttests:force_tool( "<pseudo>" )
+fasttests:set_pseudo_target( "test" )
+fasttests:set_use_name_for_input( false )
+fasttests:set_default_target( false )
 
-function AddUnitTest( fname, l, cmdline )
+local alltests = item.new( "__all_unit_tests" )
+alltests:force_tool( "<pseudo>" )
+alltests:set_pseudo_target( "test_all" )
+alltests:set_use_name_for_input( false )
+alltests:set_default_target( false )
+
+local AddSlowUnitTest = function( fname, l, cmdline, isfast )
 	assert(type(fname)=="string", "Expecting a single filename as a unit test")
 	testname = "test_" .. file.basename( fname )
 	unitname="__unit_"..testname
@@ -14,6 +20,12 @@ function AddUnitTest( fname, l, cmdline )
 	  libs( l or {} )
 	e:set_default_target( false )
 	e:set_variable( "exe_dir", "unit_tests" )
+	local descstr
+	if isfast then
+		descstr = "QUICK_TEST "
+	else
+		descstr = "TEST "
+	end
 	if cmdline then
 		add_tool{
 			tag=unitname,
@@ -22,7 +34,7 @@ function AddUnitTest( fname, l, cmdline )
 			options={},
 			option_defaults={},
 			cmd={"$exe", "-q", table.unpack(cmdline) },
-			description="TEST "..testname,
+			description=descstr..testname,
 			pool="console"
 		}
 	else
@@ -33,7 +45,7 @@ function AddUnitTest( fname, l, cmdline )
 			options={},
 			option_defaults={},
 			cmd={"$exe", "-q"},
-			description="TEST "..testname,
+			description=descstr..testname,
 			pool="console"
 		}
 	end
@@ -44,7 +56,14 @@ function AddUnitTest( fname, l, cmdline )
 	ut:set_default_target( false )
 	ut:set_use_name_for_input( false )
 	ut:add_dependency( "implicit", e )
-	tests:add_dependency( "implicit", ut )
+	alltests:add_dependency( "implicit", ut )
+	return ut
 end
 
-return AddUnitTest
+local AddUnitTest = function( fname, l, cmdline )
+	ut = AddSlowUnitTest( fname, l, cmdline, true )
+	fasttests:add_dependency( "implicit", ut )
+	return ut
+end
+
+return {AddUnitTest, AddSlowUnitTest}

@@ -3,7 +3,7 @@ assert( check_version and check_version( "1.0" ), "Please upgrade constructor" )
 add_module_path "config"
 
 Doxygen = require "doxygen"
-AddUnitTest = require "UnitTest"
+AddUnitTest, AddSlowUnitTest = table.unpack( require "UnitTest" )
 require "MingWw64"
 
 configuration "release"
