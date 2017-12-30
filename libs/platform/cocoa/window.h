@@ -31,11 +31,11 @@ public:
 	void set_popup( void ) override;
 	bool is_visible( void ) override;
 
-//	rect geometry( void ) override;
-//	void set_position( double x, double y ) override;
-	void move( double x, double y ) override;
-	void resize( double w, double h ) override;
-	void set_minimum_size( double w, double h ) override;
+	void fullscreen( bool fs ) override;
+
+	void move( coord_type x, coord_type y ) override;
+	void resize( coord_type w, coord_type h ) override;
+	void set_minimum_size( coord_type w, coord_type h ) override;
 
 	void set_title( const std::string &t ) override;
 //	void set_icon( const icon &i ) override;
@@ -45,27 +45,32 @@ public:
 
 	double scale_factor( void );
 
-	void resize_event( double w, double h );
-
-	void invalidate( const base::rect &r ) override;
+	void invalidate( const rect &r ) override;
 
 	void set_ns( void *nswin, void *nsview );
 
-	double width( void ) override
+	coord_type width( void ) override
 	{
 		return _last_w;
 	}
 
-	double height( void ) override
+	coord_type height( void ) override
 	{
 		return _last_h;
 	}
+
+//protected:
+	void make_current( const std::shared_ptr<cursor> & ) override;
+
+	void expose_event( void ) override;
+	void move_event( coord_type x, coord_type y ) override;
+	void resize_event( coord_type w, coord_type h ) override;
 
 private:
 	struct objcwrapper;
 	std::unique_ptr<objcwrapper> _impl;
 
-	double _last_w = 0.0, _last_h = 0.0;
+	coord_type _last_w = 0, _last_h = 0;
 };
 
 ////////////////////////////////////////

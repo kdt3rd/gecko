@@ -8,8 +8,10 @@
 #ifdef _WIN32
 # include <windows.h>
 #else
-# ifndef _GNU_SOURCE
-#  define _GNU_SOURCE
+# ifdef __linux__
+#  ifndef _GNU_SOURCE
+#   define _GNU_SOURCE
+#  endif
 # endif
 # include <dlfcn.h>
 # include <atomic>
@@ -37,6 +39,7 @@ loadable::loadable( std::string lpath, isolation iso )
 	void *d = nullptr;
 	if ( iso == isolation::ISOLATE )
 	{
+#ifdef __linux__
 		static std::atomic<Lmid_t> h_namespace( LM_ID_NEWLM );
 		Lmid_t ns = h_namespace.load();
 
@@ -55,6 +58,9 @@ loadable::loadable( std::string lpath, isolation iso )
 				h_namespace.store( ns );
 			}
 		}
+#else
+		d = dlopen( _loadpath.c_str(), RTLD_LAZY | RTLD_LOCAL );
+#endif
 	}
 	else if ( iso == isolation::GLOBALIZE )
 		d = dlopen( _loadpath.c_str(), RTLD_LAZY | RTLD_GLOBAL );
@@ -85,10 +91,13 @@ loadable::symbol( const const_string<char> &symName, const cstring &symVersion )
 #ifdef _WIN32
 	auto r = GetProcAddress( reinterpret_cast<HMODULE>( _dso.get() ), symName.c_str() );
 	return reinterpret_cast<void *>( r );
-#else
+#elif defined __linux__
 	if ( symVersion.empty() )
 		return dlsym( _dso.get(), symName.c_str() );
 	return dlvsym( _dso.get(), symName.c_str(), symVersion.c_str() );
+#else
+	(void)symVersion;
+	return dlsym( _dso.get(), symName.c_str() );
 #endif
 }
 
@@ -99,10 +108,13 @@ loadable::find_app_symbol( const cstring &symName, const cstring &symVersion )
 {
 #ifdef _WIN32
 	return reinterpret_cast<void *>( GetProcAddress( GetModuleHandle( NULL ), symName.c_str() ) );
-#else
+#elif defined __linux__
 	if ( symVersion.empty() )
 		return dlsym( RTLD_DEFAULT, symName.c_str() );
 	return dlvsym( RTLD_DEFAULT, symName.c_str(), symVersion.c_str() );
+#else
+	(void)symVersion;
+	return dlsym( RTLD_DEFAULT, symName.c_str() );
 #endif
 }
 
@@ -113,10 +125,13 @@ loadable::find_next_symbol( const cstring &symName, const cstring &symVersion )
 {
 #ifdef _WIN32
 	return find_app_symbol( symName, symVersion );
-#else
+#elif defined __linux__
 	if ( symVersion.empty() )
 		return dlsym( RTLD_NEXT, symName.c_str() );
 	return dlvsym( RTLD_NEXT, symName.c_str(), symVersion.c_str() );
+#else
+	(void)symVersion;
+	return dlsym( RTLD_NEXT, symName.c_str() );
 #endif
 }
 

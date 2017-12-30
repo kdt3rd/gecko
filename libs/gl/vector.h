@@ -23,10 +23,17 @@ class vector
 public:
 	static_assert( N > 0, "invalid vector size" );
 
-	vector( void )
+	vector( void ) = default;
+	~vector( void ) = default;
+	vector( const vector & ) = default;
+	vector( vector && ) = default;
+	vector &operator=( const vector & ) = default;
+	vector &operator=( vector && ) = default;
+	vector( vector &v )
 	{
+		for ( size_t i = 0; i < N; ++i )
+			_data[i] = v[i];
 	}
-
 	template<size_t M>
 	vector( const vector<M> &v )
 	{
@@ -50,7 +57,7 @@ public:
 	template<typename ...Args>
 	vector( Args ...args )
 	{
-		static_assert( sizeof...(Args) <= N, "invalid initializer list" );
+		static_assert( sizeof...(Args) <= N, "invalid argument list" );
 		setN( 0, args... );
 	}
 
@@ -156,10 +163,10 @@ private:
 	}
 
 	template<typename T, typename ...Args>
-	void setN( size_t n, T f, Args ...args )
+	void setN( size_t n, T f, Args &&...args )
 	{
 		_data[n] = static_cast<float>( f );
-		setN( n + 1, args... );
+		setN( n + 1, std::forward<Args>( args )... );
 	}
 
 	float _data[N] = { 0 };

@@ -23,10 +23,34 @@
 
 @implementation MyView
 {
-	std::shared_ptr<::platform::cocoa::window> win;
-	std::shared_ptr<::platform::cocoa::mouse> mouse;
-	std::shared_ptr<::platform::cocoa::keyboard> keyboard;
+	std::shared_ptr<::platform::cocoa::window> _win;
+	std::shared_ptr<::platform::cocoa::mouse> _mouse;
+	std::shared_ptr<::platform::cocoa::keyboard> _keyboard;
 }
+
+////////////////////////////////////////
+
+- (const std::shared_ptr<::platform::cocoa::window> &)win
+{ return self->_win; }
+
+- (void)setWin: (const std::shared_ptr<::platform::cocoa::window> &)w
+{ self->_win = w; }
+
+////////////////////////////////////////
+
+- (const std::shared_ptr<::platform::cocoa::mouse> &)mouse
+{ return _mouse; }
+
+- (void)setMouse: (const std::shared_ptr<::platform::cocoa::mouse> &)m
+{ _mouse = m; }
+
+////////////////////////////////////////
+
+- (const std::shared_ptr<::platform::cocoa::keyboard> &)keyboard
+{ return _keyboard; }
+
+- (void)setKeyboard: (const std::shared_ptr<::platform::cocoa::keyboard> &)k
+{ _keyboard = k; }
 
 ////////////////////////////////////////
 
@@ -57,9 +81,9 @@
 	self = [super init];
 	if ( self )
 	{
-		win = w;
-		mouse = m;
-		keyboard = k;
+		[self setWin: w];
+		[self setMouse: m];
+		[self setKeyboard: k];
 	}
 
 	NSOpenGLPixelFormatAttribute pixelFormatAttributes[] =
@@ -86,8 +110,8 @@
 
 - (void)drawRect:(NSRect)rect
 {
-	if ( win->exposed )
-		win->exposed();
+	if ( [self win]->exposed )
+		[self win]->exposed();
 	[[self openGLContext] flushBuffer];
 }
 
@@ -96,8 +120,9 @@
 - (void)setFrameSize:(NSSize)newSize
 {
 	[super setFrameSize:newSize];
-	double scale = win->scale_factor();
-	win->resize_event( newSize.width * scale, newSize.height * scale );
+	double scale = [self win]->scale_factor();
+	[self win]->resize_event( static_cast<platform::coord_type>( newSize.width * scale ),
+							  static_cast<platform::coord_type>( newSize.height * scale ) );
 }
 
 ////////////////////////////////////////
@@ -111,33 +136,42 @@
 
 - (void)mouseDown:(NSEvent*)event
 {
-	double scale = win->scale_factor();
+	double scale = [self win]->scale_factor();
 	NSPoint p = [event locationInWindow];
 	p = [self convertPoint:p fromView:nil];
-	if ( win->mouse_pressed )
-		win->mouse_pressed( mouse, { p.x * scale, p.y * scale }, 1 );
+	if ( [self win]->mouse_pressed )
+		[self win]->mouse_pressed(
+			*[self mouse],
+			{ static_cast<platform::coord_type>( p.x * scale ),
+					static_cast<platform::coord_type>( p.y * scale ) }, 1 );
 }
 
 ////////////////////////////////////////
 
 - (void)mouseUp:(NSEvent*)event
 {
-	double scale = win->scale_factor();
+	double scale = [self win]->scale_factor();
 	NSPoint p = [event locationInWindow];
 	p = [self convertPoint:p fromView:nil];
-	if ( win->mouse_released )
-		win->mouse_released( mouse, { p.x * scale, p.y * scale }, 1 );
+	if ( [self win]->mouse_released )
+		[self win]->mouse_released(
+			*[self mouse],
+			{ static_cast<platform::coord_type>( p.x * scale ),
+					static_cast<platform::coord_type>( p.y * scale ) }, 1 );
 }
 
 ////////////////////////////////////////
 
 - (void)mouseDragged:(NSEvent*)event
 {
-	double scale = win->scale_factor();
+	double scale = [self win]->scale_factor();
 	NSPoint p = [event locationInWindow];
 	p = [self convertPoint:p fromView:nil];
-	if ( win->mouse_moved )
-		win->mouse_moved( mouse, { p.x * scale, p.y * scale } );
+	if ( [self win]->mouse_moved )
+		[self win]->mouse_moved(
+			*[self mouse],
+			{ static_cast<platform::coord_type>( p.x * scale ),
+					static_cast<platform::coord_type>( p.y * scale ) } );
 }
 
 ////////////////////////////////////////
@@ -145,10 +179,10 @@
 - (void)keyDown:(NSEvent*)event
 {
 	unsigned short kc = [event keyCode];
-	platform::scancode sc = keyboard->get_scancode( kc );
+	platform::scancode sc = [self keyboard]->get_scancode( kc );
 
-	if ( win->key_pressed )
-		win->key_pressed( keyboard, sc );
+	if ( [self win]->key_pressed )
+		[self win]->key_pressed( *[self keyboard], sc );
 
 	NSString *chars = [event characters];
 	char32_t c;
@@ -157,8 +191,8 @@
 		c = NSSwapLittleIntToHost( c );
 		if ( c < 0xE000 || c > 0xF8FF ) // Private area
 		{
-			if ( win->text_entered )
-				win->text_entered( keyboard, c );
+			if ( [self win]->text_entered )
+				[self win]->text_entered( *[self keyboard], c );
 		}
 	}
 }
@@ -168,9 +202,9 @@
 - (void)keyUp:(NSEvent*)event
 {
 	unsigned short kc = [event keyCode];
-	platform::scancode sc = keyboard->get_scancode( kc );
-	if ( win->key_released )
-		win->key_released( keyboard, sc );
+	platform::scancode sc = [self keyboard]->get_scancode( kc );
+	if ( [self win]->key_released )
+		[self win]->key_released( *[self keyboard], sc );
 }
 
 ////////////////////////////////////////

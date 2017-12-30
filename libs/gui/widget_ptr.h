@@ -60,11 +60,11 @@ inline bool operator==( const widget_ptr<X> &x, const widget_ptr<Y> &y ) noexcep
 { return x.get() == y.get(); }
 
 template <typename X>
-inline bool operator==( const widget_ptr<X> &x, nullptr_t ) noexcept
+inline bool operator==( const widget_ptr<X> &x, std::nullptr_t ) noexcept
 { return !x; }
 
 template <typename X>
-inline bool operator==( nullptr_t, const widget_ptr<X> &x ) noexcept
+inline bool operator==( std::nullptr_t, const widget_ptr<X> &x ) noexcept
 { return !x; }
 
 template <typename X, typename Y>
@@ -72,11 +72,11 @@ inline bool operator!=( const widget_ptr<X> &x, const widget_ptr<Y> &y ) noexcep
 { return x.get() != y.get(); }
 
 template <typename X>
-inline bool operator!=( const widget_ptr<X> &x, nullptr_t ) noexcept
+inline bool operator!=( const widget_ptr<X> &x, std::nullptr_t ) noexcept
 { return static_cast<bool>( x ); }
 
 template <typename X>
-inline bool operator!=( nullptr_t, const widget_ptr<X> &x ) noexcept
+inline bool operator!=( std::nullptr_t, const widget_ptr<X> &x ) noexcept
 { return static_cast<bool>( x ); }
 
 template <typename X, typename Y>
@@ -89,14 +89,14 @@ inline bool operator<( const widget_ptr<X> &x, const widget_ptr<Y> &y ) noexcept
 }
 
 template <typename X>
-inline bool operator<( const widget_ptr<X> &x, nullptr_t ) noexcept
+inline bool operator<( const widget_ptr<X> &x, std::nullptr_t ) noexcept
 {
 	using elt = typename widget_ptr<X>::widget_type;
 	return std::less<elt *>()( x.get(), nullptr );
 }
 
 template <typename X>
-inline bool operator<( nullptr_t, const widget_ptr<X> &x ) noexcept
+inline bool operator<( std::nullptr_t, const widget_ptr<X> &x ) noexcept
 {
 	using elt = typename widget_ptr<X>::widget_type;
 	return std::less<elt *>()( nullptr, x.get() );
@@ -107,11 +107,11 @@ inline bool operator<=( const widget_ptr<X> &x, const widget_ptr<Y> &y ) noexcep
 { return !(y < x); }
 
 template <typename X>
-inline bool operator<=( const widget_ptr<X> &x, nullptr_t ) noexcept
+inline bool operator<=( const widget_ptr<X> &x, std::nullptr_t ) noexcept
 { return !(nullptr < x); }
 
 template <typename X>
-inline bool operator<=( nullptr_t, const widget_ptr<X> &x ) noexcept
+inline bool operator<=( std::nullptr_t, const widget_ptr<X> &x ) noexcept
 { return !(x < nullptr); }
 
 template <typename X, typename Y>
@@ -119,11 +119,11 @@ inline bool operator>( const widget_ptr<X> &x, const widget_ptr<Y> &y ) noexcept
 { return y < x; }
 
 template <typename X>
-inline bool operator>( const widget_ptr<X> &x, nullptr_t ) noexcept
+inline bool operator>( const widget_ptr<X> &x, std::nullptr_t ) noexcept
 { return nullptr < x; }
 
 template <typename X>
-inline bool operator>( nullptr_t, const widget_ptr<X> &x ) noexcept
+inline bool operator>( std::nullptr_t, const widget_ptr<X> &x ) noexcept
 { return x < nullptr; }
 
 template <typename X, typename Y>
@@ -131,11 +131,11 @@ inline bool operator>=( const widget_ptr<X> &x, const widget_ptr<Y> &y ) noexcep
 { return !(x < y); }
 
 template <typename X>
-inline bool operator>=( const widget_ptr<X> &x, nullptr_t ) noexcept
+inline bool operator>=( const widget_ptr<X> &x, std::nullptr_t ) noexcept
 { return !(x < nullptr); }
 
 template <typename X>
-inline bool operator>=( nullptr_t, const widget_ptr<X> &x ) noexcept
+inline bool operator>=( std::nullptr_t, const widget_ptr<X> &x ) noexcept
 { return !(nullptr < x); }
 
 template <typename X> inline void

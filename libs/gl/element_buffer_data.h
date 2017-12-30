@@ -39,11 +39,11 @@ public:
 	/// @param i Index to add.
 	/// @param args More indices to add.
 	template<typename ...Args>
-	void push_back( uint32_t i, const Args &...args )
+	void push_back( uint32_t i, Args &&...args )
 	{
 		precondition( !_ebo, "cannot add index after creating buffer object" );
 		_data.push_back( static_cast<uint32_t>( i ) );
-		push_back( args... );
+		push_back( std::forward<Args>( args )... );
 	}
 
 	/// @brief Remove last index added.

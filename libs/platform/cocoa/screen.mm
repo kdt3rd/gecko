@@ -47,18 +47,18 @@ double screen::refresh_rate( void ) const
 
 ////////////////////////////////////////
 
-base::rect screen::bounds( bool avail ) const
+rect screen::bounds( bool avail ) const
 {
 	NSScreen *scr = reinterpret_cast<NSScreen *>( _nsscreen );
 	NSRect b = [scr frame];
 	auto scale = [scr backingScaleFactor];
 	// TODO: show avail or not
-	return { 0.0, 0.0, b.size.width * scale, b.size.height * scale };
+	return { 0, 0, static_cast<coord_type>( b.size.width * scale ), static_cast<coord_type>( b.size.height * scale ) };
 }
 
 ////////////////////////////////////////
 
-base::size screen::dpi( void ) const
+base::dsize screen::dpi( void ) const
 {
 	NSScreen *scr = (NSScreen *)_nsscreen;
 	NSDictionary *desc = [scr deviceDescription];
