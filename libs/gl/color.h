@@ -76,10 +76,10 @@ public:
 		_a = a;
 	}
 
-	/// @brief Get the linear color values
+	/// @brief Get the srgb color values
 	void get_srgb( float &r, float &g, float &b ) const;
 
-	/// @brief Set the color values in the linear color space
+	/// @brief Set the color values in the srgb color space
 	void set_srgb( float r, float g, float b );
 
 	/// @brief Get the linear color values
