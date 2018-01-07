@@ -72,11 +72,21 @@ inline constexpr bool equal( F a, F b, int ulp = 2 ) noexcept
 
 ////////////////////////////////////////
 
+/// normal linear interpolation: a when perc is 0, b when perc is 1.0
+///
+/// if a and b are in the same range / order of magnitude, it is safe
+/// to use @sa lerp_fast, otherwise, use this function
+///
 template <typename F>
 inline F lerp( F a, F b, F perc )
 {
-	// a at 0, b at 1
-//	return a * ( 1.F - perc ) + b * perc;
+	return a * ( 1.F - perc ) + b * perc;
+}
+
+/// @sa lerp
+template <typename F>
+inline F lerp_fast( F a, F b, F perc )
+{
 	return a + perc * ( b - a );
 }
 
