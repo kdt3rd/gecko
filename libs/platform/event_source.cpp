@@ -28,7 +28,7 @@ event_source::~event_source( void )
 ////////////////////////////////////////
 
 void
-event_source::grab( const std::shared_ptr<event_target> &et )
+event_source::grab( const std::shared_ptr<event_target> &et, uint8_t scancode_or_button, uint8_t modifiers )
 {
 	_grabber = et;
 }

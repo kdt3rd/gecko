@@ -144,6 +144,14 @@ system::~system( void )
 
 ////////////////////////////////////////
 
+std::shared_ptr<::platform::renderer>
+system::render( void ) const
+{
+	return _renderer;
+}
+
+////////////////////////////////////////
+
 system::opengl_query
 system::gl_proc_address( void )
 {

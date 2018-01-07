@@ -52,7 +52,7 @@ public:
 	coord_type width( void ) override { return _last_w; }
 	coord_type height( void )  override { return _last_h; }
 
-	void expose_event( void );
+	void expose_event( coord_type x, coord_type y, coord_type w, coord_type h );
 	void move_event( coord_type x, coord_type y );
 	void resize_event( coord_type w, coord_type h );
 

@@ -56,7 +56,7 @@ public:
 	// TODO: restore this once we are dispatching events
 //protected:
 	void make_current( const std::shared_ptr<cursor> &c ) override;
-	void expose_event( void ) override;
+	void expose_event( coord_type x, coord_type y, coord_type w, coord_type h ) override;
 	void move_event( coord_type x, coord_type y ) override;
 	void resize_event( coord_type w, coord_type h ) override;
 

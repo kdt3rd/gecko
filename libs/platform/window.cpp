@@ -60,7 +60,11 @@ window::process_event( const event &e )
 				restored();
 			break;
 		case event_type::WINDOW_EXPOSED:
-			expose_event();
+			expose_event( e.window().x, e.window().y, e.window().width, e.window().height );
+			break;
+		case event_type::WINDOW_REGION_EXPOSED:
+			expose_event( e.window().x, e.window().y, e.window().width, e.window().height );
+//			invalidate( rect( e.window().x, e.window().y, e.window().width, e.window().height ) );
 			break;
 		case event_type::WINDOW_MOVED:
 			move_event( e.window().x, e.window().y );
@@ -147,6 +151,9 @@ window::process_event( const event &e )
 		default:
 			break;
 	}
+
+	if ( event_handoff )
+		return event_handoff( e );
 	return true;
 }
 

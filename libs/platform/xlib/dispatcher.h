@@ -141,6 +141,7 @@ private:
 	selection _sel;
 	std::vector<Atom> _sel_avail_types;
 
+	std::map< int, std::vector<KeySym> > _keycode_to_keysym;
 	Atom _sel_targets = None;
 	Atom _sel_multiple = None;
 	Atom _sel_incr = None;

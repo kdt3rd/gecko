@@ -84,12 +84,12 @@ window::window( EGLDisplay disp, struct wl_compositor *comp, struct wl_shell *sh
 	if ( 0 == num_config )
 		throw std::runtime_error( "unable to find valid egl context config" );
 
-#pragma TODO("Implement shared context - create one in system, pass it here")
+	TODO("Implement shared context - create one in system, pass it here")
 	_egl_context = eglCreateContext( disp, config, EGL_NO_CONTEXT, ctxtattribs );
 	if ( ! _egl_context )
 		throw std::runtime_error( "Unable to create egl context" );
 
-#pragma TODO("add more error checks")
+	TODO("add more error checks")
 	_surface = wl_compositor_create_surface( comp );
 	_shell_surf = wl_shell_get_shell_surface( shell, _surface );
 
@@ -204,13 +204,13 @@ void window::set_title( const std::string &t )
 
 ////////////////////////////////////////
 
-void window::invalidate( const rect & /*r*/ )
+void window::invalidate( const rect &r )
 {
 	if ( !_invalid )
 	{
 		// TODO
 		_invalid = true;
-		expose_event();
+		expose_event( r.x(), r.y(), r.width(), r.height() );
 	}
 }
 
@@ -268,7 +268,7 @@ void window::resize_event( coord_type w, coord_type h )
 
 ////////////////////////////////////////
 
-void window::expose_event( void )
+void window::expose_event( coord_type x, coord_type y, coord_type w, coord_type h )
 {
 	_invalid = false;
 	acquire();

@@ -32,6 +32,7 @@ enum event_type : uint8_t
 	WINDOW_RESTORED,
 
 	WINDOW_EXPOSED,
+	WINDOW_REGION_EXPOSED,
 	WINDOW_MOVED,
 	WINDOW_RESIZED,
 	WINDOW_MOVE_RESIZE,
@@ -169,12 +170,25 @@ public:
 		r._data.key.x = x;
 		r._data.key.y = y;
 		r._data.key.keys[0] = kc;
-		// TODO: enable this to be filled in
 		r._data.key.keys[1] = scancode::KEY_NO_EVENT;
 		r._data.key.keys[2] = scancode::KEY_NO_EVENT;
 		r._data.key.keys[3] = scancode::KEY_NO_EVENT;
 		r._data.key.keys[4] = scancode::KEY_NO_EVENT;
 		r._data.key.keys[5] = scancode::KEY_NO_EVENT;
+		r._modifiers = mods;
+		return r;
+	}
+
+	static inline event key( system *sys, event_source *src, event_type et, coord_type x, coord_type y, scancode kc[6], uint8_t mods )
+	{
+		event r;
+		r._system = sys;
+		r._source = src;
+		r._type = et;
+		r._data.key.x = x;
+		r._data.key.y = y;
+		for ( int i = 0; i < 6; ++i )
+			r._data.key.keys[i] = kc[i];
 		r._modifiers = mods;
 		return r;
 	}

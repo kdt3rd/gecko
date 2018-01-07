@@ -28,18 +28,12 @@ public:
 	system( const std::string &d );
 	~system( void );
 
-	bool is_working( void ) const
-	{
-		return static_cast<bool>( _display );
-	}
+	bool is_working( void ) const override;
 
 	opengl_query gl_proc_address( void ) override;
+	std::shared_ptr<::platform::renderer> render( void ) const override;
 
-	std::vector<std::shared_ptr<::platform::screen>> screens( void ) override
-	{
-		return _screens;
-	}
-
+	std::vector<std::shared_ptr<::platform::screen>> screens( void ) override;
 	std::shared_ptr<::platform::cursor> new_cursor( void ) override;
 	std::shared_ptr<::platform::cursor> builtin_cursor( standard_cursor sc ) override;
 
@@ -81,6 +75,8 @@ public:
 	bool query_mouse( uint8_t &buttonMask, uint8_t &modifiers, coord_type &x, coord_type &y, int &screen ) override;
 
 private:
+	std::shared_ptr<::platform::renderer> _renderer;
+
 	std::shared_ptr<Display> _display;
 	std::shared_ptr<dispatcher> _dispatcher;
 	std::shared_ptr<keyboard> _keyboard;

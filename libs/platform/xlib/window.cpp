@@ -14,7 +14,6 @@
 #include <base/contract.h>
 #include <base/scope_guard.h>
 #include <stdexcept>
-#include <gl/check.h>
 #include <X11/Xutil.h>
 
 #include "system.h"
@@ -142,11 +141,15 @@ window::window( system &s, const std::shared_ptr<Display> &dpy )
 	swa.background_pixmap = None;
 	swa.border_pixel = 0;
 	swa.event_mask =
-		ExposureMask | StructureNotifyMask | VisibilityChangeMask |
-		EnterWindowMask | LeaveWindowMask |
-		KeyPressMask | KeyReleaseMask | KeymapStateMask |
-		ButtonPressMask | ButtonReleaseMask |
-		PointerMotionMask | ButtonMotionMask;
+		KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask |
+		EnterWindowMask | LeaveWindowMask | PointerMotionMask | PointerMotionHintMask |
+		Button1MotionMask | Button2MotionMask | Button3MotionMask | Button4MotionMask |
+		Button5MotionMask | ButtonMotionMask | KeymapStateMask | ExposureMask |
+		VisibilityChangeMask | StructureNotifyMask |
+		FocusChangeMask |
+		PropertyChangeMask | ColormapChangeMask | OwnerGrabButtonMask;
+		//ResizeRedirectMask |
+		//SubstructureNotifyMask | SubstructureRedirectMask |
 
 	Window root = DefaultRootWindow( disp );
 	swa.colormap = XCreateColormap( disp, root, vi->visual, AllocNone );
@@ -162,27 +165,42 @@ window::window( system &s, const std::shared_ptr<Display> &dpy )
 	if ( ! glXCreateContextAttribsARB )
 		throw_runtime( "unable to retrieve the OpenGL glXCreateContextAttribsARB" );
 
-	// If it does, try to get a GL 4.0 context!
-	int atrributes[] =
+	// If it does, try to get a GL 3.3 context!
+	int attributes[] =
 	{
 		GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
 		GLX_CONTEXT_MINOR_VERSION_ARB, 3,
 		GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_DEBUG_BIT_ARB|GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+		//GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
+		//GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
 		None
 	};
 
-	_glc = glXCreateContextAttribsARB( disp, bestFbc, 0, True, atrributes );
+	_glc = glXCreateContextAttribsARB( disp, bestFbc, 0, True, attributes );
 	if ( ! _glc )
 		throw std::runtime_error( "Unable to create OpenGL context" );
 
 	_glc_makecurrent = reinterpret_cast<void (*)(Display *, GLXDrawable, GLXContext )>( query( "glXMakeCurrent" ) );
 	if ( ! _glc_makecurrent )
 		throw_runtime( "unable to retrieve glXMakeCurrent" );
+
+	acquire();
+
 	_glc_swapbuffers = reinterpret_cast<void (*)(Display *, GLXDrawable )>( query( "glXSwapBuffers" ) );
 	if ( ! _glc_swapbuffers )
 		throw_runtime( "unable to retrieve glXSwapBuffers" );
-
-	acquire();
+	_glc_scissor = reinterpret_cast<void (*)( GLint, GLint, GLsizei, GLsizei )>( query( "glScissor" ) );
+	if ( ! _glc_scissor )
+		throw_runtime( "unable to retrieve glScissor" );
+	_glc_viewport = reinterpret_cast<void (*)( GLint, GLint, GLsizei, GLsizei )>( query( "glViewport" ) );
+	if ( ! _glc_viewport )
+		throw_runtime( "unable to retrieve glViewport" );
+	_glc_enable = reinterpret_cast<void (*)( GLenum )>( query( "glEnable" ) );
+	if ( ! _glc_enable )
+		throw_runtime( "unable to retrieve glEnable" );
+	_glc_disable = reinterpret_cast<void (*)( GLenum )>( query( "glDisable" ) );
+	if ( ! _glc_disable )
+		throw_runtime( "unable to retrieve glDisable" );
 
 	if ( !gl3wIsSupported( 3, 3 ) )
 		throw std::runtime_error( "opengl 3.3 not supported" );
@@ -308,13 +326,14 @@ void window::set_title( const std::string &t )
 
 ////////////////////////////////////////
 
-void window::invalidate( const rect & /*r*/ )
+void window::invalidate( const rect &r )
 {
 	if ( !_invalid )
 	{
 		// TODO
-		XClearArea( _display.get(), _win, 0, 0, 0, 0, True );
+		_invalid_rgn.include( r );
 		_invalid = true;
+		XClearArea( _display.get(), _win, r.x(), r.y(), r.width(), r.height(), true );
 	}
 }
 
@@ -365,7 +384,7 @@ void window::resize_event( coord_type w, coord_type h )
 		_last_w = tw;
 		_last_h = th;
 		acquire();
-		glViewport( 0, 0, tw, th );
+		_glc_viewport( 0, 0, static_cast<GLsizei>(tw), static_cast<GLsizei>(th) );
 		if ( resized )
 			resized( w, h );
 		release();
@@ -374,13 +393,28 @@ void window::resize_event( coord_type w, coord_type h )
 
 ////////////////////////////////////////
 
-void window::expose_event( void )
+void window::expose_event( coord_type x, coord_type y, coord_type w, coord_type h )
 {
-	_invalid = false;
 	acquire();
+	if ( w == 0 && h == 0 )
+		_invalid_rgn = rect();
+	if ( ( w != 0 && h != 0 ) || ! _invalid_rgn.empty() )
+	{
+		_invalid_rgn.include( rect( x, y, w, h ) );
+		_glc_enable( GL_SCISSOR_TEST );
+		_glc_scissor( static_cast<GLint>( _invalid_rgn.x() ),
+					  static_cast<GLint>( _last_h - _invalid_rgn.y() ),
+					  static_cast<GLsizei>( _invalid_rgn.width() ),
+					  static_cast<GLsizei>( _invalid_rgn.height() ) );
+	}
+	else
+		_glc_disable( GL_SCISSOR_TEST );
 	if ( exposed )
 		exposed();
 	_glc_swapbuffers( _display.get(), _win );
+	_glc_disable( GL_SCISSOR_TEST );
+	_invalid = false;
+	_invalid_rgn = rect();
 //	glFlush();
 //	XFlush( _display.get() );
 	release();

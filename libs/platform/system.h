@@ -29,6 +29,7 @@ class keyboard;
 class mouse;
 class tray;
 class menu;
+class renderer;
 
 ////////////////////////////////////////
 
@@ -67,6 +68,7 @@ public:
 	/// @return Description of the system
 	const std::string &description( void ) const { return _desc; }
 
+	virtual std::shared_ptr<renderer> render( void ) const = 0;
 	virtual opengl_query gl_proc_address( void ) = 0;
 
 	/// @brief Return screens available to the system.

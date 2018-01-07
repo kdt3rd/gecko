@@ -45,6 +45,8 @@ static void ximShutdown( XIM, XPointer p, XPointer d )
 
 platform::scancode get_scancode( XKeyEvent &ev, KeySym symbol )
 {
+	// hrm, there is no good way to go from XKeyEvent.key_code to an actual
+	// scancode
 	static const std::map<KeySym,platform::scancode> sym2code =
 		{
 			{ XK_Return, platform::scancode::KEY_RETURN },
@@ -870,29 +872,82 @@ void dispatcher::dispatchFocusOut( const std::shared_ptr<window> &w, XEvent &eve
 
 void dispatcher::dispatchKeymapNotify( const std::shared_ptr<window> &w, XEvent &event )
 {
+	int min_keycode = 8;
+	int max_keycode = 255;
+	XDisplayKeycodes( _display.get(), &min_keycode, &max_keycode );
+	int ks_per_kc = 1;
+	KeySym *ks = XGetKeyboardMapping( _display.get(), min_keycode, max_keycode - min_keycode + 1, &ks_per_kc );
+
+	if ( ks )
+	{
+		int n = 0;
+		for ( int k = min_keycode; k <= max_keycode; ++k )
+		{
+			auto &ksl = _keycode_to_keysym[k];
+			ksl.reserve( ks_per_kc );
+			for ( int s = 0; s < ks_per_kc; ++s, ++n )
+			{
+				if ( ks[n] != 0 )
+					ksl.push_back( ks[n] );
+			}
+		}
+		XFree( ks );
+	}
+
+	for ( int n = 0; n < 32; ++n )
+	{
+		char kv = event.xkeymap.key_vector[n];
+		if ( kv == 0 )
+			continue;
+		for ( int i = 0; i < 8; ++i )
+		{
+			if ( ( kv >> i ) & 0x1 )
+			{
+				int k = n * 8 + i;
+//				std::cout << "Key " << k << " down: " << int(XK_semicolon) << std::endl;
+//				auto &ksl = _keycode_to_keysym[k];
+//				for ( auto ks: ksl )
+//				{
+//					std::cout << "  -> ks " << ks << std::endl;
+//				}
+			}
+		}
+	}
 }
 
 ////////////////////////////////////////
 
 void dispatcher::dispatchExpose( const std::shared_ptr<window> &w, XEvent &event )
 {
-	if ( event.xexpose.count == 0 && w )
-		w->process_event( event::window( _system, _ext_events.get(),
-										 event_type::WINDOW_EXPOSED,
-										 event.xexpose.x, event.xexpose.y,
-										 event.xexpose.width, event.xexpose.height ) );
+	if ( w )
+	{
+		if ( event.xexpose.count == 0 )
+		{
+			w->process_event( event::window( _system, _ext_events.get(),
+											 event_type::WINDOW_EXPOSED,
+											 event.xexpose.x, event.xexpose.y,
+											 event.xexpose.width, event.xexpose.height ) );
+		}
+		else
+			w->process_event( event::window( _system, _ext_events.get(),
+											 event_type::WINDOW_REGION_EXPOSED,
+											 event.xexpose.x, event.xexpose.y,
+											 event.xexpose.width, event.xexpose.height ) );
+	}
 }
 
 ////////////////////////////////////////
 
 void dispatcher::dispatchGraphicsExpose( const std::shared_ptr<window> &w, XEvent &event )
 {
+	// TODO: this is for XCopyArea, etc, what should we do?
 }
 
 ////////////////////////////////////////
 
 void dispatcher::dispatchNoExpose( const std::shared_ptr<window> &w, XEvent &event )
 {
+	// TODO: this is for XCopyArea, etc, what should we do?
 }
 
 ////////////////////////////////////////

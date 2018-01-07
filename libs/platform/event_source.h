@@ -24,7 +24,13 @@ public:
 	event_source( void );
 	virtual ~event_source( void );
 
-	virtual void grab( const std::shared_ptr<event_target> &et );
+	/// grabs the scancode / button and modifiers from the event
+	/// source. if the scancode_or_button or modifiers is -1, this is
+	/// interpreted as grabbing all the appropriate input from this
+	/// source.
+	virtual void grab( const std::shared_ptr<event_target> &et,
+					   uint8_t scancode_or_button = uint8_t(-1),
+					   uint8_t modifiers = uint8_t(-1) );
 	virtual void ungrab( void );
 
 	virtual size_t get_image_display_count( void ) const;

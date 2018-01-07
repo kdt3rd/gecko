@@ -122,6 +122,8 @@ public:
 	virtual void acquire( void ) = 0;
 	virtual void release( void ) = 0;
 
+	std::function<bool(const event &)> event_handoff;
+
 	/// @brief Action for mouse press events.
 	///
 	/// Callback action for mouse button press events.
@@ -175,7 +177,7 @@ public:
 protected:
 	virtual void make_current( const std::shared_ptr<cursor> & ) = 0;
 
-	virtual void expose_event( void ) = 0;
+	virtual void expose_event( coord_type x, coord_type y, coord_type w, coord_type h ) = 0;
 	virtual void move_event( coord_type x, coord_type y ) = 0;
 	virtual void resize_event( coord_type w, coord_type h ) = 0;
 

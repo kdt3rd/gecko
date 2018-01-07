@@ -200,12 +200,13 @@ window::make_current( const std::shared_ptr<cursor> &c )
 
 ////////////////////////////////////////
 
-void window::expose_event( void )
+void window::expose_event( coord_type x, coord_type y, coord_type w, coord_type h )
 {
 	acquire();
 //	PAINTSTRUCT ps;
 //	BeginPaint( _hwnd, &ps );
-	exposed();
+	if ( exposed )
+		exposed();
 //	EndPaint( _hwnd, &ps );
 //	wglSwapLayerBuffers( _hdc, WGL_SWAP_MAIN_PLANE );
 	SwapBuffers( _hdc );

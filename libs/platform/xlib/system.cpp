@@ -155,10 +155,33 @@ system::~system( void )
 
 ////////////////////////////////////////
 
+bool system::is_working( void ) const
+{
+	return static_cast<bool>( _display );
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<::platform::renderer>
+system::render( void ) const
+{
+	return _renderer;
+}
+
+////////////////////////////////////////
+
 system::opengl_query
 system::gl_proc_address( void )
 {
 	return queryGL;
+}
+
+////////////////////////////////////////
+
+std::vector<std::shared_ptr<::platform::screen>>
+system::screens( void )
+{
+	return _screens;
 }
 
 ////////////////////////////////////////

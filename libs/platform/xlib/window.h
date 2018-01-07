@@ -63,7 +63,7 @@ public:
 protected:
 	void make_current( const std::shared_ptr<::platform::cursor> & );
 
-	void expose_event( void ) override;
+	void expose_event( coord_type x, coord_type y, coord_type w, coord_type h ) override;
 	void move_event( coord_type x, coord_type y ) override;
 	void resize_event( coord_type w, coord_type h ) override;
 
@@ -75,13 +75,20 @@ private:
 	int16_t _last_x = 0, _last_y = 0;
 	uint16_t _last_w = 0, _last_h = 0;
 
+	rect _invalid_rgn;
 	bool _invalid = false;
+
 	bool _popup = false;
 	bool _fullscreen = false;
 
 	GLXContext _glc;
 	void (*_glc_makecurrent)( Display *, GLXDrawable, GLXContext ) = nullptr;
 	void (*_glc_swapbuffers)( Display *, GLXDrawable ) = nullptr;
+	void (*_glc_scissor)( GLint, GLint, GLsizei, GLsizei ) = nullptr;
+	void (*_glc_viewport)( GLint, GLint, GLsizei, GLsizei ) = nullptr;
+	void (*_glc_enable)( GLenum ) = nullptr;
+	void (*_glc_disable)( GLenum ) = nullptr;
+
 };
 
 ////////////////////////////////////////

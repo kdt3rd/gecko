@@ -236,7 +236,7 @@ bool
 dispatcher::drain_wayland_events( void )
 {
 	bool done = false;
-#pragma TODO("How do we know when we're finished?")
+	TODO("How do we know when we're finished?")
 	wl_display_dispatch_pending( _display.get() );
 	return done;
 }

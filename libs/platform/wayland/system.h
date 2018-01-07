@@ -30,6 +30,7 @@ public:
 	}
 
 	opengl_query gl_proc_address( void ) override;
+	std::shared_ptr<::platform::renderer> render( void ) const override;
 
 	std::vector<std::shared_ptr<::platform::screen>> screens( void ) override
 	{
@@ -75,6 +76,8 @@ public:
 	static bool is_available( void );
 
 private:
+	std::shared_ptr<::platform::renderer> _renderer;
+
 	std::shared_ptr<struct wl_display> _display;
 	struct wl_compositor *_compositor = nullptr;
 	struct wl_shell *_shell = nullptr;

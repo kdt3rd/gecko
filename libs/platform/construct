@@ -6,6 +6,7 @@ local mswin = subdir "mswin";
 
 lib = library "platform"
   source{
+		"context.cpp";
 		"cursor.cpp";
 		"dispatcher.cpp";
 		"event_source.cpp";
@@ -23,8 +24,6 @@ lib = library "platform"
 		"timer.cpp";
 		"tray.cpp";
 		"waitable.cpp";
-		cocoa.extra_source;
-		mswin.extra_source;
   }
   optional_source{
 	  {
@@ -37,12 +36,18 @@ lib = library "platform"
 	  },
 	  {
 		  system="Darwin";
-		  source={ "darwin.cpp" };
+		  source={
+			  "darwin.cpp";
+			  cocoa.extra_source;
+		  };
 		  libs=cocoa.extra_libs;
 	  },
 	  {
 		  system="Windows";
-		  source={ "mswin.cpp" };
+		  source={
+			  "mswin.cpp";
+			  mswin.extra_source;
+		  };
 		  libs=mswin.extra_libs;
 	  },
   }
