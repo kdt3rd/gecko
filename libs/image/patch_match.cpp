@@ -1019,7 +1019,7 @@ static bool matchPass2( plane_buffer &u, plane_buffer &v, plane_buffer &d, const
 	totChange += nChange;
 
 	size_t nSeeds = static_cast<size_t>( u.height() );
-	std::vector<uint32_t> seeds( nSeeds, 0 );
+	std::vector<std::uint_fast32_t> seeds{ nSeeds, 0 };
 	for ( size_t y = 0; y < nSeeds; ++y )
 		seeds[y] = gen();
 
