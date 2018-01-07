@@ -33,11 +33,13 @@ public:
 	inline constexpr chroma_coord( const chroma_coord<OV> &c ) noexcept : x( static_cast<value_type>(c.x) ), y( static_cast<value_type>(c.y) ) {}
 
 	chroma_coord( const chroma_coord & ) = default;
-	inline constexpr chroma_coord( chroma_coord &&c ) noexcept : x( std::move(c.x) ), y( std::move(c.y) ) {}
+	PROPER_CONSTEXPR chroma_coord( chroma_coord &&c ) noexcept(std::is_nothrow_move_constructible<value_type>::value) = default;
 
 	~chroma_coord( void ) = default;
+
 	chroma_coord &operator=( const chroma_coord & ) = default;
-	chroma_coord &operator=( chroma_coord && ) = default;
+	PROPER_CONSTEXPR chroma_coord &operator=( chroma_coord && ) noexcept(std::is_nothrow_move_constructible<value_type>::value) = default;
+
 	template <typename OV>
 	chroma_coord &operator=( const chroma_coord<OV> &c ) noexcept
 	{

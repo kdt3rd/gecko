@@ -117,6 +117,7 @@ public:
 		blue = i[2];
 		white = i[3];
 	}
+
 	inline mat RGBtoXYZ( value_type Y = value_type(1) ) const
 	{
 		xyz r = red.toXYZ( Y );
@@ -162,6 +163,7 @@ public:
 	{
 		return XYZtoRGB() * adaptation( o, m ) * o.RGBtoXYZ();
 	}
+
 	xy red, green, blue, white;
 };
 

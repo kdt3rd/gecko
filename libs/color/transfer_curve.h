@@ -18,6 +18,7 @@ enum class transfer
 {
 	LINEAR, ///< Linear (NO) curve
 	GAMMA_sRGB, ///< sRGB EOTF
+	GAMMA_BT601, ///< BT.601 OETF
 	GAMMA_BT709, ///< BT.709 OETF
 	GAMMA_BT2020, ///< BT.2020 OETF
 	GAMMA_BT1886, ///< computes a, b using Lb, Lw from BT.1886 EOTF
@@ -45,6 +46,18 @@ enum class transfer
 	ACES_cc, ///< ACES working space
 	ACES_cct, ///< ACES working space2
 	ACES_proxy, ///< ACES proxy space
+};
+
+/// @brief standard rendering functions (opto-opto transforms)
+enum class ootf
+{
+	NOOP, ///< nothing
+	BT709_RENDERING, ///< as recommended, bt.709 is supposed to be
+					 ///< viewed through bt.1886, which applies a
+					 ///< rendering function to bt.709
+	BT2100_PQ_OOTF = BT709_RENDERING, ///< PQ OOTF
+	BT2100_HLG_OOTF, ///< OOTF defined for HLG
+	ACES_RRT_v1_0_3, ///< ACES RRT v1.0.3
 };
 
 } // namespace color

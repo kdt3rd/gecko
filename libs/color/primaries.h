@@ -128,6 +128,28 @@ inline constexpr chromaticities<T> ARRI_Alexa_WCG( void )
 	);
 }
 
+template <typename T>
+inline constexpr chromaticities<T> SONY_SGamut( void ) 
+{
+	return chromaticities<T>( 
+		chroma_coord<T>( T(0.7300), T(0.2800) ),
+		chroma_coord<T>( T(0.1400), T(0.8550) ),
+		chroma_coord<T>( T(0.1000), T(-0.050) ),
+		chroma_coord<T>( T(0.3127), T(0.3290) )
+	);
+}
+
+template <typename T>
+inline constexpr chromaticities<T> SONY_SGamut3Cine( void ) 
+{
+	return chromaticities<T>( 
+		chroma_coord<T>( T(0.76600), T(0.27500) ),
+		chroma_coord<T>( T(0.22500), T(0.80000) ),
+		chroma_coord<T>( T(0.08900), T(-.08700) ),
+		chroma_coord<T>( T(0.3127), T(0.3290) )
+	);
+}
+
 /// ProPhoto RGB
 template <typename T>
 inline constexpr chromaticities<T> ROMM( void ) 
