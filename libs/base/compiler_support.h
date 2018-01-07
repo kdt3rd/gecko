@@ -16,11 +16,19 @@
 # define FALLTHROUGH [[fallthrough]]
 #endif
 
+#if __cplusplus >= 201402L
+# define PROPER_CONSTEXPR constexpr
+#else
+# define PROPER_CONSTEXPR
+#endif
+
 #if defined(__clang__)
 # ifndef FALLTHROUGH
 #  define FALLTHROUGH [[clang::fallthrough]];
 # endif
-# define TODO(x) _Pragma(STRINGIZE(GCC warning x " at line " DEFER(STRINGIZE,__LINE__)))
+# define EMIT_PRAGMA(x) _Pragma(#x)
+# define TODO(x) EMIT_PRAGMA(message ("TODO: " x " at line " DEFER(STRINGIZE,__LINE__)))
+//# define TODO(x) _Pragma(STRINGIZE(GCC warning x " at line " DEFER(STRINGIZE,__LINE__)))
 #else
 # if defined(__GNUC__)
 #  ifndef FALLTHROUGH
@@ -30,7 +38,9 @@
 #   define HAS_MISSING_STREAM_MOVE_CTORS
 #   define HAS_BAD_CODECVT_HEADER
 #  endif
-#  define TODO(x) _Pragma(STRINGIZE(GCC warning x " at line " DEFER(STRINGIZE,__LINE__)))
+//#  define TODO(x) _Pragma(STRINGIZE(GCC warning x " at line " DEFER(STRINGIZE,__LINE__)))
+#  define EMIT_PRAGMA(x) _Pragma(#x)
+#  define TODO(x) EMIT_PRAGMA(message ("TODO: " x " at line " DEFER(STRINGIZE,__LINE__)))
 # else
 #  if defined(_MSC_VER)
 #   define TODO(x) __pragma(STRINGIZE(message(x " at line " DEFER(STRINGIZE,__LINE__))))
