@@ -37,6 +37,11 @@ public:
 	/// @brief Constructor with initial point.
 	path( const gl::vec2 &p );
 
+	path( const path &p ) = default;
+	path &operator=( const path &p ) = default;
+	path( path &&p ) = default;
+	path &operator=( path &&p ) = default;
+
 	/// @brief Destructor.
 	~path( void );
 

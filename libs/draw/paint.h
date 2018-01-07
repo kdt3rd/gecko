@@ -145,12 +145,12 @@ public:
 
 	bool empty( void ) const
 	{
-		return _stroke_width == 0.0 && has_no_fill();
+		return _stroke_width == 0.F && has_no_fill();
 	}
 
 private:
 	gl::color _stroke_color;
-	float _stroke_width = 0.0;
+	float _stroke_width = 0.F;
 
 	enum
 	{

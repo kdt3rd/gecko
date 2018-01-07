@@ -33,7 +33,7 @@ public:
 #else
 	using wait_type = int;
 	using poll_type = int;
-	static const wait_type INVALID_WAIT = -1;
+	static constexpr wait_type INVALID_WAIT = -1;
 #endif
 	wait( void ) = default;
 	wait( wait_type w ) : _w( w ) {}
@@ -44,7 +44,7 @@ public:
 	~wait( void ) = default;
 
 	bool is_valid( void ) const { return _w != INVALID_WAIT; }
-	poll_type waitable( void ) const { return (poll_type)_w; }
+	poll_type waitable( void ) const { return reinterpret_cast<poll_type>(_w); }
 
 private:
 	wait_type _w = INVALID_WAIT;

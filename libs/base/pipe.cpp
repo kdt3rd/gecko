@@ -40,9 +40,25 @@ pipe::pipe( bool isPrivate, bool blocking )
 	if ( ! blocking )
 		flags |= O_NONBLOCK;
 
+# ifdef __linux__
 	int r = ::pipe2( _p, flags );
 	if ( r == -1 )
 		throw_errno( "Unable to create pipe object" );
+# else
+	// TODO: thread safety if someone fork/execs while we're opening?
+	int r = ::pipe( _p );
+	if ( r == -1 )
+		throw_errno( "Unable to create pipe object" );
+	if ( flags != 0 )
+	{
+		r = fcntl( _p[0], F_SETFL, flags );
+		if ( r == -1 )
+			throw_errno( "Unable to set flags on pipe object" );
+		r = fcntl( _p[1], F_SETFL, flags );
+		if ( r == -1 )
+			throw_errno( "Unable to set flags on pipe object" );
+	}
+# endif
 #endif
 }
 
@@ -58,8 +74,16 @@ pipe::~pipe( void )
 
 pipe::pipe( pipe &&o )
 {
+	// NB: until c++17, avoid ODR usage of const / constexpr value
+	// (taking a reference), which forces it to be defined in a
+	// translation unit somewhere for linking...
+#if __cplusplus > 201402L
 	_p[0] = exchange( o._p[0], wait::INVALID_WAIT );
 	_p[1] = exchange( o._p[1], wait::INVALID_WAIT );
+#else
+	_p[0] = exchange( o._p[0], wait::wait_type(wait::INVALID_WAIT) );
+	_p[1] = exchange( o._p[1], wait::wait_type(wait::INVALID_WAIT) );
+#endif
 }
 
 ////////////////////////////////////////
@@ -109,7 +133,7 @@ pipe::read( void *d, size_t n )
 		if ( nar == 0 )
 			break;
 		nr += nar;
-		n -= nar;
+		n -= static_cast<size_t>( nar );
 		dPtr += nar;
 	}
 #endif
@@ -148,7 +172,7 @@ pipe::write( const void *d, size_t n )
 				continue;
 			throw_errno( "Unable to write {0} bytes to the pipe", n );
 		}
-		n -= nw;
+		n -= static_cast<size_t>( nw );
 		dPtr += nw;
 		totW += nw;
 	}

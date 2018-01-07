@@ -137,7 +137,7 @@ class PolyNode
 {
 public:
     PolyNode();
-    virtual ~PolyNode(){};
+    virtual ~PolyNode();
     Path Contour;
     PolyNodes Childs;
     PolyNode* Parent;
@@ -159,7 +159,7 @@ private:
 class PolyTree: public PolyNode
 { 
 public:
-    ~PolyTree(){ Clear(); };
+    ~PolyTree(){ Clear(); }
     PolyNode* GetFirst() const;
     void Clear();
     int Total() const;
@@ -276,10 +276,10 @@ public:
       PolyTree &polytree,
       PolyFillType subjFillType,
       PolyFillType clipFillType);
-  bool ReverseSolution() { return m_ReverseOutput; };
-  void ReverseSolution(bool value) {m_ReverseOutput = value;};
-  bool StrictlySimple() {return m_StrictSimple;};
-  void StrictlySimple(bool value) {m_StrictSimple = value;};
+  bool ReverseSolution() { return m_ReverseOutput; }
+  void ReverseSolution(bool value) {m_ReverseOutput = value;}
+  bool StrictlySimple() {return m_StrictSimple;}
+  void StrictlySimple(bool value) {m_StrictSimple = value;}
   //set the callback function for z value filling on intersections (otherwise Z is 0)
 #ifdef use_xyz
   void ZFillFunction(ZFillCallback zFillFunc);
@@ -390,6 +390,8 @@ class clipperException : public std::exception
 {
   public:
     clipperException(const char* description): m_descr(description) {}
+	clipperException(const clipperException &) = default;
+	clipperException(clipperException &&) = default;
     virtual ~clipperException() noexcept;
     virtual const char* what() const noexcept {return m_descr.c_str();}
   private:

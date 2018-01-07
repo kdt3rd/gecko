@@ -485,8 +485,8 @@ matchPassHorizThreadForwardN( size_t tIdx, int s, int e, plane_buffer &u, plane_
 			if ( curDist <= eps )
 				continue;
 
-			int curDX = uLine[x];
-			int curDY = vLine[x];
+			int curDX = static_cast<int>( uLine[x] );
+			int curDY = static_cast<int>( vLine[x] );
 			bool changed = false;
 
 			int skip = maxSkip;
@@ -573,8 +573,8 @@ matchPassHorizThreadBackwardN( size_t tIdx, int s, int e, plane_buffer &u, plane
 			float curDist = dLine[x];
 			if ( curDist <= eps )
 				continue;
-			int curDX = uLine[x];
-			int curDY = vLine[x];
+			int curDX = static_cast<int>( uLine[x] );
+			int curDY = static_cast<int>( vLine[x] );
 			bool changed = false;
 
 			int skip = maxSkip;
@@ -768,8 +768,8 @@ matchPassDiagonal( size_t tIdx, int s, int e, plane_buffer &u, plane_buffer &v, 
 		const float *nextVLine = v.line( y + 1 );
 		for ( int x = 1; x < (w - 1); ++x )
 		{
-			int curDX = uLine[x];
-			int curDY = vLine[x];
+			int curDX = static_cast<int>( uLine[x] );
+			int curDY = static_cast<int>( vLine[x] );
 			float curDist = dLine[x];
 			if ( curDist <= eps )
 				continue;
@@ -834,7 +834,7 @@ matchPassDiagonal( size_t tIdx, int s, int e, plane_buffer &u, plane_buffer &v, 
 
 template <typename BufType, typename DistFunc>
 static void
-matchPassRandomThread( size_t tIdx, int s, int e, plane_buffer &u, plane_buffer &v, plane_buffer &d, const BufType &a, const BufType &b, const BufType &adx, const BufType &ady, const BufType &bdx, const BufType &bdy, int radius, const std::vector<uint32_t> &seeds, std::vector<size_t> &changeCounts, float eps )
+matchPassRandomThread( size_t tIdx, int s, int e, plane_buffer &u, plane_buffer &v, plane_buffer &d, const BufType &a, const BufType &b, const BufType &adx, const BufType &ady, const BufType &bdx, const BufType &bdy, int radius, const std::vector<std::uint_fast32_t> &seeds, std::vector<size_t> &changeCounts, float eps )
 {
 	int w = d.width();
 	int h = d.height();
@@ -846,7 +846,7 @@ matchPassRandomThread( size_t tIdx, int s, int e, plane_buffer &u, plane_buffer 
 	size_t changeCount = 0;
 	for ( int y = s; y < e; ++y )
 	{
-		std::mt19937 rndg( seeds[y] );
+		std::mt19937 rndg( seeds[static_cast<size_t>(y)] );
 		float *uLine = u.line( y );
 		float *vLine = v.line( y );
 		float *dLine = d.line( y );
@@ -942,10 +942,10 @@ matchPassRegAve( size_t tIdx, int s, int e, plane_buffer &u, plane_buffer &v, pl
 						tmpDX -= ox;
 						tmpDY -= oy;
 
-						int tDX = tmpDX - ( x + offX );
-						int tDY = tmpDY - y;
-						altDX += tDX;
-						altDY += tDY;
+						int upDX = tmpDX - ( x + offX );
+						int upDY = tmpDY - y;
+						altDX += upDX;
+						altDY += upDY;
 						++count;
 					}
 				}
@@ -1145,8 +1145,8 @@ matchPassHorizThreadForwardAlphaN( size_t tIdx, int s, int e, plane_buffer &u, p
 				continue;
 			}
 
-			int curDX = uLine[x];
-			int curDY = vLine[x];
+			int curDX = static_cast<int>( uLine[x] );
+			int curDY = static_cast<int>( vLine[x] );
 			bool changed = false;
 
 			int skip = maxSkip;
@@ -1272,8 +1272,8 @@ matchPassHorizThreadBackwardAlphaN( size_t tIdx, int s, int e, plane_buffer &u, 
 			float curDist = dLine[x];
 			if ( curDist <= eps )
 				continue;
-			int curDX = uLine[x];
-			int curDY = vLine[x];
+			int curDX = static_cast<int>( uLine[x] );
+			int curDY = static_cast<int>( vLine[x] );
 			bool changed = false;
 
 			int skip = maxSkip;
@@ -1454,8 +1454,8 @@ matchPassDiagonalAlpha( size_t tIdx, int s, int e, plane_buffer &u, plane_buffer
 		const float *nextALine = alpha.line( y + 1 );
 		for ( int x = 1; x < (w - 1); ++x )
 		{
-			int curDX = uLine[x];
-			int curDY = vLine[x];
+			int curDX = static_cast<int>( uLine[x] );
+			int curDY = static_cast<int>( vLine[x] );
 			float curDist = dLine[x];
 			if ( curDist <= eps )
 				continue;
@@ -1543,7 +1543,7 @@ matchPassDiagonalAlpha( size_t tIdx, int s, int e, plane_buffer &u, plane_buffer
 
 template <typename BufType, typename DistFunc>
 static void
-matchPassRandomThreadAlpha( size_t tIdx, int s, int e, plane_buffer &u, plane_buffer &v, plane_buffer &d, const BufType &a, const BufType &b, const BufType &adx, const BufType &ady, const BufType &bdx, const BufType &bdy, const const_plane_buffer &alpha, int radius, const std::vector<uint32_t> &seeds, std::vector<size_t> &changeCounts, float eps )
+matchPassRandomThreadAlpha( size_t tIdx, int s, int e, plane_buffer &u, plane_buffer &v, plane_buffer &d, const BufType &a, const BufType &b, const BufType &adx, const BufType &ady, const BufType &bdx, const BufType &bdy, const const_plane_buffer &alpha, int radius, const std::vector<std::uint_fast32_t> &seeds, std::vector<size_t> &changeCounts, float eps )
 {
 	int w = d.width();
 	int h = d.height();
@@ -1555,7 +1555,7 @@ matchPassRandomThreadAlpha( size_t tIdx, int s, int e, plane_buffer &u, plane_bu
 	size_t changeCount = 0;
 	for ( int y = s; y < e; ++y )
 	{
-		std::mt19937 rndg( seeds[y] );
+		std::mt19937 rndg( seeds[static_cast<size_t>(y)] );
 		float *uLine = u.line( y );
 		float *vLine = v.line( y );
 		float *dLine = d.line( y );
@@ -1658,10 +1658,10 @@ matchPassRegAveAlpha( size_t tIdx, int s, int e, plane_buffer &u, plane_buffer &
 						tmpDY -= oy;
 						if ( get_zero( alpha, tmpDX, tmpDY ) > 0.F )
 						{
-							int tDX = tmpDX - ( x + offX );
-							int tDY = tmpDY - y;
-							altDX += tDX;
-							altDY += tDY;
+							int upDX = tmpDX - ( x + offX );
+							int upDY = tmpDY - y;
+							altDX += upDX;
+							altDY += upDY;
 							++count;
 						}
 					}
@@ -1728,7 +1728,7 @@ static bool matchPass2( plane_buffer &u, plane_buffer &v, plane_buffer &d, const
 	totChange += nChange;
 
 	size_t nSeeds = static_cast<size_t>( u.height() );
-	std::vector<uint32_t> seeds( nSeeds, 0 );
+	std::vector<std::uint_fast32_t> seeds( nSeeds, 0 );
 	for ( size_t y = 0; y < nSeeds; ++y )
 		seeds[y] = gen();
 
@@ -2047,7 +2047,7 @@ static bool matchRefineIter( plane_buffer &u, plane_buffer &v, plane_buffer &d, 
 
 	std::cout << " random eps " << (eps * 100.F) << " " << std::flush;
 	size_t nSeeds = static_cast<size_t>( u.height() );
-	std::vector<uint32_t> seeds( nSeeds, 0 );
+	std::vector<std::uint_fast32_t> seeds( nSeeds, 0 );
 	for ( size_t y = 0; y < nSeeds; ++y )
 		seeds[y] = gen();
 

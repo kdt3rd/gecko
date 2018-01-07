@@ -25,9 +25,9 @@ static const uint64_t kMaxWriterCount = (uint64_t(1) << kWriterBits) - 1;
 static const uint64_t kMaxReaderCount = (uint64_t(1) << kReaderBits) - 1;
 static const uint64_t kMaxReadWriterCount = (uint64_t(1) << kReadWriterBits) - 1;
 
-static const uint64_t kReaderMask = kMaxReaderCount << kReaderOffset;
+//static const uint64_t kReaderMask = kMaxReaderCount << kReaderOffset;
 static const uint64_t kWriterMask = kMaxWriterCount << kWriterOffset;
-static const uint64_t kReadWriterMask = kMaxReadWriterCount << kReadWriterOffset;
+//static const uint64_t kReadWriterMask = kMaxReadWriterCount << kReadWriterOffset;
 
 static const uint64_t kOneWriter = uint64_t(1) << kWriterOffset;
 static const uint64_t kOneReader = uint64_t(1) << kReaderOffset;
@@ -42,11 +42,6 @@ inline uint64_t incReader( uint64_t v )
 	precondition( numReaders( v + kOneReader ) < kMaxReaderCount, "Too many readers for shared_mutex" );
 	return v + kOneReader;
 }
-inline uint64_t decReader( uint64_t v )
-{
-	precondition( numReaders( v ) > 0, "Attempt to decrement empty reader pool in shared_mutex" );
-	return v - kOneReader;
-}
 
 inline uint64_t swapReadWriters( uint64_t v )
 {
@@ -54,11 +49,6 @@ inline uint64_t swapReadWriters( uint64_t v )
 			 ( v & kWriterMask ) );
 }
 
-inline uint64_t incWriter( uint64_t v )
-{
-	precondition( numWriters( v + kOneWriter ) <= kMaxWriterCount, "Too many readers for shared_mutex" );
-	return v + kOneWriter;
-}
 inline uint64_t decWriter( uint64_t v )
 {
 	precondition( numWriters( v ) > 0, "Attempt to decrement empty reader pool in shared_mutex" );

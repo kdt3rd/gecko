@@ -73,7 +73,7 @@ class const_string
 	struct ctor_helper<S, true>
 	{
 		template <typename V, std::size_t N>
-		static constexpr std::size_t length( const V (&str)[N] )
+		static constexpr std::size_t length( const V (&)[N] )
 		{
 			return N - 1;
 		}

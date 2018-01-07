@@ -29,9 +29,9 @@ gl::color style::primary_text( gl::color bg ) const
 	float w = bg.distance( gl::white );
 	float b = bg.distance( gl::black );
 	if ( w > b )
-		return gl::color( 1, 1, 1, 1.00 );
+		return gl::color( 1, 1, 1, 1.00F );
 	else
-		return gl::color( 0, 0, 0, 0.87 );
+		return gl::color( 0, 0, 0, 0.87F );
 }
 
 ////////////////////////////////////////
@@ -41,9 +41,9 @@ gl::color style::secondary_text( gl::color bg ) const
 	float w = bg.distance( gl::white );
 	float b = bg.distance( gl::black );
 	if ( w > b )
-		return gl::color( 1, 1, 1, 0.70 );
+		return gl::color( 1, 1, 1, 0.70F );
 	else
-		return gl::color( 0, 0, 0, 0.54 );
+		return gl::color( 0, 0, 0, 0.54F );
 }
 
 ////////////////////////////////////////
@@ -53,9 +53,9 @@ gl::color style::disabled_text( gl::color bg ) const
 	float w = bg.distance( gl::white );
 	float b = bg.distance( gl::black );
 	if ( w > b )
-		return gl::color( 1, 1, 1, 0.50 );
+		return gl::color( 1, 1, 1, 0.50F );
 	else
-		return gl::color( 0, 0, 0, 0.38 );
+		return gl::color( 0, 0, 0, 0.38F );
 }
 
 ////////////////////////////////////////
@@ -65,9 +65,9 @@ gl::color style::divider( gl::color bg ) const
 	float w = bg.distance( gl::white );
 	float b = bg.distance( gl::black );
 	if ( w > b )
-		return gl::color( 1, 1, 1, 0.12 );
+		return gl::color( 1, 1, 1, 0.12F );
 	else
-		return gl::color( 0, 0, 0, 0.12 );
+		return gl::color( 0, 0, 0, 0.12F );
 }
 
 ////////////////////////////////////////
@@ -77,9 +77,9 @@ gl::color style::active_icon( gl::color bg ) const
 	float w = bg.distance( gl::white );
 	float b = bg.distance( gl::black );
 	if ( w > b )
-		return gl::color( 1, 1, 1, 1.00 );
+		return gl::color( 1, 1, 1, 1.00F );
 	else
-		return gl::color( 0, 0, 0, 0.54 );
+		return gl::color( 0, 0, 0, 0.54F );
 }
 
 ////////////////////////////////////////
@@ -89,9 +89,9 @@ gl::color style::inactive_icon( gl::color bg ) const
 	float w = bg.distance( gl::white );
 	float b = bg.distance( gl::black );
 	if ( w > b )
-		return gl::color( 1, 1, 1, 0.50 );
+		return gl::color( 1, 1, 1, 0.50F );
 	else
-		return gl::color( 0, 0, 0, 0.38 );
+		return gl::color( 0, 0, 0, 0.38F );
 }
 
 ////////////////////////////////////////

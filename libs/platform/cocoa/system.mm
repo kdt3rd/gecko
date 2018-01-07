@@ -122,6 +122,123 @@ std::vector<std::shared_ptr<::platform::screen>> system::screens( void )
 
 ////////////////////////////////////////
 
+std::shared_ptr<::platform::cursor>
+system::new_cursor( void )
+{
+	std::cout << "TODO" << std::endl;
+	return std::shared_ptr<::platform::cursor>();
+}
+
+////////////////////////////////////////
+
+std::shared_ptr<::platform::cursor>
+system::builtin_cursor( standard_cursor sc )
+{
+	std::cout << "TODO" << std::endl;
+	return std::shared_ptr<::platform::cursor>();
+}
+
+////////////////////////////////////////
+
+void
+system::set_selection( selection sel )
+{
+	std::cout << "TODO" << std::endl;
+}
+
+////////////////////////////////////////
+
+std::pair<std::vector<uint8_t>, std::string>
+system::query_selection( selection_type sel,
+						 const std::vector<std::string> &allowedMimeTypes,
+						 const std::string &clipboardName )
+{
+	std::cout << "TODO" << std::endl;
+	return std::make_pair( std::vector<uint8_t>(), std::string() );
+}
+
+////////////////////////////////////////
+
+std::pair<std::vector<uint8_t>, std::string>
+system::query_selection( selection_type sel,
+						 const selection_type_function &mimeSelector,
+						 const std::string &clipboardName )
+{
+	std::cout << "TODO" << std::endl;
+	return std::make_pair( std::vector<uint8_t>(), std::string() );
+}
+
+////////////////////////////////////////
+
+const std::vector<std::string> &
+	system::default_string_types( void )
+{
+	std::cout << "TODO" << std::endl;
+	static std::vector<std::string> mtypes
+	{
+		"text/plain;charset=utf-8", "text/plain"
+	};
+	return mtypes;
+}
+
+////////////////////////////////////////
+
+selection_type_function
+system::default_string_selector( void )
+{
+	std::cout << "TODO" << std::endl;
+	auto selFun = [](const std::vector<std::string> &l) -> std::string 
+		{
+			std::string ret{ "text/plain;charset=utf-8" };
+			if ( std::find( l.begin(), l.end(), ret ) != l.end() )
+				return ret;
+			ret = "text/plain";
+			if ( std::find( l.begin(), l.end(), ret ) != l.end() )
+				return ret;
+			return std::string();
+		};
+	return selection_type_function{ selFun };
+}
+
+////////////////////////////////////////
+
+system::mime_converter
+system::default_string_converter( void )
+{
+	std::cout << "TODO" << std::endl;
+	auto convFun = [](const std::vector<uint8_t> &d, const std::string &cur, const std::string &to) -> std::vector<uint8_t> 
+		{
+			if ( base::begins_with( cur, "text/plain" ) )
+			{
+				if ( base::begins_with( to, "text/plain" ) )
+					return d;
+			}
+			return std::vector<uint8_t>();
+		};
+	return mime_converter{ convFun };
+}
+
+////////////////////////////////////////
+
+void
+system::begin_drag( selection sel,
+					const std::shared_ptr<::platform::cursor> &c )
+{
+	std::cout << "TODO" << std::endl;
+}
+
+////////////////////////////////////////
+
+std::pair<std::vector<uint8_t>, std::string>
+system::query_drop( const selection_type_function &chooseMimeType )
+{
+	std::cout << "TODO" << std::endl;
+	return std::make_pair( std::vector<uint8_t>(), std::string() );
+}
+
+
+////////////////////////////////////////
+
 std::shared_ptr<menu> system::new_system_menu( void )
 {
 	return std::shared_ptr<menu>();
@@ -172,6 +289,31 @@ std::shared_ptr<platform::mouse> system::get_mouse( void )
 {
 	return _mouse;
 }
+
+////////////////////////////////////////
+
+uint8_t
+system::modifier_state( void )
+{
+	std::cout << "TODO" << std::endl;
+	return 0;
+}
+
+////////////////////////////////////////
+
+bool
+system::query_mouse( uint8_t &buttonMask, uint8_t &modifiers, coord_type &x, coord_type &y, int &screen )
+{
+	std::cout << "TODO" << std::endl;
+	buttonMask = 0;
+	modifiers = 0;
+	x = 0;
+	y = 0;
+	screen = -1;
+	return false;
+}
+
+
 
 ////////////////////////////////////////
 

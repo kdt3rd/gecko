@@ -45,7 +45,7 @@ public:
 	/// @brief Move assignment.
 	area &operator=( area && ) = default;
 
-	virtual ~area( void ) { }
+	virtual ~area( void );
 
 	/// @brief The minimum size of the area.
 	///

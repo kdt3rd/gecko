@@ -28,12 +28,12 @@ namespace draw
 size_t circle_precision( float r )
 {
 	size_t n = 3;
-	float error = 0.0;
+	float error = 0.0F;
 	do
 	{
 		n = n * 2;
-		error = r * ( 1 - std::cos( PI / n ) );
-	} while ( error > 0.01 );
+		error = r * ( 1.F - std::cos( static_cast<float>( PI ) / static_cast<float>( n ) ) );
+	} while ( error > 0.01F );
 
 	return n;
 }

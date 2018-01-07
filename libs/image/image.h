@@ -55,7 +55,7 @@ public:
 		if ( r == engine::nulldim && ! _planes.empty() )
 		{
 			r = _planes.front().dims();
-			r.planes = static_cast<uint16_t>( size() );
+			r.planes = static_cast<engine::dimensions::value_type>( size() );
 			r.images = 1;
 		}
 		return r;

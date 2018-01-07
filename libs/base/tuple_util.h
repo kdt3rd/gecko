@@ -56,7 +56,7 @@ auto tuple_tail( const T &t ) -> decltype( select_tuple( t, R() ) )
 
 template <std::size_t I = 0, typename Func, typename... Tp>
 inline typename std::enable_if< I == sizeof...(Tp), void >::type
-for_each( std::tuple<Tp...> &t, Func &&f )
+for_each( std::tuple<Tp...> &, Func && )
 {
 }
 template <std::size_t I = 0, typename Func, typename... Tp>
@@ -71,7 +71,7 @@ for_each( std::tuple<Tp...> &t, Func &&f )
 
 template <std::size_t I = 0, typename Func, typename... Tp>
 inline typename std::enable_if< I == sizeof...(Tp), void >::type
-for_each( const std::tuple<Tp...> &t, Func &&f )
+for_each( const std::tuple<Tp...> &, Func && )
 {
 }
 template <std::size_t I = 0, typename Func, typename... Tp>

@@ -145,7 +145,7 @@ public:
 	/// Event processing continues as normal, but this routine will
 	/// not return until the user releases the mouse button.
 	virtual void begin_drag( selection sel,
-							 const std::shared_ptr<cursor> &cursor = std::shared_ptr<cursor>() ) = 0;
+							 const std::shared_ptr<cursor> &c = std::shared_ptr<cursor>() ) = 0;
 
 	/// @brief query available mime types in response to a drop request event
 	virtual std::pair<std::vector<uint8_t>, std::string> query_drop( const selection_type_function &chooseMimeType = selection_type_function() ) = 0;

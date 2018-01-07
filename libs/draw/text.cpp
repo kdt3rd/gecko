@@ -116,7 +116,7 @@ void text::update( void )
 			coords.push_back( { cx, cy }, { tx, ty } );
 		};
 
-		auto add_tri = [&]( size_t a, size_t b, size_t c )
+		auto add_tri = [&]( uint32_t a, uint32_t b, uint32_t c )
 		{
 			tris.push_back( a, b, c );
 		};

@@ -83,6 +83,13 @@ bool window::is_visible( void )
 
 ////////////////////////////////////////
 
+void window::fullscreen( bool fs )
+{
+	// TODO:
+}
+
+////////////////////////////////////////
+
 /*
 rect window::geometry( void )
 {
@@ -91,7 +98,7 @@ rect window::geometry( void )
 
 ////////////////////////////////////////
 
-void window::move( double x, double y )
+void window::move( coord_type x, coord_type y )
 {
 	NSPoint pos;
 	pos.x = x;
@@ -101,7 +108,7 @@ void window::move( double x, double y )
 
 ////////////////////////////////////////
 
-void window::resize( double w, double h )
+void window::resize( coord_type w, coord_type h )
 {
 	NSSize size;
 	size.width = w;
@@ -118,24 +125,14 @@ double window::scale_factor( void )
 
 ////////////////////////////////////////
 
-void window::resize_event( double w, double h )
-{
-	_last_w = w;
-	_last_h = h;
-	if ( resized )
-		resized( _last_w, _last_h );
-}
-
-////////////////////////////////////////
-
-void window::invalidate( const base::rect & )
+void window::invalidate( const rect & )
 {
 	[_impl->view performSelector:@selector(forceRedraw) withObject:nil afterDelay:0.0];
 }
 
 ////////////////////////////////////////
 
-void window::set_minimum_size( double /*w*/, double /*h*/ )
+void window::set_minimum_size( coord_type /*w*/, coord_type /*h*/ )
 {
 }
 
@@ -173,6 +170,40 @@ void window::set_ns( void *w, void *v )
 	NSSize size = [_impl->view bounds].size;
 	_last_w = size.width * scale;
 	_last_h = size.height * scale;
+}
+
+////////////////////////////////////////
+
+void window::make_current( const std::shared_ptr<cursor> & )
+{
+	// TODO
+}
+
+////////////////////////////////////////
+
+void window::expose_event( void )
+{
+	acquire();
+	if ( exposed )
+		exposed();
+	// TODO: swap?
+	release();
+}
+
+////////////////////////////////////////
+
+void window::move_event( coord_type x, coord_type y )
+{
+}
+
+////////////////////////////////////////
+
+void window::resize_event( coord_type w, coord_type h )
+{
+	_last_w = w;
+	_last_h = h;
+	if ( resized )
+		resized( _last_w, _last_h );
 }
 
 ////////////////////////////////////////
