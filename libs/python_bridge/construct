@@ -1,0 +1,12 @@
+
+lib = library "python_bridge"
+  source{
+	"context.cpp",
+  }
+  libs "base"
+  external_lib{ -- can we allow multiple versions of python????
+	  lib="python";
+	  required=false;
+	  extra_libs="Python";
+	  defines={"HAVE_PYTHON"};
+  }
