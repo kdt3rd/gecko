@@ -10,6 +10,7 @@
 #include "triplet.h"
 #include "state.h"
 #include "standards.h"
+#include "util.h"
 #include <type_traits>
 
 ////////////////////////////////////////
@@ -26,7 +27,7 @@ class tristimulus_value
 	// TODO: allow a half data type - not sure is_arithmetic will return true for half?
 	static_assert( std::is_arithmetic<T>::value, "tristimulus_value component type must be arithmetic" );
 	static_assert( forcebits == -1 || ( forcebits > 0 && forcebits <= 8*sizeof(T) ), "invalid number of bits for tristimulus_value" );
-
+	static_assert( forcebits == -1 || forcebits == 8 || forcebits == 10 || forcebits == 12 || forcebits == 14 || forcebits == 16, "invalid / not implemented forcebits for tristimulus_value" );
 public:
 	using component_type = T;
 	/// primarily for integer representations, will always be the MSB bits
@@ -37,17 +38,19 @@ public:
 	tristimulus_value( const tristimulus_value & ) = default;
 	constexpr tristimulus_value( tristimulus_value && ) = default;
 	constexpr tristimulus_value &operator=( tristimulus_value && ) = default;
-
+	explicit constexpr tristimulus_value( const state &s ) : _state( o._state ) {}
+	explicit constexpr tristimulus_value( state &&s ) : _state( std::move( o._state ) ) {}
+	constexpr tristimulus_value( component_type a, component_type b, component_type c, const state &s ) : _x( a ), _y( b ), _z( c ), _state( o._state ) {}
 	
 	constexpr tristimulus_value &operator=( const tristimulus_value & ) = default;
 	template <typename To, int bO>
 	tristimulus_value &operator=( const tristimulus_value<To, bO> &o )
 	{
+		using o_t = tristimulus_value<To, bO>;
 		_state = o._state;
-		_state.bits( valid_bits );
-		_x = convert_bits<To, bO, component_type, bits>( o._x );
-		_y = convert_bits<To, bO, component_type, bits>( o._y );
-		_z = convert_bits<To, bO, component_type, bits>( o._z );
+		_x = convert_bits<To, o_t::valid_bits, component_type, valid_bits>( o._x );
+		_y = convert_bits<To, o_t::valid_bits, component_type, valid_bits>( o._y );
+		_z = convert_bits<To, o_t::valid_bits, component_type, valid_bits>( o._z );
 		return *this;
 	}
 
@@ -56,6 +59,10 @@ public:
 	explicit operator tristimulus_value<To, bO>( void ) const
 	{
 	}
+	component_type &x( void ) { return _x; }
+	component_type &y( void ) { return _y; }
+	component_type &z( void ) { return _z; }
+
 	constexpr component_type x( void ) const { return _x; }
 	constexpr component_type y( void ) const { return _y; }
 	constexpr component_type z( void ) const { return _z; }
@@ -92,10 +99,10 @@ public:
 	constexpr const state &current_state( void ) const { return _state; }
 
 protected:
-	state _state = { make_standard<standard::SRGB>() };
 	component_type _x = component_type(0);
 	component_type _y = component_type(0);
 	component_type _z = component_type(0);
+	state _state = { make_standard<standard::SRGB>() };
 };
 
 /// mixes two colors together in linear RGB

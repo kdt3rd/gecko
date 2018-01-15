@@ -51,31 +51,41 @@ namespace color
 /// in an operation that is defined across a buffer of values.
 ///
 template <typename T>
-inline tristimulus_value<T> convert( const tristimulus_value<T> &v, const state &from, const state &to )
+inline void convert( T &a, T &b, T &c, const state &from, const state &to, int bits )
 {
+}
+
+template <typename T, int fbits>
+inline tristimulus_value<T, fbits> convert( const tristimulus_value<T, fbits> &v, const state &to )
+{
+	using component_type = T;
+	using v_t = tristimulus_value<component_type, fbits>;
+	v_t r{ v.x(), v.y(), v.z(), to };
+	convert( r.x(), r.y(), r.z(), v.current_state(), to );
+	return r;
 }
 
 /// short cut when you just want to convert the space
-template <typename T>
-inline tristimulus_value<T> convert_space( const tristimulus_value<T> &v, const state &s, space tospace )
+template <typename T, int fbits>
+inline tristimulus_value<T, fbits> convert_space( const tristimulus_value<T, fbits> &v, space tospace )
 {
-	return convert( v, s, state{ s, tospace } );
+	return convert( v, state{ v.current_state(), tospace } );
 }
 
-template <typename T>
-inline tristimulus_value<T> desaturate( const tristimulus_value<T> &v, T amt )
+template <typename T, int fbits>
+inline tristimulus_value<T> desaturate( const tristimulus_value<T> &v, T amt, bool return_to_orig = true )
 {
-	using v_t = tristimulus_value<T>;
-	v_t lab = v;
-	auto lab = convert_space( v, s, space::CIE_LAB_76 );
+	auto lab = convert_space( v, space::CIE_LAB_76 );
 	lab.y() *= amt;
 	lab.z() *= amt;
-	return convert( labs, s, lab );
+	return ( return_to_orig ) ? convert( lab, lab.current_state(), v.current_state() ) : lab;
 }
 
-template <typename T>
-inline T distance( const state &s, const tristimulus_value<T> &a, const tristimulus_value<T> &b )
+template <typename T, int fbits>
+inline T distance( const state &s, const tristimulus_value<T, fbits> &a, const tristimulus_value<T, fbits> &b )
 {
+	using v_t = tristimulus_value<T, fbits>;
+	auto labA = convert_space( a, s, space::CIE_LAB_76 );
 	state labs = s;
 	labs.space( space::CIE_LAB_76 );
 	auto lab = convert( s, labs, v );
@@ -84,8 +94,8 @@ inline T distance( const state &s, const tristimulus_value<T> &a, const tristimu
 	return convert( labs, s, lab );
 }
 
-template <typename T>
-inline T distance( const state &s, const tristimulus_value<T> &a, const tristimulus_value<T> &b )
+template <typename T, int fbits>
+inline T distance( const state &s, const tristimulus_value<T, fbits> &a, const tristimulus_value<T, fbits> &b )
 {
 	state labs = s;
 	labs.space( space::CIE_LAB_76 );
