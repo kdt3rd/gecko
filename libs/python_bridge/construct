@@ -5,8 +5,12 @@ lib = library "python_bridge"
   }
   libs "base"
   external_lib{ -- can we allow multiple versions of python????
-	  lib="python";
+	  lib="python2";
 	  required=false;
-	  extra_libs="Python";
-	  defines={"HAVE_PYTHON"};
+	  defines={"HAVE_PYTHON2"};
+  }
+  external_lib{ -- can we allow multiple versions of python????
+	  lib="python3";
+	  required=false;
+	  defines={"HAVE_PYTHON3"};
   }

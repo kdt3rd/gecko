@@ -5,6 +5,10 @@
 // See the accompanying LICENSE.txt file for terms
 //
 
+#if defined(HAVE_PYTHON2) || defined(HAVE_PYTHON3)
+# define HAVE_PYTHON 1
+#endif
+
 #ifdef HAVE_PYTHON
 #pragma GCC diagnostic ignored "-Wreserved-id-macro"
 #pragma GCC diagnostic ignored "-Wold-style-cast"
