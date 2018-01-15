@@ -40,7 +40,7 @@ public:
 	threading( int nThreads );
 	~threading( void );
 
-	inline int size( void ) const { return _count + 1; }
+	inline size_t size( void ) const { return static_cast<size_t>( _count + 1 ); }
 
 	/// calls function f on the range split by the number of threads
 	/// live, and does not return until they have all finished.

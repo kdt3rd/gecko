@@ -26,6 +26,7 @@ public:
 
 	bool is_working( void ) const override;
 
+	std::shared_ptr<::platform::renderer> render( void ) const override;
 	opengl_query gl_proc_address( void ) override;
 
 	std::vector<std::shared_ptr<::platform::screen>> screens( void ) override;

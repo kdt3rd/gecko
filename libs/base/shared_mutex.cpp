@@ -112,7 +112,7 @@ shared_mutex::unlock( void )
 {
 	uint64_t curState = _state.load( std::memory_order_relaxed );
 	uint64_t newState;
-	int waitToRead = 0;
+	uint64_t waitToRead = 0;
 	do
 	{
 		precondition( numReaders( curState ) == 0, "Expecting 0 readers during unique write lock" );

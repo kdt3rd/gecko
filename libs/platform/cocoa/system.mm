@@ -99,6 +99,14 @@ system::is_working( void ) const
 
 ////////////////////////////////////////
 
+std::shared_ptr<::platform::renderer>
+system::render( void ) const
+{
+	return std::shared_ptr<::platform::renderer>();
+}
+
+////////////////////////////////////////
+
 system::opengl_query
 system::gl_proc_address( void )
 {

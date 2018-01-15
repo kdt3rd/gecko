@@ -992,7 +992,7 @@ getCount( std::vector<size_t> &counts )
 template <typename BufType, typename DistFunc>
 static bool matchPass2( plane_buffer &u, plane_buffer &v, plane_buffer &d, const BufType &a, const BufType &b, const BufType &adx, const BufType &ady, const BufType &bdx, const BufType &bdy, std::mt19937 &gen, int radius, int iter, float eps )
 {
-	std::vector<size_t> counts( threading::get().size(), size_t(0) );
+	std::vector<size_t> counts( static_cast<size_t>( threading::get().size() ), size_t(0) );
 	size_t nChange;
 	size_t totChange = 0;
 	// do one round of jump flood on second iteration
@@ -1019,7 +1019,7 @@ static bool matchPass2( plane_buffer &u, plane_buffer &v, plane_buffer &d, const
 	totChange += nChange;
 
 	size_t nSeeds = static_cast<size_t>( u.height() );
-	std::vector<std::uint_fast32_t> seeds{ nSeeds, 0 };
+	std::vector<std::uint_fast32_t> seeds( nSeeds );
 	for ( size_t y = 0; y < nSeeds; ++y )
 		seeds[y] = gen();
 
@@ -1701,7 +1701,7 @@ matchPassRegAveAlpha( size_t tIdx, int s, int e, plane_buffer &u, plane_buffer &
 template <typename BufType, typename DistFunc>
 static bool matchPass2( plane_buffer &u, plane_buffer &v, plane_buffer &d, const BufType &a, const BufType &b, const BufType &adx, const BufType &ady, const BufType &bdx, const BufType &bdy, const_plane_buffer &alpha, std::mt19937 &gen, int radius, int iter, float eps )
 {
-	std::vector<size_t> counts( threading::get().size(), size_t(0) );
+	std::vector<size_t> counts( static_cast<size_t>( threading::get().size() ), size_t(0) );
 	size_t nChange;
 	size_t totChange = 0;
 	// do one round of jump flood on second iteration
@@ -1728,7 +1728,7 @@ static bool matchPass2( plane_buffer &u, plane_buffer &v, plane_buffer &d, const
 	totChange += nChange;
 
 	size_t nSeeds = static_cast<size_t>( u.height() );
-	std::vector<std::uint_fast32_t> seeds( nSeeds, 0 );
+	std::vector<std::uint_fast32_t> seeds( nSeeds );
 	for ( size_t y = 0; y < nSeeds; ++y )
 		seeds[y] = gen();
 
@@ -2023,7 +2023,7 @@ static vector_field pmImage( const image_buf &a, const image_buf &b, const plane
 template <typename BufType, typename DistFunc>
 static bool matchRefineIter( plane_buffer &u, plane_buffer &v, plane_buffer &d, const BufType &a, const BufType &b, const BufType &adx, const BufType &ady, const BufType &bdx, const BufType &bdy, std::mt19937 &gen, int radius, int iter, float eps, const const_plane_buffer &alpha = const_plane_buffer() )
 {
-	std::vector<size_t> counts( threading::get().size(), size_t(0) );
+	std::vector<size_t> counts( static_cast<size_t>( threading::get().size() ), size_t(0) );
 	size_t nChange;
 	size_t totChange = 0;
 
@@ -2047,7 +2047,7 @@ static bool matchRefineIter( plane_buffer &u, plane_buffer &v, plane_buffer &d, 
 
 	std::cout << " random eps " << (eps * 100.F) << " " << std::flush;
 	size_t nSeeds = static_cast<size_t>( u.height() );
-	std::vector<std::uint_fast32_t> seeds( nSeeds, 0 );
+	std::vector<std::uint_fast32_t> seeds( nSeeds );
 	for ( size_t y = 0; y < nSeeds; ++y )
 		seeds[y] = gen();
 

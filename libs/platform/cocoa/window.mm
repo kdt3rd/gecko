@@ -181,7 +181,7 @@ void window::make_current( const std::shared_ptr<cursor> & )
 
 ////////////////////////////////////////
 
-void window::expose_event( void )
+void window::expose_event( coord_type x, coord_type y, coord_type w, coord_type h )
 {
 	acquire();
 	if ( exposed )
