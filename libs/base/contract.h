@@ -154,15 +154,15 @@ public:
 
 /// @brief If check is not true, throw a precondition_error
 #define precondition( check, ... ) \
-	do { if ( unlikely( !(check) ) ) throw_location( base::precondition_error( base::format( __VA_ARGS__ ) ) ); } while ( false )
+	do { if ( GK_UNLIKELY( !(check) ) ) throw_location( base::precondition_error( base::format( __VA_ARGS__ ) ) ); } while ( false )
 
 /// @brief If check is not true, throw a postcondition_error
 #define postcondition( check, ... ) \
-	do { if ( unlikely( !(check) ) ) throw_location( base::postcondition_error( base::format( __VA_ARGS__ ) ) ); } while ( false )
+	do { if ( GK_UNLIKELY( !(check) ) ) throw_location( base::postcondition_error( base::format( __VA_ARGS__ ) ) ); } while ( false )
 
 /// @brief If check is not true, throw a postcondition_error
 #define logic_check( check, ... ) \
-	do { if ( unlikely( !(check) ) ) throw_location( std::logic_error( base::format( __VA_ARGS__ ) ) ); } while ( false )
+	do { if ( GK_UNLIKELY( !(check) ) ) throw_location( std::logic_error( base::format( __VA_ARGS__ ) ) ); } while ( false )
 
 #define unused( ... ) \
 	(void)( __VA_ARGS__ )

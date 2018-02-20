@@ -14,6 +14,7 @@
 #include <stack>
 #include <algorithm>
 #include <numeric>
+#include <base/compiler_support.h>
 #include <base/contract.h>
 #include <base/scope_guard.h>
 #include <base/compiler_abi.h>

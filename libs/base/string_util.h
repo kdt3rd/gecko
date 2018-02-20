@@ -102,7 +102,7 @@ template <typename stringT>
 inline bool begins_with( const stringT &s,
 						 const const_string<typename stringT::value_type, typename stringT::traits_type> &start )
 {
-	if ( unlikely( start.empty() ) )
+	if ( GK_UNLIKELY( start.empty() ) )
 		return true;
 
 	// need this one for begins_with with a static char * second arg
@@ -116,7 +116,7 @@ template <typename charT, typename traitsT>
 constexpr inline bool begins_with( const const_string<charT, traitsT> &s,
 								   const const_string<charT, traitsT> &start )
 {
-	return ( unlikely( start.empty() ) ) ? true : ( s.compare( 0, start.size(), start, 0, start.size() ) == 0 );
+	return ( GK_UNLIKELY( start.empty() ) ) ? true : ( s.compare( 0, start.size(), start, 0, start.size() ) == 0 );
 }
 
 ////////////////////////////////////////
@@ -125,10 +125,10 @@ template <typename stringT>
 inline bool ends_with( const stringT &s,
 					   const stringT &end )
 {
-	if ( unlikely( end.empty() ) )
+	if ( GK_UNLIKELY( end.empty() ) )
 		return true;
 
-	if ( unlikely( s.size() < end.size() ) )
+	if ( GK_UNLIKELY( s.size() < end.size() ) )
 		return false;
 
 	return s.compare( s.size() - end.size(), end.size(), end ) == 0;
@@ -138,10 +138,10 @@ template <typename stringT>
 inline bool ends_with( const stringT &s,
 					   const const_string<typename stringT::value_type, typename stringT::traits_type> &end )
 {
-	if ( unlikely( end.empty() ) )
+	if ( GK_UNLIKELY( end.empty() ) )
 		return true;
 
-	if ( unlikely( s.size() < end.size() ) )
+	if ( GK_UNLIKELY( s.size() < end.size() ) )
 		return false;
 
 	return s.compare( s.size() - end.size(), end.size(), end.data(), end.size() ) == 0;
@@ -151,7 +151,7 @@ template <typename CharT, typename TraitsT>
 constexpr inline bool ends_with( const const_string<CharT, TraitsT> &s,
 					   const const_string<CharT, TraitsT> &end )
 {
-	return ( unlikely( end.empty() ) ) ? true : ( unlikely( s.size() < end.size() ) ) ? false :
+	return ( GK_UNLIKELY( end.empty() ) ) ? true : ( GK_UNLIKELY( s.size() < end.size() ) ) ? false :
 		( s.compare( s.size() - end.size(), end.size(), end ) == 0 );
 }
 

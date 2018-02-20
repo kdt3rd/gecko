@@ -140,49 +140,49 @@ short_msg( const void *message, size_t length, base::spooky_hash::value &hash )
 	{
 		case 15:
 			d += static_cast<uint64_t>( p8[14] ) << 48;
-			FALLTHROUGH;
+			GK_FALLTHROUGH;
 		case 14:
 			d += static_cast<uint64_t>( p8[13] ) << 40;
-			FALLTHROUGH;
+			GK_FALLTHROUGH;
 		case 13:
 			d += static_cast<uint64_t>( p8[12] ) << 32;
-			FALLTHROUGH;
+			GK_FALLTHROUGH;
 		case 12:
 			d += static_cast<uint64_t>( p32[2] );
 			c += p64[0];
 			break;
 		case 11:
 			d += static_cast<uint64_t>( p8[10] ) << 16;
-			FALLTHROUGH;
+			GK_FALLTHROUGH;
 		case 10:
 			d += static_cast<uint64_t>( p8[9] ) << 8;
-			FALLTHROUGH;
+			GK_FALLTHROUGH;
 		case 9:
 			d += static_cast<uint64_t>( p8[8] );
-			FALLTHROUGH;
+			GK_FALLTHROUGH;
 		case 8:
 			c += p64[0];
 			break;
 
 		case 7:
 			c += static_cast<uint64_t>( p8[6] ) << 48;
-			FALLTHROUGH;
+			GK_FALLTHROUGH;
 		case 6:
 			c += static_cast<uint64_t>( p8[5] ) << 40;
-			FALLTHROUGH;
+			GK_FALLTHROUGH;
 		case 5:
 			c += static_cast<uint64_t>( p8[4] ) << 32;
-			FALLTHROUGH;
+			GK_FALLTHROUGH;
 		case 4:
 			c += p32[0];
 			break;
 
 		case 3:
 			c += static_cast<uint64_t>( p8[2] ) << 16;
-			FALLTHROUGH;
+			GK_FALLTHROUGH;
 		case 2:
 			c += static_cast<uint64_t>( p8[1] ) << 8;
-			FALLTHROUGH;
+			GK_FALLTHROUGH;
 		case 1:
 			c += static_cast<uint64_t>( p8[0] );
 			break;
