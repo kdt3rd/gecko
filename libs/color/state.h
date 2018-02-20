@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include <base/compiler_support.h>
-
 #include "chromaticities.h"
 #include "primaries.h"
 #include "space.h"
@@ -37,6 +35,7 @@ namespace color
 /// - diffuse / reference white scale value.
 ///   NB: This is NOT the maximal white, but rather how to scale.
 ///   commonly 1.0, some systems like L*a*b* use other values (100)
+/// - black pedestal / offset
 /// - luminance range (Lb (luminance black) to Lw (luminance white) for
 ///   transfer curves like BT.1886)
 /// - gamma value for tunable transfer curves
@@ -54,7 +53,7 @@ public:
 	typedef double value_type;
 	typedef chromaticities<value_type> cx;
 
-	state( void ) = default;
+	constexpr state( void ) noexcept = default;
 	constexpr state( space s,
 					 const cx &c,
 					 value_type lum,
@@ -64,39 +63,40 @@ public:
 					 value_type crv_b = value_type(0.0),
 					 value_type crv_c = value_type(1.0),
 					 value_type crv_d = value_type(0.0),
-					 int bits = 32,
-					 value_type black_off = value_type(0.0) )
-		: _space( s ), _chroma( c ), _lum_scale( lum ),
-		  _black_offset( black_off ), _range( r ), _curve( crv ),
-		  _curve_a( crv_a ), _curve_b( crv_b ), _curve_c( crv_c ), _curve_d( crv_d ), _bits( bits )
+					 value_type black_off = value_type(0.0) ) noexcept
+		: _space( s ), _range( r ), _curve( crv ), _chroma( c ), _lum_scale( lum ),
+		  _black_offset( black_off ),
+		  _curve_a( crv_a ), _curve_b( crv_b ), _curve_c( crv_c ), _curve_d( crv_d )
 	{}
-	state( const state &s ) = default;
-	PROPER_CONSTEXPR state( state &&s ) noexcept(std::is_nothrow_move_constructible<value_type>::value) = default;
-	state &operator=( const state &s ) = default;
-	PROPER_CONSTEXPR state &operator=( state &&s ) noexcept(std::is_nothrow_move_constructible<value_type>::value) = default;
+	constexpr state( const state &s ) noexcept = default;
+	constexpr state( state &&s ) noexcept = default;
+	state &operator=( const state &s ) noexcept = default;
+	state &operator=( state &&s ) noexcept = default;
 	/// @defgroup convenience constructors to override individual settings
 	/// @{
 	constexpr state( const state &st, space s )
-		: _space( s ), _chroma( st._chroma ), _lum_scale( st._lum_scale ),
-		  _black_offset( st._black_offset ), _range( st._range ), _curve( st._curve ),
+		: _space( s ), _range( st._range ), _curve( st._curve ),
+		  _chroma( st._chroma ), _lum_scale( st._lum_scale ),
+		  _black_offset( st._black_offset ),
 		  _curve_a( st._curve_a ), _curve_b( st._curve_b ), _curve_c( st._curve_c ),
-		  _curve_d( st._curve_d ), _bits( st._bits )
+		  _curve_d( st._curve_d )
 	{}
 	constexpr state( const state &st, range r )
-		: _space( st._space ), _chroma( st._chroma ), _lum_scale( st._lum_scale ),
-		  _black_offset( st._black_offset ), _range( r ), _curve( st._curve ),
+		: _space( st._space ), _range( r ), _curve( st._curve ),
+		  _chroma( st._chroma ), _lum_scale( st._lum_scale ),
+		  _black_offset( st._black_offset ),
 		  _curve_a( st._curve_a ), _curve_b( st._curve_b ), _curve_c( st._curve_c ),
-		  _curve_d( st._curve_d ), _bits( st._bits )
+		  _curve_d( st._curve_d )
 	{}
 	constexpr state( const state &st, transfer t,
 					 value_type crv_a = value_type(1.0),
 					 value_type crv_b = value_type(0.0),
 					 value_type crv_c = value_type(1.0),
 					 value_type crv_d = value_type(0.0) )
-		: _space( st._space ), _chroma( st._chroma ), _lum_scale( st._lum_scale ),
-		  _black_offset( st._black_offset ), _range( st._range ), _curve( t ),
-		  _curve_a( crv_a ), _curve_b( crv_b ), _curve_c( crv_c ), _curve_d( crv_d ),
-		  _bits( st._bits )
+		: _space( st._space ), _range( st._range ), _curve( t ),
+		  _chroma( st._chroma ), _lum_scale( st._lum_scale ),
+		  _black_offset( st._black_offset ),
+		  _curve_a( crv_a ), _curve_b( crv_b ), _curve_c( crv_c ), _curve_d( crv_d )
 	{}
 	/// @}
 		
@@ -168,26 +168,113 @@ public:
 		_curve_d = d;
 	}
 
-	/// encoding bits
-	constexpr int bits( void ) const { return _bits; }
-	/// Defines the bits used in encoding
-	///
-	/// This is used to adjust the precision used in some of the tone
-	/// curve computations as well as the range conversions.
-	inline void bits( int b ) { _bits = b; }
+	inline cx::mat get_to_xyz_mat( value_type Y = value_type(1) ) const
+	{
+		switch ( _space )
+		{
+			case space::RGB:
+			case space::YCBCR_BT601:
+			case space::YCBCR_BT709:
+			case space::YCBCR_BT2020:
+			case space::YCBCR_BT2100:
+			case space::YCBCR_SYCC:
+			case space::YCBCR_CUSTOM:
+			case space::HSV_HEX:
+			case space::HSV_CYL:
+			case space::HSI_HEX:
+			case space::HSI_CYL:
+			case space::HSL_HEX:
+			case space::HSL_CYL:
+				break;
+			case space::ICTCP:
+			case space::IPT:
+				throw_not_yet();
+			case space::xyY:
+			case space::XYZ:
+				return cx::mat();
 
+			case space::LMS_HPE:
+				return _chroma.LMStoXYZ( cone_response::HPE );
+			case space::LMS_CAM02:
+				return _chroma.LMStoXYZ( cone_response::CIECAM02 );
+			case space::LMS_ICTCP:
+				// this defines RGB -> LMS
+				//Ma = mat( V(1688.0/4096.0), V(2146.0/4096.0), V(262.0/4096.0),
+				//V(683.0/4096.0), V(2951.0/4096.0), V(462.0/4096.0),
+				//	  V(99.0/4096.0), V(309.0/4096.0), V(3688.0/4096.0) );
+				throw_not_yet();
+
+			case space::LMS_OPPONENT:
+				return _chroma.LMStoXYZ( cone_response::WANDELL );
+
+			default:
+				
+				break;
+		}
+		return _chroma.RGBtoXYZ( Y );
+	}
+
+	inline cx::mat get_from_xyz_mat( value_type Y = value_type(1) ) const
+	{
+		switch ( _space )
+		{
+			case space::RGB:
+			case space::YCBCR_BT601:
+			case space::YCBCR_BT709:
+			case space::YCBCR_BT2020:
+			case space::YCBCR_BT2100:
+			case space::YCBCR_SYCC:
+			case space::YCBCR_CUSTOM:
+			case space::HSV_HEX:
+			case space::HSV_CYL:
+			case space::HSI_HEX:
+			case space::HSI_CYL:
+			case space::HSL_HEX:
+			case space::HSL_CYL:
+				break;
+			case space::ICTCP:
+			case space::IPT:
+				throw_not_yet();
+			case space::xyY:
+			case space::XYZ:
+				return cx::mat();
+
+			case space::LMS_HPE:
+				return _chroma.XYZtoLMS( cone_response::HPE );
+			case space::LMS_CAM02:
+				return _chroma.XYZtoLMS( cone_response::CIECAM02 );
+			case space::LMS_ICTCP:
+				// this defines RGB -> LMS
+				//Ma = mat( V(1688.0/4096.0), V(2146.0/4096.0), V(262.0/4096.0),
+				//V(683.0/4096.0), V(2951.0/4096.0), V(462.0/4096.0),
+				//	  V(99.0/4096.0), V(309.0/4096.0), V(3688.0/4096.0) );
+				throw_not_yet();
+
+			case space::LMS_OPPONENT:
+				return _chroma.XYZtoLMS( cone_response::WANDELL );
+
+			default:
+				
+				break;
+		}
+		return _chroma.XYZtoRGB( Y );
+	}
+
+	inline cx::mat adaptation( const state &o, cone_response cr ) const
+	{
+		return _chroma.adaptation( o.chroma(), value_type(1), cr );
+	}
 private:
-	space _space = space::RGB;
-	cx _chroma;
-	value_type _lum_scale = value_type(100.0);
-	value_type _black_offset = value_type(0.0);
+	space _space = space::UNKNOWN;
 	range _range = range::FULL;
 	transfer _curve = transfer::LINEAR;
+	cx _chroma = cx();
+	value_type _lum_scale = value_type(100.0);
+	value_type _black_offset = value_type(0.0);
 	value_type _curve_a = value_type(1.0);
 	value_type _curve_b = value_type(0.0);
 	value_type _curve_c = value_type(1.0);
 	value_type _curve_d = value_type(0.0);
-	int _bits = 10;
 };
 
 } // namespace color

@@ -12,6 +12,21 @@
 namespace color
 {
 
+/// basic transforms that a color undergoes:
+/// - conversion to/from non-linear encoding to linear RGB
+///   * conversion from one non-linear encoding to another
+///     ... do we always know when a rendering (or the inverse) should be applied?
+///         PQ <-> HLG involves OOTF bits to be correct...
+/// - projection / reinterpretation in a different set of primaries
+///   * optional white adaptation (i.e. ICC specifies Bradford when converting to/from D50)
+/// - conversion to alternate space for special purpose manipulation / measurement
+///   (i.e. L*a*b* for similarity)
+/// - rendering for display, (maybe destructively) applying rendering curve
+///   * user look management / OCIO (i.e. 3D LUT)
+///   * ACES (optional look xform -> RRT -> ODT)
+///   * BT.2100 OOTF functions?
+///   * BT.1886 from BT.709
+
 /// color conversion between arbitrary states happens in a prescribed chain
 /// 0. <remove any chroma subsample>
 /// 1. convert any sub-range to full
@@ -19,10 +34,10 @@ namespace color
 /// 3. remove any non-linear encoding
 /// 4. apply any (inverse) rendering function
 ///    (which may have an intermediate working space to convert to)
-/// 5. apply any matrix transforms
-///    a. RGB to XYZ
+/// 5. apply any matrix transforms or other tristimulus mixing
+///    a. RGB/LMS/whatever to XYZ
 ///    b. color adaptation matrix
-///    c. XYZ to RGB
+///    c. XYZ to RGB/LMS/whatever
 ///    d. (or other)
 /// 6. apply any non-linear encoding
 /// 7. convert to any color opponent space
@@ -39,9 +54,9 @@ namespace color
 /// destination, with the rendering intent in the middle.
 ///
 /// steps (1 and 2) and (7 and 8) are usually combined into one
-/// transformation by incorporating offset and scale into the equation
-/// for the color opponency, but are logically described as separate
-/// steps here, and may be implemented separately for
+/// transformation / matrix by incorporating offset and scale into the
+/// equation for the color opponency, but are logically described as
+/// separate steps here, and may be implemented separately for
 /// understandability.
 ///
 /// additionally, depending on source and destination state, any of
@@ -51,8 +66,27 @@ namespace color
 /// in an operation that is defined across a buffer of values.
 ///
 template <typename T>
-inline void convert( T &a, T &b, T &c, const state &from, const state &to, int bits )
+inline void convert( T &a, T &b, T &c, const state &from, const state &to, const int bits, cone_response cr = cone_response::NONE )
 {
+	// TODO: handle integral values and loss of precision
+	to_full( a, b, c, a, b, c, from.current_space(), from.signal(), bits );
+	if ( has_opponency( from.current_space() ) )
+		remove_opponency( a, b, c, a, b, c, from.current_space() );
+	if ( from.curve() != to.curve() || !( to.is_same_matrix( from ) ) )
+	{
+		triplet<T> v;
+		v.x = linearize( a, from.curve() );
+		v.y = linearize( b, from.curve() );
+		v.z = linearize( c, from.curve() );
+		matrix<T> m = to.get_from_xyz_mat() * to.adaptation( from, cr ) * from.get_to_xyz_mat();
+		v = m * v;
+		a = encode( v.x, to.curve() );
+		b = encode( v.y, to.curve() );
+		c = encode( v.z, to.curve() );
+	}
+	add_opponency( a, b, c, a, b, c, to.current_space() );
+	// TODO: should we clamp SDI values ever?
+	from_full( a, b, c, a, b, c, to.current_space(), to.signal(), bits, false );
 }
 
 template <typename T, int fbits>
@@ -61,7 +95,7 @@ inline tristimulus_value<T, fbits> convert( const tristimulus_value<T, fbits> &v
 	using component_type = T;
 	using v_t = tristimulus_value<component_type, fbits>;
 	v_t r{ v.x(), v.y(), v.z(), to };
-	convert( r.x(), r.y(), r.z(), v.current_state(), to );
+	convert( r.x(), r.y(), r.z(), v.current_state(), v_t::valid_bits, to );
 	return r;
 }
 
@@ -70,39 +104,6 @@ template <typename T, int fbits>
 inline tristimulus_value<T, fbits> convert_space( const tristimulus_value<T, fbits> &v, space tospace )
 {
 	return convert( v, state{ v.current_state(), tospace } );
-}
-
-template <typename T, int fbits>
-inline tristimulus_value<T> desaturate( const tristimulus_value<T> &v, T amt, bool return_to_orig = true )
-{
-	auto lab = convert_space( v, space::CIE_LAB_76 );
-	lab.y() *= amt;
-	lab.z() *= amt;
-	return ( return_to_orig ) ? convert( lab, lab.current_state(), v.current_state() ) : lab;
-}
-
-template <typename T, int fbits>
-inline T distance( const state &s, const tristimulus_value<T, fbits> &a, const tristimulus_value<T, fbits> &b )
-{
-	using v_t = tristimulus_value<T, fbits>;
-	auto labA = convert_space( a, s, space::CIE_LAB_76 );
-	state labs = s;
-	labs.space( space::CIE_LAB_76 );
-	auto lab = convert( s, labs, v );
-	lab.y() *= amt;
-	lab.z() *= amt;
-	return convert( labs, s, lab );
-}
-
-template <typename T, int fbits>
-inline T distance( const state &s, const tristimulus_value<T, fbits> &a, const tristimulus_value<T, fbits> &b )
-{
-	state labs = s;
-	labs.space( space::CIE_LAB_76 );
-	auto lab = convert( s, labs, v );
-	lab.y() *= amt;
-	lab.z() *= amt;
-	return convert( labs, s, lab );
 }
 
 } // namespace color

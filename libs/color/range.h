@@ -6,6 +6,7 @@
 //
 
 #pragma once
+
 #include <cmath>
 #include <base/contract.h>
 #include "space.h"
@@ -18,7 +19,7 @@ namespace color
 /// @brief Describes the normalization of encoded values
 ///
 /// This covers all the variants of the classic full vs. legal 
-enum class range
+enum class range : uint8_t
 {
 	FULL, ///< normal 0 - 2^bits - 1 integer encoding 0.0 - 1.0
 	ITU_FULL, ///< 0 - 2^bits ITU-BT.2100 defined scaling w/ a clamp at 1023.0/1024.0 (so 4092 for 12-bit) (GRRRRRRRRR)
@@ -37,7 +38,7 @@ enum class range
 };
 
 template <typename T>
-void to_full( T &outA, T &outB, T &outC, const T inA, const T inB, const T inC, space s, range r, int bits )
+void to_full( T &outA, T &outB, T &outC, const T inA, const T inB, const T inC, const space s, const range r, const int bits )
 {
 	switch ( r )
 	{
@@ -70,34 +71,70 @@ void to_full( T &outA, T &outB, T &outC, const T inA, const T inB, const T inC, 
 	}
 }
 
-template <typename T>
-void sdi_clamp_illegal( T &a, T &b, T &c, int bits )
+template <class T, class Enable = void>
+struct sdi_util
 {
-	if ( bits <= 8 )
+	static inline void clamp_illegal( T &a, T &b, T &c, const int bits )
 	{
-		static const T minV = T(1.0/255.0);
-		static const T maxV = T(254.0/255.0);
-		a = std::min( maxV, std::max( minV, a ) );
-		b = std::min( maxV, std::max( minV, b ) );
-		c = std::min( maxV, std::max( minV, c ) );
+		if ( bits <= 8 )
+		{
+			static const T minV = T(1.0/255.0);
+			static const T maxV = T(254.0/255.0);
+			a = std::min( maxV, std::max( minV, a ) );
+			b = std::min( maxV, std::max( minV, b ) );
+			c = std::min( maxV, std::max( minV, c ) );
+		}
+		else if ( bits <= 10 )
+		{
+			static const T minV = T(4.0/1023.0);
+			static const T maxV = T(1019.0/1023.0);
+			a = std::min( maxV, std::max( minV, a ) );
+			b = std::min( maxV, std::max( minV, b ) );
+			c = std::min( maxV, std::max( minV, c ) );
+		}
+		else if ( bits <= 12 )
+		{
+			static const T minV = T(16.0/4095.0);
+			static const T maxV = T(4079.0/4095.0);
+			a = std::min( maxV, std::max( minV, a ) );
+			b = std::min( maxV, std::max( minV, b ) );
+			c = std::min( maxV, std::max( minV, c ) );
+		}
 	}
-	else if ( bits <= 10 )
+};
+
+template <class T>
+struct sdi_util<T, typename std::enable_if<std::is_integral<T>::value>::type>
+{
+	// TODO: can we special case based on the type of T?
+	static inline void clamp_illegal( T &a, T &b, T &c, const int bits )
 	{
-		static const T minV = T(4.0/1023.0);
-		static const T maxV = T(1019.0/1023.0);
-		a = std::min( maxV, std::max( minV, a ) );
-		b = std::min( maxV, std::max( minV, b ) );
-		c = std::min( maxV, std::max( minV, c ) );
+		if ( bits <= 8 )
+		{
+			static const T minV = T(1);
+			static const T maxV = T(254);
+			a = std::min( maxV, std::max( minV, a ) );
+			b = std::min( maxV, std::max( minV, b ) );
+			c = std::min( maxV, std::max( minV, c ) );
+		}
+		else if ( bits <= 10 )
+		{
+			static const T minV = T(4);
+			static const T maxV = T(1019);
+			a = std::min( maxV, std::max( minV, a ) );
+			b = std::min( maxV, std::max( minV, b ) );
+			c = std::min( maxV, std::max( minV, c ) );
+		}
+		else if ( bits <= 12 )
+		{
+			static const T minV = T(16);
+			static const T maxV = T(4079);
+			a = std::min( maxV, std::max( minV, a ) );
+			b = std::min( maxV, std::max( minV, b ) );
+			c = std::min( maxV, std::max( minV, c ) );
+		}
 	}
-	else
-	{
-		static const T minV = T(16.0/4095.0);
-		static const T maxV = T(4079.0/4095.0);
-		a = std::min( maxV, std::max( minV, a ) );
-		b = std::min( maxV, std::max( minV, b ) );
-		c = std::min( maxV, std::max( minV, c ) );
-	}
-}
+};
 
 /// assumes values in ~0-1
 /// clamping only applies to other ranges besides FULL?
@@ -121,10 +158,10 @@ void from_full( T &outA, T &outB, T &outC, const T inA, const T inB, const T inC
 			outC = inC * outScale;
 			if ( doClampIllegal )
 			{
-				static const T outMax = 1023.0/1024.0;
-				outA = std::max( 0.F, std::min( outA, outMax ) );
-				outB = std::max( 0.F, std::min( outB, outMax ) );
-				outC = std::max( 0.F, std::min( outC, outMax ) );
+				static const T outMax = T(1023.0/1024.0);
+				outA = std::max( T(0), std::min( outA, outMax ) );
+				outB = std::max( T(0), std::min( outB, outMax ) );
+				outC = std::max( T(0), std::min( outC, outMax ) );
 			}
 			break;
 		}
@@ -148,7 +185,7 @@ void from_full( T &outA, T &outB, T &outC, const T inA, const T inB, const T inC
 	}
 
 	if ( doClampIllegal )
-		sdi_clamp_illegal( outA, outB, outC, bits );
+		sdi_util<T>::clamp_illegal( outA, outB, outC, bits );
 }
 
 } // namespace color

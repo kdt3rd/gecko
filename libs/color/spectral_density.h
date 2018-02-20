@@ -77,7 +77,8 @@ public:
 	value_type start_wavelength( void ) const { return _lambda_s; }
 	value_type delta( void ) const { return _lambda_d; }
 
-	value_type sample( value_type l ) const
+	inline value_type operator()( value_type l ) const { return sample( l ); }
+	inline value_type sample( value_type l ) const
 	{
 		precondition( valid(), "sampling invalid spectral density table" );
 		value_type idxF = ( l - start_wavelength() ) / delta();

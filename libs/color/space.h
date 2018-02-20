@@ -16,11 +16,12 @@ namespace color
 /// The components in a tri-stimulus value be in the order that the acronym is in, so
 /// XYZ will be X = v.x(), Y = v.y(), Z = v.z(), RGB will be R = v.x(), G = v.y(), B = v.z(),
 /// YCbCr will be Y = v.x(), Cb = v.y(), Cr = v.z(), and so on
-enum class space
+enum class space : uint8_t
 {
 	RGB, ///< RGB, where chromaticities describe how to convert to XYZ
 	XYZ, ///< CIE XYZ, chromaticies record what RGB the XYZ came from
 	xyY, ///< CIE xyY projection, chromaticies record what RGB the XYZ came from
+	LMS_HPE, ///< LMS space, as defined for Hunt / RLAB based on Hunt-Pointer-Estevez
 	LMS_CAM02, ///< LMS space, as defined in CIECAM02, chromaticies record originating RGB
 	LMS_ICTCP, ///< LMS space, as defined in BT.2100, chromaticies record originating RGB
 	CHONG, ///< perceptually uniform, illuminant invariant, per Chong et al. siggraph 2008
@@ -41,6 +42,7 @@ enum class space
 	YCBCR_BT709, ///< YCbCr as defined in BT.709
 	YCBCR_BT2020, ///< YCbCr as defined in BT.2020
 	YCBCR_BT2100, ///< YCbCr as defined in BT.2100
+	YCBCR_SYCC, ///< YCbCr as defined in amendment 1 to IEC 61966-2-1:1999 (sRGB)
 	YCBCR_CUSTOM, ///< YCbCr computed using chromaticities
 	ICTCP, ///< ICtCp, as defined in BT.2100
 	IPT, ///< Ebner & Fairchild, 1998
@@ -51,7 +53,20 @@ enum class space
 	HSL_HEX, ///< HSL, using hexagonal approximation
 	HSL_CYL, ///< HSL, using cylindrical (polar) math
 	/// @}
+	UNKNOWN ///< in some unknown state
 };
+
+// ycbcr_sYCC
+//
+// [ Y  ]   [  0.2990  0.5870  0.1140 ][ R ]
+// [ Cb ] = [ -0.1687 -0.3312  0.5000 ][ G ]
+// [ Cr ]   [  0.5000 -0.4187 -0.0813 ][ B ]
+
+// wandell LMS_OPPONENT
+//
+// [ O1 ] = [  1.0000  0.0000  0.0000 ][ L ]
+// [ O2 ] = [ -0.5900  0.8000 -0.1200 ][ M ]
+// [ O3 ] = [ -0.3400 -0.1100  0.9300 ][ S ]
 
 } // namespace color
 

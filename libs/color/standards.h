@@ -27,7 +27,7 @@ enum class standard
 	BT_1886,
 	BT_2100_PQ,
 	BT_2100_HLG,
-	ACES_v1_0_3,
+	ACES_v1_0_3, // TODO: do we need separate versioning like this, or can we have metadata?
 
 	// the rest are not standards persay, but common practice
 	DCI_P3,
@@ -51,13 +51,20 @@ public:
 	typedef chromaticities<value_type> cx;
 
 	constexpr standard_definition( void ) = default;
+	constexpr standard_definition( const standard_definition & ) noexcept = default;
+	standard_definition &operator=( const standard_definition & ) noexcept = default;
+	constexpr standard_definition( standard_definition && ) noexcept = default;
+	standard_definition &operator=( standard_definition && ) noexcept = default;
+	~standard_definition( void ) = default;
+
 	constexpr standard_definition( const cx &c,
+								   value_type black,
 								   value_type luminance,
 								   transfer oetf_crv,
 								   transfer eotf_crv,
 								   space chromaTransform,
 								   ootf renderingFunc = ootf::NOOP )
-		: _chroma( c ), _lum_scale( lum ),
+		: _chroma( c ), _black_lum( black ), _peak_lum( luminance ),
 		  _oetf_curve( oetf_crv ), _eotf_curve( eotf_crv ),
 		  _chroma_space( chromaTransform ), _rendering( renderingFunc )
 	{}
@@ -67,7 +74,11 @@ public:
 	constexpr const cx &chroma( void ) const { return _chroma; }
 	/// peak luminance. More generally, mostly for non-integer standards,
 	/// corresponds to what 1.0 should map to.
-	constexpr value_type peak_luminance( void ) const { return _lum_scale; }
+	/// this is the expected peak luminance of the reference
+	constexpr value_type peak_luminance( void ) const { return _peak_lum; }
+	/// black luminance
+	/// this is the expected luminance for black values of the reference
+	constexpr value_type peak_luminance( void ) const { return _black_lum; }
 	/// non-linear OETF (opto-electrical) transfer curve to be used
 	constexpr transfer oetf_curve( void ) const { return _oetf_curve; }
 	/// non-linear EOTF (electro-optical) transfer curve to be used
@@ -77,182 +88,29 @@ public:
 	/// prescribed rendering (mostly only for HDR standards)
 	constexpr ootf rendering_ootf( void ) const { return _rendering; }
 
-	// TODO: add ambient / surround for viewing environment?
+	// TODO: do we want the actual rounded RGB<->XYZ matrices?
+	//       or compute the (more accurate) versions from the chromaticities?
+	// TODO: add ambient / surround for viewing environment requirements?
+
+	constexpr state capture_state( int bits, range r = range::FULL, bool isRGB = true ) const
+	{
+		return state( isRGB ? space::RGB : chroma_space(), _chroma, _peak_lum, r, _oetf_curve, bits );
+	}
+	constexpr state display_state( int bits, range r = range::FULL, bool isRGB = true ) const
+	{
+		return state( isRGB ? space::RGB : chroma_space(), _chroma, _peak_lum, r, _eotf_curve, bits );
+	}
 private:
 	cx _chroma;
-	value_type _lum_scale = value_type(100.0);
+	value_type _black_lum = value_type(0.0);
+	value_type _peak_lum = value_type(100.0);
 	transfer _oetf_curve = transfer::LINEAR;
 	transfer _eotf_curve = transfer::LINEAR;
 	space _chroma_space = space::RGB;
 	ootf _rendering = ootf::NOOP;
 };
 
-namespace detail
-{
-
-template <standard s>
-struct standard_ctor
-{
-	static constexpr standard_definition make( void ) { return (false) ? standard_definition() : throw std::invalid_argument( "unknown standard" ); }
-};
-
-template <>
-struct standard_ctor<standard::SRGB>
-{
-	static constexpr standard_definition make( void )
-	{
-		return standard_definition( two_deg::Rec_709<standard_definition::value_type>(),
-									80.0, transfer::GAMMA_sRGB, transfer::GAMMA_sRGB,
-									space::YCBCR_BT709 );
-	}
-};
-
-template <>
-struct standard_ctor<standard::BT_601_NTSC>
-{
-	static constexpr standard_definition make( void )
-	{
-		return standard_definition( two_deg::Rec_601_NTSC<standard_definition::value_type>(),
-									100.0, transfer::GAMMA_BT601, transfer::GAMMA_BT1886,
-									space::YCBCR_BT601 );
-	}
-};
-
-template <>
-struct standard_ctor<standard::BT_601_PAL>
-{
-	static constexpr standard_definition make( void )
-	{
-		return standard_definition( two_deg::Rec_601_PAL<standard_definition::value_type>(),
-									100.0, transfer::GAMMA_BT601, transfer::GAMMA_BT1886,
-									space::YCBCR_BT601 );
-	}
-};
-
-template <>
-struct standard_ctor<standard::BT_709>
-{
-	static constexpr standard_definition make( void )
-	{
-		return standard_definition( two_deg::Rec_709<standard_definition::value_type>(),
-									100.0, transfer::GAMMA_BT709, transfer::GAMMA_BT1886,
-									space::YCBCR_BT709 );
-	}
-};
-
-template <>
-struct standard_ctor<standard::BT_2020>
-{
-	static constexpr standard_definition make( void )
-	{
-		return standard_definition( two_deg::Rec_2020<standard_definition::value_type>(),
-									100.0, transfer::GAMMA_BT2020, transfer::GAMMA_BT1886,
-									space::YCBCR_BT2020 );
-	}
-};
-
-template <>
-struct standard_ctor<standard::BT_1886>
-{
-	static constexpr standard_definition make( void )
-	{
-		return standard_definition( two_deg::Rec_709<standard_definition::value_type>(),
-									100.0, transfer::GAMMA_BT1886, transfer::GAMMA_BT1886,
-									space::YCBCR_BT709 );
-	}
-};
-
-template <>
-struct standard_ctor<standard::BT_2100_PQ>
-{
-	static constexpr standard_definition make( void )
-	{
-		return standard_definition( two_deg::Rec_709<standard_definition::value_type>(),
-									100.0, transfer::PQ, transfer::PQ, space::ICTCP,
-									ootf::BT2100_PQ_OOTF );
-	}
-};
-
-template <>
-struct standard_ctor<standard::BT_2100_HLG>
-{
-	static constexpr standard_definition make( void )
-	{
-		return standard_definition( two_deg::Rec_709<standard_definition::value_type>(),
-									100.0, transfer::HLG_OETF, transfer::HLG_EOTF,
-									space::YCBCR_BT2100, ootf::BT2100_HLG_OOTF );
-	}
-};
-
-template <>
-struct standard_ctor<standard::ACES_v1_0_3>
-{
-	static constexpr standard_definition make( void )
-	{
-		return standard_definition( two_deg::ACES_AP0<standard_definition::value_type>(),
-									100.0, transfer::LINEAR, transfer::LINEAR,
-									space::RGB, ootf::ACES_RRT_v1_0_3 );
-	}
-};
-
-template <>
-struct standard_ctor<standard::DCI_P3>
-{
-	static constexpr standard_definition make( void )
-	{
-		return standard_definition( two_deg::P3_DCI<standard_definition::value_type>(),
-									48.0, transfer::GAMMA_DCI, transfer::GAMMA_DCI,
-									space::XYZ );
-	}
-};
-
-template <>
-struct standard_ctor<standard::DCI_P3_D65>
-{
-	static constexpr standard_definition make( void )
-	{
-		return standard_definition( two_deg::P3_D65<standard_definition::value_type>(),
-									48.0, transfer::GAMMA_DCI, transfer::GAMMA_DCI,
-									space::XYZ );
-	}
-};
-
-template <>
-struct standard_ctor<standard::SONY_SLOG>
-{
-	static constexpr standard_definition make( void )
-	{
-		return standard_definition( two_deg::SONY_SGamut<standard_definition::value_type>(),
-									100.0, transfer::SONY_SLOG3, transfer::SONY_SLOG3,
-									space::RGB );
-	}
-};
-
-template <>
-struct standard_ctor<standard::SONY_SLOG_CINE>
-{
-	static constexpr standard_definition make( void )
-	{
-		return standard_definition( two_deg::SONY_SGamut3Cine<standard_definition::value_type>(),
-									48.0, transfer::SONY_SLOG3, transfer::SONY_SLOG3,
-									space::RGB );
-	}
-};
-
-template <>
-struct standard_ctor<standard::ARRI_WIDE_GAMUT>
-{
-	static constexpr standard_definition make( void )
-	{
-		return standard_definition( two_deg::ARRI_Alexa_WCG<standard_definition::value_type>(),
-									48.0,
-									transfer::ARRI_LOGC_SCENELIN_SUP3,
-									transfer::ARRI_LOGC_SCENELIN_SUP3,
-									space::RGB );
-	}
-};
-
-} // namespace detail
+#include "standards_util.h"
 
 template <standard s>
 constexpr standard_definition make_standard( void )

@@ -11,6 +11,7 @@
 #include <limits>
 #include <stdexcept>
 #include <ostream>
+#include <algorithm>
 #include "triplet.h"
 
 ////////////////////////////////////////
@@ -30,21 +31,27 @@ class matrix
 public:
 	typedef V value_type;
 
-	inline constexpr matrix( void ) noexcept : _m{ value_type(1), value_type(0), value_type(0), value_type(0), value_type(1), value_type(0), value_type(0), value_type(0), value_type(1) }
+	inline constexpr matrix( void ) noexcept : _m{{ value_type(1), value_type(0), value_type(0), value_type(0), value_type(1), value_type(0), value_type(0), value_type(0), value_type(1) }}
 	{}
 	/// constructs a diagonal matrix
-	inline constexpr matrix( value_type a, value_type b, value_type c ) noexcept : _m{ a, value_type(0), value_type(0), value_type(0), b, value_type(0), value_type(0), value_type(0), c }
+	inline constexpr matrix( value_type a, value_type b, value_type c ) noexcept : _m{{ a, value_type(0), value_type(0), value_type(0), b, value_type(0), value_type(0), value_type(0), c }}
 	{}
-	inline constexpr matrix( std::initializer_list<value_type> l ) noexcept : _m(l) {}
-	inline constexpr matrix( value_type m00, value_type m01, value_type m02, value_type m10, value_type m11, value_type m12, value_type m20, value_type m21, value_type m22 ) noexcept : _m{ m00, m01, m02, m10, m11, m12, m20, m21, m22 } {}
-	inline constexpr matrix( const triplet<value_type> &c1, const triplet<value_type> &c2, const triplet<value_type> &c3 ) noexcept : _m{ c1.x, c2.x, c3.x, c1.y, c2.y, c3.y, c1.z, c2.z, c3.z } {}
+	inline matrix( std::initializer_list<value_type> l )
+	{
+		if ( l.size() == 9 )
+			std::copy( l.begin(), l.end(), _m.begin() );
+		else
+			throw std::logic_error( "Initializing 3x3 color matrix with invalid number of elements" );
+	}
+	inline constexpr matrix( value_type m00, value_type m01, value_type m02, value_type m10, value_type m11, value_type m12, value_type m20, value_type m21, value_type m22 ) noexcept : _m{{ m00, m01, m02, m10, m11, m12, m20, m21, m22 }} {}
+	inline constexpr matrix( const triplet<value_type> &c1, const triplet<value_type> &c2, const triplet<value_type> &c3 ) noexcept : _m{{ c1.x, c2.x, c3.x, c1.y, c2.y, c3.y, c1.z, c2.z, c3.z }} {}
 	inline constexpr matrix( const matrix & ) = default;
 	inline constexpr matrix( matrix && ) = default;
 	inline matrix &operator=( const matrix & ) = default;
 	inline matrix &operator=( matrix && ) = default;
 
-	inline value_type *operator[]( int i ) { return _m[i*3]; }
-	inline const value_type *operator[]( int i ) const { return _m[i*3]; }
+	inline value_type *operator[]( int i ) { return &_m[i*3]; }
+	inline const value_type *operator[]( int i ) const { return &_m[i*3]; }
 
 	inline void identity( void ) noexcept
 	{
@@ -112,6 +119,7 @@ public:
 		g() = gn;
 		h() = hn;
 		i() = in;
+		return *this;
 	}
 
 	static constexpr matrix diag( value_type a, value_type b, value_type c )

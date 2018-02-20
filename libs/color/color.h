@@ -12,6 +12,7 @@
 #include "standards.h"
 #include "util.h"
 #include <type_traits>
+#include <base/contract.h>
 
 ////////////////////////////////////////
 
@@ -40,7 +41,8 @@ public:
 	constexpr tristimulus_value &operator=( tristimulus_value && ) = default;
 	explicit constexpr tristimulus_value( const state &s ) : _state( o._state ) {}
 	explicit constexpr tristimulus_value( state &&s ) : _state( std::move( o._state ) ) {}
-	constexpr tristimulus_value( component_type a, component_type b, component_type c, const state &s ) : _x( a ), _y( b ), _z( c ), _state( o._state ) {}
+	constexpr tristimulus_value( component_type a, component_type b, component_type c, const state &s ) : _x( a ), _y( b ), _z( c ), _state( s ) {}
+	constexpr tristimulus_value( component_type a, component_type b, component_type c, const standard &s ) : _x( a ), _y( b ), _z( c ), _state( o._state ) {}
 	
 	constexpr tristimulus_value &operator=( const tristimulus_value & ) = default;
 	template <typename To, int bO>
@@ -74,20 +76,14 @@ public:
 		_z = c;
 	}
 
-	void convert( const state &s )
-	{
-		
-	}
-
-	tristimulus_value convert( const state &s ) const
-	{
-	}
+	void convert( const state &s );
+	tristimulus_value convert( const state &s ) const;
+	void convert( const standard &s );
+	tristimulus_value convert( const standard &s ) const;
 
 	/// convenience for when you just want to change what space
 	/// the current tristimulus value is in
-	tristimulus_value convert( space s ) const
-	{
-	}
+	tristimulus_value convert( space s ) const;
 
 	double deltaE_1976( const tristimulus_value &o ) const;
 	double deltaE_1994( const tristimulus_value &o ) const;
@@ -95,6 +91,7 @@ public:
 	double deltaE_CMC( const tristimulus_value &o ) const;
 	/// computes the euclidian distance in lab
 	double deltaLAB( const tristimulus_value &o ) const;
+	double deltaMahalanobis( const triplet<component_type> &mean, const matrix<component_type> &cov_matrix_inv ) const;
 	
 	constexpr const state &current_state( void ) const { return _state; }
 
@@ -102,33 +99,35 @@ protected:
 	component_type _x = component_type(0);
 	component_type _y = component_type(0);
 	component_type _z = component_type(0);
-	state _state = { make_standard<standard::SRGB>() };
+	state _state = { make_standard<standard::SRGB>().display_state( valid_bits ); };
 };
 
-/// mixes two colors together in linear RGB
-template <typename Ta, int bA, typename Tb, int bB>
-tristimulus_value<typename std::common_type<Ta, Tb>::type, (bA <= bB) ? bB : bA>
-mix( const tristimulus_value<Ta, int bA> &a, const tristimulus_value<Tb, int bB> &b, float m = 0.5F )
+////////////////////////////////////////
+
+template <typename V, int fb>
+inline constexpr bool operator==( const tristimulus_value<V, fb> &a,
+								  const tristimulus_value<V, fb> &b ) noexcept
 {
-	
+	return ( a.current_state() == b.current_state() &&
+			 base::equal( a.x(), b.x() ) && base::equal( a.y(), b.y() ) &&
+			 base::equal( a.z(), b.z() ) );
 }
 
-/// mixes two colors together in whatever current space they are in
-/// NB: this is non-standard, hence the function name, but some programs need it for correct behavior
-template <typename Ta, int bA, typename Tb, int bB>
-tristimulus_value<typename std::common_type<Ta, Tb>::type, (bA <= bB) ? bB : bA>
-unnorm_mix( const tristimulus_value<Ta, int bA> &a, const tristimulus_value<Tb, int bB> &b, float m = 0.5F )
+template <typename V, int fb>
+inline constexpr bool operator!=( const tristimulus_value<V, fb> &a,
+								  const tristimulus_value<V, fb> &b ) noexcept
 {
-	
+	return !( a == b );
 }
-	
+
+////////////////////////////////////////
 
 template <typename T, int forcebits = -1>
 class value_with_alpha
 {
 public:
 	using component_type = T;
-	using value_type = tristimulus_value<T>;
+	using value_type = tristimulus_value<T, forcebits>;
 
 	constexpr value_with_alpha( void ) = default;
 	constexpr ~value_with_alpha( void ) = default;
@@ -167,5 +166,6 @@ using color4d = value_with_alpha<double>;
 
 } // namespace color
 
+#include "operations.h"
 
 

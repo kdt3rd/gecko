@@ -8,6 +8,7 @@
 #pragma once
 
 #include <type_traits>
+#include <base/math_functions.h>
 
 ////////////////////////////////////////
 
@@ -30,6 +31,44 @@ public:
 
 	value_type x, y, z;
 };
+
+////////////////////////////////////////
+
+template <typename V>
+inline constexpr bool operator==( const triplet<V> &a, const triplet<V> &b ) noexcept
+{
+	return base::equal( a.x, b.x ) && base::equal( a.y, b.y ) && base::equal( a.z, b.z );
+}
+
+template <typename V>
+inline constexpr bool operator!=( const triplet<V> &a, const triplet<V> &b ) noexcept
+{
+	return !( a == b );
+}
+
+template <typename V>
+inline constexpr triplet<V> operator+( const triplet<V> &a, const triplet<V> &b ) noexcept
+{
+	return triplet<V>( a.x + b.x, a.y + b.y, a.z + a.z );
+}
+
+template <typename V>
+inline constexpr triplet<V> operator-( const triplet<V> &a, const triplet<V> &b ) noexcept
+{
+	return triplet<V>( a.x - b.x, a.y - b.y, a.z - a.z );
+}
+
+template <typename V>
+inline constexpr triplet<V> operator*( const triplet<V> &a, const triplet<V> &b ) noexcept
+{
+	return triplet<V>( a.x * b.x, a.y * b.y, a.z * a.z );
+}
+
+template <typename V>
+inline constexpr triplet<V> operator/( const triplet<V> &a, const triplet<V> &b ) noexcept
+{
+	return triplet<V>( a.x / b.x, a.y / b.y, a.z / a.z );
+}
 
 } // namespace color
 
