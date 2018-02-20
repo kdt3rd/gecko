@@ -10,20 +10,21 @@
 #endif
 
 #ifdef HAVE_PYTHON
-#pragma GCC diagnostic ignored "-Wreserved-id-macro"
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#include <Python.h>
-#endif
-#if PY_MAJOR_VERSION <= 1
-#error python 2 or higher is required
-#else
-# if PY_MAJOR_VERSION < 3
-#  define IS_PYTHON2 1
-# elif PY_MAJOR_VERSION < 4
-#  define IS_PYTHON3 1
+# if defined(__clang__)
+#  pragma GCC diagnostic ignored "-Wreserved-id-macro"
+#  pragma GCC diagnostic ignored "-Wold-style-cast"
+# endif
+# include <Python.h>
+# if PY_MAJOR_VERSION <= 1
+#  error python 2 or higher is required
+# else
+#  if PY_MAJOR_VERSION < 3
+#   define IS_PYTHON2 1
+#  elif PY_MAJOR_VERSION < 4
+#   define IS_PYTHON3 1
+#  endif
 # endif
 #endif
-
 
 #include "context.h"
 #include <stdexcept>
@@ -161,6 +162,7 @@ void context::pop_eval_lookup( void )
 bool context::evaluate( bool &result, const char *s )
 {
 #ifdef HAVE_PYTHON
+	return true;
 #else
 	return false;
 #endif
@@ -171,6 +173,7 @@ bool context::evaluate( bool &result, const char *s )
 bool context::evaluate( int &result, const char *s )
 {
 #ifdef HAVE_PYTHON
+	return true;
 #else
 	return false;
 #endif
@@ -181,6 +184,7 @@ bool context::evaluate( int &result, const char *s )
 bool context::evaluate( float &result, const char *s )
 {
 #ifdef HAVE_PYTHON
+	return true;
 #else
 	return false;
 #endif
@@ -191,6 +195,7 @@ bool context::evaluate( float &result, const char *s )
 bool context::evaluate( double &result, const char *s )
 {
 #ifdef HAVE_PYTHON
+	return true;
 #else
 	return false;
 #endif
@@ -201,6 +206,7 @@ bool context::evaluate( double &result, const char *s )
 bool context::evaluate( int64_t &result, const char *s )
 {
 #ifdef HAVE_PYTHON
+	return true;
 #else
 	return false;
 #endif
@@ -211,6 +217,7 @@ bool context::evaluate( int64_t &result, const char *s )
 bool context::evaluate( std::string &result, const char *s )
 {
 #ifdef HAVE_PYTHON
+	return true;
 #else
 	return false;
 #endif
@@ -221,6 +228,7 @@ bool context::evaluate( std::string &result, const char *s )
 bool context::evaluate( std::wstring &result, const char *s )
 {
 #ifdef HAVE_PYTHON
+	return true;
 #else
 	return false;
 #endif
