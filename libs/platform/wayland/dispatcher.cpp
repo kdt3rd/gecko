@@ -5,9 +5,12 @@
 // See the accompanying LICENSE.txt file for terms
 //
 
+#include "dispatcher.h"
+
 #include <iostream>
 #include <stdlib.h>
 #include <sstream>
+#include <base/compiler_support.h>
 #include <base/contract.h>
 #include <base/pointer.h>
 #include <base/meta.h>
@@ -16,7 +19,6 @@
 #include <sys/select.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "dispatcher.h"
 
 namespace platform { namespace wayland
 {

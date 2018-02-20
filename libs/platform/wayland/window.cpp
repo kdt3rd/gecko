@@ -6,17 +6,18 @@
 //
 
 #include "window.h"
-#include <base/pointer.h>
 
-#include <string.h>
-#include <iostream>
-
+#include <base/compiler_support.h>
 #include <base/contract.h>
+#include <base/pointer.h>
 #include <base/scope_guard.h>
-#include <stdexcept>
 
 #include <gl/check.h>
 #include <gl/opengl.h>
+
+#include <string.h>
+#include <iostream>
+#include <stdexcept>
 
 namespace {
 
