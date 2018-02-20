@@ -69,7 +69,7 @@ Concepts that need to be thought about:
   * per window
 - task bar / tray objects
 - any window manager interaction
-- global settings (themes / colors)
+- global settings (themes / colors) *see note on HDR below*
 - system menus (mostly for OS/X support where there is a top menu)
   except this enables centralized accelerator dispatch
 - drag and drop
@@ -87,6 +87,13 @@ such.
 
 However, alternate rendering API should be implemented eventually, to
 support remote rendering of interfaces when possible.
+
+One major consideration is to think about HDR displays, where we may
+want to run the UI on a monitor that is in HDR mode (i.e. PQ or
+HLG). As such, the colors that the UI is defined in should have color
+state, and the UI system should respect that and transform colors
+prior to drawing, or on creation of the (logical) window on a
+particular screen.
 
 ## Primary Concepts / Classes ##
 
