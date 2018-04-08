@@ -24,7 +24,9 @@ class widget_ptr
 {
 public:
 	using widget_type = T;
-	using pointer_type = std::shared_ptr<widget_type>;
+	using pointer = widget_type *;
+	using reference = widget_type &;
+	using storage_type = std::shared_ptr<widget_type>;
 
 	template <typename ... Args>
 	widget_ptr( Args && ... args )
@@ -32,8 +34,8 @@ public:
 	{
 	}
 
-	explicit widget_ptr( const pointer_type &x ) : _instance( x ) {}
-	explicit widget_ptr( pointer_type &&x ) : _instance( std::move( x ) ) {}
+	explicit widget_ptr( const storage_type &x ) : _instance( x ) {}
+	explicit widget_ptr( storage_type &&x ) : _instance( std::move( x ) ) {}
 	widget_ptr( widget_ptr &o ) : _instance( o._instance ) {}
 	widget_ptr( const widget_ptr & ) = default;
 	constexpr widget_ptr( widget_ptr && ) noexcept = default;
@@ -41,18 +43,18 @@ public:
 	widget_ptr &operator=( widget_ptr && ) noexcept = default;
 	~widget_ptr( void ) = default;
 
-	T &operator *() const noexcept { return *_instance; }
-	T *operator ->() const noexcept { return get(); }
-	T *get() const noexcept { return _instance.get(); }
+	reference operator *() const noexcept { return *_instance; }
+	pointer operator ->() const noexcept { return get(); }
+	pointer get() const noexcept { return _instance.get(); }
 
 	void swap( widget_ptr &o ) noexcept { _instance.swap( o._instance ); }
 
 	explicit operator bool() const noexcept { return static_cast<bool>( _instance ); }
 
-	explicit operator pointer_type() const noexcept { return _instance; }
+	explicit operator storage_type() const noexcept { return _instance; }
 
 private:
-	pointer_type _instance;
+	storage_type _instance;
 };
 
 template <typename X, typename Y>
