@@ -38,12 +38,12 @@ public:
 	constexpr ~tristimulus_value( void ) = default;
 	tristimulus_value( const tristimulus_value & ) = default;
 	constexpr tristimulus_value( tristimulus_value && ) = default;
-	constexpr tristimulus_value &operator=( tristimulus_value && ) = default;
 	explicit constexpr tristimulus_value( const state &s ) : _state( o._state ) {}
 	explicit constexpr tristimulus_value( state &&s ) : _state( std::move( o._state ) ) {}
 	constexpr tristimulus_value( component_type a, component_type b, component_type c, const state &s ) : _x( a ), _y( b ), _z( c ), _state( s ) {}
 	constexpr tristimulus_value( component_type a, component_type b, component_type c, const standard &s ) : _x( a ), _y( b ), _z( c ), _state( o._state ) {}
 	
+	constexpr tristimulus_value &operator=( tristimulus_value && ) = default;
 	constexpr tristimulus_value &operator=( const tristimulus_value & ) = default;
 	template <typename To, int bO>
 	tristimulus_value &operator=( const tristimulus_value<To, bO> &o )

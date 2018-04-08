@@ -57,16 +57,11 @@ public:
 	constexpr state( space s,
 					 const cx &c,
 					 value_type lum,
-					 range r,
-					 transfer crv,
-					 value_type crv_a = value_type(1.0),
-					 value_type crv_b = value_type(0.0),
-					 value_type crv_c = value_type(1.0),
-					 value_type crv_d = value_type(0.0),
-					 value_type black_off = value_type(0.0) ) noexcept
-		: _space( s ), _range( r ), _curve( crv ), _chroma( c ), _lum_scale( lum ),
-		  _black_offset( black_off ),
-		  _curve_a( crv_a ), _curve_b( crv_b ), _curve_c( crv_c ), _curve_d( crv_d )
+					 value_type black_off,
+					 range lumr,
+					 transfer crv ) noexcept
+		: _space( s ), _range( lumr ), _curve( crv ), _chroma( c ), _lum_scale( lum ),
+		  _black_offset( black_off ), _curve_ctl( get_curve_defaults( crv ) )
 	{}
 	constexpr state( const state &s ) noexcept = default;
 	constexpr state( state &&s ) noexcept = default;
@@ -78,28 +73,28 @@ public:
 		: _space( s ), _range( st._range ), _curve( st._curve ),
 		  _chroma( st._chroma ), _lum_scale( st._lum_scale ),
 		  _black_offset( st._black_offset ),
-		  _curve_a( st._curve_a ), _curve_b( st._curve_b ), _curve_c( st._curve_c ),
-		  _curve_d( st._curve_d )
+		  _curve_ctl( st._curve_ctl )
 	{}
 	constexpr state( const state &st, range r )
 		: _space( st._space ), _range( r ), _curve( st._curve ),
 		  _chroma( st._chroma ), _lum_scale( st._lum_scale ),
-		  _black_offset( st._black_offset ),
-		  _curve_a( st._curve_a ), _curve_b( st._curve_b ), _curve_c( st._curve_c ),
-		  _curve_d( st._curve_d )
+		  _black_offset( st._black_offset ), _curve_ctl( st._curve_ctl )
 	{}
-	constexpr state( const state &st, transfer t,
-					 value_type crv_a = value_type(1.0),
-					 value_type crv_b = value_type(0.0),
-					 value_type crv_c = value_type(1.0),
-					 value_type crv_d = value_type(0.0) )
+	constexpr state( const state &st, transfer t, bool reset = true )
 		: _space( st._space ), _range( st._range ), _curve( t ),
 		  _chroma( st._chroma ), _lum_scale( st._lum_scale ),
 		  _black_offset( st._black_offset ),
-		  _curve_a( crv_a ), _curve_b( crv_b ), _curve_c( crv_c ), _curve_d( crv_d )
+		  _curve_ctl( reset ? get_curve_defaults( t ) : st._curve_ctl )
+	{}
+	constexpr state( const state &st, transfer t, const transfer_curve_control &ctl )
+		: _space( st._space ), _range( st._range ), _curve( t ),
+		  _chroma( st._chroma ), _lum_scale( st._lum_scale ),
+		  _black_offset( st._black_offset ),
+		  _curve_ctl( ctl )
 	{}
 	/// @}
-		
+	~state( void ) = default;
+
 	/// The current space the triplet values corresponding to this state
 	/// are transformed to
 	constexpr space current_space( void ) const { return _space; }
@@ -146,26 +141,19 @@ public:
 	/// applied to the data corresponding to this state
 	constexpr transfer curve( void ) const { return _curve; }
 	/// has different meanings depending on the curve
-	constexpr value_type curve_a( void ) const { return _curve_a; }
-	/// has different meanings depending on the curve
-	constexpr value_type curve_b( void ) const { return _curve_b; }
-	/// has different meanings depending on the curve
-	constexpr value_type curve_c( void ) const { return _curve_c; }
-	/// has different meanings depending on the curve
-	constexpr value_type curve_d( void ) const { return _curve_d; }
+	constexpr const transfer_curve_control &curve_controls( void ) const { return _curve_ctl; }
 
 	/// Define the transfer curve applied to the data
-	inline void curve( transfer crv,
-					   value_type a = value_type(1.0),
-					   value_type b = value_type(0.0),
-					   value_type c = value_type(1.0),
-					   value_type d = value_type(0.0) )
+	inline void curve( transfer crv, bool reset_controls = true )
 	{
 		_curve = crv;
-		_curve_a = a;
-		_curve_b = b;
-		_curve_c = c;
-		_curve_d = d;
+		if ( reset_controls )
+			_curve_ctl = get_curve_defaults( crv );
+	}
+	inline void curve( transfer crv, const transfer_curve_control &ctl )
+	{
+		_curve = crv;
+		_curve_ctl = ctl;
 	}
 
 	inline cx::mat get_to_xyz_mat( value_type Y = value_type(1) ) const
@@ -271,10 +259,7 @@ private:
 	cx _chroma = cx();
 	value_type _lum_scale = value_type(100.0);
 	value_type _black_offset = value_type(0.0);
-	value_type _curve_a = value_type(1.0);
-	value_type _curve_b = value_type(0.0);
-	value_type _curve_c = value_type(1.0);
-	value_type _curve_d = value_type(0.0);
+	transfer_curve_control _curve_ctl = transfer_curve_control();
 };
 
 } // namespace color

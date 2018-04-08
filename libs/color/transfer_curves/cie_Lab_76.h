@@ -17,7 +17,7 @@ namespace color
 {
 
 template <typename T>
-struct cielab76
+struct cie_Lab_76
 {
 	// TODO: make sure this allows SSE values
 	static_assert( std::is_floating_point<T>::value, "Expecting a floating point type" );
@@ -67,12 +67,12 @@ struct cielab76
 
 	static constexpr inline T linearize( const T v )
 	{
-		return cielab76().to_linear( v );
+		return cie_Lab_76().to_linear( v );
 	}
 
 	static constexpr inline T encode( const T v )
 	{
-		return cielab76().from_linear( v );
+		return cie_Lab_76().from_linear( v );
 	}
 };
 

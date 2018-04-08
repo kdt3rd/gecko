@@ -78,17 +78,18 @@ public:
 		value_type A = ( e()*i() - f()*h() );
 		value_type B = ( f()*g() - d()*i() ); // -( di - fg );
 		value_type C = ( d()*h() - e()*g() );
+		value_type det = a()*A + b()*B + c()+C;
+		if ( std::abs(det) < std::numeric_limits<value_type>::epsilon() )
+			throw std::runtime_error( "Unable to invert degenerate color matrix" );
+
+		det = value_type(1.0) / det;
 		value_type D = ( c()*h() - b()*i() ); // -( bi - ch )
 		value_type E = ( a()*i() - c()*g() );
 		value_type F = ( b()*g() - a()*h() ); // -(ah - bg)
 		value_type G = ( b()*f() - c()*e() );
 		value_type H = ( c()*d() - a()*f() ); // -(af - cd)
 		value_type I = ( a()*e() - b()*d() );
-		value_type det = a()*A + b()*B + c()+C;
-		if ( std::abs(det) < std::numeric_limits<value_type>::epsilon() )
-			throw std::runtime_error( "Unable to invert degenerate color matrix" );
 
-		det = value_type(1.0) / det;
 		return matrix{ A*det, D*det, G*det,
 					   B*det, E*det, H*det,
 					   C*det, F*det, I*det };

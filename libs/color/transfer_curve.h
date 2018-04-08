@@ -19,8 +19,9 @@
 //
 // TODO: move all the math to a separate header tree to lower dependencies
 // when just carrying the state???
-#include "transfer_midgraylog.h"
-#include "transfer_gamma_srgb.h"
+#include "transfer_curves/mid_gray_log.h"
+#include "transfer_curves/gamma_srgb.h"
+#include "transfer_curves/cie_Lab_76.h"
 
 ////////////////////////////////////////
 
@@ -62,6 +63,7 @@ enum class transfer : uint8_t
 	ACES_cc, ///< ACES working space
 	ACES_cct, ///< ACES working space2
 	ACES_proxy, ///< ACES proxy space
+	CIE_LAB_76, ///< CIE L*a*b* non-linear curve from 1976
 };
 
 /// @brief standard rendering functions (opto-opto transforms)
@@ -75,6 +77,44 @@ enum class ootf : uint8_t
 	BT2100_HLG_OOTF, ///< OOTF defined for HLG
 	ACES_RRT_v1_0_3, ///< ACES RRT v1.0.3
 };
+
+struct transfer_curve_control
+{
+	typedef double value_type;
+
+	constexpr transfer_curve_control( void ) noexcept = default;
+	constexpr transfer_curve_control( value_type a, value_type b,
+									  value_type c, value_type d,
+									  value_type e ) noexcept
+		: _A( a ), _B( b ), _C( c ), _D( d ), _E( e )
+	{}
+	constexpr transfer_curve_control( const transfer_curve_control &s ) noexcept = default;
+	constexpr transfer_curve_control( transfer_curve_control &&s ) noexcept = default;
+	transfer_curve_control &operator=( const transfer_curve_control &s ) noexcept = default;
+	transfer_curve_control &operator=( transfer_curve_control &&s ) noexcept = default;
+	~transfer_curve_control( void ) = default;
+
+	value_type _A = value_type(1);
+	value_type _B = value_type(0);
+	value_type _C = value_type(1);
+	value_type _D = value_type(0);
+	value_type _E = value_type(0);
+};
+
+inline constexpr transfer_curve_control
+get_curve_defaults( transfer t )
+{
+	// four pt gamma has values too, but the defaults are good per above
+	// TODO: know about the ARRI E.I.
+	return t == transfer::MID_GRAY_LOG ?
+		transfer_curve_control( 0.18, 445, 0.6, 0.002, 1023 ) :
+		transfer_curve_control();
+}
+
+//inline std::vector<std::string>
+//get_curve_parameter_names( transfer t )
+//{
+//}
 
 template <typename T>
 inline T linearize( const T v, transfer t )
@@ -106,6 +146,7 @@ inline T linearize( const T v, transfer t )
 		case transfer::ACES_cc: return gamma_srgb<T>::linearize( v );
 		case transfer::ACES_cct: return gamma_srgb<T>::linearize( v );
 		case transfer::ACES_proxy: return gamma_srgb<T>::linearize( v );
+		case transfer::CIE_LAB_76: return cie_Lab_76<T>::linearize( v );
 	}
 }
 
@@ -139,6 +180,7 @@ inline T encode( const T v, transfer t )
 		case transfer::ACES_cc: return gamma_srgb<T>::encode( v );
 		case transfer::ACES_cct: return gamma_srgb<T>::encode( v );
 		case transfer::ACES_proxy: return gamma_srgb<T>::encode( v );
+		case transfer::CIE_LAB_76: return cie_Lab_76<T>::encode( v );
 	}
 }
 
