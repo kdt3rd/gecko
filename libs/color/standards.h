@@ -78,7 +78,7 @@ public:
 	constexpr value_type peak_luminance( void ) const { return _peak_lum; }
 	/// black luminance
 	/// this is the expected luminance for black values of the reference
-	constexpr value_type peak_luminance( void ) const { return _black_lum; }
+	constexpr value_type black_luminance( void ) const { return _black_lum; }
 	/// non-linear OETF (opto-electrical) transfer curve to be used
 	constexpr transfer oetf_curve( void ) const { return _oetf_curve; }
 	/// non-linear EOTF (electro-optical) transfer curve to be used
@@ -92,13 +92,13 @@ public:
 	//       or compute the (more accurate) versions from the chromaticities?
 	// TODO: add ambient / surround for viewing environment requirements?
 
-	constexpr state capture_state( int bits, range r = range::FULL, bool isRGB = true ) const
+	constexpr state capture_state( range r = range::FULL, bool isRGB = true ) const
 	{
-		return state( isRGB ? space::RGB : chroma_space(), _chroma, _peak_lum, r, _oetf_curve, bits );
+		return state( isRGB ? space::RGB : chroma_space(), _chroma, _peak_lum, state::value_type(0), r, _oetf_curve );
 	}
-	constexpr state display_state( int bits, range r = range::FULL, bool isRGB = true ) const
+	constexpr state display_state( range r = range::FULL, bool isRGB = true ) const
 	{
-		return state( isRGB ? space::RGB : chroma_space(), _chroma, _peak_lum, r, _eotf_curve, bits );
+		return state( isRGB ? space::RGB : chroma_space(), _chroma, _peak_lum, state::value_type(0), r, _eotf_curve );
 	}
 private:
 	cx _chroma;

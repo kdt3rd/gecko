@@ -32,16 +32,16 @@ class tristimulus_value
 public:
 	using component_type = T;
 	/// primarily for integer representations, will always be the MSB bits
-	constexpr int valid_bits = ( forcebits > 0 ? forcebits : 8*sizeof(T) );
+	static constexpr int valid_bits = ( forcebits > 0 ? forcebits : 8*sizeof(T) );
 
 	constexpr tristimulus_value( void ) = default;
-	constexpr ~tristimulus_value( void ) = default;
+	~tristimulus_value( void ) = default;
 	tristimulus_value( const tristimulus_value & ) = default;
 	constexpr tristimulus_value( tristimulus_value && ) = default;
-	explicit constexpr tristimulus_value( const state &s ) : _state( o._state ) {}
-	explicit constexpr tristimulus_value( state &&s ) : _state( std::move( o._state ) ) {}
+	explicit constexpr tristimulus_value( const state &s ) : _state( s ) {}
+	explicit constexpr tristimulus_value( state &&s ) : _state( std::move( s ) ) {}
 	constexpr tristimulus_value( component_type a, component_type b, component_type c, const state &s ) : _x( a ), _y( b ), _z( c ), _state( s ) {}
-	constexpr tristimulus_value( component_type a, component_type b, component_type c, const standard &s ) : _x( a ), _y( b ), _z( c ), _state( o._state ) {}
+	constexpr tristimulus_value( component_type a, component_type b, component_type c, const standard &s ) : _x( a ), _y( b ), _z( c ), _state( make_standard( s ).display_state() ) {}
 	
 	constexpr tristimulus_value &operator=( tristimulus_value && ) = default;
 	constexpr tristimulus_value &operator=( const tristimulus_value & ) = default;
@@ -99,7 +99,7 @@ protected:
 	component_type _x = component_type(0);
 	component_type _y = component_type(0);
 	component_type _z = component_type(0);
-	state _state = { make_standard<standard::SRGB>().display_state( valid_bits ); };
+	state _state = { make_standard<standard::SRGB>().display_state() };
 };
 
 ////////////////////////////////////////
@@ -130,14 +130,14 @@ public:
 	using value_type = tristimulus_value<T, forcebits>;
 
 	constexpr value_with_alpha( void ) = default;
-	constexpr ~value_with_alpha( void ) = default;
+	~value_with_alpha( void ) = default;
 	value_with_alpha( const value_with_alpha & ) = default;
 	value_with_alpha &operator=( const value_with_alpha & ) = default;
 	constexpr value_with_alpha( value_with_alpha && ) = default;
 	constexpr value_with_alpha &operator=( value_with_alpha && ) = default;
 
-	value &v( void ) { return _v; }
-	const value &v( void ) const { return _v; }
+	value_type &v( void ) { return _v; }
+	const value_type &v( void ) const { return _v; }
 	component_type &a( void ) { return _a; }
 	component_type a( void ) const { return _a; }
 
