@@ -35,7 +35,10 @@ configuration "debug"
   warnings "most"
 
 default_configuration "build"
-language "c++11"
+
+-- VFX platform 2018 is c++14, so use that...
+language "c++14"
+--language "c++11"
 threads "on"
 
 Doxygen( "docs", "docs/doxyfile" )

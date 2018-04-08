@@ -15,7 +15,7 @@
 #include <stdexcept>
 
 #ifdef __has_include
-# if (__cplusplus >= 201402L)
+# if (__cplusplus > 201402L)
 #  if __has_include(<string_view>)
 #   include <string_view>
 #   define ENABLE_STRING_VIEW_COMPAT
