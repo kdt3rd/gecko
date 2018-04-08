@@ -7,6 +7,7 @@ lib = library "base"
 	"compiler_abi.cpp";
 	"contract.cpp";
 	"cpu_features.cpp";
+	"dso.cpp";
 	"event.cpp";
 	"half.cpp";
 	"loadable.cpp";
