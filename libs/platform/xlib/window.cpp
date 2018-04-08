@@ -17,6 +17,7 @@
 #include <X11/Xutil.h>
 
 #include "system.h"
+#include "renderer.h"
 #include "cursor.h"
 
 namespace {
@@ -78,14 +79,14 @@ namespace platform { namespace xlib
 
 ////////////////////////////////////////
 
-window::window( system &s, const std::shared_ptr<Display> &dpy )
+window::window( system &s, ::platform::renderer &r, const std::shared_ptr<Display> &dpy )
 	: _display( dpy )
 {
 	precondition( _display, "null display" );
 
 	Display *disp = _display.get();
 
-	auto query = s.gl_proc_address();
+	auto query = r.render_query_func();
 
 	using glXQueryVersionProc = Bool (*)( Display *, int *, int * );
 	auto glxVerFunc = reinterpret_cast<glXQueryVersionProc>( query( "glXQueryVersion" ) );

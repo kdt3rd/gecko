@@ -29,13 +29,11 @@ public:
 		return static_cast<bool>( _display );
 	}
 
-	opengl_query gl_proc_address( void ) override;
-	std::shared_ptr<::platform::renderer> render( void ) const override;
-
 	std::vector<std::shared_ptr<::platform::screen>> screens( void ) override
 	{
 		return _screens;
 	}
+	const std::shared_ptr<::platform::screen> &default_screen( void ) override;
 
 	std::shared_ptr<::platform::cursor> new_cursor( void ) override;
 	std::shared_ptr<::platform::cursor> builtin_cursor( standard_cursor sc ) override;
@@ -60,7 +58,7 @@ public:
 	std::shared_ptr<::platform::menu> new_system_menu( void ) override;
 	std::shared_ptr<::platform::tray> new_system_tray_item( void ) override;
 
-	std::shared_ptr<::platform::window> new_window( void ) override;
+	std::shared_ptr<::platform::window> new_window( const std::shared_ptr<::platform::screen> &s = std::shared_ptr<::platform::screen>() ) override;
 	void destroy_window( const std::shared_ptr<::platform::window> &w ) override;
 
 	std::shared_ptr<::platform::dispatcher> get_dispatcher( void ) override;

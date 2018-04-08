@@ -12,7 +12,12 @@
 #include <gl/opengl.h>
 #include <GL/glx.h>
 
-namespace platform { namespace xlib
+namespace platform
+{
+
+class renderer;
+
+namespace xlib
 {
 
 class system;
@@ -24,7 +29,7 @@ class window : public ::platform::window
 {
 public:
 	/// @brief Constrcutor
-	window( system &s, const std::shared_ptr<Display> &dpy );
+	window( system &s, ::platform::renderer &r, const std::shared_ptr<Display> &dpy );
 	~window( void );
 
 	void raise( void ) override;

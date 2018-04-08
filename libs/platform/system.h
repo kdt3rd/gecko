@@ -40,9 +40,6 @@ class renderer;
 class system
 {
 public:
-	using opengl_func_ptr = void (*)( void );
-	using opengl_query = opengl_func_ptr (*)( const char * );
-
 	/// @brief Constructor.
 	///
 	/// Construct a system with the given name/description.
@@ -68,14 +65,12 @@ public:
 	/// @return Description of the system
 	const std::string &description( void ) const { return _desc; }
 
-	virtual std::shared_ptr<renderer> render( void ) const = 0;
-	virtual opengl_query gl_proc_address( void ) = 0;
-
 	/// @brief Return screens available to the system.
 	///
 	/// Returns a vector of screens available to the system.
 	/// @return Vector of screens
 	virtual std::vector<std::shared_ptr<screen>> screens( void ) = 0;
+	virtual const std::shared_ptr<screen> &default_screen( void ) = 0;
 
 	/// @brief Creates a new cursor.
 	///
@@ -177,8 +172,11 @@ public:
 	/// @brief Create a new window.
 	///
 	/// Creates a new window.  Newly created windows are hidden and of size 0x0.
+	///
+	/// if no (null) screen is provided, uses the default screen.
+	///
 	/// @return A new window
-	virtual std::shared_ptr<window> new_window( void ) = 0;
+	virtual std::shared_ptr<window> new_window( const std::shared_ptr<screen> &s = std::shared_ptr<screen>() ) = 0;
 
 	/// @brief Forcibly destroy a window.
 	///

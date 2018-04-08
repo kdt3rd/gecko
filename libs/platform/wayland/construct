@@ -5,6 +5,7 @@
 extra_source = optional_source{
 	system="Linux";
 	source={
+		"renderer.cpp";
 		"system.cpp";
 		"screen.cpp";
 		"window.cpp";

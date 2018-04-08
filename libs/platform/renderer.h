@@ -17,6 +17,7 @@ namespace platform
 {
 
 using context = uintptr_t;
+class window;
 
 ///
 /// @brief Class renderer provides an abstraction around the selected rendering engine.
@@ -42,10 +43,10 @@ public:
 	renderer( void );
 	virtual ~renderer( void );
 
-	virtual std::shared_ptr<context> create_context( void ) = 0;
+	virtual std::shared_ptr<context> create_context( const std::shared_ptr<window> &w ) = 0;
 
-	virtual activate( const std::shared_ptr<context> &c ) = 0;
-	virtual deactivate( const std::shared_ptr<context> &c ) = 0;
+	virtual void activate( const std::shared_ptr<context> &c ) = 0;
+	virtual void deactivate( const std::shared_ptr<context> &c ) = 0;
 
 	virtual render_query render_query_func( void ) = 0;
 

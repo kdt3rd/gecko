@@ -16,7 +16,8 @@ namespace wayland
 
 ////////////////////////////////////////
 
-screen::screen( void )
+screen::screen( const std::shared_ptr<::platform::renderer> &r )
+	: _render( r ), _standard( color::make_standard( color::standard::SRGB ) )
 {
 }
 
@@ -52,6 +53,38 @@ rect screen::bounds( bool active ) const
 base::dsize screen::dpi( void ) const
 {
 	return { 95.0, 95.0 };
+}
+
+////////////////////////////////////////
+
+bool
+screen::is_managed( void ) const
+{
+	return true;
+}
+
+////////////////////////////////////////
+
+const std::shared_ptr<::platform::renderer> &
+screen::render( void ) const
+{
+	return _render;
+}
+
+////////////////////////////////////////
+
+const color::standard_definition &
+screen::display_standard( void ) const
+{
+	return _standard;
+}
+
+////////////////////////////////////////
+
+void
+screen::override_display_standard( const color::standard_definition &s )
+{
+	_standard = s;
 }
 
 ////////////////////////////////////////

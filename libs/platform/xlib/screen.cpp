@@ -85,8 +85,10 @@ namespace platform { namespace xlib
 
 ////////////////////////////////////////
 
-screen::screen( const std::shared_ptr<Display> &disp, int scr )
-	: _display( disp ), _screen( scr )
+screen::screen( const std::shared_ptr<Display> &disp, int scr,
+				const std::shared_ptr<::platform::renderer> &r )
+	: _display( disp ), _screen( scr ), _render( r ),
+	  _standard( color::make_standard( color::standard::SRGB ) )
 {
 	// like similar dynamic-loaded DSO for X, like OpenGL, need to
 	// bind this into the global space, resolve symbols
@@ -110,18 +112,10 @@ bool screen::is_default( void ) const
 
 ////////////////////////////////////////
 
-double
-screen::refresh_rate( void ) const
+bool
+screen::is_managed( void ) const
 {
-	if ( xrandr_getrates )
-	{
-		int nrates = 0;
-		short *rates = xrandr_getrates( _display.get(), _screen, 0, &nrates );
-		if ( rates )
-			return static_cast<double>(rates[0]);
-	}
-
-	return 0.F;
+	return true;
 }
 
 ////////////////////////////////////////
@@ -194,6 +188,46 @@ base::dsize screen::dpi( void ) const
 					  25.4 ) /
 					static_cast<double>( DisplayHeightMM( _display.get(), _screen ) ) );
 	return { tmpW, tmpH };
+}
+
+////////////////////////////////////////
+
+double
+screen::refresh_rate( void ) const
+{
+	if ( xrandr_getrates )
+	{
+		int nrates = 0;
+		short *rates = xrandr_getrates( _display.get(), _screen, 0, &nrates );
+		if ( rates )
+			return static_cast<double>(rates[0]);
+	}
+
+	return 0.F;
+}
+
+////////////////////////////////////////
+
+const std::shared_ptr<::platform::renderer> &
+screen::render( void ) const
+{
+	return _render;
+}
+
+////////////////////////////////////////
+
+const color::standard_definition &
+screen::display_standard( void ) const
+{
+	return _standard;
+}
+
+////////////////////////////////////////
+
+void
+screen::override_display_standard( const color::standard_definition &s )
+{
+	_standard = s;
 }
 
 ////////////////////////////////////////

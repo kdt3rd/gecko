@@ -9,6 +9,7 @@ extra_source = optional_source{
 		"dispatcher.cpp";
 		"keyboard.cpp";
 		"mouse.cpp";
+		"renderer.cpp";
 		"screen.cpp";
 		"system.cpp";
 		"window.cpp";
