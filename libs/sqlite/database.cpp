@@ -17,7 +17,7 @@ namespace sqlite
 database::database( std::string dbfile )
 	: _filename( std::move( dbfile ) )
 {
-	check( sqlite3_open( _filename.c_str(), &_db ) );
+	check( sqlite3_open( _filename.c_str(), &_db ), _filename.c_str() );
 }
 
 ////////////////////////////////////////
@@ -33,16 +33,21 @@ database::~database( void )
 
 void database::exec( const char *sql ) const
 {
-	check( sqlite3_exec( _db, sql, NULL, NULL, NULL ) );
+	check( sqlite3_exec( _db, sql, NULL, NULL, NULL ), sql );
 }
 
 ////////////////////////////////////////
 
-void database::check( int err ) const
+void database::check( int err, const char *msg ) const
 {
 	precondition( _db != nullptr, "null sqlite database" );
 	if ( err != SQLITE_OK )
-		throw std::runtime_error( sqlite3_errmsg( _db ) );
+	{
+		if ( msg )
+			throw_runtime( "{0}:\n{1}", sqlite3_errmsg( _db ), msg );
+		else
+			throw std::runtime_error( sqlite3_errmsg( _db ) );
+	}
 }
 
 ////////////////////////////////////////

@@ -50,7 +50,7 @@ public:
 	}
 
 private:
-	void check( int err ) const;
+	void check( int err, const char *msg = nullptr ) const;
 
 	std::string _filename;
 	sqlite3 *_db = nullptr;
