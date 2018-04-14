@@ -59,6 +59,12 @@ private:
 /// @brief Print an exception, possible nested
 void print_exception( std::ostream &out, const std::exception &e, int level = 0 );
 
+inline std::ostream &operator<<( std::ostream &out, const std::exception &e )
+{
+	print_exception( out, e );
+	return out;
+}
+
 ////////////////////////////////////////
 
 /// @brief Precondition exception
