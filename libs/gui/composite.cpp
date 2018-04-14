@@ -14,21 +14,21 @@ namespace gui
 
 ////////////////////////////////////////
 
-void composite::build( gl::api &ogl )
+void composite::build( context &ctxt )
 {
 	for_subwidgets( [&]( const std::shared_ptr<widget> &w )
 	{
-		w->build( ogl );
+		w->build( ctxt );
 	} );
 }
 
 ////////////////////////////////////////
 
-void composite::paint( gl::api &ogl )
+void composite::paint( context &ctxt )
 {
 	for_subwidgets( [&]( const std::shared_ptr<widget> &w )
 	{
-		w->paint( ogl );
+		w->paint( ctxt );
 	} );
 }
 

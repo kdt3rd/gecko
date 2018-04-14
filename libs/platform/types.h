@@ -7,6 +7,9 @@
 
 #pragma once
 
+#include <cstdint>
+#include <cstddef>
+
 #include <base/point.h>
 #include <base/size.h>
 #include <base/rect.h>
@@ -16,9 +19,11 @@
 namespace platform
 {
 
-// could potentially use a 16-bit integer which might be useful if we
-// ever run on a low-end SoC...
-using coord_type = int;
+// Lowest common denominator in real life so far is int16 in the X
+// protocol for drawing rectangles, etc
+using coord_type = int16_t;
+//using size_type = uint16_t;
+
 using point = base::point<coord_type>;
 using size = base::size<coord_type>;
 using rect = base::rect<coord_type>;

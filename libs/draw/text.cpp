@@ -12,9 +12,6 @@
 namespace draw
 {
 
-std::weak_ptr<gl::program> text::_program_cache;
-std::map<std::shared_ptr<script::font>, text::GlyphPack> text::_font_glyph_cache;
-
 ////////////////////////////////////////
 
 text::text( void )
@@ -74,14 +71,15 @@ void text::set_color( const gl::color &c )
 
 ////////////////////////////////////////
 
-void text::draw( gl::api &ogl )
+void text::draw( platform::context &ctxt )
 {
 	if ( _update )
-		update();
+		update( ctxt );
 	if ( _mesh.valid() )
 	{
-		auto x = _font_glyph_cache.find( _font );
-		if ( x != _font_glyph_cache.end() )
+		auto &fgc = _stash->_font_glyph_cache;
+		auto x = fgc.find( _font );
+		if ( x != fgc.end() )
 		{
 			std::shared_ptr<gl::texture> texture = x->second.texture;
 
@@ -90,7 +88,7 @@ void text::draw( gl::api &ogl )
 			auto txt = texture->bind();
 
 			auto b = _mesh.bind();
-			b.set_uniform( _mat_pos, local * ogl.current_matrix() );
+			b.set_uniform( _mat_pos, local * ctxt.api().current_matrix() );
 			b.set_uniform( _col_pos, _color );
 			b.set_uniform( _tex_pos, static_cast<int>( txt.unit() ) );
 			b.draw();
@@ -100,7 +98,14 @@ void text::draw( gl::api &ogl )
 
 ////////////////////////////////////////
 
-void text::update( void )
+void text::rebuild( platform::context &ctxt )
+{
+	_stash.reset();
+}
+
+////////////////////////////////////////
+
+void text::update( platform::context &ctxt )
 {
 	_mesh.clear();
 	if ( !_font || _utf8.empty() )
@@ -124,15 +129,21 @@ void text::update( void )
 		_font->render( add_point, add_tri, 0.0, 0.0, _utf8 );
 	}
 
+	// don't care about initialization, just need to have the structure
+	if ( !_stash )
+		ctxt.retrieve_common( this, _stash );
+
 	// Update the font texture if needed.
-	auto x = _font_glyph_cache.find( _font );
+	auto &fgc = _stash->_font_glyph_cache;
+	auto x = fgc.find( _font );
+	
 	uint32_t curVer = _font->glyph_version();
 
-	gl::api ogl;
+	gl::api &ogl = ctxt.api();
 	std::shared_ptr<gl::texture> texture;
 
 	bool storeTex = true;
-	if ( x != _font_glyph_cache.end() )
+	if ( x != fgc.end() )
 	{
 		GlyphPack &pk = x->second;
 		storeTex = pk.version != curVer;
@@ -152,14 +163,15 @@ void text::update( void )
 						  _font->bitmap_height(),
 						  gl::image_type::UNSIGNED_BYTE,
 						  _font->bitmap().data() );
-		_font_glyph_cache[_font] = { _font->glyph_version(), texture };
+		fgc[_font] = { _font->glyph_version(), texture };
 	}
 
-	auto prog = _program_cache.lock();
+	auto prog = _stash->_program_cache;
 	if ( !prog )
 	{
-		auto vshader = ogl.new_vertex_shader( R"SHADER(
-			#version 330
+		auto vshader = ogl.new_vertex_shader(
+			R"SHADER(
+            #version 330
 
 			layout(location = 0) in vec2 vertex_pos;
 			layout(location = 1) in vec2 char_pos;
@@ -174,7 +186,8 @@ void text::update( void )
 			}
 		)SHADER" );
 
-		auto fshader = ogl.new_fragment_shader( R"SHADER(
+		auto fshader = ogl.new_fragment_shader(
+			R"SHADER(
 			#version 330
 
 			in vec2 tex_pos;
@@ -191,7 +204,7 @@ void text::update( void )
 		)SHADER" );
 
 		prog = ogl.new_program( vshader, fshader );
-		_program_cache = prog;
+		_stash->_program_cache = prog;
 	}
 
 	_mesh.set_program( prog );

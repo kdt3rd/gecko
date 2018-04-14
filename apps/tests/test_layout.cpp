@@ -44,22 +44,22 @@ public:
 		this->set_minimum( 100, 25 );
 	}
 
-	void draw( gl::api &ogl )
+	void draw( platform::context &ctxt )
 	{
 		_rect.set_position( this->x(), this->y() );
 		_rect.set_size( this->width(), this->height() );
-		_rect.draw( ogl );
+		_rect.draw( ctxt );
 //		ogl.save_matrix();
 //		ogl.translate( this->x(), this->y() );
 		for ( auto &c: _children )
-			c( ogl );
+			c( ctxt );
 //		ogl.restore_matrix();
 	}
 
 	template<typename W>
 	void draw_subchild( const std::shared_ptr<W> &a )
 	{
-		_children.push_back( [=]( gl::api &ogl ) { a->draw( ogl ); } );
+		_children.push_back( [=]( platform::context &ctxt ) { a->draw( ctxt ); } );
 	}
 
 	template<typename W, typename ...Args>
@@ -71,7 +71,7 @@ public:
 
 private:
 	draw::rectangle _rect;
-	std::list<std::function<void(gl::api&)>> _children;
+	std::list<std::function<void(platform::context&)>> _children;
 };
 
 template<typename Area>
@@ -94,24 +94,24 @@ public:
 	template<typename W>
 	void draw_subchild( const std::shared_ptr<W> &a )
 	{
-		_children.push_back( [=]( gl::api &ogl ) { a->draw( ogl ); } );
+		_children.push_back( [=]( platform::context &ctxt ) { a->draw( ctxt ); } );
 	}
 
-	void draw( gl::api &ogl )
+	void draw( platform::context &ctxt )
 	{
 		_rect.set_position( this->x(), this->y() );
 		_rect.set_size( this->width(), this->height() );
-		_rect.draw( ogl );
+		_rect.draw( ctxt );
 //		ogl.save_matrix();
 //		ogl.translate( this->x(), this->y() );
 		for ( auto &c: _children )
-			c( ogl );
+			c( ctxt );
 //		ogl.restore_matrix();
 	}
 
 private:
 	draw::rectangle _rect;
-	std::list<std::function<void(gl::api&)>> _children;
+	std::list<std::function<void(platform::context&)>> _children;
 };
 
 typedef terminal_widget<layout::area> simple;
@@ -150,12 +150,12 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	auto sys = platform::platform::find_running();
 	auto win = sys->new_window();
 	win->set_title( "Layout" );
-	win->acquire();
+	auto render_guard = win->hw_context().begin_render();
+	gl::api &ogl = win->hw_context().api();
+	//ogl.setup_debugging();
 
 	// OpenGL information & initialization
 	gl::matrix4 matrix;
-	gl::api ogl;
-	//ogl.setup_debugging();
 
 	// Create "widgets"
 	widget<layout::packing> root( gl::white );
@@ -270,7 +270,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		ogl.set_projection( gl::matrix4::ortho( 0, static_cast<float>( win->width() ), 0, static_cast<float>( win->height() ) ) );
 		ogl.clear();
 
-		root.draw( ogl );
+		root.draw( win->hw_context() );
 	};
 
 	// Key to take a screenshot.
@@ -278,9 +278,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	{
 		if ( c == platform::scancode::KEY_S )
 		{
-			win->acquire();
+			auto r = win->hw_context().begin_render();
 			gl::png_write( "/tmp/test.png", static_cast<size_t>( win->width() ), static_cast<size_t>( win->height() ), 3 );
-			win->release();
 		}
 	};
 

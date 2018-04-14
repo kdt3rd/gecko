@@ -19,8 +19,8 @@ class composite : public widget
 public:
 	using widget::widget;
 
-	void build( gl::api &ogl ) override;
-	void paint( gl::api &ogl ) override;
+	void build( context &ctxt ) override;
+	void paint( context &ctxt ) override;
 
 	bool mouse_press( const point &p, int button ) override;
 	bool mouse_release( const point &p, int button ) override;

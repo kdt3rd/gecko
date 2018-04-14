@@ -20,10 +20,10 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	auto sys = platform::platform::find_running();
 	auto win = sys->new_window();
 	win->set_title( "Triangle" );
-	win->acquire();
+	auto render_guard = win->hw_context().begin_render();
+	gl::api &ogl = win->hw_context().api();
 
 	// OpenGL information & initialization
-	gl::api ogl;
 	std::cout << "OpenGL version " << ogl.get_version() << std::endl;
 	std::cout << "Vendor: " << ogl.get_vendor() << std::endl;
 	std::cout << "Renderer: " << ogl.get_renderer() << std::endl;
@@ -95,8 +95,6 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	gl::program::uniform matrix_loc = triangle.get_uniform_location( "matrix" );
 	float speed = 0.01F;
 
-	win->release();
-
 	auto animtimer = sys->create_timer();
 	animtimer->elapsed = [&]() { win->invalidate( platform::rect() ); };
 	animtimer->reset_repeat( 0.1 );
@@ -131,9 +129,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	{
 		if ( c == platform::scancode::KEY_S )
 		{
-			win->acquire();
+			auto r = win->hw_context().begin_render();
 			gl::png_write( "/tmp/test.png", static_cast<size_t>( win->width() ), static_cast<size_t>( win->height() ), 3 );
-			win->release();
 		}
 	};
 

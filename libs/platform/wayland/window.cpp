@@ -7,6 +7,8 @@
 
 #include "window.h"
 
+#include "context.h"
+
 #include <base/compiler_support.h>
 #include <base/contract.h>
 #include <base/pointer.h>
@@ -56,39 +58,10 @@ namespace wayland
 
 ////////////////////////////////////////
 
-window::window( EGLDisplay disp, struct wl_compositor *comp, struct wl_shell *shell )
-	: _disp( disp )
+window::window( EGLDisplay disp, struct wl_compositor *comp, struct wl_shell *shell, const std::shared_ptr<::platform::screen> &scr )
+	: ::platform::window( scr ), _disp( disp )
 {
 	_last_w = 512; _last_h = 512;
-
-	EGLint attributes[] = {
-		EGL_RED_SIZE, 8,
-		EGL_GREEN_SIZE, 8,
-		EGL_BLUE_SIZE, 8,
-		EGL_DEPTH_SIZE, 24,
-		EGL_CONFORMANT, EGL_OPENGL_BIT,
-		EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
-		EGL_NONE, EGL_NONE
-	};
-	EGLint ctxtattribs[] = {
-		EGL_CONTEXT_MAJOR_VERSION, 3,
-		EGL_CONTEXT_MINOR_VERSION, 3,
-//		EGL_CONTEXT_OPENGL_DEBUG, EGL_TRUE,
-//		EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE, EGL_TRUE,
-		EGL_NONE, EGL_NONE
-		};
-	EGLConfig config;
-	EGLint num_config = 0;
-
-	if ( ! eglChooseConfig( disp, attributes, &config, 1, &num_config ) )
-		throw std::runtime_error( "unable to find valid egl context config" );
-	if ( 0 == num_config )
-		throw std::runtime_error( "unable to find valid egl context config" );
-
-	TODO("Implement shared context - create one in system, pass it here")
-	_egl_context = eglCreateContext( disp, config, EGL_NO_CONTEXT, ctxtattribs );
-	if ( ! _egl_context )
-		throw std::runtime_error( "Unable to create egl context" );
 
 	TODO("add more error checks")
 	_surface = wl_compositor_create_surface( comp );
@@ -96,9 +69,10 @@ window::window( EGLDisplay disp, struct wl_compositor *comp, struct wl_shell *sh
 
 	wl_shell_surface_add_listener( _shell_surf, &shell_listener, this );
 	wl_shell_surface_set_toplevel( _shell_surf );
-	_egl_win = wl_egl_window_create( _surface, _last_w, _last_h );
-	_egl_surface = eglCreateWindowSurface( disp, config, (EGLNativeWindowType)_egl_win, NULL );
-	eglMakeCurrent( disp, _egl_surface, _egl_surface, _egl_context );
+	_win = wl_egl_window_create( _surface, _last_w, _last_h );
+
+	_ctxt = std::make_shared<context>( disp );
+	_ctxt->create( (EGLNativeWindowType)_win );
 
 	std::cout << "OpenGL:\n\tvendor " << glGetString( GL_VENDOR )
 			  << "\n\trenderer " << glGetString( GL_RENDERER )
@@ -111,19 +85,26 @@ window::window( EGLDisplay disp, struct wl_compositor *comp, struct wl_shell *sh
 
 	glClearColor( 0.15, 0.15, 0.15, 0.15 );
 	glClear( GL_COLOR_BUFFER_BIT );
-	eglSwapBuffers( disp, _egl_surface );
 
+	_ctxt->swap_buffers();
 }
 
 ////////////////////////////////////////
 
 window::~window( void )
 {
-	eglDestroySurface( _disp, _egl_surface);
-	wl_egl_window_destroy( _egl_win );
+	_ctxt.reset();
+
+	wl_egl_window_destroy( _win );
 	wl_shell_surface_destroy( _shell_surf );
 	wl_surface_destroy( _surface );
-	eglDestroyContext( _disp, _egl_context );
+}
+
+////////////////////////////////////////
+
+::platform::context &window::hw_context( void )
+{
+	return *(_ctxt);
 }
 
 ////////////////////////////////////////
@@ -217,20 +198,6 @@ void window::invalidate( const rect &r )
 
 ////////////////////////////////////////
 
-void window::acquire( void )
-{
-	eglMakeCurrent( _disp, _egl_surface, _egl_surface, _egl_context );
-}
-
-////////////////////////////////////////
-
-void window::release( void )
-{
-	eglMakeCurrent( _disp, NULL, NULL, NULL );
-}
-
-////////////////////////////////////////
-
 void window::move_event( coord_type x, coord_type y )
 {
 	int16_t tx = static_cast<int16_t>( x );
@@ -255,14 +222,14 @@ void window::resize_event( coord_type w, coord_type h )
 		_last_w = tw;
 		_last_h = th;
 
-		if ( _egl_win )
+		if ( _win )
 		{
-			wl_egl_window_resize( _egl_win, _last_w, _last_h, 0, 0 );
-			acquire();
-			glViewport( 0, 0, tw, th );
+			wl_egl_window_resize( _win, _last_w, _last_h, 0, 0 );
+
+			auto guard = _ctxt->begin_render();
+			_ctxt->set_viewport( 0, 0, tw, th );
 			if ( resized )
 				resized( w, h );
-			release();
 		}
 	}
 }
@@ -272,14 +239,10 @@ void window::resize_event( coord_type w, coord_type h )
 void window::expose_event( coord_type x, coord_type y, coord_type w, coord_type h )
 {
 	_invalid = false;
-	acquire();
+	auto guard = _ctxt->begin_render();
 	if ( exposed )
 		exposed();
-	eglSwapBuffers( _disp, _egl_surface );
-	//glXSwapBuffers( _display.get(), _win );
-	//glFlush();
-	//XFlush( _display.get() );
-	release();
+	_ctxt->swap_buffers();
 }
 
 ////////////////////////////////////////

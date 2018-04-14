@@ -16,8 +16,8 @@ namespace wayland
 
 ////////////////////////////////////////
 
-screen::screen( const std::shared_ptr<::platform::renderer> &r )
-	: _render( r ), _standard( color::make_standard( color::standard::SRGB ) )
+screen::screen( void )
+	: _standard( color::make_standard( color::standard::SRGB ) )
 {
 }
 
@@ -32,6 +32,22 @@ screen::~screen( void )
 bool screen::is_default( void ) const
 {
 	return true;
+}
+
+////////////////////////////////////////
+
+bool
+screen::is_managed( void ) const
+{
+	return true;
+}
+
+////////////////////////////////////////
+
+bool
+screen::is_remote( void ) const
+{
+	return false;
 }
 
 ////////////////////////////////////////
@@ -53,22 +69,6 @@ rect screen::bounds( bool active ) const
 base::dsize screen::dpi( void ) const
 {
 	return { 95.0, 95.0 };
-}
-
-////////////////////////////////////////
-
-bool
-screen::is_managed( void ) const
-{
-	return true;
-}
-
-////////////////////////////////////////
-
-const std::shared_ptr<::platform::renderer> &
-screen::render( void ) const
-{
-	return _render;
 }
 
 ////////////////////////////////////////

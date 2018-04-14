@@ -52,33 +52,36 @@ void scroll_area_w::set_widget( const std::shared_ptr<widget> &v )
 
 ////////////////////////////////////////
 
-void scroll_area_w::build( gl::api &ogl )
+void scroll_area_w::build( context &ctxt )
 {
 	if ( _hscroll )
-		_hscroll->build( ogl );
+		_hscroll->build( ctxt );
 	if ( _vscroll )
-		_vscroll->build( ogl );
+		_vscroll->build( ctxt );
 //	if ( _corner )
-//		_corner->build( ogl );
+//		_corner->build( ctxt );
 	if ( _widget )
-		_widget->build( ogl );
+		_widget->build( ctxt );
 }
 
 ////////////////////////////////////////
 
-void scroll_area_w::paint( gl::api &ogl )
+void scroll_area_w::paint( context &ctxt )
 {
 	if ( _hscroll )
-		_hscroll->paint( ogl );
+		_hscroll->paint( ctxt );
 	if ( _vscroll )
-		_vscroll->paint( ogl );
+		_vscroll->paint( ctxt );
 //	if ( _corner )
-//		_corner->paint( ogl );
+//		_corner->paint( ctxt );
 
 	if ( _widget )
 	{
-		ogl.push_scissor( _main->x(), _main->y(), _main->width(), _main->height() );
+		platform::context &hwc = ctxt.hw_context();
+		auto guard = hwc.push_clip( _main->x(), _main->y(), _main->width(), _main->height() );
+		//ogl.push_scissor();
 		{
+			gl::api &ogl = hwc.api();
 			ogl.save_matrix();
 			{
 				coord_type dx = coord_type( 0 ), dy = coord_type( 0 );
@@ -88,11 +91,11 @@ void scroll_area_w::paint( gl::api &ogl )
 					dy = _vscroll->value();
 				ogl.model_matrix().translate( _main->x() - dx, _main->y() - dy );
 
-				_widget->paint( ogl );
+				_widget->paint( ctxt );
 			}
 			ogl.restore_matrix();
 		}
-		ogl.pop_scissor();
+//		ogl.pop_scissor();
 	}
 }
 

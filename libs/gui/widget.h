@@ -10,14 +10,10 @@
 #include <type_traits>
 #include <layout/area.h>
 #include <platform/keyboard.h>
+#include <platform/context.h>
 #include <base/contract.h>
 #include "context.h"
 #include "widget_ptr.h"
-
-namespace gl
-{
-class api;
-};
 
 namespace gui
 {
@@ -31,8 +27,11 @@ public:
 	explicit widget( std::unique_ptr<layout::area> &&a );
 	virtual ~widget( void );
 
-	virtual void build( gl::api &ogl );
-	virtual void paint( gl::api &ogl );
+	/// Handle changes to the monitor configuration (refresh rate,
+	/// output color space, etc.)
+	virtual void monitor_changed( context &ctxt );
+	virtual void build( context &ctxt );
+	virtual void paint( context &ctxt );
 
 	virtual bool mouse_press( const point &p, int button );
 	virtual bool mouse_release( const point &p, int button );
@@ -42,16 +41,6 @@ public:
 	virtual bool key_release( platform::scancode c );
 	virtual bool text_input( char32_t c );
 
-	void invalidate( const rect &r )
-	{
-		context::current().invalidate( r );
-	}
-
-	void invalidate( void )
-	{
-		context::current().invalidate( *this );
-	}
-
 	const std::shared_ptr<layout::area> &layout_target( void ) const
 	{
 		return _area;
@@ -60,24 +49,14 @@ public:
 	virtual bool update_layout( double duration );
 
 protected:
-	template<typename D>
-	void callback_helper( const std::function<void(void)> &cb, D &d )
+	void invalidate( const rect &r )
 	{
-		d.callback( cb );
+		context::current().invalidate( r );
 	}
 
-	template<typename D, typename ...Args>
-	void callback_helper( const std::function<void(void)> &cb, D &d, Args &...args )
+	void invalidate( void )
 	{
-		d.callback( cb );
-		callback_helper( cb, args... );
-	}
-
-	template<typename ...Args>
-	void callback_invalidate( Args &...args )
-	{
-		auto cb = [this]() { invalidate(); };
-		callback_helper( cb, args... );
+		context::current().invalidate( *this );
 	}
 
 private:

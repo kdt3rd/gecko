@@ -11,6 +11,11 @@
 #include <base/rect.h>
 #include "style.h"
 
+namespace platform
+{
+class context;
+}
+
 namespace gui
 {
 
@@ -28,6 +33,8 @@ public:
 	context &operator=( context && ) = delete;
 
 	virtual void invalidate( const rect &r ) = 0;
+
+	virtual platform::context &hw_context( void ) = 0;
 
 	const style &get_style( void ) const
 	{

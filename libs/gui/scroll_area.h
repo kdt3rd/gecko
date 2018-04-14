@@ -26,8 +26,8 @@ public:
 	template <typename Y>
 	inline void set_widget( const widget_ptr<Y> &w ) { set_widget( static_cast<std::shared_ptr<Y>>( w ) ); }
 
-	void build( gl::api &ogl ) override;
-	void paint( gl::api &ogl ) override;
+	void build( context &ctxt ) override;
+	void paint( context &ctxt ) override;
 
 	bool mouse_press( const point &p, int button ) override;
 	bool mouse_release( const point &p, int button ) override;

@@ -35,9 +35,9 @@ public:
 		_bg.set_color( c );
 	}
 
-	void build( gl::api &ogl ) override;
+	void build( context &ctxt ) override;
 
-	void paint( gl::api &ogl ) override;
+	void paint( context &ctxt ) override;
 
 private:
 	gl::color _bg_color;

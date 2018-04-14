@@ -22,7 +22,6 @@ quadrant::quadrant( void )
 
 void quadrant::add( gl::api &ogl, const polylines &lines, const paint &c )
 {
-
 	if ( lines.empty() || c.empty() )
 		return;
 
@@ -55,8 +54,16 @@ void quadrant::add( gl::api &ogl, const polylines &lines, const paint &c )
 
 ////////////////////////////////////////
 
-void quadrant::draw( gl::api &ogl )
+void quadrant::rebuild( platform::context &ctxt )
 {
+	_meshes.clear();
+}
+
+////////////////////////////////////////
+
+void quadrant::draw( platform::context &ctxt )
+{
+	gl::api &ogl = ctxt.api();
 	for ( auto &m: _meshes )
 	{
 		if ( m.msh.valid() )

@@ -12,8 +12,16 @@
 #include <EGL/egl.h>
 #include <wayland-egl.h>
 
-namespace platform { namespace wayland
+namespace platform
 {
+
+class context;
+class screen;
+
+namespace wayland
+{
+
+class context;
 
 ////////////////////////////////////////
 
@@ -21,8 +29,11 @@ namespace platform { namespace wayland
 class window : public ::platform::window
 {
 public:
-	window( EGLDisplay disp, struct wl_compositor *comp, struct wl_shell *shell );
+	window( EGLDisplay disp, struct wl_compositor *comp, struct wl_shell *shell,
+			const std::shared_ptr<::platform::screen> &scr );
 	~window( void );
+
+	::platform::context &hw_context( void ) override;
 
 	void raise( void ) override;
 	void lower( void ) override;
@@ -45,10 +56,6 @@ public:
 
 	void invalidate( const rect &r ) override;
 
-	/// @brief Acquire window to draw
-	void acquire( void ) override;
-	void release( void ) override;
-
 	coord_type width( void ) override { return _last_w; }
 	coord_type height( void )  override { return _last_h; }
 
@@ -66,12 +73,12 @@ private:
 	bool _invalid = false;
 	bool _popup = false;
 
+	std::shared_ptr<context> _ctxt;
+
 	EGLDisplay _disp = nullptr;
-	EGLContext _egl_context = nullptr;
-	EGLSurface _egl_surface = nullptr;
 	struct wl_surface *_surface = nullptr;
 	struct wl_shell_surface *_shell_surf = nullptr;
-	struct wl_egl_window *_egl_win = nullptr;
+	struct wl_egl_window *_win = nullptr;
 	
 };
 

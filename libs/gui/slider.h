@@ -52,8 +52,8 @@ public:
 	void set_value( value_type v );
 	void set_range( value_type min, value_type max );
 
-	void build( gl::api &ogl ) override;
-	void paint( gl::api &ogl ) override;
+	void build( context &ctxt ) override;
+	void paint( context &ctxt ) override;
 
 	bool mouse_press( const point &p, int button ) override;
 	bool mouse_move( const point &p ) override;

@@ -30,8 +30,8 @@ public:
 
 	void set_font( std::shared_ptr<script::font> &f ) { _text.set_font( f ); _prompt.set_font( f ); }
 
-	void build( gl::api &ogl ) override;
-	void paint( gl::api &ogl ) override;
+	void build( context &ctxt ) override;
+	void paint( context &ctxt ) override;
 
 	bool key_press( platform::scancode c ) override;
 

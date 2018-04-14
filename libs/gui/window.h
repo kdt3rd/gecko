@@ -11,6 +11,7 @@
 #include "widget_ptr.h"
 #include <base/scope_guard.h>
 #include <platform/keyboard.h>
+#include <platform/context.h>
 #include <platform/cursor.h>
 #include <gl/api.h>
 #include <memory>
@@ -53,10 +54,13 @@ public:
 
 	void invalidate( const rect &r ) override;
 
-	typedef base::scope_guard<std::function<void(void)>> bound_context;
-	bound_context bind( void );
+	platform::context &hw_context( void ) override;
+
+	platform::context::render_guard bind( void );
 
 protected:
+	void monitor_changed( void );
+
 	void paint( void );
 	void resized( coord_type w, coord_type h );
 
@@ -69,7 +73,6 @@ protected:
 	void key_released( platform::scancode c );
 	void text_entered( char32_t c );
 
-	gl::api _ogl;
 	std::shared_ptr<platform::window> _window;
 	std::shared_ptr<widget> _widget;
 };

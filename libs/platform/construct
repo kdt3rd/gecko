@@ -17,7 +17,6 @@ lib = library "platform"
 		"menu.cpp";
 		"mouse.cpp";
 		"platform.cpp";
-		"renderer.cpp";
 		"screen.cpp";
 		"selection.cpp";
 		"system.cpp";

@@ -13,15 +13,19 @@
 #include <stack>
 
 #include "types.h"
+// TODO: should we just forward declare these, or is the places where
+// this is included small enough we can use the convenience
 #include "mouse.h"
 #include "keyboard.h"
 #include "scancode.h"
 #include "event_target.h"
+#include "context.h"
 
 namespace platform
 {
 
 class cursor;
+class screen;
 
 ////////////////////////////////////////
 
@@ -30,12 +34,26 @@ class window : public event_target
 {
 public:
 	/// @brief Constructor.
-	window( void );
+	explicit window( const std::shared_ptr<screen> &screen );
 
 	/// @brief Destructor.
 	virtual ~window( void );
 
+	/// @brief default event handler for windows.
+	///
+	/// Dispatches and calls the various registered callback functions
 	bool process_event( const event &e ) override;
+
+	/// @brief returns the screen the window was created on.
+	inline const std::shared_ptr<screen> &query_screen( void ) const { return _screen; }
+
+	/// @brief creates a context (or returns a stashed version)
+	///
+	/// This is returned as a shared pointer, for caching
+	/// (performance) purposes, however, it is not intended to have a
+	/// lifetime longer than a window, and if used past the
+	/// destruction of a window, errors should be expected.
+	virtual context &hw_context( void ) = 0;
 
 	/// @brief Set a cursor as the default for the window
 	///
@@ -46,6 +64,10 @@ public:
 	void push_cursor( const std::shared_ptr<cursor> &c );
 	/// @brief restore the previous cursor
 	void pop_cursor( void );
+
+	// TODO: add support for menus...
+//	std::shared_ptr<menu_definition> top_level_menu( void );
+//	virtual bool include_menu_in_window_area( void ) const = 0;
 
 	/// @brief Raise the window.
 	///
@@ -119,9 +141,12 @@ public:
 
 //	virtual void set_icon( const icon &i );
 
-	virtual void acquire( void ) = 0;
-	virtual void release( void ) = 0;
-
+	/// @brief Generic event handler
+	///
+	/// This is the most general event handler, in that all events
+	/// come in here. Uses of a full-fledged gui widget system
+	/// probably want to use this, and dispatch their own versions of
+	/// the below, and see all the events.
 	std::function<bool(const event &)> event_handoff;
 
 	/// @brief Action for mouse press events.
@@ -184,6 +209,8 @@ protected:
 private:
 	std::stack< std::shared_ptr<cursor> > _cursors;
 	std::shared_ptr<cursor> _default_cursor;
+
+	std::shared_ptr<screen> _screen;
 };
 
 ////////////////////////////////////////

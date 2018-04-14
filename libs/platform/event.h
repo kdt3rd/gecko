@@ -23,6 +23,8 @@ class event_source;
 
 enum event_type : uint8_t
 {
+	DISPLAY_CHANGED,
+
 	WINDOW_SHOWN,
 	WINDOW_HIDDEN,
 	WINDOW_CLOSE_REQUEST,

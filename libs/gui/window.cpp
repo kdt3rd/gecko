@@ -103,7 +103,7 @@ void window::set_widget( const std::shared_ptr<widget> &w )
 	in_context( [&,this]
 	{
 		_widget = w;
-		_widget->build( _ogl );
+		_widget->build( *this );
 		_widget->layout_target()->compute_bounds();
 		_widget->layout_target()->set_horizontal( 0.0, _window->width() - 1.0 );
 		_widget->layout_target()->set_vertical( 0.0, _window->height() - 1.0 );
@@ -133,10 +133,16 @@ void window::invalidate( const rect &r )
 
 ////////////////////////////////////////
 
-window::bound_context window::bind( void )
+platform::context &window::hw_context( void )
 {
-	_window->acquire();
-	return bound_context( [=]( void ) { _window->release(); } );
+	return _window->hw_context();
+}
+
+////////////////////////////////////////
+
+platform::context::render_guard window::bind( void )
+{
+	return _window->hw_context().begin_render();
 }
 
 ////////////////////////////////////////
@@ -146,15 +152,17 @@ void window::paint( void )
 	coord_type w = _window->width();
 	coord_type h = _window->height();
 
-	_ogl.reset();
-	_ogl.viewport( 0, 0, w, h );
-	_ogl.enable( gl::capability::MULTISAMPLE );
-	_ogl.enable( gl::capability::BLEND );
-    _ogl.blend_func( gl::blend_style::SRC_ALPHA, gl::blend_style::ONE_MINUS_SRC_ALPHA );
+	platform::context &hwctxt = _window->hw_context();
+	gl::api &ogl = hwctxt.api();
+	ogl.reset();
+	ogl.viewport( 0, 0, w, h );
+	ogl.enable( gl::capability::MULTISAMPLE );
+	ogl.enable( gl::capability::BLEND );
+    ogl.blend_func( gl::blend_style::SRC_ALPHA, gl::blend_style::ONE_MINUS_SRC_ALPHA );
 
-	_ogl.clear_color( _style.background_color() );
-	_ogl.clear();
-	_ogl.set_projection( gl::matrix4::ortho( 0, w, 0, h ) );
+	ogl.clear_color( _style.background_color() );
+	ogl.clear();
+	ogl.set_projection( gl::matrix4::ortho( 0, w, 0, h ) );
 
 	if ( _widget )
 	{
@@ -165,8 +173,8 @@ void window::paint( void )
 			_widget->layout_target()->set_size( w, h );
 			_widget->layout_target()->compute_layout();
 			if ( _widget->update_layout( 250.0 ) )
-				_widget->invalidate();
-			_widget->paint( _ogl );
+				invalidate( *_widget );
+			_widget->paint( *this );
 		} );
 	}
 }
@@ -183,7 +191,7 @@ void window::resized( coord_type w, coord_type h )
 			_widget->layout_target()->set( { 0.0, 0.0 }, { w, h } );
 			_widget->layout_target()->compute_layout();
 			_widget->update_layout( 0.0 );
-			_widget->invalidate();
+			invalidate( *_widget );
 		} );
 	}
 }

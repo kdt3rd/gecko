@@ -18,8 +18,6 @@ class standard_definition;
 namespace platform
 {
 
-class renderer;
-
 ////////////////////////////////////////
 
 /// @brief Screen device.
@@ -50,6 +48,13 @@ public:
 	/// screen-only screen.
 	virtual bool is_managed( void ) const = 0;
 
+	/// @brief determine if the screen is a remote screen.
+	///
+	/// The best example of this is if the process is running on a
+	/// remote machine (or a VM), and connecting to the X server via
+	/// the network.
+	virtual bool is_remote( void ) const = 0;
+
 	/// @brief Screen bounds.
 	///
 	/// The bounds (size) of the screen, either the full (avail ==
@@ -66,9 +71,6 @@ public:
 
 	/// @brief returns the current refresh rate of the screen
 	virtual double refresh_rate( void ) const = 0;
-
-	/// @brief Retrieve the renderer to be used for this screen
-	virtual const std::shared_ptr<renderer> &render( void ) const = 0;
 
 	/// @brief Screen display standard
 	///

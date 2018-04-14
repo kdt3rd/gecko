@@ -5,11 +5,11 @@
 extra_source = optional_source{
 	system="Linux";
 	source={
+		"context.cpp";
 		"cursor.cpp";
 		"dispatcher.cpp";
 		"keyboard.cpp";
 		"mouse.cpp";
-		"renderer.cpp";
 		"screen.cpp";
 		"system.cpp";
 		"window.cpp";

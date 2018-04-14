@@ -9,7 +9,6 @@
 #include "screen.h"
 #include "window.h"
 #include "dispatcher.h"
-#include "renderer.h"
 #include <gl/opengl.h>
 
 #include <platform/platform.h>
@@ -120,8 +119,7 @@ system::system( const std::string &d )
 			throw std::runtime_error( "Error binding to OpenGL API" );
 
 		// need to add / remove screens based on registry
-		_renderer = std::make_shared<renderer>();
-		_screens.emplace_back( std::make_shared<screen>( _renderer ) );
+		_screens.emplace_back( std::make_shared<screen>() );
 
 		// need to add / remove keyboards / mice based on registry
 		_keyboard = std::make_shared<keyboard>();
@@ -276,7 +274,7 @@ system::new_system_tray_item( void )
 
 std::shared_ptr<::platform::window> system::new_window( const std::shared_ptr<::platform::screen> &s )
 {
-	auto ret = std::make_shared<window>( _egl_disp, _compositor, _shell );
+	auto ret = std::make_shared<window>( _egl_disp, _compositor, _shell, s );
 	_dispatcher->add_window( ret );
 	return ret;
 }

@@ -15,12 +15,14 @@
 namespace platform
 {
 
-class renderer;
+class context;
 
 namespace xlib
 {
 
 class system;
+class screen;
+class context;
 
 ////////////////////////////////////////
 
@@ -29,8 +31,10 @@ class window : public ::platform::window
 {
 public:
 	/// @brief Constrcutor
-	window( system &s, ::platform::renderer &r, const std::shared_ptr<Display> &dpy );
+	window( system &s, const std::shared_ptr<Display> &dpy, const std::shared_ptr<::platform::screen> &scr );
 	~window( void );
+
+	::platform::context &hw_context( void ) override;
 
 	void raise( void ) override;
 	void lower( void ) override;
@@ -52,10 +56,6 @@ public:
 //	void set_icon( const icon &i ) override;
 
 	void invalidate( const rect &r ) override;
-
-	/// @brief Acquire window to draw
-	void acquire( void ) override;
-	void release( void ) override;
 
 	/// @brief Xlib window identifier.
 	Window id( void ) const;
@@ -86,13 +86,9 @@ private:
 	bool _popup = false;
 	bool _fullscreen = false;
 
+	std::shared_ptr<context> _ctxt;
+
 	GLXContext _glc;
-	void (*_glc_makecurrent)( Display *, GLXDrawable, GLXContext ) = nullptr;
-	void (*_glc_swapbuffers)( Display *, GLXDrawable ) = nullptr;
-	void (*_glc_scissor)( GLint, GLint, GLsizei, GLsizei ) = nullptr;
-	void (*_glc_viewport)( GLint, GLint, GLsizei, GLsizei ) = nullptr;
-	void (*_glc_enable)( GLenum ) = nullptr;
-	void (*_glc_disable)( GLenum ) = nullptr;
 
 };
 

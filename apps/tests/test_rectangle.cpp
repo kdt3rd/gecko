@@ -20,10 +20,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	auto sys = platform::platform::find_running();
 	auto win = sys->new_window();
 	win->set_title( "Triangle" );
-	win->acquire();
-
-	// OpenGL information & initialization
-	gl::api ogl;
+	auto render_guard = win->hw_context().begin_render();
+	gl::api &ogl = win->hw_context().api();
 	ogl.setup_debugging();
 
 	draw::rectangle rect( 50, 50, 100, 100, gl::blue );
@@ -31,8 +29,6 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	// Matrix for setting up ortho view
 	float w = 100;
 	float dw = 4;
-
-	win->release();
 
 	// Called to draw the window
 	win->exposed = [&]( void )
@@ -46,7 +42,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		// Draw the rectangle
 		rect.set_position( 50, 50 );
 		rect.set_size( w, 100 );
-		rect.draw( ogl );
+		rect.draw( win->hw_context() );
 
 		// Cause a redraw to continue the animation
 		win->invalidate( platform::rect() );
@@ -63,9 +59,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	{
 		if ( c == platform::scancode::KEY_S )
 		{
-			win->acquire();
+			auto r = win->hw_context().begin_render();
 			gl::png_write( "/tmp/test.png", static_cast<size_t>( win->width() ), static_cast<size_t>( win->height() ), 3 );
-			win->release();
 		}
 	};
 

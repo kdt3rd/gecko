@@ -29,11 +29,16 @@ checkbox_w::~checkbox_w( void )
 
 ////////////////////////////////////////
 
-void checkbox_w::build( gl::api &ogl )
+void checkbox_w::build( context &ctxt )
 {
-	const style &s = context::current().get_style();
+	const style &s = ctxt.get_style();
 
 	draw::paint c;
+	platform::context &hwc = ctxt.hw_context();
+	gl::api &ogl = hwc.api();
+
+	_unchecked.rebuild( hwc );
+	_checked.rebuild( hwc );
 
 	c.set_fill_color( s.active_icon( s.background_color() ) );
 	_unchecked.add( ogl, draw::iconCheckBoxEmpty(), c );
@@ -53,7 +58,7 @@ void checkbox_w::build( gl::api &ogl )
 
 ////////////////////////////////////////
 
-void checkbox_w::paint( gl::api &ogl )
+void checkbox_w::paint( context &ctxt )
 {
 	_checked.set_position( x(), y() );
 	_unchecked.set_position( x(), y() );
@@ -61,9 +66,9 @@ void checkbox_w::paint( gl::api &ogl )
 	if ( _tracking )
 		c = _current;
 	if ( c )
-		_checked.draw( ogl );
+		_checked.draw( ctxt.hw_context() );
 	else
-		_unchecked.draw( ogl );
+		_unchecked.draw( ctxt.hw_context() );
 }
 
 ////////////////////////////////////////

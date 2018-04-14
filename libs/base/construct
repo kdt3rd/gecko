@@ -5,11 +5,13 @@ lib = library "base"
 	"env.cpp";
 	"format.cpp";
 	"compiler_abi.cpp";
+	"context.cpp";
 	"contract.cpp";
 	"cpu_features.cpp";
 	"dso.cpp";
 	"event.cpp";
 	"half.cpp";
+	"ini.cpp";
 	"loadable.cpp";
 	"shared_mutex.cpp";
 	"string_util.cpp";

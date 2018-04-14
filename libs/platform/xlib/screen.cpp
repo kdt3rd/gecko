@@ -85,9 +85,8 @@ namespace platform { namespace xlib
 
 ////////////////////////////////////////
 
-screen::screen( const std::shared_ptr<Display> &disp, int scr,
-				const std::shared_ptr<::platform::renderer> &r )
-	: _display( disp ), _screen( scr ), _render( r ),
+screen::screen( const std::shared_ptr<Display> &disp, int scr )
+	: _display( disp ), _screen( scr ),
 	  _standard( color::make_standard( color::standard::SRGB ) )
 {
 	// like similar dynamic-loaded DSO for X, like OpenGL, need to
@@ -116,6 +115,14 @@ bool
 screen::is_managed( void ) const
 {
 	return true;
+}
+
+////////////////////////////////////////
+
+bool
+screen::is_remote( void ) const
+{
+	return false;
 }
 
 ////////////////////////////////////////
@@ -204,14 +211,6 @@ screen::refresh_rate( void ) const
 	}
 
 	return 0.F;
-}
-
-////////////////////////////////////////
-
-const std::shared_ptr<::platform::renderer> &
-screen::render( void ) const
-{
-	return _render;
 }
 
 ////////////////////////////////////////

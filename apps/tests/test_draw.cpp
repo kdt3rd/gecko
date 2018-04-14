@@ -27,9 +27,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	auto win = sys->new_window();
 	win->resize( 400, 400 );
 	win->set_title( "Draw Test" );
-	win->acquire();
-
-	gl::api ogl;
+	auto render_guard = win->hw_context().begin_render();
+	gl::api &ogl = win->hw_context().api();
 	ogl.setup_debugging();
 
 	gl::mesh star;
@@ -115,8 +114,6 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	gl::program::uniform matrix_loc = star.get_uniform_location( "matrix" );
 	gl::matrix4 local = gl::matrix4::translation( 200, 200 );
 
-	win->release();
-
 	// Render function
 	win->exposed = [&]( void )
 	{
@@ -145,9 +142,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	{
 		if ( c == platform::scancode::KEY_S )
 		{
-			win->acquire();
+			auto r = win->hw_context().begin_render();
 			gl::png_write( "/tmp/test.png", static_cast<size_t>( win->width() ), static_cast<size_t>( win->height() ), 3 );
-			win->release();
 		}
 	};
 

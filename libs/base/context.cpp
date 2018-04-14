@@ -5,28 +5,22 @@
 // See the accompanying LICENSE.txt file for terms
 //
 
-#include "renderer.h"
+#include "context.h"
 
 ////////////////////////////////////////
 
-namespace platform
+namespace base
 {
 
 ////////////////////////////////////////
 
-renderer::renderer( void )
-{
-}
-
-////////////////////////////////////////
-
-renderer::~renderer( void )
+context::~context( void )
 {
 }
 
 ////////////////////////////////////////
 
-} // platform
+} // base
 
 
 

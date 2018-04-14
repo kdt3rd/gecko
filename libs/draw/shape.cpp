@@ -22,7 +22,6 @@ shape::shape( void )
 
 void shape::add( gl::api &ogl, const polylines &lines, const paint &c )
 {
-
 	if ( lines.empty() || c.empty() )
 		return;
 
@@ -49,8 +48,17 @@ void shape::add( gl::api &ogl, const polylines &lines, const paint &c )
 
 ////////////////////////////////////////
 
-void shape::draw( gl::api &ogl )
+void shape::rebuild( platform::context &ctxt )
 {
+	_meshes.clear();
+}
+
+////////////////////////////////////////
+
+void shape::draw( platform::context &ctxt )
+{
+	gl::api &ogl = ctxt.api();
+
 	ogl.save_matrix();
 	ogl.model_matrix().scale( _resize[0] / _shape[0], _resize[1] / _shape[1] );
 	ogl.model_matrix().translate( _top_left[0], _top_left[1] );

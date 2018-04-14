@@ -29,7 +29,6 @@ class keyboard;
 class mouse;
 class tray;
 class menu;
-class renderer;
 
 ////////////////////////////////////////
 

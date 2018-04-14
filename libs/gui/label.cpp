@@ -34,9 +34,9 @@ label_w::~label_w( void )
 
 ////////////////////////////////////////
 
-void label_w::build( gl::api &ogl )
+void label_w::build( context &ctxt )
 {
-	const style &s = context::current().get_style();
+	const style &s = ctxt.get_style();
 	const auto &f = s.body_font();
 
 	script::font_extents fex = f->extents();
@@ -52,19 +52,19 @@ void label_w::build( gl::api &ogl )
 
 ////////////////////////////////////////
 
-void label_w::paint( gl::api &ogl )
+void label_w::paint( context &ctxt )
 {
 	if ( _bg_color.alpha() > 0.0 )
 	{
 		_bg.set_position( x(), y() );
 		_bg.set_size( width(), height() );
-		_bg.draw( ogl );
+		_bg.draw( ctxt.hw_context() );
 	}
 	const auto &f = _text.get_font();
 	if ( f )
 	{
 		_text.set_position( f->align_text( _text.get_text(), *this, _align ) );
-		_text.draw( ogl );
+		_text.draw( ctxt.hw_context() );
 	}
 }
 

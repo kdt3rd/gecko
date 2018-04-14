@@ -23,7 +23,8 @@ public:
 	rectangle( const gl::color &c = gl::white );
 	rectangle( float x, float y, float w, float h, const gl::color &c = gl::white );
 
-	void draw( gl::api &ogl ) override;
+	void rebuild( platform::context &ctxt ) override;
+	void draw( platform::context &ctxt ) override;
 
 	void set_size( float w, float h );
 	void set_position( float x, float y );
@@ -34,16 +35,19 @@ public:
 	}
 
 private:
-	void initialize( gl::api &ogl );
+	void initialize( platform::context &ctxt );
 
 	gl::matrix4 _rect;
 	gl::color _color;
 
-	std::shared_ptr<gl::mesh> _mesh;
+	struct cache_entry
+	{
+		gl::mesh _mesh;
+		gl::program::uniform _matrix_loc;
+		gl::program::uniform _color_loc;
+	};
 
-	static std::weak_ptr<gl::mesh> _mesh_cache;
-	static gl::program::uniform _matrix_loc;
-	static gl::program::uniform _color_loc;
+	std::shared_ptr<cache_entry> _stash;
 };
 
 

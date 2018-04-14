@@ -57,7 +57,8 @@ public:
 		_meshes.clear();
 	}
 
-	void draw( gl::api &ogl ) override;
+	void rebuild( platform::context &ogl ) override;
+	void draw( platform::context &ogl ) override;
 
 	void shape_size( float w, float h )
 	{

@@ -59,10 +59,12 @@ void slider_w::set_value( value_type v )
 
 ////////////////////////////////////////
 
-void slider_w::build( gl::api &ogl )
+void slider_w::build( context &ctxt )
 {
-	const style &s = context::current().get_style();
+	const style &s = ctxt.get_style();
 	_groove.set_color( s.secondary_text( s.background_color() ) );
+
+	gl::api &ogl = ctxt.hw_context().api();
 
 	draw::path handle;
 	handle.circle( { 0, 0 }, _handle );
@@ -77,16 +79,17 @@ void slider_w::build( gl::api &ogl )
 
 ////////////////////////////////////////
 
-void slider_w::paint( gl::api &ogl )
+void slider_w::paint( context &ctxt )
 {
-	coord_type ypos = y() + height()/2.0;
+	coord_type ypos = y() + height()/coord_type(2);
 
+	platform::context &c = ctxt.hw_context();
 	_groove.set_position( x(), ypos - 1 );
 	_groove.set_size( width(), 2 );
-	_groove.draw( ogl );
+	_groove.draw( c );
 
 	_knob.set_position( x( _value, _handle ), ypos );
-	_knob.draw( ogl );
+	_knob.draw( c );
 }
 
 ////////////////////////////////////////
@@ -124,7 +127,7 @@ bool slider_w::mouse_move( const point &p )
 		if ( z1 < z2 )
 			set_value( ( p.x() - z1 ) / ( z2 - z1 ) );
 		else
-			set_value( ( _min + _max ) / 2.0 );
+			set_value( ( _min + _max ) / value_type(2) );
 		when_changing( _value );
 		return true;
 	}
@@ -143,7 +146,7 @@ bool slider_w::mouse_release( const point &p, int /*button*/ )
 		if ( z1 < z2 )
 			set_value( ( p.x() - z1 ) / ( z2 - z1 ) );
 		else
-			set_value( ( _min + _max ) / 2.0 );
+			set_value( ( _min + _max ) / value_type(2) );
 		when_changed( _value );
 		invalidate();
 		return true;

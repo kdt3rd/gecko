@@ -71,12 +71,11 @@ application::application( const std::string &display, const std::string &p, cons
 	}
 	
 	auto tmpw = _impl->sys->new_window();
-	tmpw->acquire();
+	auto guard = tmpw->hw_context().begin_render();
 	GLint mw = 1024;
 	glGetIntegerv( GL_MAX_TEXTURE_SIZE, &mw );
 	_fmgr->max_glyph_store( mw, mw );
 	_impl->sys->destroy_window( tmpw );
-	tmpw->release();
 }
 
 ////////////////////////////////////////

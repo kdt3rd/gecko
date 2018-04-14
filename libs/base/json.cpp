@@ -24,13 +24,6 @@ namespace base
 
 ////////////////////////////////////////
 
-json::~json( void )
-{
-	clear();
-}
-
-////////////////////////////////////////
-
 void json::parse( const std::string &str )
 {
 	std::stringstream tmp( str );

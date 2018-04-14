@@ -32,9 +32,8 @@ public:
 	void set_font( const std::shared_ptr<script::font> &f ) { _text.set_font( f ); }
 	void set_align( base::alignment a ) { _align = a; }
 
-	void build( gl::api &ogl ) override;
-
-	void paint( gl::api &ogl ) override;
+	void build( context &ogl ) override;
+	void paint( context &ogl ) override;
 
 	bool mouse_press( const point &p, int b ) override;
 	bool mouse_release( const point &p, int b ) override;

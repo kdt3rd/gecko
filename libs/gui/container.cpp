@@ -31,21 +31,22 @@ base_container::~base_container( void )
 
 ////////////////////////////////////////
 
-void base_container::build( gl::api &ogl )
+void base_container::build( context &ctxt )
 {
 	for ( auto w: _widgets )
-		w->build( ogl );
+		w->build( ctxt );
 }
 
 ////////////////////////////////////////
 
-void base_container::paint( gl::api &ogl )
+void base_container::paint( context &ctxt )
 {
+	gl::api &ogl = ctxt.hw_context().api();
 	ogl.push_scissor( x(), y(), width(), height() );
 	ogl.clear_color( context::current().get_style().background_color() );
 	ogl.clear();
 	for ( auto w: _widgets )
-		w->paint( ogl );
+		w->paint( ctxt );
 	ogl.pop_scissor();
 }
 

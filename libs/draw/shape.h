@@ -56,7 +56,8 @@ public:
 		_meshes.clear();
 	}
 
-	void draw( gl::api &ogl ) override;
+	void rebuild( platform::context &ctxt ) override;
+	void draw( platform::context &ctxt ) override;
 
 	void set_position( float x, float y )
 	{

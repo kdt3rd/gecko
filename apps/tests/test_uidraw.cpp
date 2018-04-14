@@ -30,9 +30,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	auto win = sys->new_window();
 	win->resize( 400, 400 );
 	win->set_title( "Draw Test" );
-	win->acquire();
-
-	gl::api ogl;
+	auto render_guard = win->hw_context().begin_render();
+	gl::api &ogl = win->hw_context().api();
 	ogl.setup_debugging();
 
 	auto fm = script::font_manager::common();
@@ -151,7 +150,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		// draw the text
 		ogl.save_matrix();
 		ogl.multiply( matrix );
-		samptext.draw( ogl );
+		samptext.draw( win->hw_context() );
 		ogl.restore_matrix();
 
 		// Cause a redraw to continue the animation
@@ -163,9 +162,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	{
 		if ( c == platform::scancode::KEY_S )
 		{
-			win->acquire();
+			auto r = win->hw_context().begin_render();
 			gl::png_write( "/tmp/test.png", static_cast<size_t>( win->width() ), static_cast<size_t>( win->height() ), 3 );
-			win->release();
 		}
 		else if ( c == platform::scancode::KEY_Q )
 		{

@@ -17,28 +17,10 @@
 #include <X11/Xutil.h>
 
 #include "system.h"
-#include "renderer.h"
+#include "context.h"
 #include "cursor.h"
 
 namespace {
-
-const int visual_attribs[] =
-{
-//	GLX_X_RENDERABLE    , True,
-	GLX_DRAWABLE_TYPE   , GLX_WINDOW_BIT,
-	GLX_RENDER_TYPE     , GLX_RGBA_BIT,
-	GLX_X_VISUAL_TYPE   , GLX_TRUE_COLOR,
-	GLX_RED_SIZE        , 8,
-	GLX_GREEN_SIZE      , 8,
-	GLX_BLUE_SIZE       , 8,
-	GLX_ALPHA_SIZE      , 2, // only use 2 in case we're on a 10-bit display
-	GLX_DEPTH_SIZE      , 24,
-	GLX_STENCIL_SIZE    , 8,
-	GLX_DOUBLEBUFFER    , True,
-	GLX_SAMPLE_BUFFERS  , 1,
-	GLX_SAMPLES         , 4,
-	None
-};
 
 /*
 static bool isExtensionSupported(const char *extList, const char *extension)
@@ -79,63 +61,18 @@ namespace platform { namespace xlib
 
 ////////////////////////////////////////
 
-window::window( system &s, ::platform::renderer &r, const std::shared_ptr<Display> &dpy )
-	: _display( dpy )
+window::window( system &s, const std::shared_ptr<Display> &dpy, const std::shared_ptr<::platform::screen> &scr )
+	: ::platform::window( scr ), _display( dpy )
 {
 	precondition( _display, "null display" );
 
 	Display *disp = _display.get();
 
-	auto query = r.render_query_func();
+	_ctxt = std::make_shared<context>( dpy );
 
-	using glXQueryVersionProc = Bool (*)( Display *, int *, int * );
-	auto glxVerFunc = reinterpret_cast<glXQueryVersionProc>( query( "glXQueryVersion" ) );
-	if ( ! glxVerFunc  )
-		throw_runtime( "Unable to find glXQueryVersion" );
-	// Check GLX version.  Version 1.3 is needed for FBConfig
-	int glx_major, glx_minor;
-	if ( !glxVerFunc( disp, &glx_major, &glx_minor ) )
-		throw_runtime( "glx query version failed" );
-	if ( ( ( glx_major == 1 ) && ( glx_minor < 3 ) ) || ( glx_major < 1 ) )
-		throw_runtime( "glx too old" );
-
-	auto glxChooseFBFunc = reinterpret_cast<PFNGLXCHOOSEFBCONFIGPROC>( query( "glXChooseFBConfig" ) );
-	if ( ! glxChooseFBFunc )
-		throw_runtime( "Unable to find glXChooseFBConfig" );
-	auto glxGetVis = reinterpret_cast<PFNGLXGETVISUALFROMFBCONFIGPROC>( query( "glXGetVisualFromFBConfig" ) );
-	if ( ! glxGetVis )
-		throw_runtime( "Unable to find glXGetVisualFromFBConfig" );
-	PFNGLXGETFBCONFIGATTRIBPROC glxGetFBAttr = (PFNGLXGETFBCONFIGATTRIBPROC) query( "glXGetFBConfigAttrib" );
-
-	// Get the framebuffer configs
-	int fbcount;
-	GLXFBConfig* fbc = glxChooseFBFunc( disp, DefaultScreen( disp ), visual_attribs, &fbcount );
-	if ( fbc == nullptr )
-		throw_runtime( "failed to get GL framebuffer configs" );
-	on_scope_exit { XFree( fbc ); };
-
-	// Find the best framebuffer
-	int best_fbc = -1, best_num_samp = -1;
-	for ( int i = 0; i < fbcount; ++i )
-	{
-		XVisualInfo *vi = glxGetVis( disp, fbc[i] );
-		on_scope_exit { XFree( vi ); };
-
-		if ( vi != nullptr )
-		{
-			int samp_buf, samples;
-			glxGetFBAttr( disp, fbc[i], GLX_SAMPLE_BUFFERS, &samp_buf );
-			glxGetFBAttr( disp, fbc[i], GLX_SAMPLES, &samples );
-			if ( best_fbc < 0 || ( samp_buf && samples > best_num_samp ) )
-				best_fbc = i, best_num_samp = samples;
-		}
-	}
-
-	GLXFBConfig bestFbc = fbc[ best_fbc ];
-
-	XVisualInfo *vi = glxGetVis( disp, bestFbc );
+	XVisualInfo *vi = _ctxt->choose_best_config();
 	if ( vi == nullptr )
-		throw std::runtime_error( "no glx visual found" );
+		throw std::runtime_error( "no visual found" );
 	on_scope_exit { XFree( vi ); };
 
 	XSetWindowAttributes swa;
@@ -157,54 +94,7 @@ window::window( system &s, ::platform::renderer &r, const std::shared_ptr<Displa
 
 	_win = XCreateWindow( disp, root, 0, 0, 320, 240, 0, vi->depth, InputOutput, vi->visual, CWBorderPixel | CWColormap | CWEventMask, &swa );
 
-	// Get the default screen's GLX extension list
-
-	// NOTE: It is not necessary to create or make current to a context before
-	// calling glXGetProcAddressARB
-	auto glXCreateContextAttribsARB = reinterpret_cast<PFNGLXCREATECONTEXTATTRIBSARBPROC>( query( "glXCreateContextAttribsARB" ) );
-
-	if ( ! glXCreateContextAttribsARB )
-		throw_runtime( "unable to retrieve the OpenGL glXCreateContextAttribsARB" );
-
-	// If it does, try to get a GL 3.3 context!
-	int attributes[] =
-	{
-		GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
-		GLX_CONTEXT_MINOR_VERSION_ARB, 3,
-		GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_DEBUG_BIT_ARB|GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
-		//GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
-		//GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
-		None
-	};
-
-	_glc = glXCreateContextAttribsARB( disp, bestFbc, 0, True, attributes );
-	if ( ! _glc )
-		throw std::runtime_error( "Unable to create OpenGL context" );
-
-	_glc_makecurrent = reinterpret_cast<void (*)(Display *, GLXDrawable, GLXContext )>( query( "glXMakeCurrent" ) );
-	if ( ! _glc_makecurrent )
-		throw_runtime( "unable to retrieve glXMakeCurrent" );
-
-	acquire();
-
-	_glc_swapbuffers = reinterpret_cast<void (*)(Display *, GLXDrawable )>( query( "glXSwapBuffers" ) );
-	if ( ! _glc_swapbuffers )
-		throw_runtime( "unable to retrieve glXSwapBuffers" );
-	_glc_scissor = reinterpret_cast<void (*)( GLint, GLint, GLsizei, GLsizei )>( query( "glScissor" ) );
-	if ( ! _glc_scissor )
-		throw_runtime( "unable to retrieve glScissor" );
-	_glc_viewport = reinterpret_cast<void (*)( GLint, GLint, GLsizei, GLsizei )>( query( "glViewport" ) );
-	if ( ! _glc_viewport )
-		throw_runtime( "unable to retrieve glViewport" );
-	_glc_enable = reinterpret_cast<void (*)( GLenum )>( query( "glEnable" ) );
-	if ( ! _glc_enable )
-		throw_runtime( "unable to retrieve glEnable" );
-	_glc_disable = reinterpret_cast<void (*)( GLenum )>( query( "glDisable" ) );
-	if ( ! _glc_disable )
-		throw_runtime( "unable to retrieve glDisable" );
-
-	if ( !gl3wIsSupported( 3, 3 ) )
-		throw std::runtime_error( "opengl 3.3 not supported" );
+	_ctxt->create( _win );
 
 //	std::cout << "OpenGL:\n\tvendor " << glGetString( GL_VENDOR )
 //			  << "\n\trenderer " << glGetString( GL_RENDERER )
@@ -227,8 +117,17 @@ window::window( system &s, ::platform::renderer &r, const std::shared_ptr<Displa
 
 window::~window( void )
 {
+	// shut this down first before we kill the window...
+	_ctxt.reset();
 	if ( _win != 0 )
 		XDestroyWindow( _display.get(), _win );
+}
+
+////////////////////////////////////////
+
+::platform::context &window::hw_context( void )
+{
+	return *(_ctxt);
 }
 
 ////////////////////////////////////////
@@ -340,20 +239,6 @@ void window::invalidate( const rect &r )
 
 ////////////////////////////////////////
 
-void window::acquire( void )
-{
-	_glc_makecurrent( _display.get(), _win, _glc );
-}
-
-////////////////////////////////////////
-
-void window::release( void )
-{
-	_glc_makecurrent( _display.get(), None, nullptr );
-}
-
-////////////////////////////////////////
-
 Window window::id( void ) const
 {
 	return _win;
@@ -384,11 +269,10 @@ void window::resize_event( coord_type w, coord_type h )
 	{
 		_last_w = tw;
 		_last_h = th;
-		acquire();
-		_glc_viewport( 0, 0, static_cast<GLsizei>(tw), static_cast<GLsizei>(th) );
+		auto guard = _ctxt->begin_render();
+		_ctxt->set_viewport( 0, 0, tw, th );
 		if ( resized )
 			resized( w, h );
-		release();
 	}
 }
 
@@ -396,29 +280,29 @@ void window::resize_event( coord_type w, coord_type h )
 
 void window::expose_event( coord_type x, coord_type y, coord_type w, coord_type h )
 {
-	acquire();
+	auto guard = _ctxt->begin_render();
+
 	if ( w == 0 && h == 0 )
 		_invalid_rgn = rect();
 	if ( ( w != 0 && h != 0 ) || ! _invalid_rgn.empty() )
 	{
 		_invalid_rgn.include( rect( x, y, w, h ) );
-		_glc_enable( GL_SCISSOR_TEST );
-		_glc_scissor( static_cast<GLint>( _invalid_rgn.x() ),
-					  static_cast<GLint>( _last_h - _invalid_rgn.y() ),
-					  static_cast<GLsizei>( _invalid_rgn.width() ),
-					  static_cast<GLsizei>( _invalid_rgn.height() ) );
+//		_glc_enable( GL_SCISSOR_TEST );
+//		_glc_scissor( static_cast<GLint>( _invalid_rgn.x() ),
+//					  static_cast<GLint>( _last_h - _invalid_rgn.y() ),
+//					  static_cast<GLsizei>( _invalid_rgn.width() ),
+//					  static_cast<GLsizei>( _invalid_rgn.height() ) );
 	}
-	else
-		_glc_disable( GL_SCISSOR_TEST );
+//	else
+//		_glc_disable( GL_SCISSOR_TEST );
 	if ( exposed )
 		exposed();
-	_glc_swapbuffers( _display.get(), _win );
-	_glc_disable( GL_SCISSOR_TEST );
+	_ctxt->swap_buffers();
+//	_glc_disable( GL_SCISSOR_TEST );
 	_invalid = false;
 	_invalid_rgn = rect();
 //	glFlush();
 //	XFlush( _display.get() );
-	release();
 }
 
 ////////////////////////////////////////

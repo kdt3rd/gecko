@@ -55,10 +55,11 @@ public:
 		return _utf8;
 	}
 
-	void draw( gl::api &ogl ) override;
+	void rebuild( platform::context &ctxt ) override;
+	void draw( platform::context &ctxt ) override;
 
 private:
-	void update( void );
+	void update( platform::context &ctxt );
 
 	bool _update = false;
 
@@ -78,8 +79,12 @@ private:
 		std::shared_ptr<gl::texture> texture;
 	};
 
-	static std::weak_ptr<gl::program> _program_cache;
-	static std::map<std::shared_ptr<script::font>, GlyphPack> _font_glyph_cache;
+	struct cache_entry
+	{
+		std::shared_ptr<gl::program> _program_cache;
+		std::map<std::shared_ptr<script::font>, GlyphPack> _font_glyph_cache;
+	};
+	std::shared_ptr<cache_entry> _stash;
 };
 
 ////////////////////////////////////////

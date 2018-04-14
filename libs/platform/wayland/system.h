@@ -74,8 +74,6 @@ public:
 	static bool is_available( void );
 
 private:
-	std::shared_ptr<::platform::renderer> _renderer;
-
 	std::shared_ptr<struct wl_display> _display;
 	struct wl_compositor *_compositor = nullptr;
 	struct wl_shell *_shell = nullptr;

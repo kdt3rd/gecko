@@ -36,13 +36,19 @@ widget::~widget( void )
 
 ////////////////////////////////////////
 
-void widget::build( gl::api &ogl )
+void widget::monitor_changed( context & )
 {
 }
 
 ////////////////////////////////////////
 
-void widget::paint( gl::api &ogl )
+void widget::build( context & )
+{
+}
+
+////////////////////////////////////////
+
+void widget::paint( context & )
 {
 }
 

@@ -7,6 +7,7 @@
 
 #pragma once
 
+// TODO: we could forward declare, but subclasses probably want most of these?
 #include "paint.h"
 #include "gradient.h"
 #include <gl/texture.h>
@@ -14,6 +15,12 @@
 #include <gl/mesh.h>
 #include <map>
 #include <string>
+#include <platform/context.h>
+
+namespace platform
+{
+class context;
+}
 
 namespace draw
 {
@@ -25,7 +32,8 @@ class drawable
 public:
 	virtual ~drawable( void );
 
-	virtual void draw( gl::api &ogl ) = 0;
+	virtual void rebuild( platform::context &ctxt ) = 0;
+	virtual void draw( platform::context &ctxt ) = 0;
 
 protected:
 	std::shared_ptr<gl::texture> new_gradient( gl::api &ogl, const gradient &g, size_t n = 128 );

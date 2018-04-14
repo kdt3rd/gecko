@@ -74,8 +74,6 @@ public:
 	bool query_mouse( uint8_t &buttonMask, uint8_t &modifiers, coord_type &x, coord_type &y, int &screen ) override;
 
 private:
-	std::shared_ptr<::platform::renderer> _renderer;
-
 	std::shared_ptr<Display> _display;
 	std::shared_ptr<dispatcher> _dispatcher;
 	std::shared_ptr<keyboard> _keyboard;

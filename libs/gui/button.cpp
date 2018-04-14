@@ -55,9 +55,9 @@ void button_w::set_pressed( bool p )
 
 ////////////////////////////////////////
 
-void button_w::build( gl::api &ogl )
+void button_w::build( context &ctxt )
 {
-	style &s = context::current().get_style();
+	style &s = ctxt.get_style();
 	const auto &f = s.body_font();
 
 	script::font_extents fex = f->extents();
@@ -70,11 +70,12 @@ void button_w::build( gl::api &ogl )
 
 ////////////////////////////////////////
 
-void button_w::paint( gl::api &ogl )
+void button_w::paint( context &ctxt )
 {
+	platform::context &hwc = ctxt.hw_context();
 	_rect.set_position( x(), y() );
 	_rect.set_size( width(), height() );
-	_rect.draw( ogl );
+	_rect.draw( hwc );
 
 	const auto &f = _text.get_font();
 	if ( f )
@@ -82,7 +83,7 @@ void button_w::paint( gl::api &ogl )
 		rect lbox = *this;
 		lbox.shrink( 10, 10, 5, 5 );
 		_text.set_position( f->align_text( _text.get_text(), lbox, _align ) );
-		_text.draw( ogl );
+		_text.draw( hwc );
 	}
 }
 

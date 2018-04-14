@@ -36,9 +36,9 @@ line_edit_w::~line_edit_w( void )
 
 ////////////////////////////////////////
 
-void line_edit_w::build( gl::api &ogl )
+void line_edit_w::build( context &ctxt )
 {
-	const style &s = context::current().get_style();
+	const style &s = ctxt.get_style();
 	const auto &f = s.body_font();
 
 	script::font_extents fex = f->extents();
@@ -55,7 +55,7 @@ void line_edit_w::build( gl::api &ogl )
 
 ////////////////////////////////////////
 
-void line_edit_w::paint( gl::api &ogl )
+void line_edit_w::paint( context &ctxt )
 {
 	script::font_extents fex = _text.get_font()->extents();
 	_line.set_position( x(), y() + height() - 1.F );
@@ -63,18 +63,19 @@ void line_edit_w::paint( gl::api &ogl )
 	_text.set_position( x() + 2.F, y() + height() + fex.descent );
 	_prompt.set_position( x() + 2.F, y() + height() + fex.descent );
 
-	_line.draw( ogl );
+	platform::context &hwc = ctxt.hw_context();
+	_line.draw( hwc );
 	if ( _text.get_text().empty() )
-		_prompt.draw( ogl );
+		_prompt.draw( hwc );
 	else
-		_text.draw( ogl );
+		_text.draw( hwc );
 
 	const std::string &str = _text.get_text();
 	script::text_extents tex = _text.get_font()->extents( str.substr( 0, _cursor ) );
 
 	_marker.set_position( x() + 2.F + tex.width - 0.5F, y() + height() + fex.descent - fex.ascent );
 	_marker.set_size( 1.5F, fex.ascent - fex.descent );
-	_marker.draw( ogl );
+	_marker.draw( hwc );
 }
 
 ////////////////////////////////////////

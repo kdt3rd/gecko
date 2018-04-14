@@ -15,7 +15,8 @@ namespace platform
 
 ////////////////////////////////////////
 
-window::window( void )
+window::window( const std::shared_ptr<screen> &screen )
+	: _screen( screen )
 {
 }
 

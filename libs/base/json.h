@@ -131,25 +131,6 @@ public:
 		set<json_null>( x );
 	}
 
-	json( const json &x )
-		: _storage( x._storage )
-	{
-	}
-
-	json( json &&x )
-		: _storage( std::move( x._storage ) )
-	{
-	}
-
-	~json( void );
-
-	/// @brief Assignment operator.
-	json &operator=( json old )
-	{
-		_storage = std::move( old._storage );
-		return *this;
-	}
-
 	/// @brief pass through check to storage
 	template <typename X>
 	inline bool is( void ) const

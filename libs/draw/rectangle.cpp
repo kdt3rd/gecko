@@ -10,10 +10,6 @@
 namespace draw
 {
 
-std::weak_ptr<gl::mesh> rectangle::_mesh_cache;
-gl::program::uniform rectangle::_matrix_loc;
-gl::program::uniform rectangle::_color_loc;
-
 ////////////////////////////////////////
 
 rectangle::rectangle( const gl::color &c )
@@ -34,13 +30,20 @@ rectangle::rectangle( float x, float y, float w, float h, const gl::color &c )
 
 ////////////////////////////////////////
 
-void rectangle::draw( gl::api &ogl )
+void rectangle::rebuild( platform::context &ctxt )
 {
-	initialize( ogl );
+	_stash.reset();
+}
 
-	auto bound = _mesh->bind();
-	bound.set_uniform( _matrix_loc, _rect * ogl.current_matrix() );
-	bound.set_uniform( _color_loc, _color );
+////////////////////////////////////////
+
+void rectangle::draw( platform::context &ctxt )
+{
+	initialize( ctxt );
+
+	auto bound = _stash->_mesh.bind();
+	bound.set_uniform( _stash->_matrix_loc, _rect * ctxt.api().current_matrix() );
+	bound.set_uniform( _stash->_color_loc, _color );
 	bound.draw();
 }
 
@@ -62,17 +65,16 @@ void rectangle::set_position( float x, float y )
 
 ////////////////////////////////////////
 
-void rectangle::initialize( gl::api &ogl )
+void rectangle::initialize( platform::context &ctxt )
 {
-	if ( !_mesh )
+	if ( !_stash )
 	{
-		_mesh = _mesh_cache.lock();
-		if ( !_mesh )
+		if ( ctxt.retrieve_common( this, _stash ) )
 		{
-			_mesh = std::make_shared<gl::mesh>();
-
+			// new object
+			//
 			// Setup program with vertex and fragment shaders
-			_mesh->set_program( new_program( ogl, "simple.vert", "single_color.frag" ) );
+			_stash->_mesh.set_program( new_program( ctxt.api(), "simple.vert", "single_color.frag" ) );
 
 			// Setup vertices
 			gl::vertex_buffer_data<gl::vec2> vertices;
@@ -84,16 +86,14 @@ void rectangle::initialize( gl::api &ogl )
 
 			gl::element_buffer_data elements { 0, 3, 1, 1, 3, 2 };
 			{
-				auto bound = _mesh->bind();
+				auto bound = _stash->_mesh.bind();
 				bound.vertex_attribute( "position", vertices );
 				bound.set_elements( elements );
 			}
 
-			_mesh->add_triangles( 6 );
-			_matrix_loc = _mesh->get_uniform_location( "matrix" );
-			_color_loc = _mesh->get_uniform_location( "color" );
-
-			_mesh_cache = _mesh;
+			_stash->_mesh.add_triangles( 6 );
+			_stash->_matrix_loc = _stash->_mesh.get_uniform_location( "matrix" );
+			_stash->_color_loc = _stash->_mesh.get_uniform_location( "color" );
 		}
 	}
 }

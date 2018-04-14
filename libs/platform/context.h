@@ -9,7 +9,9 @@
 
 #include <stack>
 #include <base/utility.h>
+#include <base/context.h>
 #include "types.h"
+#include <gl/api.h>
 
 ////////////////////////////////////////
 
@@ -19,9 +21,12 @@ namespace platform
 ///
 /// @brief Class context provides...
 ///
-class context
+class context : public base::context
 {
 public:
+	using render_func_ptr = void (*)( void );
+	using render_query = render_func_ptr (*)( const char * );
+
 	class clip_region_guard
 	{
 	private:
@@ -69,9 +74,13 @@ public:
 	context &operator=( context &&o ) = delete;
 	virtual ~context( void );
 
+	virtual render_query render_query_func( void ) = 0;
+
 	virtual void share( context &o ) = 0;
 
 	virtual void set_viewport( coord_type x, coord_type y, coord_type w, coord_type h ) = 0;
+
+	virtual void swap_buffers( void ) = 0;
 
 	render_guard begin_render( void ) { return render_guard( this ); }
 
@@ -80,6 +89,8 @@ public:
 	{
 		return clip_region_guard( this, rect( x, y, w, h ) );
 	}
+
+	gl::api &api( void ) { return *_api; }
 
 protected:
 	friend class clip_region_guard;
@@ -95,6 +106,7 @@ protected:
 	rect _cur_viewport;
 	std::stack<rect> _cur_clip_stack;
 
+	std::unique_ptr<gl::api> _api;
 private:
 
 };

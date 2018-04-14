@@ -10,7 +10,6 @@
 #include "window.h"
 #include "cursor.h"
 #include "dispatcher.h"
-#include "renderer.h"
 #include <X11/Xcursor/Xcursor.h>
 #include <X11/cursorfont.h>
 
@@ -82,17 +81,30 @@ system::system( const std::string &d )
 	if (  !_display )
 		return;
 
-	_renderer = std::make_shared<renderer>();
-
 	if ( ! XSupportsLocale() )
 		throw_runtime( "Current locale not supported by X" );
 
 	if ( XSetLocaleModifiers( "@im=none" ) == nullptr )
 		throw_runtime( "Unable to set locale modifiers for Xlib" );
 
+	// TODO: add detection for remote X?
+//	int xFD = ConnectionNumber( _display.get() );
+//	int stype = -1;
+//	int rs = getsockopt( xFD, SOL_SOCKET, SO_TYPE, &stype );
+
+	// TODO: this is really only half the story. In that probably 99%
+	// of multi-monitor setups use some form of twinview / xinerama
+	// setup. As such, the screen idea is sort of antiquated -
+	// although perhaps an unmanaged x screen could be interesting for
+	// an external monitor / playback setup?
+	//
+	// TODO: consider the idea we may actually have screens that are
+	// NOT X screens, but are alive to the nvidia drivers. this is
+	// certainly the case for windows, and may be coming to the nvidia
+	// drivers for linux...
 	_screens.resize( static_cast<size_t>( ScreenCount( _display.get() ) ) );
 	for ( int i = 0; i < ScreenCount( _display.get() ); ++i )
-		_screens[0] = std::make_shared<screen>( _display, i, _renderer );
+		_screens[0] = std::make_shared<screen>( _display, i );
 
 	// TODO: look at using libinput even for xlib?
 	// don't have a good way to identify individual keyboards / mice
@@ -317,7 +329,7 @@ system::new_system_tray_item( void )
 
 std::shared_ptr<::platform::window> system::new_window( const std::shared_ptr<::platform::screen> &s )
 {
-	auto ret = std::make_shared<window>( *this, *_renderer, _display );
+	auto ret = std::make_shared<window>( *this, _display, s );
 	_dispatcher->add_window( ret );
 	return ret;
 }

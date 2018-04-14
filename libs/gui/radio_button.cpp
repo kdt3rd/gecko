@@ -31,9 +31,10 @@ radio_button_w::~radio_button_w( void )
 
 ////////////////////////////////////////
 
-void radio_button_w::build( gl::api &ogl )
+void radio_button_w::build( context &ctxt )
 {
-	const style &s = context::current().get_style();
+	const style &s = ctxt.get_style();
+	gl::api &ogl = ctxt.hw_context().api();
 
 	draw::paint c;
 	c.set_fill_color( s.active_icon( s.background_color() ) );
@@ -50,7 +51,7 @@ void radio_button_w::build( gl::api &ogl )
 
 ////////////////////////////////////////
 
-void radio_button_w::paint( gl::api &ogl )
+void radio_button_w::paint( context &ctxt )
 {
 	_checked.set_position( x(), y() );
 	_unchecked.set_position( x(), y() );
@@ -58,9 +59,9 @@ void radio_button_w::paint( gl::api &ogl )
 	if ( _tracking )
 		c = _current;
 	if ( c )
-		_checked.draw( ogl );
+		_checked.draw( ctxt.hw_context() );
 	else
-		_unchecked.draw( ogl );
+		_unchecked.draw( ctxt.hw_context() );
 }
 
 ////////////////////////////////////////

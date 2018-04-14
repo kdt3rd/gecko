@@ -65,9 +65,9 @@ void scroll_bar_w::set_range( value_type min, value_type max )
 
 ////////////////////////////////////////
 
-void scroll_bar_w::build( gl::api &ogl )
+void scroll_bar_w::build( context &ctxt )
 {
-	const style &s = context::current().get_style();
+	const style &s = ctxt.get_style();
 	_groove.set_color( s.disabled_text( s.background_color() ) );
 	_knob.set_color( s.dominant_color() );
 
@@ -79,11 +79,13 @@ void scroll_bar_w::build( gl::api &ogl )
 
 ////////////////////////////////////////
 
-void scroll_bar_w::paint( gl::api &ogl )
+void scroll_bar_w::paint( context &ctxt )
 {
+	platform::context &hwc = ctxt.hw_context();
+
 	_groove.set_position( x(), y() );
 	_groove.set_size( width(), height() );
-	_groove.draw( ogl );
+	_groove.draw( hwc );
 
 	if ( _horizontal )
 	{
@@ -91,7 +93,7 @@ void scroll_bar_w::paint( gl::api &ogl )
 		value_type w = _handle * width() / ( _max - _min );
 		_knob.set_position( x, y() );
 		_knob.set_size( w, height() );
-		_knob.draw( ogl );
+		_knob.draw( hwc );
 	}
 	else
 	{
@@ -99,7 +101,7 @@ void scroll_bar_w::paint( gl::api &ogl )
 		value_type h = _handle * height() / ( _max - _min );
 		_knob.set_position( x(), y );
 		_knob.set_size( width(), h );
-		_knob.draw( ogl );
+		_knob.draw( hwc );
 	}
 }
 
