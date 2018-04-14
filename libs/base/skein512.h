@@ -52,7 +52,7 @@ private:
     size_t  _block_size; // current byte count in buffer b[] */
     uint64_t  _T[2]; // tweak words: T[0]=byte cnt, T[1]=flags */
     uint64_t  _X[8]; // chaining variables */
-	union 
+	union
 	{
 		uint8_t  _block[64]; // partial block buffer (8-byte aligned) */
 		uint64_t _block64[8];

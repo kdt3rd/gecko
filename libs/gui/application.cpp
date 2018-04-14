@@ -69,7 +69,7 @@ application::application( const std::string &display, const std::string &p, cons
 		_fmgr->load_dpi( static_cast<int>( dpi.w() ),
 						 static_cast<int>( dpi.h() ) );
 	}
-	
+
 	auto tmpw = _impl->sys->new_window();
 	auto guard = tmpw->hw_context().begin_render();
 	GLint mw = 1024;
