@@ -33,7 +33,7 @@ std::string
 uri::full_path( void ) const
 {
 	if ( _path.empty() )
-		return std::string( '/', 1 );
+		return std::string( 1, '/' );
 
 	std::string ret;
 	size_t n = 0;
