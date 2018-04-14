@@ -38,17 +38,17 @@ int safemain( int argc, char *argv[] )
 		}
 		catch ( std::exception &e )
 		{
-			strtest.failure( std::string( "unable to query language: " ) + e.what() );
+			strtest.failure( "unable to query language ({0})", e );
 		}
 
 		try
 		{
 			base::locale::set( "en_US" );
-			strtest.success( "set language to: en_US" );
+			strtest.success( "set language to C" );
 		}
 		catch ( std::exception &e )
 		{
-			strtest.failure( std::string( "unable to set default locale: " ) + e.what() );
+			strtest.failure( "unable to set default locale ({0})", e.what() );
 		}
 
 		try
