@@ -110,6 +110,12 @@ public:
 		set<json_number>( std::make_pair( static_cast<double>( x ), to_string( x ) ) );
 	}
 
+	/// @brief JSON integer constructor
+	json( int64_t x )
+	{
+		set<json_number>( std::make_pair( static_cast<double>( x ), to_string( x ) ) );
+	}
+
 	/// @brief JSON string constructor
 	json( const char *x )
 	{
