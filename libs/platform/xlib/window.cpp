@@ -80,12 +80,13 @@ window::window( system &s, const std::shared_ptr<Display> &dpy, const std::share
 	swa.border_pixel = 0;
 	swa.event_mask =
 		KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask |
-		EnterWindowMask | LeaveWindowMask | PointerMotionMask | PointerMotionHintMask |
-		Button1MotionMask | Button2MotionMask | Button3MotionMask | Button4MotionMask |
-		Button5MotionMask | ButtonMotionMask | KeymapStateMask | ExposureMask |
+		EnterWindowMask | LeaveWindowMask | PointerMotionMask | KeymapStateMask | ExposureMask |
 		VisibilityChangeMask | StructureNotifyMask |
 		FocusChangeMask |
 		PropertyChangeMask | ColormapChangeMask | OwnerGrabButtonMask;
+	// | PointerMotionHintMask |
+	//Button1MotionMask | Button2MotionMask | Button3MotionMask | Button4MotionMask |
+	//	Button5MotionMask | ButtonMotionMask
 		//ResizeRedirectMask |
 		//SubstructureNotifyMask | SubstructureRedirectMask |
 

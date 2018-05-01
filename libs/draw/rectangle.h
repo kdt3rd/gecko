@@ -39,6 +39,7 @@ private:
 
 	gl::matrix4 _rect;
 	gl::color _color;
+	int _texture_offset;
 
 	struct cache_entry
 	{
