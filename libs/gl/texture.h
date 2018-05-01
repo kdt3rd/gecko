@@ -49,16 +49,31 @@ public:
 		~binding( void );
 
 		/// @brief Specify a single channel 2D image.
-		void image_2d_red( format f, size_t w, size_t h, image_type type, const void *data );
+		void image_2d_red( format f, size_t w, size_t h, image_type type, const void *data, size_t stride_bytes = 0, bool needswap = false )
+		{
+			upload_helper( f, GL_RED, 1, w, h, type, data, stride_bytes, needswap );
+		}
 
+		/// @brief Specify a two channel 2D image.
+		void image_2d_rg( format f, size_t w, size_t h, image_type type, const void *data, size_t stride_bytes = 0, bool needswap = false )
+		{
+			upload_helper( f, GL_RG, 2, w, h, type, data, stride_bytes, needswap );
+		}
+		
 		/// @brief Specify a RGB 2D image.
-		void image_2d_rgb( format f, size_t w, size_t h, image_type type, const void *data );
+		void image_2d_rgb( format f, size_t w, size_t h, image_type type, const void *data, size_t stride_bytes = 0, bool needswap = false )
+		{
+			upload_helper( f, GL_RGB, 3, w, h, type, data, stride_bytes, needswap );
+		}
 
 		/// @brief Specify a RGBA 2D image.
-		void image_2d_rgba( format f, size_t w, size_t h, image_type type, const void *data );
+		void image_2d_rgba( format f, size_t w, size_t h, image_type type, const void *data, size_t stride_bytes = 0, bool needswap = false )
+		{
+			upload_helper( f, GL_RGBA, 4, w, h, type, data, stride_bytes, needswap );
+		}
 
 		/// @brief Update a 2D region of the image.
-		void subimage_2d( format f, int x, int y, size_t w, size_t h, image_type type, const void *data );
+		void subimage_2d( format f, int x, int y, size_t w, size_t h, image_type type, const void *data, size_t stride_bytes = 0, bool needswap = false );
 
 		/// @brief Set the texture wrapping mode.
 		void set_wrapping( wrapping w );
@@ -80,6 +95,8 @@ public:
 
 		inline size_t unit( void ) const { return _unit; }
 	private:
+		void upload_helper( format f, GLenum fmt, int c, size_t w, size_t h, image_type type, const void *data, size_t stride_bytes, bool needswap );
+
 		size_t _unit;
 		GLenum _target;
 	};

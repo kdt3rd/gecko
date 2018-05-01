@@ -37,21 +37,21 @@ class sample_rate
 public:
 	sample_rate( void ) = default;
 	/// if realtime is true, enables drop frame handling
-	sample_rate( int64_t n, int64_t d = 1, bool realtime = false );
+	inline constexpr sample_rate( int64_t n, int64_t d = 1, bool realtime = false ) : _ratio( n, d ), _realtime( realtime ) {}
 	sample_rate( const sample_rate & ) = default;
 	sample_rate( sample_rate && ) = default;
 	~sample_rate( void ) = default;
 	sample_rate &operator=( const sample_rate & ) = default;
 	sample_rate &operator=( sample_rate && ) = default;
 
-	inline bool valid( void ) const;
+	inline constexpr bool valid( void ) const;
 
 	bool is_drop_frame( void ) const;
 
-	inline bool realtime( void ) const;
-	inline const base::ratio &ratio( void ) const;
-	inline int64_t numerator( void ) const;
-	inline int64_t denominator( void ) const;
+	inline constexpr bool realtime( void ) const;
+	inline constexpr const base::ratio &ratio( void ) const;
+	inline constexpr int64_t numerator( void ) const;
+	inline constexpr int64_t denominator( void ) const;
 
 	/// @brief Resamples the incoming sample with it's rate at
 	/// the rate represented by this
@@ -98,40 +98,64 @@ private:
 	bool _realtime = false;
 };
 
+////////////////////////////////////////
+
+inline constexpr bool operator==( const sample_rate &a, const sample_rate &b )
+{
+	return a.ratio() == b.ratio() && a.realtime() == b.realtime();
+}
+
+inline constexpr bool operator!=( const sample_rate &a, const sample_rate &b )
+{
+	return !( a == b );
+}
+
+inline constexpr bool operator<( const sample_rate &a, const sample_rate &b )
+{
+	return ( a.ratio() < b.ratio() ? true :
+			 ( a.ratio() == b.ratio() ? a.realtime() < b.realtime() : false ) );
+}
+
+inline bool operator>( const sample_rate &a, const sample_rate &b )
+{
+	return b < a;
+}
+
+////////////////////////////////////////
+
 inline std::ostream &operator<<( std::ostream &os, const sample_rate &r )
 {
 	os << r.to_string();
 	return os;
 }
 
-
 ////////////////////////////////////////
 
 
-inline bool
+inline constexpr bool
 sample_rate::valid( void ) const
 {
 	return _ratio.valid();
 }
 
-inline bool
+inline constexpr bool
 sample_rate::realtime( void ) const
 {
 	return _realtime;
 }
 
-inline const base::ratio &sample_rate::ratio( void ) const
+inline constexpr const base::ratio &sample_rate::ratio( void ) const
 {
 	return _ratio;
 }
 
-inline int64_t
+inline constexpr int64_t
 sample_rate::numerator( void ) const
 {
 	return _ratio.numerator();
 }
 
-inline int64_t
+inline constexpr int64_t
 sample_rate::denominator( void ) const
 {
 	return _ratio.denominator();

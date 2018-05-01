@@ -12,6 +12,7 @@
 #include <base/file_system.h>
 
 #include "exr_reader.h"
+#include "png_reader.h"
 #include "tiff_reader.h"
 #include <mutex>
 #include <map>
@@ -24,6 +25,7 @@ std::mutex theReaderMutex;
 void initReaders( void )
 {
 	media::register_exr_reader();
+	media::register_png_reader();
 	media::register_tiff_reader();
 }
 

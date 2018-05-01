@@ -20,26 +20,27 @@ class ratio
 {
 public:
 	ratio( void ) = default;
-	ratio( int64_t n, int64_t d, bool s = true );
+	constexpr ratio( int64_t n, int64_t d ) : _num( n ), _den( d ) {}
+	ratio( int64_t n, int64_t d, bool simp );
 	ratio( const ratio & ) = default;
-	ratio( ratio && ) = default;
+	ratio( ratio && ) noexcept = default;
 	~ratio( void ) = default;
 	ratio &operator=( const ratio & ) = default;
-	ratio &operator=( ratio && ) = default;
+	ratio &operator=( ratio && ) noexcept = default;
 
 	void set( int64_t n, int64_t d );
 
-	inline bool valid( void ) const;
+	inline constexpr bool valid( void ) const;
 
-	inline int64_t numerator( void ) const;
-	inline int64_t denominator( void ) const;
+	inline constexpr int64_t numerator( void ) const;
+	inline constexpr int64_t denominator( void ) const;
 
-	inline double value( void ) const;
+	inline constexpr double value( void ) const;
 
-	inline ratio invert( void ) const;
-	inline int64_t trunc( void ) const;
-	inline int64_t mod( void ) const;
-	inline int64_t round( void ) const;
+	inline constexpr ratio invert( void ) const;
+	inline constexpr int64_t trunc( void ) const;
+	inline constexpr int64_t mod( void ) const;
+	inline constexpr int64_t round( void ) const;
 
 	ratio &operator +=( const ratio &r );
 	ratio &operator -=( const ratio &r );
@@ -62,42 +63,42 @@ private:
 
 ////////////////////////////////////////
 
-inline bool ratio::valid( void ) const
+inline constexpr bool ratio::valid( void ) const
 {
 	return _den != 0;
 }
 
-inline int64_t ratio::numerator( void ) const
+inline constexpr int64_t ratio::numerator( void ) const
 {
 	return _num;
 }
 
-inline int64_t ratio::denominator( void ) const
+inline constexpr int64_t ratio::denominator( void ) const
 {
 	return _den;
 }
 
-inline double ratio::value( void ) const
+inline constexpr double ratio::value( void ) const
 {
 	return static_cast<double>(_num) / static_cast<double>(_den);
 }
 
-inline ratio ratio::invert( void ) const
+inline constexpr ratio ratio::invert( void ) const
 {
 	return ratio( _den, _num );
 }
 
-inline int64_t ratio::trunc( void ) const
+inline constexpr int64_t ratio::trunc( void ) const
 {
 	return _num / _den;
 }
 
-inline int64_t ratio::mod( void ) const
+inline constexpr int64_t ratio::mod( void ) const
 {
 	return _num % _den;
 }
 
-inline int64_t ratio::round( void ) const
+inline constexpr int64_t ratio::round( void ) const
 {
 	return ( _num + ( _num < 0 ? -_den : _den ) / 2 ) / _den;
 }
@@ -131,32 +132,32 @@ ratio operator/( int64_t a, const ratio &b );
 /// @defgroup RatioComparison ratio related comparison routines
 ///
 /// @{
-inline bool operator==( const ratio &a, const ratio &b )
+inline constexpr bool operator==( const ratio &a, const ratio &b )
 {
 	return a.numerator() * b.denominator() == b.numerator() * a.denominator();
 }
 
-inline bool operator!=( const ratio &a, const ratio &b )
+inline constexpr bool operator!=( const ratio &a, const ratio &b )
 {
 	return !( a == b );
 }
 
-inline bool operator<( const ratio &a, const ratio &b )
+inline constexpr bool operator<( const ratio &a, const ratio &b )
 {
 	return a.numerator() * b.denominator() < b.numerator() * a.denominator();
 }
 
-inline bool operator<=( const ratio &a, const ratio &b )
+inline constexpr bool operator<=( const ratio &a, const ratio &b )
 {
 	return a.numerator() * b.denominator() <= b.numerator() * a.denominator();
 }
 
-inline bool operator>( const ratio &a, const ratio &b )
+inline constexpr bool operator>( const ratio &a, const ratio &b )
 {
 	return a.numerator() * b.denominator() > b.numerator() * a.denominator();
 }
 
-inline bool operator>=( const ratio &a, const ratio &b )
+inline constexpr bool operator>=( const ratio &a, const ratio &b )
 {
 	return a.numerator() * b.denominator() >= b.numerator() * a.denominator();
 }

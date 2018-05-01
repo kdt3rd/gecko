@@ -52,6 +52,50 @@ private:
 
 ////////////////////////////////////////
 
+inline bool operator==( const sample &a, const sample &b )
+{
+	if ( a.rate() == b.rate() )
+		return a.offset() == b.offset();
+
+	sample_rate com = a.rate().common( b.rate() );
+	return com.resample( a.offset(), a.rate() ) == com.resample( b.offset(), b.rate() );
+}
+
+inline bool operator!=( const sample &a, const sample &b )
+{
+	return !( a == b );
+}
+
+inline bool operator<( const sample &a, const sample &b )
+{
+	if ( a.rate() == b.rate() )
+		return a.offset() < b.offset();
+
+	sample_rate com = a.rate().common( b.rate() );
+	return com.resample( a.offset(), a.rate() ) < com.resample( b.offset(), b.rate() );
+}
+
+inline bool operator<=( const sample &a, const sample &b )
+{
+	if ( a.rate() == b.rate() )
+		return a.offset() <= b.offset();
+
+	sample_rate com = a.rate().common( b.rate() );
+	return com.resample( a.offset(), a.rate() ) <= com.resample( b.offset(), b.rate() );
+}
+
+inline bool operator>( const sample &a, const sample &b )
+{
+	return b < a;
+}
+
+inline bool operator>=( const sample &a, const sample &b )
+{
+	return b <= a;
+}
+
+////////////////////////////////////////
+
 inline std::ostream &operator<<( std::ostream &os, const sample &s )
 {
 	os << s.offset() << '@' << s.rate();

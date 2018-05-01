@@ -13,9 +13,9 @@
 
 #include <base/cmd_line.h>
 #include <base/posix_file_system.h>
-#include <media/exr_reader.h>
-#include <media/video_track.h>
+#include <media/reader.h>
 #include <gui/application.h>
+#include <gui/window.h>
 #include <viewer/viewer.h>
 
 //constexpr double padding = 12;
@@ -41,68 +41,38 @@ int safemain( int argc, char **argv )
 	auto win = app->new_window();
 	win->set_title( app->active_platform() );
 
-	auto viewer = std::make_shared<viewer::viewer>();
-	win->set_widget( viewer );
+	win->in_context( [&]( void )
+	{
+		using namespace gui;
+
+		auto view = viewer();
+
+		win->set_widget( view );
+
+		if ( auto &opt = options["<img>"] )
+		{
+			base::uri inputU( opt.value() );
+			if ( ! inputU )
+				inputU.set_scheme( "file" );
+
+			media::container c = media::reader::open( inputU );
+			for ( size_t ci = 0; ci != c.video_tracks().size(); ++ci )
+			{
+				auto &vt = c.video_tracks()[ci];
+				int64_t fs = vt->begin();
+				int64_t fe = vt->end();
+
+				std::cout << "Sequence " << ci << " is from frame " << fs << " to " << fe << std::endl;
+				if ( ci == 0 )
+				{
+					view->add_video_track( vt );
+					view->update_frame( media::sample( fs, vt->rate() ) );
+				}
+			}
+		}
+	} );
 
 	win->show();
-
-	if ( auto &opt = options["<img>"] )
-	{
-		auto context = win->bind();
-
-		auto v = opt.value();
-		media::container c = media::exr_reader( base::uri( "file", "", v ) );
-		auto t = std::dynamic_pointer_cast<media::video_track>( c.at( 0 ) );
-		auto f = t->at( t->begin() );
-
-		if ( f->has_channels( "R", "G", "B" ) )
-		{
-			std::vector<float> img( size_t(f->width() * f->height() * 3) );
-			float *line = img.data();
-			media::image_buffer chans[3];
-			chans[0] = f->at( "R" );
-			chans[1] = f->at( "G" );
-			chans[2] = f->at( "B" );
-
-			for ( int64_t y = 0; y < f->height(); ++y )
-			{
-				chans[0].get_scanline( y, line+0, 3 );
-				chans[1].get_scanline( y, line+1, 3 );
-				chans[2].get_scanline( y, line+2, 3 );
-				line += f->width() * 3;
-			}
-
-			auto txt = std::make_shared<gl::texture>();
-			{
-				auto tbind = txt->bind( gl::texture::target::TEXTURE_RECTANGLE );
-				tbind.image_2d_rgb( gl::format::RGBA_FLOAT, size_t(f->width()), size_t(f->height()), gl::image_type::FLOAT, img.data() );
-			}
-			viewer->set_texture_a( txt );
-		}
-		else if ( f->has_channels( "Y" ) )
-		{
-			std::vector<float> img( size_t(f->width() * f->height()) );
-			float *line = img.data();
-			media::image_buffer chan = f->at( "Y" );
-
-			for ( int64_t y = 0; y < f->height(); ++y )
-			{
-				chan.get_scanline( y, line );
-				line += f->width();
-			}
-
-			auto txt = std::make_shared<gl::texture>();
-			{
-				auto tbind = txt->bind( gl::texture::target::TEXTURE_RECTANGLE );
-				tbind.image_2d_red( gl::format::RGBA_FLOAT, size_t(f->width()), size_t(f->height()), gl::image_type::FLOAT, img.data() );
-				tbind.set_swizzle( gl::swizzle::RED, gl::swizzle::RED, gl::swizzle::RED );
-			}
-			viewer->set_texture_a( txt );
-		}
-		else
-			throw_logic( "can only view RGB images" );
-	}
-
 	int code = app->run();
 	app->pop();
 	app.reset();

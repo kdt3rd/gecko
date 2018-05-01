@@ -66,28 +66,20 @@ public:
 
 	virtual size_t item_count( void ) const { return 1; }
 
-	size_t add_channel( std::string n, image_buffer &i )
+	size_t add_channel( std::string n, image_buffer i )
 	{
 		precondition( i.width() == width(), "invalid channel width {0} vs {1}", i.width(), width() );
 		precondition( i.height() == height(), "invalid channel height {0} vs {1}", i.height(), height() );
 		_names[std::move(n)] = _channels.size();
-		_channels.push_back( i );
+		_channels.emplace_back( std::move( i ) );
 		return _channels.size() - 1;
 	}
 
-	size_t add_channel( image_buffer &i )
+	size_t add_channel( image_buffer i )
 	{
 		precondition( i.width() == width(), "invalid channel width {0} vs {1}", i.width(), width() );
 		precondition( i.height() == height(), "invalid channel height {0} vs {1}", i.height(), height() );
-		_channels.push_back( i );
-		return _channels.size() - 1;
-	}
-
-	size_t add_channel( image_buffer &&i )
-	{
-		precondition( i.width() == width(), "invalid channel width {0} vs {1}", i.width(), width() );
-		precondition( i.height() == height(), "invalid channel height {0} vs {1}", i.height(), height() );
-		_channels.push_back( std::move( i ) );
+		_channels.emplace_back( std::move( i ) );
 		return _channels.size() - 1;
 	}
 
@@ -114,6 +106,22 @@ public:
 	size_t size( void ) const
 	{
 		return _channels.size();
+	}
+
+	bool is_interleaved( void ) const
+	{
+		size_t N = size();
+		// consider single channel image not interleaved...
+		if ( N < 2 )
+			return false;
+
+		const std::shared_ptr<void> &fcb = _channels.front().raw();
+		for ( size_t i = 1; i != N; ++i )
+		{
+			if ( _channels[i].raw() != fcb )
+				return false;
+		}
+		return true;
 	}
 
 	image_buffer &operator[]( size_t i )

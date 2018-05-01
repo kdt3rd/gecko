@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2014-2017 Ian Godin and Kimball Thurston
+// Copyright (c) 2014-2018 Ian Godin and Kimball Thurston
 // All rights reserved.
 // Copyrights licensed under the MIT License.
 // See the accompanying LICENSE.txt file for terms
@@ -8,47 +8,94 @@
 #pragma once
 
 #include <gui/widget.h>
+#include "image.h"
+#include <draw/rectangle.h>
+#include <media/sample.h>
+#include <map>
+#include <list>
 
-namespace viewer
+namespace media
+{
+class video_track;
+class sample;
+}
+
+// TODO: should we put it in it's own namespace???
+namespace gui
 {
 
 ////////////////////////////////////////
 
-class viewer : public gui::widget
+class viewer_w : public gui::widget
 {
 public:
-	viewer( void );
+	viewer_w( void );
 
-	void set_texture_a( const std::shared_ptr<gl::texture> &t );
-	void set_texture_b( const std::shared_ptr<gl::texture> &t );
+	// add image sources to the viewer
+	size_t add_video_track( const std::shared_ptr<media::video_track> &t );
+//	size_t add_image( );
 
-	void paint( const std::shared_ptr<draw::canvas> &c ) override;
+	// remove image sources from the viewer
+	void remove_video_track( const std::shared_ptr<media::video_track> &t );
+	void remove_item( size_t id );
 
-	void compute_minimum( void ) override;
+	void set_active( size_t id, bool act );
 
-	bool mouse_press( const base::point &p, int button ) override;
-	bool mouse_move( const base::point &p ) override;
-	bool mouse_release( const base::point &p, int button ) override;
+	void stack_items( size_t a, size_t b );
+
+	void unstack_items( size_t a, size_t b );
+	void unstack_all( void );
+
+	// reset all the pan / zoom positions
+	void reset_positions( void );
+
+	void set_filtering( draw::zoom_filter f );
+
+	void update_frame( const media::sample &s, bool force_reload = false );
+
+	void build( context &ogl ) override;
+	void paint( context &ctxt ) override;
+
+	bool mouse_press( const point &p, int button ) override;
+	bool mouse_move( const point &p ) override;
+	bool mouse_release( const point &p, int button ) override;
 	bool mouse_wheel( int amount ) override;
+	bool key_release( platform::scancode c ) override;
 
 private:
-	std::shared_ptr<gl::texture> _textureA;
-	std::shared_ptr<gl::texture> _textureB;
-	std::shared_ptr<gl::program> _prog;
-	std::shared_ptr<gl::vertex_array> _quad;
+	void update_images( bool force_reload );
 
-	base::point _panA;
-	base::point _panB;
-	int _zoomA = 1;
-	int _zoomB = 1;
+	media::sample _current_sample;
 
-	bool _panningA = false;
-	bool _panningB = false;
-	base::point _last;
+	static const size_t kInvalidID = size_t(-1);
+
+	struct ImageSet
+	{
+		std::shared_ptr<media::video_track> _source;
+		media::sample _last_loaded;
+		std::shared_ptr<media::image_frame> _cur;
+		std::shared_ptr<draw::image> _image;
+		bool _active = false;
+		size_t _above = kInvalidID;
+		size_t _below = kInvalidID;
+	};
+
+	draw::zoom_filter _filter = draw::zoom_filter::nearest;
+	size_t _cur_ID = 0;
+	std::map<size_t, ImageSet> _images;
+	std::list<size_t> _draw_order;
+
+	draw::rectangle _rect;
+
+	bool _panning = false;
+	point _last;
 };
-
 
 ////////////////////////////////////////
 
-}
+using viewer = widget_ptr<viewer_w>;
+
+////////////////////////////////////////
+
+} // namespace gui
 

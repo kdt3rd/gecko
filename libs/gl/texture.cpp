@@ -72,35 +72,104 @@ texture::binding::~binding( void )
 
 ////////////////////////////////////////
 
-void texture::binding::image_2d_red( format f, size_t w, size_t h, image_type type, const void *data )
+void texture::binding::upload_helper( format f, GLenum fmt, int c, size_t w, size_t h, image_type type, const void *data,
+									  size_t stride_bytes, bool needswap )
 {
+	GLint bytesper = 1;
+	switch ( type )
+	{
+		case image_type::UNSIGNED_BYTE:
+			bytesper = 1;
+			break;
+		case image_type::UNSIGNED_SHORT:
+		case image_type::HALF:
+			bytesper = 2;
+			break;
+		case image_type::UNSIGNED_INT:
+		case image_type::FLOAT:
+			bytesper = 4;
+			break;
+		default:
+			throw_runtime( "invalid image type" );
+	}
+	if ( stride_bytes != 0 )
+	{
+		size_t units = stride_bytes / (c * bytesper);
+		precondition( 0 == ( stride_bytes - units * (c * bytesper) ), "expect alignment that is a multiple of a pixel unit" );
+		glPixelStorei( GL_UNPACK_ROW_LENGTH, units );
+	}
+	else
+		glPixelStorei( GL_UNPACK_ROW_LENGTH, static_cast<GLint>( w ) );
+	glPixelStorei( GL_UNPACK_SWAP_BYTES, needswap ? 1 : 0 );
+	glPixelStorei( GL_UNPACK_ALIGNMENT, bytesper );
 	glTexImage2D( _target, 0, static_cast<GLint>(f), static_cast<GLsizei>(w),
-				  static_cast<GLsizei>(h), 0, GL_RED, static_cast<GLenum>(type), data );
+				  static_cast<GLsizei>(h), 0, fmt, static_cast<GLenum>(type), data );
+	glPixelStorei( GL_UNPACK_SWAP_BYTES, 0 );
+	glPixelStorei( GL_UNPACK_ALIGNMENT, 4 );
+	glPixelStorei( GL_UNPACK_ROW_LENGTH, 0 );
 }
 
 ////////////////////////////////////////
 
-void texture::binding::image_2d_rgb( format f, size_t w, size_t h, image_type type, const void *data )
+void texture::binding::subimage_2d( format f, int x, int y, size_t w, size_t h, image_type type, const void *data, size_t stride_bytes, bool needswap )
 {
-	glTexImage2D( _target, 0, static_cast<GLint>(f), static_cast<GLsizei>(w),
-				  static_cast<GLsizei>(h), 0, GL_RGB, static_cast<GLenum>(type), data );
-}
+	int c = 1;
+	switch ( f )
+	{
+		case format::RED:
+		case format::RED_HALF:
+		case format::RED_FLOAT:
+			c = 1; break;
+		case format::RG:
+		case format::RG_HALF:
+		case format::RG_FLOAT:
+			c = 2; break;
+		case format::RGB:
+		case format::RGB_HALF:
+		case format::RGB_FLOAT:
+			c = 3; break;
+		case format::RGBA:
+		case format::RGBA_HALF:
+		case format::RGBA_FLOAT:
+			c = 4; break;
+		default:
+			throw_runtime( "unhandled format" );
+	}
+	GLint bytesper = 1;
+	switch ( type )
+	{
+		case image_type::UNSIGNED_BYTE:
+			bytesper = 1;
+			break;
+		case image_type::UNSIGNED_SHORT:
+		case image_type::HALF:
+			bytesper = 2;
+			break;
+		case image_type::UNSIGNED_INT:
+		case image_type::FLOAT:
+			bytesper = 4;
+			break;
+		default:
+			throw_runtime( "invalid image type" );
+	}
+	if ( stride_bytes != 0 )
+	{
+		size_t units = stride_bytes / (c * bytesper);
+		precondition( 0 == ( stride_bytes - units * (c * bytesper) ), "expect alignment that is a multiple of a pixel unit" );
+		glPixelStorei( GL_UNPACK_ROW_LENGTH, units );
+	}
+	else
+		glPixelStorei( GL_UNPACK_ROW_LENGTH, static_cast<GLint>( w ) );
+	glPixelStorei( GL_UNPACK_SWAP_BYTES, needswap ? 1 : 0 );
+	glPixelStorei( GL_UNPACK_ALIGNMENT, bytesper );
 
-////////////////////////////////////////
-
-void texture::binding::image_2d_rgba( format f, size_t w, size_t h, image_type type, const void *data )
-{
-	glTexImage2D( _target, 0, static_cast<GLint>(f), static_cast<GLsizei>(w),
-				  static_cast<GLsizei>(h), 0, GL_RGBA, static_cast<GLenum>(type), data );
-}
-
-////////////////////////////////////////
-
-void texture::binding::subimage_2d( format f, int x, int y, size_t w, size_t h, image_type type, const void *data )
-{
 	glTexSubImage2D( _target, 0, static_cast<GLint>(x), static_cast<GLint>(y),
 					 static_cast<GLsizei>(w), static_cast<GLsizei>(h),
 					 static_cast<GLenum>(f), static_cast<GLenum>(type), data );
+
+	glPixelStorei( GL_UNPACK_SWAP_BYTES, 0 );
+	glPixelStorei( GL_UNPACK_ALIGNMENT, 4 );
+	glPixelStorei( GL_UNPACK_ROW_LENGTH, 0 );
 }
 
 ////////////////////////////////////////

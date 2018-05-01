@@ -18,18 +18,7 @@
 namespace media
 {
 
-
 ////////////////////////////////////////
-
-
-sample_rate::sample_rate( int64_t n, int64_t d, bool realtime )
-		: _ratio( n, d ), _realtime( realtime )
-{
-}
-
-
-////////////////////////////////////////
-
 
 bool
 sample_rate::is_drop_frame( void ) const
@@ -40,9 +29,7 @@ sample_rate::is_drop_frame( void ) const
 			   _ratio.numerator() == 60000 ) );
 }
 
-
 ////////////////////////////////////////
-
 
 int64_t
 sample_rate::resample( int64_t i, const sample_rate &rate ) const
@@ -53,9 +40,7 @@ sample_rate::resample( int64_t i, const sample_rate &rate ) const
 	return tmp.round();
 }
 
-
 ////////////////////////////////////////
-
 
 void
 sample_rate::set( int64_t n, int64_t d, bool realtime )
@@ -64,9 +49,7 @@ sample_rate::set( int64_t n, int64_t d, bool realtime )
 	_realtime = realtime;
 }
 
-
 ////////////////////////////////////////
-
 
 void
 sample_rate::set_rate( double r, bool realtime )
@@ -103,9 +86,7 @@ sample_rate::set_rate( double r, bool realtime )
 	_realtime = realtime;
 }
 
-
 ////////////////////////////////////////
-
 
 void
 sample_rate::set_rate( const std::string &r )
@@ -122,9 +103,7 @@ sample_rate::set_rate( const std::string &r )
 	set_rate( rn, rt );
 }
 
-
 ////////////////////////////////////////
-
 
 double
 sample_rate::to_number( void ) const
@@ -132,9 +111,7 @@ sample_rate::to_number( void ) const
 	return _ratio.value();
 }
 
-
 ////////////////////////////////////////
-
 
 std::string
 sample_rate::to_string( void ) const
@@ -163,9 +140,7 @@ sample_rate::to_string( void ) const
 	return buf.str();
 }
 
-
 ////////////////////////////////////////
-
 
 sample_rate
 sample_rate::common( const sample_rate &o ) const
@@ -174,9 +149,7 @@ sample_rate::common( const sample_rate &o ) const
 	return sample_rate( x.numerator(), x.denominator() );
 }
 
-
 ////////////////////////////////////////
-
 
 const std::vector<sample_rate> &
 sample_rate::frame_rates( void )
@@ -201,9 +174,7 @@ sample_rate::frame_rates( void )
 	return frates;
 }
 
-
 ////////////////////////////////////////
-
 
 const std::vector<sample_rate> &
 sample_rate::audio_rates( void )
@@ -224,9 +195,7 @@ sample_rate::audio_rates( void )
 	return arates;
 }
 
-
 ////////////////////////////////////////
-
 
 } // media
 
