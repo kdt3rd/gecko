@@ -1,7 +1,7 @@
 
 subdir "tests"
 subdir "imgc"
---subdir "viewer"
+subdir "viewer"
 subdir "template2cpp"
 subdir "file_httpd"
 subdir "transcode"

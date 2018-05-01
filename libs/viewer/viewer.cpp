@@ -7,206 +7,360 @@
 
 #include "viewer.h"
 #include <viewer/shaders.h>
-#include <draw/object.h>
-//#include <draw/image.h>
-#include <gl/png_image.h>
+#include <media/reader.h>
 
 ////////////////////////////////////////
 
-namespace
+namespace gui
 {
-	float scaling( int z )
-	{
-		if ( z <= 0 )
-			return -1.F / float( z - 2 );
-		return z;
-	}
+
+////////////////////////////////////////
+
+viewer_w::viewer_w( void )
+	: _rect( { 0.26, 0.26, 0.26 } )
+{
+	_rect.set_color( gl::color( 0.21, 0.21, 0.21, 1.0 ) );
 }
 
 ////////////////////////////////////////
 
-namespace viewer
+size_t viewer_w::add_video_track( const std::shared_ptr<media::video_track> &t )
 {
-
-////////////////////////////////////////
-
-viewer::viewer( void )
-{
-	// seem to get GL errors / crashes if we do this here as the context
-	// is around but the window hasn't yet been shown or something
-	// this is debug anyway...
-//	set_texture_a( std::make_shared<gl::texture>( gl::png_read( "/home/kimball/Images/mandril.png" ) ) );
-//	set_texture_b( std::make_shared<gl::texture>( gl::png_read( "/home/kimball/Images/lena.png" ) ) );
-
-	_zoomA = 1;
-	_panB.set( 512, 0 );
+	size_t id = ++_cur_ID;
+	ImageSet &nset = _images[id];
+	nset._source = t;
+	nset._active = true;
+	_draw_order.push_back( id );
+	return id;
 }
 
 ////////////////////////////////////////
 
-void viewer::paint( const std::shared_ptr<draw::canvas> &c )
+void viewer_w::remove_video_track( const std::shared_ptr<media::video_track> &t )
 {
-	if ( !_prog )
+	auto i = _images.begin();
+	while ( i != _images.end() )
 	{
-		try
+		if ( i->second._source == t )
 		{
-			_prog = c->new_program();
-			_prog->attach( c->new_shader( gl::shader::type::VERTEX, ::viewer::shaders( "shader.vert" ) ) );
-			_prog->attach( c->new_shader( gl::shader::type::FRAGMENT, ::viewer::shaders( "shader.frag" ) ) );
-			_prog->attach( c->new_shader( gl::shader::type::FRAGMENT, ::viewer::shaders( "textureA.frag" ) ) );
-			_prog->attach( c->new_shader( gl::shader::type::FRAGMENT, ::viewer::shaders( "textureB.frag" ) ) );
-			_prog->attach( c->new_shader( gl::shader::type::FRAGMENT, ::viewer::shaders( "nolutA.frag" ) ) );
-			_prog->attach( c->new_shader( gl::shader::type::FRAGMENT, ::viewer::shaders( "nolutB.frag" ) ) );
-			_prog->attach( c->new_shader( gl::shader::type::FRAGMENT, ::viewer::shaders( "nowipe.frag" ) ) );
-			_prog->link();
+			// yeah, we'll re-search for the item we already have, but the draw order
+			// logic is easier to maintain in one place
+			remove_item( i->first );
+			i = _images.begin();
+			continue;
 		}
-		catch ( ... )
+
+		++i;
+	}
+}
+
+////////////////////////////////////////
+
+void viewer_w::remove_item( size_t id )
+{
+	auto i = _images.find( id );
+	if ( i != _images.end() )
+		_images.erase( i );
+
+	for ( auto oi = _draw_order.begin(); oi != _draw_order.end(); ++oi )
+	{
+		if ( (*oi) == id )
 		{
-			throw_add_location( "creating image drawing shaders" );
+			_draw_order.erase( oi );
+			break;
 		}
 	}
-	c->use_program( _prog );
 
-	if ( !_quad )
-		_quad = c->new_vertex_array();
-
-	// coordinates
-	std::vector<float> vertices =
-	{
-		0, 0,
-		float(width()), 0,
-		0, float(height()),
-		float(width()), float(height())
-	};
-
-	auto buf = c->new_array_buffer<float>( vertices );
-	{
-		auto va = _quad->bind();
-		va.attrib_pointer( _prog->get_attribute_location( "position" ), buf, 2, 2, 0 );
-	}
-
-	if ( _textureA )
-		_textureA->bind( gl::texture::target::TEXTURE_RECTANGLE, 0 );
-
-	if ( _textureB )
-		_textureB->bind( gl::texture::target::TEXTURE_RECTANGLE, 1 );
-
-	float zA = scaling( _zoomA );
-	float zB = scaling( _zoomB );
-	auto matA = gl::matrix4::scaling( zA, zA ) * gl::matrix4::translation( _panA );
-	auto matB = gl::matrix4::scaling( zB, zB ) * gl::matrix4::translation( _panB ) * matA;
-
-	_prog->set_uniform( "mvpMatrix", c->current_matrix() );
-	_prog->set_uniform( "winW", width() );
-	_prog->set_uniform( "winH", height() );
-	_prog->set_uniform( "wipeX", 0.5 );
-	_prog->set_uniform( "wipeY", 0.5 );
-	_prog->set_uniform( "texMatA", matA.inverted() );
-	_prog->set_uniform( "texMatB", matB.inverted() );
-	_prog->set_uniform( "texA", 0 );
-	_prog->set_uniform( "texB", 1 );
-
-	auto va = _quad->bind();
-	va.draw( gl::primitive::TRIANGLE_STRIP, 0, 4 );
+	invalidate();
 }
 
 ////////////////////////////////////////
 
-void viewer::set_texture_a( const std::shared_ptr<gl::texture> &t )
+void viewer_w::set_active( size_t id, bool act )
 {
-	_textureA = t;
+	auto i = _images.find( id );
+	if ( i != _images.end() )
 	{
-		auto txt = _textureA->bind( gl::texture::target::TEXTURE_RECTANGLE, 0 );
-		txt.set_wrapping( gl::wrapping::CLAMP_TO_BORDER );
-		txt.set_border_color( base::color( 0, 0, 0, 0 ) );
+		bool doupd = act && ! i->second._active;
+		i->second._active = act;
+		if ( doupd )
+			update_images( false );
 	}
 }
 
 ////////////////////////////////////////
 
-void viewer::set_texture_b( const std::shared_ptr<gl::texture> &t )
+void viewer_w::stack_items( size_t a, size_t b )
 {
-	_textureB = t;
+	auto aci = _images.find( a );
+	auto bci = _images.find( b );
+	if ( aci != _images.end() && bci != _images.end() )
 	{
-		auto txt = _textureB->bind( gl::texture::target::TEXTURE_RECTANGLE, 0 );
-		txt.set_wrapping( gl::wrapping::CLAMP_TO_BORDER );
-		txt.set_border_color( base::color( 0, 0, 0, 0 ) );
+		ImageSet &as = aci->second;
+		ImageSet &bs = aci->second;
+
+		if ( as._above != kInvalidID && as._above != b )
+		{
+			auto oi = _images.find( as._above );
+			if ( oi != _images.end() )
+				oi->second._below = kInvalidID;
+		}
+		if ( bs._below != kInvalidID && bs._below != a )
+		{
+			auto oi = _images.find( bs._below );
+			if ( oi != _images.end() )
+				oi->second._above = kInvalidID;
+		}
+		as._above = b;
+		bs._below = a;
+
+		auto bi = _draw_order.end();
+		auto ai = _draw_order.end();
+		for ( auto oi = _draw_order.begin(); oi != _draw_order.end(); ++oi )
+		{
+			if ( (*oi) == b )
+			{
+				if ( ai != _draw_order.end() )
+				{
+					++oi;
+					_draw_order.erase( ai );
+					_draw_order.insert( oi, a );
+					break;
+				}
+				bi = oi;
+			}
+
+			if ( (*oi) == a )
+			{
+				// b is already being drawn first, leave it alone
+				if ( bi != _draw_order.end() )
+					break;
+				ai = oi;
+				// keep looking for b so we can put it a right after
+			}
+		}
+	}
+	// TODO: what to do if the user passes an invalid id?
+
+	invalidate();
+}
+
+////////////////////////////////////////
+
+void viewer_w::unstack_all( void )
+{
+	for ( auto &i: _images )
+	{
+		ImageSet &curs = i.second;
+		curs._above = kInvalidID;
+		curs._below = kInvalidID;
+	}
+	invalidate();
+}
+
+////////////////////////////////////////
+
+void viewer_w::reset_positions( void )
+{
+	for ( auto &i: _images )
+	{
+		const auto &img = i.second._image;
+		if ( img )
+			img->reset_position( width(), height() );
+	}
+	invalidate();
+}
+
+////////////////////////////////////////
+
+void viewer_w::set_filtering( draw::zoom_filter f )
+{
+	_filter = f;
+	for ( auto &i: _images )
+	{
+		const auto &img = i.second._image;
+		if ( img )
+			img->set_filtering( f );
+	}
+	invalidate();
+}
+
+////////////////////////////////////////
+
+void viewer_w::update_frame( const media::sample &s, bool force_reload )
+{
+	_current_sample = s;
+
+	update_images( force_reload );
+
+	invalidate();
+}
+
+////////////////////////////////////////
+
+void viewer_w::build( context &ctxt )
+{
+}
+
+////////////////////////////////////////
+
+void viewer_w::paint( context &ctxt )
+{
+	platform::context &hwc = ctxt.hw_context();
+
+	_rect.set_position( x(), y() );
+	_rect.set_size( width(), height() );
+	_rect.draw( hwc );
+
+	// TODO: need to manage wipe...
+	int texoff = 0;
+	for ( auto &i: _draw_order )
+	{
+		auto ci = _images.find( i );
+		if ( ci != _images.end() )
+		{
+			ImageSet &curs = ci->second;
+			const auto &img = curs._image;
+			if ( curs._active && img )
+			{
+				img->set_texture_offset( texoff );
+				img->draw( hwc );
+				texoff += img->num_textures();
+			}
+		}
 	}
 }
 
 ////////////////////////////////////////
 
-void viewer::compute_minimum( void )
-{
-	widget::compute_minimum();
-}
-
-////////////////////////////////////////
-
-bool viewer::mouse_press( const base::point &p, int button )
+bool viewer_w::mouse_press( const point &p, int button )
 {
 	if ( button == 1 )
 	{
-		_panningA = true;
+		_panning = true;
 		_last = p;
 		return true;
 	}
-	else if ( button == 2 )
-	{
-		_panningB = true;
-		_last = p;
-		return true;
-	}
+//	else if ( button == 2 )
+//	{
+//		_panningB = true;
+//		_last = p;
+//		return true;
+//	}
 	return widget::mouse_press( p, button );
 }
 
 ////////////////////////////////////////
 
-bool viewer::mouse_move( const base::point &p )
+bool viewer_w::mouse_move( const point &p )
 {
-	if ( _panningA )
+	// TODO: fix this
+	if ( _panning )
 	{
-		base::point delta = ( p - _last );
-		_panA = _panA + delta;
+		point delta = ( p - _last );
+		for ( auto &i: _images )
+		{
+			const auto &img = i.second._image;
+			if ( img )
+				img->set_pan( delta.x(), delta.y() );
+		}
+
 		_last = p;
 		invalidate();
+		return true;
 	}
-	else if ( _panningB )
-	{
-		float zA = scaling( _zoomA );
-		base::point delta = ( p - _last );
-		_panB = _panB + delta * ( 1.F / zA );
-		_last = p;
-		invalidate();
-	}
+
 	return widget::mouse_move( p );
 }
 
 ////////////////////////////////////////
 
-bool viewer::mouse_release( const base::point & /*p*/, int button )
+bool viewer_w::mouse_release( const point & /*p*/, int button )
 {
 	if ( button == 1 )
 	{
-		_panningA = false;
+		_panning = false;
 		return true;
 	}
-	if ( button == 2 )
-	{
-		_panningB = false;
-		return true;
-	}
+//	if ( button == 2 )
+//	{
+//		_panningB = false;
+//		return true;
+//	}
 	return false;
 }
 
 ////////////////////////////////////////
 
-bool viewer::mouse_wheel( int amount )
+bool viewer_w::mouse_wheel( int amount )
 {
-	_zoomB += amount;
+	// TODO: fix this
+	float zoomF = amount > 0 ? 2.F : 0.5F;
+	// TODO: need the real event to get the mouse position to zoom around that
+	float pivx = 0.f, pivy = 0.f;
+	for ( auto &i: _images )
+	{
+		const auto &img = i.second._image;
+		if ( img )
+			img->add_zoom( pivx, pivy, zoomF );
+	}
 
 	invalidate();
 	return true;
+}
+
+////////////////////////////////////////
+
+bool viewer_w::key_release( platform::scancode c )
+{
+	using namespace platform;
+
+	switch ( c )
+	{
+		case scancode::KEY_ESCAPE: reset_positions(); return true;
+		case scancode::KEY_F:
+			if ( _filter == draw::zoom_filter::nearest )
+				set_filtering( draw::zoom_filter::linear );
+			else
+				set_filtering( draw::zoom_filter::nearest );
+			return true;
+
+		default:
+			break;
+	}
+	return widget::key_release( c );
+}
+
+////////////////////////////////////////
+
+void viewer_w::update_images( bool force_reload )
+{
+	gl::api &ogl = context::current().hw_context().api();
+
+	for ( auto &i: _images )
+	{
+		ImageSet &curs = i.second;
+		if ( curs._active && curs._source &&
+			 ( force_reload || curs._last_loaded != _current_sample ) )
+		{
+			try
+			{
+				curs._cur = _current_sample( curs._source );
+				if ( ! curs._image )
+					curs._image = std::make_shared<draw::image>();
+				curs._image->convert( ogl, *(curs._cur) );
+				curs._image->set_filtering( _filter );
+				curs._last_loaded = _current_sample;
+			}
+			catch ( std::exception &e )
+			{
+				std::cerr << "Unable to read sample " << _current_sample << " for image ID " << i.first << ": " << e.what() << std::endl;
+				curs._image->clear();
+				// TBD: set an error frame...
+			}
+		}
+	}
+
 }
 
 ////////////////////////////////////////

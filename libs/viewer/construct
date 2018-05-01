@@ -1,6 +1,7 @@
 
 local srcs = {
-	"viewer.cpp"
+	"viewer.cpp",
+	"image.cpp"
 }
 
 local shaders = {
@@ -8,6 +9,9 @@ local shaders = {
 	"shader.frag";
 	"errorA.frag";
 	"errorB.frag";
+	"drawImagePlanar.frag";
+	"drawImage.frag";
+	"drawImage.vert";
 	"textureA.frag";
 	"textureB.frag";
 	"nolutA.frag";
@@ -18,9 +22,9 @@ local shaders = {
 local shader_h = code.create( "shaders.h", {
 	"#pragma once";
 	"#include <base/data_resource.h>";
-	"namespace viewer";
+	"namespace draw";
 	"{";
-	"extern base::data_resource shaders;";
+	"extern base::data_resource viewer_shaders;";
 	"}";
 } )
 
@@ -30,9 +34,9 @@ local shader_code = code.generate{
 	file_prefix = {
 		"#include \"shaders.h\"";
 		"using base::resource;";
-		"namespace viewer";
+		"namespace draw";
 		"{";
-		"	base::data_resource shaders( {";
+		"	base::data_resource viewer_shaders( {";
 	},
 	file_suffix = { " } );", "}" },
 	item_prefix = { "\tresource { \"$item_name\",",
@@ -48,5 +52,5 @@ shader_code:add_dependency( "order", shader_h )
 
 lib = library "viewer"
   source{ srcs, shader_code }:include_artifact_dir()
-  libs "gl"
+  libs { "gui", "media" }
 
