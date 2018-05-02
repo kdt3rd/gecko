@@ -16,7 +16,7 @@ namespace platform
 ////////////////////////////////////////
 
 window::window( const std::shared_ptr<screen> &screen, const rect &p )
-	: _screen( screen ), _rect( p )
+	: _rect( p ), _screen( screen )
 {
 }
 
@@ -32,6 +32,8 @@ window::process_event( const event &e )
 {
 	switch ( e.type() )
 	{
+		case event_type::DISPLAY_CHANGED:
+		case event_type::APP_QUIT_REQUEST:
 		case event_type::WINDOW_CLOSE_REQUEST:
 		case event_type::WINDOW_DESTROYED:
 			break;

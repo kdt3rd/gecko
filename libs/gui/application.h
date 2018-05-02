@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2014 Ian Godin
+// Copyright (c) 2014 Ian Godin and Kimball Thurston
 // All rights reserved.
 // Copyrights licensed under the MIT License.
 // See the accompanying LICENSE.txt file for terms
@@ -41,9 +41,11 @@ public:
 	application( const std::string &display = std::string(),
 				 const std::string &platform = std::string(),
 				 const std::string &render = std::string() );
-	~application( void );
+	virtual ~application( void );
 
 	const std::string &active_platform( void ) { return _platform; }
+
+	virtual bool process_quit_request( void );
 
 	std::shared_ptr<window> new_window( void );
 	std::shared_ptr<popup> new_popup( void );

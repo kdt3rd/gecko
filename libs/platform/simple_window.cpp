@@ -37,6 +37,7 @@ bool simple_window::process_event( const event &e )
 			if ( hidden )
 				hidden();
 			break;
+		case event_type::APP_QUIT_REQUEST:
 		case event_type::WINDOW_CLOSE_REQUEST:
 			if ( closed )
 				return closed( false );

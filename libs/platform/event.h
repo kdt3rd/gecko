@@ -24,6 +24,7 @@ class event_source;
 enum event_type : uint8_t
 {
 	DISPLAY_CHANGED,
+	APP_QUIT_REQUEST,
 
 	WINDOW_SHOWN,
 	WINDOW_HIDDEN,

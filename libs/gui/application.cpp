@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2014 Ian Godin
+// Copyright (c) 2014 Ian Godin and Kimball Thurston
 // All rights reserved.
 // Copyrights licensed under the MIT License.
 // See the accompanying LICENSE.txt file for terms
@@ -82,6 +82,13 @@ application::application( const std::string &display, const std::string &p, cons
 
 application::~application( void )
 {
+}
+
+////////////////////////////////////////
+
+bool application::process_quit_request( void )
+{
+	return true;
 }
 
 ////////////////////////////////////////

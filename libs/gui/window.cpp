@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2014 Ian Godin
+// Copyright (c) 2014 Ian Godin and Kimball Thurston
 // All rights reserved.
 // Copyrights licensed under the MIT License.
 // See the accompanying LICENSE.txt file for terms
@@ -8,6 +8,7 @@
 #include <iostream>
 #include "window.h"
 #include "widget.h"
+#include "application.h"
 #include <platform/window.h>
 #include <platform/event.h>
 #include <base/contract.h>
@@ -150,6 +151,15 @@ bool window::process_event( const event &e )
 	using namespace platform;
 	switch ( e.type() )
 	{
+		case event_type::DISPLAY_CHANGED:
+			break;
+
+		case event_type::APP_QUIT_REQUEST:
+		{
+			auto a = application::current();
+			return a->process_quit_request();
+		}
+
 		case event_type::WINDOW_SHOWN:
 		case event_type::WINDOW_HIDDEN:
 			break;
