@@ -31,7 +31,7 @@ class window : public ::platform::window
 {
 public:
 	/// @brief Constrcutor
-	window( system &s, const std::shared_ptr<Display> &dpy, const std::shared_ptr<::platform::screen> &scr );
+	window( system &s, const std::shared_ptr<Display> &dpy, const std::shared_ptr<::platform::screen> &scr, const rect &p = rect( 0, 0, 320, 243 ) );
 	~window( void );
 
 	::platform::context &hw_context( void ) override;
@@ -46,42 +46,31 @@ public:
 
 	void fullscreen( bool fs ) override;
 
-//	rect geometry( void ) override;
-//	void set_position( coord_type x, coord_type y ) override;
-	void move( coord_type x, coord_type y ) override;
-	void resize( coord_type w, coord_type h ) override;
 	void set_minimum_size( coord_type w, coord_type h ) override;
 
 	void set_title( const std::string &t ) override;
 //	void set_icon( const icon &i ) override;
-
-	void invalidate( const rect &r ) override;
 
 	/// @brief Xlib window identifier.
 	Window id( void ) const;
 	void set_input_context( XIC xic ) { _xic = xic; }
 	XIC input_context( void ) const { return _xic; }
 
-	coord_type width( void ) override { return _last_w; }
-	coord_type height( void )  override { return _last_h; }
-
 protected:
 	void make_current( const std::shared_ptr<::platform::cursor> & );
 
-	void expose_event( coord_type x, coord_type y, coord_type w, coord_type h ) override;
-	void move_event( coord_type x, coord_type y ) override;
-	void resize_event( coord_type w, coord_type h ) override;
+	void submit_delayed_expose( const rect &r ) override;
+
+	rect query_geometry( void ) override;
+	bool update_geometry( rect &r ) override;
 
 private:
 	std::shared_ptr<Display> _display;
 	Window _win = 0;
 	XIC _xic = 0;
 
-	int16_t _last_x = 0, _last_y = 0;
-	uint16_t _last_w = 0, _last_h = 0;
-
-	rect _invalid_rgn;
-	bool _invalid = false;
+	coord_type _min_w = 0;
+	coord_type _min_h = 0;
 
 	bool _popup = false;
 	bool _fullscreen = false;

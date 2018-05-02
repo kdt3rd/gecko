@@ -8,6 +8,7 @@
 #include <platform/platform.h>
 #include <platform/system.h>
 #include <platform/dispatcher.h>
+#include <platform/simple_window.h>
 #include <gl/opengl.h>
 #include <gl/api.h>
 #include <gl/mesh.h>
@@ -148,7 +149,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 
 	// Create a window
 	auto sys = platform::platform::find_running();
-	auto win = sys->new_window();
+	auto win = std::make_shared<platform::simple_window>( sys->new_window() );
+
 	win->set_title( "Layout" );
 	auto render_guard = win->hw_context().begin_render();
 	gl::api &ogl = win->hw_context().api();

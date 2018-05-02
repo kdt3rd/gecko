@@ -6,6 +6,7 @@
 //
 
 #include <platform/platform.h>
+#include <platform/simple_window.h>
 #include <gl/api.h>
 #include <gl/mesh.h>
 #include <gl/png_image.h>
@@ -18,7 +19,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	// Create a window
 	//const char *disp = argv[1];
 	auto sys = platform::platform::find_running();
-	auto win = sys->new_window();
+	auto win = std::make_shared<platform::simple_window>( sys->new_window() );
+
 	win->set_title( "Triangle" );
 	auto render_guard = win->hw_context().begin_render();
 	gl::api &ogl = win->hw_context().api();

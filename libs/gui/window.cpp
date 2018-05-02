@@ -9,7 +9,9 @@
 #include "window.h"
 #include "widget.h"
 #include <platform/window.h>
+#include <platform/event.h>
 #include <base/contract.h>
+#include <base/scope_guard.h>
 
 namespace gui
 {
@@ -20,15 +22,7 @@ window::window( const std::shared_ptr<platform::window> &win )
 	: _window( win )
 {
 	precondition( bool(_window), "null window" );
-	_window->exposed = [this] ( void ) { paint(); };
-	_window->resized = [this] ( platform::coord_type w, platform::coord_type h ) { resized( coord_type( w ), coord_type( h ) ); };
-	_window->mouse_pressed = [this]( platform::event_source &, const platform::point &p, int b ) { mouse_press( point( p ), b ); };
-	_window->mouse_released = [this]( platform::event_source &, const platform::point &p, int b ) { mouse_release( point( p ), b ); };
-	_window->mouse_moved = [this]( platform::event_source &, const platform::point &p ) { mouse_moved( point( p ) ); };
-	_window->mouse_wheel = [this]( platform::event_source &, int i ) { mouse_wheel( i ); };
-	_window->key_pressed = [this]( platform::event_source &, const platform::scancode &c ) { key_pressed( c ); };
-	_window->key_released = [this]( platform::event_source &, const platform::scancode &c ) { key_released( c ); };
-	_window->text_entered = [this]( platform::event_source &, const char32_t &c ) { text_entered( c ); };
+	_window->event_handoff = [this] ( const event &e ) -> bool { return process_event( e ); };
 }
 
 ////////////////////////////////////////
@@ -147,12 +141,110 @@ platform::context::render_guard window::bind( void )
 
 ////////////////////////////////////////
 
+bool window::process_event( const event &e )
+{
+	// we're doing this in the sub functions right now...
+//	push_context();
+//	on_scope_exit { pop_context(); };
+
+	using namespace platform;
+	switch ( e.type() )
+	{
+		case event_type::WINDOW_SHOWN:
+		case event_type::WINDOW_HIDDEN:
+			break;
+		case event_type::WINDOW_CLOSE_REQUEST:
+			break;
+		case event_type::WINDOW_DESTROYED:
+			break;
+		case event_type::WINDOW_MINIMIZED:
+			break;
+		case event_type::WINDOW_MAXIMIZED:
+			break;
+		case event_type::WINDOW_RESTORED:
+			break;
+		case event_type::WINDOW_EXPOSED:
+		case event_type::WINDOW_REGION_EXPOSED:
+			paint();
+			break;
+
+		case event_type::WINDOW_MOVED:
+			break;
+		case event_type::WINDOW_RESIZED:
+			resized( e.window().width, e.window().height );
+			break;
+		case event_type::WINDOW_MOVE_RESIZE:
+			resized( e.window().width, e.window().height );
+			break;
+		case event_type::MOUSE_ENTER:
+			break;
+		case event_type::MOUSE_LEAVE:
+			break;
+
+		case event_type::MOUSE_MOVE:
+			mouse_moved( point( e.mouse().x, e.mouse().y ) );
+			break;
+		case event_type::MOUSE_DOWN:
+			mouse_press( point( e.mouse().x, e.mouse().y ), e.mouse().button );
+			break;
+		case event_type::MOUSE_UP:
+			mouse_release( point( e.mouse().x, e.mouse().y ), e.mouse().button );
+			break;
+		case event_type::MOUSE_WHEEL:
+			mouse_wheel( e.hid().position );
+			break;
+
+		case event_type::DND_ENTER:
+		case event_type::DND_LEAVE:
+		case event_type::DND_MOVE:
+		case event_type::DND_DROP_REQUEST:
+			break;
+
+		case event_type::KEYBOARD_DOWN:
+			key_pressed( e.key().keys[0] );
+			break;
+		case event_type::KEYBOARD_UP:
+			key_released( e.key().keys[0] );
+			break;
+		case event_type::KEYBOARD_REPEAT:
+			key_pressed( e.key().keys[0] );
+			break;
+		case event_type::TEXT_ENTERED:
+			text_entered( e.text().text );
+			break;
+
+		case event_type::TABLET_DOWN:
+		case event_type::TABLET_UP:
+		case event_type::TABLET_MOVE:
+		case event_type::TABLET_BUTTON:
+			break;
+
+		case event_type::HID_BUTTON_DOWN:
+		case event_type::HID_BUTTON_UP:
+		case event_type::HID_RELATIVE_WHEEL:
+		case event_type::HID_SPINNER:
+		case event_type::HID_DIAL_KNOB:
+			break;
+		case event_type::USER_EVENT:
+			break;
+		case event_type::NUM_EVENTS:
+		default:
+			break;
+	}
+
+	return true;
+}
+
+////////////////////////////////////////
+
 void window::paint( void )
 {
 	coord_type w = _window->width();
 	coord_type h = _window->height();
 
 	platform::context &hwctxt = _window->hw_context();
+	auto guard = hwctxt.begin_render();
+
 	gl::api &ogl = hwctxt.api();
 	ogl.reset();
 	ogl.viewport( 0, 0, w, h );
@@ -177,6 +269,8 @@ void window::paint( void )
 			_widget->paint( *this );
 		} );
 	}
+
+	hwctxt.swap_buffers();
 }
 
 ////////////////////////////////////////

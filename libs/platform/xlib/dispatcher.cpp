@@ -362,8 +362,6 @@ dispatcher::remove_window( const std::shared_ptr<window> &w )
 		XUnsetICFocus( w->input_context() );
 
 	w->hide();
-	if ( w->closed )
-		w->closed( false );
 
 	_windows.erase( w->id() );
 }

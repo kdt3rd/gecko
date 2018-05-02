@@ -19,10 +19,13 @@
 namespace platform
 {
 	class window;
+	class event;
 }
 
 namespace gui
 {
+
+using event = platform::event;
 
 ////////////////////////////////////////
 
@@ -60,6 +63,8 @@ public:
 
 protected:
 	void monitor_changed( void );
+
+	bool process_event( const event &e );
 
 	void paint( void );
 	void resized( coord_type w, coord_type h );

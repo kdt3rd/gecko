@@ -21,6 +21,7 @@ lib = library "platform"
 		"selection.cpp";
 		"system.cpp";
 		"window.cpp";
+		"simple_window.cpp";
 		"timer.cpp";
 		"tray.cpp";
 		"waitable.cpp";

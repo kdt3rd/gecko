@@ -11,12 +11,15 @@
 #include <layout/area.h>
 #include <platform/keyboard.h>
 #include <platform/context.h>
+#include <platform/event.h>
 #include <base/contract.h>
 #include "context.h"
 #include "widget_ptr.h"
 
 namespace gui
 {
+
+using event = platform::event;
 
 ////////////////////////////////////////
 
