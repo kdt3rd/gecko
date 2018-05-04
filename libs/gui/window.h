@@ -66,7 +66,7 @@ protected:
 
 	bool process_event( const event &e );
 
-	void paint( void );
+	void paint( coord_type x, coord_type y, coord_type w, coord_type h );
 	void resized( coord_type w, coord_type h );
 
 	void mouse_press( const point &p, int button );

@@ -174,8 +174,10 @@ bool window::process_event( const event &e )
 		case event_type::WINDOW_RESTORED:
 			break;
 		case event_type::WINDOW_EXPOSED:
+			paint( 0, 0, 0, 0 );
+			break;
 		case event_type::WINDOW_REGION_EXPOSED:
-			paint();
+			paint( e.window().x, e.window().y, e.window().width, e.window().height );
 			break;
 
 		case event_type::WINDOW_MOVED:
@@ -247,7 +249,7 @@ bool window::process_event( const event &e )
 
 ////////////////////////////////////////
 
-void window::paint( void )
+void window::paint( coord_type dx, coord_type dy, coord_type dw, coord_type dh )
 {
 	coord_type w = _window->width();
 	coord_type h = _window->height();
@@ -258,6 +260,15 @@ void window::paint( void )
 	gl::api &ogl = hwctxt.api();
 	ogl.reset();
 	ogl.viewport( 0, 0, w, h );
+
+	bool didpushsc = false;
+	if ( dw != 0 || dh != 0 )
+	{
+		ogl.push_scissor( dx, dy, dw, dh );
+		didpushsc = true;
+	}
+	on_scope_exit { if ( didpushsc ) ogl.pop_scissor(); };
+
 	ogl.enable( gl::capability::MULTISAMPLE );
 	ogl.enable( gl::capability::BLEND );
     ogl.blend_func( gl::blend_style::SRC_ALPHA, gl::blend_style::ONE_MINUS_SRC_ALPHA );

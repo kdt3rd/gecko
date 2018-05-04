@@ -160,11 +160,23 @@ public:
 protected:
 	virtual void make_current( const std::shared_ptr<cursor> & ) = 0;
 
+	virtual rect query_geometry( void ) = 0;
+
+	/// may return false indicating the position didn't change
+	/// should fill in @param r with the resulting geometry
+	virtual bool update_geometry( rect &r ) = 0;
+
+	/// @brief submit an async event into the system to (eventually)
+	/// redraw the window
+	///
+	/// NB: @sa _accumulate_expose below
 	virtual void submit_delayed_expose( const rect &r ) = 0;
 
-	virtual rect query_geometry( void ) = 0;
-	/// may return false indicating the position didn't change
-	virtual bool update_geometry( rect &r ) = 0;
+	/// if we invalidate too much, we flood the system with events and
+	/// the UI becomes laggy because it's processing events,
+	/// subclasses should use this in submit_delayed_expose
+	bool _accumulate_expose = false;
+	rect _invalid_rgn;
 
 private:
 	rect _rect;

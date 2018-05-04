@@ -229,15 +229,18 @@ Window window::id( void ) const
 
 void window::submit_delayed_expose( const rect &r )
 {
-	XEvent exp;
-	exp.type = Expose;
-	exp.xexpose.window = _win;
-	exp.xexpose.x = r.x();
-	exp.xexpose.y = r.y();
-	exp.xexpose.width = r.width();
-	exp.xexpose.height = r.height();
-	XSendEvent( _display.get(), _win, False, ExposureMask, &exp );
-	//XFlush( _display.get() );
+	if ( _accumulate_expose )
+	{
+		_invalid_rgn.include( r );
+		return;
+	}
+
+	_invalid_rgn = r;
+	_accumulate_expose = true;
+
+	XExposeEvent exp = { Expose, 0, 1, _display.get(), _win, r.x(), r.y(), r.width(), r.height(), 0 };
+	XSendEvent( _display.get(), _win, False, ExposureMask, reinterpret_cast<XEvent *>( &exp ) );
+	XFlush( _display.get() );
 }
 
 ////////////////////////////////////////

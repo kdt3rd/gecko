@@ -47,8 +47,27 @@ window::process_event( const event &e )
 			break;
 
 		case event_type::WINDOW_EXPOSED:
-		case event_type::WINDOW_REGION_EXPOSED:
+			_accumulate_expose = false;
+			_invalid_rgn = rect();
+			// let the default dispatch below send the included rect
 			break;
+
+		case event_type::WINDOW_REGION_EXPOSED:
+		{
+			rect tmp{ e.window().x, e.window().y, e.window().width, e.window().height };
+			tmp.include( _invalid_rgn );
+
+			_accumulate_expose = false;
+			_invalid_rgn = rect();
+
+			event incE = event::window( &e.sys(), &e.source(), e.type(),
+										tmp.x(), tmp.y(), tmp.width(), tmp.height() );
+
+			// shortcut since we've created a custom event to incorporate the region
+			if ( event_handoff )
+				return event_handoff( incE );
+			break;
+		}
 
 		case event_type::WINDOW_MOVED:
 			_rect.set_x( e.window().x );
@@ -60,6 +79,7 @@ window::process_event( const event &e )
 		case event_type::WINDOW_MOVE_RESIZE:
 			_rect.set( e.window().x, e.window().y, e.window().width, e.window().height );
 			break;
+
 		case event_type::MOUSE_ENTER:
 		case event_type::MOUSE_LEAVE:
 		case event_type::MOUSE_MOVE:
