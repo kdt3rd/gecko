@@ -19,7 +19,7 @@ class mouse : public ::platform::mouse
 {
 public:
 	mouse( void );
-	~mouse( void );
+	~mouse( void ) override;
 
 	void start( void ) override;
 	void cancel( void ) override;

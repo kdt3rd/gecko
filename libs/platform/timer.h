@@ -32,7 +32,7 @@ public:
 
 	timer( void );
 	/// @brief Destructor.
-	virtual ~timer( void );
+	~timer( void ) override;
 
 	/// @brief activates (continues) a timer
 	///

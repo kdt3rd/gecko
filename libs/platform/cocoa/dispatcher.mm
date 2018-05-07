@@ -5,11 +5,17 @@
 // See the accompanying LICENSE.txt file for terms
 //
 
+#include "dispatcher.h"
+
 #include <iostream>
 #include <stdlib.h>
 #include <base/contract.h>
 #include <base/pointer.h>
-#include "dispatcher.h"
+#include <platform/event.h>
+#include <platform/event_queue.h>
+
+#include "window.h"
+
 #include <Cocoa/Cocoa.h>
 
 ////////////////////////////////////////
@@ -26,6 +32,7 @@
 	std::shared_ptr<::platform::cocoa::window> _win;
 	std::shared_ptr<::platform::cocoa::mouse> _mouse;
 	std::shared_ptr<::platform::cocoa::keyboard> _keyboard;
+	::platform::event_source *_def_evtsource;
 }
 
 ////////////////////////////////////////
@@ -39,18 +46,26 @@
 ////////////////////////////////////////
 
 - (const std::shared_ptr<::platform::cocoa::mouse> &)mouse
-{ return _mouse; }
+{ return self->_mouse; }
 
 - (void)setMouse: (const std::shared_ptr<::platform::cocoa::mouse> &)m
-{ _mouse = m; }
+{ self->_mouse = m; }
 
 ////////////////////////////////////////
 
 - (const std::shared_ptr<::platform::cocoa::keyboard> &)keyboard
-{ return _keyboard; }
+{ return self->_keyboard; }
 
 - (void)setKeyboard: (const std::shared_ptr<::platform::cocoa::keyboard> &)k
-{ _keyboard = k; }
+{ self->_keyboard = k; }
+
+////////////////////////////////////////
+
+- (::platform::event_source *)source
+{ return self->_def_evtsource; }
+- (void)setEventQueue: (::platform::event_source *)s
+{ self->_def_evtsource = s; }
+
 
 ////////////////////////////////////////
 
@@ -75,7 +90,7 @@
 
 ////////////////////////////////////////
 
-- (id)initWithWindow:(std::shared_ptr<::platform::cocoa::window>)w andMouse:(std::shared_ptr<::platform::cocoa::mouse>)m andKeyboard: (std::shared_ptr<::platform::cocoa::keyboard>)k
+- (id)initWithWindow:(std::shared_ptr<::platform::cocoa::window>)w andMouse:(std::shared_ptr<::platform::cocoa::mouse>)m andKeyboard: (std::shared_ptr<::platform::cocoa::keyboard>)k andSource: (::platform::event_queue *)es
 {
 	[[self superview] setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
 	self = [super init];
@@ -84,6 +99,7 @@
 		[self setWin: w];
 		[self setMouse: m];
 		[self setKeyboard: k];
+		[self setEventQueue: es];
 	}
 
 	NSOpenGLPixelFormatAttribute pixelFormatAttributes[] =
@@ -110,19 +126,28 @@
 
 - (void)drawRect:(NSRect)rect
 {
-	if ( [self win]->exposed )
-		[self win]->exposed();
-	[[self openGLContext] flushBuffer];
+	using namespace platform;
+
+	[self win]->process_event(
+		event::window( nullptr, [self source],
+					   event_type::WINDOW_EXPOSED,
+					   0, 0, 0, 0 ) );
+
 }
 
 ////////////////////////////////////////
 
 - (void)setFrameSize:(NSSize)newSize
 {
+	using namespace platform;
 	[super setFrameSize:newSize];
 	double scale = [self win]->scale_factor();
-	[self win]->resize_event( static_cast<platform::coord_type>( newSize.width * scale ),
-							  static_cast<platform::coord_type>( newSize.height * scale ) );
+	[self win]->process_event(
+		event::window( nullptr, [self source],
+					   event_type::WINDOW_RESIZED,
+					   0, 0,
+					   static_cast<coord_type>( newSize.width * scale ),
+					   static_cast<coord_type>( newSize.height * scale ) ) );
 }
 
 ////////////////////////////////////////
@@ -136,53 +161,66 @@
 
 - (void)mouseDown:(NSEvent*)event
 {
+	using namespace platform;
+
 	double scale = [self win]->scale_factor();
 	NSPoint p = [event locationInWindow];
 	p = [self convertPoint:p fromView:nil];
-	if ( [self win]->mouse_pressed )
-		[self win]->mouse_pressed(
-			*[self mouse],
-			{ static_cast<platform::coord_type>( p.x * scale ),
-					static_cast<platform::coord_type>( p.y * scale ) }, 1 );
+	// TODO: fill in modifiers and system
+	[self win]->process_event(
+		event::mouse( nullptr, [self mouse].get(), event_type::MOUSE_DOWN,
+					  static_cast<platform::coord_type>( p.x * scale ),
+					  static_cast<platform::coord_type>( p.y * scale ),
+					  1, 0 ) );
 }
 
 ////////////////////////////////////////
 
 - (void)mouseUp:(NSEvent*)event
 {
+	using namespace platform;
+
 	double scale = [self win]->scale_factor();
 	NSPoint p = [event locationInWindow];
 	p = [self convertPoint:p fromView:nil];
-	if ( [self win]->mouse_released )
-		[self win]->mouse_released(
-			*[self mouse],
-			{ static_cast<platform::coord_type>( p.x * scale ),
-					static_cast<platform::coord_type>( p.y * scale ) }, 1 );
+	// TODO: fill in modifiers and system
+	[self win]->process_event(
+		event::mouse( nullptr, [self mouse].get(), event_type::MOUSE_UP,
+					  static_cast<platform::coord_type>( p.x * scale ),
+					  static_cast<platform::coord_type>( p.y * scale ),
+					  1, 0 ) );
 }
 
 ////////////////////////////////////////
 
 - (void)mouseDragged:(NSEvent*)event
 {
+	using namespace platform;
+
 	double scale = [self win]->scale_factor();
 	NSPoint p = [event locationInWindow];
 	p = [self convertPoint:p fromView:nil];
-	if ( [self win]->mouse_moved )
-		[self win]->mouse_moved(
-			*[self mouse],
-			{ static_cast<platform::coord_type>( p.x * scale ),
-					static_cast<platform::coord_type>( p.y * scale ) } );
+	[self win]->process_event(
+		event::mouse( nullptr, [self mouse].get(), event_type::MOUSE_MOVE,
+					  static_cast<platform::coord_type>( p.x * scale ),
+					  static_cast<platform::coord_type>( p.y * scale ),
+					  0, 0 ) );
 }
 
 ////////////////////////////////////////
 
 - (void)keyDown:(NSEvent*)event
 {
-	unsigned short kc = [event keyCode];
-	platform::scancode sc = [self keyboard]->get_scancode( kc );
+	using namespace platform;
 
-	if ( [self win]->key_pressed )
-		[self win]->key_pressed( *[self keyboard], sc );
+	unsigned short kc = [event keyCode];
+	scancode sc = [self keyboard]->get_scancode( kc );
+
+	// TODO: query mouse position (or extract from ns event)
+	[self win]->process_event(
+		event::key( nullptr, [self keyboard].get(),
+					event_type::KEYBOARD_DOWN,
+					0, 0, sc, 0 ) );
 
 	NSString *chars = [event characters];
 	char32_t c;
@@ -191,8 +229,10 @@
 		c = NSSwapLittleIntToHost( c );
 		if ( c < 0xE000 || c > 0xF8FF ) // Private area
 		{
-			if ( [self win]->text_entered )
-				[self win]->text_entered( *[self keyboard], c );
+			[self win]->process_event(
+				event::text( nullptr, [self keyboard].get(),
+							 event_type::TEXT_ENTERED,
+							 0, 0, c, 0 ) );
 		}
 	}
 }
@@ -201,10 +241,15 @@
 
 - (void)keyUp:(NSEvent*)event
 {
+	using namespace platform;
+
 	unsigned short kc = [event keyCode];
-	platform::scancode sc = [self keyboard]->get_scancode( kc );
-	if ( [self win]->key_released )
-		[self win]->key_released( *[self keyboard], sc );
+	scancode sc = [self keyboard]->get_scancode( kc );
+	// TODO: query mouse position (or extract from ns event)
+	[self win]->process_event(
+		event::key( nullptr, [self keyboard].get(),
+					event_type::KEYBOARD_UP,
+					0, 0, sc, 0 ) );
 }
 
 ////////////////////////////////////////

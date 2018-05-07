@@ -8,18 +8,27 @@
 #include "dso.h"
 #include "contract.h"
 #ifndef _WIN32
-#define HAS_CXXABI
-#define HAS_ELF_DLFCN
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <cxxabi.h>
-#include <elf.h>
-#include <link.h>
+
+# define HAS_CXXABI
+# include <cxxabi.h>
+
+# define HAS_DLFCN
 #include <dlfcn.h>
-#define HAS_BACKTRACE
-#include <execinfo.h>
+
+# ifdef __linux__
+#  define HAS_VSYM
+#  define HAS_ELF_DLFCN
+#  include <sys/types.h>
+#  include <sys/stat.h>
+#  include <fcntl.h>
+#  include <elf.h>
+#  include <link.h>
+# endif
+
+#else
+#error "NYI"
 #endif
+
 #include "memory_map.h"
 
 ////////////////////////////////////////
@@ -93,7 +102,7 @@ dso &dso::operator=( dso &&o )
 
 void dso::reset( void )
 {
-#ifdef HAS_ELF_DLFCN
+#ifdef HAS_DLFCN
     if ( _handle )
         dlclose( _handle );
 #else
@@ -116,8 +125,8 @@ void dso::load( const char *fn, bool makeGlobal )
     reset();
     if ( fn )
         _fn = fn;
-#ifdef HAS_ELF_DLFCN
-    int flags = RTLD_NOW|RTLD_DEEPBIND;
+#ifdef HAS_DLFCN
+    int flags = RTLD_NOW;
     if ( makeGlobal )
         flags |= RTLD_GLOBAL;
     _handle = dlopen( fn, flags );
@@ -161,11 +170,15 @@ dso::find( const char *symn, const char *symver )
     void *ret = nullptr;
     if ( _handle )
     {
-#ifdef HAS_ELF_DLFCN
+#ifdef HAS_DLFCN
+# ifdef HAS_VSYM
         if ( symver )
             ret = dlvsym( _handle, symn, symver );
         else
             ret = dlsym( _handle, symn );
+#else
+		ret = dlsym( _handle, symn );
+#endif
         if ( ! ret )
             _last_err = dlerror();
 #else
@@ -453,14 +466,33 @@ static int fillActiveCB( struct dl_phdr_info *phdr, size_t size, void *data )
 
 }
 
+#else
+class active_shared_object::impl
+{
+public:
+	impl( const char *name, uintptr_t baseaddr ) : _name( name ), _base( baseaddr ) {}
+    inline const std::string &path( void ) const { return _path; }
+    inline const std::string &name( void ) const { return _name; }
+    inline uintptr_t base( void ) const { return _base; }
+
+    bool is_closest( void *addr, const impl *curdso )
+    { throw_not_yet(); }
+    void load_syms( const char *fn )
+	{ throw_not_yet(); }
+    std::string find_symbol( void *addr, bool include_offset = true )
+	{ throw_not_yet(); }
+
+private:
+	std::string _path;
+	std::string _name;
+	uintptr_t _base = 0;
+};
 #endif // HAS_ELF_DLFCN
 
 ////////////////////////////////////////
 
 active_shared_object::active_shared_object( const char *name, uintptr_t base_addr )
-#ifdef HAS_ELF_DLFCN
     : _impl( new impl( name, base_addr ) )
-#endif
 {
 }
 
@@ -516,7 +548,7 @@ active_objects::active_objects()
 #ifdef HAS_ELF_DLFCN
     dl_iterate_phdr( &fillActiveCB, &_dsos );
 #else
-# error "NYI"
+	throw_not_yet();
 #endif
 }
 
@@ -538,11 +570,14 @@ std::shared_ptr<active_shared_object> active_objects::find_dso( void *addr ) con
 
 void *find_next( const char *sig, const char *ver )
 {
-#ifdef HAS_ELF_DLFCN
+#ifdef HAS_DLFCN
+
+#ifdef HAS_VSYM
     if ( ver )
         return dlvsym( RTLD_NEXT, sig, ver );
+#endif
 
-    return dlsym( RTLD_NEXT, sig );
+	return dlsym( RTLD_NEXT, sig );
 #else
 # error "NYI"
 #endif

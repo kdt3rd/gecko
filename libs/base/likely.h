@@ -16,7 +16,7 @@
 // say which is better
 #if defined(__clang__)
 
-# if __has_builtin(__builtin_expect) )
+# if __has_builtin(__builtin_expect)
 #  define GK_LIKELY(condition) __builtin_expect( (condition), 1 )
 #  define GK_UNLIKELY(condition) __builtin_expect( (condition), 0 )
 #  define GK_EXPECT(condition, outcome) __builtin_expect( (condition), (outcome) )

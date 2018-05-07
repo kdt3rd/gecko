@@ -102,7 +102,7 @@ public:
 	struct mouse_info
 	{
 		coord_type x, y;
-		coord_type button;
+		int button;
 	};
 	struct key_info
 	{
@@ -196,7 +196,7 @@ public:
 		return r;
 	}
 
-	static inline event mouse( system *sys, event_source *src, event_type et, coord_type x, coord_type y, coord_type b, uint8_t mods )
+	static inline event mouse( system *sys, event_source *src, event_type et, coord_type x, coord_type y, int b, uint8_t mods )
 	{
 		event r;
 		r._system = sys;

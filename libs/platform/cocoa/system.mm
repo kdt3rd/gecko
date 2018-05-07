@@ -19,34 +19,6 @@
 
 #include <Cocoa/Cocoa.h>
 
-namespace
-{
-void *libgl = nullptr;
-std::once_flag opengl_init_flag;
-
-void shutdown_libgl(void)
-{
-	if ( libgl )
-		dlclose( libgl );
-}
-
-void init_libgl(void)
-{
-	libgl = dlopen( "/System/Library/Frameworks/OpenGL.framework/OpenGL", RTLD_GLOBAL | RTLD_LAZY );
-	atexit( shutdown_libgl );
-}
-
-platform::system::opengl_func_ptr
-queryGL( const char *f )
-{
-	if ( libgl )
-		return (platform::system::opengl_func_ptr) dlsym( libgl, f );
-
-	return nullptr;
-}
-
-} // empty namespace
-
 namespace platform { namespace cocoa
 {
 
@@ -55,8 +27,6 @@ namespace platform { namespace cocoa
 system::system( const std::string & )
 	: platform::system( "cocoa", "Cocoa" )
 {
-	std::call_once( opengl_init_flag, [](){ init_libgl(); } );
-
     [NSAutoreleasePool new];
     [NSApplication sharedApplication];
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
@@ -79,8 +49,12 @@ system::system( const std::string & )
 
     [NSApp activateIgnoringOtherApps:YES];
 
-	if ( ! gl3wInit2( queryGL ) )
-		throw_runtime( "Unable to initialize OpenGL" );
+	NSArray *s = [NSScreen screens];
+	for ( size_t i = 0; i < [s count]; ++i )
+	{
+		auto scr = std::make_shared<screen>( [s objectAtIndex:i] );
+		_screens.push_back( scr );
+	}
 }
 
 ////////////////////////////////////////
@@ -99,33 +73,18 @@ system::is_working( void ) const
 
 ////////////////////////////////////////
 
-std::shared_ptr<::platform::renderer>
-system::render( void ) const
-{
-	return std::shared_ptr<::platform::renderer>();
-}
-
-////////////////////////////////////////
-
-system::opengl_query
-system::gl_proc_address( void )
-{
-	return queryGL;
-}
-
-////////////////////////////////////////
-
 std::vector<std::shared_ptr<::platform::screen>> system::screens( void )
 {
-	std::vector<std::shared_ptr<::platform::screen>> result;
-	NSArray *s = [NSScreen screens];
-	for ( size_t i = 0; i < [s count]; ++i )
-	{
-		auto scr = std::make_shared<screen>( [s objectAtIndex:i] );
-		result.push_back( scr );
-	}
+	return _screens;
+}
 
-	return result;
+////////////////////////////////////////
+
+const std::shared_ptr<::platform::screen> &
+system::default_screen( void )
+{
+	precondition( ! _screens.empty(), "expect at least 1 screen" );
+	return _screens.front();
 }
 
 ////////////////////////////////////////
@@ -261,9 +220,10 @@ std::shared_ptr<tray> system::new_system_tray_item( void )
 
 ////////////////////////////////////////
 
-std::shared_ptr<platform::window> system::new_window( void )
+std::shared_ptr<platform::window> system::new_window( const std::shared_ptr<::platform::screen> &s )
 {
-	auto ret = std::make_shared<::platform::cocoa::window>();
+	rect p{ 0, 0, 320, 240 };
+	auto ret = std::make_shared<::platform::cocoa::window>( s, p );
 	_dispatcher->add_window( ret );
 	return ret;
 }

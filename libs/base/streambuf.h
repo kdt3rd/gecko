@@ -65,7 +65,7 @@ public:
 		if ( std::has_facet<codecvt_type>( this->getloc() ) )
 			_codecvt_cache = &std::use_facet<codecvt_type>( this->getloc() );
 	}
-	virtual ~base_streambuf( void )
+	~base_streambuf( void ) override
 	{
 		this->close();
 	}

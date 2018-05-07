@@ -22,14 +22,12 @@ public:
 	/// @brief Constructor.
 	system( const std::string & );
 
-	~system( void );
+	~system( void ) override;
 
 	bool is_working( void ) const override;
 
-	std::shared_ptr<::platform::renderer> render( void ) const override;
-	opengl_query gl_proc_address( void ) override;
-
 	std::vector<std::shared_ptr<::platform::screen>> screens( void ) override;
+	const std::shared_ptr<::platform::screen> &default_screen( void ) override;
 
 	std::shared_ptr<::platform::cursor> new_cursor( void ) override;
 	std::shared_ptr<::platform::cursor> builtin_cursor( standard_cursor sc ) override;
@@ -55,7 +53,7 @@ public:
 	std::shared_ptr<menu> new_system_menu( void ) override;
 	std::shared_ptr<tray> new_system_tray_item( void ) override;
 
-	std::shared_ptr<::platform::window> new_window( void ) override;
+	std::shared_ptr<::platform::window> new_window( const std::shared_ptr<::platform::screen> &s = std::shared_ptr<screen>() ) override;
 	void destroy_window( const std::shared_ptr<::platform::window> &w ) override;
 
 	std::shared_ptr<::platform::dispatcher> get_dispatcher( void ) override;
@@ -69,6 +67,7 @@ private:
 	std::shared_ptr<dispatcher> _dispatcher;
 	std::shared_ptr<keyboard> _keyboard;
 	std::shared_ptr<mouse> _mouse;
+	std::vector<std::shared_ptr<::platform::screen>> _screens;
 };
 
 ////////////////////////////////////////

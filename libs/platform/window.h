@@ -37,7 +37,7 @@ public:
 	explicit window( const std::shared_ptr<screen> &screen, const rect &p = rect( 0, 0, 512, 512 ) );
 
 	/// @brief Destructor.
-	virtual ~window( void );
+	~window( void ) override;
 
 	/// @brief default event handler for windows.
 	///

@@ -25,7 +25,7 @@ class dispatcher : public ::platform::dispatcher
 {
 public:
 	dispatcher( const std::shared_ptr<keyboard> &k, const std::shared_ptr<mouse> &m );
-	~dispatcher( void );
+	~dispatcher( void ) override;
 
 	int execute( void ) override;
 	void exit( int code ) override;

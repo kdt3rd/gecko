@@ -187,14 +187,14 @@ public:
 	void set_horizontal( coord_type x1, coord_type x2 )
 	{
 		_position.set_x( std::min( x1, x2 ) );
-		_extent.set_width( std::abs( x2 - x1 ) + coord_type(1) );
+		_extent.set_width( coord_type( std::abs( x2 - x1 ) ) + coord_type(1) );
 	}
 
 	/// @brief Set top and bottom sides
 	void set_vertical( coord_type y1, coord_type y2 )
 	{
 		_position.set_y( std::min( y1, y2 ) );
-		_extent.set_height( std::abs( y2 - y1 ) + coord_type(1) );
+		_extent.set_height( coord_type( std::abs( y2 - y1 ) ) + coord_type(1) );
 	}
 
 	/// @brief Set position
@@ -298,7 +298,8 @@ private:
 	void fix_extent( void )
 	{
 		_position.move_by( std::min( _extent.w(), coord_type(0) ), std::min( _extent.h(), coord_type(0) ) );
-		_extent.set( std::abs( _extent.w() ), std::abs( _extent.h() ) );
+		_extent.set( coord_type( std::abs( _extent.w() ) ),
+					 coord_type( std::abs( _extent.h() ) ) );
 	}
 
 	point_type _position;
