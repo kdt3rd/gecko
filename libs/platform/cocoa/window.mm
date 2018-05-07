@@ -171,13 +171,15 @@ window::update_geometry( rect &r )
 	[_impl->win setFrame:cgr display:true];
 
 	r = query_geometry();
+	return true;
 }
 
 ////////////////////////////////////////
 
 void window::submit_delayed_expose( const rect &r )
 {
-	[_impl->view performSelector:@selector(forceRedraw) withObject:nil afterDelay:0.0];
+	//[_impl->view performSelector:@selector(forceRedraw) withObject:nil afterDelay:0.0];
+	[_impl->view setNeedsDisplay:YES];
 }
 
 ////////////////////////////////////////
