@@ -36,7 +36,7 @@ void scroll_bar_w::set_value( value_type v )
 
 void scroll_bar_w::set_handle( value_type h )
 {
-	precondition( h > 0.0, "invalid scroll bar handle size" );
+	precondition( h > 0.0, "invalid scroll bar handle size {0}", h );
 	_handle = h;
 	if ( _handle > _max - _min )
 		_handle = _max - _min;

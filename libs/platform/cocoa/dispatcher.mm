@@ -348,7 +348,7 @@ void dispatcher::add_window( const std::shared_ptr<window> &w )
 	[nswin cascadeTopLeftFromPoint:NSMakePoint(20,20)];
 	[nswin setIgnoresMouseEvents:NO];
 
-	MyView *view = [[MyView alloc] initWithWindow:w andMouse:_mouse andKeyboard:_keyboard];
+	MyView *view = [[MyView alloc] initWithWindow:w andMouse:_mouse andKeyboard:_keyboard andSource:_ext_events.get()];
 	[nswin setContentView:view];
 	[nswin setInitialFirstResponder:view];
 

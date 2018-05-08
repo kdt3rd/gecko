@@ -55,6 +55,8 @@ namespace platform { namespace cocoa
 context::context( void )
 {
 	std::call_once( opengl_init_flag, [](){ init_libgl(); } );
+
+	_api.reset( new gl::api );
 }
 
 ////////////////////////////////////////
