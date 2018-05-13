@@ -44,7 +44,7 @@ public:
 
 	double scale_factor( void );
 
-	void set_ns( void *nswin, void *nsview );
+	void set_ns( void *nsview );
 
 protected:
 	void make_current( const std::shared_ptr<cursor> & ) override;

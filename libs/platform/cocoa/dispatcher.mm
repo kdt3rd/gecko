@@ -339,20 +339,8 @@ void dispatcher::remove_waitable( const std::shared_ptr<waitable> &w )
 
 void dispatcher::add_window( const std::shared_ptr<window> &w )
 {
-	int style = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
-
-	NSWindow *nswin = [[[NSWindow alloc] initWithContentRect:NSMakeRect( 0, 0, 200, 200 )
-		styleMask:style backing:NSBackingStoreBuffered defer:YES] autorelease];
-
-	[nswin orderOut:nil];
-	[nswin cascadeTopLeftFromPoint:NSMakePoint(20,20)];
-	[nswin setIgnoresMouseEvents:NO];
-
 	MyView *view = [[MyView alloc] initWithWindow:w andMouse:_mouse andKeyboard:_keyboard andSource:_ext_events.get()];
-	[nswin setContentView:view];
-	[nswin setInitialFirstResponder:view];
-
-	w->set_ns( nswin, view );
+	w->set_ns( view );
 }
 
 ////////////////////////////////////////

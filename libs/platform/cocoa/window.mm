@@ -12,6 +12,7 @@
 #include <stdexcept>
 
 #include "context.h"
+#include <platform/screen.h>
 
 #include <Cocoa/Cocoa.h>
 
@@ -32,6 +33,19 @@ window::window( const std::shared_ptr<::platform::screen> &s, const rect &p )
 	  _impl( new objcwrapper ),
 	  _context( std::make_shared<context>() )
 {
+	int style = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
+
+	// window coordinates are flipped - 0 is at lower left
+	rect scrbounds = s->bounds( true );
+
+	auto y = scrbounds.height() - p.height() - p.y();
+	NSWindow *nswin = [[[NSWindow alloc] initWithContentRect:NSMakeRect( p.x(), y, p.width(), p.height() )
+		styleMask:style backing:NSBackingStoreBuffered defer:YES] autorelease];
+	_impl->win = nswin;
+
+	[nswin orderOut:nil];
+	[nswin cascadeTopLeftFromPoint:NSMakePoint(20,20)];
+	[nswin setIgnoresMouseEvents:NO];
 }
 
 ////////////////////////////////////////
@@ -125,13 +139,16 @@ void window::set_title( const std::string &t )
 
 ////////////////////////////////////////
 
-void window::set_ns( void *w, void *v )
+void window::set_ns( void *v )
 {
-	_context->set_ns( w, v );
-	_impl->win = static_cast<NSWindow *>( w );
-	_impl->view = static_cast<NSOpenGLView *>( v );
-	if ( [_impl->view respondsToSelector:@selector(setWantsBestResolutionOpenGLSurface:)] )
-		[_impl->view setWantsBestResolutionOpenGLSurface:YES];
+	NSOpenGLView *view = static_cast<NSOpenGLView *>( v );
+	[_impl->win setContentView:view];
+	[_impl->win setInitialFirstResponder:view];
+
+	_context->set_ns( _impl->win, v );
+	_impl->view = view;
+	if ( [view respondsToSelector:@selector(setWantsBestResolutionOpenGLSurface:)] )
+		[view setWantsBestResolutionOpenGLSurface:YES];
 
 //	double scale = scale_factor();
 //	NSSize size = [_impl->view bounds].size;
@@ -151,6 +168,12 @@ void window::make_current( const std::shared_ptr<cursor> & )
 rect window::query_geometry( void )
 {
 	NSRect cgr = [_impl->win frame];
+
+	cgr = [_impl->win contentRectForFrameRect:cgr];
+
+	rect scrbounds = query_screen()->bounds( true );
+	auto y = scrbounds.height() - ( cgr.origin.y + cgr.size.height );
+
 	// this includes the title bar?
 	return rect( cgr.origin.x, cgr.origin.y, cgr.size.width, cgr.size.height );
 }
@@ -166,8 +189,11 @@ window::update_geometry( rect &r )
 	cgr.size.width = r.width();
 	cgr.size.height = r.height();
 
-	// this includes the title bar? or do we need to change
-	// the view as well?
+	rect scrbounds = query_screen()->bounds( true );
+	auto y = scrbounds.height() - r.height() - r.y();
+
+	cgr = [_impl->win frameRectForContentRect:cgr];
+
 	[_impl->win setFrame:cgr display:true];
 
 	r = query_geometry();

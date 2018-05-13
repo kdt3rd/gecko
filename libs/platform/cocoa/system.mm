@@ -223,7 +223,7 @@ std::shared_ptr<tray> system::new_system_tray_item( void )
 std::shared_ptr<platform::window> system::new_window( const std::shared_ptr<::platform::screen> &s )
 {
 	rect p{ 0, 0, 320, 240 };
-	auto ret = std::make_shared<::platform::cocoa::window>( s, p );
+	auto ret = std::make_shared<::platform::cocoa::window>( s ? s : default_screen(), p );
 	_dispatcher->add_window( ret );
 	return ret;
 }
