@@ -45,7 +45,7 @@ public:
         auto i = _keys.find( k );
         if ( i != _keys.end() )
             return _values[i->second].second;
-        return std::move( defaultVal );
+        return defaultVal;
     }
 
     template <typename K>

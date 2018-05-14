@@ -30,21 +30,14 @@ public:
 	void build( context &ctxt ) override;
 	void paint( context &ctxt ) override;
 
-	bool mouse_press( const point &p, int button ) override;
-	bool mouse_release( const point &p, int button ) override;
-	bool mouse_move( const point &p ) override;
-	bool mouse_wheel( int amount ) override;
-	bool key_press( platform::scancode c ) override;
-	bool key_release( platform::scancode c ) override;
-	bool text_input( char32_t c ) override;
+	std::shared_ptr<widget> find_widget_under( coord x, coord y ) override;
+
 	bool update_layout( double duration ) override;
 
 	void remove( size_t w );
 
 protected:
 	std::vector<std::shared_ptr<widget>> _widgets;
-	std::shared_ptr<widget> _mouse_grab;
-	std::shared_ptr<widget> _key_focus;
 };
 
 ////////////////////////////////////////

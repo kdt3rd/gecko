@@ -63,108 +63,16 @@ void base_container::paint( context &ctxt )
 
 ////////////////////////////////////////
 
-bool base_container::mouse_press( const point &p, int button )
+std::shared_ptr<widget> base_container::find_widget_under( coord x, coord y )
 {
+	std::shared_ptr<widget> ret;
 	for ( auto w: _widgets )
 	{
-		if ( w->mouse_press( p, button ) )
-		{
-			_mouse_grab = w;
-			return true;
-		}
+		ret = w->find_widget_under( x, y );
+		if ( ret )
+			break;
 	}
-	return widget::mouse_press( p, button );
-}
-
-////////////////////////////////////////
-
-bool base_container::mouse_release( const point &p, int button )
-{
-	if ( _mouse_grab )
-	{
-		auto tmp = _mouse_grab;
-		_mouse_grab.reset();
-		return tmp->mouse_release( p, button );
-	}
-
-	for ( auto w: _widgets )
-	{
-		if ( w->mouse_release( p, button ) )
-			return true;
-	}
-	return widget::mouse_release( p, button );
-}
-
-////////////////////////////////////////
-
-bool base_container::mouse_move( const point &p )
-{
-	if ( _mouse_grab )
-		return _mouse_grab->mouse_move( p );
-
-	for ( auto w: _widgets )
-	{
-		if ( w->mouse_move( p ) )
-			return true;
-	}
-	return widget::mouse_move( p );
-}
-
-////////////////////////////////////////
-
-bool base_container::mouse_wheel( int amount )
-{
-	for ( auto w: _widgets )
-	{
-		if ( w->mouse_wheel( amount ) )
-			return true;
-	}
-	return widget::mouse_wheel( amount );
-}
-
-////////////////////////////////////////
-
-bool base_container::key_press( platform::scancode c )
-{
-	if ( _key_focus )
-		return _key_focus->key_press( c );
-
-	for ( auto w: _widgets )
-	{
-		if ( w->key_press( c ) )
-			return true;
-	}
-	return widget::key_press( c );
-}
-
-////////////////////////////////////////
-
-bool base_container::key_release( platform::scancode c )
-{
-	if ( _key_focus )
-		return _key_focus->key_release( c );
-
-	for ( auto w: _widgets )
-	{
-		if ( w->key_release( c ) )
-			return true;
-	}
-	return widget::key_release( c );
-}
-
-////////////////////////////////////////
-
-bool base_container::text_input( char32_t c )
-{
-	if ( _key_focus )
-		return _key_focus->text_input( c );
-
-	for ( auto w: _widgets )
-	{
-		if ( w->text_input( c ) )
-			return true;
-	}
-	return widget::text_input( c );
+	return ret;
 }
 
 ////////////////////////////////////////

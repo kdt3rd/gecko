@@ -94,38 +94,40 @@ void slider_w::paint( context &ctxt )
 
 ////////////////////////////////////////
 
-bool slider_w::mouse_press( const point &p, int /*button*/ )
+bool slider_w::mouse_press( const event &e )
 {
-	if ( contains( p ) )
+	if ( e.mouse().button != 1 )
+		return false;
+
+	value_type z1 = x1() + _handle;
+	value_type z2 = x2() - _handle;
+	if ( z1 < z2 )
 	{
-		value_type z1 = x1() + _handle;
-		value_type z2 = x2() - _handle;
-		if ( z1 < z2 )
+		value_type current = z1 + _value * ( z2 - z1 );
+		value_type dist = std::abs( e.mouse().x - current );
+		if ( dist < _handle )
 		{
-			value_type current = z1 + _value * ( z2 - z1 );
-			value_type dist = std::abs( p.x() - current );
-			if ( dist < _handle )
-			{
-				_tracking = true;
-				_start = p.x();
-				invalidate(); // TODO invalidate only handle.
-				return true;
-			}
+			_tracking = true;
+			context::current().grab_source( e, shared_from_this() );
+			_start = e.mouse().x;
+			invalidate(); // TODO invalidate only handle.
+			return true;
 		}
 	}
+
 	return false;
 }
 
 ////////////////////////////////////////
 
-bool slider_w::mouse_move( const point &p )
+bool slider_w::mouse_move( const event &e )
 {
 	if ( _tracking )
 	{
 		value_type z1 = x1() + _handle;
 		value_type z2 = x2() - _handle;
 		if ( z1 < z2 )
-			set_value( ( p.x() - z1 ) / ( z2 - z1 ) );
+			set_value( ( e.mouse().x - z1 ) / ( z2 - z1 ) );
 		else
 			set_value( ( _min + _max ) / value_type(2) );
 		when_changing( _value );
@@ -136,7 +138,7 @@ bool slider_w::mouse_move( const point &p )
 
 ////////////////////////////////////////
 
-bool slider_w::mouse_release( const point &p, int /*button*/ )
+bool slider_w::mouse_release( const event &e )
 {
 	if ( _tracking )
 	{
@@ -144,11 +146,12 @@ bool slider_w::mouse_release( const point &p, int /*button*/ )
 		value_type z1 = x1() + _handle;
 		value_type z2 = x2() - _handle;
 		if ( z1 < z2 )
-			set_value( ( p.x() - z1 ) / ( z2 - z1 ) );
+			set_value( ( e.mouse().x - z1 ) / ( z2 - z1 ) );
 		else
 			set_value( ( _min + _max ) / value_type(2) );
 		when_changed( _value );
 		invalidate();
+		context::current().release_source( e );
 		return true;
 	}
 	return false;

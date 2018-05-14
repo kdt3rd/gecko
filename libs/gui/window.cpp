@@ -135,6 +135,30 @@ platform::context &window::hw_context( void )
 
 ////////////////////////////////////////
 
+void window::grab_source( const event &e, std::shared_ptr<widget> w )
+{
+	e.source().grab( _window );
+	// TODO: not general...
+	_mouse_grab = w;
+}
+
+////////////////////////////////////////
+
+void window::release_source( const event &e )
+{
+	_mouse_grab.reset();
+	e.source().ungrab();
+}
+
+////////////////////////////////////////
+
+void window::set_focus( std::shared_ptr<widget> w )
+{
+	_key_focus = std::move( w );
+}
+
+////////////////////////////////////////
+
 platform::context::render_guard window::bind( void )
 {
 	return _window->hw_context().begin_render();
@@ -145,8 +169,8 @@ platform::context::render_guard window::bind( void )
 bool window::process_event( const event &e )
 {
 	// we're doing this in the sub functions right now...
-//	push_context();
-//	on_scope_exit { pop_context(); };
+	push_context();
+	on_scope_exit { pop_context(); };
 
 	using namespace platform;
 	switch ( e.type() )
@@ -202,16 +226,45 @@ bool window::process_event( const event &e )
 			break;
 
 		case event_type::MOUSE_MOVE:
-			mouse_moved( point( e.mouse().x, e.mouse().y ) );
+			if ( _mouse_grab )
+				_mouse_grab->mouse_move( e );
+			else if ( _widget )
+			{
+				auto w = _widget->find_widget_under( e.mouse().x, e.mouse().y );
+				if ( w )
+					w->mouse_move( e );
+			}
 			break;
 		case event_type::MOUSE_DOWN:
-			mouse_press( point( e.mouse().x, e.mouse().y ), e.mouse().button );
+			if ( _mouse_grab )
+				_mouse_grab->mouse_press( e );
+			else if ( _widget )
+			{
+				auto w = _widget->find_widget_under( e.mouse().x, e.mouse().y );
+				if ( w )
+					w->mouse_press( e );
+			}
 			break;
 		case event_type::MOUSE_UP:
-			mouse_release( point( e.mouse().x, e.mouse().y ), e.mouse().button );
+			if ( _mouse_grab )
+				_mouse_grab->mouse_release( e );
+			else if ( _widget )
+			{
+				auto w = _widget->find_widget_under( e.mouse().x, e.mouse().y );
+				if ( w )
+					w->mouse_release( e );
+			}
 			break;
 		case event_type::MOUSE_WHEEL:
-			mouse_wheel( e.hid().position );
+			if ( _mouse_grab )
+				_mouse_grab->mouse_wheel( e );
+			else if ( _widget )
+			{
+				auto w = _widget->find_widget_under( e.hid().x, e.hid().y );
+				if ( w )
+					w->mouse_wheel( e );
+			}
+//			mouse_wheel( e.hid().position );
 			break;
 
 		case event_type::DND_ENTER:
@@ -221,22 +274,42 @@ bool window::process_event( const event &e )
 			break;
 
 		case event_type::KEYBOARD_DOWN:
-			key_pressed( e.key().keys[0] );
-			break;
-		case event_type::KEYBOARD_UP:
-			key_released( e.key().keys[0] );
+			key_down( e );
 			break;
 		case event_type::KEYBOARD_REPEAT:
-			key_pressed( e.key().keys[0] );
+			key_repeat( e );
+			break;
+		case event_type::KEYBOARD_UP:
+			if ( _key_focus )
+				_key_focus->key_release( e );
+			else if ( _widget )
+			{
+				auto w = _widget->find_widget_under( e.key().x, e.key().y );
+				if ( w )
+					w->key_release( e );
+			}
 			break;
 		case event_type::TEXT_ENTERED:
-			text_entered( e.text().text );
+			if ( _key_focus )
+				_key_focus->text_input( e );
+			else if ( _widget )
+			{
+				auto w = _widget->find_widget_under( e.key().x, e.key().y );
+				if ( w )
+					w->text_input( e );
+			}
 			break;
 
 		case event_type::TABLET_DOWN:
 		case event_type::TABLET_UP:
 		case event_type::TABLET_MOVE:
 		case event_type::TABLET_BUTTON:
+			if ( _widget )
+			{
+				auto w = _widget->find_widget_under( e.tablet().x, e.tablet().y );
+				if ( w )
+					w->tablet_event( e );
+			}
 			break;
 
 		case event_type::HID_BUTTON_DOWN:
@@ -244,9 +317,17 @@ bool window::process_event( const event &e )
 		case event_type::HID_RELATIVE_WHEEL:
 		case event_type::HID_SPINNER:
 		case event_type::HID_DIAL_KNOB:
+			// TODO: focus???
+			if ( _widget )
+				_widget->hid_event( e );
 			break;
+
 		case event_type::USER_EVENT:
+			// TODO: focus???
+			if ( _widget )
+				in_context( [&, this] { _widget->user_event( e ); } );
 			break;
+
 		case event_type::NUM_EVENTS:
 		default:
 			break;
@@ -332,58 +413,48 @@ void window::resized( coord w, coord h )
 
 ////////////////////////////////////////
 
-void window::mouse_press( const point &p, int b )
+void window::key_down( const event &e )
 {
-	if ( _widget )
-		in_context( [&,this] { _widget->mouse_press( p, b ); } );
+	// TODO: don't allow multiple scancode combinations?
+	if ( e.key().keys[1] != platform::scancode::KEY_NO_EVENT )
+		return;
+
+#if defined(__APPLE__)
+	if ( ! e.has_only_mod( platform::modifier::LEFT_META | platform::modifier::RIGHT_META ) )
+		return;
+#else
+	if ( ! e.has_only_mod( platform::modifier::LEFT_CTRL | platform::modifier::RIGHT_CTRL ) )
+		return;
+#endif
+
+	platform::scancode sc = e.key().keys[0];
+
+	if ( application::current()->dispatch_global_hotkey( e ) )
+		return;
+
+	auto i = _hotkeys.find( sc );
+	if ( i != _hotkeys.end() )
+	{
+		(i->second)( point( e.key().x, e.key().y ) );
+		return;
+	}
+
+	if ( _key_focus )
+		_key_focus->key_press( e );
+	else if ( _widget )
+	{
+		auto w = _widget->find_widget_under( e.key().x, e.key().y );
+		if ( w )
+			w->key_press( e );
+	}
 }
 
 ////////////////////////////////////////
 
-void window::mouse_release( const point &p, int b )
+void window::key_repeat( const event &e )
 {
-	if ( _widget )
-		in_context( [&,this] { _widget->mouse_release( p, b ); } );
-}
-
-////////////////////////////////////////
-
-void window::mouse_moved( const point &p )
-{
-	if ( _widget )
-		in_context( [&,this] { _widget->mouse_move( p ); } );
-}
-
-////////////////////////////////////////
-
-void window::mouse_wheel( int amount )
-{
-	if ( _widget )
-		in_context( [&,this] { _widget->mouse_wheel( amount ); } );
-}
-
-////////////////////////////////////////
-
-void window::key_pressed( platform::scancode c )
-{
-	if ( _widget )
-		in_context( [&,this] { _widget->key_press( c ); } );
-}
-
-////////////////////////////////////////
-
-void window::key_released( platform::scancode c )
-{
-	if ( _widget )
-		in_context( [&,this] { _widget->key_release( c ); } );
-}
-
-////////////////////////////////////////
-
-void window::text_entered( char32_t c )
-{
-	if ( _widget )
-		in_context( [&,this] { _widget->text_input( c ); } );
+	// TODO: do we need to differentiate this?
+	key_down( e );
 }
 
 ////////////////////////////////////////

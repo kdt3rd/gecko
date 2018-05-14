@@ -56,11 +56,11 @@ public:
 	void build( context &ogl ) override;
 	void paint( context &ctxt ) override;
 
-	bool mouse_press( const point &p, int button ) override;
-	bool mouse_move( const point &p ) override;
-	bool mouse_release( const point &p, int button ) override;
-	bool mouse_wheel( int amount ) override;
-	bool key_release( platform::scancode c ) override;
+	bool mouse_press( const event &e ) override;
+	bool mouse_move( const event &e ) override;
+	bool mouse_release( const event &e ) override;
+	bool mouse_wheel( const event &e ) override;
+	bool key_release( const event &e ) override;
 
 private:
 	void update_images( bool force_reload );

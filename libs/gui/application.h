@@ -9,8 +9,11 @@
 
 #include <memory>
 #include <set>
+#include <map>
 #include <string>
+#include <functional>
 #include <platform/cursor.h>
+#include <platform/scancode.h>
 #include "types.h"
 
 namespace script
@@ -22,6 +25,7 @@ class font_manager;
 namespace platform
 {
 class system;
+class event;
 }
 
 namespace gui
@@ -38,6 +42,8 @@ using standard_cursor = platform::standard_cursor;
 class application : public std::enable_shared_from_this<application>
 {
 public:
+	using hotkey_handler = std::function<void(const point &)>;
+
 	application( const std::string &display = std::string(),
 				 const std::string &platform = std::string(),
 				 const std::string &render = std::string() );
@@ -46,6 +52,9 @@ public:
 	const std::string &active_platform( void ) { return _platform; }
 
 	virtual bool process_quit_request( void );
+
+	void register_global_hotkey( platform::scancode sc, hotkey_handler f );
+	bool dispatch_global_hotkey( const platform::event &e );
 
 	std::shared_ptr<window> new_window( void );
 
@@ -78,6 +87,8 @@ private:
 
 	std::string _platform;
 	std::shared_ptr<script::font_manager> _fmgr;
+
+	std::map<platform::scancode, hotkey_handler> _hotkeys;
 };
 
 ////////////////////////////////////////

@@ -124,10 +124,11 @@ public:
 	struct hid_info
 	{
 		// TODO: is negative useful for element or should this be
-		// uint32_t, w/ uint32_t(-1) meaning something special (all,
+		// uint16_t, w/ uint16_t(-1) meaning something special (all,
 		// none, unknown)?
-		int32_t element; // which one of the buttons / dials / thingies
-		int32_t position; // what's the detent / delta
+		coord_type x, y; // pointer position
+		int16_t element; // which one of the buttons / dials / thingies
+		int16_t position; // what's the detent / delta
 	};
 	struct user_info
 	{
@@ -137,6 +138,8 @@ public:
 
 	inline event_type type( void ) const { return _type; }
 
+	inline uint8_t modifiers( void ) const { return _modifiers; }
+	inline bool has_only_mod( uint8_t mask ) const { return ( _modifiers & mask ) == _modifiers; }
 	inline bool has_control_mod( void ) const { return ( _modifiers & ( modifier::LEFT_CTRL | modifier::RIGHT_CTRL ) ) != 0; }
 	inline bool has_shift_mod( void ) const { return ( _modifiers & ( modifier::LEFT_SHIFT | modifier::RIGHT_SHIFT ) ) != 0; }
 	inline bool has_alt_mod( void ) const { return ( _modifiers & ( modifier::LEFT_ALT | modifier::RIGHT_ALT ) ) != 0; }
@@ -222,12 +225,14 @@ public:
 		return r;
 	}
 
-	static inline event hid( system *sys, event_source *src, event_type et, int32_t elt, int32_t pos, uint8_t mods )
+	static inline event hid( system *sys, event_source *src, event_type et, coord_type x, coord_type y, int16_t elt, int16_t pos, uint8_t mods )
 	{
 		event r;
 		r._system = sys;
 		r._source = src;
 		r._type = et;
+		r._data.hid.x = x;
+		r._data.hid.y = y;
 		r._data.hid.element = elt;
 		r._data.hid.position = pos;
 		r._modifiers = mods;

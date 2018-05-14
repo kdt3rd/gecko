@@ -46,6 +46,17 @@ int safemain( int argc, char **argv )
 	win->in_context( [&]( void )
 	{
 		using namespace gui;
+
+		auto fakemenu = box( alignment::RIGHT );
+		fakemenu->set_padding( 0, 0, 2, 2 );
+		fakemenu->set_spacing( 8, 8 );
+		fakemenu->add( label( "File" ) );
+		fakemenu->add( label( "Edit" ) );
+		fakemenu->add( label( "Help" ) );
+		auto filler = label( "" );
+		filler->layout_target()->set_expansion_priority( 1 );
+		fakemenu->add( filler );
+
 		auto l = label( "Hello World", alignment::LEFT );
 		auto b = button( "Click Me" );
 		auto sl = slider();
@@ -84,6 +95,7 @@ int safemain( int argc, char **argv )
 		auto bx = box( alignment::BOTTOM );
 		bx->set_padding( 12, 12, 5, 5 );
 		bx->set_spacing( 8, 2 );
+		bx->add( fakemenu );
 		bx->add( l );
 		size_t n = bx->add( b );
 		b->when_activated.connect( [=]( void ) { bx->remove( n ); bx->remove( n + 1 ); } );

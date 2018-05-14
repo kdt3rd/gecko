@@ -770,9 +770,11 @@ void dispatcher::dispatchButtonPress( const std::shared_ptr<window> &w, XEvent &
 						 (((event.xbutton.state & ShiftMask) != 0) ? 0x02 : 0) );
 
 		if ( event.xbutton.button == 4 )
-			w->process_event( event::hid( _system, _mouse.get(), event_type::MOUSE_WHEEL, 4, 1, mods ) );
+			w->process_event( event::hid( _system, _mouse.get(), event_type::MOUSE_WHEEL,
+										  event.xbutton.x, event.xbutton.y, 4, 1, mods ) );
 		else if ( event.xbutton.button == 5 )
-			w->process_event( event::hid( _system, _mouse.get(), event_type::MOUSE_WHEEL, 5, -1, mods ) );
+			w->process_event( event::hid( _system, _mouse.get(), event_type::MOUSE_WHEEL,
+										  event.xbutton.x, event.xbutton.y, 5, -1, mods ) );
 		else
 			w->process_event( event::mouse( _system, _mouse.get(),
 											event_type::MOUSE_DOWN,

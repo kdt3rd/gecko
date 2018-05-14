@@ -23,9 +23,9 @@ public:
 	void build( context &ctxt ) override;
 	void paint( context &ctxt ) override;
 
-	bool mouse_press( const point &p, int button ) override;
-	bool mouse_release( const point &p, int button ) override;
-	bool mouse_move( const point &p ) override;
+	bool mouse_press( const event &e ) override;
+	bool mouse_release( const event &e ) override;
+	bool mouse_move( const event &e ) override;
 
 	bool is_checked( void ) const
 	{

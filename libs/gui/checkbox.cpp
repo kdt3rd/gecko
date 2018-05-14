@@ -73,43 +73,48 @@ void checkbox_w::paint( context &ctxt )
 
 ////////////////////////////////////////
 
-bool checkbox_w::mouse_press( const point &p, int button )
+bool checkbox_w::mouse_press( const event &e )
 {
-	unused( button );
+	if ( e.mouse().button != 1 )
+		return false;
 
-	if ( contains( p ) )
-	{
-		_tracking = true;
-		_current = !_state;
-		invalidate();
-	}
+	context::current().grab_source( e, shared_from_this() );
+
+	_tracking = true;
+	_current = !_state;
+	invalidate();
+
 	return _tracking;
 }
 
 ////////////////////////////////////////
 
-bool checkbox_w::mouse_release( const point &p, int button )
+bool checkbox_w::mouse_release( const event &e )
 {
-	unused( button );
+	if ( e.mouse().button != 1 )
+		return false;
 
 	if ( _tracking )
 	{
 		_tracking = false;
-		if ( contains( p ) )
+		if ( contains( e.mouse().x, e.mouse().y ) )
 			set_state( _current );
+		_current = _state;
 		invalidate();
+		context::current().release_source( e );
 		return true;
 	}
+
 	return false;
 }
 
 ////////////////////////////////////////
 
-bool checkbox_w::mouse_move( const point &p )
+bool checkbox_w::mouse_move( const event &e )
 {
 	if ( _tracking )
 	{
-		if ( contains( p ) )
+		if ( contains( e.mouse().x, e.mouse().y ) )
 			_current = !_state;
 		else
 			_current = _state;

@@ -11,6 +11,7 @@
 #include <platform/system.h>
 #include <platform/window.h>
 #include <platform/dispatcher.h>
+#include <platform/event.h>
 #include <script/font_manager.h>
 #include <base/contract.h>
 
@@ -89,6 +90,30 @@ application::~application( void )
 bool application::process_quit_request( void )
 {
 	return true;
+}
+
+////////////////////////////////////////
+
+void application::register_global_hotkey( platform::scancode sc, hotkey_handler f )
+{
+	// TODO: handle duplicates?
+	_hotkeys[sc] = std::move( f );
+}
+
+////////////////////////////////////////
+
+bool application::dispatch_global_hotkey( const platform::event &e )
+{
+	platform::scancode sc = e.key().keys[0];
+
+	auto i = _hotkeys.find( sc );
+	if ( i != _hotkeys.end() )
+	{
+		(i->second)( point( e.key().x, e.key().y ) );
+		return true;
+	}
+
+	return false;
 }
 
 ////////////////////////////////////////
