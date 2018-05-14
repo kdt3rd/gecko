@@ -1,11 +1,12 @@
 //
-// Copyright (c) 2014 Ian Godin
+// Copyright (c) 2014 Ian Godin and Kimball Thurston
 // All rights reserved.
 // Copyrights licensed under the MIT License.
 // See the accompanying LICENSE.txt file for terms
 //
 
 #include "container.h"
+#include <base/scope_guard.h>
 
 namespace gui
 {
@@ -31,6 +32,14 @@ base_container::~base_container( void )
 
 ////////////////////////////////////////
 
+void base_container::monitor_changed( context &ctxt )
+{
+	for ( auto w: _widgets )
+		w->monitor_changed( ctxt );
+}
+
+////////////////////////////////////////
+
 void base_container::build( context &ctxt )
 {
 	for ( auto w: _widgets )
@@ -42,12 +51,14 @@ void base_container::build( context &ctxt )
 void base_container::paint( context &ctxt )
 {
 	gl::api &ogl = ctxt.hw_context().api();
+
 	ogl.push_scissor( x(), y(), width(), height() );
-	ogl.clear_color( context::current().get_style().background_color() );
+	on_scope_exit{ ogl.pop_scissor(); };
+
+	ogl.clear_color( ctxt.get_style().background_color() );
 	ogl.clear();
 	for ( auto w: _widgets )
 		w->paint( ctxt );
-	ogl.pop_scissor();
 }
 
 ////////////////////////////////////////

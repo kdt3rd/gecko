@@ -103,6 +103,13 @@ std::shared_ptr<window> application::new_window( void )
 
 ////////////////////////////////////////
 
+void application::window_destroyed( window * /*w*/ )
+{
+	// TBD: we aren't stashing the windows (yet), so until then, just ignore...
+}
+
+////////////////////////////////////////
+
 std::shared_ptr<popup> application::new_popup( void )
 {
 	throw_not_yet();
@@ -185,7 +192,7 @@ std::set<std::string> application::get_font_styles( const std::string &family )
 
 ////////////////////////////////////////
 
-std::shared_ptr<script::font> application::get_font( const std::string &family, const std::string &style, coord_type pixsize )
+std::shared_ptr<script::font> application::get_font( const std::string &family, const std::string &style, coord pixsize )
 {
 	return _fmgr->get_font( family, style, pixsize );
 }

@@ -12,17 +12,18 @@
 #include <base/rect.h>
 #include <base/signal.h>
 #include <base/alignment.h>
+#include <layout/types.h>
 
 ////////////////////////////////////////
 
 namespace gui
 {
 
-// do we need double precision?
-using coord_type = double;
-using point = base::point<coord_type>;
-using size = base::size<coord_type>;
-using rect = base::rect<coord_type>;
+//using coord = double;
+using coord = layout::coord;
+using rect = base::rect<coord>;
+using point = rect::point_type;
+using size = rect::size_type;
 
 // we don't collect in the GUI library, so we can just use this, right?
 template<typename Func> using signal = base::signal<Func>;

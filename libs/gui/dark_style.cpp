@@ -118,7 +118,7 @@ void dark_style::line_edit_frame( const std::shared_ptr<draw::canvas> &c, const 
 
 ////////////////////////////////////////
 
-coord_type dark_style::slider_size( const rect &rect )
+coord dark_style::slider_size( const rect &rect )
 {
 	return rect.radius();
 }
@@ -129,8 +129,8 @@ void dark_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const re
 {
 	construct( c );
 
-	coord_type rad = slider_size( rect );
-	coord_type h = rect.height() - 7;
+	coord rad = slider_size( rect );
+	coord h = rect.height() - 7;
 	rect tmp( rect );
 	tmp.trim( rad, rad, h/2, h/2 );
 
@@ -140,11 +140,11 @@ void dark_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const re
 
 ////////////////////////////////////////
 
-void dark_style::slider_button( const std::shared_ptr<draw::canvas> &c, const rect &r, bool pressed, coord_type val )
+void dark_style::slider_button( const std::shared_ptr<draw::canvas> &c, const rect &r, bool pressed, coord val )
 {
 	construct( c );
 
-	coord_type rad = 9.0; //r.radius();
+	coord rad = 9.0; //r.radius();
 	rect tmp( rad * 2, rad * 2 );
 	tmp.set_center( { r.x( val, rad ), r.y( 0.5, rad ) } );
 
@@ -154,7 +154,7 @@ void dark_style::slider_button( const std::shared_ptr<draw::canvas> &c, const re
 
 ////////////////////////////////////////
 
-void dark_style::text_cursor( const std::shared_ptr<draw::canvas> &c, const point &p, coord_type h )
+void dark_style::text_cursor( const std::shared_ptr<draw::canvas> &c, const point &p, coord h )
 {
 	construct( c );
 

@@ -79,14 +79,14 @@ void window::hide( void )
 
 ////////////////////////////////////////
 
-void window::move( coord_type x, coord_type y )
+void window::move( coord x, coord y )
 {
 	_window->move( x, y );
 }
 
 ////////////////////////////////////////
 
-void window::resize( coord_type w, coord_type h )
+void window::resize( coord w, coord h )
 {
 	_window->resize( w, h );
 }
@@ -107,14 +107,14 @@ void window::set_widget( const std::shared_ptr<widget> &w )
 
 ////////////////////////////////////////
 
-coord_type window::width( void ) const
+coord window::width( void ) const
 {
 	return _window->width();
 }
 
 ////////////////////////////////////////
 
-coord_type window::height( void ) const
+coord window::height( void ) const
 {
 	return _window->height();
 }
@@ -155,24 +155,32 @@ bool window::process_event( const event &e )
 			break;
 
 		case event_type::APP_QUIT_REQUEST:
-		{
-			auto a = application::current();
-			return a->process_quit_request();
-		}
+			return application::current()->process_quit_request();
+
+		case event_type::WINDOW_CLOSE_REQUEST:
+			return close_request( e );
+
+		case event_type::WINDOW_DESTROYED:
+			// to make sure the window isn't used...
+			_window.reset();
+			application::current()->window_destroyed( this );
+			return true;
 
 		case event_type::WINDOW_SHOWN:
+			break;
+
 		case event_type::WINDOW_HIDDEN:
 			break;
-		case event_type::WINDOW_CLOSE_REQUEST:
-			break;
-		case event_type::WINDOW_DESTROYED:
-			break;
+
+			// do we care about the subtle difference implied by these?
+			// for now, just use the shown / hidden above...
 		case event_type::WINDOW_MINIMIZED:
-			break;
-		case event_type::WINDOW_MAXIMIZED:
-			break;
 		case event_type::WINDOW_RESTORED:
 			break;
+
+		case event_type::WINDOW_MAXIMIZED:
+			break;
+
 		case event_type::WINDOW_EXPOSED:
 			paint( 0, 0, 0, 0 );
 			break;
@@ -249,10 +257,21 @@ bool window::process_event( const event &e )
 
 ////////////////////////////////////////
 
-void window::paint( coord_type dx, coord_type dy, coord_type dw, coord_type dh )
+bool window::close_request( const event &e )
 {
-	coord_type w = _window->width();
-	coord_type h = _window->height();
+	return true;
+}
+
+////////////////////////////////////////
+
+void window::paint( coord dx, coord dy, coord dw, coord dh )
+{
+	// in case we were destroyed but still are processing paint requests...
+	if ( ! _window )
+		return;
+
+	coord w = _window->width();
+	coord h = _window->height();
 
 	platform::context &hwctxt = _window->hw_context();
 	auto guard = hwctxt.begin_render();
@@ -296,14 +315,14 @@ void window::paint( coord_type dx, coord_type dy, coord_type dw, coord_type dh )
 
 ////////////////////////////////////////
 
-void window::resized( coord_type w, coord_type h )
+void window::resized( coord w, coord h )
 {
 	if ( _widget )
 	{
 		in_context( [&,this]
 		{
-			_widget->set( { 0.0, 0.0 }, { w, h } );
-			_widget->layout_target()->set( { 0.0, 0.0 }, { w, h } );
+			_widget->set( { coord(0), coord(0) }, { w, h } );
+			_widget->layout_target()->set( { coord(0), coord(0) }, { w, h } );
 			_widget->layout_target()->compute_layout();
 			_widget->update_layout( 0.0 );
 			invalidate( *_widget );

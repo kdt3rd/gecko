@@ -48,6 +48,10 @@ public:
 	virtual bool process_quit_request( void );
 
 	std::shared_ptr<window> new_window( void );
+
+	// provided in case we track windows in the future or a sub-class
+	void window_destroyed( window *w );
+
 	std::shared_ptr<popup> new_popup( void );
 	std::shared_ptr<menu> new_menu( void );
 
@@ -62,7 +66,7 @@ public:
 
 	std::set<std::string> get_font_families( void );
 	std::set<std::string> get_font_styles( const std::string &family );
-	std::shared_ptr<script::font> get_font( const std::string &family, const std::string &style, coord_type pixsize );
+	std::shared_ptr<script::font> get_font( const std::string &family, const std::string &style, coord pixsize );
 
 	std::shared_ptr<platform::system> get_system( void );
 

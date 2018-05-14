@@ -8,7 +8,7 @@
 #pragma once
 
 #include "layout.h"
-#include <base/alignment.h>
+
 #include <list>
 #include <memory>
 
@@ -24,7 +24,7 @@ class box : public layout
 {
 public:
 	/// @brief Default constructor.
-	box( base::alignment direction = base::alignment::RIGHT );
+	box( alignment direction = alignment::RIGHT );
 
 	/// @brief Add an area.
 	/// @param a Area to add.
@@ -36,7 +36,7 @@ public:
 
 private:
 	std::list<std::weak_ptr<area>> _areas;
-	base::alignment _align = base::alignment::RIGHT;
+	alignment _align = alignment::RIGHT;
 };
 
 ////////////////////////////////////////

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 Ian Godin
+// Copyright (c) 2017 Ian Godin and Kimball Thurston
 // All rights reserved.
 // Copyrights licensed under the MIT License.
 // See the accompanying LICENSE.txt file for terms
@@ -13,10 +13,10 @@ namespace layout
 
 ////////////////////////////////////////
 
-box::box( base::alignment direction )
+box::box( alignment direction )
 	: _align( direction )
 {
-	precondition( direction != base::alignment::CENTER, "invalid direction for box layout" );
+	precondition( direction != alignment::CENTER, "invalid direction for box layout" );
 }
 
 ////////////////////////////////////////
@@ -26,14 +26,14 @@ void box::compute_bounds( void )
 	// Clean up areas that have been deleted.
 	_areas.remove_if( []( const std::weak_ptr<area> &a ) { return a.expired(); } );
 
-	double minw = 0.0;
-	double minh = 0.0;
-	double maxw = 0.0;
-	double maxh = 0.0;
+	coord minw = min_coord();
+	coord minh = min_coord();
+	coord maxw = min_coord();
+	coord maxh = min_coord();
 	switch ( _align )
 	{
-		case base::alignment::LEFT:
-		case base::alignment::RIGHT:
+		case alignment::LEFT:
+		case alignment::RIGHT:
 			for ( auto &wa: _areas )
 			{
 				auto a = wa.lock();
@@ -53,8 +53,8 @@ void box::compute_bounds( void )
 			}
 			break;
 
-		case base::alignment::TOP:
-		case base::alignment::BOTTOM:
+		case alignment::TOP:
+		case alignment::BOTTOM:
 			for ( auto &wa: _areas )
 			{
 				auto a = wa.lock();
@@ -74,10 +74,10 @@ void box::compute_bounds( void )
 			}
 			break;
 
-		case base::alignment::TOP_LEFT:
-		case base::alignment::TOP_RIGHT:
-		case base::alignment::BOTTOM_LEFT:
-		case base::alignment::BOTTOM_RIGHT:
+		case alignment::TOP_LEFT:
+		case alignment::TOP_RIGHT:
+		case alignment::BOTTOM_LEFT:
+		case alignment::BOTTOM_RIGHT:
 			for ( auto &wa: _areas )
 			{
 				auto a = wa.lock();
@@ -99,7 +99,7 @@ void box::compute_bounds( void )
 			}
 			break;
 
-		case base::alignment::CENTER:
+		case alignment::CENTER:
 			throw_runtime( "invalid direction for box layout" );
 	}
 	minw += _pad[0] + _pad[1];
@@ -120,68 +120,68 @@ void box::compute_bounds( void )
 
 void box::compute_layout( void )
 {
-	double x = 0.0, y = 0.0;
-	double dx = 0.0, dy = 0.0;
+	coord x = min_coord(), y = min_coord();
+	coord dx = min_coord(), dy = min_coord();
 
 	switch ( _align )
 	{
-		case base::alignment::LEFT:
+		case alignment::LEFT:
 			x = width() - _pad[1];
 			y = _pad[2];
-			dx = -1.0;
-			dy = 0.0;
+			dx = coord(-1);
+			dy = min_coord();
 			break;
 
-		case base::alignment::RIGHT:
+		case alignment::RIGHT:
 			x = _pad[0];
 			y = _pad[2];
-			dx = 1.0;
-			dy = 0.0;
+			dx = coord(1);
+			dy = min_coord();
 			break;
 
-		case base::alignment::TOP:
+		case alignment::TOP:
 			x = _pad[0];
 			y = height() - _pad[3];
-			dx = 0.0;
-			dy = -1.0;
+			dx = min_coord();
+			dy = coord(-1);
 			break;
 
-		case base::alignment::BOTTOM:
+		case alignment::BOTTOM:
 			x = _pad[0];
 			y = _pad[2];
-			dx = 0.0;
-			dy = 1.0;
+			dx = min_coord();
+			dy = coord(1);
 			break;
 
-		case base::alignment::TOP_LEFT:
+		case alignment::TOP_LEFT:
 			x = width() - _pad[1];
 			y = height() - _pad[3];
-			dx = -1.0;
-			dy = -1.0;
+			dx = coord(-1);
+			dy = coord(-1);
 			break;
 
-		case base::alignment::TOP_RIGHT:
+		case alignment::TOP_RIGHT:
 			x = _pad[0];
 			y = height() - _pad[3];
-			dx = 1.0;
-			dy = -1.0;
+			dx = coord(1);
+			dy = coord(-1);
 			break;
 
-		case base::alignment::BOTTOM_LEFT:
+		case alignment::BOTTOM_LEFT:
 			x = width() - _pad[1];
 			y = _pad[2];
-			dx = -1.0;
-			dy = 1.0;
+			dx = coord(-1);
+			dy = coord(1);
 			break;
 
-		case base::alignment::BOTTOM_RIGHT:
+		case alignment::BOTTOM_RIGHT:
 			x = _pad[0];
 			y = _pad[2];
-			dx = 1.0;
-			dy = 1.0;
+			dx = coord(1);
+			dy = coord(1);
 			break;
 
-		case base::alignment::CENTER:
+		case alignment::CENTER:
 			throw_runtime( "invalid direction for box layout" );
 	}
 
@@ -195,18 +195,18 @@ void box::compute_layout( void )
 		}
 	}
 
-	double w = std::max( 0.0, width() - _pad[0] - _pad[1] );
-	double h = std::max( 0.0, height() - _pad[2] - _pad[3] );
+	coord w = std::max( min_coord(), width() - _pad[0] - _pad[1] );
+	coord h = std::max( min_coord(), height() - _pad[2] - _pad[3] );
 
-	if ( dx != 0.0 )
+	if ( dx != min_coord() )
 	{
 		expand_width( _areas, width() - minimum_width() );
-		w = 0.0;
+		w = min_coord();
 	}
-	if ( dy != 0.0 )
+	if ( dy != min_coord() )
 	{
 		expand_height( _areas, height() - minimum_height() );
-		h = 0.0;
+		h = min_coord();
 	}
 
 	for ( auto &wa: _areas )
@@ -214,8 +214,8 @@ void box::compute_layout( void )
 		auto a = wa.lock();
 		if ( a )
 		{
-			double aw = a->width();
-			double ah = a->height();
+			coord aw = a->width();
+			coord ah = a->height();
 			a->set( { x1() + x, y1() + y }, { aw * dx + w, ah * dy + h } );
 			x += ( aw + _spacing[0] ) * dx;
 			y += ( ah + _spacing[1] ) * dy;

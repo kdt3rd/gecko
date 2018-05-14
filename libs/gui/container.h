@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2014 Ian Godin
+// Copyright (c) 2014 Ian Godin and Kimball Thurston
 // All rights reserved.
 // Copyrights licensed under the MIT License.
 // See the accompanying LICENSE.txt file for terms
@@ -26,8 +26,10 @@ public:
 	explicit base_container( std::unique_ptr<layout::area> &&a );
 	~base_container( void ) override;
 
+	void monitor_changed( context &ctxt ) override;
 	void build( context &ctxt ) override;
 	void paint( context &ctxt ) override;
+
 	bool mouse_press( const point &p, int button ) override;
 	bool mouse_release( const point &p, int button ) override;
 	bool mouse_move( const point &p ) override;
@@ -83,12 +85,12 @@ public:
 		return _widgets.size() - 1;
 	}
 
-	void set_padding( double l, double r, double t, double b )
+	void set_padding( coord l, coord r, coord t, coord b )
 	{
 		_layout->set_padding( l, r, t, b );
 	}
 
-	void set_spacing( double h, double v )
+	void set_spacing( coord h, coord v )
 	{
 		_layout->set_spacing( h, v );
 	}

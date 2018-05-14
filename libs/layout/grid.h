@@ -18,8 +18,8 @@ namespace layout
 class grid : public layout
 {
 public:
-	size_t add_columns( size_t n, double flex = 1.0, int32_t pri = 0 );
-	size_t add_rows( size_t n, double flex = 1.0, int32_t pri = 0 );
+	size_t add_columns( size_t n, coord flex = coord(1), int32_t pri = 0 );
+	size_t add_rows( size_t n, coord flex = coord(1), int32_t pri = 0 );
 
 	void add( const std::shared_ptr<area> &a, size_t x, size_t y, size_t w, size_t h );
 

@@ -34,11 +34,11 @@ public:
 
 	void line_edit_frame( const std::shared_ptr<draw::canvas> &c, const rect &r, bool focused ) override;
 
-	coord_type slider_size( const rect &rect ) override;
+	coord slider_size( const rect &rect ) override;
 	void slider_groove( const std::shared_ptr<draw::canvas> &c, const rect &rect ) override;
-	void slider_button( const std::shared_ptr<draw::canvas> &c, const rect &r, bool pressed, coord_type val ) override;
+	void slider_button( const std::shared_ptr<draw::canvas> &c, const rect &r, bool pressed, coord val ) override;
 
-	virtual void text_cursor( const std::shared_ptr<draw::canvas> &c, const point &p, coord_type h ) override;
+	virtual void text_cursor( const std::shared_ptr<draw::canvas> &c, const point &p, coord h ) override;
 
 private:
 	void construct( const std::shared_ptr<draw::canvas> &c );

@@ -20,9 +20,9 @@ class field : public layout
 public:
 	field( const std::shared_ptr<area> &l, const std::shared_ptr<area> &e );
 
-	double field_minimum_width( void );
+	coord field_minimum_width( void );
 
-	void set_field_width( double w )
+	void set_field_width( coord w )
 	{
 		_width = w;
 	}
@@ -34,7 +34,7 @@ public:
 	void compute_layout( void ) override;
 
 private:
-	double _width = 0.0;
+	coord _width = min_coord();
 	std::weak_ptr<area> _label;
 	std::weak_ptr<area> _field;
 };

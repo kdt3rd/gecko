@@ -19,23 +19,23 @@ area::~area( void )
 
 ////////////////////////////////////////
 
-void area::set_expansion_flex( coord_type f )
+void area::set_expansion_flex( coord f )
 {
-	precondition( f >= 0.0, "invalid expansion flex" );
+	precondition( f >= min_coord(), "invalid expansion flex" );
 	_flex = f;
 }
 
 ////////////////////////////////////////
 
-area::coord_type area::expand_width( coord_type w, coord_type overall_flex )
+coord area::expand_width( coord w, coord overall_flex )
 {
-	precondition( overall_flex >= 0.0, "invalid overall flex {0}", overall_flex );
+	precondition( overall_flex >= min_coord(), "invalid overall flex {0}", overall_flex );
 	precondition( _flex <= overall_flex, "invalid overall flex ({0}/{1})", _flex, overall_flex );
 
-	coord_type used = 0.0;
-	if ( w > 0.0 )
+	coord used = min_coord();
+	if ( w > min_coord() )
 	{
-		coord_type maxflex = w * _flex / overall_flex;
+		coord maxflex = divide( w * _flex, overall_flex );
 		used = std::min( _max.w() - width(), maxflex );
 		set_width( width() + used );
 	}
@@ -45,15 +45,15 @@ area::coord_type area::expand_width( coord_type w, coord_type overall_flex )
 
 ////////////////////////////////////////
 
-area::coord_type area::expand_height( coord_type h, coord_type overall_flex )
+coord area::expand_height( coord h, coord overall_flex )
 {
-	precondition( overall_flex >= 0.0, "invalid overall flex {0}", overall_flex );
+	precondition( overall_flex >= min_coord(), "invalid overall flex {0}", overall_flex );
 	precondition( _flex <= overall_flex, "invalid overall flex ({0}/{1})", _flex, overall_flex );
 
-	coord_type used = 0.0;
-	if ( h > 0.0 )
+	coord used = min_coord();
+	if ( h > min_coord() )
 	{
-		coord_type maxflex = h * _flex / overall_flex;
+		coord maxflex = divide( h * _flex, overall_flex );
 		used = std::min( _max.h() - height(), maxflex );
 		set_height( height() + used );
 	}

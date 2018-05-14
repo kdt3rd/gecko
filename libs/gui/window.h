@@ -44,16 +44,16 @@ public:
 	void show( void );
 	void hide( void );
 
-	void move( coord_type x, coord_type y );
-	void resize( coord_type w, coord_type h );
+	void move( coord x, coord y );
+	void resize( coord w, coord h );
 
 	void set_widget( const std::shared_ptr<widget> &w );
 	template <typename Y>
 	inline void set_widget( const widget_ptr<Y> &w ) { set_widget( static_cast<std::shared_ptr<Y>>( w ) ); }
 	std::shared_ptr<widget> get_widget( void ) { return _widget; }
 
-	coord_type width( void ) const;
-	coord_type height( void ) const;
+	coord width( void ) const;
+	coord height( void ) const;
 
 	void invalidate( const rect &r ) override;
 
@@ -66,8 +66,16 @@ protected:
 
 	bool process_event( const event &e );
 
-	void paint( coord_type x, coord_type y, coord_type w, coord_type h );
-	void resized( coord_type w, coord_type h );
+	/// if you subclass window and make a "main window", or otherwise
+	/// count the number of windows and then prompt the user to save,
+	/// you should override this and return false if the window close
+	/// request should be ignored / cancelled.
+	///
+	/// by default, returns true, indicating the window can close.
+	virtual bool close_request( const event &e );
+
+	void paint( coord x, coord y, coord w, coord h );
+	void resized( coord w, coord h );
 
 	void mouse_press( const point &p, int button );
 	void mouse_release( const point &p, int button );

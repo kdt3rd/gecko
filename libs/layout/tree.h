@@ -1,3 +1,9 @@
+//
+// Copyright (c) 2017 Ian Godin and Kimball Thurston
+// All rights reserved.
+// Copyrights licensed under the MIT License.
+// See the accompanying LICENSE.txt file for terms
+//
 
 #pragma once
 
@@ -20,7 +26,7 @@ public:
 	{
 	}
 
-	tree( double i, const std::shared_ptr<area> &t )
+	tree( coord i, const std::shared_ptr<area> &t )
 		: _title( t ), _indent( i )
 	{
 	}
@@ -35,7 +41,7 @@ public:
 		_title = t;
 	}
 
-	void set_indent( double i )
+	void set_indent( coord i )
 	{
 		_indent = i;
 	}
@@ -55,7 +61,7 @@ private:
 	std::weak_ptr<area> _groove;
 	std::weak_ptr<area> _title;
 	std::list<std::weak_ptr<area>> _areas;
-	double _indent = 10.0;
+	coord _indent = coord(10);
 };
 
 ////////////////////////////////////////
