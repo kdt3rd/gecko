@@ -104,10 +104,6 @@ public:
 	/// Make the window fullscreen.
 	virtual void fullscreen( bool fs ) = 0;
 
-//	virtual rect geometry( void ) = 0;
-
-//	virtual void set_geometry( const rect &r ) = 0;
-
 	/// @brief Move the window.
 	///
 	/// Move the window to the given position.

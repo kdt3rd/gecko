@@ -13,6 +13,8 @@
 #ifndef _WIN32
 # include <sys/mman.h>
 # include <unistd.h>
+#else
+# include <windows.h>
 #endif
 
 #include "contract.h"
@@ -54,7 +56,11 @@ public:
     using reference = const T &;
 
     // TODO: win32 support
+#ifdef _WIN32
+	using file_handle = HANDLE;
+#else
     using file_handle = int;
+#endif
 
     /// @brief default ctor for delayed mapping
     read_memory_map( void ) = default;
@@ -109,6 +115,8 @@ public:
             int r = munmap( tmp, unmapsz );
             if ( r == -1 )
                 throw_errno( "Unable to unmap memory map" );
+#else
+			UnmapViewOfFile( _ptr );
 #endif
         }
     }
@@ -131,7 +139,15 @@ public:
         if ( p == MAP_FAILED )
             throw_errno( "Unable to map read only {0} bytes at offset {1} of file {2}", size, mapoff, fd );
 #else
-        throw_not_yet();
+		SYSTEM_INFO si;
+		GetSystemInfo( &si );
+		off_t mapoff = offset;
+		off_t extraAtBeg = mapoff % si.dwPageSize;
+		mapoff -= extraAtBeg;
+		size += static_cast<size_t>( extraAtBeg );
+		DWORD high = static_cast<DWORD>( uint64_t( ( uint64_t(mapoff) >> 32 ) & 0xFFFFFFFF ) );
+		DWORD low = mapoff & 0xFFFFFFFF;
+		void *p = MapViewOfFile( fd, FILE_MAP_ALL_ACCESS, high, low, size );
 #endif
         char *tmp = static_cast<char *>( p );
         _ptr = reinterpret_cast<pointer>( tmp + extraAtBeg );

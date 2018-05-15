@@ -26,7 +26,7 @@
 # endif
 
 #else
-#error "NYI"
+# include <windows.h>
 #endif
 
 #include "memory_map.h"
@@ -148,7 +148,7 @@ void dso::load( const char *fn, bool makeGlobal )
     {
         char *msg = nullptr;
         FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER, nullptr, GetLastError(), 0,
-                       &msg, 0, nullptr );
+                       (LPSTR)&msg, 0, nullptr );
         if ( msg )
             _last_err = msg;
 
@@ -184,12 +184,13 @@ dso::find( const char *symn, const char *symver )
 #else
 # ifdef _WIN32
         // todo symbol versioning???
-        ret = GetProcAddress( _handle, symn );
+		FARPROC ptr = GetProcAddress( (HMODULE)_handle, symn );
+        ret = reinterpret_cast<void *>( ptr );
         if ( ! ret )
         {
             char *msg = nullptr;
             FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER, nullptr, GetLastError(), 0,
-                           &msg, 0, nullptr );
+                           (LPSTR)&msg, 0, nullptr );
             if ( msg )
                 _last_err = msg;
             LocalFree( msg );
@@ -579,7 +580,7 @@ void *find_next( const char *sig, const char *ver )
 
 	return dlsym( RTLD_NEXT, sig );
 #else
-# error "NYI"
+	return reinterpret_cast<void *>( GetProcAddress( GetModuleHandle( nullptr ), sig ) );
 #endif
 }
 

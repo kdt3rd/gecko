@@ -3,8 +3,8 @@ extra_source = optional_source{
 	source={
 		"dispatcher.cpp",
 		"keyboard.cpp",
+		"context.cpp",
 		"mouse.cpp",
-		"opengl.cpp",
 		"screen.cpp",
 		"system.cpp",
 		"window.cpp",

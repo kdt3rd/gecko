@@ -11,6 +11,7 @@
 #include <platform/screen.h>
 #include <string>
 #include <windows.h>
+#include <color/color.h>
 
 namespace platform { namespace mswin
 {
@@ -26,16 +27,26 @@ public:
 
 	bool is_default( void ) const override;
 
-	double refresh_rate( void ) const override;
+	bool is_managed( void ) const override;
+
+	bool is_remote( void ) const override;
 
 	rect bounds( bool avail ) const override;
 
 	base::dsize dpi( void ) const override;
 
+	double refresh_rate( void ) const override;
+
+	const color::standard_definition &display_standard( void ) const override;
+
+	void override_display_standard( const color::standard_definition & ) override;
+
 private:
 	HMONITOR _monitor;
 	std::string _disp_devname;
 	bool _is_primary;
+
+	color::standard_definition _standard;
 };
 
 ////////////////////////////////////////

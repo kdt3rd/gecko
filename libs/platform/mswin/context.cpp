@@ -5,9 +5,12 @@
 // See the accompanying LICENSE.txt file for terms
 //
 
+#include "context.h"
+
 #include <mutex>
-#include "opengl.h"
 #include <base/contract.h>
+
+////////////////////////////////////////
 
 namespace
 {
@@ -20,7 +23,31 @@ HGLRC WINAPI (*wglCreateContextAttribsARB)( HDC, HGLRC, const int * ) = nullptr;
 HMODULE libgl = NULL;
 HWND coreWindow = NULL;
 HGLRC coreContext = NULL;
+
 std::once_flag opengl_init_flag;
+
+platform::mswin::context::render_func_ptr
+queryGL( const char *f )
+{
+//	std::call_once( opengl_init_flag, [](){ init_libgl(); } );
+	using func_ptr = platform::mswin::context::render_func_ptr;
+	func_ptr res = nullptr;
+
+	HGLRC oldCtxt = wglGetCurrentContext();
+	HDC oldDC = wglGetCurrentDC();
+	if ( oldCtxt != coreContext )
+		wglMakeCurrent( GetDC( coreWindow ), coreContext );
+
+	res = (func_ptr) wglGetProcAddress( f );
+
+	if ( oldCtxt != coreContext )
+		wglMakeCurrent( oldDC, oldCtxt );
+
+	if ( ! res && libgl )
+		res = (func_ptr) GetProcAddress( libgl, f );
+
+	return res;
+}
 
 HGLRC doCreate( HDC dc, HGLRC parContext )
 {
@@ -105,7 +132,8 @@ HGLRC doCreate( HDC dc, HGLRC parContext )
 		wglMakeCurrent( tmpdc, coreContext );
 		wglDeleteContext( tempOpenGLContext );
 		std::cout << "initializing OpenGL function pointers..." << std::endl;
-		bool ok = gl3wInit2( platform::mswin::queryGL );
+		bool ok = gl3wInit2( queryGL );
+
 		wglMakeCurrent( tmpdc, oldCtxt );
 		if ( ! ok )
 			throw_runtime( "Unable to initialize OpenGL" );
@@ -153,38 +181,107 @@ void init_libgl( void )
 
 } // anonymous namespace
 
+////////////////////////////////////////
 
 namespace platform
 {
 namespace mswin
 {
 
-HGLRC
-createOGLContext( HDC dc )
+////////////////////////////////////////
+
+context::context( void )
 {
 	std::call_once( opengl_init_flag, [](){ init_libgl(); } );
 
-	return doCreate( dc, coreContext );
+#if __cplusplus > 201402L
+    _api = std::make_unique<gl::api>();
+#else
+    _api.reset( new gl::api );
+#endif
 }
 
-platform::system::opengl_func_ptr
-queryGL( const char *f )
+////////////////////////////////////////
+
+context::~context( void )
 {
-//	std::call_once( opengl_init_flag, [](){ init_libgl(); } );
+	if ( _hrc )
+	{
+		HGLRC oldCtxt = wglGetCurrentContext();
+		if ( oldCtxt == _hrc )
+			wglMakeCurrent( _hdc, NULL );
+		wglDeleteContext( _hrc );
+	}
+}
 
-	platform::system::opengl_func_ptr res;
+////////////////////////////////////////
 
-	HGLRC oldCtxt = wglGetCurrentContext();
-	if ( oldCtxt != coreContext )
-		wglMakeCurrent( GetDC( coreWindow ), coreContext );
-	res = (platform::system::opengl_func_ptr) wglGetProcAddress( f );
-	if ( oldCtxt != coreContext )
-		wglMakeCurrent( GetDC( coreWindow ), oldCtxt );
+context::render_query context::render_query_func( void )
+{
+	return queryGL;
+}
 
-	if ( ! res && libgl )
-		res = (platform::system::opengl_func_ptr) GetProcAddress( libgl, f );
+////////////////////////////////////////
 
-	return res;
+void context::init( HWND hwnd )
+{
+	precondition( _hrc == nullptr, "expect uninitialized context" );
+	_hdc = GetDC( hwnd );
+	_hrc = doCreate( _hdc, coreContext );
+
+	wglMakeCurrent( _hdc, _hrc );
+
+	if ( !gl3wIsSupported( 3, 3 ) )
+		throw_runtime( "OpenGL 3.3 not supported" );
+}
+
+////////////////////////////////////////
+
+void context::share( ::platform::context &o )
+{
+}
+
+////////////////////////////////////////
+
+void context::set_viewport( coord_type x, coord_type y, coord_type w, coord_type h )
+{
+    glViewport( static_cast<GLint>(x), static_cast<GLint>(y),
+				static_cast<GLsizei>(w), static_cast<GLsizei>(h) );
+}
+
+////////////////////////////////////////
+
+void context::swap_buffers( void )
+{
+	SwapBuffers( _hdc );
+}
+
+////////////////////////////////////////
+
+void context::acquire( void )
+{
+//	PAINTSTRUCT ps;
+//	BeginPaint( _hwnd, &ps );
+	if ( !wglMakeCurrent( _hdc, _hrc ) )
+		throw std::runtime_error( "couldn't make context current" );
+}
+
+////////////////////////////////////////
+
+void context::release( void )
+{
+	wglMakeCurrent( NULL, NULL );
+}
+
+////////////////////////////////////////
+
+void context::reset_clip( const rect &r )
+{
+    glEnable( GL_SCISSOR_TEST );
+    glScissor( static_cast<GLint>( r.x() ),
+			   static_cast<GLint>( r.y() ),
+			   static_cast<GLsizei>( r.width() ),
+			   static_cast<GLsizei>( r.height() ) );
 }
 
 } // namespace mswin
