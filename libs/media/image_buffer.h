@@ -199,7 +199,7 @@ public:
 	}
 
 	template<typename T>
-	static image_buffer simple_interleaved( int64_t w, int64_t h, int chans )
+	static image_buffer simple_interleaved( int64_t w, int64_t h, int chans, base::endianness endi = base::endianness::NATIVE )
 	{
 		// TBD: make each line sse (avx2) 256-bit (32-byte) aligned? we would have to
 		// adjust opengl texturing and a few other places if we do that, and wouldn't be useable

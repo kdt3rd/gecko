@@ -148,7 +148,7 @@ png_read_track::doRead( int64_t f )
 
     double fgama = 1.0;
     if ( png_get_gAMA( png_ptr, info_ptr, &fgama ) == 0 )
-        throw_runtime( "error getting gamma" );
+        fgama = 2.4;
 
     if ( color_type == PNG_COLOR_TYPE_PALETTE )
     {
@@ -188,7 +188,9 @@ png_read_track::doRead( int64_t f )
     if ( bit_depth > 8 )
     {
         offbits = 16;
-        imgbuf = image_buffer::simple_interleaved<uint16_t>( temp_width, temp_height, c );
+        // png is always in network (BIG endian) order...
+        imgbuf = image_buffer::simple_interleaved<uint16_t>( temp_width, temp_height, c,
+                                                             base::endianness::BIG );
     }
     else
         imgbuf = image_buffer::simple_interleaved<uint8_t>( temp_width, temp_height, c );

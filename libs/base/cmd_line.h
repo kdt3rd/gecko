@@ -238,11 +238,11 @@ public:
 	/// @param o Option to add to the command line parser.
 	/// @param opts Extra options to also add.
 	template<typename ...Opts>
-	cmd_line( const char *prog, const option &o, Opts ...opts )
+	cmd_line( const char *prog, const option &o, Opts && ...opts )
 		: _program( prog )
 	{
 		precondition( prog != nullptr, "null program name" );
-		add( o, opts... );
+		add( o, std::forward<Opts>( opts )... );
 	}
 
 	/// @}
@@ -255,17 +255,17 @@ public:
 	/// @param o Option to add to the command line parser.
 	/// @param opts Extra options to also add.
 	template<typename ...Opts>
-	void add( const option &o, Opts ...opts )
+	void add( option o, Opts && ...opts )
 	{
-		_options.push_back( o );
-		add( opts... );
+		_options.emplace_back( std::move( o ) );
+		add( std::forward<Opts>( opts )... );
 	}
 
 	/// @brief Add an option.
 	/// @param o Option to add to the command line parser.
-	void add( const option &o )
+	void add( option o )
 	{
-		_options.push_back( o );
+		_options.emplace_back( std::move( o ) );
 	}
 
 	/// @brief Add standard help option.

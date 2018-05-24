@@ -8,6 +8,7 @@
 #include "viewer.h"
 #include <viewer/shaders.h>
 #include <media/reader.h>
+#include <algorithm>
 
 ////////////////////////////////////////
 
@@ -272,6 +273,8 @@ bool viewer_w::mouse_move( const event &e )
 		invalidate();
 		return true;
 	}
+	else
+		_last = point{ e.mouse().x, e.mouse().y };
 
 	return widget::mouse_move( e );
 }
@@ -283,6 +286,7 @@ bool viewer_w::mouse_release( const event &e )
 	if ( _panning )
 	{
 		context::current().release_source( e );
+		_panning = false;
 		return true;
 	}
 
@@ -297,7 +301,7 @@ bool viewer_w::mouse_wheel( const event &e )
 	// TODO: fix this
 	float zoomF = amount > 0 ? 2.F : 0.5F;
 	// TODO: need the real event to get the mouse position to zoom around that
-	float pivx = 0.f, pivy = 0.f;
+	float pivx = _last.x(), pivy = _last.y();
 	for ( auto &i: _images )
 	{
 		const auto &img = i.second._image;
@@ -319,13 +323,17 @@ bool viewer_w::key_release( const event &e )
 	switch ( c )
 	{
 		case scancode::KEY_ESCAPE: reset_positions(); return true;
-		case scancode::KEY_F:
+		case scancode::KEY_L:
 			if ( _filter == draw::zoom_filter::nearest )
 				set_filtering( draw::zoom_filter::linear );
 			else
 				set_filtering( draw::zoom_filter::nearest );
 			return true;
 
+		case scancode::KEY_F:
+			std::rotate( _draw_order.begin(), std::next( _draw_order.begin() ), _draw_order.end() );
+			invalidate();
+			return true;
 		default:
 			break;
 	}

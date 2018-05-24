@@ -28,7 +28,7 @@ namespace {
 int safemain( int argc, char **argv )
 {
 	base::cmd_line options( argv[0],
-		base::cmd_line::option(  0,  "", "<img>", base::cmd_line::arg<0,1>, "Image to show", false )
+		base::cmd_line::option(  0,  "", "<img>", base::cmd_line::arg<0,std::numeric_limits<size_t>::max()>, "Image to show", false )
 	);
 
 	auto errhandler = base::make_guard( [&]() { std::cerr << options << std::endl; } );
@@ -51,22 +51,32 @@ int safemain( int argc, char **argv )
 
 		if ( auto &opt = options["<img>"] )
 		{
-			base::uri inputU( opt.value() );
-			if ( ! inputU )
-				inputU.set_scheme( "file" );
-
-			media::container c = media::reader::open( inputU );
-			for ( size_t ci = 0; ci != c.video_tracks().size(); ++ci )
+			for ( auto f: opt.values() )
 			{
-				auto &vt = c.video_tracks()[ci];
-				int64_t fs = vt->begin();
-				int64_t fe = vt->end();
-
-				std::cout << "Sequence " << ci << " is from frame " << fs << " to " << fe << std::endl;
-				if ( ci == 0 )
+				try
 				{
-					view->add_video_track( vt );
-					view->update_frame( media::sample( fs, vt->rate() ) );
+					base::uri inputU( f );
+					if ( ! inputU )
+						inputU.set_scheme( "file" );
+
+					media::container c = media::reader::open( inputU );
+					for ( size_t ci = 0; ci != c.video_tracks().size(); ++ci )
+					{
+						auto &vt = c.video_tracks()[ci];
+						int64_t fs = vt->begin();
+						int64_t fe = vt->end();
+
+						std::cout << "Sequence " << ci << " is from frame " << fs << " to " << fe << std::endl;
+						if ( ci == 0 )
+						{
+							view->add_video_track( vt );
+							view->update_frame( media::sample( fs, vt->rate() ) );
+						}
+					}
+				}
+				catch ( std::exception &e )
+				{
+					std::cerr << "Unable to load '" << f << "': " << e.what() << std::endl;
 				}
 			}
 		}
