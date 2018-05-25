@@ -181,6 +181,7 @@ public:
 	static image_buffer simple_buffer( int64_t x1, int64_t y1, int64_t x2, int64_t y2 )
 	{
 		int64_t w = ( x2 - x1 + 1 );
+		int64_t h = ( y2 - y1 + 1 );
 
 		// TBD: make each line sse (avx2) 256-bit (32-byte) aligned? we would have to
 		// adjust opengl texturing and a few other places if we do that, and wouldn't be useable
@@ -192,13 +193,13 @@ public:
 		constexpr bool isf = std::is_floating_point<T>::value;
 		constexpr bool isu = std::is_unsigned<T>::value;
 
-		std::shared_ptr<void> vdata = std::shared_ptr<uint8_t>( new uint8_t[ystride * xstride], base::array_deleter<uint8_t>() );
+		std::shared_ptr<void> vdata = std::shared_ptr<uint8_t>( new uint8_t[ystride * h], base::array_deleter<uint8_t>() );
 		return image_buffer( vdata, bits, x1, y1, x2, y2, xstride * 8, ystride * 8, 0,
 							 base::endianness::NATIVE, isf, isu );
 	}
 
 	template<typename T>
-	static image_buffer simple_interleaved( int64_t w, int64_t h, int chans )
+	static image_buffer simple_interleaved( int64_t w, int64_t h, int chans, base::endianness endi = base::endianness::NATIVE )
 	{
 		// TBD: make each line sse (avx2) 256-bit (32-byte) aligned? we would have to
 		// adjust opengl texturing and a few other places if we do that, and wouldn't be useable

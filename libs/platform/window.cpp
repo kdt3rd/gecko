@@ -15,8 +15,8 @@ namespace platform
 
 ////////////////////////////////////////
 
-window::window( const std::shared_ptr<screen> &screen )
-	: _screen( screen )
+window::window( const std::shared_ptr<screen> &screen, const rect &p )
+	: _rect( p ), _screen( screen )
 {
 }
 
@@ -32,122 +32,78 @@ window::process_event( const event &e )
 {
 	switch ( e.type() )
 	{
-		case event_type::WINDOW_SHOWN:
-			if ( shown )
-				shown();
-			break;
-		case event_type::WINDOW_HIDDEN:
-			if ( hidden )
-				hidden();
-			break;
+		case event_type::DISPLAY_CHANGED:
+		case event_type::APP_QUIT_REQUEST:
 		case event_type::WINDOW_CLOSE_REQUEST:
-			if ( closed )
-				return closed( false );
-			break;
 		case event_type::WINDOW_DESTROYED:
-			if ( closed )
-				closed( false );
 			break;
+
+		case event_type::WINDOW_SHOWN:
+		case event_type::WINDOW_HIDDEN:
 		case event_type::WINDOW_MINIMIZED:
-			if ( minimized )
-				minimized();
-			break;
 		case event_type::WINDOW_MAXIMIZED:
-			if ( maximized )
-				maximized();
-			break;
 		case event_type::WINDOW_RESTORED:
-			if ( restored )
-				restored();
+			_rect = query_geometry();
 			break;
+
 		case event_type::WINDOW_EXPOSED:
-			expose_event( e.window().x, e.window().y, e.window().width, e.window().height );
+			_accumulate_expose = false;
+			_invalid_rgn = rect();
+			// let the default dispatch below send the included rect
 			break;
+
 		case event_type::WINDOW_REGION_EXPOSED:
-			expose_event( e.window().x, e.window().y, e.window().width, e.window().height );
-//			invalidate( rect( e.window().x, e.window().y, e.window().width, e.window().height ) );
+		{
+			rect tmp{ e.window().x, e.window().y, e.window().width, e.window().height };
+			tmp.include( _invalid_rgn );
+
+			_accumulate_expose = false;
+			_invalid_rgn = rect();
+
+			event incE = event::window( &e.sys(), &e.source(), e.type(),
+										tmp.x(), tmp.y(), tmp.width(), tmp.height() );
+
+			// shortcut since we've created a custom event to incorporate the region
+			if ( event_handoff )
+				return event_handoff( incE );
 			break;
+		}
+
 		case event_type::WINDOW_MOVED:
-			move_event( e.window().x, e.window().y );
+			_rect.set_x( e.window().x );
+			_rect.set_y( e.window().y );
 			break;
 		case event_type::WINDOW_RESIZED:
-			resize_event( e.window().width, e.window().height );
+			_rect.set_size( e.window().width, e.window().height );
 			break;
 		case event_type::WINDOW_MOVE_RESIZE:
-			move_event( e.window().x, e.window().y );
-			resize_event( e.window().width, e.window().height );
+			_rect.set( e.window().x, e.window().y, e.window().width, e.window().height );
 			break;
+
 		case event_type::MOUSE_ENTER:
-			if ( entered )
-				entered();
-			break;
 		case event_type::MOUSE_LEAVE:
-			if ( exited )
-				exited();
-			break;
-
 		case event_type::MOUSE_MOVE:
-			if ( mouse_moved )
-				mouse_moved( e.source(), point( e.mouse().x, e.mouse().y ) );
-			break;
 		case event_type::MOUSE_DOWN:
-			if ( mouse_pressed )
-				mouse_pressed( e.source(), point( e.mouse().x, e.mouse().y ), e.mouse().button );
-			break;
 		case event_type::MOUSE_UP:
-			if ( mouse_released )
-				mouse_released( e.source(), point( e.mouse().x, e.mouse().y ), e.mouse().button );
-			break;
 		case event_type::MOUSE_WHEEL:
-			if ( mouse_wheel )
-				mouse_wheel( e.source(), e.hid().position );
-			break;
-
 		case event_type::DND_ENTER:
 		case event_type::DND_LEAVE:
 		case event_type::DND_MOVE:
 		case event_type::DND_DROP_REQUEST:
-			break;
-
 		case event_type::KEYBOARD_DOWN:
-			if ( e.has_control_mod() && e.key().keys[0] == scancode::KEY_V )
-			{
-				auto sel = e.sys().query_selection( selection_type::CLIPBOARD );
-				std::string val{ sel.first.begin(), sel.first.end() };
-				std::cout << "Paste: '" << sel.second << "':\n" << val << std::endl;
-			}
-			if ( key_pressed )
-				key_pressed( e.source(), e.key().keys[0] );
-			break;
 		case event_type::KEYBOARD_UP:
-			if ( key_released )
-				key_released( e.source(), e.key().keys[0] );
-			break;
-
 		case event_type::KEYBOARD_REPEAT:
-			if ( key_pressed )
-				key_pressed( e.source(), e.key().keys[0] );
-			break;
-
 		case event_type::TEXT_ENTERED:
-			if ( text_entered )
-				text_entered( e.source(), e.text().text );
-			break;
-
 		case event_type::TABLET_DOWN:
 		case event_type::TABLET_UP:
 		case event_type::TABLET_MOVE:
 		case event_type::TABLET_BUTTON:
-			break;
-
 		case event_type::HID_BUTTON_DOWN:
 		case event_type::HID_BUTTON_UP:
 		case event_type::HID_RELATIVE_WHEEL:
 		case event_type::HID_SPINNER:
 		case event_type::HID_DIAL_KNOB:
-			break;
 		case event_type::USER_EVENT:
-			break;
 		case event_type::NUM_EVENTS:
 		default:
 			break;
@@ -191,6 +147,35 @@ window::pop_cursor( void )
 		make_current( _default_cursor );
 	else
 		make_current( _cursors.top() );
+}
+
+////////////////////////////////////////
+
+void window::move( coord_type x, coord_type y )
+{
+	rect tmp = _rect;
+	tmp.set_x( x );
+	tmp.set_y( y );
+	if ( update_geometry( tmp ) )
+		_rect = tmp;
+}
+
+////////////////////////////////////////
+
+void window::resize( coord_type w, coord_type h )
+{
+	rect tmp = _rect;
+	tmp.set_size( w, h );
+	if ( update_geometry( tmp ) )
+		_rect = tmp;
+}
+
+////////////////////////////////////////
+
+void window::invalidate( const rect &r )
+{
+	// TBD: do we need to do region compression ourselves?
+	submit_delayed_expose( r );
 }
 
 ////////////////////////////////////////

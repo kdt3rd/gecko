@@ -44,7 +44,7 @@ public:
 					std::streamsize bufSz = 0 );
 	unix_streambuf( unix_streambuf &&u );
 	unix_streambuf &operator=( unix_streambuf &&u );
-	virtual ~unix_streambuf( void );
+	~unix_streambuf( void ) override;
 
 	void swap( unix_streambuf &u );
 

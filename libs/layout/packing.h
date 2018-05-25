@@ -32,7 +32,7 @@ public:
 	//
 	/// @param a Area to add.
 	/// @param where Which side to add to.
-	void add( const std::shared_ptr<area> &a, base::alignment where );
+	void add( const std::shared_ptr<area> &a, alignment where );
 
 	void compute_bounds( void ) override;
 
@@ -41,13 +41,13 @@ public:
 private:
 	struct section
 	{
-		section( const std::shared_ptr<area> &ar, base::alignment al )
+		section( const std::shared_ptr<area> &ar, alignment al )
 			: _area( ar ), _align( al )
 		{
 		}
 
 		std::weak_ptr<area> _area;
-		base::alignment _align;
+		alignment _align;
 	};
 
 	std::list<section> _areas;

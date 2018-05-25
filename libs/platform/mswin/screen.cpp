@@ -45,23 +45,16 @@ screen::is_default( void ) const
 
 ////////////////////////////////////////
 
-double
-screen::refresh_rate( void ) const
+bool screen::is_managed( void ) const
 {
-	DEVMODE dm;
-	dm.dmSize = sizeof(dm);
-	dm.dmDriverExtra = 0;
-	if ( EnumDisplaySettings( (LPCTSTR)_disp_devname.c_str(),
-							  ENUM_CURRENT_SETTINGS, &dm ) )
-	{
-		// comment says this may be 0 or 1 indicating the
-		// 'default' hardware frequency for devices not managed
-		// by the system normally...
-		if ( ( dm.dmFields & DM_DISPLAYFREQUENCY ) != 0 &&
-			 dm.dmDisplayFrequency > 1 )
-			return static_cast<double>( dm.dmDisplayFrequency );
-	}
-	return 0.0;
+	return true;
+}
+
+////////////////////////////////////////
+
+bool screen::is_remote( void ) const
+{
+	return false;
 }
 
 ////////////////////////////////////////
@@ -86,7 +79,28 @@ rect screen::bounds( bool avail ) const
 
 ////////////////////////////////////////
 
-base::size screen::dpi( void ) const
+double
+screen::refresh_rate( void ) const
+{
+	DEVMODE dm;
+	dm.dmSize = sizeof(dm);
+	dm.dmDriverExtra = 0;
+	if ( EnumDisplaySettings( (LPCTSTR)_disp_devname.c_str(),
+							  ENUM_CURRENT_SETTINGS, &dm ) )
+	{
+		// comment says this may be 0 or 1 indicating the
+		// 'default' hardware frequency for devices not managed
+		// by the system normally...
+		if ( ( dm.dmFields & DM_DISPLAYFREQUENCY ) != 0 &&
+			 dm.dmDisplayFrequency > 1 )
+			return static_cast<double>( dm.dmDisplayFrequency );
+	}
+	return 0.0;
+}
+
+////////////////////////////////////////
+
+base::dsize screen::dpi( void ) const
 {
 	HDC dc = CreateDC( TEXT("DISPLAY"), (LPCTSTR)_disp_devname.c_str(), NULL, NULL );
 	if ( dc == NULL )
@@ -108,5 +122,20 @@ base::size screen::dpi( void ) const
 
 ////////////////////////////////////////
 
-} }
+const color::standard_definition &screen::display_standard( void ) const
+{
+	return _standard;
+}
+
+////////////////////////////////////////
+
+void screen::override_display_standard( const color::standard_definition &s )
+{
+	_standard = s;
+}
+
+////////////////////////////////////////
+
+} // namespace mswin
+} // namespace platform
 

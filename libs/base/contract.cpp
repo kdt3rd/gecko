@@ -21,6 +21,12 @@ location_exception::location_exception( const char *file, int line )
 
 ////////////////////////////////////////
 
+location_exception::~location_exception( void )
+{
+}
+
+////////////////////////////////////////
+
 const char *
 location_exception::what( void ) const noexcept
 {

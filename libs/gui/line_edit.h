@@ -33,11 +33,11 @@ public:
 	void build( context &ctxt ) override;
 	void paint( context &ctxt ) override;
 
-	bool key_press( platform::scancode c ) override;
+	bool key_press( const event &e ) override;
 
-	bool text_input( char32_t c ) override;
+	bool text_input( const event &e ) override;
 
-	bool mouse_press( const point &p, int button ) override;
+	bool mouse_press( const event &e ) override;
 
 private:
 	draw::rectangle _line;

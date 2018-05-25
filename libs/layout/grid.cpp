@@ -13,7 +13,7 @@ namespace layout
 
 ////////////////////////////////////////
 
-size_t grid::add_columns( size_t n, double flex, int32_t pri )
+size_t grid::add_columns( size_t n, coord flex, int32_t pri )
 {
 	size_t result = _cols.size();
 	for ( size_t i = 0; i < n; ++i )
@@ -28,7 +28,7 @@ size_t grid::add_columns( size_t n, double flex, int32_t pri )
 
 ////////////////////////////////////////
 
-size_t grid::add_rows( size_t n, double flex, int32_t pri )
+size_t grid::add_rows( size_t n, coord flex, int32_t pri )
 {
 	size_t result = _rows.size();
 	for ( size_t i = 0; i < n; ++i )
@@ -69,7 +69,7 @@ void grid::compute_bounds( void )
 			a->compute_bounds();
 
 			// Handle width
-			double w = 0.0;
+			coord w = min_coord();
 			tmp.clear();
 			for ( size_t x = 0; x < c._w; ++x )
 			{
@@ -77,11 +77,11 @@ void grid::compute_bounds( void )
 				w += col->width();
 				tmp.push_back( std::move( col ) );
 			}
-			double extra = a->minimum_width() - w;
+			coord extra = a->minimum_width() - w;
 			expand_width( tmp, extra );
 
 			// Handle height
-			double h = 0.0;
+			coord h = min_coord();
 			tmp.clear();
 			for ( size_t y = 0; y < c._h; ++y )
 			{
@@ -94,7 +94,7 @@ void grid::compute_bounds( void )
 		}
 	}
 
-	double minw = 0.0;
+	coord minw = min_coord();
 	if ( !_cols.empty() )
 	{
 		for ( auto &c: _cols )
@@ -106,7 +106,7 @@ void grid::compute_bounds( void )
 	}
 	minw += _pad[0] + _pad[1];
 
-	double minh = 0.0;
+	coord minh = min_coord();
 	if ( !_rows.empty() )
 	{
 		for ( auto &r: _rows )
@@ -135,7 +135,7 @@ void grid::compute_layout( void )
 	expand_width( tmp, width() - minimum_width() );
 
 	// Now layout columns left to right
-	double x = _pad[0];
+	coord x = _pad[0];
 	for ( auto &c: _cols )
 	{
 		c->set_position( { x, 0 } );
@@ -152,7 +152,7 @@ void grid::compute_layout( void )
 	expand_height( tmp, height() - minimum_height() );
 
 	// Now layout rows top to bottom
-	double y = _pad[2];
+	coord y = _pad[2];
 	for ( auto &r: _rows )
 	{
 		r->set_position( { 0, y } );

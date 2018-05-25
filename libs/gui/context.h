@@ -14,10 +14,14 @@
 namespace platform
 {
 class context;
+class event;
 }
 
 namespace gui
 {
+
+using event = platform::event;
+class widget;
 
 ////////////////////////////////////////
 
@@ -35,6 +39,10 @@ public:
 	virtual void invalidate( const rect &r ) = 0;
 
 	virtual platform::context &hw_context( void ) = 0;
+
+	virtual void grab_source( const event &e, std::shared_ptr<widget> w ) = 0;
+	virtual void release_source( const event &e ) = 0;
+	virtual void set_focus( std::shared_ptr<widget> w ) = 0;
 
 	const style &get_style( void ) const
 	{

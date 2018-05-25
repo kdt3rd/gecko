@@ -101,78 +101,18 @@ void scroll_area_w::paint( context &ctxt )
 
 ////////////////////////////////////////
 
-bool scroll_area_w::mouse_press( const point &p, int button )
+std::shared_ptr<widget> scroll_area_w::find_widget_under( coord x, coord y )
 {
-	bool result = false;
-	if ( !result && _hscroll )
-		result = _hscroll->mouse_press( p, button );
-	if ( !result && _vscroll )
-		result = _vscroll->mouse_press( p, button );
-	return result;
+	if ( _hscroll && _hscroll->contains( x, y ) )
+		return _hscroll;
+	if ( _vscroll && _vscroll->contains( x, y ) )
+		return _vscroll;
 
-//	if ( button == 2 && _widget )
-//	{
-//		_tracking = true;
-//		_track = p;
-//		return true;
-//	}
-//	else
-//	{
-//		if ( _widget )
-//			return _widget->mouse_press( p, button );
-//		return widget::mouse_press( p, button );
-//	}
-}
+	// if we're not in the scroll areas, we're in the widget
+	if ( _widget )
+		return _widget;
 
-////////////////////////////////////////
-
-bool scroll_area_w::mouse_release( const point &p, int button )
-{
-	bool result = false;
-	if ( !result && _hscroll )
-		result = _hscroll->mouse_release( p, button );
-	if ( !result && _vscroll )
-		result = _vscroll->mouse_release( p, button );
-	return result;
-
-//	if ( _tracking )
-//	{
-//		_tracking = false;
-//		return true;
-//	}
-//	else
-//	{
-//		if ( _widget )
-//			return _widget->mouse_release( p, button );
-//		return widget::mouse_release( p, button );
-//	}
-}
-
-////////////////////////////////////////
-
-bool scroll_area_w::mouse_move( const point &p )
-{
-	bool result = false;
-	if ( !result && _hscroll )
-		result = _hscroll->mouse_move( p );
-	if ( !result && _vscroll )
-		result = _vscroll->mouse_move( p );
-	return result;
-
-//	if ( _tracking )
-//	{
-//		if ( _widget )
-//			_widget->set_position( _widget->position() - _track.delta( p ) );
-//		_track = p;
-//		invalidate();
-//		return true;
-//	}
-//	else
-//	{
-//		if ( _widget )
-//			return _widget->mouse_move( p );
-//		return widget::mouse_move( p );
-//	}
+	return widget::find_widget_under( x, y );
 }
 
 ////////////////////////////////////////

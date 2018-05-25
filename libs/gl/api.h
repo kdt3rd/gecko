@@ -91,7 +91,7 @@ public:
 	void viewport( float x, float y, float w, float h );
 
 	/// @brief Set the viewport coordinates.
-	void push_scissor( float x, float y, float w, float h );
+	void push_scissor( int x, int y, int w, int h );
 
 	void pop_scissor( void );
 
@@ -246,7 +246,7 @@ private:
 	std::vector<matrix4> _matrix;
 	matrix4 _view;
 	matrix4 _projection;
-	std::vector<base::frect> _scissors;
+	std::vector<base::irect> _scissors;
 };
 
 ////////////////////////////////////////

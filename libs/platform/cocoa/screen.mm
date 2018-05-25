@@ -21,6 +21,7 @@ namespace platform { namespace cocoa
 screen::screen( void *scr )
 {
 	_nsscreen = scr;
+	_standard = color::make_standard<color::standard::SRGB>();
 }
 
 ////////////////////////////////////////
@@ -38,10 +39,16 @@ bool screen::is_default( void ) const
 
 ////////////////////////////////////////
 
-double screen::refresh_rate( void ) const
+bool screen::is_managed( void ) const
 {
-	// TODO: implement. Look at CVDisplayLink?
-	return 30.0;
+	return true;
+}
+
+////////////////////////////////////////
+
+bool screen::is_remote( void ) const
+{
+	return false;
 }
 
 
@@ -66,6 +73,29 @@ base::dsize screen::dpi( void ) const
 	NSSize dpi;
 	[val getValue:&dpi];
 	return { dpi.width, dpi.height };
+}
+
+////////////////////////////////////////
+
+double screen::refresh_rate( void ) const
+{
+	// TODO: implement. Look at CVDisplayLink?
+	return 30.0;
+}
+
+////////////////////////////////////////
+
+const color::standard_definition &screen::display_standard( void ) const
+{
+	return _standard;
+}
+
+////////////////////////////////////////
+
+void screen::override_display_standard( const color::standard_definition &s )
+{
+	_override_standard = true;
+	_standard = s;
 }
 
 ////////////////////////////////////////

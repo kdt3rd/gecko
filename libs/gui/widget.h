@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2014 Ian Godin
+// Copyright (c) 2014 Ian Godin and Kimball Thurston
 // All rights reserved.
 // Copyrights licensed under the MIT License.
 // See the accompanying LICENSE.txt file for terms
@@ -9,14 +9,16 @@
 
 #include <type_traits>
 #include <layout/area.h>
-#include <platform/keyboard.h>
 #include <platform/context.h>
+#include <platform/event.h>
 #include <base/contract.h>
 #include "context.h"
 #include "widget_ptr.h"
 
 namespace gui
 {
+
+using event = platform::event;
 
 ////////////////////////////////////////
 
@@ -33,13 +35,24 @@ public:
 	virtual void build( context &ctxt );
 	virtual void paint( context &ctxt );
 
-	virtual bool mouse_press( const point &p, int button );
-	virtual bool mouse_release( const point &p, int button );
-	virtual bool mouse_move( const point &p );
-	virtual bool mouse_wheel( int a );
-	virtual bool key_press( platform::scancode c );
-	virtual bool key_release( platform::scancode c );
-	virtual bool text_input( char32_t c );
+	virtual std::shared_ptr<widget> find_widget_under( coord x, coord y );
+
+	virtual bool mouse_press( const event &e );
+	virtual bool mouse_release( const event &e );
+	virtual bool mouse_move( const event &e );
+	virtual bool mouse_wheel( const event &e );
+
+	virtual bool key_press( const event &e );
+	virtual bool key_repeat( const event &e );
+	virtual bool key_release( const event &e );
+
+	virtual bool text_input( const event &e );
+
+	// TBD: do we need to split these into multiple functions as we
+	// did with mouse / keyboard?
+	virtual bool tablet_event( const event &e );
+	virtual bool hid_event( const event &e );
+	virtual bool user_event( const event &e );
 
 	const std::shared_ptr<layout::area> &layout_target( void ) const
 	{
@@ -49,6 +62,7 @@ public:
 	virtual bool update_layout( double duration );
 
 protected:
+
 	void invalidate( const rect &r )
 	{
 		context::current().invalidate( r );

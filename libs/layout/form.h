@@ -32,7 +32,7 @@ public:
 private:
 	std::shared_ptr<area> _layout;
 	std::list<std::shared_ptr<field>> _fields;
-	double _min_field_w = 0.0;
+	//coord _min_field_w = min_coord();
 };
 
 ////////////////////////////////////////

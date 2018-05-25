@@ -34,10 +34,10 @@ class window : public event_target
 {
 public:
 	/// @brief Constructor.
-	explicit window( const std::shared_ptr<screen> &screen );
+	explicit window( const std::shared_ptr<screen> &screen, const rect &p = rect( 0, 0, 512, 512 ) );
 
 	/// @brief Destructor.
-	virtual ~window( void );
+	~window( void ) override;
 
 	/// @brief default event handler for windows.
 	///
@@ -104,16 +104,12 @@ public:
 	/// Make the window fullscreen.
 	virtual void fullscreen( bool fs ) = 0;
 
-//	virtual rect geometry( void ) = 0;
-
-//	virtual void set_geometry( const rect &r ) = 0;
-
 	/// @brief Move the window.
 	///
 	/// Move the window to the given position.
 	/// @param x New x position of the window
 	/// @param y New y position of the window
-	virtual void move( coord_type x, coord_type y ) = 0;
+	void move( coord_type x, coord_type y );
 	void move( const point &p ) { move( p.x(), p.y() ); }
 
 	/// @brief Resize the window.
@@ -121,7 +117,7 @@ public:
 	/// Resize the window to the given size.
 	/// @param w New width of the window
 	/// @param h New height of the window
-	virtual void resize( coord_type w, coord_type h ) = 0;
+	void resize( coord_type w, coord_type h );
 	void resize( const size &s ) { resize( s.w(), s.h() ); }
 
 	/// @brief Set minimum window size.
@@ -137,9 +133,17 @@ public:
 	/// @param t The window title
 	virtual void set_title( const std::string &t ) = 0;
 
-	virtual void invalidate( const rect &r ) = 0;
+	void invalidate( const rect &r );
 
 //	virtual void set_icon( const icon &i );
+
+	/// @brief query the window x position
+	coord_type x( void ) const { return _rect.x(); }
+	/// @brief query the window y position
+	coord_type y( void ) const { return _rect.y(); }
+	/// @brief query the window width
+	coord_type width( void ) const { return _rect.width(); }
+	coord_type height( void ) const { return _rect.height(); }
 
 	/// @brief Generic event handler
 	///
@@ -149,64 +153,30 @@ public:
 	/// the below, and see all the events.
 	std::function<bool(const event &)> event_handoff;
 
-	/// @brief Action for mouse press events.
-	///
-	/// Callback action for mouse button press events.
-	std::function<void( event_source &, const point &, int )> mouse_pressed;
-
-	/// @brief Action for mouse release events.
-	///
-	/// Callback action for mouse button release events.
-	std::function<void( event_source &, const point &, int )> mouse_released;
-
-	/// @brief Actionfor mouse motion events.
-	///
-	/// Callback action for mouse motion events.
-	std::function<void( event_source &, const point & )> mouse_moved;
-
-	/// @brief Action for mouse wheel events.
-	///
-	/// Callback action for mouse wheel events.
-	std::function<void( event_source &, int )> mouse_wheel;
-
-	/// @brief Action for key press events.
-	///
-	/// Callback action for key press events.
-	std::function<void( event_source &, scancode )> key_pressed;
-
-	/// @brief Action for key release events.
-	///
-	/// Callback action for key release events.
-	std::function<void( event_source &, scancode )> key_released;
-
-	/// @brief Action for text entered events.
-	///
-	/// Callback action for text entered events.
-	std::function<void( event_source &, char32_t )> text_entered;
-
-	std::function<bool( bool )> closed;
-	std::function<void( void )> shown;
-	std::function<void( void )> hidden;
-	std::function<void( void )> minimized;
-	std::function<void( void )> maximized;
-	std::function<void( void )> restored;
-	std::function<void( void )> exposed;
-	std::function<void( coord_type, coord_type )> moved;
-	std::function<void( coord_type, coord_type )> resized;
-	std::function<void( void )> entered;
-	std::function<void( void )> exited;
-
-	virtual coord_type width( void ) = 0;
-	virtual coord_type height( void ) = 0;
-
 protected:
 	virtual void make_current( const std::shared_ptr<cursor> & ) = 0;
 
-	virtual void expose_event( coord_type x, coord_type y, coord_type w, coord_type h ) = 0;
-	virtual void move_event( coord_type x, coord_type y ) = 0;
-	virtual void resize_event( coord_type w, coord_type h ) = 0;
+	virtual rect query_geometry( void ) = 0;
+
+	/// may return false indicating the position didn't change
+	/// should fill in @param r with the resulting geometry
+	virtual bool update_geometry( rect &r ) = 0;
+
+	/// @brief submit an async event into the system to (eventually)
+	/// redraw the window
+	///
+	/// NB: @sa _accumulate_expose below
+	virtual void submit_delayed_expose( const rect &r ) = 0;
+
+	/// if we invalidate too much, we flood the system with events and
+	/// the UI becomes laggy because it's processing events,
+	/// subclasses should use this in submit_delayed_expose
+	bool _accumulate_expose = false;
+	rect _invalid_rgn;
 
 private:
+	rect _rect;
+
 	std::stack< std::shared_ptr<cursor> > _cursors;
 	std::shared_ptr<cursor> _default_cursor;
 

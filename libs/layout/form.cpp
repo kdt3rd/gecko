@@ -32,7 +32,7 @@ void form::add( const std::shared_ptr<field> &f )
 void form::compute_bounds( void )
 {
 	// Compute the size of the fields
-	double minw = 0.0;
+	coord minw = min_coord();
 	for ( auto &f: _fields )
 		minw = std::max( minw, f->field_minimum_width() );
 
@@ -43,7 +43,7 @@ void form::compute_bounds( void )
 	// Now compute the sub-layout bounds.
 	_layout->compute_bounds();
 
-	base::dsize pads( _pad[0] + _pad[1], _pad[2] + _pad[3] );
+	size pads( _pad[0] + _pad[1], _pad[2] + _pad[3] );
 	set_minimum( _layout->minimum_size() + pads );
 	set_maximum( _layout->maximum_size() + pads );
 }

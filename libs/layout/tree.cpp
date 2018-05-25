@@ -1,3 +1,9 @@
+//
+// Copyright (c) 2017 Ian Godin and Kimball Thurston
+// All rights reserved.
+// Copyrights licenced under the MIT License.
+// See the accompanying LICENSE.txt file for terms
+//
 
 #include "tree.h"
 #include <base/format.h>
@@ -12,10 +18,10 @@ void tree::compute_bounds( void )
 	auto g = _groove.lock();
 	auto t = _title.lock();
 
-	double minw = 0.0;
-	double minh = 0.0;
-	double maxw = 0.0;
-	double maxh = 0.0;
+	coord minw = min_coord();
+	coord minh = min_coord();
+	coord maxw = min_coord();
+	coord maxh = min_coord();
 
 	if ( t )
 	{
@@ -75,19 +81,19 @@ void tree::compute_layout( void )
 	auto g = _groove.lock();
 	auto t = _title.lock();
 
-	double iw = _indent;
+	coord iw = _indent;
 	if ( g )
 		iw = std::max( _indent + _spacing[0], g->minimum_width() + _spacing[0] );
 
-	double cw = std::max( 0.0, width() - _pad[0] - _pad[1] - iw );
-	double th = 0.0;
+	coord cw = std::max( min_coord(), width() - _pad[0] - _pad[1] - iw );
+	coord th = min_coord();
 	if ( t )
 		th = t->minimum_height();
 
-	double ch = height() - _pad[2] - _pad[3] - _spacing[1] - th;
+	coord ch = height() - _pad[2] - _pad[3] - _spacing[1] - th;
 
-	double x = _pad[0];
-	double y = _pad[2];
+	coord x = _pad[0];
+	coord y = _pad[2];
 	if ( g )
 	{
 		g->set( { x1() + x, y1() + y }, { iw - _spacing[0], th + _spacing[1] + ch } );

@@ -29,9 +29,7 @@ public:
 	void build( context &ctxt ) override;
 	void paint( context &ctxt ) override;
 
-	bool mouse_press( const point &p, int button ) override;
-	bool mouse_release( const point &p, int button ) override;
-	bool mouse_move( const point &p ) override;
+	std::shared_ptr<widget> find_widget_under( coord x, coord y ) override;
 
 	bool update_layout( double duration ) override;
 

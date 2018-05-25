@@ -13,6 +13,8 @@
 #ifndef _WIN32
 # include <sys/mman.h>
 # include <unistd.h>
+#else
+# include <windows.h>
 #endif
 
 #include "contract.h"
@@ -54,7 +56,11 @@ public:
     using reference = const T &;
 
     // TODO: win32 support
+#ifdef _WIN32
+	using file_handle = HANDLE;
+#else
     using file_handle = int;
+#endif
 
     /// @brief default ctor for delayed mapping
     read_memory_map( void ) = default;
@@ -88,7 +94,7 @@ public:
         std::swap( _sz, o._sz );
         return *this;
     }
-    read_memory_map &operator=( nullptr_t ) noexcept
+    read_memory_map &operator=( std::nullptr_t ) noexcept
     {
         reset();
         return *this;
@@ -109,6 +115,8 @@ public:
             int r = munmap( tmp, unmapsz );
             if ( r == -1 )
                 throw_errno( "Unable to unmap memory map" );
+#else
+			UnmapViewOfFile( _ptr );
 #endif
         }
     }
@@ -125,13 +133,21 @@ public:
         off_t mapoff = offset;
         off_t extraAtBeg = mapoff % pageSize;
         mapoff -= extraAtBeg;
-        size += extraAtBeg;
+        size += static_cast<size_t>( extraAtBeg );
         // map shared so the os can re-use, but it's read only anyway?
-        void *p = mmap( 0, size, PROT_READ, MAP_SHARED, fd, mapoff );
+        void *p = mmap( nullptr, size, PROT_READ, MAP_SHARED, fd, mapoff );
         if ( p == MAP_FAILED )
             throw_errno( "Unable to map read only {0} bytes at offset {1} of file {2}", size, mapoff, fd );
 #else
-        throw_not_yet();
+		SYSTEM_INFO si;
+		GetSystemInfo( &si );
+		off_t mapoff = offset;
+		off_t extraAtBeg = mapoff % si.dwPageSize;
+		mapoff -= extraAtBeg;
+		size += static_cast<size_t>( extraAtBeg );
+		DWORD high = static_cast<DWORD>( uint64_t( ( uint64_t(mapoff) >> 32 ) & 0xFFFFFFFF ) );
+		DWORD low = mapoff & 0xFFFFFFFF;
+		void *p = MapViewOfFile( fd, FILE_MAP_ALL_ACCESS, high, low, size );
 #endif
         char *tmp = static_cast<char *>( p );
         _ptr = reinterpret_cast<pointer>( tmp + extraAtBeg );
@@ -215,73 +231,73 @@ inline bool operator>=( const read_memory_map<T> &x, const read_memory_map<U> &y
 ////////////////////////////////////////
 
 template <typename T>
-inline bool operator==( const read_memory_map<T> &x, nullptr_t ) noexcept
+inline bool operator==( const read_memory_map<T> &x, std::nullptr_t ) noexcept
 {
     return ! x;
 }
 
 template <typename T>
-inline bool operator==( nullptr_t, const read_memory_map<T> &x ) noexcept
+inline bool operator==( std::nullptr_t, const read_memory_map<T> &x ) noexcept
 {
     return ! x;
 }
 
 template <typename T>
-inline bool operator!=( const read_memory_map<T> &x, nullptr_t ) noexcept
+inline bool operator!=( const read_memory_map<T> &x, std::nullptr_t ) noexcept
 {
     return static_cast<bool>( x );
 }
 
 template <typename T>
-inline bool operator!=( nullptr_t, const read_memory_map<T> &x ) noexcept
+inline bool operator!=( std::nullptr_t, const read_memory_map<T> &x ) noexcept
 {
     return static_cast<bool>( x );
 }
 
 template <typename T>
-inline bool operator<( const read_memory_map<T> &x, nullptr_t ) noexcept
+inline bool operator<( const read_memory_map<T> &x, std::nullptr_t ) noexcept
 {
     return std::less<typename read_memory_map<T>::pointer>( x.get(), nullptr );
 }
 
 template <typename T>
-inline bool operator<( nullptr_t, const read_memory_map<T> &x ) noexcept
+inline bool operator<( std::nullptr_t, const read_memory_map<T> &x ) noexcept
 {
     return std::less<typename read_memory_map<T>::pointer>( nullptr, x.get() );
 }
 
 template <typename T>
-inline bool operator<=( const read_memory_map<T> &x, nullptr_t ) noexcept
+inline bool operator<=( const read_memory_map<T> &x, std::nullptr_t ) noexcept
 {
     return !( nullptr < x );
 }
 
 template <typename T>
-inline bool operator<=( nullptr_t, const read_memory_map<T> &x ) noexcept
+inline bool operator<=( std::nullptr_t, const read_memory_map<T> &x ) noexcept
 {
     return !( x < nullptr );
 }
 
 template <typename T>
-inline bool operator>( const read_memory_map<T> &x, nullptr_t ) noexcept
+inline bool operator>( const read_memory_map<T> &x, std::nullptr_t ) noexcept
 {
     return std::less<typename read_memory_map<T>::pointer>( nullptr, x.get() );
 }
 
 template <typename T>
-inline bool operator>( nullptr_t, const read_memory_map<T> &x ) noexcept
+inline bool operator>( std::nullptr_t, const read_memory_map<T> &x ) noexcept
 {
     return std::less<typename read_memory_map<T>::pointer>( x.get(), nullptr );
 }
 
 template <typename T>
-inline bool operator>=( const read_memory_map<T> &x, nullptr_t ) noexcept
+inline bool operator>=( const read_memory_map<T> &x, std::nullptr_t ) noexcept
 {
     return !( x < nullptr );
 }
 
 template <typename T>
-inline bool operator>=( nullptr_t, const read_memory_map<T> &x ) noexcept
+inline bool operator>=( std::nullptr_t, const read_memory_map<T> &x ) noexcept
 {
     return !( nullptr < x );
 }

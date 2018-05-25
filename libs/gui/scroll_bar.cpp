@@ -36,7 +36,7 @@ void scroll_bar_w::set_value( value_type v )
 
 void scroll_bar_w::set_handle( value_type h )
 {
-	precondition( h > 0.0, "invalid scroll bar handle size" );
+	precondition( h > 0.0, "invalid scroll bar handle size {0}", h );
 	_handle = h;
 	if ( _handle > _max - _min )
 		_handle = _max - _min;
@@ -107,82 +107,92 @@ void scroll_bar_w::paint( context &ctxt )
 
 ////////////////////////////////////////
 
-bool scroll_bar_w::mouse_press( const point &p, int button )
+bool scroll_bar_w::mouse_press( const event &e )
 {
-	if ( contains( p ) )
+	if ( e.mouse().button != 1 )
+		return false;
+
+	coord x = e.mouse().x;
+	coord y = e.mouse().y;
+
+	if ( _horizontal )
 	{
-		if ( _horizontal )
+		value_type x1 = translate_from_full_w( _value );
+		value_type x2 = translate_from_full_w( _value + _handle );
+		if ( x >= x1 && x <= x2 )
 		{
-			value_type x1 = translate_from_full_w( _value );
-			value_type x2 = translate_from_full_w( _value + _handle );
-			if ( p.x() >= x1 && p.x() <= x2 )
-			{
-				_tracking = true;
-				_start = p.x();
-				invalidate();
-			}
-			else if ( p.x() < x1 )
-			{
-				if ( _page > 0.0 )
-					update_value( _value - _page );
-				else
-					update_value( _value - _handle/2.0 );
-			}
-			else if ( p.x() > x2 )
-			{
-				if ( _page > 0.0 )
-					update_value( _value + _page );
-				else
-					update_value( _value + _handle/2.0 );
-			}
+			_tracking = true;
+			_start = x;
+			invalidate();
 		}
-		else
+		else if ( x < x1 )
 		{
-			value_type y1 = translate_from_full_h( _value );
-			value_type y2 = translate_from_full_h( _value + _handle );
-			if ( p.y() >= y1 && p.y() <= y2 )
-			{
-				_tracking = true;
-				_start = p.y();
-				invalidate();
-			}
-			else if ( p.y() < y1 )
-			{
-				if ( _page > 0.0 )
-					update_value( _value - _page );
-				else
-					update_value( _value - _handle/2.0 );
-			}
-			else if ( p.y() > y2 )
-			{
-				if ( _page > 0.0 )
-					update_value( _value + _page );
-				else
-					update_value( _value + _handle/2.0 );
-			}
+			if ( _page > 0.0 )
+				update_value( _value - _page );
+			else
+				update_value( _value - _handle/2.0 );
+		}
+		else if ( x > x2 )
+		{
+			if ( _page > 0.0 )
+				update_value( _value + _page );
+			else
+				update_value( _value + _handle/2.0 );
 		}
 	}
+	else
+	{
+		value_type y1 = translate_from_full_h( _value );
+		value_type y2 = translate_from_full_h( _value + _handle );
+		if ( y >= y1 && y <= y2 )
+		{
+			_tracking = true;
+			_start = y;
+			invalidate();
+		}
+		else if ( y < y1 )
+		{
+			if ( _page > 0.0 )
+				update_value( _value - _page );
+			else
+				update_value( _value - _handle/2.0 );
+		}
+		else if ( y > y2 )
+		{
+			if ( _page > 0.0 )
+				update_value( _value + _page );
+			else
+				update_value( _value + _handle/2.0 );
+		}
+	}
+
+	if ( _tracking )
+		context::current().grab_source( e, shared_from_this() );
+
 	return _tracking;
 }
 
 ////////////////////////////////////////
 
-bool scroll_bar_w::mouse_move( const point &p )
+bool scroll_bar_w::mouse_move( const event &e )
 {
 	if ( _tracking )
 	{
+		coord px = e.mouse().x;
+		coord py = e.mouse().y;
+
 		if ( _horizontal )
 		{
-			value_type delta = p.x() - _start;
-			_start = p.x();
+			value_type delta = px - _start;
+			_start = px;
 			value_type x = translate_from_full_w( _value );
 			x += delta;
 			update_value( translate_to_full_w( x ) );
 		}
 		else
 		{
-			value_type delta = p.y() - _start;
-			_start = p.y();
+			value_type delta = py - _start;
+			_start = py;
 			value_type y = translate_from_full_h( _value );
 			y += delta;
 			update_value( translate_to_full_h( y ) );
@@ -194,10 +204,11 @@ bool scroll_bar_w::mouse_move( const point &p )
 
 ////////////////////////////////////////
 
-bool scroll_bar_w::mouse_release( const point &p, int button )
+bool scroll_bar_w::mouse_release( const event &e )
 {
 	if ( _tracking )
 	{
+		context::current().release_source( e );
 		_tracking = false;
 		return true;
 	}

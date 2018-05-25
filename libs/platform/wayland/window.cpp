@@ -35,7 +35,7 @@ static void shell_configure( void *data,
 							 int32_t width, int32_t height )
 {
 	platform::wayland::window *win = reinterpret_cast<platform::wayland::window *>( data );
-	win->resize_event( platform::coord_type( width ), platform::coord_type( height ) );
+	win->shell_resize_event( platform::coord_type( width ), platform::coord_type( height ) );
 }
 
 static void shell_popup_done( void *data,
@@ -58,18 +58,16 @@ namespace wayland
 
 ////////////////////////////////////////
 
-window::window( EGLDisplay disp, struct wl_compositor *comp, struct wl_shell *shell, const std::shared_ptr<::platform::screen> &scr )
-	: ::platform::window( scr ), _disp( disp )
+window::window( EGLDisplay disp, struct wl_compositor *comp, struct wl_shell *shell, const std::shared_ptr<::platform::screen> &scr, const rect &p )
+	: ::platform::window( scr, p ), _disp( disp )
 {
-	_last_w = 512; _last_h = 512;
-
 	TODO("add more error checks")
 	_surface = wl_compositor_create_surface( comp );
 	_shell_surf = wl_shell_get_shell_surface( shell, _surface );
 
 	wl_shell_surface_add_listener( _shell_surf, &shell_listener, this );
 	wl_shell_surface_set_toplevel( _shell_surf );
-	_win = wl_egl_window_create( _surface, _last_w, _last_h );
+	_win = wl_egl_window_create( _surface, width(), height() );
 
 	_ctxt = std::make_shared<context>( disp );
 	_ctxt->create( (EGLNativeWindowType)_win );
@@ -154,28 +152,24 @@ window::fullscreen( bool fs )
 
 ////////////////////////////////////////
 
-/*
-rect window::geometry( void )
+void window::set_minimum_size( coord_type w, coord_type h )
 {
-}
-*/
-
-////////////////////////////////////////
-
-void window::move( coord_type x, coord_type y )
-{
-}
-
-////////////////////////////////////////
-
-void window::resize( coord_type w, coord_type h )
-{
-}
-
-////////////////////////////////////////
-
-void window::set_minimum_size( coord_type /*w*/, coord_type /*h*/ )
-{
+	_min_w = w;
+	_min_h = h;
+	rect r = query_geometry();
+	bool changed = false;
+	if ( r.width() < _min_w )
+	{
+		r.set_width( _min_w );
+		changed = true;
+	}
+	if ( r.height() < _min_h )
+	{
+		r.set_height( _min_h );
+		changed = true;
+	}
+	if ( changed )
+		update_geometry( r );
 }
 
 ////////////////////////////////////////
@@ -186,63 +180,10 @@ void window::set_title( const std::string &t )
 
 ////////////////////////////////////////
 
-void window::invalidate( const rect &r )
+void window::shell_resize_event( coord_type w, coord_type h )
 {
-	if ( !_invalid )
-	{
-		// TODO
-		_invalid = true;
-		expose_event( r.x(), r.y(), r.width(), r.height() );
-	}
-}
-
-////////////////////////////////////////
-
-void window::move_event( coord_type x, coord_type y )
-{
-	int16_t tx = static_cast<int16_t>( x );
-	int16_t ty = static_cast<int16_t>( y );
-	if ( _last_x != tx || _last_y != ty )
-	{
-		_last_x = tx;
-		_last_y = ty;
-		if ( moved )
-			moved( x, y );
-	}
-}
-
-////////////////////////////////////////
-
-void window::resize_event( coord_type w, coord_type h )
-{
-	uint16_t tw = static_cast<uint16_t>( w );
-	uint16_t th = static_cast<uint16_t>( h );
-	if ( _last_w != tw || _last_h != th )
-	{
-		_last_w = tw;
-		_last_h = th;
-
-		if ( _win )
-		{
-			wl_egl_window_resize( _win, _last_w, _last_h, 0, 0 );
-
-			auto guard = _ctxt->begin_render();
-			_ctxt->set_viewport( 0, 0, tw, th );
-			if ( resized )
-				resized( w, h );
-		}
-	}
-}
-
-////////////////////////////////////////
-
-void window::expose_event( coord_type x, coord_type y, coord_type w, coord_type h )
-{
-	_invalid = false;
-	auto guard = _ctxt->begin_render();
-	if ( exposed )
-		exposed();
-	_ctxt->swap_buffers();
+	if ( _win )
+		wl_egl_window_resize( _win, w, h, 0, 0 );
 }
 
 ////////////////////////////////////////
@@ -251,6 +192,38 @@ void
 window::make_current( const std::shared_ptr<::platform::cursor> & )
 {
 	throw_not_yet();
+}
+
+////////////////////////////////////////
+
+void window::submit_delayed_expose( const rect &r )
+{
+	wl_surface_damage( _surface, r.x(), r.y(), r.width(), r.height() );
+}
+
+////////////////////////////////////////
+
+rect window::query_geometry( void )
+{
+	rect ret;
+	int w = 0, h = 0;
+	wl_egl_window_get_attached_size( _win, &w, &h );
+	ret.set_size( w, h );
+	_delay_position = ret;
+	return ret;
+}
+
+////////////////////////////////////////
+
+bool window::update_geometry( rect &r )
+{
+	if ( r.width() < _min_w )
+		r.set_width( _min_w );
+	if ( r.height() < _min_h )
+		r.set_height( _min_h );
+
+	wl_egl_window_resize( _win, r.width(), r.height(), r.x(), r.y() );
+	return true;
 }
 
 ////////////////////////////////////////

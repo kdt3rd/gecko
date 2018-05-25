@@ -54,59 +54,100 @@ void widget::paint( context & )
 
 ////////////////////////////////////////
 
-bool widget::mouse_press( const point &p, int button )
+std::shared_ptr<widget>
+widget::find_widget_under( coord x, coord y )
 {
-	unused( p );
-	unused( button );
+	if ( contains( x, y ) )
+		return shared_from_this();
+
+	return std::shared_ptr<widget>();
+}
+
+////////////////////////////////////////
+
+bool widget::mouse_press( const event &e )
+{
+	unused( e );
 	return false;
 }
 
 ////////////////////////////////////////
 
-bool widget::mouse_release( const point &p, int button )
+bool widget::mouse_release( const event &e )
 {
-	unused( p );
-   	unused( button );
+	unused( e );
 	return false;
 }
 
 ////////////////////////////////////////
 
-bool widget::mouse_move( const point &p )
+bool widget::mouse_move( const event &e )
 {
-	unused( p );
+	unused( e );
 	return false;
 }
 
 ////////////////////////////////////////
 
-bool widget::mouse_wheel( int a )
+bool widget::mouse_wheel( const event &e )
 {
-	unused( a );
+	unused( e );
 	return false;
 }
 
 ////////////////////////////////////////
 
-bool widget::key_press( platform::scancode c )
+bool widget::key_press( const event &e )
 {
-	unused( c );
+	unused( e );
 	return false;
 }
 
 ////////////////////////////////////////
 
-bool widget::key_release( platform::scancode c )
+bool widget::key_repeat( const event &e )
 {
-	unused( c );
+	unused( e );
 	return false;
 }
 
 ////////////////////////////////////////
 
-bool widget::text_input( char32_t c )
+bool widget::key_release( const event &e )
 {
-	unused( c );
+	unused( e );
+	return false;
+}
+
+////////////////////////////////////////
+
+bool widget::text_input( const event &e )
+{
+	unused( e );
+	return false;
+}
+
+////////////////////////////////////////
+
+bool widget::tablet_event( const event &e )
+{
+	unused( e );
+	return false;
+}
+
+////////////////////////////////////////
+
+bool widget::hid_event( const event &e )
+{
+	unused( e );
+	return false;
+}
+
+////////////////////////////////////////
+
+bool widget::user_event( const event &e )
+{
+	unused( e );
 	return false;
 }
 
@@ -146,6 +187,7 @@ bool widget::update_layout( double duration )
 		_anim_time = -1.0;
 	return result;
 }
+
 ////////////////////////////////////////
 
 }

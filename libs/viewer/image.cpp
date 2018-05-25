@@ -123,7 +123,7 @@ void image::convert( gl::api &ogl, const media::image_frame &fr )
 	if ( _interleaved )
 	{
 		precondition( nChannels <= 4, "expect max of 4 channels for interleaved, got {0}", nChannels );
-		
+
 		if ( ! _texture[0] )
 			_texture[0] = ogl.new_texture( gl::texture::target::RECTANGLE );
 		_texture[1].reset();
@@ -173,6 +173,8 @@ void image::convert( gl::api &ogl, const media::image_frame &fr )
 			bind.image_2d_rgba( gl::format::RGBA_FLOAT, w, h, it, p, stride,
 								b.endianness() != base::endianness::NATIVE );
 		}
+		if ( _stash )
+			_mesh.set_program( _stash->_interleave_prog );
 	}
 	else
 	{
@@ -211,9 +213,10 @@ void image::convert( gl::api &ogl, const media::image_frame &fr )
 			bind.image_2d_red( gl::format::RED_FLOAT, w, h, it, p, stride,
 							   b.endianness() != base::endianness::NATIVE );
 		}
-		
+		if ( _stash )
+			_mesh.set_program( _stash->_planar_prog );
 	}
-	_stash.reset();
+
 }
 
 ////////////////////////////////////////
@@ -364,7 +367,7 @@ void image::draw( platform::context &ctxt )
 			bound.set_uniform( _stash->_p_matrix_loc, _rect * ctxt.api().current_matrix() );
 			bound.set_uniform( _stash->_p_tex_unit0_loc, _texture_offset );
 			bound.set_uniform( _stash->_p_tex_unit1_loc, _texture_offset + 1 );
-			bound.set_uniform( _stash->_p_num_chans, GLint(3) );
+			bound.set_uniform( _stash->_p_num_chans, GLint(2) );
 			bound.draw();
 		}
 		else if ( _texture[0] )
@@ -375,7 +378,7 @@ void image::draw( platform::context &ctxt )
 			auto bound = _mesh.bind();
 			bound.set_uniform( _stash->_p_matrix_loc, _rect * ctxt.api().current_matrix() );
 			bound.set_uniform( _stash->_p_tex_unit0_loc, _texture_offset );
-			bound.set_uniform( _stash->_p_num_chans, GLint(3) );
+			bound.set_uniform( _stash->_p_num_chans, GLint(1) );
 			bound.draw();
 		}
 	}

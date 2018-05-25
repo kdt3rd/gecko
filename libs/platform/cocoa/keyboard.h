@@ -19,7 +19,7 @@ class keyboard : public ::platform::keyboard
 {
 public:
 	keyboard( void );
-	~keyboard( void );
+	~keyboard( void ) override;
 
 	void update_mapping( void );
 

@@ -20,8 +20,8 @@ void scroll::compute_bounds( void )
 	std::shared_ptr<area> v = _vscroll.lock();
 	std::shared_ptr<area> c = _corner.lock();
 
-	double minw = 0.0;
-	double minh = 0.0;
+	coord minw = min_coord();
+	coord minh = min_coord();
 
 	if ( v )
 		minw += v->minimum_width() + _spacing[0];
@@ -60,8 +60,8 @@ void scroll::compute_layout( void )
 	std::shared_ptr<area> v = _vscroll.lock();
 	std::shared_ptr<area> c = _corner.lock();
 
-	double vw = 0.0;
-	double vh = 0.0;
+	coord vw = min_coord();
+	coord vh = min_coord();
 
 	if ( c )
 	{
@@ -72,15 +72,15 @@ void scroll::compute_layout( void )
 	if ( v )
 		vw = std::max( vw, v->minimum_width() );
 	else
-		vw = 0.0;
+		vw = min_coord();
 
 	if ( h )
 		vh = std::max( vh, h->minimum_height() );
 	else
-		vh = 0.0;
+		vh = min_coord();
 
-	double mw = std::max( 0.0, width() - _pad[0] - _pad[1] - ( vw > 0.0 ? vw + _spacing[0] : 0.0 ) );
-	double mh = std::max( 0.0, height() - _pad[2] - _pad[3] - ( vh > 0.0 ? vh + _spacing[1] : 0.0 ) );
+	coord mw = std::max( min_coord(), width() - _pad[0] - _pad[1] - ( vw > min_coord() ? vw + _spacing[0] : min_coord() ) );
+	coord mh = std::max( min_coord(), height() - _pad[2] - _pad[3] - ( vh > min_coord() ? vh + _spacing[1] : min_coord() ) );
 
 	if ( m )
 	{

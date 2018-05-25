@@ -33,7 +33,7 @@ template<typename F, typename... Ts>
 class variant_helper<F, Ts...>
 {
 public:
-	static void destroy( std::size_t id, void *data )
+	static inline void destroy( std::size_t id, void *data )
 	{
 		if ( id == typeid(F).hash_code() )
 			reinterpret_cast<F*>(data)->~F();
@@ -41,7 +41,7 @@ public:
 			variant_helper<Ts...>::destroy( id, data );
 	}
 
-	static void move( std::size_t old_t, void *old_v, void *new_v )
+	static inline void move( std::size_t old_t, void *old_v, void *new_v )
 	{
 		if ( old_t == typeid(F).hash_code() )
 			new (new_v) F( std::move( *reinterpret_cast<F*>( old_v ) ) );
@@ -49,7 +49,7 @@ public:
 			variant_helper<Ts...>::move( old_t, old_v, new_v );
 	}
 
-	static void copy( std::size_t old_t, const void *old_v, void *new_v )
+	static inline void copy( std::size_t old_t, const void *old_v, void *new_v )
 	{
 		if ( old_t == typeid(F).hash_code() )
 			new (new_v) F( *reinterpret_cast<const F*>( old_v ) );
@@ -58,7 +58,7 @@ public:
 	}
 
 	template<typename T>
-	static constexpr bool is_valid( void )
+	static inline constexpr bool is_valid( void ) noexcept
 	{
 		return std::is_base_of<F,T>::value || std::is_same<F,T>::value || variant_helper<Ts...>::template is_valid<T>();
 	}
@@ -75,25 +75,25 @@ template<>
 class variant_helper<>
 {
 public:
-	static void destroy( std::size_t, void * )
+	static inline void destroy( std::size_t, void * )
 	{
 	}
 
-	static void move( std::size_t, void *, void * )
+	static inline void move( std::size_t, void *, void * )
 	{
 	}
 
-	static void copy( std::size_t, const void *, void * )
+	static inline void copy( std::size_t, const void *, void * )
 	{
 	}
 
 	template<typename T>
-	static constexpr bool is_valid( void )
+	static inline constexpr bool is_valid( void ) noexcept
 	{
 		return false;
 	}
 
-	static const char *type_name( std::size_t )
+	static inline const char *type_name( std::size_t )
 	{
 		return typeid(void).name();
 	}
@@ -109,7 +109,7 @@ class visitor_helper<T1, T2, Ts...>
 {
 public:
 	template<typename Result, typename Visitor, typename Variant>
-	static Result visit( Visitor &v, const Variant &x )
+	static inline Result visit( Visitor &v, const Variant &x )
 	{
 		if ( x.template is<T1>() )
 			return v( x.template get<T1>() );
@@ -118,7 +118,7 @@ public:
 	}
 
 	template<typename Result, typename Visitor, typename Variant>
-	static Result visit( Visitor &v, Variant &x )
+	static inline Result visit( Visitor &v, Variant &x )
 	{
 		if ( x.template is<T1>() )
 			return v( x.template get<T1>() );
@@ -132,7 +132,7 @@ class visitor_helper<T>
 {
 public:
 	template<typename Result, typename Visitor, typename Variant>
-	static Result visit( Visitor &v, const Variant &x )
+	static inline Result visit( Visitor &v, const Variant &x )
 	{
 		if ( x.template is<T>() )
 			return v( x.template get<T>() );
@@ -141,7 +141,7 @@ public:
 	}
 
 	template<typename Result, typename Visitor, typename Variant>
-	static Result visit( Visitor &v, Variant &x )
+	static inline Result visit( Visitor &v, Variant &x )
 	{
 		if ( x.template is<T>() )
 			return v( x.template get<T>() );
@@ -360,7 +360,7 @@ Result visit( Visitor &v, const variant<Ts...> &x )
 
 /// @brief Apply the visitor with multiple variants.
 template<typename Result = void, typename Visitor, typename Variant1, typename Variant2, typename ...Variants>
-static Result visit( Visitor &v, const Variant1 &x, const Variant2 &y, const Variants &...vs )
+inline Result visit( Visitor &v, const Variant1 &x, const Variant2 &y, const Variants &...vs )
 {
 	detail::visitor_multi<Result, Visitor, std::tuple<>, Variant1, Variant2, Variants...> newv( v, std::tuple<>(), y, vs... );
 	visit( newv, x );

@@ -61,8 +61,8 @@ namespace platform { namespace xlib
 
 ////////////////////////////////////////
 
-window::window( system &s, const std::shared_ptr<Display> &dpy, const std::shared_ptr<::platform::screen> &scr )
-	: ::platform::window( scr ), _display( dpy )
+window::window( system &s, const std::shared_ptr<Display> &dpy, const std::shared_ptr<::platform::screen> &scr, const rect &p )
+	: ::platform::window( scr, p ), _display( dpy )
 {
 	precondition( _display, "null display" );
 
@@ -93,7 +93,7 @@ window::window( system &s, const std::shared_ptr<Display> &dpy, const std::share
 	Window root = DefaultRootWindow( disp );
 	swa.colormap = XCreateColormap( disp, root, vi->visual, AllocNone );
 
-	_win = XCreateWindow( disp, root, 0, 0, 320, 240, 0, vi->depth, InputOutput, vi->visual, CWBorderPixel | CWColormap | CWEventMask, &swa );
+	_win = XCreateWindow( disp, root, x(), y(), width(), height(), 0, vi->depth, InputOutput, vi->visual, CWBorderPixel | CWColormap | CWEventMask, &swa );
 
 	_ctxt->create( _win );
 
@@ -190,32 +190,25 @@ window::fullscreen( bool fs )
 
 ////////////////////////////////////////
 
-/*
-rect window::geometry( void )
+void window::set_minimum_size( coord_type w, coord_type h )
 {
-}
-*/
+	_min_w = w;
+	_min_h = h;
+	rect r = query_geometry();
+	bool changed = false;
+	if ( r.width() < _min_w )
+	{
+		r.set_width( _min_w );
+		changed = true;
+	}
+	if ( r.height() < _min_h )
+	{
+		r.set_height( _min_h );
+		changed = true;
+	}
 
-////////////////////////////////////////
-
-void window::move( coord_type x, coord_type y )
-{
-	XMoveWindow( _display.get(), _win, static_cast<int>( x ), static_cast<int>( y ) );
-}
-
-////////////////////////////////////////
-
-void window::resize( coord_type w, coord_type h )
-{
-	XResizeWindow( _display.get(), _win,
-				   static_cast<unsigned int>( w ),
-				   static_cast<unsigned int>( h ) );
-}
-
-////////////////////////////////////////
-
-void window::set_minimum_size( coord_type /*w*/, coord_type /*h*/ )
-{
+	if ( changed )
+		update_geometry( r );
 }
 
 ////////////////////////////////////////
@@ -227,19 +220,6 @@ void window::set_title( const std::string &t )
 
 ////////////////////////////////////////
 
-void window::invalidate( const rect &r )
-{
-	if ( !_invalid )
-	{
-		// TODO
-		_invalid_rgn.include( r );
-		_invalid = true;
-		XClearArea( _display.get(), _win, r.x(), r.y(), r.width(), r.height(), true );
-	}
-}
-
-////////////////////////////////////////
-
 Window window::id( void ) const
 {
 	return _win;
@@ -247,63 +227,54 @@ Window window::id( void ) const
 
 ////////////////////////////////////////
 
-void window::move_event( coord_type x, coord_type y )
+void window::submit_delayed_expose( const rect &r )
 {
-	int16_t tx = static_cast<int16_t>( x );
-	int16_t ty = static_cast<int16_t>( y );
-	if ( _last_x != tx || _last_y != ty )
+	if ( _accumulate_expose )
 	{
-		_last_x = tx;
-		_last_y = ty;
-		if ( moved )
-			moved( x, y );
+		_invalid_rgn.include( r );
+		return;
 	}
+
+	_invalid_rgn = r;
+	_accumulate_expose = true;
+
+	XExposeEvent exp = { Expose, 0, 1, _display.get(), _win, r.x(), r.y(), r.width(), r.height(), 0 };
+	XSendEvent( _display.get(), _win, False, ExposureMask, reinterpret_cast<XEvent *>( &exp ) );
+	XFlush( _display.get() );
 }
 
 ////////////////////////////////////////
 
-void window::resize_event( coord_type w, coord_type h )
+rect window::query_geometry( void )
 {
-	uint16_t tw = static_cast<uint16_t>( w );
-	uint16_t th = static_cast<uint16_t>( h );
-	if ( _last_w != tw || _last_h != th )
+	int x = 0, y = 0;
+	unsigned int w = 0, h = 0;
+	unsigned int bw = 0, d = 0;
+	Window root = None;
+	rect ret;
+	if ( XGetGeometry( _display.get(), _win, &root, &x, &y, &w, &h, &bw, &d ) )
 	{
-		_last_w = tw;
-		_last_h = th;
-		auto guard = _ctxt->begin_render();
-		_ctxt->set_viewport( 0, 0, tw, th );
-		if ( resized )
-			resized( w, h );
+		ret.set( static_cast<coord_type>( x ), static_cast<coord_type>( y ),
+				 static_cast<coord_type>( w ), static_cast<coord_type>( h ) );
 	}
+	return ret;
 }
 
 ////////////////////////////////////////
 
-void window::expose_event( coord_type x, coord_type y, coord_type w, coord_type h )
+bool window::update_geometry( rect &r )
 {
-	auto guard = _ctxt->begin_render();
+	if ( r.width() < _min_w )
+		r.set_width( _min_w );
+	if ( r.height() < _min_h )
+		r.set_height( _min_h );
 
-	if ( w == 0 && h == 0 )
-		_invalid_rgn = rect();
-	if ( ( w != 0 && h != 0 ) || ! _invalid_rgn.empty() )
-	{
-		_invalid_rgn.include( rect( x, y, w, h ) );
-//		_glc_enable( GL_SCISSOR_TEST );
-//		_glc_scissor( static_cast<GLint>( _invalid_rgn.x() ),
-//					  static_cast<GLint>( _last_h - _invalid_rgn.y() ),
-//					  static_cast<GLsizei>( _invalid_rgn.width() ),
-//					  static_cast<GLsizei>( _invalid_rgn.height() ) );
-	}
-//	else
-//		_glc_disable( GL_SCISSOR_TEST );
-	if ( exposed )
-		exposed();
-	_ctxt->swap_buffers();
-//	_glc_disable( GL_SCISSOR_TEST );
-	_invalid = false;
-	_invalid_rgn = rect();
-//	glFlush();
-//	XFlush( _display.get() );
+	int x = r.x(), y = r.y();
+	unsigned int w = static_cast<unsigned int>( r.width() );
+	unsigned int h = static_cast<unsigned int>( r.height() );
+	XMoveResizeWindow( _display.get(), _win, x, y, w, h );
+
+	return true;
 }
 
 ////////////////////////////////////////

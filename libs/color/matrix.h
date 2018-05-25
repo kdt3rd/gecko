@@ -50,8 +50,8 @@ public:
 	inline matrix &operator=( const matrix & ) = default;
 	inline matrix &operator=( matrix && ) = default;
 
-	inline value_type *operator[]( int i ) { return &_m[i*3]; }
-	inline const value_type *operator[]( int i ) const { return &_m[i*3]; }
+	inline value_type *operator[]( size_t i ) { return &_m[i*3]; }
+	inline const value_type *operator[]( size_t i ) const { return &_m[i*3]; }
 
 	inline void identity( void ) noexcept
 	{

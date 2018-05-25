@@ -131,7 +131,7 @@ void cocoa_style::line_edit_frame( const std::shared_ptr<draw::canvas> &c, const
 
 ////////////////////////////////////////
 
-coord_type cocoa_style::slider_size( const rect &rect )
+coord cocoa_style::slider_size( const rect &rect )
 {
 	return rect.radius();
 }
@@ -142,8 +142,8 @@ void cocoa_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const r
 {
 	construct( c );
 
-	coord_type rad = slider_size( rect );
-	coord_type h = rect.height() - 7;
+	coord rad = slider_size( rect );
+	coord h = rect.height() - 7;
 	rect tmp( rect );
 	tmp.trim( rad, rad, h/2, h/2 );
 
@@ -153,11 +153,11 @@ void cocoa_style::slider_groove( const std::shared_ptr<draw::canvas> &c, const r
 
 ////////////////////////////////////////
 
-void cocoa_style::slider_button( const std::shared_ptr<draw::canvas> &c, const rect &r, bool pressed, coord_type val )
+void cocoa_style::slider_button( const std::shared_ptr<draw::canvas> &c, const rect &r, bool pressed, coord val )
 {
 	construct( c );
 
-	coord_type rad = 9.0; //r.radius();
+	coord rad = coord(9); //r.radius();
 	rect tmp( rad * 2, rad * 2 );
 	tmp.set_center( { r.x( val, rad ), r.y( 0.5, rad ) } );
 
@@ -167,7 +167,7 @@ void cocoa_style::slider_button( const std::shared_ptr<draw::canvas> &c, const r
 
 ////////////////////////////////////////
 
-void cocoa_style::text_cursor( const std::shared_ptr<draw::canvas> &c, const point &p, coord_type h )
+void cocoa_style::text_cursor( const std::shared_ptr<draw::canvas> &c, const point &p, coord h )
 {
 	construct( c );
 

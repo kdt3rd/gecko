@@ -30,7 +30,8 @@ class window : public ::platform::window
 {
 public:
 	window( EGLDisplay disp, struct wl_compositor *comp, struct wl_shell *shell,
-			const std::shared_ptr<::platform::screen> &scr );
+			const std::shared_ptr<::platform::screen> &scr,
+			const rect &p = rect( 0, 0, 320, 243 ) );
 	~window( void );
 
 	::platform::context &hw_context( void ) override;
@@ -45,30 +46,23 @@ public:
 
 	void fullscreen( bool fs ) override;
 
-//	rect geometry( void ) override;
-//	void set_position( coord_type x, coord_type y ) override;
-	void move( coord_type x, coord_type y ) override;
-	void resize( coord_type w, coord_type h ) override;
 	void set_minimum_size( coord_type w, coord_type h ) override;
 
 	void set_title( const std::string &t ) override;
 //	void set_icon( const icon &i ) override;
 
-	void invalidate( const rect &r ) override;
-
-	coord_type width( void ) override { return _last_w; }
-	coord_type height( void )  override { return _last_h; }
-
-	void expose_event( coord_type x, coord_type y, coord_type w, coord_type h );
-	void move_event( coord_type x, coord_type y );
-	void resize_event( coord_type w, coord_type h );
-
+	void shell_resize_event( coord_type w, coord_type h );
 protected:
 	void make_current( const std::shared_ptr<::platform::cursor> & );
 
+	void submit_delayed_expose( const rect &r ) override;
+	rect query_geometry( void ) override;
+	bool update_geometry( rect &r ) override;
+
 private:
-	int16_t _last_x = 0, _last_y = 0;
-	uint16_t _last_w = 0, _last_h = 0;
+	coord_type _min_w = 0;
+	coord_type _min_h = 0;
+	rect _delay_position;
 
 	bool _invalid = false;
 	bool _popup = false;

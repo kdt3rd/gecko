@@ -53,7 +53,7 @@ public:
 			throw_errno( "Unable to initialize notification watcher" );
 	}
 
-	~posix_watcher( void )
+	~posix_watcher( void ) override
 	{
 		if ( _notify_fd != -1 )
 			::close( _notify_fd );
@@ -90,7 +90,7 @@ public:
 
 		_watch_thread = std::thread( &posix_watcher::watchThread, this );
 	}
-	~posix_watcher( void )
+	~posix_watcher( void ) override
 	{
 		if ( _notify_fd != -1 )
 			::close( _notify_fd );
@@ -241,7 +241,7 @@ namespace base
 uri
 posix_file_system::current_path( void ) const
 {
-	char *tmp = ::getcwd( NULL, 0 );
+	char *tmp = ::getcwd( nullptr, 0 );
 	on_scope_exit{ ::free( tmp ); };
 	return uri( tmp );
 }
@@ -380,7 +380,7 @@ directory_iterator posix_file_system::readdir( const uri &path )
 
 	auto next_entry = [=]( void )
 	{
-		struct dirent *result = NULL;
+		struct dirent *result = nullptr;
 		while ( ::readdir_r( dir.get(), dir_ent.get(), &result ) == 0 )
 		{
 			if ( result )

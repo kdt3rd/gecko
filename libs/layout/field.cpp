@@ -20,7 +20,7 @@ field::field( const std::shared_ptr<area> &l, const std::shared_ptr<area> &e )
 
 ////////////////////////////////////////
 
-double field::field_minimum_width( void )
+coord field::field_minimum_width( void )
 {
 	auto f = _field.lock();
 	if ( f )
@@ -28,7 +28,7 @@ double field::field_minimum_width( void )
 		f->compute_bounds();
 		return f->minimum_width();
 	}
-	return 0.0;
+	return min_coord();
 }
 
 ////////////////////////////////////////
@@ -38,10 +38,10 @@ void field::compute_bounds( void )
 	auto l = _label.lock();
 	auto f = _field.lock();
 
-	double minw = _pad[0] + _pad[1];
-	double minh = 0.0;
-	double maxw = _pad[0] + _pad[1];
-	double maxh = 0.0;
+	coord minw = _pad[0] + _pad[1];
+	coord minh = min_coord();
+	coord maxw = _pad[0] + _pad[1];
+	coord maxh = min_coord();
 
 
 	if ( l )
@@ -57,7 +57,7 @@ void field::compute_bounds( void )
 
 	if ( f )
 	{
-		double w = std::max( f->minimum_width(), _width );
+		coord w = std::max( f->minimum_width(), _width );
 		minw += w;
 		minh = std::max( minh, f->minimum_height() );
 		maxw += f->maximum_width();
@@ -77,10 +77,10 @@ void field::compute_layout( void )
 {
 	auto l = _label.lock();
 	auto f = _field.lock();
-	double fw = _width;
-	double w = width() - _pad[0] - _pad[1];
-	double h = height() - _pad[2] - _pad[3];
-	double x = _pad[0];
+	coord fw = _width;
+	coord w = width() - _pad[0] - _pad[1];
+	coord h = height() - _pad[2] - _pad[3];
+	coord x = _pad[0];
 	if ( f )
 	{
 		fw = std::max( fw, f->minimum_width() );

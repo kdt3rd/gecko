@@ -13,14 +13,15 @@
 #include <windows.h>
 #include <base/contract.h>
 
-#include "opengl.h"
+#include "context.h"
 
 namespace platform { namespace mswin
 {
 
 ////////////////////////////////////////
 
-window::window( void )
+window::window( const std::shared_ptr<screen> &screen, const rect &p )
+	: base( screen, p )
 {
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 	_hwnd = CreateWindowEx(
@@ -34,49 +35,40 @@ window::window( void )
 	if ( _hwnd == nullptr )
 		throw_runtime( "window creation failed" );
 
-	_hdc = GetDC( _hwnd );
-	_hrc = createOGLContext( _hdc );
-
-	wglMakeCurrent( _hdc, _hrc );
-
-	if ( !gl3wIsSupported( 3, 3 ) )
-		throw_runtime( "OpenGL 3.3 not supported" );
-
-	update_position();
-	//wglCreateLayerContext
-
-//	int glVersion[2];
-//	glGetIntegerv( GL_MAJOR_VERSION, &glVersion[0] );
-//	glGetIntegerv( GL_MINOR_VERSION, &glVersion[1] );
-//	std::cout << "Using OpenGL: " << glVersion[0] << "." << glVersion[1] << std::endl;
+	_context.reset( new context );
+	_context->init( _hwnd );
 }
 
 ////////////////////////////////////////
 
 window::~window( void )
 {
-	if ( _hrc )
-	{
-		HGLRC oldCtxt = wglGetCurrentContext();
-		if ( oldCtxt == _hrc )
-			wglMakeCurrent( _hdc, NULL );
-		wglDeleteContext( _hrc );
-	}
-
+	_context.reset();
 	if ( _hwnd )
 		DestroyWindow( _hwnd );
 }
 
 ////////////////////////////////////////
 
+::platform::context &window::hw_context( void )
+{
+	return (*_context);
+}
+	
+////////////////////////////////////////
+
 void window::raise( void )
 {
+	SetWindowPos( _hwnd, HWND_TOP, 0, 0, 0, 0,
+				  SWP_NOMOVE|SWP_NOSIZE );
 }
 
 ////////////////////////////////////////
 
 void window::lower( void )
 {
+	SetWindowPos( _hwnd, HWND_BOTTOM, 0, 0, 0, 0,
+				  SWP_NOMOVE|SWP_NOSIZE );
 }
 
 ////////////////////////////////////////
@@ -91,14 +83,14 @@ void window::show( void )
 
 void window::hide( void )
 {
+	ShowWindow( _hwnd, SW_HIDE );
 }
 
 ////////////////////////////////////////
 
 bool window::is_visible( void )
 {
-	// TODO fix this
-	return true;
+	return static_cast<bool>( IsWindowVisible( _hwnd ) );
 }
 
 ////////////////////////////////////////
@@ -107,26 +99,6 @@ void
 window::fullscreen( bool fs )
 {
 	std::cout << "implement window::fullscreen" << std::endl;
-}
-
-////////////////////////////////////////
-
-/*
-rect window::geometry( void )
-{
-}
-*/
-
-////////////////////////////////////////
-
-void window::move( coord_type x, coord_type y )
-{
-}
-
-////////////////////////////////////////
-
-void window::resize( coord_type w, coord_type h )
-{
 }
 
 ////////////////////////////////////////
@@ -149,7 +121,27 @@ void window::set_popup( void )
 
 ////////////////////////////////////////
 
-void window::invalidate( const rect &r )
+rect window::query_geometry( void )
+{
+	RECT pos;
+//	GetWindowRect( _hwnd, &pos );
+	GetClientRect( _hwnd, &pos );
+	return rect{ pos.left, pos.top, pos.right - pos.left + 1, pos.bottom - pos.top + 1 };
+}
+
+////////////////////////////////////////
+
+bool window::update_geometry( rect &r )
+{
+	SetWindowPos( _hwnd, NULL, r.x(), r.y(), r.width(), r.height(),
+				  SWP_NOOWNERZORDER | SWP_NOZORDER );
+	r = query_geometry();
+	return true;
+}
+
+////////////////////////////////////////
+
+void window::submit_delayed_expose( const rect &r )
 {
 	RECT rect = { LONG( std::floor( r.x1() ) ), LONG( std::floor( r.y1() ) ), LONG( std::ceil( r.x2() ) ), LONG( std::ceil( r.y2() ) ) };
 	if ( rect.left == rect.top &&
@@ -158,36 +150,6 @@ void window::invalidate( const rect &r )
 		RedrawWindow( _hwnd, NULL, NULL, RDW_INTERNALPAINT );
 	else
 		RedrawWindow( _hwnd, &rect, NULL, RDW_INTERNALPAINT );
-//	InvalidateRect( _hwnd, &rect, FALSE );
-}
-
-////////////////////////////////////////
-
-void window::acquire( void )
-{
-	if ( !wglMakeCurrent( _hdc, _hrc ) )
-		throw std::runtime_error( "couldn't make context current" );
-}
-
-////////////////////////////////////////
-
-void window::release( void )
-{
-	wglMakeCurrent( NULL, NULL );
-}
-
-////////////////////////////////////////
-
-void window::update_position( void )
-{
-	RECT pos;
-	GetWindowRect( _hwnd, &pos );
-	// TODO: do we have to handle the resize handle width???
-	_last_x = pos.left;
-	_last_y = pos.top;
-	_last_w = pos.right - pos.left + 1;
-	_last_h = pos.bottom - pos.top + 1;
-	std::cout << "window resized to: " << _last_w << " x " << _last_h << " (" << pos.left << ", " << pos.top << " " << pos.right << ", " << pos.bottom << ")" << std::endl;
 }
 
 ////////////////////////////////////////
@@ -200,38 +162,6 @@ window::make_current( const std::shared_ptr<cursor> &c )
 
 ////////////////////////////////////////
 
-void window::expose_event( coord_type x, coord_type y, coord_type w, coord_type h )
-{
-	acquire();
-//	PAINTSTRUCT ps;
-//	BeginPaint( _hwnd, &ps );
-	if ( exposed )
-		exposed();
-//	EndPaint( _hwnd, &ps );
-//	wglSwapLayerBuffers( _hdc, WGL_SWAP_MAIN_PLANE );
-	SwapBuffers( _hdc );
-	release();
-}
-
-////////////////////////////////////////
-
-void
-window::move_event( coord_type x, coord_type y )
-{
-	_last_x = x;
-	_last_y = y;
-}
-
-////////////////////////////////////////
-
-void
-window::resize_event( coord_type w, coord_type h )
-{
-	_last_w = w;
-	_last_h = h;
-}
-
-////////////////////////////////////////
-
-} }
+} // namespace mswin
+} // namespace platform
 

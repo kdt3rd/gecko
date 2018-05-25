@@ -14,6 +14,16 @@ namespace gui
 
 ////////////////////////////////////////
 
+void composite::monitor_changed( context &ctxt )
+{
+	for_subwidgets( [&]( const std::shared_ptr<widget> &w )
+	{
+		w->monitor_changed( ctxt );
+	} );
+}
+
+////////////////////////////////////////
+
 void composite::build( context &ctxt )
 {
 	for_subwidgets( [&]( const std::shared_ptr<widget> &w )
@@ -34,120 +44,16 @@ void composite::paint( context &ctxt )
 
 ////////////////////////////////////////
 
-bool composite::mouse_press( const point &p, int button )
+std::shared_ptr<widget> composite::find_widget_under( coord x, coord y )
 {
-	if ( _mouse_grab )
-		return _mouse_grab->mouse_press( p, button );
-	else
-	{
-		for_subwidgets( [&]( const std::shared_ptr<widget> &w )
-		{
-			if ( !_mouse_grab )
-			{
-				if ( w->mouse_press( p, button ) )
-					_mouse_grab = w;
-			}
-		} );
-	}
-
-	return static_cast<bool>( _mouse_grab );
-}
-
-////////////////////////////////////////
-
-bool composite::mouse_move( const point &p )
-{
-	bool result = false;
-	if ( _mouse_grab )
-		result = _mouse_grab->mouse_move( p );
-	else
-	{
-		for_subwidgets( [&]( const std::shared_ptr<widget> &w )
-		{
-			if ( !result )
-				result = w->mouse_move( p );
-		} );
-	}
-	return result;
-}
-
-////////////////////////////////////////
-
-bool composite::mouse_release( const point &p, int button )
-{
-	bool result = false;
-	if ( _mouse_grab )
-	{
-		auto tmp = _mouse_grab;
-		_mouse_grab.reset();
-		result = tmp->mouse_release( p, button );
-	}
-	else
-	{
-		for_subwidgets( [&]( const std::shared_ptr<widget> &w )
-		{
-			if ( !result )
-				result = w->mouse_release( p, button );
-		} );
-	}
-
-	return result;
-}
-
-////////////////////////////////////////
-
-bool composite::mouse_wheel( int amount )
-{
-	bool result = false;
+	std::shared_ptr<widget> ret;
 	for_subwidgets( [&]( const std::shared_ptr<widget> &w )
 	{
-		if ( !result )
-			result = w->mouse_wheel( amount );
+		if ( ret )
+			return;
+		ret = w->find_widget_under( x, y );
 	} );
-
-	return result;
-}
-
-////////////////////////////////////////
-
-bool composite::key_press( platform::scancode c )
-{
-	bool result = false;
-	for_subwidgets( [&]( const std::shared_ptr<widget> &w )
-	{
-		if ( !result )
-			result = w->key_press( c );
-	} );
-
-	return result;
-}
-
-////////////////////////////////////////
-
-bool composite::key_release( platform::scancode c )
-{
-	bool result = false;
-	for_subwidgets( [&]( const std::shared_ptr<widget> &w )
-	{
-		if ( !result )
-			result = w->key_release( c );
-	} );
-
-	return result;
-}
-
-////////////////////////////////////////
-
-bool composite::text_input( char32_t c )
-{
-	bool result = false;
-	for_subwidgets( [&]( const std::shared_ptr<widget> &w )
-	{
-		if ( !result )
-			result = w->text_input( c );
-	} );
-
-	return result;
+	return ret;
 }
 
 ////////////////////////////////////////

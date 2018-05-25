@@ -8,6 +8,7 @@
 #include <platform/platform.h>
 #include <platform/system.h>
 #include <platform/dispatcher.h>
+#include <platform/simple_window.h>
 #include <gl/opengl.h>
 #include <base/contract.h>
 
@@ -23,7 +24,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	for ( auto scr: screens )
 		std::cout << "Screen full " << scr->bounds( false ) << " active " << scr->bounds( true ) << " dpi " << scr->dpi() << " refresh " << scr->refresh_rate() << (scr->is_default() ? " DEFAULT" : " ALT") << std::endl;
 
-	auto win = sys->new_window();
+	auto win = std::make_shared<platform::simple_window>( sys->new_window() );
 	win->set_title( "Hello World" );
 	win->exposed = [&]( void )
 	{

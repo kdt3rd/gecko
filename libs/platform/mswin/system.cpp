@@ -9,7 +9,6 @@
 #include "screen.h"
 #include "window.h"
 #include "dispatcher.h"
-#include "opengl.h"
 
 #include <mutex>
 
@@ -43,7 +42,7 @@ system::system( const std::string & )
 {
 	_keyboard = std::make_shared<keyboard>();
 	_mouse = std::make_shared<mouse>();
-	_dispatcher = std::make_shared<dispatcher>( _keyboard, _mouse );
+	_dispatcher = std::make_shared<dispatcher>( this, _keyboard, _mouse );
 
 	EnumDisplayMonitors( NULL, NULL, monitorEnumCB, (LPARAM)&_screens);
 }
@@ -56,10 +55,9 @@ system::~system( void )
 
 ////////////////////////////////////////
 
-system::opengl_query
-system::gl_proc_address( void )
+const std::shared_ptr<::platform::screen> &system::default_screen( void )
 {
-	return queryGL;
+	return _screens.front();
 }
 
 ////////////////////////////////////////
@@ -193,9 +191,9 @@ system::new_system_tray_item( void )
 
 ////////////////////////////////////////
 
-std::shared_ptr<platform::window> system::new_window( void )
+std::shared_ptr<::platform::window> system::new_window( const std::shared_ptr<::platform::screen> &s )
 {
-	auto ret = std::make_shared<window>();
+	auto ret = std::make_shared<window>( s ? s : default_screen() );
 	_dispatcher->add_window( ret );
 	return ret;
 }
@@ -242,14 +240,21 @@ system::modifier_state( void )
 ////////////////////////////////////////
 
 bool
-system::query_mouse( uint8_t &buttonMask, uint8_t &modifiers, int &x, int &y, int &screen )
+system::query_mouse( uint8_t &buttonMask, uint8_t &modifiers, coord_type &x, coord_type &y, int &screen )
 {
-	std::cout << "implement query_mouse" << std::endl;
 	buttonMask = 0;
 	modifiers = 0;
 	x = 0;
 	y = 0;
 	screen = 0;
+
+	POINT pt;
+	if ( GetCursorPos( &pt ) )
+	{
+		x = pt.x;
+		y = pt.y;
+	}
+	std::cout << "implement query_mouse" << std::endl;
 	return false;
 }
 

@@ -89,42 +89,46 @@ void button_w::paint( context &ctxt )
 
 ////////////////////////////////////////
 
-bool button_w::mouse_press( const point &p, int b )
+bool button_w::mouse_press( const event &e )
 {
-	unused( b );
+	if ( e.mouse().button != 1 )
+		return false;
 
-	if ( contains( p ) )
-	{
-		_tracking = true;
-		set_pressed( true );
-	}
-	return _tracking;
+	context::current().grab_source( e, shared_from_this() );
+
+	_tracking = true;
+	set_pressed( true );
+
+	return true;
 }
 
 ////////////////////////////////////////
 
-bool button_w::mouse_release( const point &p, int b )
+bool button_w::mouse_release( const event &e )
 {
-	unused( b );
+	if ( e.mouse().button != 1 )
+		return false;
 
 	if ( _tracking )
 	{
 		_tracking = false;
 		set_pressed( false );
-		if ( contains( p ) )
+		if ( contains( e.mouse().x, e.mouse().y ) )
 			when_activated();
+		context::current().release_source( e );
 		return true;
 	}
+
 	return false;
 }
 
 ////////////////////////////////////////
 
-bool button_w::mouse_move( const point &p )
+bool button_w::mouse_move( const event &e )
 {
 	if ( _tracking )
 	{
-		set_pressed( contains( p ) );
+		set_pressed( contains( e.mouse().x, e.mouse().y ) );
 		return true;
 	}
 	return false;

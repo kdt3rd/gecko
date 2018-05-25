@@ -1,3 +1,9 @@
+//
+// Copyright (c) 2017 Ian Godin and Kimball Thurston
+// All rights reserved.
+// Copyrights licensed under the MIT License.
+// See the accompanying LICENSE.txt file for terms
+//
 
 #pragma once
 
@@ -20,7 +26,7 @@ public:
 	~layout( void ) override;
 
 	/// @brief Set padding amount.
-	void set_padding( double l, double r, double t, double b )
+	void set_padding( coord l, coord r, coord t, coord b )
 	{
 		_pad[0] = l;
 		_pad[1] = r;
@@ -29,7 +35,7 @@ public:
 	}
 
 	/// @brief Set spacing amount.
-	void set_spacing( double h, double v )
+	void set_spacing( coord h, coord v )
 	{
 		_spacing[0] = h;
 		_spacing[1] = v;
@@ -37,13 +43,13 @@ public:
 
 protected:
 	/// @brief Distribute the extra width.
-	void expand_width( std::list<std::shared_ptr<area>> &areas, double extra );
+	void expand_width( std::list<std::shared_ptr<area>> &areas, coord extra );
 
 	/// @brief Distribute the extra width.
 	template<typename Container>
-	void expand_width( const Container &areas, double extra )
+	void expand_width( const Container &areas, coord extra )
 	{
-		if ( extra <= 0.0 )
+		if ( extra <= min_coord() )
 			return;
 
 		// Lock the pointers and remove any null pointer.
@@ -59,13 +65,13 @@ protected:
 	}
 
 	/// @brief Distribute the extra height.
-	void expand_height( std::list<std::shared_ptr<area>> &areas, double extra );
+	void expand_height( std::list<std::shared_ptr<area>> &areas, coord extra );
 
 	/// @brief Distribute the extra height.
 	template<typename Container>
-	void expand_height( const Container &areas, double extra )
+	void expand_height( const Container &areas, coord extra )
 	{
-		if ( extra <= 0.0 )
+		if ( extra <= min_coord() )
 			return;
 
 		// Lock the pointers and remove any null pointer.
@@ -80,8 +86,8 @@ protected:
 		expand_height( lst, extra );
 	}
 
-	double _pad[4] = { 0.0 };
-	double _spacing[2] = { 0.0 };
+	coord _pad[4] = { min_coord(), min_coord(), min_coord(), min_coord() };
+	coord _spacing[2] = { min_coord(), min_coord() };
 };
 
 ////////////////////////////////////////

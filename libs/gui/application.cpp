@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2014 Ian Godin
+// Copyright (c) 2014 Ian Godin and Kimball Thurston
 // All rights reserved.
 // Copyrights licensed under the MIT License.
 // See the accompanying LICENSE.txt file for terms
@@ -11,6 +11,7 @@
 #include <platform/system.h>
 #include <platform/window.h>
 #include <platform/dispatcher.h>
+#include <platform/event.h>
 #include <script/font_manager.h>
 #include <base/contract.h>
 
@@ -86,12 +87,50 @@ application::~application( void )
 
 ////////////////////////////////////////
 
+bool application::process_quit_request( void )
+{
+	return true;
+}
+
+////////////////////////////////////////
+
+void application::register_global_hotkey( platform::scancode sc, hotkey_handler f )
+{
+	// TODO: handle duplicates?
+	_hotkeys[sc] = std::move( f );
+}
+
+////////////////////////////////////////
+
+bool application::dispatch_global_hotkey( const platform::event &e )
+{
+	platform::scancode sc = e.key().keys[0];
+
+	auto i = _hotkeys.find( sc );
+	if ( i != _hotkeys.end() )
+	{
+		(i->second)( point( e.key().x, e.key().y ) );
+		return true;
+	}
+
+	return false;
+}
+
+////////////////////////////////////////
+
 std::shared_ptr<window> application::new_window( void )
 {
 	auto w = _impl->sys->new_window();
 	auto result = std::make_shared<window>( w );
 	result->get_style().set_font_manager( _fmgr );
 	return result;
+}
+
+////////////////////////////////////////
+
+void application::window_destroyed( window * /*w*/ )
+{
+	// TBD: we aren't stashing the windows (yet), so until then, just ignore...
 }
 
 ////////////////////////////////////////
@@ -178,7 +217,7 @@ std::set<std::string> application::get_font_styles( const std::string &family )
 
 ////////////////////////////////////////
 
-std::shared_ptr<script::font> application::get_font( const std::string &family, const std::string &style, coord_type pixsize )
+std::shared_ptr<script::font> application::get_font( const std::string &family, const std::string &style, coord pixsize )
 {
 	return _fmgr->get_font( family, style, pixsize );
 }

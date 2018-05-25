@@ -8,6 +8,7 @@
 #include <platform/platform.h>
 #include <platform/system.h>
 #include <platform/dispatcher.h>
+#include <platform/simple_window.h>
 #include <gl/opengl.h>
 #include <gl/api.h>
 #include <gl/mesh.h>
@@ -24,7 +25,7 @@ namespace
 int safemain( int /*argc*/, char * /*argv*/ [] )
 {
 	auto sys = platform::platform::find_running();
-	auto win = sys->new_window();
+	auto win = std::make_shared<platform::simple_window>( sys->new_window() );
 	win->resize( 400, 400 );
 	win->set_title( "Draw Test" );
 	auto render_guard = win->hw_context().begin_render();

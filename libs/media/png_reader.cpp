@@ -19,7 +19,9 @@
 # include <base/env.h>
 
 #include <png.h>
+#ifndef _WIN32
 #include <setjmp.h>
+#endif
 
 #endif // HAVE_LIBPNG
 
@@ -34,7 +36,9 @@ namespace {
 struct StreamHolder
 {
     base::istream *stream;
+#ifndef _WIN32
     sigjmp_buf jmpBuffer;
+#endif
     ssize_t nread;
     ssize_t nreq;
 };
@@ -47,7 +51,9 @@ void mypng_raw_read( png_structp png_ptr, png_bytep data, png_size_t length )
     if ( readPtr->nread != ssize_t( length ) )
     {
         readPtr->nreq = ssize_t( length );
+#ifndef _WIN32
         longjmp( readPtr->jmpBuffer, 1 );
+#endif
     }
 }
 
@@ -103,8 +109,10 @@ png_read_track::doRead( int64_t f )
         png_destroy_read_struct( &png_ptr, nullptr, nullptr );
     };
 
+#ifndef _WIN32
     if ( setjmp( sh.jmpBuffer )  )
         throw_runtime( "error: unable to read requested bytes {0} from stream, got {1}", sh.nreq, sh.nread );
+#endif
 
     // create png info struct
     png_infop info_ptr = png_create_info_struct( png_ptr );
@@ -140,7 +148,7 @@ png_read_track::doRead( int64_t f )
 
     double fgama = 1.0;
     if ( png_get_gAMA( png_ptr, info_ptr, &fgama ) == 0 )
-        throw_runtime( "error getting gamma" );
+        fgama = 2.4;
 
     if ( color_type == PNG_COLOR_TYPE_PALETTE )
     {
@@ -180,7 +188,9 @@ png_read_track::doRead( int64_t f )
     if ( bit_depth > 8 )
     {
         offbits = 16;
-        imgbuf = image_buffer::simple_interleaved<uint16_t>( temp_width, temp_height, c );
+        // png is always in network (BIG endian) order...
+        imgbuf = image_buffer::simple_interleaved<uint16_t>( temp_width, temp_height, c,
+                                                             base::endianness::BIG );
     }
     else
         imgbuf = image_buffer::simple_interleaved<uint8_t>( temp_width, temp_height, c );

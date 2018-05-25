@@ -27,7 +27,7 @@ public:
 	/// @brief Constructor
 	location_exception( const char *file, int line );
 
-	~location_exception( void ) override = default;
+	~location_exception( void ) override;
 	location_exception( const location_exception &e ) = default;
 	location_exception( location_exception &&e ) noexcept(true) = default;
 	location_exception &operator=( const location_exception &e ) = default;
@@ -99,41 +99,56 @@ public:
 /// Helper macros for throw exceptions.
 /// @{
 
+namespace detail
+{
+
+template <typename E>
+[[noreturn]] inline void throw_location_impl( E &&e, const char *f, int l )
+{
+	try { throw location_exception( f, l ); }
+	catch ( ... ) { std::throw_with_nested( std::forward<E>( e ) ); }
+}
+
+template <typename ... Args>
+[[noreturn]] inline void throw_add_location_impl( const char *f, int l, Args &&... a )
+{
+	try { std::throw_with_nested( location_exception( f, l ) ); }
+	catch ( ... )
+	{
+		std::throw_with_nested( std::runtime_error( format( std::forward<Args>( a )... ) ) );
+	}
+}
+
+} // namespace detail
+
 /// @brief Throw the exception, adding it's source location
 /// @param exc Exception to add source location to
 /// @sa base::location_exception
-#define throw_location( exc ) \
-	do { \
-		try { throw base::location_exception( __FILE__, __LINE__ ); } \
-		catch ( ... ) { std::throw_with_nested( exc ); } \
-	} while ( false )
+#define throw_location( exc ) ::base::detail::throw_location_impl( exc, __FILE__, __LINE__ )
 
 /// @brief Add a message as a nested exception
 ///
 /// Can only be called from inside a catch block.
 /// @param formats Format arguments.
 #define throw_add( ... ) \
-	std::throw_with_nested( std::runtime_error( base::format( __VA_ARGS__ ) ) );
+	std::throw_with_nested( std::runtime_error( ::base::format( __VA_ARGS__ ) ) );
 
 /// @brief Add the source location as a nested exception.
 ///
 /// Can only be called from inside a catch block.
 /// @sa base::location_exception
 #define throw_add_location( ... ) \
-	do { \
-		try { std::throw_with_nested( base::location_exception( __FILE__, __LINE__ ) ); } \
-		catch ( ... ) { throw_add( __VA_ARGS__ ); } \
-	} while ( false )
+	::base::detail::throw_add_location_impl( __FILE__, __LINE__, __VA_ARGS__ )
 
 /// @brief Throw a runtime error using format
 /// @sa base::format
 #define throw_runtime( ... ) \
-	throw_location( std::runtime_error( base::format( __VA_ARGS__ ) ) )
+	throw_location( std::runtime_error( ::base::format( __VA_ARGS__ ) ) )
 
 /// @brief Throw a logic error using format
 /// @sa base::format
 #define throw_logic( ... ) \
-	throw_location( std::logic_error( base::format( __VA_ARGS__ ) ) )
+	throw_location( std::logic_error( ::base::format( __VA_ARGS__ ) ) )
 
 /// @brief If check is not true, throw a postcondition_error
 #define throw_not_yet() \
@@ -145,30 +160,30 @@ public:
 /// custom for windows, assumes windows.h has previously
 /// been included
 # define throw_lasterror( ... ) \
-	throw_location( std::system_error( GetLastError(), std::generic_category(), base::format( __VA_ARGS__ ) ) )
+	throw_location( std::system_error( GetLastError(), std::generic_category(), ::base::format( __VA_ARGS__ ) ) )
 /// @brief Throw a errno error using format
 /// @sa base::format
 /// windows puts errno errors in the generic category
 # define throw_errno( ... ) \
-	throw_location( std::system_error( errno, std::generic_category(), base::format( __VA_ARGS__ ) ) )
+	throw_location( std::system_error( errno, std::generic_category(), ::base::format( __VA_ARGS__ ) ) )
 #else
 /// @brief Throw a errno error using format
 /// @sa base::format
 # define throw_errno( ... ) \
-	throw_location( std::system_error( errno, std::system_category(), base::format( __VA_ARGS__ ) ) )
+	throw_location( std::system_error( errno, std::system_category(), ::base::format( __VA_ARGS__ ) ) )
 #endif
 
 /// @brief If check is not true, throw a precondition_error
 #define precondition( check, ... ) \
-	do { if ( GK_UNLIKELY( !(check) ) ) throw_location( base::precondition_error( base::format( __VA_ARGS__ ) ) ); } while ( false )
+	( GK_LIKELY( static_cast<bool>(check) ) ? void(0) : throw_location( ::base::precondition_error( ::base::format( __VA_ARGS__ ) ) ) )
 
 /// @brief If check is not true, throw a postcondition_error
 #define postcondition( check, ... ) \
-	do { if ( GK_UNLIKELY( !(check) ) ) throw_location( base::postcondition_error( base::format( __VA_ARGS__ ) ) ); } while ( false )
+	( GK_LIKELY( static_cast<bool>(check) ) ? void(0) : throw_location( ::base::postcondition_error( ::base::format( __VA_ARGS__ ) ) ) )
 
 /// @brief If check is not true, throw a postcondition_error
 #define logic_check( check, ... ) \
-	do { if ( GK_UNLIKELY( !(check) ) ) throw_location( std::logic_error( base::format( __VA_ARGS__ ) ) ); } while ( false )
+	( GK_LIKELY( static_cast<bool>(check) ) ? void(0) : throw_location( std::logic_error( ::base::format( __VA_ARGS__ ) ) ) )
 
 #define unused( ... ) \
 	(void)( __VA_ARGS__ )

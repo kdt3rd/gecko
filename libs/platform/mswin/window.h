@@ -10,19 +10,29 @@
 #include <platform/window.h>
 #include <windows.h>
 
-namespace platform { namespace mswin
+namespace platform
 {
+namespace mswin
+{
+
+class context;
 
 ////////////////////////////////////////
 
 class window : public ::platform::window
 {
+	using base = ::platform::window;
+
 public:
-	window( void );
+	window( const std::shared_ptr<screen> &screen, const rect &p = rect( 0, 0, 512, 512 ) );
 	~window( void );
+
+	::platform::context &hw_context( void ) override;
 
 	void raise( void ) override;
 	void lower( void ) override;
+
+	void set_popup( void ) override;
 
 	void show( void ) override;
 	void hide( void ) override;
@@ -30,43 +40,24 @@ public:
 
 	void fullscreen( bool fs ) override;
 
-//	rect geometry( void ) override;
-//	void set_position( coord_type x, coord_type y ) override;
-	void move( coord_type x, coord_type y ) override;
-	void resize( coord_type w, coord_type h ) override;
 	void set_minimum_size( coord_type w, coord_type h ) override;
 
 	void set_title( const std::string &t ) override;
 //	void set_icon( const icon &i ) override;
-	void set_popup( void ) override;
-
-	void invalidate( const rect &r );
-
-	void acquire( void ) override;
-	void release( void ) override;
-
-	bool check_last_position( int16_t x, int16_t y ) { if ( _last_x != x || _last_y != y ) { _last_x = x; _last_y = y; return true; } return false; }
-	bool check_last_size( uint16_t w, uint16_t h ) { if ( _last_w != w || _last_h != h ) { _last_w = w; _last_h = h; return true; } return false; }
-	void update_position( void );
 
 	HWND id( void ) const { return _hwnd; }
 
-	coord_type width( void ) override { return _last_w; }
-	coord_type height( void )  override { return _last_h; }
-	// TODO: restore this once we are dispatching events
-//protected:
+protected:
 	void make_current( const std::shared_ptr<cursor> &c ) override;
-	void expose_event( coord_type x, coord_type y, coord_type w, coord_type h ) override;
-	void move_event( coord_type x, coord_type y ) override;
-	void resize_event( coord_type w, coord_type h ) override;
+
+	rect query_geometry( void ) override;
+	bool update_geometry( rect &r ) override;
+
+	void submit_delayed_expose( const rect &r ) override;
 
 private:
 	HWND _hwnd;
-	HGLRC _hrc;
-	HDC _hdc;
-
-	int16_t _last_x = 0, _last_y = 0;
-	uint16_t _last_w = 0, _last_h = 0;
+	std::unique_ptr<context> _context;
 };
 
 ////////////////////////////////////////

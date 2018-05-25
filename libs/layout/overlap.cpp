@@ -24,10 +24,10 @@ void overlap::compute_bounds( void )
 	// Clean up areas that have been deleted.
 	_areas.remove_if( []( const std::weak_ptr<area> &a ) { return a.expired(); } );
 
-	double minw = 0.0;
-	double minh = 0.0;
-	double maxw = 0.0;
-	double maxh = 0.0;
+	coord minw = min_coord();
+	coord minh = min_coord();
+	coord maxw = min_coord();
+	coord maxh = min_coord();
 
 	for ( auto &wa: _areas )
 	{
@@ -61,10 +61,10 @@ void overlap::compute_bounds( void )
 
 void overlap::compute_layout( void )
 {
-	double x = this->x() + _pad[0];
-	double y = this->y() + _pad[2];
-	double w = width() - _pad[0] - _pad[1];
-	double h = height() - _pad[2] - _pad[3];
+	coord x = this->x() + _pad[0];
+	coord y = this->y() + _pad[2];
+	coord w = width() - _pad[0] - _pad[1];
+	coord h = height() - _pad[2] - _pad[3];
 
 	for ( auto &wa: _areas )
 	{

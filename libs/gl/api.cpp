@@ -171,19 +171,19 @@ void api::viewport( float xx, float yy, float ww, float hh )
 
 ////////////////////////////////////////
 
-void api::push_scissor( float xx, float yy, float ww, float hh )
+void api::push_scissor( int xx, int yy, int ww, int hh )
 {
-	base::frect r( xx, _viewport.height() - yy - hh, ww, hh );
+	base::irect r( xx, _viewport.height() - yy - hh, ww, hh );
 	if ( _scissors.empty() )
 		enable( capability::SCISSOR_TEST );
 	else
 		r.clip( _scissors.back() );
 
 	_scissors.emplace_back( r );
-	GLint x = static_cast<GLint>( std::floor( r.x() ) );
-	GLint y = static_cast<GLint>( std::floor( r.y() ) );
-	GLsizei w = static_cast<GLsizei>( std::ceil( r.width() + r.x() - float(x) ) );
-	GLsizei h = static_cast<GLsizei>( std::ceil( r.height() + r.y() - float(y) ) );
+	GLint x = static_cast<GLint>( r.x() );
+	GLint y = static_cast<GLint>( r.y() );
+	GLsizei w = static_cast<GLsizei>( r.width() + r.x() - x );
+	GLsizei h = static_cast<GLsizei>( r.height() + r.y() - y );
 	glScissor( x, y, w, h );
 }
 
@@ -197,11 +197,11 @@ void api::pop_scissor( void )
 		disable( capability::SCISSOR_TEST );
 	else
 	{
-		const base::frect &r = _scissors.back();
-		GLint x = static_cast<GLint>( std::floor( r.x() ) );
-		GLint y = static_cast<GLint>( std::floor( r.y() ) );
-		GLsizei w = static_cast<GLsizei>( std::ceil( r.width() + r.x() - float(x) ) );
-		GLsizei h = static_cast<GLsizei>( std::ceil( r.height() + r.y() - float(y) ) );
+		const base::irect &r = _scissors.back();
+		GLint x = static_cast<GLint>( r.x() );
+		GLint y = static_cast<GLint>( r.y() );
+		GLsizei w = static_cast<GLsizei>( r.width() + r.x() - x );
+		GLsizei h = static_cast<GLsizei>( r.height() + r.y() - y );
 		glScissor( x, y, w, h );
 	}
 }

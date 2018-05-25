@@ -80,10 +80,11 @@ void line_edit_w::paint( context &ctxt )
 
 ////////////////////////////////////////
 
-bool line_edit_w::key_press( platform::scancode c )
+bool line_edit_w::key_press( const event &e )
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-enum"
+	platform::scancode c = e.key().keys[0];
 	switch ( c )
 	{
 		case platform::scancode::KEY_LEFT:
@@ -151,8 +152,9 @@ bool line_edit_w::key_press( platform::scancode c )
 
 ////////////////////////////////////////
 
-bool line_edit_w::text_input( char32_t c )
+bool line_edit_w::text_input( const event &e )
 {
+	char32_t c = e.text().text;
 	if ( utf::is_graphic( c ) )
 	{
 		std::string tmp( _text.get_text() );
@@ -174,9 +176,15 @@ bool line_edit_w::text_input( char32_t c )
 ////////////////////////////////////////
 
 bool
-line_edit_w::mouse_press( const point &p, int button )
+line_edit_w::mouse_press( const event &e )
 {
-	if ( button == 2 )
+	int button = e.mouse().button;
+	if ( button == 1 )
+	{
+		// TODO: set cursor position
+		context::current().set_focus( shared_from_this() );
+	}
+	else if ( button == 2 )
 	{
 		auto paste = application::current()->get_system()->query_selection( platform::selection_type::MOUSE );
 		if ( ! paste.second.empty() )
@@ -210,7 +218,7 @@ line_edit_w::mouse_press( const point &p, int button )
 		}
 		return true;
 	}
-	return widget::mouse_press( p, button );
+	return widget::mouse_press( e );
 }
 
 
