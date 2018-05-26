@@ -372,6 +372,7 @@ peakThread( size_t, int s, int e, plane_buffer &u, const const_plane_buffer &ori
 	}
 }
 
+/*
 static void
 removePeaks( plane &u, plane &v, const plane &origU, const plane &origV, int diam )
 {
@@ -385,6 +386,7 @@ removePeaks( plane &u, plane &v, const plane &origU, const plane &origV, int dia
 	plane_buffer vb = v;
 	threading::get().dispatch( std::bind( peakThread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::ref( vb ), std::cref( mvb ), static_cast<int>(diam/2) ), v );
 }
+*/
 
 static void
 removePeaks( plane &u, plane &v, int diam )

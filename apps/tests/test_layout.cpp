@@ -144,8 +144,10 @@ std::shared_ptr<widget<layout::tree>> make_tree( void )
 	return result;
 }
 
-int safemain( int /*argc*/, char * /*argv*/ [] )
+int safemain( int argc, char *argv[] )
 {
+	unused( argc );
+	unused( argv );
 
 	// Create a window
 	auto sys = platform::platform::find_running();

@@ -135,7 +135,6 @@ int dispatcher::execute( void )
 		}
 
 		bool doTimeouts = false;
-		bool doDispatch = false;
 		if ( firenow.empty() )
 		{
 			++nWaits;

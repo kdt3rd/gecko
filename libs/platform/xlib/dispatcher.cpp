@@ -903,7 +903,7 @@ void dispatcher::dispatchKeymapNotify( const std::shared_ptr<window> &w, XEvent 
 		{
 			if ( ( kv >> i ) & 0x1 )
 			{
-				int k = n * 8 + i;
+//				int k = n * 8 + i;
 //				std::cout << "Key " << k << " down: " << int(XK_semicolon) << std::endl;
 //				auto &ksl = _keycode_to_keysym[k];
 //				for ( auto ks: ksl )

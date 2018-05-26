@@ -23,7 +23,7 @@ namespace layout
 using coord = int32_t;
 constexpr inline coord divide( coord a, coord b )
 {
-	return ( a + (b - 1 ) ) / b;
+	return ( a + ( b - 1 ) ) / b;
 }
 
 using rect = base::rect<coord>;
@@ -35,7 +35,7 @@ inline constexpr coord max_coord( void ) { return std::numeric_limits<coord>::ma
 
 using alignment = base::alignment;
 
-} // namespace layout
+}
 
 
 
