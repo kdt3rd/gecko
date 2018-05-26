@@ -570,7 +570,6 @@ private:
 			std::move( p + 1, end(), p );
 		--_impl._end;
 		allocator_traits::destroy( _impl, _impl._end );
-		return p;
 	}
 
 	void do_erase( iterator f, iterator l )
@@ -581,7 +580,6 @@ private:
 				std::move( l, end(), f );
 			erase_at_end( f + ( end() - l ) );
 		}
-		return f;
 	}
 
 	size_type check_len( size_type n ) const
