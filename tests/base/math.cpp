@@ -42,13 +42,13 @@ int safemain( int argc, char *argv[] )
 
 	test["ratio"] = [&]( void )
 	{
-		base::ratio oneT( 10, 100 );
+		base::ratio oneT( 10, 100, true );
 		if ( oneT.numerator() == 1 && oneT.denominator() == 10 )
 			test.success( "ratio::simplify positive numbers" );
 		else
 			test.failure( "ratio::simplify should reduce 10/100 to 1/10, got {0}/{1}", oneT.numerator(), oneT.denominator() );
 
-		base::ratio negV( -35, 49 );
+		base::ratio negV( -35, 49, true );
 		if ( negV.numerator() == -5 && negV.denominator() == 7 )
 			test.success( "ratio::simplify negative number" );
 		else
