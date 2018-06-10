@@ -386,9 +386,7 @@ win32_file_system::open_write( const base::uri &path, std::ios_base::openmode m 
 	throw_not_yet();
 #if 0
 	std::unique_ptr<unix_streambuf> sb( new unix_streambuf( m, path, page_size ) );
-	ostream ret( std::move( sb ) );
-	ret.exceptions( std::ios_base::failbit );
-	return ret;
+	return ostream( std::move( sb ) );
 #endif
 }
 
@@ -403,9 +401,7 @@ win32_file_system::open( const base::uri &path, std::ios_base::openmode m )
 	throw_not_yet();
 #if 0
 	std::unique_ptr<unix_streambuf> sb( new unix_streambuf( m, path, page_size ) );
-	iostream ret( std::move( sb ) );
-	ret.exceptions( std::ios_base::failbit );
-	return ret;
+	return iostream( std::move( sb ) );
 #endif
 }
 

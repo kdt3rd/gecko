@@ -193,14 +193,15 @@ private:
 
 std::ostream &operator<<( std::ostream &out, const uri &u );
 
-inline uri operator/( const uri &u, const std::string &str )
+inline uri operator/( const uri &u, cstring str )
 {
-	return std::move( uri( u ) /= str );
+	return uri( u ) /= str;
 }
 
-inline uri operator/( uri &&u, const std::string &str )
+inline uri operator/( uri &&u, cstring str )
 {
-	return std::move( u /= str );
+	u /= str;
+	return std::move( u );
 }
 
 ////////////////////////////////////////

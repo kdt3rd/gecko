@@ -53,8 +53,7 @@ int safemain( int argc, char *argv[] )
 	test["posix_stream"] = [&]( void )
 	{
 		auto fs = base::file_system::get( std::string( "file" ) );
-		base::uri path( std::string( "file:///tmp/test.txt" ) );
-		base::istream in = fs->open_read( path );
+		base::istream in = fs->open_read( base::uri( base::cstring( "/tmp/test.txt" ) ) );
 		char buf[8];
 		while ( !in.eof() )
 		{

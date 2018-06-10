@@ -549,9 +549,7 @@ posix_file_system::open_read( const base::uri &path, std::ios_base::openmode m )
 {
 	precondition( path.scheme() == "file", "posix_file_system expected \"file\" uri" );
 	std::unique_ptr<unix_streambuf> sb( new unix_streambuf( m, path, page_size ) );
-	istream ret( std::move( sb ) );
-	ret.exceptions( std::ios_base::failbit );
-	return ret;
+	return istream( std::move( sb ) );
 }
 
 
@@ -563,9 +561,7 @@ posix_file_system::open_write( const base::uri &path, std::ios_base::openmode m 
 {
 	precondition( path.scheme() == "file", "posix_file_system expected \"file\" uri" );
 	std::unique_ptr<unix_streambuf> sb( new unix_streambuf( m, path, page_size ) );
-	ostream ret( std::move( sb ) );
-	ret.exceptions( std::ios_base::failbit );
-	return ret;
+	return ostream( std::move( sb ) );
 }
 
 
