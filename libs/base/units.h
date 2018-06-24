@@ -9,16 +9,24 @@
 
 #include <cmath>
 #include <ratio>
+#include <iostream>
 
 ////////////////////////////////////////
 
 namespace base
 {
 
-/// @brief Modelled after std::chrono
+/// @brief Measure of units
 ///
+/// This is modeled after std::chrono where there are compile-time
+/// ratios in place for conversion. Unlike std::chrono, math operators
+/// are defined.
+/// 
 /// Provides type that can be used for units of measure (length
 /// primarily, but could be extended in the future)
+///
+/// NB: includes files at end to put operations in other files to clean up
+/// this header
 namespace units
 {
 
@@ -108,6 +116,7 @@ template <typename T, typename RtoM>
 class length
 {
 public:
+	static_assert( std::is_arithmetic<T>::value, "length should be composed of an arithmetic value type" );
     using value_type = T;
     using ratio_to_meters = RtoM;
 
@@ -116,13 +125,13 @@ public:
     template <typename OT, typename = std::enable_if_t<std::is_convertible<OT, value_type>::value &&
                                                        (std::is_floating_point<value_type>::value ||
                                                         (!std::is_floating_point<OT>::value) )>>
-    constexpr explicit length( const OT &o ) : _val( static_cast<value_type>( o ) ) {}
+    constexpr explicit inline length( const OT &o ) : _val( static_cast<value_type>( o ) ) {}
 
     template <typename OT, typename other_ratio,
               typename = std::enable_if_t<std::is_floating_point<value_type>::value ||
                                           ( std::integral_constant<bool, 1 == std::ratio_divide<other_ratio, ratio_to_meters>::den>::value &&
                                             ( ! std::is_floating_point<OT>::value ) )> >
-    constexpr length( const length<OT, other_ratio> &o ) : _val( convert<length>( o ).count() ) {}
+    constexpr inline length( const length<OT, other_ratio> &o ) : _val( convert<length>( o ).count() ) {}
     ~length( void ) = default;
     length( const length & ) = default;
     length &operator=( const length & ) = default;
@@ -141,94 +150,42 @@ public:
         return convert<OT>( *this );
     }
 
+    /// @brief Enable explicit (programmer specified) cast conversion
+    template <typename tO, typename rO>
+    explicit inline operator length<tO, rO>( void ) const { return length<tO, rO>( *this ); }
+
+    /// @brief Retrieve the current count of length units.
+    ///
+    /// Much like std::chrono, we do not provide implicit conversion to avoid
+    /// the loss of units.
     constexpr inline value_type count( void ) const { return _val; }
+
+    inline length &operator=( value_type v ) { _val = v; return *this; }
+
+    inline length &operator++( void ) { ++_val; return *this; }
+    inline length operator++( int ) { length tmp(*this); ++_val; return tmp; }
+
+    inline length &operator+=( const length &l ) { _val += l.count(); return *this; }
+    inline length &operator+=( value_type v ) { _val += v; return *this; }
+    inline length &operator-=( const length &l ) { _val -= l.count(); return *this; }
+    inline length &operator-=( value_type v ) { _val -= v; return *this; }
+    inline length &operator*=( const length &l ) { _val *= l.count(); return *this; }
+    inline length &operator*=( value_type v ) { _val *= v; return *this; }
+    inline length &operator/=( const length &l ) { _val /= l.count(); return *this; }
+    inline length &operator/=( value_type v ) { _val /= v; return *this; }
+
+    inline length operator+( const length &l ) const { return length( count() + l.count() ); }
+    inline length operator+( value_type v ) const { return length( count() + v ); }
+    inline length operator-( const length &l ) const { return length( count() - l.count() ); }
+    inline length operator-( value_type v ) const { return length( count() - v ); }
+    inline length operator*( const length &l ) const { return length( count() * l.count() ); }
+    inline length operator*( value_type v ) const { return length( count() * v ); }
+    inline length operator/( const length &l ) const { return length( count() / l.count() ); }
+    inline length operator/( value_type v ) const { return length( count() / v ); }
 
 private:
     value_type _val;
 };
-
-////////////////////////////////////////
-
-namespace detail
-{
-
-template <typename convr, typename comt, typename CompareFunc, bool numisone = false, bool denisone = false>
-struct compare_impl
-{
-    template <typename aT, typename aRtoM, typename bT, typename bRtoM>
-    static constexpr inline bool apply( const length<aT, aRtoM> &a, const length<bT, bRtoM> &b, CompareFunc f )
-    {
-        return std::forward<CompareFunc>( f )( static_cast<comt>( a.count() ), static_cast<comt>( b.count() ) * static_cast<comt>( convr::num ) / static_cast<comt>( convr::den ) );
-    }
-};
-
-template <typename convr, typename comt, typename CompareFunc>
-struct compare_impl<convr, comt, CompareFunc, true, true>
-{
-    template <typename aT, typename aRtoM, typename bT, typename bRtoM>
-    static constexpr inline bool apply( const length<aT, aRtoM> &a, const length<bT, bRtoM> &b, CompareFunc f )
-    {
-        return std::forward<CompareFunc>( f )( static_cast<comt>( a.count() ), static_cast<comt>( b.count() ) );
-    }
-};
-
-template <typename convr, typename comt, typename CompareFunc>
-struct compare_impl<convr, comt, CompareFunc, true, false>
-{
-    template <typename aT, typename aRtoM, typename bT, typename bRtoM>
-    static constexpr inline bool apply( const length<aT, aRtoM> &a, const length<bT, bRtoM> &b, CompareFunc f )
-    {
-        return std::forward<CompareFunc>( f )( static_cast<comt>( a.count() ), static_cast<comt>( b.count() ) / static_cast<comt>( convr::den ) );
-    }
-};
-
-template <typename convr, typename comt, typename CompareFunc>
-struct compare_impl<convr, comt, CompareFunc, false, true>
-{
-    template <typename aT, typename aRtoM, typename bT, typename bRtoM>
-    static constexpr inline bool apply( const length<aT, aRtoM> &a, const length<bT, bRtoM> &b, CompareFunc f )
-    {
-        return std::forward<CompareFunc>( f )( static_cast<comt>( a.count() ), static_cast<comt>( b.count() ) * static_cast<comt>( convr::num ) );
-    }
-};
-
-template <typename a_length, typename b_length, typename CompareFunc>
-constexpr inline bool compare( const a_length &a, const b_length &b, CompareFunc f )
-{
-    using a_value = typename a_length::value_type;
-    using b_value = typename b_length::value_type;
-    using convr = typename std::ratio_divide<typename a_length::ratio_to_meters,
-                                             typename b_length::ratio_to_meters>;
-    using comt = std::common_type_t<a_value, b_value, std::intmax_t>;
-    using comparator = compare_impl<convr, comt, CompareFunc, convr::num == 1, convr::den == 1>;
-    return comparator::apply( a, b, std::forward<CompareFunc>( f ) );
-}
-
-} // namespace detail
-
-template <typename tA, typename rA, typename tB, typename rB>
-inline bool operator==( const length<tA, rA> &a, const length<tB, rB> &b )
-{ return detail::compare( a, b, []( auto a, auto b ) { return a == b; } ); }
-
-template <typename tA, typename rA, typename tB, typename rB>
-inline bool operator!=( const length<tA, rA> &a, const length<tB, rB> &b )
-{ return detail::compare( a, b, []( auto a, auto b ) { return a != b; } ); }
-
-template <typename tA, typename rA, typename tB, typename rB>
-inline bool operator<( const length<tA, rA> &a, const length<tB, rB> &b )
-{ return detail::compare( a, b, []( auto a, auto b ) { return a < b; } ); }
-
-template <typename tA, typename rA, typename tB, typename rB>
-inline bool operator<=( const length<tA, rA> &a, const length<tB, rB> &b )
-{ return detail::compare( a, b, []( auto a, auto b ) { return a <= b; } ); }
-
-template <typename tA, typename rA, typename tB, typename rB>
-inline bool operator>( const length<tA, rA> &a, const length<tB, rB> &b )
-{ return detail::compare( a, b, []( auto a, auto b ) { return a > b; } ); }
-
-template <typename tA, typename rA, typename tB, typename rB>
-inline bool operator>=( const length<tA, rA> &a, const length<tB, rB> &b )
-{ return detail::compare( a, b, []( auto a, auto b ) { return a >= b; } ); }
 
 ////////////////////////////////////////
 // standard SI units
@@ -287,54 +244,9 @@ template <typename T> using astronomical_units   = length<T, std::ratio<14959787
 
 } // namespace units
 
-////////////////////////////////////////
-
-inline namespace literals
-{
-
-inline namespace length_literals
-{
-
-constexpr inline units::meters<long double> operator"" _km( long double x )
-{ return units::kilometers<long double>( x ); }
-
-constexpr inline units::meters<unsigned long long int> operator"" _km( unsigned long long int x )
-{ return units::kilometers<unsigned long long int>( x ); }
-
-constexpr inline units::meters<long double> operator"" _m( long double x )
-{ return units::meters<long double>( x ); }
-
-constexpr inline units::meters<unsigned long long int> operator"" _m( unsigned long long int x )
-{ return units::meters<unsigned long long int>( x ); }
-
-constexpr inline units::centimeters<long double> operator"" _cm( long double x )
-{ return units::centimeters<long double>( x ); }
-
-constexpr inline units::centimeters<unsigned long long int> operator"" _cm( unsigned long long int x )
-{ return units::centimeters<unsigned long long int>( x ); }
-
-constexpr inline units::millimeters<long double> operator"" _mm( long double x )
-{ return units::millimeters<long double>( x ); }
-
-constexpr inline units::millimeters<unsigned long long int> operator"" _mm( unsigned long long int x )
-{ return units::millimeters<unsigned long long int>( x ); }
-
-constexpr inline units::inches<long double> operator"" _in( long double x )
-{ return units::inches<long double>( x ); }
-
-constexpr inline units::inches<unsigned long long int> operator"" _in( unsigned long long int x )
-{ return units::inches<unsigned long long int>( x ); }
-
-} // namespace length_literals
-
-} // namespace literals
-
-namespace units
-{
-using namespace literals::length_literals;
-}
-
 } // namespace base
 
+#include "units_ext_operations.h"
+#include "units_literals.h"
 
 
