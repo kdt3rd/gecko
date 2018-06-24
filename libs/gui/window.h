@@ -38,7 +38,7 @@ public:
 	using hotkey_handler = std::function<void(const point &)>;
 
 	window( const std::shared_ptr<platform::window> &w );
-	virtual ~window( void );
+	~window( void ) override;
 
 	void set_title( const std::string &t );
 

@@ -219,7 +219,7 @@ public:
 						   value_type adapt_amount = value_type(0.0),
 						   cone_response m = cone_response::DEFAULT )
 	{
-		return XYZtoRGB() * adaptation( o, m ) * o.RGBtoXYZ();
+		return XYZtoRGB() * adaptation( o, adapt_amount, m ) * o.RGBtoXYZ();
 	}
 
 	xy red = xy( value_type(1), value_type(0) );

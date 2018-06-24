@@ -101,7 +101,7 @@ public:
 
 	void set_dominant_dark( const gl::color &c )
 	{
-		_dominant[3] = c;
+		_dominant[2] = c;
 		++_version;
 	}
 

@@ -22,7 +22,7 @@ public:
 	font_manager( void );
 
 	/// @brief Destructor.
-	~font_manager( void );
+	~font_manager( void ) override;
 
 	std::set<std::string> get_families( void ) override;
 	std::set<std::string> get_styles( const std::string &family ) override;

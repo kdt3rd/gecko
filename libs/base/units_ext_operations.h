@@ -47,7 +47,7 @@ typename detail::unit_math<length<tA, rA>, length<tB, rB>>::result_type
 operator+( const length<tA, rA> &a, const length<tB, rB> &b )
 {
     using mather = detail::unit_math<length<tA, rA>, length<tB, rB>>;
-    return mather::apply( a, b, []( auto a, auto b ) { return a + b; } );
+    return mather::apply( a, b, []( auto x, auto y ) { return x + y; } );
 }
 
 template <typename tA, typename rA, typename tB, typename rB>
@@ -56,7 +56,7 @@ typename detail::unit_math<length<tA, rA>, length<tB, rB>>::result_type
 operator-( const length<tA, rA> &a, const length<tB, rB> &b )
 {
     using mather = detail::unit_math<length<tA, rA>, length<tB, rB>>;
-    return mather::apply( a, b, []( auto a, auto b ) { return a - b; } );
+    return mather::apply( a, b, []( auto x, auto y ) { return x - y; } );
 }
 
 template <typename tA, typename rA, typename tB, typename rB>
@@ -65,7 +65,7 @@ typename detail::unit_math<length<tA, rA>, length<tB, rB>>::result_type
 operator*( const length<tA, rA> &a, const length<tB, rB> &b )
 {
     using mather = detail::unit_math<length<tA, rA>, length<tB, rB>>;
-    return mather::apply( a, b, []( auto a, auto b ) { return a * b; } );
+    return mather::apply( a, b, []( auto x, auto y ) { return x * y; } );
 }
 
 template <typename tA, typename rA, typename tB, typename rB>
@@ -74,7 +74,7 @@ typename detail::unit_math<length<tA, rA>, length<tB, rB>>::result_type
 operator/( const length<tA, rA> &a, const length<tB, rB> &b )
 {
     using mather = detail::unit_math<length<tA, rA>, length<tB, rB>>;
-    return mather::apply( a, b, []( auto a, auto b ) { return a / b; } );
+    return mather::apply( a, b, []( auto x, auto y ) { return x / y; } );
 }
 
 ////////////////////////////////////////
@@ -138,27 +138,27 @@ constexpr inline bool compare( const a_length &a, const b_length &b, CompareFunc
 
 template <typename tA, typename rA, typename tB, typename rB>
 inline bool operator==( const length<tA, rA> &a, const length<tB, rB> &b )
-{ return detail::compare( a, b, []( auto a, auto b ) { return a == b; } ); }
+{ return detail::compare( a, b, []( auto x, auto y ) { return x == y; } ); }
 
 template <typename tA, typename rA, typename tB, typename rB>
 inline bool operator!=( const length<tA, rA> &a, const length<tB, rB> &b )
-{ return detail::compare( a, b, []( auto a, auto b ) { return a != b; } ); }
+{ return detail::compare( a, b, []( auto x, auto y ) { return x != y; } ); }
 
 template <typename tA, typename rA, typename tB, typename rB>
 inline bool operator<( const length<tA, rA> &a, const length<tB, rB> &b )
-{ return detail::compare( a, b, []( auto a, auto b ) { return a < b; } ); }
+{ return detail::compare( a, b, []( auto x, auto y ) { return x < y; } ); }
 
 template <typename tA, typename rA, typename tB, typename rB>
 inline bool operator<=( const length<tA, rA> &a, const length<tB, rB> &b )
-{ return detail::compare( a, b, []( auto a, auto b ) { return a <= b; } ); }
+{ return detail::compare( a, b, []( auto x, auto y ) { return x <= y; } ); }
 
 template <typename tA, typename rA, typename tB, typename rB>
 inline bool operator>( const length<tA, rA> &a, const length<tB, rB> &b )
-{ return detail::compare( a, b, []( auto a, auto b ) { return a > b; } ); }
+{ return detail::compare( a, b, []( auto x, auto y ) { return x > y; } ); }
 
 template <typename tA, typename rA, typename tB, typename rB>
 inline bool operator>=( const length<tA, rA> &a, const length<tB, rB> &b )
-{ return detail::compare( a, b, []( auto a, auto b ) { return a >= b; } ); }
+{ return detail::compare( a, b, []( auto x, auto y ) { return x >= y; } ); }
 
 ////////////////////////////////////////
 

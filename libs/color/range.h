@@ -38,7 +38,7 @@ enum class range : uint8_t
 };
 
 template <typename T>
-void to_full( T &outA, T &outB, T &outC, const T inA, const T inB, const T inC, const space s, const range r, const int bits )
+void to_full( T &outA, T &outB, T &outC, const T inA, const T inB, const T inC, const space /*s*/, const range r, const int /*bits*/ )
 {
 	switch ( r )
 	{
@@ -139,7 +139,7 @@ struct sdi_util<T, typename std::enable_if<std::is_integral<T>::value>::type>
 /// assumes values in ~0-1
 /// clamping only applies to other ranges besides FULL?
 template <typename T>
-void from_full( T &outA, T &outB, T &outC, const T inA, const T inB, const T inC, space s, range r, int bits, bool doClampIllegal )
+void from_full( T &outA, T &outB, T &outC, const T inA, const T inB, const T inC, space /*s*/, range r, int bits, bool doClampIllegal )
 {
 	switch ( r )
 	{

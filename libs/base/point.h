@@ -279,7 +279,7 @@ inline bool is_inside( const point<T> &p, const point<T> &p1, const point<T> &p2
 /// @param a angle of the point, in radians.
 /// \todo { if c++ ever adds a sincos or we move to our own math library, switch to sincos }
 template<typename F1, typename F2, typename T = F1>
-static point<T> polar( F1 r, F2 a )
+inline point<T> polar( F1 r, F2 a )
 {
 	static_assert( std::is_floating_point<F1>::value, "polar requires floating point type" );
 	static_assert( std::is_floating_point<F2>::value, "polar requires floating point type" );

@@ -43,7 +43,7 @@ mix( const tristimulus_value<Ta, bA> &a, const tristimulus_value<Tb, bB> &b, flo
 	state mixs = a.current_state();
 	mixs.current_space( space::RGB );
 	mixs.curve( transfer::LINEAR );
-	return unnorm_mix( convert( a, mixs ), convert( b, mixs ) );
+	return unnorm_mix( convert( a, mixs ), convert( b, mixs ), m );
 }
 
 template <typename T, int fbits>
