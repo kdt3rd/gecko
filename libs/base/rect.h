@@ -25,7 +25,7 @@ template <typename T>
 class rect
 {
 public:
-	typedef T coord_type;
+	using coord_type = T;
 	using point_type = point<coord_type>;
 	using size_type = size<coord_type>;
 
@@ -89,10 +89,18 @@ public:
 	constexpr coord_type height( void ) const { return _extent.h(); }
 
 	/// @brief X coordinate in the rectangle
-	constexpr coord_type x( coord_type percent, coord_type radius = coord_type(0) ) const { return _position.x() + radius + ( _extent.w() - radius*coord_type(2) ) * percent; }
+	constexpr coord_type x( coord_type percent, coord_type radius = coord_type(0) ) const
+	{
+		static_assert( std::is_floating_point<coord_type>::value, "expect a floating point type for percent accessor" );
+		return _position.x() + radius + ( _extent.w() - radius*coord_type(2) ) * percent;
+	}
 
 	/// @brief Y coordinate in the rectangle
-	constexpr coord_type y( coord_type percent, coord_type radius = coord_type(0) ) const { return _position.y() + radius + ( _extent.h() - radius*coord_type(2) ) * percent; }
+	constexpr coord_type y( coord_type percent, coord_type radius = coord_type(0) ) const
+	{
+		static_assert( std::is_floating_point<coord_type>::value, "expect a floating point type for percent accessor" );
+		return _position.y() + radius + ( _extent.h() - radius*coord_type(2) ) * percent;
+	}
 
 	/// @brief X coordinate of right side
 	constexpr coord_type x1( void ) const { return _position.x(); }
@@ -252,16 +260,6 @@ public:
 		set_vertical( yy1, yy2 );
 	}
 
-	typename std::conditional<sizeof(coord_type) <= sizeof(double), double, long double>::type
-	distance( const rect &other ) const
-	{
-		auto d1 = point_type::distance( top_left(), other.top_left() );
-		auto d2 = point_type::distance( top_right(), other.top_right() );
-		auto d3 = point_type::distance( bottom_left(), other.bottom_left() );
-		auto d4 = point_type::distance( bottom_right(), other.bottom_right() );
-		return std::max( std::max( d1, d2 ), std::max( d3, d4 ) );
-	}
-
 	void clip( const rect &other )
 	{
 		coord_type xx1 = std::max( x1(), other.x1() );
@@ -315,6 +313,18 @@ inline std::ostream &operator<<( std::ostream &out, const rect<T> &r )
 	out << r.position() << ' ' << r.extent();
 	return out;
 }
+
+template <typename T>
+inline decltype(distance(point<T>(), point<T>()))
+distance( const rect<T> &r, const rect<T> &other )
+{
+	auto d1 = distance( r.top_left(), other.top_left() );
+	auto d2 = distance( r.top_right(), other.top_right() );
+	auto d3 = distance( r.bottom_left(), other.bottom_left() );
+	auto d4 = distance( r.bottom_right(), other.bottom_right() );
+	return std::max( std::max( d1, d2 ), std::max( d3, d4 ) );
+}
+
 
 using frect = rect<float>;
 using drect = rect<double>;

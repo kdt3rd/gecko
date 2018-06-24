@@ -10,8 +10,8 @@
 #include <iostream>
 #include <cmath>
 #include <cstdint>
-#include <functional>
 #include <algorithm>
+#include "type_util.h"
 
 namespace base
 {
@@ -23,8 +23,8 @@ template <typename T>
 class size
 {
 public:
-	static_assert( std::is_arithmetic<T>::value, "size should be a signed value" );
-	typedef T coord_type;
+	static_assert( has_arithmetic_ops<T>::value, "size should be composed of an arithmetic value type" );
+	using coord_type = T;
 	
 	constexpr size( void ) = default;
 	constexpr size( const size & ) = default;
@@ -92,41 +92,6 @@ public:
 		return _w < o._w || ( std::equal_to<coord_type>()( _w, o._w ) && _h < o._h );
 	}
 
-	/// @brief Round size up to nearest integer based on half-way
-	void round( void )
-	{
-		_w = std::lround( _w );
-		_h = std::lround( _h );
-	}
-
-	/// @brief Round size up to nearest integer
-	void ceil( void )
-	{
-		_w = std::ceil( _w );
-		_h = std::ceil( _h );
-	}
-
-	/// @brief Round size down to nearest integer
-	void floor( void )
-	{
-		_w = std::floor( _w );
-		_h = std::floor( _h );
-	}
-
-	/// @brief Maximum operation.
-	void maximum( const size &o )
-	{
-		_w = std::max( _w, o.w() );
-		_h = std::max( _h, o.h() );
-	}
-
-	/// @brief Minimum operation.
-	void minimum( const size &o )
-	{
-		_w = std::min( _w, o.w() );
-		_h = std::min( _h, o.h() );
-	}
-
 	bool empty( void ) const
 	{
 		return _w <= coord_type( 0 ) && _h <= coord_type( 0 );
@@ -135,6 +100,64 @@ public:
 private:
 	coord_type _w = coord_type( 0 ), _h = coord_type( 0 );
 };
+
+////////////////////////////////////////
+
+/// @brief Round size up following rounding rules
+template <typename T>
+inline size<T> round( const size<T> &s )
+{
+	using namespace std;
+	return size<T>( static_cast<T>( round( s.w() ) ), round( s.h() ) );
+}
+
+/// @brief Round size up to nearest integer based on half-way
+template <typename T>
+inline size<long> lround( const size<T> &s )
+{
+	using namespace std;
+	return size<long>( lround( s.w() ), lround( s.h() ) );
+}
+
+/// @brief Round size up to nearest integer based on half-way
+template <typename T>
+inline size<long long> llround( const size<T> &s )
+{
+	using namespace std;
+	return size<long long>( llround( s.w() ), llround( s.h() ) );
+}
+
+/// @brief Round size up to nearest integer
+template <typename T>
+inline size<T> ceil( const size<T> &s )
+{
+	using namespace std;
+	return size<T>( static_cast<T>( ceil( s.w() ) ), static_cast<T>( ceil( s.h() ) ) );
+}
+
+/// @brief Round size up to nearest integer
+template <typename T>
+inline size<T> floor( const size<T> &s )
+{
+	using namespace std;
+	return size<T>( static_cast<T>( floor( s.w() ) ), static_cast<T>( floor( s.h() ) ) );
+}
+
+/// @brief Round size up to nearest integer
+template <typename T>
+inline size<T> max( const size<T> &a, const size<T> &b )
+{
+	using namespace std;
+	return size<T>( max( a.w(), b.w() ), max( a.h(), b.h() ) );
+}
+
+/// @brief Round size up to nearest integer
+template <typename T>
+inline size<T> min( const size<T> &a, const size<T> &b )
+{
+	using namespace std;
+	return size<T>( min( a.w(), b.w() ), min( a.h(), b.h() ) );
+}
 
 ////////////////////////////////////////
 
@@ -154,4 +177,53 @@ using lsize = size<int64_t>;
 ////////////////////////////////////////
 
 }
+
+// provide std specialization of the functions above
+namespace std
+{
+
+template <typename T>
+inline base::size<T> round( const base::size<T> &a )
+{
+	return base::round( a );
+}
+
+template <typename T>
+inline base::size<long> lround( const base::size<T> &a )
+{
+	return base::lround( a );
+}
+
+template <typename T>
+inline base::size<long long> llround( const base::size<T> &a )
+{
+	return base::llround( a );
+}
+
+template <typename T>
+inline base::size<T> ceil( const base::size<T> &a )
+{
+	return base::ceil( a );
+}
+
+template <typename T>
+inline base::size<T> floor( const base::size<T> &a )
+{
+	return base::floor( a );
+}
+
+template <typename T>
+inline base::size<T> max( const base::size<T> &a, const base::size<T> &b )
+{
+	return base::max( a, b );
+}
+
+template <typename T>
+inline base::size<T> min( const base::size<T> &a, const base::size<T> &b )
+{
+	return base::min( a, b );
+}
+
+} // namespace std
+
 
