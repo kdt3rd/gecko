@@ -203,8 +203,10 @@ namespace platform { namespace mswin
 
 ////////////////////////////////////////
 
-dispatcher::dispatcher( ::platform::system *sys, const std::shared_ptr<keyboard> &k, const std::shared_ptr<mouse> &m )
-	: _system( sys ), _keyboard( k ), _mouse( m )
+dispatcher::dispatcher( ::platform::system *sys )
+	: ::platform::dispatcher( sys ), _system( sys ),
+	_keyboard( std::make_shared<keyboard>( sys ) ),
+	_mouse( std::make_shared<mouse>( sys ) )
 {
 	precondition( the_glob_disp == nullptr, "expect only a single dispatcher" );
 	the_glob_disp = this;
@@ -357,7 +359,7 @@ dispatcher::dispatch_evt( const evt &e )
 			break;
 
 		case WM_CLOSE:
-			if ( w->process_event( event::window( _system, _ext_events.get(), event_type::WINDOW_CLOSE_REQUEST, coord_type(0), coord_type(0), coord_type(0), coord_type(0) ) ) )
+			if ( w->process_event( event::window( _ext_events.get(), event_type::WINDOW_CLOSE_REQUEST, coord_type(0), coord_type(0), coord_type(0), coord_type(0) ) ) )
 			{
 				_windows.erase( w->id() );
 				return true;
@@ -376,7 +378,7 @@ dispatcher::dispatch_evt( const evt &e )
 			rgn.right = LOWORD( lp );
 			rgn.bottom = HIWORD( lp );
 			w->process_event(
-				event::window( _system, _ext_events.get(),
+				event::window( _ext_events.get(),
 							   event_type::WINDOW_EXPOSED,
 							   coord_type(rgn.left),
 							   coord_type(rgn.top),
@@ -393,7 +395,7 @@ dispatcher::dispatch_evt( const evt &e )
 			// lprc->bottom = min / max / cur;
 
 			w->process_event(
-				event::window( _system, _ext_events.get(),
+				event::window( _ext_events.get(),
 							   event_type::WINDOW_MOVE_RESIZE,
 							   coord_type(lprc->left),
 							   coord_type(lprc->top),
@@ -410,7 +412,7 @@ dispatcher::dispatch_evt( const evt &e )
 		{
 			LPWINDOWPOS pwp = (LPWINDOWPOS)lp;
 			w->process_event(
-				event::window( _system, _ext_events.get(),
+				event::window( _ext_events.get(),
 							   event_type::WINDOW_MOVE_RESIZE,
 							   coord_type(pwp->x),
 							   coord_type(pwp->y),
@@ -459,7 +461,7 @@ dispatcher::dispatch_evt( const evt &e )
 			int amt = HIWORD( wp ) / WHEEL_DELTA;
 			uint8_t mods = extract_mods( LOWORD( wp ) );
 			w->process_event(
-				event::hid( _system, _mouse.get(), event_type::MOUSE_WHEEL,
+				event::hid( _mouse.get(), event_type::MOUSE_WHEEL,
 							p.x, p.y, 4, amt, mods ) );
 			break;
 		}
@@ -472,7 +474,7 @@ dispatcher::dispatch_evt( const evt &e )
 
 		case WM_ERASEBKGND:
 			w->process_event(
-				event::window( _system, _ext_events.get(),
+				event::window( _ext_events.get(),
 							   event_type::WINDOW_EXPOSED,
 							   0, 0, 0, 0 ) );
 			break;
@@ -517,7 +519,7 @@ void dispatcher::send_mouse_evt( const std::shared_ptr<window> &w,
 	uint8_t mods = extract_mods( LOWORD( wp ) );
 
 	w->process_event(
-		event::mouse( _system, _mouse.get(), e, p.x, p.y, button, mods ) );
+		event::mouse( _mouse.get(), e, p.x, p.y, button, mods ) );
 }
 
 ////////////////////////////////////////

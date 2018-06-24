@@ -17,7 +17,7 @@ namespace platform { namespace mswin
 class keyboard : public ::platform::keyboard
 {
 public:
-	keyboard( void );
+	keyboard( ::platform::system *s );
 	virtual ~keyboard( void );
 
 	void start( void ) override;

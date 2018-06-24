@@ -100,7 +100,17 @@ screen::refresh_rate( void ) const
 
 ////////////////////////////////////////
 
-base::dsize screen::dpi( void ) const
+dots_per_unit screen::dpi( void ) const
+{
+	dots_per_unit mm = dpmm();
+
+	return dots_per_unit( mm.w() * dots_per_unit::coord_type(25.4),
+						  mm.h() * dots_per_unit::coord_type(25.4) );
+}
+
+////////////////////////////////////////
+
+dots_per_unit screen::dpmm( void ) const
 {
 	HDC dc = CreateDC( TEXT("DISPLAY"), (LPCTSTR)_disp_devname.c_str(), NULL, NULL );
 	if ( dc == NULL )
@@ -108,17 +118,12 @@ base::dsize screen::dpi( void ) const
 	on_scope_exit{ DeleteDC( dc ); };
 
 	// logpixelsx/y returns same value for all screens...
-	double bx, by;
-	bx = static_cast<double>( GetDeviceCaps( dc, HORZRES ) );
-	by = static_cast<double>( GetDeviceCaps( dc, VERTRES ) );
-
-	int szx = GetDeviceCaps( dc, HORZSIZE );
-	int szy = GetDeviceCaps( dc, VERTSIZE );
-	bx *= 25.4 / static_cast<double>( szx );
-	by *= 25.4 / static_cast<double>( szy );
-
-	return { bx, by };
+	return dots_per_unit( ( dots_per_unit::coord_type( GetDeviceCaps( dc, HORZRES ) ) /
+							dots_per_unit::coord_type( GetDeviceCaps( dc, HORZSIZE ) ) ),
+						  dots_per_unit::coord_type( GetDeviceCaps( dc, VERTRES ) ) /
+						  dots_per_unit::coord_type( GetDeviceCaps( dc, VERTSIZE ) ) );
 }
+
 
 ////////////////////////////////////////
 

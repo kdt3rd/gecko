@@ -40,14 +40,14 @@ public:
 
 	void fullscreen( bool fs ) override;
 
-	void set_minimum_size( coord_type w, coord_type h ) override;
-
 	void set_title( const std::string &t ) override;
 //	void set_icon( const icon &i ) override;
 
 	HWND id( void ) const { return _hwnd; }
 
 protected:
+	void apply_minimum_size( coord_type w, coord_type h ) override;
+
 	void make_current( const std::shared_ptr<cursor> &c ) override;
 
 	rect query_geometry( void ) override;

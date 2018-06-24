@@ -17,7 +17,7 @@ namespace platform { namespace mswin
 class mouse : public ::platform::mouse
 {
 public:
-	mouse( void );
+	mouse( ::platform::system *s );
 	virtual ~mouse( void );
 
 	void start( void ) override;

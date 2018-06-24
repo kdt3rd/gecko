@@ -103,7 +103,7 @@ window::fullscreen( bool fs )
 
 ////////////////////////////////////////
 
-void window::set_minimum_size( coord_type w, coord_type h )
+void window::apply_minimum_size( coord_type w, coord_type h )
 {
 }
 

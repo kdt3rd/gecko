@@ -25,8 +25,8 @@ namespace platform { namespace mswin
 class dispatcher : public ::platform::dispatcher
 {
 public:
-	dispatcher( ::platform::system *sys, const std::shared_ptr<keyboard> &k, const std::shared_ptr<mouse> &m );
-	virtual ~dispatcher( void );
+	dispatcher( ::platform::system *sys );
+	~dispatcher( void ) override;
 
 	int execute( void ) override;
 	void exit( int code ) override;

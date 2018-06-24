@@ -14,7 +14,8 @@ namespace platform { namespace mswin
 
 ////////////////////////////////////////
 
-keyboard::keyboard( void )
+keyboard::keyboard( ::platform::system *s )
+	: ::platform::keyboard( s )
 {
 }
 
