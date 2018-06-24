@@ -43,9 +43,7 @@ system::system( const std::string & )
     [appMenu addItem:quitMenuItem];
     [appMenuItem setSubmenu:appMenu];
 
-	_keyboard = std::make_shared<keyboard>();
-	_mouse = std::make_shared<mouse>();
-	_dispatcher = std::make_shared<dispatcher>( _keyboard, _mouse );
+	_dispatcher = std::make_shared<dispatcher>( this );
 
     [NSApp activateIgnoringOtherApps:YES];
 
@@ -243,45 +241,6 @@ std::shared_ptr<platform::dispatcher> system::get_dispatcher( void )
 {
 	return _dispatcher;
 }
-
-////////////////////////////////////////
-
-std::shared_ptr<platform::keyboard> system::get_keyboard( void )
-{
-	return _keyboard;
-}
-
-////////////////////////////////////////
-
-std::shared_ptr<platform::mouse> system::get_mouse( void )
-{
-	return _mouse;
-}
-
-////////////////////////////////////////
-
-uint8_t
-system::modifier_state( void )
-{
-	std::cout << "TODO" << std::endl;
-	return 0;
-}
-
-////////////////////////////////////////
-
-bool
-system::query_mouse( uint8_t &buttonMask, uint8_t &modifiers, coord_type &x, coord_type &y, int &screen )
-{
-	std::cout << "TODO" << std::endl;
-	buttonMask = 0;
-	modifiers = 0;
-	x = 0;
-	y = 0;
-	screen = -1;
-	return false;
-}
-
-
 
 ////////////////////////////////////////
 

@@ -178,7 +178,8 @@ namespace platform { namespace cocoa
 
 ////////////////////////////////////////
 
-keyboard::keyboard( void )
+keyboard::keyboard( ::platform::system *s )
+	: ::platform::keyboard( s )
 {
 	update_mapping();
 }

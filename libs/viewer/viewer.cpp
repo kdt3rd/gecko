@@ -239,7 +239,7 @@ bool viewer_w::mouse_press( const event &e )
 	if ( e.mouse().button == 1 )
 	{
 		_panning = true;
-		_last = point{ e.mouse().x, e.mouse().y };
+		_last = point{ float(e.mouse().x), float(e.mouse().y) };
 		context::current().grab_source( e, shared_from_this() );
 
 		return true;
@@ -260,7 +260,7 @@ bool viewer_w::mouse_move( const event &e )
 	// TODO: fix this
 	if ( _panning )
 	{
-		point p{ e.mouse().x, e.mouse().y };
+		point p{ float(e.mouse().x), float(e.mouse().y) };
 		point delta = ( p - _last );
 		for ( auto &i: _images )
 		{
@@ -274,7 +274,7 @@ bool viewer_w::mouse_move( const event &e )
 		return true;
 	}
 	else
-		_last = point{ e.mouse().x, e.mouse().y };
+		_last = point{ float(e.mouse().x), float(e.mouse().y) };
 
 	return widget::mouse_move( e );
 }

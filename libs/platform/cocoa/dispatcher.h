@@ -24,7 +24,7 @@ namespace platform { namespace cocoa
 class dispatcher : public ::platform::dispatcher
 {
 public:
-	dispatcher( const std::shared_ptr<keyboard> &k, const std::shared_ptr<mouse> &m );
+	dispatcher( ::platform::system *s );
 	~dispatcher( void ) override;
 
 	int execute( void ) override;

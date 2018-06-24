@@ -57,16 +57,10 @@ public:
 	void destroy_window( const std::shared_ptr<::platform::window> &w ) override;
 
 	std::shared_ptr<::platform::dispatcher> get_dispatcher( void ) override;
-	std::shared_ptr<::platform::keyboard> get_keyboard( void ) override;
-	std::shared_ptr<::platform::mouse> get_mouse( void ) override;
-
-	uint8_t modifier_state( void ) override;
-	bool query_mouse( uint8_t &buttonMask, uint8_t &modifiers, coord_type &x, coord_type &y, int &screen ) override;
 
 private:
 	std::shared_ptr<dispatcher> _dispatcher;
-	std::shared_ptr<keyboard> _keyboard;
-	std::shared_ptr<mouse> _mouse;
+
 	std::vector<std::shared_ptr<::platform::screen>> _screens;
 };
 

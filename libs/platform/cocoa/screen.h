@@ -31,7 +31,8 @@ public:
 	bool is_remote( void ) const override;
 
 	rect bounds( bool avail ) const override;
-	base::dsize dpi( void ) const override;
+	dots_per_unit dpi( void ) const override;
+	dots_per_unit dpmm( void ) const override;
 
 	double refresh_rate( void ) const override;
 

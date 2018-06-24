@@ -18,7 +18,7 @@ namespace platform { namespace cocoa
 class mouse : public ::platform::mouse
 {
 public:
-	mouse( void );
+	mouse( ::platform::system *s );
 	~mouse( void ) override;
 
 	void start( void ) override;

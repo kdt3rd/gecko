@@ -18,7 +18,7 @@ namespace platform { namespace cocoa
 class keyboard : public ::platform::keyboard
 {
 public:
-	keyboard( void );
+	keyboard( ::platform::system *s );
 	~keyboard( void ) override;
 
 	void update_mapping( void );

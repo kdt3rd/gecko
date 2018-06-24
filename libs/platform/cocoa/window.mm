@@ -121,7 +121,7 @@ double window::scale_factor( void )
 
 ////////////////////////////////////////
 
-void window::set_minimum_size( coord_type w, coord_type h )
+void window::apply_minimum_size( coord_type w, coord_type h )
 {
 //	NSSize size;
 //	size.width = w;

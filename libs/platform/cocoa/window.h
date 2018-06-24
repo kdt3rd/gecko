@@ -38,8 +38,6 @@ public:
 
 	void fullscreen( bool fs ) override;
 
-	void set_minimum_size( coord_type w, coord_type h ) override;
-
 	void set_title( const std::string &t ) override;
 
 	double scale_factor( void );
@@ -47,6 +45,8 @@ public:
 	void set_ns( void *nsview );
 
 protected:
+	void apply_minimum_size( coord_type w, coord_type h ) override;
+
 	void make_current( const std::shared_ptr<cursor> & ) override;
 
 	rect query_geometry( void ) override;

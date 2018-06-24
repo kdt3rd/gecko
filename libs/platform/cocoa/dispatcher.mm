@@ -129,7 +129,7 @@
 	using namespace platform;
 
 	[self win]->process_event(
-		event::window( nullptr, [self source],
+		event::window( [self source],
 					   event_type::WINDOW_EXPOSED,
 					   0, 0, 0, 0 ) );
 
@@ -143,7 +143,7 @@
 	[super setFrameSize:newSize];
 	double scale = [self win]->scale_factor();
 	[self win]->process_event(
-		event::window( nullptr, [self source],
+		event::window( [self source],
 					   event_type::WINDOW_RESIZED,
 					   0, 0,
 					   static_cast<coord_type>( newSize.width * scale ),
@@ -168,7 +168,7 @@
 	p = [self convertPoint:p fromView:nil];
 	// TODO: fill in modifiers and system
 	[self win]->process_event(
-		event::mouse( nullptr, [self mouse].get(), event_type::MOUSE_DOWN,
+		event::mouse( [self mouse].get(), event_type::MOUSE_DOWN,
 					  static_cast<platform::coord_type>( p.x * scale ),
 					  static_cast<platform::coord_type>( p.y * scale ),
 					  1, 0 ) );
@@ -185,7 +185,7 @@
 	p = [self convertPoint:p fromView:nil];
 	// TODO: fill in modifiers and system
 	[self win]->process_event(
-		event::mouse( nullptr, [self mouse].get(), event_type::MOUSE_UP,
+		event::mouse( [self mouse].get(), event_type::MOUSE_UP,
 					  static_cast<platform::coord_type>( p.x * scale ),
 					  static_cast<platform::coord_type>( p.y * scale ),
 					  1, 0 ) );
@@ -201,7 +201,7 @@
 	NSPoint p = [event locationInWindow];
 	p = [self convertPoint:p fromView:nil];
 	[self win]->process_event(
-		event::mouse( nullptr, [self mouse].get(), event_type::MOUSE_MOVE,
+		event::mouse( [self mouse].get(), event_type::MOUSE_MOVE,
 					  static_cast<platform::coord_type>( p.x * scale ),
 					  static_cast<platform::coord_type>( p.y * scale ),
 					  0, 0 ) );
@@ -218,7 +218,7 @@
 
 	// TODO: query mouse position (or extract from ns event)
 	[self win]->process_event(
-		event::key( nullptr, [self keyboard].get(),
+		event::key( [self keyboard].get(),
 					event_type::KEYBOARD_DOWN,
 					0, 0, sc, 0 ) );
 
@@ -230,7 +230,7 @@
 		if ( c < 0xE000 || c > 0xF8FF ) // Private area
 		{
 			[self win]->process_event(
-				event::text( nullptr, [self keyboard].get(),
+				event::text( [self keyboard].get(),
 							 event_type::TEXT_ENTERED,
 							 0, 0, c, 0 ) );
 		}
@@ -247,7 +247,7 @@
 	scancode sc = [self keyboard]->get_scancode( kc );
 	// TODO: query mouse position (or extract from ns event)
 	[self win]->process_event(
-		event::key( nullptr, [self keyboard].get(),
+		event::key( [self keyboard].get(),
 					event_type::KEYBOARD_UP,
 					0, 0, sc, 0 ) );
 }
@@ -262,8 +262,10 @@ namespace platform { namespace cocoa
 
 ////////////////////////////////////////
 
-dispatcher::dispatcher( const std::shared_ptr<keyboard> &k, const std::shared_ptr<mouse> &m )
-	: _keyboard( k ), _mouse( m )
+dispatcher::dispatcher( ::platform::system *s )
+	: ::platform::dispatcher( s ),
+		_keyboard( std::make_shared<keyboard>( s ) ),
+		_mouse( std::make_shared<mouse>( s ) )
 {
 }
 
