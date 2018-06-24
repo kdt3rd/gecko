@@ -24,11 +24,14 @@ typedef struct
 } xrrsz;
 typedef xrrsz *(*XRRSizesFunc)(Display *, int, int *);
 typedef short *(*XRRRatesFunc)(Display *, int, int, int *);
+typedef void (*XRRSelectInputFunc)(Display *, Window w, int);
 
 std::once_flag xrandr_dso_flag;
 void *xrandr_dso = nullptr;
 XRRSizesFunc xrandr_getsizes = nullptr;
 XRRRatesFunc xrandr_getrates = nullptr;
+XRRSelectInputFunc xrandr_selinput = nullptr;
+int _ev_base = -1;
 
 void shutdown_xrandr( void )
 {
@@ -57,6 +60,7 @@ void init_xrandr( Display *d )
 			 (*qFuncExt)( d, &evB, &erB ) &&
 			 (*qFuncVer)( d, &maj, &min ) == Success )
 		{
+			_ev_base = evB;
 			std::cout << "Found active XRandR X extension v" << maj << '.' << min << std::endl;
 			// until we support changing the resolution, don't
 			// bother querying all the other bits
@@ -73,6 +77,7 @@ void init_xrandr( Display *d )
 		// these are always valid (whether randr is active)...
 		xrandr_getsizes = (XRRSizesFunc) dlsym( xrandr_dso, "XRRSizes" );
 		xrandr_getrates = (XRRRatesFunc) dlsym( xrandr_dso, "XRRRates" );
+		xrandr_selinput = (XRRSelectInputFunc) dlsym( xrandr_dso, "XRRSelectInput" );
 
 		atexit( &shutdown_xrandr );
 	}
@@ -94,6 +99,10 @@ screen::screen( const std::shared_ptr<Display> &disp, int scr )
 	// but then NOT dlclose it until after the display is fully
 	// closed...
 	std::call_once( xrandr_dso_flag, [&]() { init_xrandr( disp.get() ); } );
+
+	if ( xrandr_selinput )
+		xrandr_selinput( disp.get(), RootWindow( disp.get(), scr ), (1L << 0)/*RRScreenChangeNotifyMask*/ );
+	update_resolution();
 }
 
 ////////////////////////////////////////
@@ -176,25 +185,54 @@ rect screen::bounds( bool avail ) const
 
 ////////////////////////////////////////
 
-base::dsize screen::dpi( void ) const
+dots_per_unit screen::dpi( void ) const
 {
+	dots_per_unit dmm = dpmm();
+	return dots_per_unit( dmm.w() * dots_per_unit::coord_type(25.4),
+						  dmm.h() * dots_per_unit::coord_type(25.4) );
+}
+
+////////////////////////////////////////
+
+int screen::resolution_event_id() 
+{
+	return _ev_base;
+}
+
+////////////////////////////////////////
+
+void screen::update_resolution( void )
+{
+	using val_type = dots_per_unit::coord_type;
+
+	if ( xrandr_getrates )
+	{
+		int nrates = 0;
+		short *rates = xrandr_getrates( _display.get(), _screen, 0, &nrates );
+		if ( rates )
+			_d_rr = static_cast<double>(rates[0]);
+		else
+			_d_rr = 0.0;
+	}
+	else
+		_d_rr = 0.0;
+
 	if ( xrandr_getsizes )
 	{
 		int nsizes = 0;
 		xrrsz *sizes = xrandr_getsizes( _display.get(), _screen, &nsizes );
 		if ( sizes )
-			return { static_cast<double>(sizes[0].w) * 25.4 / static_cast<double>(sizes[0].mw),
-					 static_cast<double>(sizes[0].h) * 25.4 / static_cast<double>(sizes[0].mh)
-					};
+		{
+			_d_p_mm.set( static_cast<val_type>(sizes[0].w) / static_cast<val_type>(sizes[0].mw),
+						 static_cast<val_type>(sizes[0].h) / static_cast<val_type>(sizes[0].mh) );
+			return;
+		}
 	}
 
-	double tmpW = ( ( static_cast<double>( DisplayWidth( _display.get(), _screen ) ) *
-					  25.4 ) /
-					static_cast<double>( DisplayWidthMM( _display.get(), _screen ) ) );
-	double tmpH = ( ( static_cast<double>( DisplayHeight( _display.get(), _screen ) ) *
-					  25.4 ) /
-					static_cast<double>( DisplayHeightMM( _display.get(), _screen ) ) );
-	return { tmpW, tmpH };
+	_d_p_mm.set( ( static_cast<val_type>( DisplayWidth( _display.get(), _screen ) ) /
+				   static_cast<val_type>( DisplayWidthMM( _display.get(), _screen ) ) ),
+				 ( static_cast<val_type>( DisplayHeight( _display.get(), _screen ) ) /
+				   static_cast<val_type>( DisplayHeightMM( _display.get(), _screen ) ) ) );
 }
 
 ////////////////////////////////////////

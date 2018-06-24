@@ -25,8 +25,6 @@
 namespace platform
 {
 
-class keyboard;
-class mouse;
 class tray;
 class menu;
 
@@ -190,33 +188,9 @@ public:
 	/// @return The dispatcher
 	virtual std::shared_ptr<dispatcher> get_dispatcher( void ) = 0;
 
-	/// @brief Get the keyboard.
-	///
-	/// Get the main system keyboard.
-	/// @return The keyboard
-	virtual std::shared_ptr<keyboard> get_keyboard( void ) = 0;
-
-	/// @brief Get the mouse.
-	///
-	/// Get the main system mouse.
-	/// @return The mouse
-	virtual std::shared_ptr<mouse> get_mouse( void ) = 0;
-
-	/// @brief queries the current keyboard modifiers
-	///
-	/// Returns a mask that is the logical or of the modifiers defined
-	/// in scancode.h
-	virtual uint8_t modifier_state( void ) = 0;
-
-	/// @brief queries the current mouse position
-	///
-	/// This should only generally be necessary outside of the event
-	/// system.
-	virtual bool query_mouse( uint8_t &buttonMask, uint8_t &modifiers, coord_type &x, coord_type &y, int &screen ) = 0;
-
 	/// @brief creates a generic timer.
 	///
-	/// NB: The owner of the shared pointer is responsible for
+	/// NB: The primary owner of the shared pointer is responsible for
 	/// registering and unregistering as a waitable with the
 	/// dispatcher
 	std::shared_ptr<timer> create_timer( void );

@@ -23,7 +23,7 @@ class keyboard : public waitable
 {
 public:
 	/// @brief Constructor.
-	keyboard( void );
+	keyboard( system *s );
 
 	/// @brief Destructor.
 	virtual ~keyboard( void );

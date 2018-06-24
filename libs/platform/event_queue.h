@@ -18,6 +18,8 @@
 namespace platform
 {
 
+class system;
+
 ///
 /// @brief Class event_queue provides a thread-safe queue of events
 ///
@@ -37,7 +39,7 @@ namespace platform
 class event_queue : public waitable
 {
 public:
-	event_queue( void );
+	event_queue( system *s );
 	virtual ~event_queue( void );
 
 	void start( void ) final;

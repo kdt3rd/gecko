@@ -60,7 +60,7 @@ window::process_event( const event &e )
 			_accumulate_expose = false;
 			_invalid_rgn = rect();
 
-			event incE = event::window( &e.sys(), &e.source(), e.type(),
+			event incE = event::window( &e.source(), e.type(),
 										tmp.x(), tmp.y(), tmp.width(), tmp.height() );
 
 			// shortcut since we've created a custom event to incorporate the region
@@ -162,6 +162,17 @@ void window::move( coord_type x, coord_type y )
 
 ////////////////////////////////////////
 
+void window::move( const phys_point &p )
+{
+	phys_rect tmp = phys_bounds();
+	tmp.set_position( p );
+	rect nat = _screen->to_native( tmp );
+	if ( update_geometry( nat ) )
+		_rect = nat;
+}
+
+////////////////////////////////////////
+
 void window::resize( coord_type w, coord_type h )
 {
 	rect tmp = _rect;
@@ -172,10 +183,43 @@ void window::resize( coord_type w, coord_type h )
 
 ////////////////////////////////////////
 
+void window::resize( const phys_size &s )
+{
+	phys_rect tmp = phys_bounds();
+	tmp.set_extent( s );
+	rect nat = _screen->to_native( tmp );
+	if ( update_geometry( nat ) )
+		_rect = nat;
+}
+
+////////////////////////////////////////
+
+void window::set_minimum_size( coord_type w, coord_type h )
+{
+	apply_minimum_size( w, h );
+}
+
+////////////////////////////////////////
+
+void window::set_minimum_size( const phys_size &s )
+{
+	size nat = _screen->to_native( s );
+	apply_minimum_size( nat.w(), nat.h() );
+}
+
+////////////////////////////////////////
+
 void window::invalidate( const rect &r )
 {
 	// TBD: do we need to do region compression ourselves?
 	submit_delayed_expose( r );
+}
+
+////////////////////////////////////////
+
+phys_rect window::phys_bounds( void ) const
+{
+	return _screen->to_physical( _rect );
 }
 
 ////////////////////////////////////////

@@ -121,13 +121,7 @@ system::system( const std::string &d )
 		// need to add / remove screens based on registry
 		_screens.emplace_back( std::make_shared<screen>() );
 
-		// need to add / remove keyboards / mice based on registry
-		_keyboard = std::make_shared<keyboard>();
-		_mouse = std::make_shared<mouse>();
-
-		_dispatcher = std::make_shared<dispatcher>( _display, _keyboard, _mouse );
-		// _dispatcher->add_waitable( _keyboard );
-		// _dispatcher->add_waitable( _mouse );
+		_dispatcher = std::make_shared<dispatcher>( this, _display );
 
 		int err = gl3wInit2( eglGetProcAddress );
 		if ( err != 0 )
@@ -293,41 +287,6 @@ system::destroy_window( const std::shared_ptr<::platform::window> &w )
 std::shared_ptr<::platform::dispatcher> system::get_dispatcher( void )
 {
 	return _dispatcher;
-}
-
-////////////////////////////////////////
-
-std::shared_ptr<::platform::keyboard> system::get_keyboard( void )
-{
-	return _keyboard;
-}
-
-////////////////////////////////////////
-
-std::shared_ptr<::platform::mouse> system::get_mouse( void )
-{
-	return _mouse;
-}
-
-////////////////////////////////////////
-
-uint8_t
-system::modifier_state( void )
-{
-	return 0;
-}
-
-////////////////////////////////////////
-
-bool
-system::query_mouse( uint8_t &buttonMask, uint8_t &modifiers, coord_type &x, coord_type &y,int &screen )
-{
-	buttonMask = 0;
-	modifiers = 0;
-	x = 0;
-	y = 0;
-	screen = -1;
-	return false;
 }
 
 ////////////////////////////////////////

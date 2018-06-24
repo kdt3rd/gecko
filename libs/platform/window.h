@@ -13,10 +13,6 @@
 #include <stack>
 
 #include "types.h"
-// TODO: should we just forward declare these, or is the places where
-// this is included small enough we can use the convenience
-#include "mouse.h"
-#include "keyboard.h"
 #include "scancode.h"
 #include "event_target.h"
 #include "context.h"
@@ -111,6 +107,9 @@ public:
 	/// @param y New y position of the window
 	void move( coord_type x, coord_type y );
 	void move( const point &p ) { move( p.x(), p.y() ); }
+	/// Moves to a screen distance from the upper left of the screen
+	/// the window was created with
+	void move( const phys_point &p );
 
 	/// @brief Resize the window.
 	///
@@ -119,13 +118,17 @@ public:
 	/// @param h New height of the window
 	void resize( coord_type w, coord_type h );
 	void resize( const size &s ) { resize( s.w(), s.h() ); }
+	/// Resizes the window to the specified size based on the screen
+	/// the window was created with
+	void resize( const phys_size &s );
 
 	/// @brief Set minimum window size.
 	///
 	/// The window will not be allowed to resize smaller than the minimum given.
 	/// @param w Minimum width for the window
 	/// @param h Minimum height for the window
-	virtual void set_minimum_size( coord_type w, coord_type h ) = 0;
+	void set_minimum_size( coord_type w, coord_type h );
+	void set_minimum_size( const phys_size &s );
 
 	/// @brief Set the window title.
 	///
@@ -145,6 +148,8 @@ public:
 	coord_type width( void ) const { return _rect.width(); }
 	coord_type height( void ) const { return _rect.height(); }
 
+	phys_rect phys_bounds( void ) const;
+
 	/// @brief Generic event handler
 	///
 	/// This is the most general event handler, in that all events
@@ -154,6 +159,7 @@ public:
 	std::function<bool(const event &)> event_handoff;
 
 protected:
+	virtual void apply_minimum_size( coord_type w, coord_type h ) = 0;
 	virtual void make_current( const std::shared_ptr<cursor> & ) = 0;
 
 	virtual rect query_geometry( void ) = 0;

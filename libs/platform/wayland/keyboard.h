@@ -19,7 +19,7 @@ class keyboard : public ::platform::keyboard
 {
 public:
 	/// @brief Constructor.
-	keyboard( void );
+	keyboard( ::platform::system *s );
 	~keyboard( void );
 
 	void start( void ) override;

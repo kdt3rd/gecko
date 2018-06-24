@@ -15,6 +15,7 @@ namespace platform
 {
 
 class event;
+class event_source;
 
 ///
 /// @brief Class event_target provides...

@@ -46,8 +46,6 @@ public:
 
 	void fullscreen( bool fs ) override;
 
-	void set_minimum_size( coord_type w, coord_type h ) override;
-
 	void set_title( const std::string &t ) override;
 //	void set_icon( const icon &i ) override;
 
@@ -57,6 +55,8 @@ public:
 	XIC input_context( void ) const { return _xic; }
 
 protected:
+	void apply_minimum_size( coord_type w, coord_type h ) override;
+
 	void make_current( const std::shared_ptr<::platform::cursor> & );
 
 	void submit_delayed_expose( const rect &r ) override;

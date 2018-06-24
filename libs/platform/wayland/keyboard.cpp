@@ -29,7 +29,8 @@ namespace platform { namespace wayland
 
 ////////////////////////////////////////
 
-keyboard::keyboard( void )
+keyboard::keyboard( ::platform::system *s )
+	: ::platform::keyboard( s )
 {
 }
 

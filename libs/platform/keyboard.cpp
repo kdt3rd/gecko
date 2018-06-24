@@ -12,7 +12,8 @@ namespace platform
 
 ////////////////////////////////////////
 
-keyboard::keyboard( void )
+keyboard::keyboard( system *s )
+    : waitable( s )
 {
 }
 

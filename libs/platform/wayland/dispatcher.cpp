@@ -19,14 +19,17 @@
 #include <sys/select.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include "keyboard.h"
+#include "mouse.h"
 
 namespace platform { namespace wayland
 {
 
 ////////////////////////////////////////
 
-dispatcher::dispatcher( const std::shared_ptr<struct wl_display> &dpy, const std::shared_ptr<keyboard> &k, const std::shared_ptr<mouse> &m )
-	: _display( dpy ), _keyboard( k ), _mouse( m )
+dispatcher::dispatcher( ::platform::system *s, const std::shared_ptr<struct wl_display> &dpy )
+	: ::platform::dispatcher( s ), _display( dpy ), _keyboard( std::make_shared<keyboard>( s ) ),
+	  _mouse( std::make_shared<mouse>( s ) )
 {
 	precondition( _display, "null display" );
 

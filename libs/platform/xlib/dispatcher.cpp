@@ -25,7 +25,11 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "dispatcher.h"
+#include "keyboard.h"
+#include "mouse.h"
 #include <platform/event_queue.h>
+#include "system.h"
+#include "screen.h"
 
 ////////////////////////////////////////
 
@@ -213,9 +217,15 @@ namespace platform { namespace xlib
 
 ////////////////////////////////////////
 
-dispatcher::dispatcher( ::platform::system *sys, const std::shared_ptr<Display> &dpy, const std::shared_ptr<keyboard> &k, const std::shared_ptr<mouse> &m )
-	: _system( sys ), _wait_pipe( true, false ), _display( dpy ), _keyboard( k ), _mouse( m )
+dispatcher::dispatcher( ::platform::system *sys, const std::shared_ptr<Display> &dpy )
+	: ::platform::dispatcher( sys ), _system( sys ), _wait_pipe( true, false ), _display( dpy ),
+	  _keyboard( std::make_shared<keyboard>( sys ) ),
+	  _mouse( std::make_shared<mouse>( sys ) )
 {
+	// TODO: look at using libinput even for xlib?
+	// don't have a good way to identify individual keyboards / mice
+	// in raw xlib? maybe it doesn't matter...
+
 	for ( auto &x: _dispatch )
 		x = &dispatcher::dispatchUNKNOWN;
 	// from X.h
@@ -566,7 +576,12 @@ dispatcher::drain_xlib_events( void )
 	{
 		XNextEvent( _display.get(), &event );
 		if ( event.type >= LASTEvent )
+		{
+			if ( event.type == screen::resolution_event_id() )
+				dispatchRandRChange( event );
 			continue;
+		}
+		
 
 		if ( XFilterEvent( &event, None ) == True && event.type != KeyRelease )
 			continue;
@@ -723,7 +738,7 @@ void dispatcher::dispatchKeyPress( const std::shared_ptr<window> &w, XEvent &eve
 	uint8_t mods = ( (((event.xkey.state & ControlMask) != 0) ? 0x01 : 0) |
 					 (((event.xkey.state & ShiftMask) != 0) ? 0x02 : 0) );
 
-	w->process_event( event::key( _system, _keyboard.get(),
+	w->process_event( event::key( _keyboard.get(),
 								  event_type::KEYBOARD_DOWN,
 								  event.xkey.x, event.xkey.y,
 								  sc, mods ) );
@@ -736,7 +751,7 @@ void dispatcher::dispatchKeyPress( const std::shared_ptr<window> &w, XEvent &eve
 		{
 			// why only graphic? Why not formatting as well?
 			if ( utf::is_graphic( *it ) )
-				w->process_event( event::text( _system, _keyboard.get(),
+				w->process_event( event::text( _keyboard.get(),
 											   event_type::TEXT_ENTERED,
 											   event.xkey.x, event.xkey.y,
 											   *it, mods ) );
@@ -753,7 +768,7 @@ void dispatcher::dispatchKeyRelease( const std::shared_ptr<window> &w, XEvent &e
 		uint8_t mods = ( (((event.xkey.state & ControlMask) != 0) ? 0x01 : 0) |
 						 (((event.xkey.state & ShiftMask) != 0) ? 0x02 : 0) );
 
-		w->process_event( event::key( _system, _keyboard.get(),
+		w->process_event( event::key( _keyboard.get(),
 									  event_type::KEYBOARD_UP,
 									  event.xkey.x, event.xkey.y,
 									  get_scancode( event.xkey ), mods ) );
@@ -770,13 +785,13 @@ void dispatcher::dispatchButtonPress( const std::shared_ptr<window> &w, XEvent &
 						 (((event.xbutton.state & ShiftMask) != 0) ? 0x02 : 0) );
 
 		if ( event.xbutton.button == 4 )
-			w->process_event( event::hid( _system, _mouse.get(), event_type::MOUSE_WHEEL,
+			w->process_event( event::hid( _mouse.get(), event_type::MOUSE_WHEEL,
 										  event.xbutton.x, event.xbutton.y, 4, 1, mods ) );
 		else if ( event.xbutton.button == 5 )
-			w->process_event( event::hid( _system, _mouse.get(), event_type::MOUSE_WHEEL,
+			w->process_event( event::hid( _mouse.get(), event_type::MOUSE_WHEEL,
 										  event.xbutton.x, event.xbutton.y, 5, -1, mods ) );
 		else
-			w->process_event( event::mouse( _system, _mouse.get(),
+			w->process_event( event::mouse( _mouse.get(),
 											event_type::MOUSE_DOWN,
 											event.xbutton.x, event.xbutton.y,
 											int(event.xbutton.button), mods ) );
@@ -793,7 +808,7 @@ void dispatcher::dispatchButtonRelease( const std::shared_ptr<window> &w, XEvent
 		{
 			uint8_t mods = ( (((event.xbutton.state & ControlMask) != 0) ? 0x01 : 0) |
 							 (((event.xbutton.state & ShiftMask) != 0) ? 0x02 : 0) );
-			w->process_event( event::mouse( _system, _mouse.get(),
+			w->process_event( event::mouse( _mouse.get(),
 											event_type::MOUSE_UP,
 											event.xbutton.x, event.xbutton.y,
 											int(event.xbutton.button), mods ) );
@@ -809,7 +824,7 @@ void dispatcher::dispatchMotionNotify( const std::shared_ptr<window> &w, XEvent 
 	{
 		uint8_t mods = ( (((event.xbutton.state & ControlMask) != 0) ? 0x01 : 0) |
 						 (((event.xbutton.state & ShiftMask) != 0) ? 0x02 : 0) );
-		w->process_event( event::mouse( _system, _mouse.get(), event_type::MOUSE_MOVE,
+		w->process_event( event::mouse( _mouse.get(), event_type::MOUSE_MOVE,
 										event.xbutton.x, event.xbutton.y, 0, mods ) );
 	}
 }
@@ -828,7 +843,7 @@ void dispatcher::dispatchEnterNotify( const std::shared_ptr<window> &w, XEvent &
 		uint8_t mods = ( (((event.xcrossing.state & ControlMask) != 0) ? 0x01 : 0) |
 						 (((event.xcrossing.state & ShiftMask) != 0) ? 0x02 : 0) );
 		_ext_events->grab( w );
-		w->process_event( event::mouse( _system, _mouse.get(), event_type::MOUSE_ENTER,
+		w->process_event( event::mouse( _mouse.get(), event_type::MOUSE_ENTER,
 										event.xcrossing.x, event.xcrossing.y, 0, mods ) );
 	}
 }
@@ -847,7 +862,7 @@ void dispatcher::dispatchLeaveNotify( const std::shared_ptr<window> &w, XEvent &
 	{
 		uint8_t mods = ( (((event.xcrossing.state & ControlMask) != 0) ? 0x01 : 0) |
 						 (((event.xcrossing.state & ShiftMask) != 0) ? 0x02 : 0) );
-		w->process_event( event::mouse( _system, _mouse.get(), event_type::MOUSE_LEAVE,
+		w->process_event( event::mouse( _mouse.get(), event_type::MOUSE_LEAVE,
 										event.xcrossing.x, event.xcrossing.y, 0, mods ) );
 	}
 }
@@ -923,13 +938,13 @@ void dispatcher::dispatchExpose( const std::shared_ptr<window> &w, XEvent &event
 	{
 		if ( event.xexpose.count == 0 )
 		{
-			w->process_event( event::window( _system, _ext_events.get(),
+			w->process_event( event::window( _ext_events.get(),
 											 event_type::WINDOW_EXPOSED,
 											 event.xexpose.x, event.xexpose.y,
 											 event.xexpose.width, event.xexpose.height ) );
 		}
 		else
-			w->process_event( event::window( _system, _ext_events.get(),
+			w->process_event( event::window( _ext_events.get(),
 											 event_type::WINDOW_REGION_EXPOSED,
 											 event.xexpose.x, event.xexpose.y,
 											 event.xexpose.width, event.xexpose.height ) );
@@ -970,7 +985,7 @@ void dispatcher::dispatchDestroyNotify( const std::shared_ptr<window> &w, XEvent
 	{
 		if ( _xim )
 			XUnsetICFocus( w->input_context() );
-		w->process_event( event::window( _system, _ext_events.get(),
+		w->process_event( event::window( _ext_events.get(),
 										 event_type::WINDOW_DESTROYED, 0, 0, 0, 0 ) );
 		_windows.erase( w->id() );
 	}
@@ -984,9 +999,9 @@ void dispatcher::dispatchUnmapNotify( const std::shared_ptr<window> &w, XEvent &
 	{
 		if ( _xim )
 			XUnsetICFocus( w->input_context() );
-		w->process_event( event::window( _system, _ext_events.get(),
+		w->process_event( event::window( _ext_events.get(),
 										 event_type::WINDOW_HIDDEN, 0, 0, 0, 0 ) );
-		w->process_event( event::window( _system, _ext_events.get(),
+		w->process_event( event::window( _ext_events.get(),
 										 event_type::WINDOW_MINIMIZED, 0, 0, 0, 0 ) );
 		// add icccm for minimized state storage?
 	}
@@ -998,9 +1013,9 @@ void dispatcher::dispatchMapNotify( const std::shared_ptr<window> &w, XEvent &ev
 {
 	if ( w )
 	{
-		w->process_event( event::window( _system, _ext_events.get(),
+		w->process_event( event::window( _ext_events.get(),
 										 event_type::WINDOW_SHOWN, 0, 0, 0, 0 ) );
-		w->process_event( event::window( _system, _ext_events.get(),
+		w->process_event( event::window( _ext_events.get(),
 										 event_type::WINDOW_RESTORED, 0, 0, 0, 0 ) );
 	}
 }
@@ -1022,7 +1037,7 @@ void dispatcher::dispatchReparentNotify( const std::shared_ptr<window> &w, XEven
 void dispatcher::dispatchConfigureNotify( const std::shared_ptr<window> &w, XEvent &event )
 {
 	if ( w )
-		w->process_event( event::window( _system, _ext_events.get(),
+		w->process_event( event::window( _ext_events.get(),
 										 event_type::WINDOW_MOVE_RESIZE,
 										 event.xconfigure.x, event.xconfigure.y,
 										 event.xconfigure.width, event.xconfigure.height ) );
@@ -1218,9 +1233,9 @@ void dispatcher::dispatchClientMessage( const std::shared_ptr<window> &w, XEvent
 	{
 		bool doWinClose = true;
 		if ( evatom == _atom_quit_app )
-			doWinClose = w->process_event( event::window( _system, _ext_events.get(), event_type::WINDOW_CLOSE_REQUEST, 0, 0, 0, 0 ) );
+			doWinClose = w->process_event( event::window( _ext_events.get(), event_type::WINDOW_CLOSE_REQUEST, 0, 0, 0, 0 ) );
 		else
-			w->process_event( event::window( _system, _ext_events.get(),
+			w->process_event( event::window( _ext_events.get(),
 											 event_type::WINDOW_DESTROYED, 0, 0, 0, 0 ) );
 
 		if ( doWinClose )
@@ -1252,6 +1267,16 @@ void dispatcher::dispatchGenericEvent( const std::shared_ptr<window> &w, XEvent 
 void dispatcher::dispatchUNKNOWN( const std::shared_ptr<window> &w, XEvent &event )
 {
 }
+
+////////////////////////////////////////
+
+void dispatcher::dispatchRandRChange( XEvent &event )
+{
+	std::cout << "updating screen resolutions" << std::endl;
+	for ( auto &s: _system->screens() )
+		reinterpret_cast<screen *>( s.get() )->update_resolution();
+}
+
 
 ////////////////////////////////////////
 

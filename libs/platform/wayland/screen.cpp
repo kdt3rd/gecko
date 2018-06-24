@@ -66,9 +66,16 @@ rect screen::bounds( bool active ) const
 
 ////////////////////////////////////////
 
-base::dsize screen::dpi( void ) const
+dots_per_unit screen::dpi( void ) const
 {
-	return { 95.0, 95.0 };
+	return { dots_per_unit::coord_type(95.0), dots_per_unit::coord_type(95.0) };
+}
+
+////////////////////////////////////////
+
+dots_per_unit screen::dpmm( void ) const
+{
+	return { dots_per_unit::coord_type(3.75), dots_per_unit::coord_type(3.75) };
 }
 
 ////////////////////////////////////////

@@ -46,13 +46,13 @@ public:
 
 	void fullscreen( bool fs ) override;
 
-	void set_minimum_size( coord_type w, coord_type h ) override;
-
 	void set_title( const std::string &t ) override;
 //	void set_icon( const icon &i ) override;
 
 	void shell_resize_event( coord_type w, coord_type h );
 protected:
+	void apply_minimum_size( coord_type w, coord_type h ) override;
+
 	void make_current( const std::shared_ptr<::platform::cursor> & );
 
 	void submit_delayed_expose( const rect &r ) override;

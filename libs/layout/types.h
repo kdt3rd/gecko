@@ -20,11 +20,12 @@ namespace layout
 //constexpr inline coord_type divide( coord_type a, coord_type b )
 //{ return a / b; }
 
-using coord = int32_t;
-constexpr inline coord divide( coord a, coord b )
-{
-	return ( a + ( b - 1 ) ) / b;
-}
+//using coord = int32_t;
+//constexpr inline coord divide( coord a, coord b )
+//{ return ( a + ( b - 1 ) ) / b; }
+using coord = float;//base::units::millimeters<float>;
+constexpr inline coord divide( const coord &a, const coord &b )
+{ return a / b; }
 
 using rect = base::rect<coord>;
 using point = rect::point_type;

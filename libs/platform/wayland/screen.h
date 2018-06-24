@@ -35,7 +35,8 @@ public:
 
 	rect bounds( bool active ) const override;
 
-	base::dsize dpi( void ) const override;
+	dots_per_unit dpi( void ) const override;
+	dots_per_unit dpmm( void ) const override;
 
 	double refresh_rate( void ) const override;
 

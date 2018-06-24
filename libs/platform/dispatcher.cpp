@@ -14,8 +14,8 @@ namespace platform
 
 ////////////////////////////////////////
 
-dispatcher::dispatcher( void )
-	: _ext_events( std::make_shared<event_queue>() )
+dispatcher::dispatcher( system *s )
+	: _ext_events( std::make_shared<event_queue>( s ) )
 {
 	// TODO: this should normally be done via add_waitable but we're
 	// in the ctor, so virtual functions will be sliced...

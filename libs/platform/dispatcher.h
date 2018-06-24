@@ -28,7 +28,7 @@ class dispatcher
 {
 public:
 	/// @brief Constructor.
-	dispatcher( void );
+	dispatcher( system *s );
 
 	/// @brief Destructor.
 	virtual ~dispatcher( void );

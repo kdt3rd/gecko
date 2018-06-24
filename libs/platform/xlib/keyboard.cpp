@@ -14,7 +14,8 @@ namespace platform { namespace xlib
 
 ////////////////////////////////////////
 
-keyboard::keyboard( void )
+keyboard::keyboard( ::platform::system *s )
+	: ::platform::keyboard( s )
 {
 }
 

@@ -14,7 +14,8 @@ namespace platform
 
 ////////////////////////////////////////
 
-waitable::waitable( void )
+waitable::waitable( system *s )
+    : event_source( s )
 {
 }
 

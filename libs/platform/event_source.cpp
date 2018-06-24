@@ -15,7 +15,8 @@ namespace platform
 
 ////////////////////////////////////////
 
-event_source::event_source( void )
+event_source::event_source( system *s )
+	: _system( s )
 {
 }
 

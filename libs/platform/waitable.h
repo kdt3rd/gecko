@@ -16,6 +16,8 @@
 namespace platform
 {
 
+class system;
+
 ///
 /// @brief Class waitable provides an abstract class used for waiting
 /// for multiple event sources.
@@ -36,7 +38,7 @@ public:
 	using wait = base::wait;
 	static const wait::wait_type INVALID_WAIT = base::wait::INVALID_WAIT;
 
-	waitable( void );
+	waitable( system *s );
 	virtual ~waitable( void );
 
 	/// This can be called by anyone to cancel this waitable as a

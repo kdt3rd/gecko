@@ -157,7 +157,7 @@ bool widget::update_layout( double duration )
 {
 	precondition( _area, "null area" );
 	bool result = false;
-	if ( distance( *_area ) > 0.001 )
+	if ( distance( *this, *_area ) > point::coord_type(1) )
 	{
 		if ( _anim_time < 0.0 )
 		{

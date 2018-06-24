@@ -12,7 +12,8 @@ namespace platform
 
 ////////////////////////////////////////
 
-mouse::mouse( void )
+mouse::mouse( system *s )
+    : waitable( s )
 {
 }
 

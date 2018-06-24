@@ -27,11 +27,15 @@ public:
 
 	std::shared_ptr<system> create( const std::string &disp = std::string() ) const { return _creator( disp ); }
 
+	/// This returns a list of all platforms enabled
 	static const std::vector<platform> &list( void );
 	/// This will return the first platform in the list of
 	/// supported / compiled-in platforms as the 'preferred'
 	/// TODO: add a configuration file about which one to use?
 	static const platform &preferred( void );
+	/// This attempts to find and create a system for a running
+	/// platform - meant as a mechanism to dynamically discover
+	/// whether a scenario like X is running or wayland...
 	static std::shared_ptr<system> find_running( const std::string &disp = std::string() );
 
 	platform( void ) = default;

@@ -13,6 +13,7 @@ namespace platform
 ////////////////////////////////////////
 
 timer::timer( void )
+	: waitable( nullptr )
 {
 }
 

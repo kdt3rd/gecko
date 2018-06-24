@@ -17,12 +17,15 @@ namespace platform
 
 class event_target;
 class event;
+class system;
 
 class event_source
 {
 public:
-	event_source( void );
+	explicit event_source( system *sys );
 	virtual ~event_source( void );
+
+	system *get_system( void ) const { return _system; }
 
 	/// grabs the scancode / button and modifiers from the event
 	/// source. if the scancode_or_button or modifiers is -1, this is
@@ -33,6 +36,7 @@ public:
 					   uint8_t modifiers = uint8_t(-1) );
 	virtual void ungrab( void );
 
+	/// for devices that can display images on their panels
 	virtual size_t get_image_display_count( void ) const;
 	virtual size_t get_image_display_width( size_t ) const;
 	virtual size_t get_image_display_height( size_t ) const;
@@ -40,6 +44,7 @@ public:
 	virtual bool is_image_display_color( size_t ) const;
 	virtual void set_image_display( size_t, void * );
 
+	/// for input devices that can display text on their panels
 	virtual size_t get_text_display_count( void ) const;
 	virtual size_t get_text_num_chars_width( size_t ) const;
 	virtual size_t get_text_num_chars_height( size_t ) const;
@@ -77,7 +82,7 @@ protected:
 	void emit_event( event &e );
 
 private:
-
+	system *_system = nullptr;
 };
 
 } // namespace platform

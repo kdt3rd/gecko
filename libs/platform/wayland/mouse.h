@@ -19,7 +19,7 @@ class mouse : public ::platform::mouse
 {
 public:
 	/// @brief Constructor.
-	mouse( void );
+	mouse( ::platform::system *s );
 
 	/// @brief Destructor.
 	~mouse( void );

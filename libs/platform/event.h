@@ -12,13 +12,13 @@
 
 #include "scancode.h"
 #include "types.h"
+#include "system.h"
 
 ////////////////////////////////////////
 
 namespace platform
 {
 
-class system;
 class event_source;
 
 enum event_type : uint8_t
@@ -83,14 +83,6 @@ enum event_type : uint8_t
 /// This is transformed by the dispatcher from the @event_source to
 /// deliver to the @sa event_target
 ///
-/// NB: all the events currently have different data layouts, but are
-/// a max of 16 bytes of data then + 1 to hold the type.
-///
-/// TODO: is there other data we could pass? Most implementations will
-/// pad this to at least 20 bytes... and at that point, might as well
-/// go to 32 to get even L2 alignment? 15 extra bytes gives 3 int32_t
-/// and 3 bytes...
-///
 class event
 {
 public:
@@ -153,13 +145,12 @@ public:
 	const hid_info &hid( void ) const { return _data.hid; }
 	const user_info &user( void ) const { return _data.user; }
 
-	system &sys( void ) const { return *_system; }
+	system &sys( void ) const { return *(_source->get_system()); }
 	event_source &source( void ) const { return *_source; }
 
-	static inline event window( system *sys, event_source *src, event_type et, coord_type x, coord_type y, coord_type w, coord_type h )
+	static inline event window( event_source *src, event_type et, coord_type x, coord_type y, coord_type w, coord_type h )
 	{
 		event r;
-		r._system = sys;
 		r._source = src;
 		r._type = et;
 		r._data.window = { x, y, w, h };
@@ -167,10 +158,9 @@ public:
 		return r;
 	}
 
-	static inline event key( system *sys, event_source *src, event_type et, coord_type x, coord_type y, scancode kc, uint8_t mods )
+	static inline event key( event_source *src, event_type et, coord_type x, coord_type y, scancode kc, uint8_t mods )
 	{
 		event r;
-		r._system = sys;
 		r._source = src;
 		r._type = et;
 		r._data.key.x = x;
@@ -185,10 +175,9 @@ public:
 		return r;
 	}
 
-	static inline event key( system *sys, event_source *src, event_type et, coord_type x, coord_type y, scancode kc[6], uint8_t mods )
+	static inline event key( event_source *src, event_type et, coord_type x, coord_type y, scancode kc[6], uint8_t mods )
 	{
 		event r;
-		r._system = sys;
 		r._source = src;
 		r._type = et;
 		r._data.key.x = x;
@@ -199,10 +188,9 @@ public:
 		return r;
 	}
 
-	static inline event mouse( system *sys, event_source *src, event_type et, coord_type x, coord_type y, int b, uint8_t mods )
+	static inline event mouse( event_source *src, event_type et, coord_type x, coord_type y, int b, uint8_t mods )
 	{
 		event r;
-		r._system = sys;
 		r._source = src;
 		r._type = et;
 		r._data.mouse.x = x;
@@ -212,10 +200,9 @@ public:
 		return r;
 	}
 
-	static inline event text( system *sys, event_source *src, event_type et, coord_type x, coord_type y, char32_t c, uint8_t mods )
+	static inline event text( event_source *src, event_type et, coord_type x, coord_type y, char32_t c, uint8_t mods )
 	{
 		event r;
-		r._system = sys;
 		r._source = src;
 		r._type = et;
 		r._data.text.x = x;
@@ -225,10 +212,9 @@ public:
 		return r;
 	}
 
-	static inline event hid( system *sys, event_source *src, event_type et, coord_type x, coord_type y, int16_t elt, int16_t pos, uint8_t mods )
+	static inline event hid( event_source *src, event_type et, coord_type x, coord_type y, int16_t elt, int16_t pos, uint8_t mods )
 	{
 		event r;
-		r._system = sys;
 		r._source = src;
 		r._type = et;
 		r._data.hid.x = x;
@@ -239,10 +225,9 @@ public:
 		return r;
 	}
 
-	static inline event user( system *sys, event_source *src, uint32_t id, void *data )
+	static inline event user( event_source *src, uint32_t id, void *data )
 	{
 		event r;
-		r._system = sys;
 		r._source = src;
 		r._type = USER_EVENT;
 		r._data.user.id = id;
@@ -253,7 +238,6 @@ public:
 	static uint32_t register_user_event( const std::string &name );
 
 private:
-	system *_system = nullptr;
 	event_source *_source = nullptr;
 
 	union

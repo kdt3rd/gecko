@@ -106,17 +106,7 @@ system::system( const std::string &d )
 	for ( int i = 0; i < ScreenCount( _display.get() ); ++i )
 		_screens[0] = std::make_shared<screen>( _display, i );
 
-	// TODO: look at using libinput even for xlib?
-	// don't have a good way to identify individual keyboards / mice
-	// in raw xlib? maybe it doesn't matter...
-	_keyboard = std::make_shared<keyboard>();
-	_mouse = std::make_shared<mouse>();
-
-	_dispatcher = std::make_shared<dispatcher>( this, _display, _keyboard, _mouse );
-	// keyboard and mouse are event sources, but we don't wait on
-	// their input under xlib - the events are delivered to the dispatcher...
-//	_dispatcher->add_waitable( _keyboard );
-//	_dispatcher->add_waitable( _mouse );
+	_dispatcher = std::make_shared<dispatcher>( this, _display );
 }
 
 ////////////////////////////////////////
@@ -352,88 +342,74 @@ std::shared_ptr<::platform::dispatcher> system::get_dispatcher( void )
 
 ////////////////////////////////////////
 
-std::shared_ptr<::platform::keyboard> system::get_keyboard( void )
-{
-	return _keyboard;
-}
-
-////////////////////////////////////////
-
-std::shared_ptr<::platform::mouse> system::get_mouse( void )
-{
-	return _mouse;
-}
-
-////////////////////////////////////////
-
-uint8_t
-system::modifier_state( void )
-{
-	char keys[32];
-	memset( keys, 0, sizeof(keys) );
-
-	XQueryKeymap( _display.get(), keys );
-
-	uint8_t r = 0;
-	static_assert( modifier::LEFT_CTRL == 0x01 &&
-				   modifier::LEFT_SHIFT == 0x02 &&
-				   modifier::LEFT_ALT == 0x04 &&
-				   modifier::LEFT_META == 0x08 &&
-				   modifier::RIGHT_CTRL == 0x10 &&
-				   modifier::RIGHT_SHIFT == 0x20 &&
-				   modifier::RIGHT_ALT == 0x40 &&
-				   modifier::RIGHT_META == 0x80, "Modifiers incorrectly mapped" );
-
-	static const KeySym modkeys[8] = {
-		XK_Control_L, XK_Shift_L, XK_Alt_L, XK_Super_L,
-		XK_Control_R, XK_Shift_R, XK_Alt_R, XK_Super_R 
-	};
-	for ( uint8_t i = 0; i < 8; ++i )
-	{
-		KeyCode kc = XKeysymToKeycode( _display.get(), modkeys[i] );
-		if ( ( ( keys[kc >> 3] >> (kc & 7) ) & 1 ) != 0 )
-			r |= (1 << i);
-	}
-	return r;
-}
-
-////////////////////////////////////////
-
-bool
-system::query_mouse( uint8_t &buttonMask, uint8_t &modifiers, coord_type &x, coord_type &y,int &screen )
-{
-	Window rt, child;
-	int rx, ry, wx, wy;
-	unsigned int mask;
-
-	for ( int s = 0, nS = ScreenCount( _display.get() ); s < nS; ++s )
-	{
-		if ( XQueryPointer( _display.get(), RootWindow( _display.get(), s ), &rt, &child,
-							&rx, &ry, &wx, &wy, &mask ) == True )
-		{
-			buttonMask = ((mask & Button1Mask) != 0) ? 0x01 : 0;
-			buttonMask |= ((mask & Button2Mask) != 0) ? 0x02 : 0;
-			buttonMask |= ((mask & Button3Mask) != 0) ? 0x04 : 0;
-			buttonMask |= ((mask & Button4Mask) != 0) ? 0x08 : 0;
-			buttonMask |= ((mask & Button5Mask) != 0) ? 0x10 : 0;
-
-			modifiers = ( (((mask & ControlMask) != 0) ? 0x01 : 0) |
-						  (((mask & ShiftMask) != 0) ? 0x02 : 0) );
-			// the rest are Mod[1-5]Mask....
-
-			x = rx;
-			y = ry;
-			screen = s;
-			return true;
-		}
-	}
-	buttonMask = 0;
-	modifiers = 0;
-	x = 0;
-	y = 0;
-	screen = -1;
-	return false;
-}
+//uint8_t
+//system::modifier_state( void )
+//{
+//	char keys[32];
+//	memset( keys, 0, sizeof(keys) );
+//
+//	XQueryKeymap( _display.get(), keys );
+//
+//	uint8_t r = 0;
+//	static_assert( modifier::LEFT_CTRL == 0x01 &&
+//				   modifier::LEFT_SHIFT == 0x02 &&
+//				   modifier::LEFT_ALT == 0x04 &&
+//				   modifier::LEFT_META == 0x08 &&
+//				   modifier::RIGHT_CTRL == 0x10 &&
+//				   modifier::RIGHT_SHIFT == 0x20 &&
+//				   modifier::RIGHT_ALT == 0x40 &&
+//				   modifier::RIGHT_META == 0x80, "Modifiers incorrectly mapped" );
+//
+//	static const KeySym modkeys[8] = {
+//		XK_Control_L, XK_Shift_L, XK_Alt_L, XK_Super_L,
+//		XK_Control_R, XK_Shift_R, XK_Alt_R, XK_Super_R 
+//	};
+//	for ( uint8_t i = 0; i < 8; ++i )
+//	{
+//		KeyCode kc = XKeysymToKeycode( _display.get(), modkeys[i] );
+//		if ( ( ( keys[kc >> 3] >> (kc & 7) ) & 1 ) != 0 )
+//			r |= (1 << i);
+//	}
+//	return r;
+//}
+//
+//////////////////////////////////////////
+//
+//bool
+//system::query_mouse( uint8_t &buttonMask, uint8_t &modifiers, coord_type &x, coord_type &y,int &screen )
+//{
+//	Window rt, child;
+//	int rx, ry, wx, wy;
+//	unsigned int mask;
+//
+//	for ( int s = 0, nS = ScreenCount( _display.get() ); s < nS; ++s )
+//	{
+//		if ( XQueryPointer( _display.get(), RootWindow( _display.get(), s ), &rt, &child,
+//							&rx, &ry, &wx, &wy, &mask ) == True )
+//		{
+//			buttonMask = ((mask & Button1Mask) != 0) ? 0x01 : 0;
+//			buttonMask |= ((mask & Button2Mask) != 0) ? 0x02 : 0;
+//			buttonMask |= ((mask & Button3Mask) != 0) ? 0x04 : 0;
+//			buttonMask |= ((mask & Button4Mask) != 0) ? 0x08 : 0;
+//			buttonMask |= ((mask & Button5Mask) != 0) ? 0x10 : 0;
+//
+//			modifiers = ( (((mask & ControlMask) != 0) ? 0x01 : 0) |
+//						  (((mask & ShiftMask) != 0) ? 0x02 : 0) );
+//			// the rest are Mod[1-5]Mask....
+//
+//			x = rx;
+//			y = ry;
+//			screen = s;
+//			return true;
+//		}
+//	}
+//	buttonMask = 0;
+//	modifiers = 0;
+//	x = 0;
+//	y = 0;
+//	screen = -1;
+//	return false;
+//}
 
 ////////////////////////////////////////
 

@@ -12,7 +12,8 @@ namespace platform { namespace xlib
 
 ////////////////////////////////////////
 
-mouse::mouse( void )
+mouse::mouse( ::platform::system *s )
+	: ::platform::mouse( s )
 {
 }
 

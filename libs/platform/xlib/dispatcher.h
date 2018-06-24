@@ -19,8 +19,6 @@
 #include <base/pipe.h>
 #include <base/bidirectional_map.h>
 #include "window.h"
-#include "keyboard.h"
-#include "mouse.h"
 
 namespace platform
 {
@@ -30,6 +28,8 @@ class system;
 namespace xlib
 {
 
+class keyboard;
+class mouse;
 
 ////////////////////////////////////////
 
@@ -40,7 +40,7 @@ class dispatcher : public ::platform::dispatcher
 {
 public:
 	/// @brief Constructor.
-	dispatcher( ::platform::system *sys, const std::shared_ptr<Display> &dpy, const std::shared_ptr<keyboard> &k, const std::shared_ptr<mouse> &m );
+	dispatcher( ::platform::system *sys, const std::shared_ptr<Display> &dpy );
 	~dispatcher( void );
 
 	int execute( void ) override;
@@ -114,6 +114,8 @@ private:
 	void dispatchMappingNotify( const std::shared_ptr<window> &w, XEvent &event );
 	void dispatchGenericEvent( const std::shared_ptr<window> &w, XEvent &event );
 	void dispatchUNKNOWN( const std::shared_ptr<window> &w, XEvent &event );
+
+	void dispatchRandRChange( XEvent &event );
 
 	typedef void (dispatcher::*event_dispatch_func)( const std::shared_ptr<window> &, XEvent & );
 

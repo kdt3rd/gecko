@@ -15,8 +15,8 @@ namespace platform
 
 ////////////////////////////////////////
 
-event_queue::event_queue( void )
-	: _signalled( false ), _pipe( true, false )
+event_queue::event_queue( system *s )
+	: waitable( s ), _signalled( false ), _pipe( true, false )
 {
 }
 

@@ -22,7 +22,7 @@ class mouse : public waitable
 public:
 
 	/// @brief Constructor.
-	mouse( void );
+	mouse( system *s );
 
 	/// @brief Destructor.
 	virtual ~mouse( void );
