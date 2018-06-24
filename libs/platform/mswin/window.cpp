@@ -143,13 +143,14 @@ bool window::update_geometry( rect &r )
 
 void window::submit_delayed_expose( const rect &r )
 {
+	/// \todo { Need to fix the local vs screen coordinates }
 	RECT rect = { LONG( std::floor( r.x1() ) ), LONG( std::floor( r.y1() ) ), LONG( std::ceil( r.x2() ) ), LONG( std::ceil( r.y2() ) ) };
 	if ( rect.left == rect.top &&
 		 rect.left == rect.right &&
 		 rect.left == rect.bottom )
-		RedrawWindow( _hwnd, NULL, NULL, RDW_INTERNALPAINT );
+		RedrawWindow( _hwnd, NULL, NULL, RDW_INTERNALPAINT|RDW_UPDATENOW );
 	else
-		RedrawWindow( _hwnd, &rect, NULL, RDW_INTERNALPAINT );
+		RedrawWindow( _hwnd, &rect, NULL, RDW_INVALIDATE|RDW_UPDATENOW );
 }
 
 ////////////////////////////////////////

@@ -111,11 +111,11 @@ bool button_w::mouse_release( const event &e )
 
 	if ( _tracking )
 	{
+		on_scope_exit{ context::current().release_source( e ); };
 		_tracking = false;
 		set_pressed( false );
 		if ( contains( e.mouse().x, e.mouse().y ) )
 			when_activated();
-		context::current().release_source( e );
 		return true;
 	}
 

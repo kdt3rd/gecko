@@ -384,6 +384,7 @@ dispatcher::dispatch_evt( const evt &e )
 							   coord_type(rgn.top),
 							   coord_type(rgn.right - rgn.left + 1),
 							   coord_type(rgn.bottom - rgn.top + 1) ) );
+			RedrawWindow( w->id(), &rgn, NULL, RDW_VALIDATE );
 			break;
 		}
 
@@ -458,6 +459,8 @@ dispatcher::dispatch_evt( const evt &e )
 			p.x = GET_X_LPARAM( lp );
 			p.y = GET_Y_LPARAM( lp );
 			//ScreenToClient( w->id(), &p );
+			// NB: we deliver coordinates in screen coordinates currently
+			MapWindowPoints( w->id(), HWND_DESKTOP, &p, 1 );
 			int amt = HIWORD( wp ) / WHEEL_DELTA;
 			uint8_t mods = extract_mods( LOWORD( wp ) );
 			w->process_event(
@@ -477,6 +480,7 @@ dispatcher::dispatch_evt( const evt &e )
 				event::window( _ext_events.get(),
 							   event_type::WINDOW_EXPOSED,
 							   0, 0, 0, 0 ) );
+			RedrawWindow( w->id(), NULL, NULL, RDW_VALIDATE );
 			break;
 
 		case WM_CLEAR:
@@ -515,6 +519,9 @@ void dispatcher::send_mouse_evt( const std::shared_ptr<window> &w,
 	p.x = GET_X_LPARAM( lp );
 	p.y = GET_Y_LPARAM( lp );
 	//ScreenToClient( w->id(), &p );
+	//ClientToScreen( w->id(), &p );
+	// NB: we deliver coordinates in screen coordinates currently
+	MapWindowPoints( w->id(), HWND_DESKTOP, &p, 1 );
 
 	uint8_t mods = extract_mods( LOWORD( wp ) );
 

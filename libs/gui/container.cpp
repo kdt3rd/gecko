@@ -90,6 +90,7 @@ bool base_container::update_layout( double duration )
 void base_container::remove( size_t w )
 {
 	_widgets.erase( _widgets.begin() + w );
+	invalidate();
 }
 
 ////////////////////////////////////////
