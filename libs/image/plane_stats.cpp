@@ -384,6 +384,106 @@ compute_mse( scanline &dest, int y, const plane &p, const plane &p2, int radius 
 	}
 }
 
+////////////////////////////////////////
+
+static void
+compute_ssim( scanline &dest, int y, const plane &p, const plane &p2, int radius, const float L, const float k1, const float k2, const float sigma )
+{
+	int wm1 = dest.width() - 1;
+	int n2 = radius * 2 + 1;
+	n2 *= n2;
+	const float c1 = ( k1 * L ) * ( k1 * L );
+	const float c2 = ( k2 * L ) * ( k2 * L );
+	int yRangeB = y - radius;
+	if ( yRangeB < p.y1() )
+		yRangeB = p.y1();
+	int yRangeE = yRangeB + radius * 2;
+	if ( yRangeE > p.y2() )
+	{
+		yRangeE = p.y2();
+		yRangeB = std::max( p.y1(), yRangeE - radius * 2 );
+	}
+	float sig = sigma;
+	if ( sig <= 0.f )
+		sig = logf( static_cast<float>(radius) );
+	sig = -1.f / ( 2.f * sig * sig );
+	std::vector<float> gweight;
+	gweight.resize( radius * 2 + 1, 0.f );
+	int i = -radius;
+	for ( auto &g: gweight )
+	{
+		g = expf( static_cast<float>( i * i ) * sig );
+		++i;
+	}
+
+	for ( int x = 0; x <= wm1; ++x )
+	{
+		int xrb = x - radius;
+		if ( xrb < 0 )
+			xrb = 0;
+		int xre = xrb + radius * 2;
+		if ( xre > wm1 )
+		{
+			xre = wm1;
+			xrb = std::max( int(0), xre - radius * 2 );
+		}
+		double Ex = 0.0, Ey = 0.0, Exx = 0.0, Eyy = 0.0, Exy = 0.0;
+		double K = 0.0, K2 = 0.0, weightsum = 0.0;
+		size_t widxy = 0;
+		for ( int cy = yRangeB; cy <= yRangeE; ++cy )
+		{
+			const float *srcL = p.line( cy );
+			const float *srcL2 = p2.line( cy );
+			float weightY = gweight[widxy++];
+			if ( cy == yRangeB )
+			{
+				K = 0.5 * ( srcL[xrb] + srcL[xre] );
+				K2 = 0.5 * ( srcL2[xrb] + srcL2[xre] );
+			}
+			size_t widxx = 0;
+			for ( int cx = xrb; cx <= xre; ++cx )
+			{
+				float weight = weightY * gweight[widxx++];
+				float lv1 = ( srcL[cx] - K );
+				float lv2 = ( srcL2[cx] - K2 );
+				Ex += lv1 * weight;
+				Ey += lv2 * weight;
+				Exy += lv1 * lv2 * weight;
+				Exx += lv1 * lv1 * weight;
+				Eyy += lv2 * lv2 * weight;
+				weightsum += weight;
+			}
+		}
+		double norm = 1.0 / weightsum;
+		double cov = (Exy - Ex * Ey * norm) * norm;
+		// should the second norm be (n - 1)???? radius is usually small, so keep it at n
+		double var1 = (Exx - (Ex * Ex) * norm) * norm; 
+		double var2 = (Eyy - (Ey * Ey) * norm) * norm;
+		double ave1 = Ex * norm + K;
+		double ave2 = Ey * norm + K2;
+		double ssval;
+		if ( c1 > 0.f && c2 > 0.f)
+			ssval = static_cast<float>(
+				(2.0 * ave1 * ave2 + c1 ) * ( 2.0 * cov + c2 ) /
+				( ( ave1*ave1 + ave2*ave2 + c1 ) * ( var1 + var2 + c2 ) ) );
+		else
+		{
+			double num1 = (2.0 * ave1 * ave2 + c1 );
+			double num2 = ( 2.0 * cov + c2 );
+			double den1 = ( ave1*ave1 + ave2*ave2 + c1 );
+			double den2 = ( var1 + var2 + c2 );
+			double den = den1 * den2;
+			if ( den > 0.0 )
+				ssval = num1 * num2 / den;
+			else if ( den1 > 0.0 )
+				ssval = num1 / den1;
+			else
+				ssval = 1.0;
+		}
+		dest[x] = static_cast<float>( ssval );
+	}
+}
+
 }
 
 ////////////////////////////////////////
@@ -457,6 +557,15 @@ mse( const plane &p, const plane &p2, int radius )
 
 ////////////////////////////////////////
 
+plane
+ssim( const plane &p, const plane &p2, int radius, float L, float k1, float k2 )
+{
+	precondition( p.dims() == p2.dims(), "unable to compute SSIM for planes of different sizes" );
+	return plane( "p.ssim", p.dims(), p, p2, radius, L, k1, k2 );
+}
+
+////////////////////////////////////////
+
 engine::computed_value< std::vector<uint64_t> >
 histogram( const plane &p, int bins, float lowV, float highV )
 {
@@ -488,6 +597,7 @@ add_plane_stats( engine::registry &r )
 	r.add( op( "p.local_variance", base::choose_runtime( compute_variance ), n_scanline_plane_adapter<false, decltype(compute_variance)>(), dispatch_scan_processing, op::n_to_one ) );
 
 	r.add( op( "p.mean_square_error", base::choose_runtime( compute_mse ), n_scanline_plane_adapter<false, decltype(compute_mse)>(), dispatch_scan_processing, op::n_to_one ) );
+	r.add( op( "p.mean_square_error", base::choose_runtime( compute_ssim ), n_scanline_plane_adapter<false, decltype(compute_ssim)>(), dispatch_scan_processing, op::n_to_one ) );
 }
 
 } // image

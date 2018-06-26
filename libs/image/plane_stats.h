@@ -46,6 +46,9 @@ plane local_mean( const accum_buf &sat, int radius );
 plane local_variance( const accum_buf &sat, const accum_buf &sat2, int radius );
 
 plane mse( const plane &p1, const plane &p2, int radius );
+/// Computes structured similarity
+/// if sigma is negative, it auto computes it based on the radius
+plane ssim( const plane &p1, const plane &p2, int radius, float L = 1.f, float k1 = 0.01f, float k2 = 0.03f, float sigma = -1.f );
 
 /// Computes a histogram of the plane
 ///
