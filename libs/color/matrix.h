@@ -45,6 +45,13 @@ public:
 	}
 	inline constexpr matrix( value_type m00, value_type m01, value_type m02, value_type m10, value_type m11, value_type m12, value_type m20, value_type m21, value_type m22 ) noexcept : _m{{ m00, m01, m02, m10, m11, m12, m20, m21, m22 }} {}
 	inline constexpr matrix( const triplet<value_type> &c1, const triplet<value_type> &c2, const triplet<value_type> &c3 ) noexcept : _m{{ c1.x, c2.x, c3.x, c1.y, c2.y, c3.y, c1.z, c2.z, c3.z }} {}
+
+	template <typename U>
+	inline constexpr matrix( const matrix<U> &o ) noexcept : _m{{
+			static_cast<value_type>(o[0][0]), static_cast<value_type>(o[0][1]), static_cast<value_type>(o[0][2]),
+			static_cast<value_type>(o[1][3]), static_cast<value_type>(o[1][4]), static_cast<value_type>(o[1][5]),
+			static_cast<value_type>(o[2][6]), static_cast<value_type>(o[2][7]), static_cast<value_type>(o[2][8]) }} {}
+			
 	inline constexpr matrix( const matrix & ) = default;
 	inline constexpr matrix( matrix && ) = default;
 	inline matrix &operator=( const matrix & ) = default;

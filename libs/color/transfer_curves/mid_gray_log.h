@@ -52,14 +52,12 @@ struct mid_gray_log
 
 	constexpr inline T to_linear( const T v ) const
 	{
-		using namespace std;
-		return _lin_ref * pow( T(10.0), ( min( max( 0, v * _bits ), _bits ) - _log_ref ) * _lin_s );
+		return _lin_ref * std::pow( T(10.0), ( std::min( std::max( T(0), v * _bits ), _bits ) - _log_ref ) * _lin_s );
 	}
 
 	constexpr inline T from_linear( const T v ) const
 	{
-		using namespace std;
-		return min( _bits, _log_ref + log10( max( v, T(1e-10) ) * _one_lin_ref ) * _log_s ) * _bitn;
+		return std::min( _bits, _log_ref + std::log10( std::max( v, T(1e-10) ) * _one_lin_ref ) * _log_s ) * _bitn;
 	}
 
 	const T _lin_ref;

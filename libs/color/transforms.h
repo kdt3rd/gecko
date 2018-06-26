@@ -70,10 +70,9 @@ inline void convert( T &a, T &b, T &c, const state &from, const state &to, const
 {
 	// TODO: handle integral values and loss of precision
 	to_full( a, b, c, a, b, c, from.current_space(), from.signal(), bits );
-//	if ( has_opponency( from.current_space() ) )
-//		remove_opponency( a, b, c, a, b, c, from.current_space() );
-//	if ( from.curve() != to.curve() || !( to.is_same_matrix( from ) ) )
-	if ( from.curve() != to.curve() )
+	if ( has_opponency( from.current_space() ) )
+		remove_opponency( a, b, c, a, b, c, from.current_space() );
+	if ( from.curve() != to.curve() || !( to.is_same_matrix( from ) ) )
 	{
 		triplet<T> v;
 		v.x = linearize( a, from.curve() );
@@ -85,7 +84,8 @@ inline void convert( T &a, T &b, T &c, const state &from, const state &to, const
 		b = encode( v.y, to.curve() );
 		c = encode( v.z, to.curve() );
 	}
-//	add_opponency( a, b, c, a, b, c, to.current_space() );
+	if ( has_opponency( to.current_space() ) )
+		add_opponency( a, b, c, a, b, c, to.current_space() );
 	// TODO: should we clamp SDI values ever?
 	from_full( a, b, c, a, b, c, to.current_space(), to.signal(), bits, false );
 }

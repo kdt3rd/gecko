@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <iostream>
+
 ////////////////////////////////////////
 
 namespace color
@@ -56,6 +58,42 @@ enum class space : uint8_t
 	UNKNOWN ///< in some unknown state
 };
 
+inline std::ostream &operator<<( std::ostream &os, const space &s )
+{
+	switch ( s )
+	{
+		case space::RGB: os << "rgb"; break;
+		case space::YCBCR_BT601: os << "ycbcr601"; break;
+		case space::YCBCR_BT709: os << "ycbcr709"; break;
+		case space::YCBCR_BT2020: os << "ycbcr2020"; break;
+		case space::YCBCR_BT2100: os << "ycbcr2100"; break;
+		case space::YCBCR_SYCC: os << "sycc"; break;
+		case space::YCBCR_CUSTOM: os << "custom_ycbcr"; break;
+		case space::HSV_HEX: os << "hsvhex"; break;
+		case space::HSV_CYL: os << "hsvcyl"; break;
+		case space::HSI_HEX: os << "hsihex"; break;
+		case space::HSI_CYL: os << "hsicyl"; break;
+		case space::HSL_HEX: os << "hslhex"; break;
+		case space::HSL_CYL: os << "hslcyl"; break;
+		case space::ICTCP: os << "ictcp"; break;
+		case space::IPT: os << "ipt"; break;
+		case space::xyY: os << "xyY"; break;
+		case space::XYZ: os << "xyz"; break;
+		case space::LMS_HPE: os << "lms_hpe"; break;
+		case space::LMS_CAM02: os << "lms_cam02"; break;
+		case space::LMS_ICTCP: os << "lms_ictcp"; break;
+		case space::LMS_OPPONENT: os << "lms_opp"; break;
+		case space::CHONG: os << "chong"; break;
+		case space::HUNTER_LAB: os << "hunter_lab"; break;
+		case space::CIE_LAB_76: os << "cie_lab_76"; break;
+		case space::CIE_LUV_76: os << "cie_luv_76"; break;
+		case space::CIE_LCH_76: os << "cie_lch_76"; break;
+		case space::CIE_UVW_64: os << "cie_uvw_64"; break;
+		case space::UNKNOWN: os << "UNKNOWN"; break;
+	}
+	return os;
+}
+
 // ycbcr_sYCC
 //
 // [ Y  ]   [  0.2990  0.5870  0.1140 ][ R ]
@@ -70,5 +108,7 @@ enum class space : uint8_t
 
 } // namespace color
 
+#include "space_traits.h"
+#include "space_impl.h"
 
 

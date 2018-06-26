@@ -12,14 +12,12 @@
 #include "space.h"
 #include "range.h"
 #include "transfer_curve.h"
-
+#include <iostream>
 
 ////////////////////////////////////////
 
-
 namespace color
 {
-
 
 /// @brief Class description provides a basic set of attributes
 ///        describing the current state of an image or other color
@@ -156,6 +154,12 @@ public:
 		_curve_ctl = ctl;
 	}
 
+	inline bool is_same_matrix( const state &o ) const
+	{
+		// \todo { implement this }
+		return false;
+	}
+
 	inline cx::mat get_to_xyz_mat( value_type Y = value_type(1) ) const
 	{
 		switch ( _space )
@@ -261,6 +265,12 @@ private:
 	value_type _black_offset = value_type(0.0);
 	transfer_curve_control _curve_ctl = transfer_curve_control();
 };
+
+inline std::ostream &operator<<( std::ostream &os, const state &s )
+{
+	os << "space(" << s.current_space() << ") chroma(" << s.chroma() << ") lumscale(" << s.luminance_scale() << ") blackoff(" << s.black_offset() << ") range(" << s.signal() << ") transfer(" << s.curve() << ",{" << s.curve_controls() << "})";
+	return os;
+}
 
 } // namespace color
 

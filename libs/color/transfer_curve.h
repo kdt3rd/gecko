@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <iostream>
+
 // the following implementations of transfer curves are expected to
 // provide a (templated) structure implementing the following:
 // 1. static functions for linearize / encode of that transfer curve
@@ -121,7 +123,7 @@ inline T linearize( const T v, transfer t )
 {
 	switch ( t )
 	{
-		case transfer::LINEAR: return t;
+		case transfer::LINEAR: return v;
 		case transfer::GAMMA_sRGB: return gamma_srgb<T>::linearize( v );
 		case transfer::GAMMA_BT601: return gamma_srgb<T>::linearize( v );
 		case transfer::GAMMA_BT709: return gamma_srgb<T>::linearize( v );
@@ -148,6 +150,7 @@ inline T linearize( const T v, transfer t )
 		case transfer::ACES_proxy: return gamma_srgb<T>::linearize( v );
 		case transfer::CIE_LAB_76: return cie_Lab_76<T>::linearize( v );
 	}
+	return v;
 }
 
 template <typename T>
@@ -155,7 +158,7 @@ inline T encode( const T v, transfer t )
 {
 	switch ( t )
 	{
-		case transfer::LINEAR: return t;
+		case transfer::LINEAR: return v;
 		case transfer::GAMMA_sRGB: return gamma_srgb<T>::encode( v );
 		case transfer::GAMMA_BT601: return gamma_srgb<T>::encode( v );
 		case transfer::GAMMA_BT709: return gamma_srgb<T>::encode( v );
@@ -182,6 +185,51 @@ inline T encode( const T v, transfer t )
 		case transfer::ACES_proxy: return gamma_srgb<T>::encode( v );
 		case transfer::CIE_LAB_76: return cie_Lab_76<T>::encode( v );
 	}
+	return v;
+}
+
+////////////////////////////////////////
+
+inline std::ostream &operator<<( std::ostream &os, const transfer &t )
+{
+	switch ( t )
+	{
+		case transfer::LINEAR: os << "linear"; break;
+		case transfer::GAMMA_sRGB: os << "gamma_srgb"; break;
+		case transfer::GAMMA_BT601: os << "gamma_bt601"; break;
+		case transfer::GAMMA_BT709: os << "gamma_bt709"; break;
+		case transfer::GAMMA_BT2020: os << "gamma_bt2020"; break;
+		case transfer::GAMMA_BT1886: os << "gamma_bt1886"; break;
+		case transfer::GAMMA_DCI: os << "gamma_dci"; break;
+		case transfer::GAMMA_CUSTOM: os << "gamma_custom"; break;
+		case transfer::FOUR_PT_GAMMA_CUSTOM: os << "fourpt_gamma"; break;
+		case transfer::SONY_SLOG1: os << "slog1"; break;
+		case transfer::SONY_SLOG2: os << "slog2"; break;
+		case transfer::SONY_SLOG3: os << "slog3"; break;
+		case transfer::ARRI_LOGC_NORMSENS_SUP2: os << "arri_logc_sens2"; break;
+		case transfer::ARRI_LOGC_SCENELIN_SUP2: os << "arri_logc_scene2"; break;
+		case transfer::ARRI_LOGC_NORMSENS_SUP3: os << "arri_logc_sens3"; break;
+		case transfer::ARRI_LOGC_SCENELIN_SUP3: os << "arri_logc_scene3"; break;
+		case transfer::CINEON: os << "cineon"; break;
+		case transfer::CINEON_SOFTCLIP: os << "cineon_soft"; break;
+		case transfer::MID_GRAY_LOG: os << "midgraylog"; break;
+		case transfer::PQ: os << "pq"; break;
+		case transfer::HLG_OETF: os << "hlg_oetf"; break;
+		case transfer::HLG_EOTF: os << "hlg_eotf"; break;
+		case transfer::ACES_cc: os << "aces_cc"; break;
+		case transfer::ACES_cct: os << "aces_cct"; break;
+		case transfer::ACES_proxy: os << "aces_proxy"; break;
+		case transfer::CIE_LAB_76: os << "cielab76"; break;
+	}
+	return os;
+}
+
+////////////////////////////////////////
+
+inline std::ostream &operator<<( std::ostream &os, const transfer_curve_control &tcc )
+{
+	os << tcc._A << ',' << tcc._B << ',' << tcc._C << ',' << tcc._D << ',' << tcc._E;
+	return os;
 }
 
 } // namespace color

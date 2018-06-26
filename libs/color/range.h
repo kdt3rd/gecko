@@ -10,6 +10,7 @@
 #include <cmath>
 #include <base/contract.h>
 #include "space.h"
+#include <iostream>
 
 ////////////////////////////////////////
 
@@ -186,6 +187,23 @@ void from_full( T &outA, T &outB, T &outC, const T inA, const T inB, const T inC
 
 	if ( doClampIllegal )
 		sdi_util<T>::clamp_illegal( outA, outB, outC, bits );
+}
+
+////////////////////////////////////////
+
+inline std::ostream &operator<<( std::ostream &os, const range &r )
+{
+	switch ( r )
+	{
+		case range::FULL: os << "full"; break;
+		case range::ITU_FULL: os << "itu_full"; break;
+		case range::SMPTE: os << "smpte"; break;
+		case range::SDI: os << "sdi"; break;
+		case range::SDI_RP2077: os << "sdi_rp2077"; break;
+		case range::SDI_ST2084: os << "sdi_st2084"; break;
+		case range::SMPTE_PLUS: os << "smpte_plus"; break;
+	}
+	return os;
 }
 
 } // namespace color

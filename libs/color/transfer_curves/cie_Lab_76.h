@@ -55,14 +55,12 @@ struct cie_Lab_76
 
 	constexpr inline T to_linear( const T v ) const
 	{
-		using namespace std;
-		return abs( v * v * v ) > ehat ? v * v * v : copysign( ( T(116) * abs( v ) - T(16) ) / khat, v );
+		return std::abs( v * v * v ) > ehat ? v * v * v : std::copysign( ( T(116) * std::abs( v ) - T(16) ) / khat, v );
 	}
 
 	constexpr inline T from_linear( const T v ) const
 	{
-		using namespace std;
-		return copysign( (abs( v ) <= ehat) ? ((khat * abs( v ) + T(16)) / T(116)) : cbrt( abs( v ) ), v );
+		return std::copysign( (std::abs( v ) <= ehat) ? ((khat * std::abs( v ) + T(16)) / T(116)) : std::cbrt( std::abs( v ) ), v );
 	}
 
 	static constexpr inline T linearize( const T v )

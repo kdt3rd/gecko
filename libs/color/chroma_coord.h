@@ -13,6 +13,7 @@
 #include <base/math_functions.h>
 #include <base/likely.h>
 #include "triplet.h"
+#include <iostream>
 
 ////////////////////////////////////////
 
@@ -90,6 +91,13 @@ template <typename V>
 inline constexpr bool operator<( const chroma_coord<V> &a, const chroma_coord<V> &b ) noexcept
 {
 	return ( ( a.x < b.x ) ? true : ( ( b.x < a.x ) ? false : a.y < b.y ) );
+}
+
+template <typename V>
+inline std::ostream &operator<<( std::ostream &os, const chroma_coord<V> &c )
+{
+	os << '{' << c.x << ',' << c.y << '}';
+	return os;
 }
 
 } // namespace color

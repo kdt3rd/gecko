@@ -28,6 +28,7 @@ lib = library "image"
 	"plane_resize.cpp";
 	"plane_stats.cpp";
 	"plane_convolve.cpp";
+	"color_ops.cpp";
 	"media_io.cpp";
 	"spatial_filter.cpp";
 	"vector_field.cpp";

@@ -55,14 +55,14 @@ struct gamma_srgb
 
 	constexpr inline T to_linear( const T v ) const
 	{
-		using namespace std;
-		return abs( v ) <= T(0.04045) ? v / T(12.92) : copysign( pow( ( abs( v ) + T(0.055) ) / T(1.055) ), v );
+		static_assert( std::is_floating_point<T>::value, "expect a floating point value for transfer curve to/from" );
+		return std::abs( v ) <= T(0.04045) ? v / T(12.92) : std::copysign( std::pow( ( std::abs( v ) + T(0.055) ) / T(1.055), T(2.4) ), v );
 	}
 
 	constexpr inline T from_linear( const T v ) const
 	{
-		using namespace std;
-		return abs( v ) <= T(0.0031308) ? v * T(12.92) : copysign( T(1.055) * pow( abs( v ), T(1.0/2.4) ) - T(0.055), v );
+		static_assert( std::is_floating_point<T>::value, "expect a floating point value for transfer curve to/from" );
+		return std::abs( v ) <= T(0.0031308) ? v * T(12.92) : std::copysign( T(1.055) * std::pow( std::abs( v ), T(1.0/2.4) ) - T(0.055), v );
 	}
 
 	static constexpr inline T linearize( const T v )

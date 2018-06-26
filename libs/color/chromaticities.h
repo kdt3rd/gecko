@@ -12,10 +12,9 @@
 
 #include "chroma_coord.h"
 #include "matrix.h"
-
+#include <iostream>
 
 ////////////////////////////////////////
-
 
 namespace color
 {
@@ -227,6 +226,13 @@ public:
 	xy blue = xy( value_type(0), value_type(1) );
 	xy white = xy( value_type(1) / value_type(3), value_type(1) / value_type(3) );
 };
+
+template <typename T>
+inline std::ostream &operator<<( std::ostream &os, const chromaticities<T> &c )
+{
+	os << c.red << ',' << c.green << ',' << c.blue << ',' << c.white;
+	return os;
+}
 
 } // namespace color
 
