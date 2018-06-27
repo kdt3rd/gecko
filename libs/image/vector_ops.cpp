@@ -579,6 +579,24 @@ modify_vectors( const plane &newu, const plane &newv, bool a )
 
 ////////////////////////////////////////
 
+vector_field concatenate( const vector_field &a, const vector_field &b )
+{
+	vector_field pull = b;
+	if ( a.is_absolute() != b.is_absolute() )
+	{
+		if ( a.is_absolute() )
+			pull = convert_to_absolute( b );
+		else
+			pull = convert_to_relative( b );
+	}
+
+	plane u = warp_bilinear( b.u(), a );
+	plane v = warp_bilinear( b.u(), a );
+	return vector_field( a.u() + u, a.v() + v, a.is_absolute() );
+}
+
+////////////////////////////////////////
+
 void add_vector_ops( engine::registry &r )
 {
 	using namespace engine;
