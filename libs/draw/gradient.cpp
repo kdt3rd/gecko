@@ -16,7 +16,7 @@ namespace draw
 
 void gradient::sort( void )
 {
-	auto cmp = []( const std::pair<float,gl::color> &a, const std::pair<float,gl::color> &b )
+	auto cmp = []( const stop_type &a, const stop_type &b )
 	{
 		return a.first < b.first;
 	};
@@ -25,7 +25,7 @@ void gradient::sort( void )
 
 ////////////////////////////////////////
 
-gl::color gradient::sample( float v ) const
+color gradient::sample( value_type v ) const
 {
 	size_t i = 0;
 	while ( i < _stops.size() )
@@ -40,10 +40,10 @@ gl::color gradient::sample( float v ) const
 		if ( i == 0 )
 			return _stops[0].second;
 
-		float range = _stops[i].first - _stops[i-1].first;
-		float mix = ( _stops[i].first - v ) / range;
+		value_type range = _stops[i].first - _stops[i-1].first;
+		value_type mix = ( _stops[i].first - v ) / range;
 
-		return gl::color::mix( _stops[i].second, _stops[i-1].second, mix );
+		return color::mix( _stops[i].second, _stops[i-1].second, mix );
 	}
 
 	return _stops.back().second;

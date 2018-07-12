@@ -57,14 +57,14 @@ void text::set_text( const std::string &utf8 )
 
 ////////////////////////////////////////
 
-void text::set_position( const gl::vec2 &p )
+void text::set_position( const point &p )
 {
 	_pos = p;
 }
 
 ////////////////////////////////////////
 
-void text::set_color( const gl::color &c )
+void text::set_color( const color &c )
 {
 	_color = c;
 }
@@ -83,7 +83,7 @@ void text::draw( platform::context &ctxt )
 		{
 			std::shared_ptr<gl::texture> texture = x->second.texture;
 
-			gl::matrix4 local = gl::matrix4::translation( _pos[0], _pos[1] );
+			gl::matrix4 local = gl::matrix4::translation( to_api( _pos[0] ), to_api( _pos[1] ) );
 
 			auto txt = texture->bind();
 
@@ -98,7 +98,7 @@ void text::draw( platform::context &ctxt )
 
 ////////////////////////////////////////
 
-void text::rebuild( platform::context &ctxt )
+void text::rebuild( platform::context & )
 {
 	_stash.reset();
 }
@@ -136,7 +136,7 @@ void text::update( platform::context &ctxt )
 	// Update the font texture if needed.
 	auto &fgc = _stash->_font_glyph_cache;
 	auto x = fgc.find( _font );
-	
+
 	uint32_t curVer = _font->glyph_version();
 
 	gl::api &ogl = ctxt.api();
@@ -159,8 +159,8 @@ void text::update( platform::context &ctxt )
 		txt.set_wrapping( gl::wrapping::CLAMP_TO_EDGE );
 		txt.set_filters( gl::filter::LINEAR, gl::filter::LINEAR );
 		txt.image_2d_red( gl::format::RED,
-						  _font->bitmap_width(),
-						  _font->bitmap_height(),
+						  static_cast<size_t>( _font->bitmap_width() ),
+						  static_cast<size_t>( _font->bitmap_height() ),
 						  gl::image_type::UNSIGNED_BYTE,
 						  _font->bitmap().data() );
 		fgc[_font] = { _font->glyph_version(), texture };
@@ -227,4 +227,3 @@ void text::update( platform::context &ctxt )
 ////////////////////////////////////////
 
 }
-

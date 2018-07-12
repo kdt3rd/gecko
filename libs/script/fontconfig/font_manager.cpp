@@ -126,14 +126,14 @@ std::set<std::string> font_manager::get_styles( const std::string &family )
 ////////////////////////////////////////
 
 std::shared_ptr<script::font>
-font_manager::get_font( const std::string &family, const std::string &style, double pixsize )
+font_manager::get_font( const std::string &family, const std::string &style, points pts )
 {
 	std::string lang = base::locale::language();
 	FcPattern *pat = FcPatternBuild( nullptr,
 		FC_FAMILY, FcTypeString, family.c_str(),
 		FC_STYLE, FcTypeString, style.c_str(),
 		FC_LANG, FcTypeString, lang.c_str(),
-		FC_PIXEL_SIZE, FcTypeDouble, pixsize,
+		FC_SIZE, FcTypeDouble, static_cast<double>( pts.count() ),
 		nullptr );
 	FcConfigSubstitute( _impl->config, pat, FcMatchPattern );
 	FcDefaultSubstitute( pat );
@@ -161,7 +161,7 @@ font_manager::get_font( const std::string &family, const std::string &style, dou
 
 			try
 			{
-				ret = std::make_shared<script::freetype2::font>( ftface, family, style, pixsize );
+				ret = std::make_shared<script::freetype2::font>( ftface, family, style, pts );
 				ret->load_dpi( _dpi_h, _dpi_v );
 				ret->max_glyph_store( _max_glyph_w, _max_glyph_h );
 			}
@@ -182,4 +182,3 @@ font_manager::get_font( const std::string &family, const std::string &style, dou
 ////////////////////////////////////////
 
 } }
-

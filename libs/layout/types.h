@@ -8,6 +8,7 @@
 #pragma once
 
 #include <limits>
+#include <base/units.h>
 #include <base/rect.h>
 #include <base/alignment.h>
 
@@ -23,9 +24,10 @@ namespace layout
 //using coord = int32_t;
 //constexpr inline coord divide( coord a, coord b )
 //{ return ( a + ( b - 1 ) ) / b; }
-using coord = float;//base::units::millimeters<float>;
-constexpr inline coord divide( const coord &a, const coord &b )
-{ return a / b; }
+using coord = base::units::millimeters<float>;
+template <typename U>
+constexpr inline coord divide( const coord &a, U && b )
+{ return a / coord( std::forward<U>( b ) ); }
 
 using rect = base::rect<coord>;
 using point = rect::point_type;
@@ -37,6 +39,3 @@ inline constexpr coord max_coord( void ) { return std::numeric_limits<coord>::ma
 using alignment = base::alignment;
 
 }
-
-
-

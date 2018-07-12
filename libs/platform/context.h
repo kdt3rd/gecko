@@ -78,13 +78,23 @@ public:
 
 	virtual void share( context &o ) = 0;
 
-	virtual void set_viewport( coord_type x, coord_type y, coord_type w, coord_type h ) = 0;
-
 	virtual void swap_buffers( void ) = 0;
+
+	inline void viewport( coord_type x, coord_type y, coord_type w, coord_type h )
+	{
+		set_viewport( x, y, w, h );
+	}
+	inline void viewport( const rect &r )
+	{
+		set_viewport( r.x(), r.y(), r.width(), r.height() );
+	}
 
 	render_guard begin_render( void ) { return render_guard( this ); }
 
-	clip_region_guard push_clip( const rect &r ) { return clip_region_guard( this, r ); }
+	clip_region_guard push_clip( const rect &r )
+	{
+		return clip_region_guard( this, r );
+	}
 	clip_region_guard push_clip( coord_type x, coord_type y, coord_type w, coord_type h )
 	{
 		return clip_region_guard( this, rect( x, y, w, h ) );
@@ -99,6 +109,8 @@ protected:
 	virtual void acquire( void ) = 0;
 	virtual void release( void ) = 0;
 
+	virtual void set_viewport( coord_type x, coord_type y, coord_type w, coord_type h ) = 0;
+
 	virtual void push_clip_rect( const rect &r );
 	virtual void reset_clip( const rect &r ) = 0;
 	virtual void pop_clip_rect( void );
@@ -112,6 +124,3 @@ private:
 };
 
 } // namespace platform
-
-
-

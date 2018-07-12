@@ -26,7 +26,7 @@ class rect
 {
 public:
 	using coord_type = T;
-	using point_type = point<coord_type>;
+	using point_type = point<coord_type, 2>;
 	using size_type = size<coord_type>;
 
 	constexpr rect( void ) = default;
@@ -77,10 +77,10 @@ public:
 	{}
 
 	/// @brief X coordinate
-	constexpr coord_type x( void ) const { return _position.x(); }
+	constexpr coord_type x( void ) const { return _position[0]; }
 
 	/// @brief Y coordinate
-	constexpr coord_type y( void ) const { return _position.y(); }
+	constexpr coord_type y( void ) const { return _position[1]; }
 
 	/// @brief Width
 	constexpr coord_type width( void ) const { return _extent.w(); }
@@ -91,28 +91,28 @@ public:
 	/// @brief X coordinate in the rectangle
 	constexpr coord_type x( coord_type percent, coord_type radius = coord_type(0) ) const
 	{
-		static_assert( std::is_floating_point<coord_type>::value, "expect a floating point type for percent accessor" );
-		return _position.x() + radius + ( _extent.w() - radius*coord_type(2) ) * percent;
+		static_assert( !std::is_integral<coord_type>::value, "expect a floating point type for percent accessor" );
+		return _position[0] + radius + ( _extent.w() - radius*coord_type(2) ) * percent;
 	}
 
 	/// @brief Y coordinate in the rectangle
 	constexpr coord_type y( coord_type percent, coord_type radius = coord_type(0) ) const
 	{
-		static_assert( std::is_floating_point<coord_type>::value, "expect a floating point type for percent accessor" );
-		return _position.y() + radius + ( _extent.h() - radius*coord_type(2) ) * percent;
+		static_assert( !std::is_integral<coord_type>::value, "expect a floating point type for percent accessor" );
+		return _position[1] + radius + ( _extent.h() - radius*coord_type(2) ) * percent;
 	}
 
 	/// @brief X coordinate of right side
-	constexpr coord_type x1( void ) const { return _position.x(); }
+	constexpr coord_type x1( void ) const { return _position[0]; }
 
 	/// @brief Y coordinate of top side
-	constexpr coord_type y1( void ) const { return _position.y(); }
+	constexpr coord_type y1( void ) const { return _position[1]; }
 
 	/// @brief X coordinate of right side
-	constexpr coord_type x2( void ) const { return _position.x() + _extent.w() - coord_type(1); }
+	constexpr coord_type x2( void ) const { return _position[0] + _extent.w() - coord_type(1); }
 
 	/// @brief Y coordinate of bottom side
-	constexpr coord_type y2( void ) const { return _position.y() + _extent.h() - coord_type(1); }
+	constexpr coord_type y2( void ) const { return _position[1] + _extent.h() - coord_type(1); }
 
 	/// @brief Position of the rectangle
 	constexpr const point_type &position( void ) const { return _position; }
@@ -160,12 +160,18 @@ public:
 		_extent.set( w, h );
 		fix_extent();
 	}
+	void set( const rect &r )
+	{
+		_position = r.position();
+		_extent = r.extent();
+		// no need to re-fix the extent - just a convenience to make it like a copy
+	}
 
 	/// @brief Set x position
-	void set_x( coord_type x ) { _position.set_x( x ); }
+	void set_x( coord_type x ) { _position[0] = x; }
 
 	/// @brief Set y position
-	void set_y( coord_type y ) { _position.set_y( y ); }
+	void set_y( coord_type y ) { _position[1] = y; }
 
 	/// @brief Set width
 	void set_width( coord_type w ) { _extent.set_width( w ); fix_extent(); }
@@ -180,10 +186,10 @@ public:
 	void set_size( const size_type &s ) { _extent = s; }
 
 	/// @brief Set left side
-	void set_x1( coord_type x ) { _position.set_x( x ); }
+	void set_x1( coord_type x ) { _position[0] = x; }
 
 	/// @brief Set top side
-	void set_y1( coord_type y ) { _position.set_y( y ); }
+	void set_y1( coord_type y ) { _position[1] = y; }
 
 	/// @brief Set right side
 	void set_x2( coord_type x ) { _extent.set_width( x - x1() ); }
@@ -194,14 +200,14 @@ public:
 	/// @brief Set left and right sides
 	void set_horizontal( coord_type x1, coord_type x2 )
 	{
-		_position.set_x( std::min( x1, x2 ) );
+		_position[0] = std::min( x1, x2 );
 		_extent.set_width( coord_type( std::abs( x2 - x1 ) ) + coord_type(1) );
 	}
 
 	/// @brief Set top and bottom sides
 	void set_vertical( coord_type y1, coord_type y2 )
 	{
-		_position.set_y( std::min( y1, y2 ) );
+		_position[1] = std::min( y1, y2 );
 		_extent.set_height( coord_type( std::abs( y2 - y1 ) ) + coord_type(1) );
 	}
 
@@ -231,7 +237,7 @@ public:
 	}
 
 	/// @brief Is the point contained in the rectangle?
-	bool contains( const point_type &p ) const { return contains( p.x(), p.y() ); }
+	bool contains( const point_type &p ) const { return contains( p[0], p[1] ); }
 
 	/// @brief Shrink the rectangle
 	void shrink( coord_type left, coord_type right, coord_type top, coord_type bottom )
@@ -291,7 +297,7 @@ public:
 		r.set_x2( std::ceil( x2() ) );
 		r.set_y2( std::ceil( y2() ) );
 		return r;
-	}		
+	}
 private:
 	void fix_extent( void )
 	{
@@ -315,7 +321,7 @@ inline std::ostream &operator<<( std::ostream &out, const rect<T> &r )
 }
 
 template <typename T>
-inline decltype(distance(point<T>(), point<T>()))
+inline decltype(distance(point<T, 2>(), point<T, 2>()))
 distance( const rect<T> &r, const rect<T> &other )
 {
 	auto d1 = distance( r.top_left(), other.top_left() );
@@ -334,4 +340,3 @@ using lrect = rect<int64_t>;
 ////////////////////////////////////////
 
 } // namespace base
-

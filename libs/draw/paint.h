@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+#include "types.h"
 #include "gradient.h"
 #include <gl/color.h>
 #include <gl/vector.h>
@@ -38,7 +39,7 @@ public:
 	/// Paint with the given stroke of the given width and no fill.
 	/// @param c Color of stroke.
 	/// @param w Width of stroke.
-	paint( const gl::color &c, float w = 1.F );
+	paint( const color &c, dim w = dim(1) );
 
 	/// @brief Destructor.
 	~paint( void );
@@ -46,21 +47,21 @@ public:
 	/// @brief Set the stroke color and width.
 	/// @param c Color of stroke.
 	/// @param w Width of stroke.
-	void set_stroke( const gl::color &c, float w ) { _stroke_color = c; _stroke_width = w; }
+	void set_stroke( const color &c, dim w ) { _stroke_color = c; _stroke_width = w; }
 
 	/// @brief Set the stroke color.
 	/// @param c Color of stroke.
-	void set_stroke_color( const gl::color &c ) { _stroke_color = c; }
+	void set_stroke_color( const color &c ) { _stroke_color = c; }
 
 	/// @brief Get the stroke color.
-	const gl::color &get_stroke_color( void ) const { return _stroke_color; }
+	const color &get_stroke_color( void ) const { return _stroke_color; }
 
 	/// @brief Set the stroke width.
 	/// @param w Width of stroke.
-	void set_stroke_width( float w ) { _stroke_width = w; }
+	void set_stroke_width( dim w ) { _stroke_width = w; }
 
 	/// @brief Get the stroke width.
-	float get_stroke_width( void ) const { return _stroke_width; }
+	dim get_stroke_width( void ) const { return _stroke_width; }
 
 	/// @name No fill paint.
 	/// Functions relating to having no fill paint.
@@ -82,13 +83,13 @@ public:
 
 	/// @brief Set the fill color.
 	/// Set the fill to a single solid color.
-	void set_fill_color( const gl::color &c ) { clear_fill(); _fill_type = COLOR; _fill_color = c; }
+	void set_fill_color( const color &c ) { clear_fill(); _fill_type = COLOR; _fill_color = c; }
 
 	/// @brief Return true if solid color fill.
 	bool has_fill_color( void ) const { return _fill_type == COLOR; }
 
 	/// @brief Get the fill color.
-	const gl::color &get_fill_color( void ) const { precondition( has_fill_color(), "no fill color" ); return _fill_color; }
+	const color &get_fill_color( void ) const { precondition( has_fill_color(), "no fill color" ); return _fill_color; }
 
 	/// @}
 
@@ -96,11 +97,11 @@ public:
 	/// Functions relating to having a linear gradient fill.
 	/// @{
 	bool has_fill_linear( void ) const { return _fill_type == LINEAR; }
-	void set_fill_linear( const gl::vec2 &p, const gl::vec2 &s, const gradient &g ) { clear_fill(); _fill_type = LINEAR; new (&_fill_linear) linear( p, s, g ); }
-	void set_fill_linear( const gl::vec2 &p, float w, float h, const gradient &g ) { set_fill_linear( p, { w, h }, g ); }
+	void set_fill_linear( const point &p, const size &s, const gradient &g ) { clear_fill(); _fill_type = LINEAR; new (&_fill_linear) linear( p, s, g ); }
+	void set_fill_linear( const point &p, dim w, dim h, const gradient &g ) { set_fill_linear( p, { w, h }, g ); }
 
-	const gl::vec2 &get_fill_linear_origin( void ) const { precondition( has_fill_linear(), "no fill linear" ); return _fill_linear.p; }
-	const gl::vec2 &get_fill_linear_size( void ) const { precondition( has_fill_linear(), "no fill linear" ); return _fill_linear.s; }
+	const point &get_fill_linear_origin( void ) const { precondition( has_fill_linear(), "no fill linear" ); return _fill_linear.p; }
+	const size &get_fill_linear_size( void ) const { precondition( has_fill_linear(), "no fill linear" ); return _fill_linear.s; }
 	const gradient &get_fill_linear_gradient( void ) const { precondition( has_fill_linear(), "no fill linear" ); return _fill_linear.grad; }
 
 	/// @}
@@ -110,11 +111,11 @@ public:
 	/// @{
 
 	bool has_fill_radial( void ) const { return _fill_type == RADIAL; }
-	void set_fill_radial( const gl::vec2 &p1, float r1, float r2, const gradient &g ) { clear_fill(); _fill_type = RADIAL; new (&_fill_radial) radial( p1, r1, r2, g ); }
-	void set_fill_radial( const gl::vec2 &p, float r, const gradient &g ) { set_fill_radial( p, 0.0, r, g ); }
-	const gl::vec2 &get_fill_radial_center( void ) const { precondition( has_fill_radial(), "no fill radial" ); return _fill_radial.center; }
-	float get_fill_radial_r1( void ) const { precondition( has_fill_radial(), "no fill radial" ); return _fill_radial.r1; }
-	float get_fill_radial_r2( void ) const { precondition( has_fill_radial(), "no fill radial" ); return _fill_radial.r2; }
+	void set_fill_radial( const point &p1, dim r1, dim r2, const gradient &g ) { clear_fill(); _fill_type = RADIAL; new (&_fill_radial) radial( p1, r1, r2, g ); }
+	void set_fill_radial( const point &p, dim r, const gradient &g ) { set_fill_radial( p, dim(0), r, g ); }
+	const point &get_fill_radial_center( void ) const { precondition( has_fill_radial(), "no fill radial" ); return _fill_radial.center; }
+	dim get_fill_radial_r1( void ) const { precondition( has_fill_radial(), "no fill radial" ); return _fill_radial.r1; }
+	dim get_fill_radial_r2( void ) const { precondition( has_fill_radial(), "no fill radial" ); return _fill_radial.r2; }
 	const gradient &get_fill_radial_gradient( void ) const { precondition( has_fill_radial(), "no fill radial" ); return _fill_radial.grad; }
 
 	/// @}
@@ -124,8 +125,8 @@ public:
 	/// @{
 
 	bool has_fill_conical( void ) const { return _fill_type == CONICAL; }
-	void set_fill_conical( const gl::vec2 &p, const gradient &g ) { clear_fill(); _fill_type = CONICAL; new (&_fill_conical) conical( p, g ); }
-	const gl::vec2 &get_fill_conical_center( void ) const { precondition( has_fill_conical(), "no fill conical" ); return _fill_conical.p; }
+	void set_fill_conical( const point &p, const gradient &g ) { clear_fill(); _fill_type = CONICAL; new (&_fill_conical) conical( p, g ); }
+	const point &get_fill_conical_center( void ) const { precondition( has_fill_conical(), "no fill conical" ); return _fill_conical.p; }
 	const gradient &get_fill_conical_gradient( void ) const { precondition( has_fill_conical(), "no fill conical" ); return _fill_conical.grad; }
 
 	/// @}
@@ -134,23 +135,23 @@ public:
 	/// Functions relating to having a box gradient fill.
 	/// @{
 	bool has_fill_box( void ) const { return _fill_type == BOX; }
-	void set_fill_box( const gl::vec2 &p1, const gl::vec2 &p2, float radius, const gradient &g ) { clear_fill(); _fill_type = BOX; new (&_fill_box) box( p1, p2, radius, g ); }
+	void set_fill_box( const point &p1, const point &p2, dim radius, const gradient &g ) { clear_fill(); _fill_type = BOX; new (&_fill_box) box( p1, p2, radius, g ); }
 
-	const gl::vec2 &get_fill_box_point1( void ) const { precondition( has_fill_box(), "no fill box" ); return _fill_box.point1; }
-	const gl::vec2 &get_fill_box_point2( void ) const { precondition( has_fill_box(), "no fill box" ); return _fill_box.point2; }
-	float get_fill_box_radius( void ) const { precondition( has_fill_box(), "no fill box" ); return _fill_box.radius; }
+	const point &get_fill_box_point1( void ) const { precondition( has_fill_box(), "no fill box" ); return _fill_box.point1; }
+	const point &get_fill_box_point2( void ) const { precondition( has_fill_box(), "no fill box" ); return _fill_box.point2; }
+	dim get_fill_box_radius( void ) const { precondition( has_fill_box(), "no fill box" ); return _fill_box.radius; }
 	const gradient &get_fill_box_gradient( void ) const { precondition( has_fill_box(), "no fill box" ); return _fill_box.grad; }
 
 	/// @}
 
 	bool empty( void ) const
 	{
-		return _stroke_width == 0.F && has_no_fill();
+		return _stroke_width == dim(0) && has_no_fill();
 	}
 
 private:
-	gl::color _stroke_color;
-	float _stroke_width = 0.F;
+	color _stroke_color;
+	dim _stroke_width = dim(0);
 
 	enum
 	{
@@ -164,55 +165,55 @@ private:
 
 	struct linear
 	{
-		linear( const gl::vec2 &pt, const gl::vec2 &sz, const gradient &g )
+		linear( const point &pt, const size &sz, const gradient &g )
 			: p( pt ), s( sz ), grad( g )
 		{
 		}
 
-		gl::vec2 p;
-		gl::vec2 s;
+		point p;
+		size s;
 		gradient grad;
 	};
 
 	struct radial
 	{
-		radial( const gl::vec2 &c, float rr1, float rr2, const gradient &g )
+		radial( const point &c, dim rr1, dim rr2, const gradient &g )
 			: center( c ), r1( rr1 ), r2( rr2 ), grad( g )
 		{
 		}
 
-		gl::vec2 center;
-		float r1, r2;
+		point center;
+		dim r1, r2;
 		gradient grad;
 	};
 
 	struct conical
 	{
-		conical( const gl::vec2 &pp, const gradient &g )
+		conical( const point &pp, const gradient &g )
 			: p( pp ), grad( g )
 		{
 		}
 
-		gl::vec2 p;
+		point p;
 		gradient grad;
 	};
 
 	struct box
 	{
-		box( const gl::vec2 &p1, const gl::vec2 &p2, float r, const gradient &g )
+		box( const point &p1, const point &p2, dim r, const gradient &g )
 			: point1( p1 ), point2( p2 ), radius( r ), grad( g )
 		{
 		}
 
-		gl::vec2 point1;
-		gl::vec2 point2;
-		float radius;
+		point point1;
+		point point2;
+		dim radius;
 		gradient grad;
 	};
 
 	union
 	{
-		gl::color _fill_color;
+		color _fill_color;
 		linear _fill_linear;
 		radial _fill_radial;
 		conical _fill_conical;
@@ -223,4 +224,3 @@ private:
 ////////////////////////////////////////
 
 }
-

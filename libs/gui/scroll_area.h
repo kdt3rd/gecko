@@ -20,7 +20,7 @@ class scroll_area_w : public widget
 {
 public:
 	scroll_area_w( bool hscroll = true, bool vscroll = true, bool bounded = true );
-	~scroll_area_w( void );
+	~scroll_area_w( void ) override;
 
 	void set_widget( const std::shared_ptr<widget> &v );
 	template <typename Y>
@@ -29,7 +29,7 @@ public:
 	void build( context &ctxt ) override;
 	void paint( context &ctxt ) override;
 
-	std::shared_ptr<widget> find_widget_under( coord x, coord y ) override;
+	std::shared_ptr<widget> find_widget_under( const point &p ) override;
 
 	bool update_layout( double duration ) override;
 
@@ -51,4 +51,3 @@ private:
 using scroll_area = widget_ptr<scroll_area_w>;
 
 }
-

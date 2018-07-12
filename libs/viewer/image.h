@@ -33,7 +33,7 @@ public:
 	//image( void );
 	//image( const std::shared_ptr<gl::texture> &t );
 
-	void set_color_state( const color::state &s );
+	void set_color_state( const ::color::state &s );
 //	void set_interleaved( gl::api &ogl,
 //						  int datax, int datay, int w, int h,
 //						  gl::image_type it, void *ptr, int nchannels,
@@ -96,4 +96,3 @@ private:
 ////////////////////////////////////////
 
 }
-

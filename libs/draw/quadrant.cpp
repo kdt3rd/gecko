@@ -38,7 +38,7 @@ void quadrant::add( gl::api &ogl, const polylines &lines, const paint &c )
 		_meshes.push_back( std::move( m ) );
 	}
 
-	if ( c.get_stroke_width() > 0.F )
+	if ( c.get_stroke_width() > dim(0) )
 	{
 		mesh m;
 		m.matrix = stroke_mesh( ogl, m.msh, c, "quadrant.vert" );
@@ -84,4 +84,3 @@ void quadrant::draw( platform::context &ctxt )
 ////////////////////////////////////////
 
 }
-

@@ -30,8 +30,8 @@ namespace script { namespace freetype2
 class font : public ::script::font
 {
 public:
-	font( FT_Face face, std::string fam, std::string style, double pixsize, const std::shared_ptr<uint8_t []> &ttfData = std::shared_ptr<uint8_t []>() );
-	~font( void );
+	font( FT_Face face, std::string fam, std::string style, base::units::points<extent_type> pts, const std::shared_ptr<uint8_t []> &ttfData = std::shared_ptr<uint8_t []>() );
+	~font( void ) override;
 
 	extent_type kerning( char32_t c1, char32_t c2 ) override;
 
@@ -47,4 +47,3 @@ private:
 
 } // namespace freetype2
 } // namespace script
-

@@ -22,13 +22,16 @@ drawable::~drawable( void )
 
 ////////////////////////////////////////
 
-std::shared_ptr<gl::texture> drawable::new_gradient( gl::api &ogl, const draw::gradient &g, size_t n )
+std::shared_ptr<gl::texture> drawable::new_gradient( gl::api &ogl, const gradient &g, size_t n )
 {
 	std::vector<uint8_t> bytes( n * 4 );
+	using vt = gradient::value_type;
+
+	vt norm = vt(1) / vt(n - 1);
 	for ( size_t i = 0; i < n; ++i )
 	{
-		double stop = double(i)/double(n-1);
-		gl::color c = g.sample( stop );
+		vt stop = vt(i) * norm;
+		color c = g.sample( stop );
 		bytes[i*4+0] = static_cast<uint8_t>( std::max( 0.F, std::min( 255.F, std::floor( c.red() * 256.F ) ) ) );
 		bytes[i*4+1] = static_cast<uint8_t>( std::max( 0.F, std::min( 255.F, std::floor( c.green() * 256.F ) ) ) );
 		bytes[i*4+2] = static_cast<uint8_t>( std::max( 0.F, std::min( 255.F, std::floor( c.blue() * 256.F ) ) ) );
@@ -122,33 +125,33 @@ gl::program::uniform drawable::fill_mesh( gl::api &ogl, gl::mesh &m, const paint
 		m.set_program( new_program( ogl, vert, "linear_gradient.frag", false ) );
 		m.get_program().use();
 		m.set_uniform( "txt", 0 );
-		m.set_uniform( "origin", p.get_fill_linear_origin() );
-		m.set_uniform( "dir", p.get_fill_linear_size() );
+		m.set_uniform( "origin", to_api( p.get_fill_linear_origin() ) );
+		m.set_uniform( "dir", to_api( p.get_fill_linear_size() ) );
 	}
 	else if ( p.has_fill_radial() )
 	{
 		m.set_program( new_program( ogl, vert, "radial_gradient.frag", false ) );
 		m.get_program().use();
 		m.set_uniform( "txt", 0 );
-		m.set_uniform( "center", p.get_fill_radial_center() );
-		m.set_uniform( "min_radius", p.get_fill_radial_r1() );
-		m.set_uniform( "max_radius", p.get_fill_radial_r2() );
+		m.set_uniform( "center", to_api( p.get_fill_radial_center() ) );
+		m.set_uniform( "min_radius", to_api( p.get_fill_radial_r1() ) );
+		m.set_uniform( "max_radius", to_api( p.get_fill_radial_r2() ) );
 	}
 	else if ( p.has_fill_conical() )
 	{
 		m.set_program( new_program( ogl, vert, "conical_gradient.frag", false ) );
 		m.get_program().use();
 		m.set_uniform( "txt", 0 );
-		m.set_uniform( "center", p.get_fill_conical_center() );
+		m.set_uniform( "center", to_api( p.get_fill_conical_center() ) );
 	}
 	else if ( p.has_fill_box() )
 	{
 		m.set_program( new_program( ogl, vert, "box_gradient.frag", false ) );
 		m.get_program().use();
 		m.set_uniform( "txt", 0 );
-		m.set_uniform( "point1", p.get_fill_box_point1() );
-		m.set_uniform( "point2", p.get_fill_box_point2() );
-		m.set_uniform( "radius", p.get_fill_box_radius() );
+		m.set_uniform( "point1", to_api( p.get_fill_box_point1() ) );
+		m.set_uniform( "point2", to_api( p.get_fill_box_point2() ) );
+		m.set_uniform( "radius", to_api( p.get_fill_box_radius() ) );
 	}
 	else if ( p.has_no_fill() )
 	{
@@ -175,4 +178,3 @@ gl::program::uniform drawable::stroke_mesh( gl::api &ogl, gl::mesh &m, const pai
 ////////////////////////////////////////
 
 }
-

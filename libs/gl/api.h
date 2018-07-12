@@ -87,14 +87,6 @@ public:
 	/// @brief Depth function to use
 	void depth_func( depth_test t );
 
-	/// @brief Set the viewport coordinates.
-	void viewport( float x, float y, float w, float h );
-
-	/// @brief Set the viewport coordinates.
-	void push_scissor( int x, int y, int w, int h );
-
-	void pop_scissor( void );
-
 	/// @brief Save the current matrix
 	void save_matrix( void );
 
@@ -242,14 +234,11 @@ public:
 	void setup_debugging( void );
 
 private:
-	base::irect _viewport;
 	std::vector<matrix4> _matrix;
 	matrix4 _view;
 	matrix4 _projection;
-	std::vector<base::irect> _scissors;
 };
 
 ////////////////////////////////////////
 
 }
-

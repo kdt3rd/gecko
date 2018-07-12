@@ -20,7 +20,7 @@ path::path( void )
 
 ////////////////////////////////////////
 
-path::path( const gl::vec2 &p )
+path::path( const point &p )
 {
 	move_to( p );
 }
@@ -33,7 +33,7 @@ path::~path( void )
 
 ////////////////////////////////////////
 
-void path::move_to( const gl::vec2 &p )
+void path::move_to( const point &p )
 {
 	add( p );
 	_last = p;
@@ -42,7 +42,7 @@ void path::move_to( const gl::vec2 &p )
 
 ////////////////////////////////////////
 
-void path::line_to( const gl::vec2 &p )
+void path::line_to( const point &p )
 {
 	add( p );
 	_last = p;
@@ -51,7 +51,7 @@ void path::line_to( const gl::vec2 &p )
 
 ////////////////////////////////////////
 
-void path::quadratic_to( const gl::vec2 &p1, const gl::vec2 &p2 )
+void path::quadratic_to( const point &p1, const point &p2 )
 {
 	add( p1, p2 );
 	_last = p2;
@@ -60,7 +60,7 @@ void path::quadratic_to( const gl::vec2 &p1, const gl::vec2 &p2 )
 
 ////////////////////////////////////////
 
-void path::cubic_to( const gl::vec2 &p1, const gl::vec2 &p2, const gl::vec2 &p3 )
+void path::cubic_to( const point &p1, const point &p2, const point &p3 )
 {
 	add( p1, p2, p3 );
 	_last2 = p2;
@@ -70,9 +70,9 @@ void path::cubic_to( const gl::vec2 &p1, const gl::vec2 &p2, const gl::vec2 &p3 
 
 ////////////////////////////////////////
 
-void path::cubic_to( const gl::vec2 &p2, const gl::vec2 &p3 )
+void path::cubic_to( const point &p2, const point &p3 )
 {
-	gl::vec2 p1 = _last;
+	point p1 = _last;
 	if ( !_actions.empty() && _actions.back() == action::CUBIC )
 		p1 = _last * 2.F - _last2;
 	cubic_to( p1, p2, p3 );
@@ -80,10 +80,10 @@ void path::cubic_to( const gl::vec2 &p2, const gl::vec2 &p3 )
 
 ////////////////////////////////////////
 
-void path::arc_to( const gl::vec2 &center, float radius, float angle1, float angle2 )
+void path::arc_to( const point &center, dim radius, float angle1, float angle2 )
 {
 	add( center, radius, angle1, angle2 );
-	_last = center + gl::vec2::polar( radius, angle2 );
+	_last = center + base::polar( radius, angle2 );
 	_actions.push_back( action::ARC );
 }
 
@@ -100,7 +100,7 @@ void path::close( void )
 
 ////////////////////////////////////////
 
-void path::circle( const gl::vec2 &center, float radius )
+void path::circle( const point &center, dim radius )
 {
 	move_to( { center[0] + radius, center[1] } );
 	arc_to( center, radius, 0.F, 360.0_degf );
@@ -109,12 +109,12 @@ void path::circle( const gl::vec2 &center, float radius )
 
 ////////////////////////////////////////
 
-void path::rectangle( const gl::vec2 &p1, const gl::vec2 &p2 )
+void path::rectangle( const point &p1, const point &p2 )
 {
-	const float x1 = std::min( p1[0], p2[0] );
-	const float y1 = std::min( p1[1], p2[1] );
-	const float x2 = std::max( p1[0], p2[0] );
-	const float y2 = std::max( p1[1], p2[1] );
+	const dim x1 = std::min( p1[0], p2[0] );
+	const dim y1 = std::min( p1[1], p2[1] );
+	const dim x2 = std::max( p1[0], p2[0] );
+	const dim y2 = std::max( p1[1], p2[1] );
 
 	move_to( { x1, y1 } );
 	line_to( { x2, y1 } );
@@ -125,12 +125,12 @@ void path::rectangle( const gl::vec2 &p1, const gl::vec2 &p2 )
 
 ////////////////////////////////////////
 
-void path::rounded_rect( const gl::vec2 &p1, const gl::vec2 &p2, float r )
+void path::rounded_rect( const point &p1, const point &p2, dim r )
 {
-	const float x1 = std::min( p1[0], p2[0] );
-	const float y1 = std::min( p1[1], p2[1] );
-	const float x2 = std::max( p1[0], p2[0] );
-	const float y2 = std::max( p1[1], p2[1] );
+	const dim x1 = std::min( p1[0], p2[0] );
+	const dim y1 = std::min( p1[1], p2[1] );
+	const dim x2 = std::max( p1[0], p2[0] );
+	const dim y2 = std::max( p1[1], p2[1] );
 
 	move_to( { x1 + r, y1 } );
 	arc_to( { x2 - r, y1 + r }, r, -90.0_degf, 0.0_degf );
@@ -142,7 +142,7 @@ void path::rounded_rect( const gl::vec2 &p1, const gl::vec2 &p2, float r )
 
 ////////////////////////////////////////
 
-void path::rounded_rect( const gl::vec2 &p1, float w, float h, float r )
+void path::rounded_rect( const point &p1, dim w, dim h, dim r )
 {
 	rounded_rect( p1, { p1[0] + w, p1[1] + h }, r );
 }
@@ -159,27 +159,27 @@ std::ostream &operator<<( std::ostream &out, const path &p )
 		{
 		}
 
-		void move_to( const gl::vec2 &x )
+		void move_to( const point &x )
 		{
 			out << "Move( " << x << " )\n";
 		}
 
-		void line_to( const gl::vec2 &x )
+		void line_to( const point &x )
 		{
 			out << "Line( " << x << " )\n";
 		}
 
-		void quadratic_to( const gl::vec2 &p1, const gl::vec2 &p2 )
+		void quadratic_to( const point &p1, const point &p2 )
 		{
 			out << "Quadratic( " << p1 << ", " << p2 << " )\n";
 		}
 
-		void cubic_to( const gl::vec2 &p1, const gl::vec2 &p2, const gl::vec2 &p3 )
+		void cubic_to( const point &p1, const point &p2, const point &p3 )
 		{
 			out << "Cubic( " << p1 << ", " << p2 << ", " << p3 << " )\n";
 		}
 
-		void arc_to( const gl::vec2 &center, float radius, float angle1, float angle2 )
+		void arc_to( const point &center, dim radius, float angle1, float angle2 )
 		{
 			out << "Arc( " << center << ", " << radius << ", " << angle1 << ", " << angle2 << " )\n";
 		}
@@ -202,4 +202,3 @@ std::ostream &operator<<( std::ostream &out, const path &p )
 ////////////////////////////////////////
 
 }
-

@@ -55,9 +55,9 @@ void widget::paint( context & )
 ////////////////////////////////////////
 
 std::shared_ptr<widget>
-widget::find_widget_under( coord x, coord y )
+widget::find_widget_under( const point &p )
 {
-	if ( contains( x, y ) )
+	if ( contains( p ) )
 		return shared_from_this();
 
 	return std::shared_ptr<widget>();
@@ -157,7 +157,7 @@ bool widget::update_layout( double duration )
 {
 	precondition( _area, "null area" );
 	bool result = false;
-	if ( distance( *this, *_area ) > point::coord_type(1) )
+	if ( distance( *this, *_area ) > coord(1) )
 	{
 		if ( _anim_time < 0.0 )
 		{
@@ -176,10 +176,10 @@ bool widget::update_layout( double duration )
 		{
 			point tl = base::ease( _anim_start.top_left(), _area->top_left(), _anim_time, duration );
 			point br = base::ease( _anim_start.bottom_right(), _area->bottom_right(), _anim_time, duration );
-			set_x1( tl.x() );
-			set_y1( tl.y() );
-			set_x2( br.x() );
-			set_y2( br.y() );
+			set_x1( tl[0] );
+			set_y1( tl[1] );
+			set_x2( br[0] );
+			set_y2( br[1] );
 			result = true;
 		}
 	}
@@ -191,6 +191,3 @@ bool widget::update_layout( double duration )
 ////////////////////////////////////////
 
 }
-
-
-

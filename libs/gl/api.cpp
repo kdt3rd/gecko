@@ -159,55 +159,6 @@ void api::depth_func( depth_test t )
 
 ////////////////////////////////////////
 
-void api::viewport( float xx, float yy, float ww, float hh )
-{
-	GLint x = static_cast<GLint>( std::floor( xx ) );
-	GLint y = static_cast<GLint>( std::floor( yy ) );
-	GLsizei w = static_cast<GLsizei>( std::ceil( ww + xx - float(x) ) );
-	GLsizei h = static_cast<GLsizei>( std::ceil( hh + yy - float(y) ) );
-	_viewport.set( x, y, w, h );
-	glViewport( x, y, w, h );
-}
-
-////////////////////////////////////////
-
-void api::push_scissor( int xx, int yy, int ww, int hh )
-{
-	base::irect r( xx, _viewport.height() - yy - hh, ww, hh );
-	if ( _scissors.empty() )
-		enable( capability::SCISSOR_TEST );
-	else
-		r.clip( _scissors.back() );
-
-	_scissors.emplace_back( r );
-	GLint x = static_cast<GLint>( r.x() );
-	GLint y = static_cast<GLint>( r.y() );
-	GLsizei w = static_cast<GLsizei>( r.width() + r.x() - x );
-	GLsizei h = static_cast<GLsizei>( r.height() + r.y() - y );
-	glScissor( x, y, w, h );
-}
-
-////////////////////////////////////////
-
-void api::pop_scissor( void )
-{
-	precondition( !_scissors.empty(), "no scissor to pop" );
-	_scissors.pop_back();
-	if ( _scissors.empty() )
-		disable( capability::SCISSOR_TEST );
-	else
-	{
-		const base::irect &r = _scissors.back();
-		GLint x = static_cast<GLint>( r.x() );
-		GLint y = static_cast<GLint>( r.y() );
-		GLsizei w = static_cast<GLsizei>( r.width() + r.x() - x );
-		GLsizei h = static_cast<GLsizei>( r.height() + r.y() - y );
-		glScissor( x, y, w, h );
-	}
-}
-
-////////////////////////////////////////
-
 void api::ortho( float left, float right, float top, float bottom )
 {
 	multiply( gl::matrix4::ortho( left, right, top, bottom ) );
@@ -250,7 +201,6 @@ void api::reset( void )
 	_matrix.emplace_back();
 	_view = gl::matrix4::identity();
 	_projection = gl::matrix4::identity();
-	_scissors.clear();
 }
 
 ////////////////////////////////////////
@@ -313,4 +263,3 @@ void api::setup_debugging( void )
 ////////////////////////////////////////
 
 }
-

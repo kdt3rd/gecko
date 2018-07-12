@@ -50,12 +50,12 @@ public:
 	void max_glyph_store( int w, int h ) { _max_glyph_w = w; _max_glyph_h = h; }
 
 	/// @brief Size of the font.
-	inline extent_type size( void ) const { return _size; }
+	inline points size( void ) const { return _size; }
 
 	/// @brief Accessor to check if triplet of values is this font.
-	inline bool matches( const std::string &f, const std::string &s, extent_type sz ) const
+	inline bool matches( const std::string &f, const std::string &s, points p ) const
 	{
-		return family() == f && style() == s && std::abs( size() - sz ) < extent_type(0.000001);
+		return family() == f && style() == s && std::abs( size() - p ) < points(0.000001);
 	}
 
 	/// @brief The general size of the font.
@@ -118,15 +118,18 @@ public:
 
 	std::pair<extent_type, extent_type> align_text( const std::string &utf8, extent_type x1, extent_type y1, extent_type x2, extent_type y2, base::alignment a );
 	template <typename T>
-	base::point<T> align_text( const std::string &utf8, const base::rect<T> &rect, base::alignment a )
+	base::point<T, 2> align_text( const std::string &utf8, const base::rect<T> &rect, base::alignment a )
 	{
-		auto e = align_text( utf8, rect.x1(), rect.y1(), rect.x2(), rect.y2(), a );
-		return base::point<T>( static_cast<T>( e.first ), static_cast<T>( e.second ) );
+		auto e = align_text( utf8, static_cast<extent_type>( rect.x1() ),
+		                     static_cast<extent_type>( rect.y1() ),
+							 static_cast<extent_type>( rect.x2() ),
+							 static_cast<extent_type>( rect.y2() ), a );
+		return base::point<T, 2>( static_cast<T>( e.first ), static_cast<T>( e.second ) );
 	}
 
 protected:
 	/// @brief Construct a font.
-	font( std::string fam, std::string sty, extent_type sz );
+	font( std::string fam, std::string sty, points pts );
 
 	void add_glyph( char32_t char_code, const uint8_t *glData, int glPitch, int w, int h );
 
@@ -155,7 +158,7 @@ protected:
 
 	std::string _family;
 	std::string _style;
-	extent_type _size;
+	points _size;
 	int _dpi_h = 95;
 	int _dpi_v = 95;
 };

@@ -8,6 +8,7 @@ lib = library "gui"
 	  "composite.cpp";
 	  "container.cpp";
 	  "context.cpp";
+    "event.cpp";
 	  "label.cpp";
 	  "line_edit.cpp";
 	  "radio_button.cpp";

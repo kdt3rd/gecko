@@ -42,8 +42,8 @@ namespace script { namespace freetype2
 
 ////////////////////////////////////////
 
-font::font( FT_Face face, std::string fam, std::string style, double pixsize, const std::shared_ptr<uint8_t []> &ttfData )
-	: script::font( std::move( fam ), std::move( style ), pixsize ),
+font::font( FT_Face face, std::string fam, std::string style, base::units::points<extent_type> pts, const std::shared_ptr<uint8_t []> &ttfData )
+	: script::font( std::move( fam ), std::move( style ), pts ),
 	_face( face ), _font_data( ttfData )
 {
 	auto err = FT_Select_Charmap( _face, FT_ENCODING_UNICODE );
@@ -62,14 +62,14 @@ font::font( FT_Face face, std::string fam, std::string style, double pixsize, co
 
 	if ( FT_IS_SCALABLE( _face ) )
 	{
-		err = FT_Set_Char_Size( _face, static_cast<int>( pixsize * 64.0 ), 0,
+		err = FT_Set_Char_Size( _face, static_cast<int>( pts.count() * 64.F ), 0,
 								_dpi_h, _dpi_v );
 		if ( err )
 			throw std::runtime_error( "Unable to set character size" );
 	}
 	else if ( _face->num_fixed_sizes > 1 )
 	{
-		int targsize = static_cast<int>( pixsize );
+		int targsize = static_cast<int>( pts.count() );
 		int bestSize[2];
 		bestSize[0] = bestSize[1] = targsize;
 		int i;
@@ -204,4 +204,3 @@ font::get_glyph( char32_t char_code )
 ////////////////////////////////////////
 
 } }
-

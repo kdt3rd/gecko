@@ -22,13 +22,12 @@
 namespace platform
 {
 	class window;
-	class event;
 }
 
 namespace gui
 {
 
-using event = platform::event;
+class event;
 
 ////////////////////////////////////////
 
@@ -67,6 +66,19 @@ public:
 
 	void invalidate( const rect &r ) override;
 
+	coord from_native_horiz( platform::coord_type c ) const override;
+	coord from_native_vert( platform::coord_type c ) const override;
+	point from_native( const platform::point &p ) const override;
+	point from_native( platform::coord_type x, platform::coord_type y ) const override;
+	size from_native( const platform::size &s ) const override;
+	rect from_native( const platform::rect &r ) const override;
+
+	platform::coord_type to_native_horiz( const coord &c ) const override;
+	platform::coord_type to_native_vert( const coord &c ) const override;
+	platform::point to_native( const point &p ) const override;
+	platform::size to_native( const size &s ) const override;
+	platform::rect to_native( const rect &r ) const override;
+
 	platform::context &hw_context( void ) override;
 
 	void grab_source( const event &e, std::shared_ptr<widget> w ) override;
@@ -88,8 +100,8 @@ protected:
 	/// by default, returns true, indicating the window can close.
 	virtual bool close_request( const event &e );
 
-	void paint( coord x, coord y, coord w, coord h );
-	void resized( coord w, coord h );
+	void paint( const rect &r );
+	void resized( const size &s );
 
 	void key_down( const event &e );
 	void key_repeat( const event &e );
@@ -106,4 +118,3 @@ protected:
 ////////////////////////////////////////
 
 }
-

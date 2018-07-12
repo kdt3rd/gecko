@@ -14,11 +14,10 @@
 #include <base/contract.h>
 #include "context.h"
 #include "widget_ptr.h"
+#include "event.h"
 
 namespace gui
 {
-
-using event = platform::event;
 
 ////////////////////////////////////////
 
@@ -35,7 +34,7 @@ public:
 	virtual void build( context &ctxt );
 	virtual void paint( context &ctxt );
 
-	virtual std::shared_ptr<widget> find_widget_under( coord x, coord y );
+	virtual std::shared_ptr<widget> find_widget_under( const point &p );
 
 	virtual bool mouse_press( const event &e );
 	virtual bool mouse_release( const event &e );
@@ -82,4 +81,3 @@ private:
 ////////////////////////////////////////
 
 }
-

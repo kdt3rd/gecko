@@ -18,7 +18,7 @@ class checkbox_w : public widget
 {
 public:
 	checkbox_w( void );
-	~checkbox_w( void );
+	~checkbox_w( void ) override;
 
 	void build( context &ctxt ) override;
 	void paint( context &ctxt ) override;
@@ -50,4 +50,3 @@ public:
 using checkbox = widget_ptr<checkbox_w>;
 
 }
-

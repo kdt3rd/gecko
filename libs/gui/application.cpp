@@ -7,6 +7,7 @@
 
 #include "application.h"
 #include "window.h"
+#include "event.h"
 #include <platform/platform.h>
 #include <platform/system.h>
 #include <platform/window.h>
@@ -102,14 +103,14 @@ void application::register_global_hotkey( platform::scancode sc, hotkey_handler 
 
 ////////////////////////////////////////
 
-bool application::dispatch_global_hotkey( const platform::event &e )
+bool application::dispatch_global_hotkey( const event &e )
 {
-	platform::scancode sc = e.key().keys[0];
+	platform::scancode sc = e.raw_key().keys[0];
 
 	auto i = _hotkeys.find( sc );
 	if ( i != _hotkeys.end() )
 	{
-		(i->second)( point( e.key().x, e.key().y ) );
+		(i->second)( e.from_native( e.raw_key().x, e.raw_key().y ) );
 		return true;
 	}
 
@@ -219,7 +220,7 @@ std::set<std::string> application::get_font_styles( const std::string &family )
 
 std::shared_ptr<script::font> application::get_font( const std::string &family, const std::string &style, coord pixsize )
 {
-	return _fmgr->get_font( family, style, pixsize );
+	return _fmgr->get_font( family, style, pixsize.as<base::units::points<script::extent_type>>() );
 }
 
 ////////////////////////////////////////
@@ -242,4 +243,3 @@ std::shared_ptr<application> application::current( void )
 ////////////////////////////////////////
 
 }
-

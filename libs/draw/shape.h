@@ -24,16 +24,16 @@ class shape : public drawable
 {
 public:
 	shape( void );
-	shape( float x, float y )
+	shape( dim x, dim y )
 	{
 		set_position( x, y );
 	}
 
 	void add( gl::api &ogl, const polylines &p, const paint &c );
 
-	void add( gl::api &ogl, const polylines &p, const gl::color &c )
+	void add( gl::api &ogl, const polylines &p, const color &c )
 	{
-		add( ogl, p, paint( c, 1.F ) );
+		add( ogl, p, paint( c ) );
 	}
 
 	void add( gl::api &ogl, const path &p, const paint &c )
@@ -46,9 +46,9 @@ public:
 		add( ogl, lines, c );
 	}
 
-	void add( gl::api &ogl, const path &p, const gl::color &c )
+	void add( gl::api &ogl, const path &p, const color &c )
 	{
-		add( ogl, p, paint( c, 1.F ) );
+		add( ogl, p, paint( c ) );
 	}
 
 	void clear( void )
@@ -59,25 +59,25 @@ public:
 	void rebuild( platform::context &ctxt ) override;
 	void draw( platform::context &ctxt ) override;
 
-	void set_position( float x, float y )
+	void set_position( dim x, dim y )
 	{
 		_top_left.set( x, y );
 	}
 
-	void set_size( float w, float h )
+	void set_size( dim w, dim h )
 	{
 		_resize.set( w, h );
 	}
 
-	void shape_size( float w, float h )
+	void shape_size( dim w, dim h )
 	{
 		_shape.set( w, h );
 	}
 
 private:
-	gl::vec2 _shape = { 10.F, 10.F };
-	gl::vec2 _resize = { 10.F, 10.F };
-	gl::vec2 _top_left = { 0.F, 0.F };
+	point _shape = { dim(10), dim(10) };
+	point _resize = { dim(10), dim(10) };
+	point _top_left = { dim(0), dim(0) };
 
 	struct mesh
 	{
@@ -92,4 +92,3 @@ private:
 ////////////////////////////////////////
 
 }
-

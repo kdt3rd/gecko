@@ -48,5 +48,12 @@ context &context::current( void )
 
 ////////////////////////////////////////
 
+platform::context::clip_region_guard
+context::push_clip( const rect &r )
+{
+	return hw_context().push_clip( to_native( r ) );
 }
 
+////////////////////////////////////////
+
+}

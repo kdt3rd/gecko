@@ -20,7 +20,7 @@ namespace script { namespace cocoa
 class font : public ::script::font
 {
 public:
-	font( void *font, std::string fam, std::string style, double pixsize );
+	font( void *font, std::string fam, std::string style, points pts );
 	~font( void ) override;
 
 	extent_type kerning( char32_t c1, char32_t c2 ) override;
@@ -33,4 +33,3 @@ private:
 };
 
 } }
-

@@ -68,7 +68,7 @@ void radio_button_w::paint( context &ctxt )
 
 bool radio_button_w::mouse_press( const event &e )
 {
-	if ( e.mouse().button != 1 )
+	if ( e.raw_mouse().button != 1 )
 		return false;
 
 	context::current().grab_source( e, shared_from_this() );
@@ -84,13 +84,13 @@ bool radio_button_w::mouse_press( const event &e )
 
 bool radio_button_w::mouse_release( const event &e )
 {
-	if ( e.mouse().button != 1 )
+	if ( e.raw_mouse().button != 1 )
 		return false;
 
 	if ( _tracking )
 	{
 		_tracking = false;
-		if ( contains( e.mouse().x, e.mouse().y ) )
+		if ( contains( e.from_native( e.raw_mouse().x, e.raw_mouse().y ) ) )
 			set_state( _current );
 		invalidate();
 		context::current().release_source( e );
@@ -105,7 +105,7 @@ bool radio_button_w::mouse_move( const event &e )
 {
 	if ( _tracking )
 	{
-		if ( contains( e.mouse().x, e.mouse().y ) )
+		if ( contains( e.from_native( e.raw_mouse().x, e.raw_mouse().y ) ) )
 			_current = true;
 		else
 			_current = _state;
@@ -130,4 +130,3 @@ void radio_button_w::set_state( bool s )
 ////////////////////////////////////////
 
 }
-

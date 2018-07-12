@@ -5,7 +5,6 @@
 // See the accompanying LICENSE.txt file for terms
 //
 
-#include <iostream>
 #include "label.h"
 #include "application.h"
 
@@ -23,7 +22,7 @@ label_w::label_w( void )
 label_w::label_w( std::string l, base::alignment a )
 	: _align( a )
 {
-	_text.set_text( l );
+	_text.set_text( std::move( l ) );
 }
 
 ////////////////////////////////////////
@@ -41,10 +40,10 @@ void label_w::build( context &ctxt )
 
 	script::font_extents fex = f->extents();
 	script::text_extents tex = f->extents( _text.get_text() );
-	layout_target()->set_minimum( tex.width, std::max( 24.0, fex.height + 2.0 ) );
+	layout_target()->set_minimum( tex.width, std::max( script::extent_type(24), fex.height + script::extent_type(2) ) );
 
 	_text.set_font( f );
-	if ( _bg_color.alpha() > 0.0 )
+	if ( _bg_color.alpha() > 0.F )
 		_text.set_color( s.primary_text( _bg_color ) );
 	else
 		_text.set_color( s.primary_text( s.background_color() ) );
@@ -54,10 +53,10 @@ void label_w::build( context &ctxt )
 
 void label_w::paint( context &ctxt )
 {
-	if ( _bg_color.alpha() > 0.0 )
+	if ( _bg_color.alpha() > 0.F )
 	{
-		_bg.set_position( x(), y() );
-		_bg.set_size( width(), height() );
+		_bg.set_position( static_cast<float>( x() ), static_cast<float>( y() ) );
+		_bg.set_size( static_cast<float>( width() ), static_cast<float>( height() ) );
 		_bg.draw( ctxt.hw_context() );
 	}
 	const auto &f = _text.get_font();
@@ -71,4 +70,3 @@ void label_w::paint( context &ctxt )
 ////////////////////////////////////////
 
 }
-

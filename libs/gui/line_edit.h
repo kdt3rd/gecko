@@ -22,7 +22,7 @@ class line_edit_w : public widget
 public:
 	line_edit_w( void );
 	line_edit_w( std::string l );
-	~line_edit_w( void );
+	~line_edit_w( void ) override;
 
 	const std::string &text( void ) const { return _text.get_text(); }
 	void set_text( const std::string &t ) { _text.set_text( t ); }
@@ -52,4 +52,3 @@ private:
 using line_edit = widget_ptr<line_edit_w>;
 
 }
-

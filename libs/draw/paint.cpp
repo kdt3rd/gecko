@@ -18,7 +18,7 @@ paint::paint( void )
 
 ////////////////////////////////////////
 
-paint::paint( const gl::color &c, float w )
+paint::paint( const color &c, dim w )
 	: _stroke_color( c ), _stroke_width( w )
 {
 }
@@ -61,4 +61,3 @@ void paint::clear_fill( void )
 ////////////////////////////////////////
 
 }
-

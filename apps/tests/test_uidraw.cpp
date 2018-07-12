@@ -42,8 +42,8 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 
 	draw::text samptext( fm->get_font( "Lucida Grande", "Regular", 28.0 ) );
 	samptext.set_text( "Hello, world!" );
-	samptext.set_position( gl::vec2( 100.F, 200.F ) );
-	samptext.set_color( gl::color( 1.0, 1.0, 1.0, 1.0 ) );
+	samptext.set_position( draw::point( 1.F, 2.F ) );
+	samptext.set_color( draw::color( 1.0, 1.0, 1.0, 1.0 ) );
 
 	gl::mesh star;
 	{
@@ -51,9 +51,9 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		draw::path path;
 		size_t p = 17;
 		size_t q = 5;
-		path.move_to( gl::vec2::polar( 200.F, 0.F ) );
+		path.move_to( base::polar( 2.F, 0.F ) );
 		for ( size_t i = q % p; i != 0; i = ( i + q ) % p )
-			path.line_to( gl::vec2::polar( 200.F, 360.0_deg * i / p ) );
+			path.line_to( base::polar( 200.F, 360.0_deg * i / p ) );
 		path.close();
 
 		// Setup GL vertex/element buffers.
@@ -135,7 +135,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 		matrix = gl::matrix4::ortho( 0, static_cast<float>( win->width() ), 0, static_cast<float>( win->height() ) );
 
 		ogl.clear();
-		ogl.viewport( 0, 0, win->width(), win->height() );
+		win->hw_context().viewport( 0, 0, win->width(), win->height() );
 		ogl.enable( gl::capability::BLEND );
 		ogl.blend_func( gl::blend_style::SRC_ALPHA, gl::blend_style::ONE_MINUS_SRC_ALPHA );
 
@@ -198,4 +198,3 @@ int main( int argc, char *argv[] )
 }
 
 ////////////////////////////////////////
-

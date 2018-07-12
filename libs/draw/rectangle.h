@@ -20,16 +20,16 @@ namespace draw
 class rectangle : public drawable
 {
 public:
-	rectangle( const gl::color &c = gl::white );
-	rectangle( float x, float y, float w, float h, const gl::color &c = gl::white );
+	rectangle( const color &c = gl::white );
+	rectangle( dim x, dim y, dim w, dim h, const color &c = gl::white );
 
 	void rebuild( platform::context &ctxt ) override;
 	void draw( platform::context &ctxt ) override;
 
-	void set_size( float w, float h );
-	void set_position( float x, float y );
+	void set_size( dim w, dim h );
+	void set_position( dim x, dim y );
 
-	void set_color( const gl::color &c )
+	void set_color( const color &c )
 	{
 		_color = c;
 	}
@@ -38,7 +38,7 @@ private:
 	void initialize( platform::context &ctxt );
 
 	gl::matrix4 _rect;
-	gl::color _color;
+	color _color;
 	int _texture_offset;
 
 	struct cache_entry
@@ -55,4 +55,3 @@ private:
 ////////////////////////////////////////
 
 }
-

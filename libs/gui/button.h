@@ -24,7 +24,7 @@ class button_w : public widget
 public:
 	button_w( void );
 	button_w( std::string l, base::alignment a = base::alignment::CENTER );
-	~button_w( void );
+	~button_w( void ) override;
 
 	void set_pressed( bool p );
 	void set_text( const std::string &utf8 ) { _text.set_text( utf8 ); }
@@ -54,4 +54,3 @@ private:
 using button = widget_ptr<button_w>;
 
 }
-

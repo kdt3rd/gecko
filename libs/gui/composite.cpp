@@ -14,6 +14,12 @@ namespace gui
 
 ////////////////////////////////////////
 
+composite::~composite( void )
+{
+}
+
+////////////////////////////////////////
+
 void composite::monitor_changed( context &ctxt )
 {
 	for_subwidgets( [&]( const std::shared_ptr<widget> &w )
@@ -44,14 +50,14 @@ void composite::paint( context &ctxt )
 
 ////////////////////////////////////////
 
-std::shared_ptr<widget> composite::find_widget_under( coord x, coord y )
+std::shared_ptr<widget> composite::find_widget_under( const point &p )
 {
 	std::shared_ptr<widget> ret;
 	for_subwidgets( [&]( const std::shared_ptr<widget> &w )
 	{
 		if ( ret )
 			return;
-		ret = w->find_widget_under( x, y );
+		ret = w->find_widget_under( p );
 	} );
 	return ret;
 }
@@ -71,4 +77,3 @@ bool composite::update_layout( double duration )
 ////////////////////////////////////////
 
 }
-

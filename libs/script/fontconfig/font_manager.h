@@ -24,7 +24,7 @@ public:
 	std::set<std::string> get_families( void ) override;
 	std::set<std::string> get_styles( const std::string &family ) override;
 
-	std::shared_ptr<script::font> get_font( const std::string &family, const std::string &style, double pixsize ) override;
+	std::shared_ptr<script::font> get_font( const std::string &family, const std::string &style, points pts ) override;
 
 private:
 	struct pimpl;
@@ -34,4 +34,3 @@ private:
 ////////////////////////////////////////
 
 } }
-

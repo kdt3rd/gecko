@@ -96,7 +96,7 @@ void slider_w::paint( context &ctxt )
 
 bool slider_w::mouse_press( const event &e )
 {
-	if ( e.mouse().button != 1 )
+	if ( e.raw_mouse().button != 1 )
 		return false;
 
 	value_type z1 = x1() + _handle;
@@ -104,12 +104,13 @@ bool slider_w::mouse_press( const event &e )
 	if ( z1 < z2 )
 	{
 		value_type current = z1 + _value * ( z2 - z1 );
-		value_type dist = std::abs( e.mouse().x - current );
+		value_type ex = e.from_native_horiz( e.raw_mouse().x );
+		value_type dist = std::abs( ex - current );
 		if ( dist < _handle )
 		{
 			_tracking = true;
 			context::current().grab_source( e, shared_from_this() );
-			_start = e.mouse().x;
+			_start = ex;
 			invalidate(); // TODO invalidate only handle.
 			return true;
 		}
@@ -126,8 +127,9 @@ bool slider_w::mouse_move( const event &e )
 	{
 		value_type z1 = x1() + _handle;
 		value_type z2 = x2() - _handle;
+		value_type ex = e.from_native_horiz( e.raw_mouse().x );
 		if ( z1 < z2 )
-			set_value( ( e.mouse().x - z1 ) / ( z2 - z1 ) );
+			set_value( ( ex - z1 ) / ( z2 - z1 ) );
 		else
 			set_value( ( _min + _max ) / value_type(2) );
 		when_changing( _value );
@@ -145,8 +147,9 @@ bool slider_w::mouse_release( const event &e )
 		_tracking = false;
 		value_type z1 = x1() + _handle;
 		value_type z2 = x2() - _handle;
+		value_type ex = e.from_native_horiz( e.raw_mouse().x );
 		if ( z1 < z2 )
-			set_value( ( e.mouse().x - z1 ) / ( z2 - z1 ) );
+			set_value( ( ex - z1 ) / ( z2 - z1 ) );
 		else
 			set_value( ( _min + _max ) / value_type(2) );
 		when_changed( _value );
@@ -160,4 +163,3 @@ bool slider_w::mouse_release( const event &e )
 ////////////////////////////////////////
 
 }
-

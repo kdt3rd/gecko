@@ -7,20 +7,15 @@
 
 #pragma once
 
-#include <base/scope_guard.h>
-#include <base/rect.h>
+#include "types.h"
 #include "style.h"
-
-namespace platform
-{
-class context;
-class event;
-}
+#include <platform/context.h>
+#include <base/scope_guard.h>
 
 namespace gui
 {
 
-using event = platform::event;
+class event;
 class widget;
 
 ////////////////////////////////////////
@@ -37,6 +32,23 @@ public:
 	context &operator=( context && ) = delete;
 
 	virtual void invalidate( const rect &r ) = 0;
+
+	virtual coord from_native_horiz( platform::coord_type c ) const = 0;
+	virtual coord from_native_vert( platform::coord_type c ) const = 0;
+	virtual point from_native( const platform::point &p ) const = 0;
+	virtual point from_native( platform::coord_type x, platform::coord_type y ) const = 0;
+	virtual size from_native( const platform::size &s ) const = 0;
+	virtual rect from_native( const platform::rect &r ) const = 0;
+
+	virtual platform::coord_type to_native_horiz( const coord &c ) const = 0;
+	virtual platform::coord_type to_native_vert( const coord &c ) const = 0;
+	virtual platform::point to_native( const point &p ) const = 0;
+	virtual platform::size to_native( const size &s ) const = 0;
+	virtual platform::rect to_native( const rect &r ) const = 0;
+
+	platform::context::clip_region_guard push_clip( const rect &r );
+	platform::context::clip_region_guard push_clip( coord x, coord y, coord w, coord h )
+	{ return push_clip( rect( x, y, w, h ) ); }
 
 	virtual platform::context &hw_context( void ) = 0;
 
@@ -74,4 +86,3 @@ protected:
 ////////////////////////////////////////
 
 }
-

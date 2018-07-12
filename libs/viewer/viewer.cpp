@@ -167,7 +167,7 @@ void viewer_w::reset_positions( void )
 	{
 		const auto &img = i.second._image;
 		if ( img )
-			img->reset_position( width(), height() );
+			img->reset_position( width().count(), height().count() );
 	}
 	invalidate();
 }
@@ -236,10 +236,10 @@ void viewer_w::paint( context &ctxt )
 
 bool viewer_w::mouse_press( const event &e )
 {
-	if ( e.mouse().button == 1 )
+	if ( e.raw_mouse().button == 1 )
 	{
 		_panning = true;
-		_last = point{ float(e.mouse().x), float(e.mouse().y) };
+		_last = e.from_native( e.raw_mouse().x, e.raw_mouse().y );
 		context::current().grab_source( e, shared_from_this() );
 
 		return true;
@@ -260,13 +260,13 @@ bool viewer_w::mouse_move( const event &e )
 	// TODO: fix this
 	if ( _panning )
 	{
-		point p{ float(e.mouse().x), float(e.mouse().y) };
+		point p = e.from_native( e.raw_mouse().x, e.raw_mouse().y );
 		point delta = ( p - _last );
 		for ( auto &i: _images )
 		{
 			const auto &img = i.second._image;
 			if ( img )
-				img->set_pan( delta.x(), delta.y() );
+				img->set_pan( delta[0].count(), delta[1].count() );
 		}
 
 		_last = p;
@@ -274,7 +274,7 @@ bool viewer_w::mouse_move( const event &e )
 		return true;
 	}
 	else
-		_last = point{ float(e.mouse().x), float(e.mouse().y) };
+		_last = e.from_native( e.raw_mouse().x, e.raw_mouse().y );
 
 	return widget::mouse_move( e );
 }
@@ -297,11 +297,11 @@ bool viewer_w::mouse_release( const event &e )
 
 bool viewer_w::mouse_wheel( const event &e )
 {
-	int amount = e.hid().position;
+	int amount = e.raw_hid().position;
 	// TODO: fix this
 	float zoomF = amount > 0 ? 2.F : 0.5F;
 	// TODO: need the real event to get the mouse position to zoom around that
-	float pivx = _last.x(), pivy = _last.y();
+	float pivx = _last[0].count(), pivy = _last[1].count();
 	for ( auto &i: _images )
 	{
 		const auto &img = i.second._image;
@@ -318,7 +318,7 @@ bool viewer_w::mouse_wheel( const event &e )
 bool viewer_w::key_release( const event &e )
 {
 	using namespace platform;
-	scancode c = e.key().keys[0];
+	scancode c = e.raw_key().keys[0];
 
 	switch ( c )
 	{
@@ -375,4 +375,3 @@ void viewer_w::update_images( bool force_reload )
 ////////////////////////////////////////
 
 }
-

@@ -17,7 +17,7 @@ namespace gui
 ////////////////////////////////////////
 
 button_w::button_w( void )
-	: _rect( { 0.26, 0.26, 0.26 } )
+	: _rect( draw::color{ 0.26F, 0.26F, 0.26F } )
 {
 }
 
@@ -60,10 +60,11 @@ void button_w::build( context &ctxt )
 	style &s = ctxt.get_style();
 	const auto &f = s.body_font();
 
+	using etype = script::extent_type;
 	script::font_extents fex = f->extents();
 	script::text_extents tex = f->extents( _text.get_text() );
-	layout_target()->set_minimum( tex.width + 10.0, std::max( 24.0, fex.height + 2.0 ) );
-	layout_target()->set_maximum_height( 24 );
+	layout_target()->set_minimum( tex.width + etype(10), std::max( etype(24), fex.height + etype(2) ) );
+	layout_target()->set_maximum_height( etype(24) );
 
 	_text.set_font( f );
 }
@@ -91,7 +92,7 @@ void button_w::paint( context &ctxt )
 
 bool button_w::mouse_press( const event &e )
 {
-	if ( e.mouse().button != 1 )
+	if ( e.raw_mouse().button != 1 )
 		return false;
 
 	context::current().grab_source( e, shared_from_this() );
@@ -106,7 +107,7 @@ bool button_w::mouse_press( const event &e )
 
 bool button_w::mouse_release( const event &e )
 {
-	if ( e.mouse().button != 1 )
+	if ( e.raw_mouse().button != 1 )
 		return false;
 
 	if ( _tracking )
@@ -114,7 +115,8 @@ bool button_w::mouse_release( const event &e )
 		on_scope_exit{ context::current().release_source( e ); };
 		_tracking = false;
 		set_pressed( false );
-		if ( contains( e.mouse().x, e.mouse().y ) )
+		point p = e.from_native( e.raw_mouse().x, e.raw_mouse().y );
+		if ( contains( p ) )
 			when_activated();
 		return true;
 	}
@@ -128,7 +130,7 @@ bool button_w::mouse_move( const event &e )
 {
 	if ( _tracking )
 	{
-		set_pressed( contains( e.mouse().x, e.mouse().y ) );
+		set_pressed( contains( e.from_native( e.raw_mouse().x, e.raw_mouse().y ) ) );
 		return true;
 	}
 	return false;
@@ -137,4 +139,3 @@ bool button_w::mouse_move( const event &e )
 ////////////////////////////////////////
 
 }
-

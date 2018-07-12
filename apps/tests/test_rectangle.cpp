@@ -38,7 +38,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 
 		// Clear the window
 		ogl.clear();
-		ogl.viewport( 0, 0, win->width(), win->height() );
+		win->hw_context().viewport( 0, 0, win->width(), win->height() );
 		ogl.set_projection( gl::matrix4::ortho( 0, static_cast<float>( win->width() ), 0, static_cast<float>( win->height() ) ) );
 
 		// Draw the rectangle
@@ -93,4 +93,3 @@ int main( int argc, char *argv[] )
 }
 
 ////////////////////////////////////////
-

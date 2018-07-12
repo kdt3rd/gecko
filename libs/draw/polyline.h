@@ -8,10 +8,11 @@
 #pragma once
 
 #include <vector>
+#include <array>
 #include <iostream>
 #include <iterator>
 #include <base/format.h>
-#include <gl/vector.h>
+#include "types.h"
 
 namespace draw
 {
@@ -21,7 +22,7 @@ namespace draw
 class polyline
 {
 public:
-	using point = gl::vec3;
+	using point = point3;
 
 	void close( void )
 	{
@@ -83,7 +84,7 @@ public:
 		return _points[i];
 	}
 
-	void set_depth( float z )
+	void set_depth( dim z )
 	{
 		for ( auto &p: _points )
 			p[2] = z;
@@ -126,4 +127,3 @@ inline std::ostream &operator<<( std::ostream &out, const polyline &p )
 ////////////////////////////////////////
 
 }
-

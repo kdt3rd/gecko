@@ -9,7 +9,6 @@
 
 #include "drawable.h"
 #include <script/font.h>
-#include <gl/color.h>
 #include <gl/mesh.h>
 
 namespace draw
@@ -27,18 +26,17 @@ public:
 
 	void set_font( const std::shared_ptr<script::font> &font );
 	void set_text( const std::string &utf8 );
-	void set_position( const gl::vec2 &p );
-	void set_position( float x, float y )
+	void set_position( const point &p );
+	void set_position( dim x, dim y )
 	{
-		set_position( gl::vec2( x, y ) );
+		set_position( point( x, y ) );
 	}
 	template <typename T>
-	void set_position( const base::point<T> &p )
+	void set_position( const base::point<T, 2> &p )
 	{
-		set_position( gl::vec2( static_cast<float>( p.x() ),
-								static_cast<float>( p.y() ) ) );
+		set_position( point( static_cast<dim>( p[0] ), static_cast<dim>( p[1] ) ) );
 	}
-	void set_color( const gl::color &c );
+	void set_color( const color &c );
 
 	const std::shared_ptr<script::font> &get_font( void ) const
 	{
@@ -65,8 +63,8 @@ private:
 
 	std::shared_ptr<script::font> _font;
 	std::string _utf8;
-	gl::vec2 _pos;
-	gl::color _color;
+	point _pos;
+	color _color;
 
 	gl::mesh _mesh;
 	gl::program::uniform _col_pos;

@@ -49,10 +49,10 @@ public:
 	/// Create and return a font with the given attributes.
 	/// @param family Family of the font to create
 	/// @param style Style of the font to create
-	/// @param pixsize Size of the font to create
+	/// @param pts Size of the font in points to create
 	///
 	/// @return The best matching font found
-	virtual std::shared_ptr<font> get_font( const std::string &family, const std::string &style, double pixsize ) = 0;
+	virtual std::shared_ptr<font> get_font( const std::string &family, const std::string &style, points pts ) = 0;
 
 	static const std::vector<std::shared_ptr<font_manager>> &list( void );
 
@@ -66,10 +66,9 @@ protected:
 
 private:
 	static void init( void );
-	static void enroll( const std::shared_ptr<font_manager> &mgr ); 
+	static void enroll( const std::shared_ptr<font_manager> &mgr );
 };
 
 ////////////////////////////////////////
 
 }
-

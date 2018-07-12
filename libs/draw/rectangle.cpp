@@ -12,7 +12,7 @@ namespace draw
 
 ////////////////////////////////////////
 
-rectangle::rectangle( const gl::color &c )
+rectangle::rectangle( const color &c )
 	: _color( c )
 {
 	_rect = gl::matrix4::scaling( 100, 100 );
@@ -20,12 +20,12 @@ rectangle::rectangle( const gl::color &c )
 
 ////////////////////////////////////////
 
-rectangle::rectangle( float x, float y, float w, float h, const gl::color &c )
+rectangle::rectangle( dim x, dim y, dim w, dim h, const color &c )
 	: _color( c )
 {
-	_rect = gl::matrix4::scaling( w, h );
-	_rect.translate_x( x );
-	_rect.translate_y( y );
+	_rect = gl::matrix4::scaling( to_api( w ), to_api( h ) );
+	_rect.translate_x( to_api( x ) );
+	_rect.translate_y( to_api( y ) );
 }
 
 ////////////////////////////////////////
@@ -49,18 +49,18 @@ void rectangle::draw( platform::context &ctxt )
 
 ////////////////////////////////////////
 
-void rectangle::set_size( float w, float h )
+void rectangle::set_size( dim w, dim h )
 {
-	_rect.get( 0, 0 ) = w;
-	_rect.get( 1, 1 ) = h;
+	_rect.get( 0, 0 ) = to_api( w );
+	_rect.get( 1, 1 ) = to_api( h );
 }
 
 ////////////////////////////////////////
 
-void rectangle::set_position( float x, float y )
+void rectangle::set_position( dim x, dim y )
 {
-	_rect.get( 0, 3 ) = x;
-	_rect.get( 1, 3 ) = y;
+	_rect.get( 0, 3 ) = to_api( x );
+	_rect.get( 1, 3 ) = to_api( y );
 }
 
 ////////////////////////////////////////
@@ -101,4 +101,3 @@ void rectangle::initialize( platform::context &ctxt )
 ////////////////////////////////////////
 
 }
-

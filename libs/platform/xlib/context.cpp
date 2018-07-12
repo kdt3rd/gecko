@@ -300,19 +300,21 @@ void context::release( void )
 
 void context::reset_clip( const rect &r )
 {
-    // TODO: just use the gl::api layer?
-//                  static_cast<GLint>( _last_h - r.y() ),
-    _glc_enable( GL_SCISSOR_TEST );
-    _glc_scissor( static_cast<GLint>( r.x() ),
-                  static_cast<GLint>( r.y() ),
-                  static_cast<GLsizei>( r.width() ),
-                  static_cast<GLsizei>( r.height() ) );
+    if ( r.empty() )
+    {
+        _glc_disable( GL_SCISSOR_TEST );
+    }
+    else
+    {
+        _glc_enable( GL_SCISSOR_TEST );
+        _glc_scissor( static_cast<GLint>( r.x() ),
+                      static_cast<GLint>( r.y() ),
+                      static_cast<GLsizei>( r.width() ),
+                      static_cast<GLsizei>( r.height() ) );
+    }
 }
 
 ////////////////////////////////////////
 
 } // namespace xlib
 } // namespace platform
-
-
-

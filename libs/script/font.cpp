@@ -15,8 +15,8 @@ namespace script
 
 ////////////////////////////////////////
 
-font::font( std::string fam, std::string sty, extent_type sz )
-	: _family( std::move(fam) ), _style( std::move(sty) ), _size( sz )
+font::font( std::string fam, std::string sty, base::units::points<extent_type> pts )
+	: _family( std::move(fam) ), _style( std::move(sty) ), _size( pts )
 {
 }
 
@@ -178,7 +178,7 @@ font::align_text( const std::string &utf8, extent_type x1, extent_type y1, exten
 	font_extents fex = extents();
 	text_extents tex = extents( utf8 );
 
-	extent_type y = 0.0, x = 0.0;
+	extent_type y = extent_type(0), x = extent_type(0);
 	extent_type textHeight = fex.ascent - fex.descent;
 
 	switch ( a )
@@ -186,7 +186,7 @@ font::align_text( const std::string &utf8, extent_type x1, extent_type y1, exten
 		case base::alignment::CENTER:
 		case base::alignment::LEFT:
 		case base::alignment::RIGHT:
-			y = rect.y() + std::round( ( rect.height() + textHeight ) / 2.0 ) + fex.descent;
+			y = rect.y() + std::round( ( rect.height() + textHeight ) / extent_type(2) ) + fex.descent;
 			break;
 
 		case base::alignment::BOTTOM:
@@ -219,7 +219,7 @@ font::align_text( const std::string &utf8, extent_type x1, extent_type y1, exten
 		case base::alignment::CENTER:
 		case base::alignment::TOP:
 		case base::alignment::BOTTOM:
-			x = rect.x1() + std::round( ( rect.width() - tex.width ) / 2.0 );
+			x = rect.x1() + std::round( ( rect.width() - tex.width ) / extent_type(2) );
 			break;
 	}
 
@@ -353,4 +353,3 @@ font::bump_glyph_store_size( void )
 ////////////////////////////////////////
 
 }
-

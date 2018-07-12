@@ -25,12 +25,12 @@ class font_manager;
 namespace platform
 {
 class system;
-class event;
 }
 
 namespace gui
 {
 
+class event;
 class window;
 class popup;
 class menu;
@@ -54,7 +54,7 @@ public:
 	virtual bool process_quit_request( void );
 
 	void register_global_hotkey( platform::scancode sc, hotkey_handler f );
-	bool dispatch_global_hotkey( const platform::event &e );
+	bool dispatch_global_hotkey( const event &e );
 
 	std::shared_ptr<window> new_window( void );
 
@@ -94,4 +94,3 @@ private:
 ////////////////////////////////////////
 
 }
-

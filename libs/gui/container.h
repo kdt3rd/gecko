@@ -30,14 +30,15 @@ public:
 	void build( context &ctxt ) override;
 	void paint( context &ctxt ) override;
 
-	std::shared_ptr<widget> find_widget_under( coord x, coord y ) override;
+	std::shared_ptr<widget> find_widget_under( const point &p ) override;
 
 	bool update_layout( double duration ) override;
 
 	void remove( size_t w );
 
 protected:
-	std::vector<std::shared_ptr<widget>> _widgets;
+	using widget_list = std::vector<std::shared_ptr<widget>>;
+	widget_list _widgets;
 };
 
 ////////////////////////////////////////
@@ -53,9 +54,7 @@ public:
 		_layout = std::dynamic_pointer_cast<TheLayout>( layout_target() );
 	}
 
-	~container_w( void )
-	{
-	}
+	~container_w( void ) override = default;
 
 	TheLayout &layout( void )
 	{
@@ -109,4 +108,3 @@ using tree = widget_ptr<tree_w>;
 ////////////////////////////////////////
 
 }
-

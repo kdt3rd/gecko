@@ -55,10 +55,10 @@ public:
 	}
 
 	template<typename ...Args>
-	vector( Args ...args )
+	vector( Args && ...args )
 	{
 		static_assert( sizeof...(Args) <= N, "invalid argument list" );
-		setN( 0, args... );
+		setN( 0, std::forward<Args>( args )... );
 	}
 
 	float operator[]( size_t i ) const
@@ -78,10 +78,10 @@ public:
 	}
 
 	template<typename ...Args>
-	void set( Args ...args )
+	void set( Args && ...args )
 	{
 		static_assert( sizeof...(Args) == N, "invalid initializer list" );
-		setN( 0, args... );
+		setN( 0, std::forward<Args>( args )... );
 	}
 
 	/// @brief Get data
@@ -190,4 +190,3 @@ std::ostream &operator<<( std::ostream &out, const vector<N> &v )
 ////////////////////////////////////////
 
 }
-

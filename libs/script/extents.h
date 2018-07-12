@@ -7,10 +7,14 @@
 
 #pragma once
 
+#include <base/units.h>
+
 namespace script
 {
 
 using extent_type = float;
+using points = base::units::points<extent_type>;
+
 //using extent_type = double;
 
 ////////////////////////////////////////
@@ -42,4 +46,3 @@ struct font_extents
 ////////////////////////////////////////
 
 }
-

@@ -5,6 +5,10 @@
 // See the accompanying LICENSE.txt file for terms
 //
 
+#ifndef GK_BASE_UNITS_H
+# error "Do not include units_literals.h by itself, meant as a helper for units.h"
+#endif
+
 #pragma once
 
 ////////////////////////////////////////
@@ -60,6 +64,3 @@ using namespace literals::length_literals;
 }
 
 } // namespace base
-
-
-

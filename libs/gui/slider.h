@@ -24,7 +24,7 @@ public:
 
 	slider_w( void );
 	slider_w( value_type v, value_type min = 0.0, value_type max = 1.0 );
-	~slider_w( void );
+	~slider_w( void ) override;
 
 	template<typename T>
 	typename std::enable_if<std::is_integral<T>::value, T>::type value( void ) const
@@ -79,4 +79,3 @@ private:
 using slider = widget_ptr<slider_w>;
 
 }
-

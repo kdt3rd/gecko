@@ -23,7 +23,7 @@ class label_w : public widget
 public:
 	label_w( void );
 	label_w( std::string l, base::alignment a = alignment::LEFT );
-	~label_w( void );
+	~label_w( void ) override;
 
 	void set_text( const std::string &utf8 ) { _text.set_text( utf8 ); }
 	void set_color( const gl::color &c ) { _text.set_color( c ); }
@@ -51,4 +51,3 @@ private:
 using label = widget_ptr<label_w>;
 
 }
-

@@ -6,8 +6,11 @@
 //
 
 #pragma once
+#ifndef GK_BASE_UNITS_H
+# define GK_BASE_UNITS_H 1
 
 #include <cmath>
+#include <cstdlib>
 #include <ratio>
 #include <iostream>
 
@@ -21,7 +24,7 @@ namespace base
 /// This is modeled after std::chrono where there are compile-time
 /// ratios in place for conversion. Unlike std::chrono, math operators
 /// are defined.
-/// 
+///
 /// Provides type that can be used for units of measure (length
 /// primarily, but could be extended in the future)
 ///
@@ -122,10 +125,13 @@ public:
 
     constexpr length( void ) = default;
 
-    template <typename OT, typename = std::enable_if_t<std::is_convertible<OT, value_type>::value &&
+    template <typename OT, typename = std::enable_if_t<std::is_convertible<typename std::decay<OT>::type, value_type>::value &&
                                                        (std::is_floating_point<value_type>::value ||
                                                         (!std::is_floating_point<OT>::value) )>>
-    constexpr explicit inline length( const OT &o ) : _val( static_cast<value_type>( o ) ) {}
+    constexpr inline length( OT &&o ) : _val( static_cast<value_type>( o ) ) {}
+
+    constexpr length( const value_type &o ) : _val( o ) {}
+    constexpr length( value_type &&o ) : _val( std::move( o ) ) {}
 
     template <typename OT, typename other_ratio,
               typename = std::enable_if_t<std::is_floating_point<value_type>::value ||
@@ -153,6 +159,9 @@ public:
     /// @brief Enable explicit (programmer specified) cast conversion
     template <typename tO, typename rO>
     explicit inline operator length<tO, rO>( void ) const { return length<tO, rO>( *this ); }
+
+    /// @brief alternate (explicit) method of getting @sa count
+    explicit constexpr inline operator value_type( void ) const { return _val; }
 
     /// @brief Retrieve the current count of length units.
     ///
@@ -220,15 +229,23 @@ template <typename T> using angstroms = length<T, std::ratio<1, 10000000000>>;
 // imperial units
 
 // 1/1000 of an inch
-template <typename T> using mils    = length<T, std::ratio<1,1>>;
+template <typename T> using mils    = length<T, std::ratio<254,1000*10000>>;
 template <typename T> using thous   = mils<T>;
 // 1/12 of an inch
-template <typename T> using line    = length<T, std::ratio<1,1>>;
+template <typename T> using line    = length<T, std::ratio<254,12*10000>>;
 template <typename T> using inches  = length<T, std::ratio<254,10000>>;
 template <typename T> using feet    = length<T, std::ratio<254*12,10000>>;
 template <typename T> using yards   = length<T, std::ratio<254*12*3,10000>>;
 template <typename T> using miles   = length<T, std::ratio<254*12*5280,10000>>;
 template <typename T> using leagues = length<T, std::ratio<254*12*5280*3,10000>>;
+
+
+////////////////////////////////////////
+// print units
+
+template <typename T> using points   = length<T, std::ratio<254,72*10000>>;
+template <typename T> using picas   = length<T, std::ratio<254,6*10000>>;
+template <typename T> using twips   = length<T, std::ratio<254,20*72*10000>>;
 
 ////////////////////////////////////////
 // marine units
@@ -249,4 +266,4 @@ template <typename T> using astronomical_units   = length<T, std::ratio<14959787
 #include "units_ext_operations.h"
 #include "units_literals.h"
 
-
+#endif // GK_BASE_UNITS_H

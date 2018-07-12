@@ -50,10 +50,8 @@ void base_container::build( context &ctxt )
 
 void base_container::paint( context &ctxt )
 {
+	auto scisguard = ctxt.push_clip( *this );
 	gl::api &ogl = ctxt.hw_context().api();
-
-	ogl.push_scissor( x(), y(), width(), height() );
-	on_scope_exit{ ogl.pop_scissor(); };
 
 	ogl.clear_color( ctxt.get_style().background_color() );
 	ogl.clear();
@@ -63,12 +61,12 @@ void base_container::paint( context &ctxt )
 
 ////////////////////////////////////////
 
-std::shared_ptr<widget> base_container::find_widget_under( coord x, coord y )
+std::shared_ptr<widget> base_container::find_widget_under( const point &p )
 {
 	std::shared_ptr<widget> ret;
 	for ( auto w: _widgets )
 	{
-		ret = w->find_widget_under( x, y );
+		ret = w->find_widget_under( p );
 		if ( ret )
 			break;
 	}
@@ -89,7 +87,7 @@ bool base_container::update_layout( double duration )
 
 void base_container::remove( size_t w )
 {
-	_widgets.erase( _widgets.begin() + w );
+	_widgets.erase( _widgets.begin() + widget_list::difference_type(w) );
 	invalidate();
 }
 

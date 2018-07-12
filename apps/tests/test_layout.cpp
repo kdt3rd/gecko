@@ -128,7 +128,7 @@ std::shared_ptr<simple> make_simple( const gl::color &c )
 
 std::shared_ptr<widget<layout::tree>> make_tree( void )
 {
-	auto groove = std::make_shared<simple>( gl::color( 0.45, 0.45, 0.45 ) );
+	auto groove = std::make_shared<simple>( gl::color( 0.45F, 0.45F, 0.45F ) );
 	keepers.push_back( groove );
 	groove->set_minimum_width( 15 );
 
@@ -260,8 +260,10 @@ int safemain( int argc, char *argv[] )
 	center->add_child( scroll );
 
 	root.compute_bounds();
-	win->set_minimum_size( root.minimum_width(), root.minimum_height() );
-	win->resize( root.minimum_width(), root.minimum_height() );
+	win->set_minimum_size( win->query_screen()->to_native_horiz( root.minimum_width() ),
+	                       win->query_screen()->to_native_vert( root.minimum_height() ) );
+	win->resize( win->query_screen()->to_native_horiz( root.minimum_width() ),
+	             win->query_screen()->to_native_vert( root.minimum_height() ) );
 
 	// Render function
 	win->exposed = [&]( void )
@@ -270,7 +272,7 @@ int safemain( int argc, char *argv[] )
 		root.compute_bounds();
 		root.compute_layout();
 
-		ogl.viewport( 0, 0, win->width(), win->height() );
+		win->hw_context().viewport( 0, 0, win->width(), win->height() );
 		ogl.set_projection( gl::matrix4::ortho( 0, static_cast<float>( win->width() ), 0, static_cast<float>( win->height() ) ) );
 		ogl.clear();
 
@@ -312,4 +314,3 @@ int main( int argc, char *argv[] )
 }
 
 ////////////////////////////////////////
-

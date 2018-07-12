@@ -113,7 +113,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 
 		// Clear the window
 		ogl.clear();
-		ogl.viewport( 0, 0, win->width(), win->height() );
+		win->hw_context().viewport( 0, 0, win->width(), win->height() );
 
 		// Draw the triangle
 		{
@@ -163,4 +163,3 @@ int main( int argc, char *argv[] )
 }
 
 ////////////////////////////////////////
-

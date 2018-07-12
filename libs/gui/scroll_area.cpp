@@ -77,42 +77,41 @@ void scroll_area_w::paint( context &ctxt )
 
 	if ( _widget )
 	{
+		auto scisguard = ctxt.push_clip( *_main );
 		platform::context &hwc = ctxt.hw_context();
-		auto guard = hwc.push_clip( _main->x(), _main->y(), _main->width(), _main->height() );
-		//ogl.push_scissor();
 		{
 			gl::api &ogl = hwc.api();
 			ogl.save_matrix();
 			{
-				coord_type dx = coord_type( 0 ), dy = coord_type( 0 );
+				coord dx = coord( 0 ), dy = coord( 0 );
 				if ( _hscroll )
 					dx = _hscroll->value();
 				if ( _vscroll )
 					dy = _vscroll->value();
-				ogl.model_matrix().translate( _main->x() - dx, _main->y() - dy );
+				ogl.model_matrix().translate( draw::to_api( _main->x() - dx ),
+				                              draw::to_api( _main->y() - dy ) );
 
 				_widget->paint( ctxt );
 			}
 			ogl.restore_matrix();
 		}
-//		ogl.pop_scissor();
 	}
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<widget> scroll_area_w::find_widget_under( coord x, coord y )
+std::shared_ptr<widget> scroll_area_w::find_widget_under( const point &p )
 {
-	if ( _hscroll && _hscroll->contains( x, y ) )
+	if ( _hscroll && _hscroll->contains( p ) )
 		return _hscroll;
-	if ( _vscroll && _vscroll->contains( x, y ) )
+	if ( _vscroll && _vscroll->contains( p ) )
 		return _vscroll;
 
 	// if we're not in the scroll areas, we're in the widget
 	if ( _widget )
 		return _widget;
 
-	return widget::find_widget_under( x, y );
+	return widget::find_widget_under( p );
 }
 
 ////////////////////////////////////////
@@ -142,14 +141,14 @@ void scroll_area_w::update_widget( void )
 {
 	if ( _widget )
 	{
-		if ( _widget->width() > 0.0 )
+		if ( _widget->width() > coord( 0 ) )
 		{
-			_hscroll->set_range( _widget->x1(), _widget->x2() + 1 );
+			_hscroll->set_range( _widget->x1(), _widget->x1() + _widget->width() );
 			_hscroll->set_handle( _main->width() );
 		}
-		if ( _widget->height() > 0.0 )
+		if ( _widget->height() > coord( 0 ) )
 		{
-			_vscroll->set_range( _widget->y1(), _widget->y2() + 1 );
+			_vscroll->set_range( _widget->y1(), _widget->y1() + _widget->height() );
 			_vscroll->set_handle( _main->height() );
 		}
 	}
@@ -163,4 +162,3 @@ void scroll_area_w::update_widget( void )
 ////////////////////////////////////////
 
 }
-

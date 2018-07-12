@@ -18,12 +18,13 @@ class composite : public widget
 {
 public:
 	using widget::widget;
+	~composite( void ) override;
 
 	void monitor_changed( context &ctxt ) override;
 	void build( context &ctxt ) override;
 	void paint( context &ctxt ) override;
 
-	std::shared_ptr<widget> find_widget_under( coord x, coord y ) override;
+	std::shared_ptr<widget> find_widget_under( const point &p ) override;
 
 	bool update_layout( double duration ) override;
 
@@ -36,4 +37,3 @@ protected:
 ////////////////////////////////////////
 
 }
-

@@ -46,8 +46,8 @@ phys_point screen::to_physical( const point &p )
 {
     dots_per_unit d_mm = dpmm();
     using val_type = dots_per_unit::coord_type;
-    return phys_point( phys_unit( static_cast<val_type>( p.x() ) / d_mm.w() ),
-                         phys_unit( static_cast<val_type>( p.y() ) / d_mm.h() ) );
+    return phys_point( phys_unit( static_cast<val_type>( p[0] ) / d_mm.w() ),
+                       phys_unit( static_cast<val_type>( p[1] ) / d_mm.h() ) );
 }
 
 ////////////////////////////////////////
@@ -57,7 +57,7 @@ phys_size screen::to_physical( const size &p )
     dots_per_unit d_mm = dpmm();
     using val_type = dots_per_unit::coord_type;
     return phys_size( phys_unit( static_cast<val_type>( p.w() ) / d_mm.w() ),
-                        phys_unit( static_cast<val_type>( p.h() ) / d_mm.h() ) );
+                      phys_unit( static_cast<val_type>( p.h() ) / d_mm.h() ) );
 }
 
 ////////////////////////////////////////
@@ -79,7 +79,7 @@ coord_type screen::to_native_horiz( const phys_unit &u )
     dots_per_unit d_mm = dpmm();
     using val_type = dots_per_unit::coord_type;
     using mm = base::units::millimeters<val_type>;
-    
+
     return static_cast<coord_type>( ( u * mm( d_mm.w() ) ).count() );
 }
 
@@ -102,8 +102,8 @@ point screen::to_native( const phys_point &u )
     using val_type = dots_per_unit::coord_type;
     using mm = base::units::millimeters<val_type>;
 
-    return point( static_cast<coord_type>( ( u.x() * mm( d_mm.w() ) ).count() ),
-                  static_cast<coord_type>( ( u.y() * mm( d_mm.h() ) ).count() ) );
+    return point( static_cast<coord_type>( ( u[0] * mm( d_mm.w() ) ).count() ),
+                  static_cast<coord_type>( ( u[1] * mm( d_mm.h() ) ).count() ) );
 }
 
 ////////////////////////////////////////
@@ -142,4 +142,3 @@ phys_rect screen::physical_bounds( bool avail )
 ////////////////////////////////////////
 
 }
-

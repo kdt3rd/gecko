@@ -145,10 +145,17 @@ public:
 	/// @brief Construct translation matrix
 	static matrix4 translation( float x, float y, float z = 0.0 );
 	template <typename T>
-	static inline matrix4 translation( const base::point<T> &p )
+	static inline matrix4 translation( const base::point<T, 2> &p )
 	{
-		return translation( static_cast<float>( p.x() ),
-							static_cast<float>( p.y() ) );
+		return translation( static_cast<float>( p[0] ),
+							static_cast<float>( p[1] ) );
+	}
+	template <typename T>
+	static inline matrix4 translation( const base::point<T, 3> &p )
+	{
+		return translation( static_cast<float>( p[0] ),
+							static_cast<float>( p[1] ),
+							static_cast<float>( p[2] ) );
 	}
 
 	/// @brief Construct scale matrix
@@ -241,4 +248,3 @@ inline vec2 operator*( const matrix4 &a, const vec2 &b2 )
 std::ostream &operator<<( std::ostream &out, const matrix4 &m );
 
 }
-

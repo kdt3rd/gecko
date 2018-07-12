@@ -40,7 +40,7 @@ public:
 
 	void cubic_to( const polyline::point &p1, const polyline::point &p2, const polyline::point &p3 );
 
-	void arc_to( const polyline::point &center, float radius, float angle1, float angle2 );
+	void arc_to( const polyline::point &center, dim radius, float angle1, float angle2 );
 
 	void add_point( const polyline::point &p );
 
@@ -66,8 +66,8 @@ public:
 		return _lines[i];
 	}
 
-	polylines stroked( float width, float dx = 0.0, float dy = 0.0, float dz = 0.0 ) const;
-	polylines offset( float width, float dx = 0.0, float dy = 0.0, float dz = 0.0 ) const;
+	polylines stroked( dim width, dim dx = dim(0), dim dy = dim(0), dim dz = dim(0) ) const;
+	polylines offset( dim width, dim dx = dim(0), dim dy = dim(0), dim dz = dim(0) ) const;
 
 	void filled( const std::function<void(float,float)> &points, const std::function<void(uint32_t,uint32_t,uint32_t)> &tris ) const;
 	void filled( gl::mesh &mesh, const std::string &pos ) const;
@@ -123,4 +123,3 @@ polylines operator^( const polylines &a, const polylines &b );
 ////////////////////////////////////////
 
 }
-

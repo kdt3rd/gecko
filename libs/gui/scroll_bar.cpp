@@ -36,7 +36,7 @@ void scroll_bar_w::set_value( value_type v )
 
 void scroll_bar_w::set_handle( value_type h )
 {
-	precondition( h > 0.0, "invalid scroll bar handle size {0}", h );
+	precondition( h > value_type(0), "invalid scroll bar handle size {0}", h );
 	_handle = h;
 	if ( _handle > _max - _min )
 		_handle = _max - _min;
@@ -109,60 +109,59 @@ void scroll_bar_w::paint( context &ctxt )
 
 bool scroll_bar_w::mouse_press( const event &e )
 {
-	if ( e.mouse().button != 1 )
+	if ( e.raw_mouse().button != 1 )
 		return false;
 
-	coord x = e.mouse().x;
-	coord y = e.mouse().y;
+	point p = e.from_native( e.raw_mouse().x, e.raw_mouse().y );
 
 	if ( _horizontal )
 	{
 		value_type x1 = translate_from_full_w( _value );
 		value_type x2 = translate_from_full_w( _value + _handle );
-		if ( x >= x1 && x <= x2 )
+		if ( p[0] >= x1 && p[0] <= x2 )
 		{
 			_tracking = true;
-			_start = x;
+			_start = p[0];
 			invalidate();
 		}
-		else if ( x < x1 )
+		else if ( p[0] < x1 )
 		{
-			if ( _page > 0.0 )
+			if ( _page > value_type(0) )
 				update_value( _value - _page );
 			else
-				update_value( _value - _handle/2.0 );
+				update_value( _value - _handle/value_type(2) );
 		}
-		else if ( x > x2 )
+		else if ( p[0] > x2 )
 		{
-			if ( _page > 0.0 )
+			if ( _page > value_type(0) )
 				update_value( _value + _page );
 			else
-				update_value( _value + _handle/2.0 );
+				update_value( _value + _handle/value_type(2) );
 		}
 	}
 	else
 	{
 		value_type y1 = translate_from_full_h( _value );
 		value_type y2 = translate_from_full_h( _value + _handle );
-		if ( y >= y1 && y <= y2 )
+		if ( p[1] >= y1 && p[1] <= y2 )
 		{
 			_tracking = true;
-			_start = y;
+			_start = p[1];
 			invalidate();
 		}
-		else if ( y < y1 )
+		else if ( p[1] < y1 )
 		{
-			if ( _page > 0.0 )
+			if ( _page > value_type(0) )
 				update_value( _value - _page );
 			else
-				update_value( _value - _handle/2.0 );
+				update_value( _value - _handle/value_type(2) );
 		}
-		else if ( y > y2 )
+		else if ( p[1] > y2 )
 		{
-			if ( _page > 0.0 )
+			if ( _page > value_type(0) )
 				update_value( _value + _page );
 			else
-				update_value( _value + _handle/2.0 );
+				update_value( _value + _handle/value_type(2) );
 		}
 	}
 
@@ -178,21 +177,20 @@ bool scroll_bar_w::mouse_move( const event &e )
 {
 	if ( _tracking )
 	{
-		coord px = e.mouse().x;
-		coord py = e.mouse().y;
+		point p = e.from_native( e.raw_mouse().x, e.raw_mouse().y );
 
 		if ( _horizontal )
 		{
-			value_type delta = px - _start;
-			_start = px;
+			value_type delta = p[0] - _start;
+			_start = p[0];
 			value_type x = translate_from_full_w( _value );
 			x += delta;
 			update_value( translate_to_full_w( x ) );
 		}
 		else
 		{
-			value_type delta = py - _start;
-			_start = py;
+			value_type delta = p[1] - _start;
+			_start = p[1];
 			value_type y = translate_from_full_h( _value );
 			y += delta;
 			update_value( translate_to_full_h( y ) );
@@ -227,10 +225,10 @@ void scroll_bar_w::update_value( value_type v )
 			_value = _min;
 		else
 		{
-			if ( _page > 0.0 )
+			if ( _page > value_type(0) )
 				_min = _value - _page;
 			else
-				_min = _value - _handle/2.0;
+				_min = _value - _handle/value_type(2);
 		}
 		changed = true;
 	}
@@ -240,10 +238,10 @@ void scroll_bar_w::update_value( value_type v )
 			_value = _max - _handle;
 		else
 		{
-			if ( _page > 0.0 )
+			if ( _page > value_type(0) )
 				_max = _value + _handle + _page;
 			else
-				_max = _value + _handle + _handle/2.0;
+				_max = _value + _handle + _handle/value_type(2);
 		}
 		changed = true;
 	}
@@ -257,4 +255,3 @@ void scroll_bar_w::update_value( value_type v )
 ////////////////////////////////////////
 
 }
-

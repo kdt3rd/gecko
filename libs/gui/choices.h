@@ -23,7 +23,7 @@ class choices_w : public composite
 {
 public:
 	choices_w( void );
-	~choices_w( void );
+	~choices_w( void ) override;
 
 	void add_choice( const std::string &l );
 
@@ -45,4 +45,3 @@ private:
 using choices = widget_ptr<choices_w>;
 
 }
-

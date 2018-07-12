@@ -35,7 +35,7 @@ void shape::add( gl::api &ogl, const polylines &lines, const paint &c )
 		_meshes.push_back( std::move( m ) );
 	}
 
-	if ( c.get_stroke_width() > 0.F )
+	if ( c.get_stroke_width() > dim(0) )
 	{
 		mesh m;
 		m.matrix = stroke_mesh( ogl, m.msh, c, "position_uv.vert" );
@@ -60,8 +60,9 @@ void shape::draw( platform::context &ctxt )
 	gl::api &ogl = ctxt.api();
 
 	ogl.save_matrix();
-	ogl.model_matrix().scale( _resize[0] / _shape[0], _resize[1] / _shape[1] );
-	ogl.model_matrix().translate( _top_left[0], _top_left[1] );
+	ogl.model_matrix().scale( ( _resize[0] / _shape[0] ).count(),
+	                          ( _resize[1] / _shape[1] ).count() );
+	ogl.model_matrix().translate( _top_left[0].count(), _top_left[1].count() );
 
 	for ( auto &m: _meshes )
 	{
@@ -82,4 +83,3 @@ void shape::draw( platform::context &ctxt )
 ////////////////////////////////////////
 
 }
-

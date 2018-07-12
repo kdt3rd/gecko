@@ -84,7 +84,7 @@ bool line_edit_w::key_press( const event &e )
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-enum"
-	platform::scancode c = e.key().keys[0];
+	platform::scancode c = e.raw_key().keys[0];
 	switch ( c )
 	{
 		case platform::scancode::KEY_LEFT:
@@ -154,7 +154,7 @@ bool line_edit_w::key_press( const event &e )
 
 bool line_edit_w::text_input( const event &e )
 {
-	char32_t c = e.text().text;
+	char32_t c = e.raw_text().text;
 	if ( utf::is_graphic( c ) )
 	{
 		std::string tmp( _text.get_text() );
@@ -178,7 +178,7 @@ bool line_edit_w::text_input( const event &e )
 bool
 line_edit_w::mouse_press( const event &e )
 {
-	int button = e.mouse().button;
+	int button = e.raw_mouse().button;
 	if ( button == 1 )
 	{
 		// TODO: set cursor position
@@ -212,7 +212,7 @@ line_edit_w::mouse_press( const event &e )
 					_cursor += utf::convert_utf8( x, it );
 
 				_text.set_text( tmp );
-				
+
 			}
 			invalidate();
 		}
@@ -225,4 +225,3 @@ line_edit_w::mouse_press( const event &e )
 ////////////////////////////////////////
 
 }
-

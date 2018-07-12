@@ -7,12 +7,10 @@
 
 #pragma once
 
-#include <base/point.h>
-#include <base/size.h>
+#include <layout/types.h>
 #include <base/rect.h>
 #include <base/signal.h>
 #include <base/alignment.h>
-#include <layout/types.h>
 
 ////////////////////////////////////////
 
@@ -31,6 +29,3 @@ template<typename Func> using signal = base::signal<Func>;
 using alignment = base::alignment;
 
 } // namespace gui
-
-
-

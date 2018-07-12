@@ -9,7 +9,7 @@
 
 #include <vector>
 #include <memory>
-#include <gl/color.h>
+#include "types.h"
 
 namespace draw
 {
@@ -20,6 +20,8 @@ namespace draw
 class gradient
 {
 public:
+	using value_type = float;
+	using stop_type = std::pair<value_type, color>;
 	gradient( void )
 	{
 	}
@@ -29,20 +31,20 @@ public:
 	{
 	}
 
-	gradient( std::initializer_list<std::pair<float,gl::color>> l )
+	gradient( std::initializer_list<stop_type> l )
 		: _stops( l )
 	{
 	}
 
 	~gradient( void ) {}
 
-	void add_stop( float v, const gl::color &c ) { _stops.emplace_back( v, c ); }
+	void add_stop( value_type v, const color &c ) { _stops.emplace_back( v, c ); }
 
 	void sort( void );
 
-	gl::color sample( float v ) const;
+	color sample( value_type v ) const;
 
-	const std::vector<std::pair<float,gl::color>> &stops( void ) const { return _stops; }
+	const std::vector<stop_type> &stops( void ) const { return _stops; }
 
 	gradient &operator=( const gradient &g ) { _stops = g._stops; return *this; }
 
@@ -51,10 +53,9 @@ public:
 private:
 	gradient( gradient && ) = delete;
 
-	std::vector<std::pair<float,gl::color>> _stops;
+	std::vector<stop_type> _stops;
 };
 
 ////////////////////////////////////////
 
 }
-

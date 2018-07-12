@@ -69,7 +69,7 @@ void polylines::cubic_to( const polyline::point &p1, const polyline::point &p2, 
 
 ////////////////////////////////////////
 
-void polylines::arc_to( const polyline::point &center, float radius, float angle1, float angle2 )
+void polylines::arc_to( const polyline::point &center, dim radius, float angle1, float angle2 )
 {
 	precondition( !_lines.empty(), "no point to start from" );
 	add_arc( center, radius, angle1, angle2, _lines.back() );
@@ -105,7 +105,7 @@ void polylines::close( void )
 
 ////////////////////////////////////////
 
-polylines polylines::stroked( float width, float dx, float dy, float dz ) const
+polylines polylines::stroked( dim width, dim dx, dim dy, dim dz ) const
 {
 	using namespace draw::detail;
 	Path subj;
@@ -119,18 +119,23 @@ polylines polylines::stroked( float width, float dx, float dy, float dz ) const
 
 		subj.clear();
 		for ( const auto &p: line )
-			subj << IntPoint( static_cast<int>( p[0] * 100.F + 0.5F ), static_cast<int>( p[1] * 100.F + 0.5F ), static_cast<int>( p[2] * 100.F + 0.5F ) );
+			subj << IntPoint( static_cast<int>( to_api( p[0] ) * 100.F + 0.5F ),
+			                  static_cast<int>( to_api( p[1] ) * 100.F + 0.5F ),
+							  static_cast<int>( to_api( p[2] ) * 100.F + 0.5F ) );
 
 		ClipperOffset co;
 		co.AddPath( subj, jtRound, line.closed() ? etClosedLine : etOpenRound );
 
 		solution.clear();
-		co.Execute( solution, width * 50.F );
+		co.Execute( solution, to_api( width * 50.F ) );
+		auto adx = to_api( dx );
+		auto ady = to_api( dy );
+		auto adz = to_api( dz );
 		for ( auto path: solution )
 		{
 			result.new_polyline();
 			for ( const auto &p: path )
-				result.add_point( { p.X / 100.F + dx, p.Y / 100.F + dy, p.Z / 100.F + dz } );
+				result.add_point( { p.X / 100.F + adx, p.Y / 100.F + ady, p.Z / 100.F + adz } );
 			result.close();
 		}
 	}
@@ -140,7 +145,7 @@ polylines polylines::stroked( float width, float dx, float dy, float dz ) const
 
 ////////////////////////////////////////
 
-polylines polylines::offset( float width, float dx, float dy, float dz ) const
+polylines polylines::offset( dim width, dim dx, dim dy, dim dz ) const
 {
 	using namespace draw::detail;
 	Path subj;
@@ -154,18 +159,23 @@ polylines polylines::offset( float width, float dx, float dy, float dz ) const
 
 		subj.clear();
 		for ( const auto &p: line )
-			subj << IntPoint( static_cast<int>( p[0] * 100.F + 0.5F ), static_cast<int>( p[1] * 100.F + 0.5F ), static_cast<int>( p[2] * 100.F + 0.5F ) );
+			subj << IntPoint( static_cast<int>( to_api( p[0] ) * 100.F + 0.5F ),
+			                  static_cast<int>( to_api( p[1] ) * 100.F + 0.5F ),
+							  static_cast<int>( to_api( p[2] ) * 100.F + 0.5F ) );
 
 		ClipperOffset co;
 		co.AddPath( subj, jtRound, line.closed() ? etClosedPolygon : etOpenRound );
 
 		solution.clear();
-		co.Execute( solution, width * 100.F );
+		co.Execute( solution, to_api( width * 100.F ) );
+		auto adx = to_api( dx );
+		auto ady = to_api( dy );
+		auto adz = to_api( dz );
 		for ( const auto &path: solution )
 		{
 			result.new_polyline();
 			for ( const auto &p: path )
-				result.add_point( { p.X / 100.F + dx, p.Y / 100.F + dy, p.Z / 100.F + dz } );
+				result.add_point( { p.X / 100.F + adx, p.Y / 100.F + ady, p.Z / 100.F + adz } );
 			result.close();
 		}
 	}
@@ -193,7 +203,8 @@ void polylines::filled( const std::function<void(float,float)> &add_point, const
 				{
 					subj.clear();
 					for ( const auto &p: line )
-						subj << IntPoint( static_cast<int>( p[0] * 100.F + 0.5F ), static_cast<int>( p[1] * 100.F + 0.5F ) );
+						subj << IntPoint( static_cast<int>( to_api( p[0] ) * 100.F + 0.5F ),
+						                  static_cast<int>( to_api( p[1] ) * 100.F + 0.5F ) );
 					clip.AddPath( subj, ptSubject, line.closed() );
 				}
 			}
@@ -218,12 +229,12 @@ void polylines::filled( const std::function<void(float,float)> &add_point, const
 
 void polylines::filled( gl::mesh &m, const std::string &attr ) const
 {
-	gl::vertex_buffer_data<polyline::point> points;
+	gl::vertex_buffer_data<gl::vec3> points;
 	gl::element_buffer_data tris;
 
 	auto add_point = [&]( float cx, float cy )
 	{
-		points.push_back( { cx, cy, 0 } ); // TODO handle Z
+		points.push_back( { cx, cy, 0.F } ); // TODO: handle Z
 	};
 
 	auto add_tri = [&]( uint32_t a, uint32_t b, uint32_t c )
@@ -257,4 +268,3 @@ void polylines::save_svg( std::ostream &out )
 ////////////////////////////////////////
 
 }
-

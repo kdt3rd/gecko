@@ -28,7 +28,7 @@ namespace draw
 
 ////////////////////////////////////////
 
-void image::set_color_state( const color::state &s )
+void image::set_color_state( const ::color::state &s )
 {
 	// TODO
 }
@@ -282,7 +282,7 @@ void image::reset_position( int parw, int parh )
 
 	set_pan( float( cenx - imgcenx ), float( ceny - imgceny ) );
 }
-					 
+
 void image::rebuild( platform::context &ctxt )
 {
 	_stash.reset();
@@ -346,7 +346,7 @@ void image::draw( platform::context &ctxt )
 
 			auto bt2 = _texture[2]->bind( _texture_offset + 2 );
 			bt2.set_filters( gf, gf );
-			
+
 			auto bound = _mesh.bind();
 			bound.set_uniform( _stash->_p_matrix_loc, _rect * ctxt.api().current_matrix() );
 			bound.set_uniform( _stash->_p_tex_unit0_loc, _texture_offset );
@@ -362,7 +362,7 @@ void image::draw( platform::context &ctxt )
 
 			auto bt1 = _texture[1]->bind( _texture_offset + 1 );
 			bt1.set_filters( gf, gf );
-			
+
 			auto bound = _mesh.bind();
 			bound.set_uniform( _stash->_p_matrix_loc, _rect * ctxt.api().current_matrix() );
 			bound.set_uniform( _stash->_p_tex_unit0_loc, _texture_offset );
@@ -374,7 +374,7 @@ void image::draw( platform::context &ctxt )
 		{
 			auto bt0 = _texture[0]->bind( _texture_offset );
 			bt0.set_filters( gf, gf );
-			
+
 			auto bound = _mesh.bind();
 			bound.set_uniform( _stash->_p_matrix_loc, _rect * ctxt.api().current_matrix() );
 			bound.set_uniform( _stash->_p_tex_unit0_loc, _texture_offset );
@@ -510,4 +510,3 @@ void image::clear_textures( void )
 ////////////////////////////////////////
 
 }
-

@@ -87,7 +87,7 @@ public:
 	/// @param x New x position of the window
 	/// @param y New y position of the window
 	void move( coord_type x, coord_type y ) { _win->move( x, y ); }
-	void move( const point &p ) { move( p.x(), p.y() ); }
+	void move( const point &p ) { move( p[0], p[1] ); }
 
 	/// @brief Resize the window.
 	///
@@ -181,6 +181,3 @@ private:
 };
 
 } // namespace platform
-
-
-

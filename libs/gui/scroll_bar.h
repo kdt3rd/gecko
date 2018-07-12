@@ -19,10 +19,10 @@ namespace gui
 class scroll_bar_w : public widget
 {
 public:
-	using value_type = coord_type;
+	using value_type = coord;
 
 	scroll_bar_w( bool bounded = true );
-	~scroll_bar_w( void );
+	~scroll_bar_w( void ) override;
 
 	value_type value( void )
 	{
@@ -96,4 +96,3 @@ private:
 using scroll_bar = widget_ptr<scroll_bar_w>;
 
 }
-

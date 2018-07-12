@@ -23,7 +23,7 @@ window::window( const std::shared_ptr<platform::window> &win )
 	: _window( win )
 {
 	precondition( bool(_window), "null window" );
-	_window->event_handoff = [this] ( const event &e ) -> bool { return process_event( e ); };
+	_window->event_handoff = [this] ( const platform::event &e ) -> bool { return process_event( event( *this, e ) ); };
 }
 
 ////////////////////////////////////////
@@ -81,14 +81,14 @@ void window::hide( void )
 
 void window::move( coord x, coord y )
 {
-	_window->move( x, y );
+	_window->move( to_native( point( x, y ) ) );
 }
 
 ////////////////////////////////////////
 
 void window::resize( coord w, coord h )
 {
-	_window->resize( w, h );
+	_window->resize( to_native( size( w, h ) ) );
 }
 
 ////////////////////////////////////////
@@ -123,7 +123,84 @@ coord window::height( void ) const
 
 void window::invalidate( const rect &r )
 {
-	_window->invalidate( platform::rect( r.round() ) );
+	_window->invalidate( to_native( r.round() ) );
+}
+
+////////////////////////////////////////
+
+coord window::from_native_horiz( platform::coord_type c ) const
+{
+	return _window->query_screen()->to_physical_horiz( c );
+}
+
+////////////////////////////////////////
+
+coord window::from_native_vert( platform::coord_type c ) const
+{
+	return _window->query_screen()->to_physical_vert( c );
+}
+
+////////////////////////////////////////
+
+point window::from_native( const platform::point &p ) const
+{
+	return _window->query_screen()->to_physical( p );
+}
+
+////////////////////////////////////////
+
+point window::from_native( platform::coord_type x, platform::coord_type y ) const
+{
+	return _window->query_screen()->to_physical( platform::point( x, y ) );
+}
+
+////////////////////////////////////////
+
+size window::from_native( const platform::size &s ) const
+{
+	return _window->query_screen()->to_physical( s );
+}
+
+////////////////////////////////////////
+
+rect window::from_native( const platform::rect &r ) const
+{
+	return _window->query_screen()->to_physical( r );
+}
+
+////////////////////////////////////////
+
+platform::coord_type window::to_native_horiz( const coord &c ) const
+{
+	return _window->query_screen()->to_native_horiz( c );
+}
+
+////////////////////////////////////////
+
+platform::coord_type window::to_native_vert( const coord &c ) const
+{
+	return _window->query_screen()->to_native_vert( c );
+}
+
+////////////////////////////////////////
+
+platform::point window::to_native( const point &p ) const
+{
+	return _window->query_screen()->to_native( p );
+}
+
+////////////////////////////////////////
+
+platform::size window::to_native( const size &s ) const
+{
+	return _window->query_screen()->to_native( s );
+}
+
+////////////////////////////////////////
+
+platform::rect window::to_native( const rect &r ) const
+{
+	return _window->query_screen()->to_native( r );
 }
 
 ////////////////////////////////////////
@@ -206,19 +283,20 @@ bool window::process_event( const event &e )
 			break;
 
 		case event_type::WINDOW_EXPOSED:
-			paint( 0, 0, 0, 0 );
+			paint( rect() );
 			break;
 		case event_type::WINDOW_REGION_EXPOSED:
-			paint( e.window().x, e.window().y, e.window().width, e.window().height );
+			paint( from_native( platform::rect( e.raw_window().x, e.raw_window().y,
+								e.raw_window().width, e.raw_window().height ) ) );
 			break;
 
 		case event_type::WINDOW_MOVED:
 			break;
 		case event_type::WINDOW_RESIZED:
-			resized( e.window().width, e.window().height );
+			resized( from_native( platform::size( e.raw_window().width, e.raw_window().height ) ) );
 			break;
 		case event_type::WINDOW_MOVE_RESIZE:
-			resized( e.window().width, e.window().height );
+			resized( from_native( platform::size( e.raw_window().width, e.raw_window().height ) ) );
 			break;
 		case event_type::MOUSE_ENTER:
 			break;
@@ -230,7 +308,7 @@ bool window::process_event( const event &e )
 				_mouse_grab->mouse_move( e );
 			else if ( _widget )
 			{
-				auto w = _widget->find_widget_under( e.mouse().x, e.mouse().y );
+				auto w = _widget->find_widget_under( from_native( e.raw_mouse().x, e.raw_mouse().y ) );
 				if ( w )
 					w->mouse_move( e );
 			}
@@ -240,7 +318,7 @@ bool window::process_event( const event &e )
 				_mouse_grab->mouse_press( e );
 			else if ( _widget )
 			{
-				auto w = _widget->find_widget_under( e.mouse().x, e.mouse().y );
+				auto w = _widget->find_widget_under( from_native( e.raw_mouse().x, e.raw_mouse().y ) );
 				if ( w )
 					w->mouse_press( e );
 			}
@@ -250,7 +328,7 @@ bool window::process_event( const event &e )
 				_mouse_grab->mouse_release( e );
 			else if ( _widget )
 			{
-				auto w = _widget->find_widget_under( e.mouse().x, e.mouse().y );
+				auto w = _widget->find_widget_under( from_native( e.raw_mouse().x, e.raw_mouse().y ) );
 				if ( w )
 					w->mouse_release( e );
 			}
@@ -260,7 +338,7 @@ bool window::process_event( const event &e )
 				_mouse_grab->mouse_wheel( e );
 			else if ( _widget )
 			{
-				auto w = _widget->find_widget_under( e.hid().x, e.hid().y );
+				auto w = _widget->find_widget_under( from_native( e.raw_hid().x, e.raw_hid().y ) );
 				if ( w )
 					w->mouse_wheel( e );
 			}
@@ -284,7 +362,7 @@ bool window::process_event( const event &e )
 				_key_focus->key_release( e );
 			else if ( _widget )
 			{
-				auto w = _widget->find_widget_under( e.key().x, e.key().y );
+				auto w = _widget->find_widget_under( from_native( e.raw_key().x, e.raw_key().y ) );
 				if ( w )
 					w->key_release( e );
 			}
@@ -294,7 +372,7 @@ bool window::process_event( const event &e )
 				_key_focus->text_input( e );
 			else if ( _widget )
 			{
-				auto w = _widget->find_widget_under( e.key().x, e.key().y );
+				auto w = _widget->find_widget_under( from_native( e.raw_key().x, e.raw_key().y ) );
 				if ( w )
 					w->text_input( e );
 			}
@@ -306,7 +384,7 @@ bool window::process_event( const event &e )
 		case event_type::TABLET_BUTTON:
 			if ( _widget )
 			{
-				auto w = _widget->find_widget_under( e.tablet().x, e.tablet().y );
+				auto w = _widget->find_widget_under( from_native( e.raw_tablet().x, e.raw_tablet().y ) );
 				if ( w )
 					w->tablet_event( e );
 			}
@@ -345,45 +423,39 @@ bool window::close_request( const event &e )
 
 ////////////////////////////////////////
 
-void window::paint( coord dx, coord dy, coord dw, coord dh )
+void window::paint( const rect &r )
 {
 	// in case we were destroyed but still are processing paint requests...
 	if ( ! _window )
 		return;
 
-	coord w = _window->width();
-	coord h = _window->height();
+	auto winbounds = _window->phys_bounds();
 
 	platform::context &hwctxt = _window->hw_context();
 	auto guard = hwctxt.begin_render();
 
+	platform::rect native_winr = to_native( winbounds );
+	hwctxt.viewport( native_winr );
+
+	auto clipguard = hwctxt.push_clip( r.empty() ? native_winr : to_native( r ) );
+
 	gl::api &ogl = hwctxt.api();
 	ogl.reset();
-	ogl.viewport( 0, 0, w, h );
-
-	bool didpushsc = false;
-	if ( dw != 0 || dh != 0 )
-	{
-		ogl.push_scissor( dx, dy, dw, dh );
-		didpushsc = true;
-	}
-	on_scope_exit { if ( didpushsc ) ogl.pop_scissor(); };
-
 	ogl.enable( gl::capability::MULTISAMPLE );
 	ogl.enable( gl::capability::BLEND );
     ogl.blend_func( gl::blend_style::SRC_ALPHA, gl::blend_style::ONE_MINUS_SRC_ALPHA );
 
 	ogl.clear_color( _style.background_color() );
 	ogl.clear();
-	ogl.set_projection( gl::matrix4::ortho( 0, w, 0, h ) );
+	ogl.set_projection( gl::matrix4::ortho( 0, winbounds.width().count(), 0, winbounds.height().count() ) );
 
 	if ( _widget )
 	{
 		in_context( [&,this]
 		{
 			_widget->layout_target()->compute_bounds();
-			_widget->set_size( w, h );
-			_widget->layout_target()->set_size( w, h );
+			_widget->set_size( winbounds.width(), winbounds.height() );
+			_widget->layout_target()->set_size( winbounds.width(), winbounds.height() );
 			_widget->layout_target()->compute_layout();
 			if ( _widget->update_layout( 250.0 ) )
 				invalidate( *_widget );
@@ -396,14 +468,15 @@ void window::paint( coord dx, coord dy, coord dw, coord dh )
 
 ////////////////////////////////////////
 
-void window::resized( coord w, coord h )
+void window::resized( const size &s )
 {
 	if ( _widget )
 	{
 		in_context( [&,this]
 		{
-			_widget->set( { coord(0), coord(0) }, { w, h } );
-			_widget->layout_target()->set( { coord(0), coord(0) }, { w, h } );
+			rect r = { point(), s };
+			_widget->set( r );
+			_widget->layout_target()->set( r );
 			_widget->layout_target()->compute_layout();
 			_widget->update_layout( 0.0 );
 			invalidate( *_widget );
@@ -416,7 +489,7 @@ void window::resized( coord w, coord h )
 void window::key_down( const event &e )
 {
 	// TODO: don't allow multiple scancode combinations?
-	if ( e.key().keys[1] != platform::scancode::KEY_NO_EVENT )
+	if ( e.raw_key().keys[1] != platform::scancode::KEY_NO_EVENT )
 		return;
 
 #if defined(__APPLE__)
@@ -427,7 +500,7 @@ void window::key_down( const event &e )
 		return;
 #endif
 
-	platform::scancode sc = e.key().keys[0];
+	platform::scancode sc = e.raw_key().keys[0];
 
 	if ( application::current()->dispatch_global_hotkey( e ) )
 		return;
@@ -435,7 +508,7 @@ void window::key_down( const event &e )
 	auto i = _hotkeys.find( sc );
 	if ( i != _hotkeys.end() )
 	{
-		(i->second)( point( e.key().x, e.key().y ) );
+		(i->second)( from_native( e.raw_key().x, e.raw_key().y ) );
 		return;
 	}
 
@@ -443,7 +516,7 @@ void window::key_down( const event &e )
 		_key_focus->key_press( e );
 	else if ( _widget )
 	{
-		auto w = _widget->find_widget_under( e.key().x, e.key().y );
+		auto w = _widget->find_widget_under( from_native( e.raw_key().x, e.raw_key().y ) );
 		if ( w )
 			w->key_press( e );
 	}
@@ -460,4 +533,3 @@ void window::key_repeat( const event &e )
 ////////////////////////////////////////
 
 }
-

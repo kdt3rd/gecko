@@ -28,7 +28,7 @@ using dots_per_unit = base::fsize;
 
 /// physical measurement types (i.e. actual length)
 using phys_unit = base::units::millimeters<float>;
-using phys_point = base::point<phys_unit>;
+using phys_point = base::point<phys_unit, 2>;
 using phys_size = base::size<phys_unit>;
 using phys_rect = base::rect<phys_unit>;
 
@@ -37,11 +37,8 @@ using phys_rect = base::rect<phys_unit>;
 using coord_type = int16_t;
 //using size_type = uint16_t;
 
-using point = base::point<coord_type>;
+using point = base::point<coord_type, 2>;
 using size = base::size<coord_type>;
 using rect = base::rect<coord_type>;
 
 } // namespace platform
-
-
-
