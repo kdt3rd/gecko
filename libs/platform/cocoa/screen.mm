@@ -57,9 +57,12 @@ bool screen::is_remote( void ) const
 rect screen::bounds( bool avail ) const
 {
 	NSScreen *scr = reinterpret_cast<NSScreen *>( _nsscreen );
-	NSRect b = [scr frame];
+	NSRect b;
+    if ( avail )
+        b = [scr visibleFrame];
+    else
+        b = [scr frame];
 	auto scale = [scr backingScaleFactor];
-	// TODO: show avail or not
 	return { 0, 0, static_cast<coord_type>( b.size.width * scale ), static_cast<coord_type>( b.size.height * scale ) };
 }
 
@@ -67,7 +70,7 @@ rect screen::bounds( bool avail ) const
 
 dots_per_unit screen::dpi( void ) const
 {
-	NSScreen *scr = (NSScreen *)_nsscreen;
+	NSScreen *scr = static_cast<NSScreen *>( _nsscreen );
 	NSDictionary *desc = [scr deviceDescription];
 	NSValue *val = [desc objectForKey:NSDeviceResolution];
 	NSSize dpi;
@@ -111,5 +114,3 @@ void screen::override_display_standard( const color::standard_definition &s )
 ////////////////////////////////////////
 
 } }
-
-

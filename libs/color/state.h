@@ -111,7 +111,7 @@ public:
 	/// scale for power if desired.
 	constexpr value_type luminance_scale( void ) const { return _lum_scale; }
 	/// This defines the scaling of 1.0 to nits (candela / m^2).
-	/// 
+	///
 	/// A common value for this is 100, meaning a value of 1.0
 	/// corresponds to 100 nits, meaning 18% gray (0.18) is 18 nits
 	inline void luminance_scale( value_type s ) { _lum_scale = s; }
@@ -156,8 +156,9 @@ public:
 
 	inline bool is_same_matrix( const state &o ) const
 	{
-		// \todo { implement this }
-		return false;
+		/// \todo Deal with adaptation matrices
+		/// \todo deal with collapsing ycbcr->rgb?
+		return _chroma == o._chroma;
 	}
 
 	inline cx::mat get_to_xyz_mat( value_type Y = value_type(1) ) const
@@ -199,8 +200,17 @@ public:
 			case space::LMS_OPPONENT:
 				return _chroma.LMStoXYZ( cone_response::WANDELL );
 
-			default:
-				
+			case space::CHONG:
+				throw_not_yet();
+			case space::CIE_LAB_76:
+			case space::CIE_LUV_76:
+			case space::CIE_LCH_76:
+			case space::CIE_UVW_64:
+			case space::HUNTER_LAB:
+				throw_not_yet();
+				//return cx::mat();
+			case space::UNKNOWN:
+			//default:
 				break;
 		}
 		return _chroma.RGBtoXYZ( Y );
@@ -245,8 +255,17 @@ public:
 			case space::LMS_OPPONENT:
 				return _chroma.XYZtoLMS( cone_response::WANDELL );
 
-			default:
-				
+			case space::CHONG:
+				throw_not_yet();
+			case space::CIE_LAB_76:
+			case space::CIE_LUV_76:
+			case space::CIE_LCH_76:
+			case space::CIE_UVW_64:
+			case space::HUNTER_LAB:
+				throw_not_yet();
+				//return cx::mat();
+			case space::UNKNOWN:
+			//default:
 				break;
 		}
 		return _chroma.XYZtoRGB( Y );
@@ -273,6 +292,3 @@ inline std::ostream &operator<<( std::ostream &os, const state &s )
 }
 
 } // namespace color
-
-
-

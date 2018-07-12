@@ -43,8 +43,8 @@ file_sequence::file_sequence( base::uri path, marker_style ms )
 			else if ( extract_percentd_pattern() )
 				_marker_style = MARKER_PERCENTD;
 			break;
-		default:
-			throw_logic( "Invalid marker style" );
+		//default:
+		//	throw_logic( "Invalid marker style" );
 	}
 }
 
@@ -331,4 +331,3 @@ file_sequence::split_pattern( size_t start, size_t sz )
 ////////////////////////////////////////
 
 }
-

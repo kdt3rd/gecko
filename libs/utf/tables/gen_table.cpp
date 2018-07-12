@@ -513,7 +513,7 @@ int safemain( int argc, char *argv[] )
 
 			do
 			{
-				strm.avail_in = in.read( reinterpret_cast<char *>( tmpBufIn ), kChunk ).gcount();
+				strm.avail_in = static_cast<uInt>( in.read( reinterpret_cast<char *>( tmpBufIn ), kChunk ).gcount() );
 				if ( strm.avail_in == 0 )
 					break;
 				strm.next_in = tmpBufIn;
@@ -940,4 +940,3 @@ int main( int argc, char *argv[] )
 }
 
 ////////////////////////////////////////
-

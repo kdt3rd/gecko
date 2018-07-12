@@ -60,11 +60,6 @@ inline uint64_t incReadWriter( uint64_t v )
 	precondition( numReadWriters( v + kOneReadWriter ) <= kMaxReadWriterCount, "Too many readers for shared_mutex" );
 	return v + kOneReadWriter;
 }
-inline uint64_t decReadWriter( uint64_t v )
-{
-	precondition( numReadWriters( v ) > 0, "Attempt to decrement empty reader pool in shared_mutex" );
-	return v - kOneReadWriter;
-}
 
 } // empty namespace
 
@@ -172,4 +167,3 @@ shared_mutex::unlock_shared( void )
 ////////////////////////////////////////
 
 } // base
-

@@ -228,6 +228,18 @@ public:
 };
 
 template <typename T>
+inline bool operator==( const chromaticities<T> &a, const chromaticities<T> &b )
+{
+	return a.red == b.red && a.green == b.green && a.blue == b.blue && a.white == b.white;
+}
+
+template <typename T>
+inline bool operator!=( const chromaticities<T> &a, const chromaticities<T> &b )
+{
+	return !( a == b);
+}
+
+template <typename T>
 inline std::ostream &operator<<( std::ostream &os, const chromaticities<T> &c )
 {
 	os << c.red << ',' << c.green << ',' << c.blue << ',' << c.white;
@@ -235,6 +247,3 @@ inline std::ostream &operator<<( std::ostream &os, const chromaticities<T> &c )
 }
 
 } // namespace color
-
-
-

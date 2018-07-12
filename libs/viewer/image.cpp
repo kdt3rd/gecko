@@ -160,17 +160,20 @@ void image::convert( gl::api &ogl, const media::image_frame &fr )
 		size_t stride = static_cast<size_t>( b.ystride_bytes() );
 		if ( nChannels == 2 )
 		{
-			bind.image_2d_rg( gl::format::RG_FLOAT, w, h, it, p, stride,
+			bind.image_2d_rg( gl::format::RG_FLOAT, static_cast<size_t>( w ),
+			                  static_cast<size_t>( h ), it, p, stride,
 							  b.endianness() != base::endianness::NATIVE );
 		}
 		else if ( nChannels == 3 )
 		{
-			bind.image_2d_rgb( gl::format::RGB_FLOAT, w, h, it, p, stride,
+			bind.image_2d_rgb( gl::format::RGB_FLOAT, static_cast<size_t>( w ),
+			                   static_cast<size_t>( h ), it, p, stride,
 							   b.endianness() != base::endianness::NATIVE );
 		}
 		else if ( nChannels == 4 )
 		{
-			bind.image_2d_rgba( gl::format::RGBA_FLOAT, w, h, it, p, stride,
+			bind.image_2d_rgba( gl::format::RGBA_FLOAT, static_cast<size_t>( w ),
+			                    static_cast<size_t>( h ), it, p, stride,
 								b.endianness() != base::endianness::NATIVE );
 		}
 		if ( _stash )
@@ -210,7 +213,8 @@ void image::convert( gl::api &ogl, const media::image_frame &fr )
 			const uint8_t *p = static_cast<const uint8_t *>( b.data() );
 			p += b.offset() / 8;
 			size_t stride = static_cast<size_t>( b.ystride_bytes() );
-			bind.image_2d_red( gl::format::RED_FLOAT, w, h, it, p, stride,
+			bind.image_2d_red( gl::format::RED_FLOAT, static_cast<size_t>( w ),
+			                   static_cast<size_t>( h ), it, p, stride,
 							   b.endianness() != base::endianness::NATIVE );
 		}
 		if ( _stash )
@@ -299,7 +303,7 @@ void image::draw( platform::context &ctxt )
 	{
 		if ( _texture[0] )
 		{
-			auto bt = _texture[0]->bind( _texture_offset );
+			auto bt = _texture[0]->bind( static_cast<size_t>( _texture_offset ) );
 			bt.set_filters( gf, gf );
 			auto bound = _mesh.bind();
 			//gl::matrix4 tmp = _rect;
@@ -315,16 +319,16 @@ void image::draw( platform::context &ctxt )
 	{
 		if ( _texture[0] && _texture[1] && _texture[2] && _texture[3] )
 		{
-			auto bt0 = _texture[0]->bind( _texture_offset );
+			auto bt0 = _texture[0]->bind( static_cast<size_t>( _texture_offset ) );
 			bt0.set_filters( gf, gf );
 
-			auto bt1 = _texture[1]->bind( _texture_offset + 1 );
+			auto bt1 = _texture[1]->bind( static_cast<size_t>( _texture_offset + 1 ) );
 			bt1.set_filters( gf, gf );
 
-			auto bt2 = _texture[2]->bind( _texture_offset + 2 );
+			auto bt2 = _texture[2]->bind( static_cast<size_t>( _texture_offset + 2 ) );
 			bt2.set_filters( gf, gf );
 
-			auto bt3 = _texture[3]->bind( _texture_offset + 3 );
+			auto bt3 = _texture[3]->bind( static_cast<size_t>( _texture_offset + 3 ) );
 			bt3.set_filters( gf, gf );
 
 			auto bound = _mesh.bind();
@@ -338,13 +342,13 @@ void image::draw( platform::context &ctxt )
 		}
 		else if ( _texture[0] && _texture[1] && _texture[2] )
 		{
-			auto bt0 = _texture[0]->bind( _texture_offset );
+			auto bt0 = _texture[0]->bind( static_cast<size_t>( _texture_offset ) );
 			bt0.set_filters( gf, gf );
 
-			auto bt1 = _texture[1]->bind( _texture_offset + 1 );
+			auto bt1 = _texture[1]->bind( static_cast<size_t>( _texture_offset + 1 ) );
 			bt1.set_filters( gf, gf );
 
-			auto bt2 = _texture[2]->bind( _texture_offset + 2 );
+			auto bt2 = _texture[2]->bind( static_cast<size_t>( _texture_offset + 2 ) );
 			bt2.set_filters( gf, gf );
 
 			auto bound = _mesh.bind();
@@ -357,10 +361,10 @@ void image::draw( platform::context &ctxt )
 		}
 		else if ( _texture[0] && _texture[1] )
 		{
-			auto bt0 = _texture[0]->bind( _texture_offset );
+			auto bt0 = _texture[0]->bind( static_cast<size_t>( _texture_offset ) );
 			bt0.set_filters( gf, gf );
 
-			auto bt1 = _texture[1]->bind( _texture_offset + 1 );
+			auto bt1 = _texture[1]->bind( static_cast<size_t>( _texture_offset + 1 ) );
 			bt1.set_filters( gf, gf );
 
 			auto bound = _mesh.bind();
@@ -372,7 +376,7 @@ void image::draw( platform::context &ctxt )
 		}
 		else if ( _texture[0] )
 		{
-			auto bt0 = _texture[0]->bind( _texture_offset );
+			auto bt0 = _texture[0]->bind( static_cast<size_t>( _texture_offset ) );
 			bt0.set_filters( gf, gf );
 
 			auto bound = _mesh.bind();

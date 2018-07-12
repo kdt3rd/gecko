@@ -89,13 +89,17 @@ void texture::binding::upload_helper( format f, GLenum fmt, int c, size_t w, siz
 		case image_type::FLOAT:
 			bytesper = 4;
 			break;
-		default:
+		case image_type::UNSIGNED_SHORT_4_4_4_4:
+		case image_type::UNSIGNED_SHORT_5_5_5_1:
+		case image_type::UNSIGNED_INT_10_10_10_2:
+		case image_type::UNSIGNED_SHORT_5_6_5:
+		//default:
 			throw_runtime( "invalid image type" );
 	}
 	if ( stride_bytes != 0 )
 	{
-		size_t units = stride_bytes / (c * bytesper);
-		precondition( 0 == ( stride_bytes - units * (c * bytesper) ), "expect alignment that is a multiple of a pixel unit" );
+		GLint units = static_cast<GLint>( stride_bytes / static_cast<size_t>( c * bytesper ) );
+		precondition( 0 == ( stride_bytes - static_cast<size_t>( units ) * static_cast<size_t>( c * bytesper ) ), "expect alignment that is a multiple of a pixel unit" );
 		glPixelStorei( GL_UNPACK_ROW_LENGTH, units );
 	}
 	else
@@ -132,7 +136,7 @@ void texture::binding::subimage_2d( format f, int x, int y, size_t w, size_t h, 
 		case format::RGBA_HALF:
 		case format::RGBA_FLOAT:
 			c = 4; break;
-		default:
+		//default:
 			throw_runtime( "unhandled format" );
 	}
 	GLint bytesper = 1;
@@ -149,13 +153,17 @@ void texture::binding::subimage_2d( format f, int x, int y, size_t w, size_t h, 
 		case image_type::FLOAT:
 			bytesper = 4;
 			break;
-		default:
+		case image_type::UNSIGNED_SHORT_4_4_4_4:
+		case image_type::UNSIGNED_SHORT_5_5_5_1:
+		case image_type::UNSIGNED_INT_10_10_10_2:
+		case image_type::UNSIGNED_SHORT_5_6_5:
+		//default:
 			throw_runtime( "invalid image type" );
 	}
 	if ( stride_bytes != 0 )
 	{
-		size_t units = stride_bytes / (c * bytesper);
-		precondition( 0 == ( stride_bytes - units * (c * bytesper) ), "expect alignment that is a multiple of a pixel unit" );
+		GLint units = static_cast<GLint>( stride_bytes / static_cast<size_t>( c * bytesper ) );
+		precondition( 0 == ( stride_bytes - static_cast<size_t>( units ) * static_cast<size_t>( c * bytesper ) ), "expect alignment that is a multiple of a pixel unit" );
 		glPixelStorei( GL_UNPACK_ROW_LENGTH, units );
 	}
 	else
@@ -229,4 +237,3 @@ void texture::binding::operator=( binding &&other )
 ////////////////////////////////////////
 
 }
-

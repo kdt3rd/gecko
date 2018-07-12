@@ -80,7 +80,7 @@ decode( std::string &val )
 			hex[1] = val[i+3];
 
 			char ch[2] = "";
-			ch[0] = static_cast<char>( strtol( hex, NULL, 16 ) );
+			ch[0] = static_cast<char>( strtol( hex, nullptr, 16 ) );
 
 			val.replace( i, 5, ch );
 			--i;
@@ -320,4 +320,3 @@ encode( const std::string &val )
 ////////////////////////////////////////
 
 }
-

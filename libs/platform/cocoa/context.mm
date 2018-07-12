@@ -24,15 +24,24 @@ platform::context::render_func_ptr
 queryGL( const char *f )
 {
 	if ( libgl )
-		return (platform::context::render_func_ptr) dlsym( libgl, f );
+		return reinterpret_cast<platform::context::render_func_ptr>( dlsym( libgl, f ) );
 
 	return nullptr;
 }
+
+void (*_glc_scissor)( GLint, GLint, GLsizei, GLsizei ) = nullptr;
+void (*_glc_viewport)( GLint, GLint, GLsizei, GLsizei ) = nullptr;
+void (*_glc_enable)( GLenum ) = nullptr;
+void (*_glc_disable)( GLenum ) = nullptr;
 
 void shutdown_libgl(void)
 {
 	if ( libgl )
 		dlclose( libgl );
+    _glc_scissor = nullptr;
+    _glc_viewport = nullptr;
+    _glc_enable = nullptr;
+    _glc_disable = nullptr;
 }
 
 void init_libgl(void)
@@ -43,6 +52,11 @@ void init_libgl(void)
 		throw_runtime( "Unable to initialize OpenGL" );
 
 	atexit( shutdown_libgl );
+    _glc_scissor = reinterpret_cast<void (*)(GLint, GLint, GLsizei, GLsizei)>( queryGL( "glScissor" ) );
+    _glc_viewport = reinterpret_cast<void (*)(GLint, GLint, GLsizei, GLsizei)>( queryGL( "glViewport" ) );
+    _glc_enable = reinterpret_cast<void (*)(GLenum)>( queryGL( "glEnable" ) );
+    _glc_disable = reinterpret_cast<void (*)(GLenum)>( queryGL( "glDisable" ) );
+
 }
 
 } // empty namespace
@@ -83,7 +97,7 @@ context::render_query_func( void )
 
 ////////////////////////////////////////
 
-void context::share( ::platform::context &o )
+void context::share( ::platform::context & )
 {
 }
 
@@ -91,6 +105,8 @@ void context::share( ::platform::context &o )
 
 void context::set_viewport( coord_type x, coord_type y, coord_type w, coord_type h )
 {
+    _glc_viewport( static_cast<GLint>(x), static_cast<GLint>(y),
+                   static_cast<GLsizei>(w), static_cast<GLsizei>(h) );
 }
 
 ////////////////////////////////////////
@@ -119,7 +135,19 @@ void context::release( void )
 
 void context::reset_clip( const rect &r )
 {
+    if ( r.empty() )
+    {
+        _glc_disable( GL_SCISSOR_TEST );
+    }
+    else
+    {
+        _glc_enable( GL_SCISSOR_TEST );
+        _glc_scissor( static_cast<GLint>( r.x() ),
+                      static_cast<GLint>( r.y() ),
+                      static_cast<GLsizei>( r.width() ),
+                      static_cast<GLsizei>( r.height() ) );
+    }
 }
-	
+
 } // namespace cocoa
 } // namespace platform

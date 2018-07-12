@@ -35,7 +35,7 @@ frame_set::add( int64_t f )
 		if ( ( prior.second + 1 ) == cur.first )
 		{
 			prior.second = cur.second;
-			_ranges.erase( _ranges.begin() + i );
+			_ranges.erase( _ranges.begin() + static_cast<ssize_t>( i ) );
 		}
 		else
 		{
@@ -75,6 +75,3 @@ std::ostream &operator<<( std::ostream &os, const frame_set &fs )
 ////////////////////////////////////////
 
 } // media
-
-
-

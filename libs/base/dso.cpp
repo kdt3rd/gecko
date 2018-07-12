@@ -143,7 +143,7 @@ void dso::load( const char *fn, bool makeGlobal )
     }
     else
         haderr = ! GetModuleHandleEx( 0, NULL, &t );
-    
+
     if ( haderr )
     {
         char *msg = nullptr;
@@ -177,6 +177,7 @@ dso::find( const char *symn, const char *symver )
         else
             ret = dlsym( _handle, symn );
 #else
+        unused( symver );
 		ret = dlsym( _handle, symn );
 #endif
         if ( ! ret )
@@ -358,7 +359,7 @@ public:
 
         // don't need the header anymore...
         hdr.reset();
-        
+
         //std::cout << " numSegHdrs: " << numSegHdrs << " hdroff: " << std::hex << segHdrOff << std::dec << " hdrsz: " << segHdrSize << std::endl;
         read_memory_map<ElfW(Shdr)> segHdrs( _fd, segHdrOff, segHdrSize );
 
@@ -387,7 +388,7 @@ public:
                     _dyn_syms.reset( _fd, segHdrs[i], segHdrs.get(), numSegHdrs );
                     break;
                 case SHT_PROGBITS:
-                    
+
                     break;
             }
         }
@@ -415,7 +416,7 @@ public:
                 }
             }
         }
-        
+
         for ( size_t s = 0; ret.empty() && s < _nondyn_syms.size(); ++s )
         {
             const ElfW(Sym) &t = _nondyn_syms[s];
@@ -589,6 +590,3 @@ void *find_next( const char *sig, const char *ver )
 ////////////////////////////////////////
 
 } // namespace base
-
-
-

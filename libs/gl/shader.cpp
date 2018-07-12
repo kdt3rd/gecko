@@ -42,7 +42,7 @@ shader::~shader( void )
 void shader::source( const std::string &code )
 {
 	const char *c = code.c_str();
-	glShaderSource( _shader, 1, &c, NULL );
+	glShaderSource( _shader, 1, &c, nullptr );
 }
 
 ////////////////////////////////////////

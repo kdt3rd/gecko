@@ -28,7 +28,7 @@ void wait_for( const wait &w )
 	FD_ZERO( &waitreadobjs );
 	int nWaits = w.waitable();
 	FD_SET( nWaits, &waitreadobjs );
-	int selrv = select( nWaits, &waitreadobjs, NULL, NULL, NULL );
+	int selrv = select( nWaits, &waitreadobjs, nullptr, nullptr, nullptr );
 	if ( selrv < 0 )
 		throw_errno( "Error waiting for events to be available" );
 #endif
@@ -60,7 +60,7 @@ wait wait_for_any( const std::vector<wait> &w )
 		nWaits = std::max( nWaits, afd );
 		FD_SET( afd, &waitreadobjs );
 	}
-	int selrv = select( nWaits, &waitreadobjs, NULL, NULL, NULL );
+	int selrv = select( nWaits, &waitreadobjs, nullptr, nullptr, nullptr );
 	if ( selrv < 0 )
 		throw_errno( "Error waiting for events to be available" );
 
@@ -76,6 +76,3 @@ wait wait_for_any( const std::vector<wait> &w )
 ////////////////////////////////////////
 
 } // base
-
-
-
