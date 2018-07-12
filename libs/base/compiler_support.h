@@ -46,6 +46,9 @@
 # define TODO(x) EMIT_PRAGMA(message ("TODO: " x " at line " DEFER(STRINGIZE,__LINE__)))
 //# define TODO(x) _Pragma(STRINGIZE(GCC warning x " at line " DEFER(STRINGIZE,__LINE__)))
 
+# define GK_IGNORE_WARNING_BEGIN EMIT_PRAGMA(clang diagnostic push)
+# define GK_IGNORE_WARNING_END EMIT_PRAGMA(clang diagnostic pop)
+# define GK_IGNORE_WARNINGS EMIT_PRAGMA(clang diagnostic ignored "-Weverything")
 #elif defined(_MSC_VER)
 
 # ifndef GK_DEPRECATE
@@ -72,12 +75,16 @@
 # define EMIT_PRAGMA(x) _Pragma(#x)
 # define TODO(x) EMIT_PRAGMA(message ("TODO: " x " at line " DEFER(STRINGIZE,__LINE__)))
 
+# define GK_IGNORE_WARNING_BEGIN EMIT_PRAGMA(GCC diagnostic push)
+# define GK_IGNORE_WARNING_END EMIT_PRAGMA(GCC diagnostic pop)
+# define GK_IGNORE_WARNINGS EMIT_PRAGMA(GCC diagnostic ignored "-Wall")
+
 #else
 # error "compiler support not yet filled in for current compiler"
 #endif
 
 #ifndef GK_FALLTHROUGH
-# define GK_FALLTHROUGH 
+# define GK_FALLTHROUGH
 #endif
 #ifndef GK_UNUSED
 # define GK_UNUSED
