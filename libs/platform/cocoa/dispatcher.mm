@@ -8,7 +8,7 @@
 #include "dispatcher.h"
 
 #include <iostream>
-#include <stdlib.h>
+#include <cstdlib>
 #include <base/contract.h>
 #include <base/pointer.h>
 #include <platform/event.h>
@@ -117,7 +117,7 @@
 	if ( openGLContext == nullptr )
 		throw std::runtime_error( "no opengl context" );
 	[self setOpenGLContext:openGLContext];
-	[openGLContext makeCurrentContext]; 
+	[openGLContext makeCurrentContext];
 
 	return self;
 }
@@ -355,4 +355,3 @@ dispatcher::remove_window( const std::shared_ptr<window> &w )
 ////////////////////////////////////////
 
 } }
-

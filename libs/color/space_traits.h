@@ -182,7 +182,7 @@ inline constexpr bool has_opponency( const space s )
 		case space::HSL_CYL: return space_traits<space::HSL_CYL>::provides_color_opponents;
 
 		case space::UNKNOWN:
-		default:
+		//default:
 			break;
 	}
 	return false;
@@ -218,6 +218,3 @@ inline constexpr bool has_opponency( const space s )
 }
 
 } // namespace color
-
-
-

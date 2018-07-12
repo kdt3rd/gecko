@@ -1,7 +1,7 @@
 // Automatically generated from SVG
 // (from file /home/iangodin/Sources/material-design-icons/toggle/svg/design/ic_radio_button_unchecked_24px.svg)
 
-#include <draw/path.h>
+#include <draw/icons.h>
 
 namespace draw
 {
@@ -37,4 +37,3 @@ draw::path iconRadioButtonEmpty( void )
 }
 
 }
-

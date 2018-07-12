@@ -63,7 +63,7 @@ public:
 		: _p( base::to_function( f ) ), _dispatch( g )
 	{
 	}
-	virtual ~opfunc_one_to_one( void ) noexcept
+	virtual ~opfunc_one_to_one( void ) noexcept override
 	{
 	}
 
@@ -124,7 +124,7 @@ public:
 		: _p( base::to_function( f ) )
 	{
 	}
-	virtual ~opfunc_simple( void ) noexcept
+	virtual ~opfunc_simple( void ) noexcept override
 	{
 	}
 
@@ -192,7 +192,7 @@ public:
 		: opfunc_simple<Functor>( f )
 	{
 	}
-	virtual ~opfunc_locked_simple( void ) noexcept
+	virtual ~opfunc_locked_simple( void ) noexcept override
 	{
 	}
 
@@ -207,6 +207,3 @@ private:
 };
 
 } // namespace engine
-
-
-

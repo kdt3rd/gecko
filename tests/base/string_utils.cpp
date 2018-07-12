@@ -38,7 +38,7 @@ int safemain( int argc, char *argv[] )
 		}
 		catch ( std::exception &e )
 		{
-			strtest.failure( "unable to query language ({0})", e );
+			strtest.failure( "unable to query language ({0})", e.what() );
 		}
 
 		try
@@ -49,13 +49,6 @@ int safemain( int argc, char *argv[] )
 		catch ( std::exception &e )
 		{
 			strtest.failure( "unable to set default locale ({0})", e.what() );
-		}
-
-		try
-		{
-		}
-		catch ( std::exception &e )
-		{
 		}
 	};
 

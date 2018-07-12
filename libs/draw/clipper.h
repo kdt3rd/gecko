@@ -171,10 +171,7 @@ private:
 class PolyTree: public PolyNode
 {
 public:
-	~PolyTree()
-	{
-		Clear();
-	}
+	~PolyTree() override;
 	PolyNode *GetFirst() const;
 	void Clear();
 	int Total() const;
@@ -445,5 +442,3 @@ private:
 }
 
 #endif //clipper_hpp
-
-

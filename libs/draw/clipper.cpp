@@ -158,6 +158,11 @@ inline cInt Abs( cInt val )
 // PolyTree methods ...
 //------------------------------------------------------------------------------
 
+PolyTree::~PolyTree( void )
+{
+	Clear();
+}
+
 void PolyTree::Clear()
 {
 	for ( PolyNodes::size_type i = 0; i < AllNodes.size(); ++i )

@@ -162,7 +162,7 @@ public:
 	}
 
 	// assignable to nullptr...
-	inline thread_ptr &operator=( nullptr_t ) noexcept
+	inline thread_ptr &operator=( std::nullptr_t ) noexcept
 	{
 		reset();
 		return *this;
@@ -283,4 +283,3 @@ void swap( base::thread_ptr<T, D, C> &a, base::thread_ptr<T, D, C> &b )
 }
 
 } // namespace std
-

@@ -71,16 +71,16 @@ public:
 		  _xstride( interleaved._xstride ), _ystride( interleaved._ystride ),
 		  _endian( interleaved._endian ),
 		  _bits( interleaved._bits ),
-		  _ysubsample( interleaved._ysubsample ), 
-		  _ysubsample_shift( interleaved._ysubsample_shift ), 
-		  _xsubsample( interleaved._xsubsample ), 
-		  _xsubsample_shift( interleaved._xsubsample_shift ), 
+		  _ysubsample( interleaved._ysubsample ),
+		  _ysubsample_shift( interleaved._ysubsample_shift ),
+		  _xsubsample( interleaved._xsubsample ),
+		  _xsubsample_shift( interleaved._xsubsample_shift ),
 		  _floating( interleaved._floating ),
 		  _unsigned( interleaved._unsigned )
 	{
 		precondition( offset % 8 == 0, "offset should be multiple of 8 bits" );
 	}
-		
+
 	image_buffer( const std::shared_ptr<void> &data, int16_t bits, int64_t x1, int64_t y1, int64_t x2, int64_t y2, int64_t xstride, int64_t ystride, int64_t offset, base::endianness e, bool isfloat, bool isunsign )
 		: _data( data ),
 		  _offset( offset ),
@@ -186,14 +186,15 @@ public:
 		// TBD: make each line sse (avx2) 256-bit (32-byte) aligned? we would have to
 		// adjust opengl texturing and a few other places if we do that, and wouldn't be useable
 		// on formats that just read into a flat memory buffer...
-		size_t linebytes = w*sizeof(T);
-		int64_t bits = static_cast<int16_t>( sizeof(T) * 8 );
+		size_t linebytes = static_cast<size_t>( w ) * sizeof(T);
+		int16_t bits = static_cast<int16_t>( sizeof(T) * 8 );
 		int64_t xstride = static_cast<int64_t>( sizeof(T) );
 		int64_t ystride = static_cast<int64_t>( linebytes );
 		constexpr bool isf = std::is_floating_point<T>::value;
 		constexpr bool isu = std::is_unsigned<T>::value;
 
-		std::shared_ptr<void> vdata = std::shared_ptr<uint8_t>( new uint8_t[ystride * h], base::array_deleter<uint8_t>() );
+		std::shared_ptr<void> vdata = std::shared_ptr<uint8_t>(
+			new uint8_t[static_cast<size_t>( ystride * h )], base::array_deleter<uint8_t>() );
 		return image_buffer( vdata, bits, x1, y1, x2, y2, xstride * 8, ystride * 8, 0,
 							 base::endianness::NATIVE, isf, isu );
 	}
@@ -211,9 +212,10 @@ public:
 		constexpr bool isf = std::is_floating_point<T>::value;
 		constexpr bool isu = std::is_unsigned<T>::value;
 
-		std::shared_ptr<void> vdata = std::shared_ptr<uint8_t>( new uint8_t[ystride * h], base::array_deleter<uint8_t>() );
+		std::shared_ptr<void> vdata = std::shared_ptr<uint8_t>(
+			new uint8_t[static_cast<size_t>( ystride * h )], base::array_deleter<uint8_t>() );
 		return image_buffer( vdata, bits, 0, 0, w - 1, h - 1, xstride * 8, ystride * 8, 0,
-							 base::endianness::NATIVE, isf, isu );
+							 endi, isf, isu );
 	}
 
 private:
@@ -252,4 +254,3 @@ private:
 ////////////////////////////////////////
 
 }
-

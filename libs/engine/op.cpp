@@ -18,7 +18,7 @@ class null_func : public op_function
 {
 public:
 	null_func( const std::reference_wrapper<const std::type_info> &ti );
-	virtual ~null_func( void );
+	virtual ~null_func( void ) override;
 
 	virtual const std::type_info &result_type( void ) const override;
 
@@ -114,6 +114,3 @@ op::~op( void )
 ////////////////////////////////////////
 
 } // engine
-
-
-

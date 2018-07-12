@@ -1,7 +1,7 @@
 // Automatically generated from SVG
 // (from file /home/iangodin/Sources/material-design-icons/toggle/svg/design/ic_check_box_24px.svg)
 
-#include <draw/path.h>
+#include <draw/icons.h>
 
 namespace draw
 {
