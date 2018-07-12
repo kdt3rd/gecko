@@ -220,7 +220,7 @@ std::set<std::string> application::get_font_styles( const std::string &family )
 
 std::shared_ptr<script::font> application::get_font( const std::string &family, const std::string &style, coord pixsize )
 {
-	return _fmgr->get_font( family, style, pixsize.as<base::units::points<script::extent_type>>() );
+	return _fmgr->get_font( family, style, pixsize.as<script::points>() );
 }
 
 ////////////////////////////////////////
