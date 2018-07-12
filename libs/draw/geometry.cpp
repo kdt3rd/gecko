@@ -77,7 +77,6 @@ void add_quadratic( const polyline::point &p1, const polyline::point &p2, const 
 
 void add_cubic( const polyline::point &p1, const polyline::point &p2, const polyline::point &p3, const polyline::point &p4, polyline &line )
 {
-#if 0
 	using pp = polyline::point;
 	typedef std::tuple<pp,pp,pp,pp> curve;
 	std::vector<curve> stack;
@@ -116,15 +115,12 @@ void add_cubic( const polyline::point &p1, const polyline::point &p2, const poly
 		}
 		first = false;
 	}
-#endif
 }
 
 ////////////////////////////////////////
 
 void add_arc( const polyline::point &center, dim radius, float a1, float a2, polyline &line )
 {
-	using pp = polyline::point;
-
 	size_t n = circle_precision( radius );
 
 	float span = std::abs( std::fmod( ( a1 - a2 + float( M_PI ) ), float( 2.0 * M_PI ) ) - float( M_PI ) );
