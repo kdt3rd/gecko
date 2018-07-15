@@ -40,7 +40,9 @@ void label_w::build( context &ctxt )
 
 	script::font_extents fex = f->extents();
 	script::text_extents tex = f->extents( _text.get_text() );
-	layout_target()->set_minimum( tex.width, std::max( script::extent_type(24), fex.height + script::extent_type(2) ) );
+	const coord ht = std::max( ctxt.from_native_vert( 24 ), ctxt.from_native_vert( platform::coord_type( fex.height + 2.F ) ) );
+	const coord wt = ctxt.from_native_horiz( tex.width );
+	layout_target()->set_minimum( wt, ht );
 
 	_text.set_font( f );
 	if ( _bg_color.alpha() > 0.F )

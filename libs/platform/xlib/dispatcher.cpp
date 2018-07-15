@@ -299,6 +299,10 @@ dispatcher::dispatcher( ::platform::system *sys, const std::shared_ptr<Display> 
 
 dispatcher::~dispatcher( void )
 {
+	for ( auto w: _windows )
+		remove_window( w.second );
+	_windows.clear();
+
 	XDestroyWindow( _display.get(), _clipboard_win );
 	if ( _xim )
 		XCloseIM( _xim );

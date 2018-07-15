@@ -29,6 +29,8 @@ public:
 	using point_type = point<coord_type, 2>;
 	using size_type = size<coord_type>;
 
+	static constexpr coord_type kEndOff = std::is_integral<T>::value ? coord_type(1) : coord_type(0);
+
 	constexpr rect( void ) = default;
 	constexpr rect( const rect & ) = default;
 	constexpr rect( rect && ) noexcept = default;
@@ -109,10 +111,10 @@ public:
 	constexpr coord_type y1( void ) const { return _position[1]; }
 
 	/// @brief X coordinate of right side
-	constexpr coord_type x2( void ) const { return _position[0] + _extent.w() - coord_type(1); }
+	constexpr coord_type x2( void ) const { return _position[0] + _extent.w() - kEndOff; }
 
 	/// @brief Y coordinate of bottom side
-	constexpr coord_type y2( void ) const { return _position[1] + _extent.h() - coord_type(1); }
+	constexpr coord_type y2( void ) const { return _position[1] + _extent.h() - kEndOff; }
 
 	/// @brief Position of the rectangle
 	constexpr const point_type &position( void ) const { return _position; }
@@ -201,14 +203,14 @@ public:
 	void set_horizontal( coord_type x1, coord_type x2 )
 	{
 		_position[0] = std::min( x1, x2 );
-		_extent.set_width( coord_type( std::abs( x2 - x1 ) ) + coord_type(1) );
+		_extent.set_width( coord_type( std::abs( x2 - x1 ) ) + kEndOff );
 	}
 
 	/// @brief Set top and bottom sides
 	void set_vertical( coord_type y1, coord_type y2 )
 	{
 		_position[1] = std::min( y1, y2 );
-		_extent.set_height( coord_type( std::abs( y2 - y1 ) ) + coord_type(1) );
+		_extent.set_height( coord_type( std::abs( y2 - y1 ) ) + kEndOff );
 	}
 
 	/// @brief Set position

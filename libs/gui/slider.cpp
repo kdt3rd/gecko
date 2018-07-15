@@ -74,7 +74,9 @@ void slider_w::build( context &ctxt )
 
 	_knob.add( ogl, handle, paint );
 
-	layout_target()->set_minimum( 24.0 * 2.0, 24.0 );
+	const coord ht = ctxt.from_native_vert( 24 );
+	const coord wt = ht * 2.F;
+	layout_target()->set_minimum( wt, ht );
 }
 
 ////////////////////////////////////////

@@ -63,8 +63,10 @@ void button_w::build( context &ctxt )
 	using etype = script::extent_type;
 	script::font_extents fex = f->extents();
 	script::text_extents tex = f->extents( _text.get_text() );
-	layout_target()->set_minimum( tex.width + etype(10), std::max( etype(24), fex.height + etype(2) ) );
-	layout_target()->set_maximum_height( etype(24) );
+	const coord ht = std::max( ctxt.from_native_vert( 24 ), ctxt.from_native_vert( fex.height + etype(2) ) );
+	const coord wt = ctxt.from_native_horiz( tex.width + etype(10) );
+	layout_target()->set_minimum( wt, ht );
+	layout_target()->set_maximum_height( ht );
 
 	_text.set_font( f );
 }

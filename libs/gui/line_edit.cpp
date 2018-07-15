@@ -43,7 +43,9 @@ void line_edit_w::build( context &ctxt )
 
 	script::font_extents fex = f->extents();
 	script::text_extents tex = f->extents( _text.get_text() );
-	layout_target()->set_minimum( tex.width + 4, fex.height - fex.descent + 2  );
+	const coord ht = ctxt.from_native_vert( fex.height + 2 );
+	const coord wt = ctxt.from_native_horiz( tex.width + 4 );
+	layout_target()->set_minimum( wt, ht );
 
 	_text.set_font( f );
 	_text.set_color( s.primary_text( s.background_color() ) );

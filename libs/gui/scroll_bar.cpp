@@ -36,7 +36,7 @@ void scroll_bar_w::set_value( value_type v )
 
 void scroll_bar_w::set_handle( value_type h )
 {
-	precondition( h > value_type(0), "invalid scroll bar handle size {0}", h );
+	precondition( h >= value_type(0), "invalid scroll bar handle size {0}", h );
 	_handle = h;
 	if ( _handle > _max - _min )
 		_handle = _max - _min;
@@ -72,9 +72,9 @@ void scroll_bar_w::build( context &ctxt )
 	_knob.set_color( s.dominant_color() );
 
 	if ( _horizontal )
-		layout_target()->set_minimum( 45.0, 15.0 );
+		layout_target()->set_minimum( ctxt.from_native_horiz( 45.0 ), ctxt.from_native_vert( 15.0 ) );
 	else
-		layout_target()->set_minimum( 15.0, 45.0 );
+		layout_target()->set_minimum( ctxt.from_native_horiz( 15.0 ), ctxt.from_native_vert( 45.0 ) );
 }
 
 ////////////////////////////////////////

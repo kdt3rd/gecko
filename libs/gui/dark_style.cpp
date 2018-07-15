@@ -17,8 +17,8 @@
 namespace
 {
 
-gui::color bg { 0.13, 0.13, 0.13 };
-gui::color fg { 1.0, 1.0, 1.0 };
+gui::color bg { 0.13F, 0.13F, 0.13F };
+gui::color fg { 1.0F, 1.0F, 1.0F };
 gui::color button_bg { 0.27, 0.27, 0.27 };
 
 }
@@ -32,10 +32,10 @@ namespace gui
 
 dark_style::dark_style( void )
 {
-	_default_font = application::current()->get_font( "Lucida Grande", "Regular", 14.0 );
+	_default_font = application::current()->get_font( "Lucida Grande", "Regular", 7.0 );
 	postcondition( bool(_default_font), "font for dark style not found" );
 
-	_default_bold_font = application::current()->get_font( "Lucida Grande", "Bold", 14.0 );
+	_default_bold_font = application::current()->get_font( "Lucida Grande", "Bold", 7.0 );
 	postcondition( bool(_default_bold_font), "font for dark bold style not found" );
 }
 

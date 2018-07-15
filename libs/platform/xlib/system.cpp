@@ -104,7 +104,7 @@ system::system( const std::string &d )
 	// drivers for linux...
 	_screens.resize( static_cast<size_t>( ScreenCount( _display.get() ) ) );
 	for ( int i = 0; i < ScreenCount( _display.get() ); ++i )
-		_screens[0] = std::make_shared<screen>( _display, i );
+		_screens[i] = std::make_shared<screen>( _display, i );
 
 	_dispatcher = std::make_shared<dispatcher>( this, _display );
 }
@@ -113,6 +113,8 @@ system::system( const std::string &d )
 
 system::~system( void )
 {
+	_dispatcher.reset();
+	_screens.clear();
 }
 
 ////////////////////////////////////////

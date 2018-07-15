@@ -75,7 +75,7 @@ protected:
 private:
 	std::shared_ptr<layout::area> _area;
 	rect _anim_start;
-	double _anim_time;
+	double _anim_time = -1.0;
 };
 
 ////////////////////////////////////////

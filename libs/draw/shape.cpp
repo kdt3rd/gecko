@@ -62,7 +62,7 @@ void shape::draw( platform::context &ctxt )
 	ogl.save_matrix();
 	ogl.model_matrix().scale( ( _resize[0] / _shape[0] ).count(),
 	                          ( _resize[1] / _shape[1] ).count() );
-	ogl.model_matrix().translate( _top_left[0].count(), _top_left[1].count() );
+	ogl.model_matrix().translate( to_api( _top_left[0] ), to_api( _top_left[1] ) );
 
 	for ( auto &m: _meshes )
 	{

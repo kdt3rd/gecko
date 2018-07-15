@@ -34,7 +34,7 @@ base_container::~base_container( void )
 
 void base_container::monitor_changed( context &ctxt )
 {
-	for ( auto w: _widgets )
+	for ( auto &w: _widgets )
 		w->monitor_changed( ctxt );
 }
 
@@ -42,7 +42,7 @@ void base_container::monitor_changed( context &ctxt )
 
 void base_container::build( context &ctxt )
 {
-	for ( auto w: _widgets )
+	for ( auto &w: _widgets )
 		w->build( ctxt );
 }
 
@@ -55,7 +55,7 @@ void base_container::paint( context &ctxt )
 
 	ogl.clear_color( ctxt.get_style().background_color() );
 	ogl.clear();
-	for ( auto w: _widgets )
+	for ( auto &w: _widgets )
 		w->paint( ctxt );
 }
 
@@ -64,7 +64,7 @@ void base_container::paint( context &ctxt )
 std::shared_ptr<widget> base_container::find_widget_under( const point &p )
 {
 	std::shared_ptr<widget> ret;
-	for ( auto w: _widgets )
+	for ( auto &w: _widgets )
 	{
 		ret = w->find_widget_under( p );
 		if ( ret )

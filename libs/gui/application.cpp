@@ -84,6 +84,8 @@ application::application( const std::string &display, const std::string &p, cons
 
 application::~application( void )
 {
+	_impl->dispatch.reset();
+	_impl->sys.reset();
 }
 
 ////////////////////////////////////////

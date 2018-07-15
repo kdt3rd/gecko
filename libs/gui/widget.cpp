@@ -17,14 +17,14 @@ namespace gui
 ////////////////////////////////////////
 
 widget::widget( void )
-	: _area{ std::make_shared<layout::area>() }
+	: rect( 0, 0, 0, 0 ), _area{ std::make_shared<layout::area>( 0, 0, 0, 0 ) }
 {
 }
 
 ////////////////////////////////////////
 
 widget::widget( std::unique_ptr<layout::area> &&a )
-	: _area( std::move( a ) )
+	: rect( 0, 0, 0, 0 ), _area( std::move( a ) )
 {
 }
 

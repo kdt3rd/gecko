@@ -48,8 +48,8 @@ int safemain( int argc, char **argv )
 		using namespace gui;
 
 		auto fakemenu = box( alignment::RIGHT );
-		fakemenu->set_padding( 0, 0, 2, 2 );
-		fakemenu->set_spacing( 8, 8 );
+		fakemenu->set_padding( 0, 0, win->from_native_vert( 2 ), win->from_native_vert( 2 ) );
+		fakemenu->set_spacing( win->from_native_horiz( 8 ), win->from_native_vert( 8 ) );
 		fakemenu->add( label( "File" ) );
 		fakemenu->add( label( "Edit" ) );
 		fakemenu->add( label( "Help" ) );
@@ -93,8 +93,8 @@ int safemain( int argc, char **argv )
 		sarea->layout_target()->set_expansion_flex( 1.0 );
 
 		auto bx = box( alignment::BOTTOM );
-		bx->set_padding( 12, 12, 5, 5 );
-		bx->set_spacing( 8, 2 );
+		bx->set_padding( win->from_native_horiz( 12 ), win->from_native_horiz( 12 ), win->from_native_vert( 5 ), win->from_native_vert( 5 ) );
+		bx->set_spacing( win->from_native_horiz( 8 ), win->from_native_vert( 2 ) );
 		bx->add( fakemenu );
 		bx->add( l );
 		size_t n = bx->add( b );
@@ -113,6 +113,7 @@ int safemain( int argc, char **argv )
 	int code = app->run();
 	app->pop();
 	app.reset();
+
 	return code;
 }
 
@@ -131,6 +132,11 @@ int main( int argc, char *argv[] )
 	}
 	catch ( std::exception &e )
 	{
+		if ( app )
+		{
+			app->pop();
+			app.reset();
+		}
 		base::print_exception( std::cerr, e );
 	}
 	return ret;

@@ -18,7 +18,7 @@ choices_w::choices_w( void )
 	: composite( std::unique_ptr<layout::grid>( new layout::grid ) )
 {
 	_layout = std::dynamic_pointer_cast<layout::grid>( layout_target() );
-	_layout->set_spacing( 3, 3 );
+	//_layout->set_spacing( 3, 3 );
 	_layout->add_columns( 1, 0.0 );
 	_layout->add_columns( 1, 1.0 );
 }
@@ -49,8 +49,6 @@ void choices_w::add_choice( const std::string &l )
 	size_t n = _layout->add_rows( 1 );
 	_layout->add( _radios.back()->layout_target(), 0, n );
 	_layout->add( _labels.back()->layout_target(), 1, n );
-	invalidate();
-
 }
 
 ////////////////////////////////////////
