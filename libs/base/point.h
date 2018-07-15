@@ -127,7 +127,8 @@ public:
 	void move_by( Args && ... v )
 	{
 		static_assert( sizeof...(Args) == N, "expect to initialize point with correct number of coords" );
-		*this += point( { std::forward<Args>( v )... } );
+		const point tmp = { std::forward<Args>( v )... };
+		*this += tmp;
 	}
 
 	/// @brief Add the coordinates of this and p.
