@@ -135,7 +135,6 @@ system::screens( void )
 const std::shared_ptr<::platform::screen> &
 system::default_screen( void )
 {
-	std::cerr << " TODO" << std::endl;
 	return _screens.front();
 }
 
@@ -319,7 +318,7 @@ system::new_system_tray_item( void )
 
 std::shared_ptr<::platform::window> system::new_window( const std::shared_ptr<::platform::screen> &s )
 {
-	auto ret = std::make_shared<window>( *this, _display, s );
+	auto ret = std::make_shared<window>( *this, _display, s ? s : default_screen() );
 	_dispatcher->add_window( ret );
 	return ret;
 }
