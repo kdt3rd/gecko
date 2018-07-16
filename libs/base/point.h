@@ -36,27 +36,35 @@ public:
 
 	/// @brief Default constructor.
 	/// Create the point (0,0) (the origin).
-	constexpr point( void ) = default;
-	constexpr point( const point & ) = default;
+	constexpr point( void ) : _v{ coord_type(0) } {}
+	point( const point & ) = default;
 	constexpr point( point && ) noexcept = default;
 	point &operator=( const point & ) = default;
 	point &operator=( point && ) noexcept = default;
 	~point( void ) = default;
 
+	/// @brief override to avoid confusion w/ template coersion below
+	inline point( point &p )
+	{
+		std::copy( std::begin( p._v ), std::end( p._v ), std::begin( _v ) );
+	}
+
 	/// @brief Point constructor.
+	///
+	/// Assigns the same value to all entries in the point
 	explicit inline point( coord_type x )
 	{
 		for (size_t i = 0; i != N; ++i )
 			_v[i] = x;
 	}
 
-	/// @brief Point constructor.
+	/// @brief Point constructor with an array.
 	inline point( const std::array<coord_type, N> &a )
 	{
 		std::copy( std::begin( a ), std::end( a ), std::begin( _v ) );
 	}
 
-	/// @brief Point constructor.
+	/// @brief Point constructor an initializer list.
 	inline point( const std::initializer_list<coord_type> l )
 	{
 		auto i = l.begin();
@@ -64,11 +72,6 @@ public:
 			_v[x] = *i++;
 		for ( size_t x = l.size(); x < N; ++x )
 			_v[x] = coord_type(0);
-	}
-
-	inline point( point &p )
-	{
-		std::copy( std::begin( p._v ), std::end( p._v ), std::begin( _v ) );
 	}
 
 	template <typename ... Args>
