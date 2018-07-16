@@ -53,6 +53,14 @@ void choices_w::add_choice( const std::string &l )
 
 ////////////////////////////////////////
 
+void choices_w::build( context &ctxt )
+{
+	_layout->set_spacing( ctxt.from_native_horiz( 3 ), ctxt.from_native_vert( 3 ) );
+	composite::build( ctxt );
+}
+
+////////////////////////////////////////
+
 void choices_w::for_subwidgets( const std::function<void(const std::shared_ptr<widget>&)> &f )
 {
 	for ( auto &l: _labels )

@@ -34,7 +34,7 @@ using point = rect::point_type;
 using size = rect::size_type;
 
 inline constexpr coord min_coord( void ) { return coord(0); }
-inline constexpr coord max_coord( void ) { return std::numeric_limits<coord>::max(); }
+inline constexpr coord max_coord( void ) { return coord(1e6); }
 
 using alignment = base::alignment;
 

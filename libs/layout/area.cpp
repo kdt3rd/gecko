@@ -36,7 +36,7 @@ coord area::expand_width( coord w, coord overall_flex )
 	if ( w > min_coord() )
 	{
 		coord maxflex = divide( w * _flex, overall_flex );
-		used = std::min( _max.w() - width(), maxflex );
+		used = std::min( std::max( min_coord(), _max.w() - width() ), maxflex );
 		set_width( width() + used );
 	}
 
@@ -54,7 +54,7 @@ coord area::expand_height( coord h, coord overall_flex )
 	if ( h > min_coord() )
 	{
 		coord maxflex = divide( h * _flex, overall_flex );
-		used = std::min( _max.h() - height(), maxflex );
+		used = std::min( std::max( min_coord(), _max.h() - height() ), maxflex );
 		set_height( height() + used );
 	}
 	return used;

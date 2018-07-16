@@ -29,6 +29,8 @@ public:
 
 	signal<void(size_t)> when_activated;
 
+	void build( context &ctxt ) override;
+
 protected:
 	void for_subwidgets( const std::function<void(const std::shared_ptr<widget>&)> &f ) override;
 
