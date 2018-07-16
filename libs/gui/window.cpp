@@ -435,6 +435,8 @@ void window::paint( const rect &r )
 	auto guard = hwctxt.begin_render();
 
 	platform::rect native_winr = to_native( winbounds );
+	native_winr.set_x( 0 );
+	native_winr.set_y( 0 );
 	hwctxt.viewport( native_winr );
 
 	auto clipguard = hwctxt.push_clip( r.empty() ? native_winr : to_native( r ) );
