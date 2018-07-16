@@ -47,8 +47,8 @@ void checkbox_w::build( context &ctxt )
 	_checked.add( ogl, draw::iconCheckBoxChecked(), c );
 
 	size sz = ctxt.from_native( platform::size( 24, 24 ) );
-	_unchecked.shape_size( sz.w(), sz.h() );
-	_checked.shape_size( sz.w(), sz.h() );
+	_unchecked.shape_size( 24, 24 );
+	_checked.shape_size( 24, 24 );
 	_unchecked.set_size( sz.w(), sz.h() );
 	_checked.set_size( sz.w(), sz.h() );
 
