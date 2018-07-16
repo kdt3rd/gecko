@@ -23,8 +23,11 @@ menu::menu( const std::shared_ptr<platform::window> &w )
 	std::cout << "Created menu: " << w << std::endl;
 
     _container = std::make_shared<gui::simple_container>( direction::DOWN );
-    _container->set_spacing( 12, 6 );
-    _container->set_pad( 12, 12, 12, 12 );
+	coord twelveH = w->from_native_horiz( 12 );
+	coord twelveV = w->from_native_vert( 12 );
+	coord sixV = w->from_native_vert( 6 );
+    _container->set_spacing( twelveH, sixV );
+    _container->set_pad( twelveH, twelveH, twelveV, twelveV );
 
 	set_widget( _container );
 }

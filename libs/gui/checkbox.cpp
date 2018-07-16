@@ -53,8 +53,8 @@ void checkbox_w::build( context &ctxt )
 	_checked.set_size( sz.w(), sz.h() );
 
 	auto &l = layout_target();
-	l->set_minimum( sz.w(), sz.h() );
-	l->set_maximum( sz.w(), sz.h() );
+	l->set_minimum( sz );
+	l->set_maximum( sz );
 }
 
 ////////////////////////////////////////

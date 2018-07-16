@@ -84,7 +84,8 @@ void button_w::paint( context &ctxt )
 	if ( f )
 	{
 		rect lbox = *this;
-		lbox.shrink( 10, 10, 5, 5 );
+		lbox.shrink( ctxt.from_native_horiz( 10 ), ctxt.from_native_horiz( 10 ),
+					 ctxt.from_native_vert( 5 ), ctxt.from_native_vert( 5 ) );
 		_text.set_position( f->align_text( _text.get_text(), lbox, _align ) );
 		_text.draw( hwc );
 	}

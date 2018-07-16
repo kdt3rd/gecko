@@ -19,8 +19,6 @@ namespace gui
 
 radio_button_w::radio_button_w( void )
 {
-	layout_target()->set_minimum( 24, 24 );
-	layout_target()->set_maximum( 24, 24 );
 }
 
 ////////////////////////////////////////
@@ -48,6 +46,10 @@ void radio_button_w::build( context &ctxt )
 	_checked.shape_size( sz.w(), sz.h() );
 	_unchecked.set_size( sz.w(), sz.h() );
 	_checked.set_size( sz.w(), sz.h() );
+
+	auto &l = layout_target();
+	l->set_minimum( sz );
+	l->set_maximum( sz );
 }
 
 ////////////////////////////////////////

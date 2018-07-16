@@ -184,7 +184,11 @@ bool widget::update_layout( double duration )
 		}
 	}
 	else
+	{
+		set_position( _area->position() );
+		set_extent( _area->extent() );
 		_anim_time = -1.0;
+	}
 	return result;
 }
 
