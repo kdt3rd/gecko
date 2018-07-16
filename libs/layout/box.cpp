@@ -108,8 +108,8 @@ void box::compute_bounds( void )
 	maxh += _pad[2] + _pad[3];
 	if ( _areas.empty() )
 	{
-		maxw = 1e6;
-		maxh = 1e6;
+		maxw = max_coord();
+		maxh = max_coord();
 	}
 
 	set_minimum( minw, minh );

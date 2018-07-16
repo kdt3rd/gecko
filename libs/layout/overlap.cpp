@@ -49,8 +49,8 @@ void overlap::compute_bounds( void )
 
 	if ( _areas.empty() )
 	{
-		maxw = 1e6;
-		maxh = 1e6;
+		maxw = max_coord();
+		maxh = max_coord();
 	}
 
 	set_minimum( minw, minh );
