@@ -312,6 +312,8 @@ private:
 	size_type _extent;
 };
 
+template <typename T> constexpr T rect<T>::kEndOff;
+
 ////////////////////////////////////////
 
 /// @brief Output operator for rectangle.
