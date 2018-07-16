@@ -83,15 +83,22 @@ void text::draw( platform::context &ctxt )
 		{
 			std::shared_ptr<gl::texture> texture = x->second.texture;
 
-			gl::matrix4 local = gl::matrix4::translation( to_api( _pos[0] ), to_api( _pos[1] ) );
+			gl::api &ogl = ctxt.api();
+			ogl.save_matrix();
+			// scale by mm/in * in/pt such that the texture draws the
+			// appropriate box
+			ogl.model_matrix().scale( 25.4f/72.f, 25.4f/72.f );
+			ogl.model_matrix().translate( to_api( _pos[0] ), to_api( _pos[1] ) );
 
 			auto txt = texture->bind();
 
 			auto b = _mesh.bind();
-			b.set_uniform( _mat_pos, local * ctxt.api().current_matrix() );
+			b.set_uniform( _mat_pos, ogl.current_matrix() );
 			b.set_uniform( _col_pos, _color );
 			b.set_uniform( _tex_pos, static_cast<int>( txt.unit() ) );
 			b.draw();
+
+			ogl.restore_matrix();
 		}
 	}
 }
