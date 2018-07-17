@@ -74,9 +74,11 @@ void slider_w::build( context &ctxt )
 
 	_knob.add( ogl, handle, paint );
 
-	const coord ht = ctxt.from_native_vert( 24 );
-	const coord wt = ht * 2.F;
-	layout_target()->set_minimum( wt, ht );
+	size sz = ctxt.from_native( platform::size( 24, 24 ) );
+	_knob.shape_size( _handle * 2.F, _handle * 2.F );
+	_knob.set_size( sz.w(), sz.h() );
+
+	layout_target()->set_minimum( sz.w() * 2.f, sz.h() );
 }
 
 ////////////////////////////////////////
@@ -85,9 +87,10 @@ void slider_w::paint( context &ctxt )
 {
 	coord_type ypos = y() + height()/coord_type(2);
 
+	coord_type grvht = ctxt.from_native_vert( 2 );
 	platform::context &c = ctxt.hw_context();
-	_groove.set_position( x(), ypos - 1 );
-	_groove.set_size( width(), 2 );
+	_groove.set_position( x(), ypos - grvht / coord_type(2) );
+	_groove.set_size( width(), grvht );
 	_groove.draw( c );
 
 	_knob.set_position( x( _value, _handle ), ypos );
