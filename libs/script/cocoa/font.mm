@@ -18,6 +18,15 @@ font::font( void *font, std::string fam, std::string style, points pts )
 		: script::font( std::move( fam ), std::move( style ), pts ),
 		  _font( font )
 {
+    NSFont *nf = reinterpret_cast<NSFont *>( font );
+    _extents.ascent = [nf ascender]; // in points?
+    _extents.descent = [nf descender];
+    NSRect bbox = [nf boundingRectForFont];
+    NSSize madv = [nf maximumAdvancement];
+    _extents.width = NSWidth( bbox );
+    _extents.height = NSHeight( bbox );
+    _extents.max_x_advance = madv.width;
+    _extents.max_y_advance = madv.height;
 }
 
 ////////////////////////////////////////
