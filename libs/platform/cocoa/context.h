@@ -46,15 +46,13 @@ protected:
 	void release( void ) override;
 
 	void reset_clip( const rect &r ) override;
-    
+
 private:
 	void *_window = nullptr;
 	void *_view = nullptr;
+    coord_type _last_vp[4];
 };
 
 } // namespace cocoa
 
 } // namespace platform
-
-
-
