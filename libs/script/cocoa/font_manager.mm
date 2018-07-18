@@ -120,9 +120,11 @@ std::shared_ptr<script::font> font_manager::get_font( const std::string &family,
 	NSFont *nsfont = [fmgr fontWithFamily:fam traits:mask weight:5 size:static_cast<double>( pts.count() )];
 	if ( nsfont )
 	{
-		ret = std::make_shared<script::cocoa::font>( static_cast<void *>(nsfont), family, style, pts );
-		ret->load_dpi( _dpi_h, _dpi_v );
-		ret->max_glyph_store( _max_glyph_w, _max_glyph_h );
+		auto cret = std::make_shared<script::cocoa::font>( static_cast<void *>(nsfont), family, style, pts );
+		cret->load_dpi( _dpi_h, _dpi_v );
+		cret->max_glyph_store( _max_glyph_w, _max_glyph_h );
+        cret->init_extents();
+        ret = cret;
 	}
 	else
 		throw std::runtime_error( "font not found" );

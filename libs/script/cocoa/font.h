@@ -25,6 +25,8 @@ public:
 
 	extent_type kerning( char32_t c1, char32_t c2 ) override;
 
+	void init_extents( void );
+
 protected:
 	const text_extents &get_glyph( char32_t char_code ) override;
 

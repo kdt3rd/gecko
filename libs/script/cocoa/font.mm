@@ -18,21 +18,28 @@ font::font( void *font, std::string fam, std::string style, points pts )
 		: script::font( std::move( fam ), std::move( style ), pts ),
 		  _font( font )
 {
-    NSFont *nf = reinterpret_cast<NSFont *>( font );
-    _extents.ascent = [nf ascender]; // in points?
-    _extents.descent = [nf descender];
-    NSRect bbox = [nf boundingRectForFont];
-    NSSize madv = [nf maximumAdvancement];
-    _extents.width = NSWidth( bbox );
-    _extents.height = NSHeight( bbox );
-    _extents.max_x_advance = madv.width;
-    _extents.max_y_advance = madv.height;
 }
 
 ////////////////////////////////////////
 
 font::~font( void )
 {
+}
+
+////////////////////////////////////////
+
+void font::init_extents( void )
+{
+    // we have the dpi now, so we can convert points to dots...
+    NSFont *nf = reinterpret_cast<NSFont *>( _font );
+    _extents.ascent = [nf ascender] * extent_type( _dpi_v ) / extent_type( 72.0 ); // in points?
+    _extents.descent = [nf descender] * extent_type( _dpi_v ) / extent_type( 72.0 );
+    NSRect bbox = [nf boundingRectForFont];
+    NSSize madv = [nf maximumAdvancement];
+    _extents.width = NSWidth( bbox );
+    _extents.height = NSHeight( bbox );
+    _extents.max_x_advance = madv.width;
+    _extents.max_y_advance = madv.height;
 }
 
 ////////////////////////////////////////
