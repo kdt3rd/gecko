@@ -15,27 +15,28 @@ namespace draw
 ////////////////////////////////////////
 
 text::text( void )
+	: _scale( 1.F, 1.F )
 {
 }
 
 ////////////////////////////////////////
 
 text::text( const std::shared_ptr<script::font> &font )
-	: _font( font )
+	: _font( font ), _scale( 1.F, 1.F )
 {
 }
 
 ////////////////////////////////////////
 
 text::text( const std::string &utf8 )
-	: _utf8( utf8 )
+	: _utf8( utf8 ), _scale( 1.F, 1.F )
 {
 }
 
 ////////////////////////////////////////
 
 text::text( const std::shared_ptr<script::font> &font, const std::string &utf8 )
-	: _font( font ), _utf8( utf8 )
+	: _font( font ), _utf8( utf8 ), _scale( 1.F, 1.F )
 {
 }
 
@@ -53,6 +54,13 @@ void text::set_text( const std::string &utf8 )
 {
 	_update = ( utf8 != _utf8 );
 	_utf8 = utf8;
+}
+
+////////////////////////////////////////
+
+void text::set_scale( const point &s )
+{
+	_scale = s;
 }
 
 ////////////////////////////////////////
@@ -85,9 +93,7 @@ void text::draw( platform::context &ctxt )
 
 			gl::api &ogl = ctxt.api();
 			ogl.save_matrix();
-			// scale by mm/in * in/pt such that the texture draws the
-			// appropriate box
-			ogl.model_matrix().scale( 25.4f/72.f, 25.4f/72.f );
+			ogl.model_matrix().scale( to_api( _scale[0] ), to_api( _scale[1] ) );
 			ogl.model_matrix().translate( to_api( _pos[0] ), to_api( _pos[1] ) );
 
 			auto txt = texture->bind();

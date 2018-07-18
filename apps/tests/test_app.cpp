@@ -50,10 +50,10 @@ int safemain( int argc, char **argv )
 		auto fakemenu = box( alignment::RIGHT );
 		fakemenu->set_padding( 0, 0, win->from_native_vert( 2 ), win->from_native_vert( 2 ) );
 		fakemenu->set_spacing( win->from_native_horiz( 8 ), win->from_native_vert( 8 ) );
-		fakemenu->add( label( "File" ) );
-		fakemenu->add( label( "Edit" ) );
-		fakemenu->add( label( "Help" ) );
-		auto filler = label( "" );
+		fakemenu->add( label( "File", alignment::LEFT ) );
+		fakemenu->add( label( "Edit", alignment::LEFT ) );
+		fakemenu->add( label( "Help", alignment::LEFT ) );
+		auto filler = label( "", alignment::LEFT );
 		filler->layout_target()->set_expansion_priority( 1 );
 		fakemenu->add( filler );
 
@@ -95,6 +95,7 @@ int safemain( int argc, char **argv )
 		auto bx = box( alignment::BOTTOM );
 		bx->set_padding( win->from_native_horiz( 12 ), win->from_native_horiz( 12 ), win->from_native_vert( 5 ), win->from_native_vert( 5 ) );
 		bx->set_spacing( win->from_native_horiz( 8 ), win->from_native_vert( 2 ) );
+
 		bx->add( fakemenu );
 		bx->add( l );
 		size_t n = bx->add( b );

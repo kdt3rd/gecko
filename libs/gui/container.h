@@ -26,6 +26,8 @@ public:
 	explicit base_container( std::unique_ptr<layout::area> &&a );
 	~base_container( void ) override;
 
+	void set_transparent( bool t );
+
 	void monitor_changed( context &ctxt ) override;
 	void build( context &ctxt ) override;
 	void paint( context &ctxt ) override;
@@ -39,6 +41,7 @@ public:
 protected:
 	using widget_list = std::vector<std::shared_ptr<widget>>;
 	widget_list _widgets;
+	bool _is_transparent = false;
 };
 
 ////////////////////////////////////////

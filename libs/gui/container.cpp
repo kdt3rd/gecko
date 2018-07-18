@@ -32,6 +32,13 @@ base_container::~base_container( void )
 
 ////////////////////////////////////////
 
+void base_container::set_transparent( bool t )
+{
+	_is_transparent = t;
+}
+
+////////////////////////////////////////
+
 void base_container::monitor_changed( context &ctxt )
 {
 	for ( auto &w: _widgets )
@@ -51,10 +58,14 @@ void base_container::build( context &ctxt )
 void base_container::paint( context &ctxt )
 {
 	auto scisguard = ctxt.push_clip( *this );
-	gl::api &ogl = ctxt.hw_context().api();
 
-	ogl.clear_color( ctxt.get_style().background_color() );
-	ogl.clear();
+	if ( ! _is_transparent )
+	{
+		gl::api &ogl = ctxt.hw_context().api();
+		ogl.clear_color( ctxt.get_style().background_color() );
+		ogl.clear();
+	}
+
 	for ( auto &w: _widgets )
 		w->paint( ctxt );
 }

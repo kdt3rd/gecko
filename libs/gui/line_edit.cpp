@@ -60,10 +60,20 @@ void line_edit_w::build( context &ctxt )
 void line_edit_w::paint( context &ctxt )
 {
 	script::font_extents fex = _text.get_font()->extents();
-	_line.set_position( x(), y() + height() - 1.F );
-	_line.set_size( width(), 1.5F );
-	_text.set_position( x() + 2.F, y() + height() + fex.descent );
-	_prompt.set_position( x() + 2.F, y() + height() + fex.descent );
+
+	auto voff = ctxt.from_native_vert( static_cast<platform::coord_type>( fex.descent ) );
+	auto inset = ctxt.from_native_horiz( static_cast<platform::coord_type>( 2 ) );
+
+	auto scalep = ctxt.from_native(
+		platform::point( platform::coord_type(1), platform::coord_type(1) ) );
+
+	_line.set_position( x(), y() + height() - inset / 2.F );
+	_line.set_size( width(), inset * 0.75F );
+
+	_text.set_scale( scalep );
+	_text.set_position( x() + inset, y() + height() + voff );
+	_prompt.set_scale( scalep );
+	_prompt.set_position( x() + inset, y() + height() + voff );
 
 	platform::context &hwc = ctxt.hw_context();
 	_line.draw( hwc );
@@ -75,8 +85,10 @@ void line_edit_w::paint( context &ctxt )
 	const std::string &str = _text.get_text();
 	script::text_extents tex = _text.get_font()->extents( str.substr( 0, _cursor ) );
 
-	_marker.set_position( x() + 2.F + tex.width - 0.5F, y() + height() + fex.descent - fex.ascent );
-	_marker.set_size( 1.5F, fex.ascent - fex.descent );
+	auto mpos = ctxt.from_native_horiz( static_cast<platform::coord_type>( tex.width ) );
+	auto moff = ctxt.from_native_vert( static_cast<platform::coord_type>( fex.ascent ) );
+	_marker.set_position( x() + inset + mpos, y() + height() + voff - moff );
+	_marker.set_size( inset * 0.75F, moff - voff );
 	_marker.draw( hwc );
 }
 

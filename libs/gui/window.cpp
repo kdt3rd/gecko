@@ -455,10 +455,10 @@ void window::paint( const rect &r )
 	{
 		in_context( [&,this]
 		{
-//			_widget->layout_target()->compute_bounds();
-//			_widget->set_size( winbounds.width(), winbounds.height() );
-//			_widget->layout_target()->set_size( winbounds.width(), winbounds.height() );
-//			_widget->layout_target()->compute_layout();
+			_widget->layout_target()->compute_bounds();
+			_widget->set_size( winbounds.width(), winbounds.height() );
+			_widget->layout_target()->set_size( winbounds.width(), winbounds.height() );
+			_widget->layout_target()->compute_layout();
 			if ( _widget->update_layout( 250.0 ) )
 				invalidate( *_widget );
 			_widget->paint( *this );

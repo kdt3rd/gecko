@@ -26,6 +26,7 @@ public:
 
 	void set_font( const std::shared_ptr<script::font> &font );
 	void set_text( const std::string &utf8 );
+	void set_scale( const point &s );
 	void set_position( const point &p );
 	void set_position( dim x, dim y )
 	{
@@ -64,6 +65,7 @@ private:
 	std::shared_ptr<script::font> _font;
 	std::string _utf8;
 	point _pos;
+	point _scale;
 	color _color;
 
 	gl::mesh _mesh;
