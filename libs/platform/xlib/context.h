@@ -55,6 +55,7 @@ private:
     GLXFBConfig _bestFBC = None;
     GLXWindow _win = None;
     GLXContext _ctxt = None;
+    coord_type _last_vp[4];
 };
 
 } // namespace xlib
