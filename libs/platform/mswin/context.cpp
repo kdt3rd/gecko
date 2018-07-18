@@ -247,6 +247,10 @@ void context::set_viewport( coord_type x, coord_type y, coord_type w, coord_type
 {
     glViewport( static_cast<GLint>(x), static_cast<GLint>(y),
 				static_cast<GLsizei>(w), static_cast<GLsizei>(h) );
+	_last_vp[0] = x;
+	_last_vp[1] = y;
+	_last_vp[2] = w;
+	_last_vp[3] = h;
 }
 
 ////////////////////////////////////////
@@ -279,7 +283,7 @@ void context::reset_clip( const rect &r )
 {
     glEnable( GL_SCISSOR_TEST );
     glScissor( static_cast<GLint>( r.x() ),
-			   static_cast<GLint>( r.y() ),
+			   static_cast<GLint>( _last_vp[3] - ( r.y() + r.height() ) ),
 			   static_cast<GLsizei>( r.width() ),
 			   static_cast<GLsizei>( r.height() ) );
 }

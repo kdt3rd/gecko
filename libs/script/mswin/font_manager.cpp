@@ -146,7 +146,7 @@ std::set<std::string> font_manager::get_styles( const std::string &family )
 ////////////////////////////////////////
 
 std::shared_ptr<script::font>
-font_manager::get_font( const std::string &family, const std::string &style, double pixsize )
+font_manager::get_font( const std::string &family, const std::string &style, points pts )
 {
 	std::string lang = base::locale::language();
 
@@ -159,8 +159,7 @@ font_manager::get_font( const std::string &family, const std::string &style, dou
 
 	LOGFONT fquery = {0};
 	fquery.lfCharSet = DEFAULT_CHARSET;
-//	fquery.lfHeight = static_cast<int>( pixsize );
-	fquery.lfHeight = - MulDiv( static_cast<int>( pixsize ), GetDeviceCaps( dc, LOGPIXELSY ), 72 );
+	fquery.lfHeight = - MulDiv( static_cast<int>( pts.count() ), GetDeviceCaps( dc, LOGPIXELSY ), 72 );
 	fquery.lfWidth = 0;
 	fquery.lfWeight = FW_DONTCARE;
 
@@ -219,7 +218,7 @@ font_manager::get_font( const std::string &family, const std::string &style, dou
 
 	try
 	{
-		ret = std::make_shared<script::freetype2::font>( ftface, family, style, pixsize, ttfData );
+		ret = std::make_shared<script::freetype2::font>( ftface, family, style, pts, ttfData );
 		ret->load_dpi( _dpi_h, _dpi_v );
 		ret->max_glyph_store( _max_glyph_w, _max_glyph_h );
 	}

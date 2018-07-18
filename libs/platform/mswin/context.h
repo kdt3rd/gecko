@@ -47,6 +47,7 @@ protected:
 private:
 	HGLRC _hrc = nullptr;
 	HDC _hdc = nullptr;
+	coord_type _last_vp[4];
 };
 
 } // namespace mswin
