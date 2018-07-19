@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <draw/types.h>
 #include <layout/types.h>
 #include <base/rect.h>
 #include <base/signal.h>
@@ -16,6 +17,8 @@
 
 namespace gui
 {
+
+using color = draw::color;
 
 //using coord = double;
 using coord = layout::coord;

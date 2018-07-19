@@ -41,9 +41,10 @@ void radio_button_w::build( context &ctxt )
 	c.set_fill_color( s.dominant_color() );
 	_checked.add( ogl, draw::iconRadioButtonChecked(), c );
 
-	size sz = ctxt.from_native( platform::size( 24, 24 ) );
-	_unchecked.shape_size( 24, 24 );
-	_checked.shape_size( 24, 24 );
+	size sz = s.widget_minimum_size();
+	auto native = ctxt.to_native( sz );
+	_unchecked.shape_size( native.w(), native.h() );
+	_checked.shape_size( native.w(), native.h() );
 	_unchecked.set_size( sz.w(), sz.h() );
 	_checked.set_size( sz.w(), sz.h() );
 

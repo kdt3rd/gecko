@@ -26,7 +26,7 @@ button_w::button_w( void )
 button_w::button_w( std::string l, base::alignment a )
 	: _align( a )
 {
-	gl::color bg = context::current().get_style().dominant_color();
+	color bg = context::current().get_style().dominant_color();
 	_rect.set_color( bg );
 	_text.set_text( l );
 	_text.set_color( context::current().get_style().primary_text( bg ) );
@@ -63,7 +63,7 @@ void button_w::build( context &ctxt )
 	using etype = script::extent_type;
 	script::font_extents fex = f->extents();
 	script::text_extents tex = f->extents( _text.get_text() );
-	const coord ht = std::max( ctxt.from_native_vert( 24 ), ctxt.from_native_vert( fex.height + etype(2) ) );
+	const coord ht = std::max( s.widget_minimum_size().h(), ctxt.from_native_vert( fex.height + etype(2) ) );
 	const coord wt = ctxt.from_native_horiz( tex.width + etype(10) );
 	layout_target()->set_minimum( wt, ht );
 	layout_target()->set_maximum_height( ht );

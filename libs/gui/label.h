@@ -26,10 +26,10 @@ public:
 	~label_w( void ) override;
 
 	void set_text( const std::string &utf8 ) { _text.set_text( utf8 ); }
-	void set_color( const gl::color &c ) { _text.set_color( c ); }
+	void set_color( const color &c ) { _text.set_color( c ); }
 	void set_font( const std::shared_ptr<script::font> &f ) { _text.set_font( f ); }
 	void set_align( alignment a ) { _align = a; }
-	void set_bg( const gl::color &c )
+	void set_bg( const color &c )
 	{
 		_bg_color = c;
 		_bg.set_color( c );
@@ -40,7 +40,7 @@ public:
 	void paint( context &ctxt ) override;
 
 private:
-	gl::color _bg_color;
+	color _bg_color;
 	draw::rectangle _bg;
 	draw::text _text;
 	alignment _align = alignment::LEFT;

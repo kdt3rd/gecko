@@ -71,10 +71,11 @@ void scroll_bar_w::build( context &ctxt )
 	_groove.set_color( s.disabled_text( s.background_color() ) );
 	_knob.set_color( s.dominant_color() );
 
+	size sz = s.widget_minimum_size();
 	if ( _horizontal )
-		layout_target()->set_minimum( ctxt.from_native_horiz( 45.0 ), ctxt.from_native_vert( 15.0 ) );
+		layout_target()->set_minimum( sz.w() * 4.F, sz.h() );
 	else
-		layout_target()->set_minimum( ctxt.from_native_horiz( 15.0 ), ctxt.from_native_vert( 45.0 ) );
+		layout_target()->set_minimum( sz.w(), sz.h() * 4.F );
 }
 
 ////////////////////////////////////////

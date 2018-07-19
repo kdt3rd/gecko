@@ -28,7 +28,7 @@ public:
 
 	void set_pressed( bool p );
 	void set_text( const std::string &utf8 ) { _text.set_text( utf8 ); }
-	void set_color( const gl::color &c ) { _text.set_color( c ); }
+	void set_color( const color &c ) { _text.set_color( c ); }
 	void set_font( const std::shared_ptr<script::font> &f ) { _text.set_font( f ); }
 	void set_align( base::alignment a ) { _align = a; }
 

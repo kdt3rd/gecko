@@ -25,74 +25,74 @@ void style::set_font_manager( const std::shared_ptr<script::font_manager> &fmgr 
 
 ////////////////////////////////////////
 
-gl::color style::primary_text( gl::color bg ) const
+color style::primary_text( color bg ) const
 {
 	float w = bg.distance( gl::white );
 	float b = bg.distance( gl::black );
 	if ( w > b )
-		return gl::color( 1.F, 1.F, 1.F, 1.F );
+		return color( 1.F, 1.F, 1.F, 1.F );
 	else
-		return gl::color( 0.F, 0.F, 0.F, 0.87F );
+		return color( 0.F, 0.F, 0.F, 0.87F );
 }
 
 ////////////////////////////////////////
 
-gl::color style::secondary_text( gl::color bg ) const
+color style::secondary_text( color bg ) const
 {
 	float w = bg.distance( gl::white );
 	float b = bg.distance( gl::black );
 	if ( w > b )
-		return gl::color( 1.F, 1.F, 1.F, 0.70F );
+		return color( 1.F, 1.F, 1.F, 0.70F );
 	else
-		return gl::color( 0.F, 0.F, 0.F, 0.54F );
+		return color( 0.F, 0.F, 0.F, 0.54F );
 }
 
 ////////////////////////////////////////
 
-gl::color style::disabled_text( gl::color bg ) const
+color style::disabled_text( color bg ) const
 {
 	float w = bg.distance( gl::white );
 	float b = bg.distance( gl::black );
 	if ( w > b )
-		return gl::color( 1, 1, 1, 0.50F );
+		return color( 1, 1, 1, 0.50F );
 	else
-		return gl::color( 0, 0, 0, 0.38F );
+		return color( 0, 0, 0, 0.38F );
 }
 
 ////////////////////////////////////////
 
-gl::color style::divider( gl::color bg ) const
+color style::divider( color bg ) const
 {
 	float w = bg.distance( gl::white );
 	float b = bg.distance( gl::black );
 	if ( w > b )
-		return gl::color( 1, 1, 1, 0.12F );
+		return color( 1, 1, 1, 0.12F );
 	else
-		return gl::color( 0, 0, 0, 0.12F );
+		return color( 0, 0, 0, 0.12F );
 }
 
 ////////////////////////////////////////
 
-gl::color style::active_icon( gl::color bg ) const
+color style::active_icon( color bg ) const
 {
 	float w = bg.distance( gl::white );
 	float b = bg.distance( gl::black );
 	if ( w > b )
-		return gl::color( 1, 1, 1, 1.00F );
+		return color( 1, 1, 1, 1.00F );
 	else
-		return gl::color( 0, 0, 0, 0.54F );
+		return color( 0, 0, 0, 0.54F );
 }
 
 ////////////////////////////////////////
 
-gl::color style::inactive_icon( gl::color bg ) const
+color style::inactive_icon( color bg ) const
 {
 	float w = bg.distance( gl::white );
 	float b = bg.distance( gl::black );
 	if ( w > b )
-		return gl::color( 1, 1, 1, 0.50F );
+		return color( 1, 1, 1, 0.50F );
 	else
-		return gl::color( 0, 0, 0, 0.38F );
+		return color( 0, 0, 0, 0.38F );
 }
 
 ////////////////////////////////////////

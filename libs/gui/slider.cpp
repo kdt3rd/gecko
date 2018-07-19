@@ -74,7 +74,7 @@ void slider_w::build( context &ctxt )
 
 	_knob.add( ogl, handle, paint );
 
-	size sz = ctxt.from_native( platform::size( 24, 24 ) );
+	size sz = s.widget_minimum_size();
 	_knob.shape_size( _handle * 2.F, _handle * 2.F );
 	_knob.set_size( sz.w(), sz.h() );
 

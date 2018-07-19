@@ -41,7 +41,8 @@ void label_w::build( context &ctxt )
 	// these come out in pixels...
 	script::font_extents fex = f->extents();
 	script::text_extents tex = f->extents( _text.get_text() );
-	const coord ht = std::max( ctxt.from_native_vert( 24 ), ctxt.from_native_vert( platform::coord_type( fex.height + 2.F ) ) );
+	const coord ht = std::max( s.widget_minimum_size().h(),
+							   ctxt.from_native_vert( platform::coord_type( fex.height + 2.F ) ) );
 	const coord wt = ctxt.from_native_horiz( tex.width );
 	layout_target()->set_minimum( wt, ht );
 

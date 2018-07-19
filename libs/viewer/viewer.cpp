@@ -18,7 +18,7 @@ namespace gui
 ////////////////////////////////////////
 
 viewer_w::viewer_w( void )
-	: _rect( draw::color{ 0.21F, 0.21F, 0.21F, 1.F } )
+	: _rect( color{ 0.21F, 0.21F, 0.21F, 1.F } )
 {
 }
 
