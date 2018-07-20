@@ -904,11 +904,11 @@ void dispatcher::dispatchKeymapNotify( const std::shared_ptr<window> &w, XEvent 
 		for ( int k = min_keycode; k <= max_keycode; ++k )
 		{
 			auto &ksl = _keycode_to_keysym[k];
-			ksl.reserve( ks_per_kc );
+			ksl.resize( ks_per_kc );
 			for ( int s = 0; s < ks_per_kc; ++s, ++n )
 			{
 				if ( ks[n] != 0 )
-					ksl.push_back( ks[n] );
+					ksl[s] = ks[n];
 			}
 		}
 		XFree( ks );
