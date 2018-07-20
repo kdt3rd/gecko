@@ -123,6 +123,7 @@ coord window::height( void ) const
 
 void window::invalidate( const rect &r )
 {
+	_internal_paint = true;
 	_window->invalidate( to_native( r.round() ) );
 }
 
@@ -455,12 +456,17 @@ void window::paint( const rect &r )
 	{
 		in_context( [&,this]
 		{
-			_widget->layout_target()->compute_bounds();
-			_widget->set_size( winbounds.width(), winbounds.height() );
-			_widget->layout_target()->set_size( winbounds.width(), winbounds.height() );
-			_widget->layout_target()->compute_layout();
-			if ( _widget->update_layout( 250.0 ) )
-				invalidate( *_widget );
+			if ( _internal_paint )
+			{
+				_widget->layout_target()->compute_bounds();
+				_widget->set_size( winbounds.width(), winbounds.height() );
+				_widget->layout_target()->set_size( winbounds.width(), winbounds.height() );
+				_widget->layout_target()->compute_layout();
+				if ( _widget->update_layout( 250.0 ) )
+					invalidate( *_widget );
+				else
+					_internal_paint = false;
+			}
 			_widget->paint( *this );
 		} );
 	}
@@ -481,7 +487,9 @@ void window::resized( const size &s )
 			_widget->layout_target()->set( r );
 			_widget->layout_target()->compute_layout();
 			_widget->update_layout( 0.0 );
-			invalidate( *_widget );
+			// the ui will send a paint request, we don't need to double that up...
+//			invalidate( *_widget );
+			_internal_paint = false;
 		} );
 	}
 }

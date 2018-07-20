@@ -46,12 +46,8 @@ window::process_event( const event &e )
 			_rect = query_geometry();
 			break;
 
+			// any difference?
 		case event_type::WINDOW_EXPOSED:
-			_accumulate_expose = false;
-			_invalid_rgn = rect();
-			// let the default dispatch below send the included rect
-			break;
-
 		case event_type::WINDOW_REGION_EXPOSED:
 		{
 			rect tmp{ e.window().x, e.window().y, e.window().width, e.window().height };
@@ -211,7 +207,12 @@ void window::set_minimum_size( const phys_size &s )
 
 void window::invalidate( const rect &r )
 {
-	// TBD: do we need to do region compression ourselves?
+	_invalid_rgn.include( r );
+
+	// invalidation compression...
+	if ( _accumulate_expose )
+		return;
+
 	submit_delayed_expose( r );
 }
 

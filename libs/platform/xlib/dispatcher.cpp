@@ -351,7 +351,8 @@ dispatcher::remove_waitable( const std::shared_ptr<waitable> &w )
 void dispatcher::add_window( const std::shared_ptr<window> &w )
 {
 	_windows[w->id()] = w;
-	XSetWMProtocols( _display.get(), w->id(), &_atom_delete_window, 1 );
+	Atom protocols[2] = { _atom_delete_window, _atom_quit_app };
+	XSetWMProtocols( _display.get(), w->id(), protocols, 2 );
 
 	// Create an input context.
 	if ( _xim )
@@ -948,10 +949,14 @@ void dispatcher::dispatchExpose( const std::shared_ptr<window> &w, XEvent &event
 											 event.xexpose.width, event.xexpose.height ) );
 		}
 		else
-			w->process_event( event::window( _ext_events.get(),
-											 event_type::WINDOW_REGION_EXPOSED,
-											 event.xexpose.x, event.xexpose.y,
-											 event.xexpose.width, event.xexpose.height ) );
+		{
+//			w->process_event( event::window( _ext_events.get(),
+//											 event_type::WINDOW_REGION_EXPOSED,
+//											 event.xexpose.x, event.xexpose.y,
+//											 event.xexpose.width, event.xexpose.height ) );
+			w->add_expose( rect( event.xexpose.x, event.xexpose.y,
+								 event.xexpose.width, event.xexpose.height ) );
+		}
 	}
 }
 

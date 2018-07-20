@@ -15,6 +15,7 @@
 #include <base/scope_guard.h>
 #include <stdexcept>
 #include <X11/Xutil.h>
+#include <X11/Xatom.h>
 
 #include "system.h"
 #include "context.h"
@@ -152,6 +153,11 @@ void window::set_popup( void )
 	XSetWindowAttributes swa;
 	swa.override_redirect = true;
 	XChangeWindowAttributes( _display.get(), _win, CWOverrideRedirect, &swa );
+
+	Atom winType = XInternAtom( _display.get(), "_NET_WM_WINDOW_TYPE", False );
+	Atom defType = XInternAtom( _display.get(), "_NET_WM_WINDOW_TYPE_POPUP_MENU", False );
+	XChangeProperty( _display.get(), _win, winType, XA_ATOM, 32, PropModeReplace,
+					 reinterpret_cast<unsigned char *>( &defType ), 1 );
 	_popup = true;
 }
 
@@ -229,15 +235,6 @@ Window window::id( void ) const
 
 void window::submit_delayed_expose( const rect &r )
 {
-	if ( _accumulate_expose )
-	{
-		_invalid_rgn.include( r );
-		return;
-	}
-
-	_invalid_rgn = r;
-	_accumulate_expose = true;
-
 	XExposeEvent exp = { Expose, 0, 1, _display.get(), _win, r.x(), r.y(), r.width(), r.height(), 0 };
 	XSendEvent( _display.get(), _win, False, ExposureMask, reinterpret_cast<XEvent *>( &exp ) );
 	XFlush( _display.get() );

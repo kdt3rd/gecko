@@ -112,6 +112,8 @@ protected:
 	std::shared_ptr<widget> _mouse_grab;
 	std::shared_ptr<widget> _key_focus;
 
+	bool _internal_paint = false;
+
 	std::map<platform::scancode, hotkey_handler> _hotkeys;
 };
 

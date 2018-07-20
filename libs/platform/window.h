@@ -137,6 +137,9 @@ public:
 	virtual void set_title( const std::string &t ) = 0;
 
 	void invalidate( const rect &r );
+	void reset_expose( void ) { _invalid_rgn.clear(); }
+	void add_expose( const rect &r ) { _invalid_rgn.include( r ); }
+	const rect &get_expose( void ) { return _invalid_rgn; }
 
 //	virtual void set_icon( const icon &i );
 

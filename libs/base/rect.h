@@ -259,6 +259,15 @@ public:
 
 	void include( const rect &other )
 	{
+		if ( other.empty() )
+			return;
+
+		if ( empty() )
+		{
+			*this = other;
+			return;
+		}
+
 		coord_type xx1 = std::min( x1(), other.x1() );
 		coord_type yy1 = std::min( y1(), other.y1() );
 		coord_type xx2 = std::max( x2(), other.x2() );
@@ -289,6 +298,12 @@ public:
 	bool empty( void ) const
 	{
 		return _extent.empty();
+	}
+
+	void clear( void )
+	{
+		_position = point_type();
+		_extent = size_type();
 	}
 
 	rect round( void ) const
