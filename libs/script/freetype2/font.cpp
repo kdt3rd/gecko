@@ -46,6 +46,12 @@ font::font( FT_Face face, std::string fam, std::string style, base::units::point
 	: script::font( std::move( fam ), std::move( style ), pts ),
 	_face( face ), _font_data( ttfData )
 {
+}
+
+////////////////////////////////////////
+
+void font::init_font( void )
+{
 	auto err = FT_Select_Charmap( _face, FT_ENCODING_UNICODE );
 	if ( err )
 	{
@@ -62,14 +68,16 @@ font::font( FT_Face face, std::string fam, std::string style, base::units::point
 
 	if ( FT_IS_SCALABLE( _face ) )
 	{
-		err = FT_Set_Char_Size( _face, static_cast<int>( pts.count() * 64.F ), 0,
+		std::cout << "Scalable font, setting to " << _size << " points (" << int( _size.count() * 64.F )
+				  << " 26.6) hres " << _dpi_h << " vres " << _dpi_v << std::endl;
+		err = FT_Set_Char_Size( _face, static_cast<int>( _size.count() * 64.F ), 0,
 								_dpi_h, _dpi_v );
 		if ( err )
 			throw std::runtime_error( "Unable to set character size" );
 	}
 	else if ( _face->num_fixed_sizes > 1 )
 	{
-		int targsize = static_cast<int>( pts.count() );
+		int targsize = static_cast<int>( _size.count() );
 		int bestSize[2];
 		bestSize[0] = bestSize[1] = targsize;
 		int i;
@@ -122,6 +130,7 @@ font::font( FT_Face face, std::string fam, std::string style, base::units::point
 		_extents.max_y_advance = 0.0;
 	}
 
+	std::cout << "font has width " << _extents.width << " height " << _extents.height << " PIXELS" << std::endl;
 }
 
 ////////////////////////////////////////

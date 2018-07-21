@@ -123,7 +123,7 @@ std::shared_ptr<script::font> font_manager::get_font( const std::string &family,
 		auto cret = std::make_shared<script::cocoa::font>( static_cast<void *>(nsfont), family, style, pts );
 		cret->load_dpi( _dpi_h, _dpi_v );
 		cret->max_glyph_store( _max_glyph_w, _max_glyph_h );
-        cret->init_extents();
+        cret->init_font();
         ret = cret;
 	}
 	else

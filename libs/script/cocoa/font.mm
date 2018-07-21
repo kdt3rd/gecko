@@ -28,7 +28,7 @@ font::~font( void )
 
 ////////////////////////////////////////
 
-void font::init_extents( void )
+void font::init_font( void )
 {
     // we have the dpi now, so we can convert points to dots...
     NSFont *nf = reinterpret_cast<NSFont *>( _font );

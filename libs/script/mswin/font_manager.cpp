@@ -221,6 +221,8 @@ font_manager::get_font( const std::string &family, const std::string &style, poi
 		ret = std::make_shared<script::freetype2::font>( ftface, family, style, pts, ttfData );
 		ret->load_dpi( _dpi_h, _dpi_v );
 		ret->max_glyph_store( _max_glyph_w, _max_glyph_h );
+
+		ret->init_font();
 	}
 	catch ( ... )
 	{

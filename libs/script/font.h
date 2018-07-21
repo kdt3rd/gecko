@@ -49,6 +49,13 @@ public:
 	void load_dpi( int h, int v ) { _dpi_h = h; _dpi_v = v; }
 	void max_glyph_store( int w, int h ) { _max_glyph_w = w; _max_glyph_h = h; }
 
+	/// @brief opportunity to initialize the internal font structures
+	///
+	/// This is used such that the font can be fully initialized with
+	/// the dpi and all other information prior to creating whatever
+	/// internal structures
+	virtual void init_font( void ) = 0;
+
 	/// @brief Size of the font.
 	inline points size( void ) const { return _size; }
 
