@@ -33,7 +33,7 @@ struct application::impl
 ////////////////////////////////////////
 
 application::application( const std::string &display, const std::string &p, const std::string &r )
-	: _impl( new application::impl )
+	: _impl( new application::impl ), _fmgr( script::font_manager::make() )
 {
 	auto const &platforms = platform::platform::list();
 	if ( platforms.empty() )
@@ -59,25 +59,6 @@ application::application( const std::string &display, const std::string &p, cons
 
 	if ( !_impl->sys )
 		throw std::runtime_error( "platform does not exist" );
-
-	_fmgr = script::font_manager::common();
-	if ( !_fmgr )
-		throw std::runtime_error( "no font manager available" );
-
-	auto scr = _impl->sys->screens();
-	if ( ! scr.empty() )
-	{
-		auto dpi = scr.front()->dpi();
-		_fmgr->load_dpi( static_cast<int>( dpi.w() ),
-						 static_cast<int>( dpi.h() ) );
-	}
-
-	auto tmpw = _impl->sys->new_window();
-	auto guard = tmpw->hw_context().begin_render();
-	GLint mw = 1024;
-	glGetIntegerv( GL_MAX_TEXTURE_SIZE, &mw );
-	_fmgr->max_glyph_store( mw, mw );
-	_impl->sys->destroy_window( tmpw );
 }
 
 ////////////////////////////////////////
@@ -121,12 +102,39 @@ bool application::dispatch_global_hotkey( const event &e )
 
 ////////////////////////////////////////
 
-std::shared_ptr<window> application::new_window( void )
+std::shared_ptr<window> application::new_window( const std::shared_ptr<platform::screen> &s )
 {
-	auto w = _impl->sys->new_window();
-	auto result = std::make_shared<window>( w );
-	result->get_style().set_font_manager( _fmgr );
+	auto result = std::make_shared<window>( _impl->sys->new_window( s ) );
+
+	update_display( result.get() );
+
 	return result;
+}
+
+////////////////////////////////////////
+
+void application::update_display( window *w )
+{
+	if ( ! w )
+		return;
+
+	auto nw = w->native_window();
+	if ( nw )
+	{
+		auto scr = nw->query_screen();
+		if ( scr )
+		{
+			auto dpi = scr->dpi();
+			GLint mw = 1024;
+
+			{
+				auto guard = w->bind();
+				glGetIntegerv( GL_MAX_TEXTURE_SIZE, &mw );
+			}
+
+			w->get_style().set_font_cache( _fmgr->get_cache( dpi.w(), dpi.h(), mw, mw ) );
+		}
+	}
 }
 
 ////////////////////////////////////////
@@ -216,13 +224,6 @@ std::set<std::string> application::get_font_families( void )
 std::set<std::string> application::get_font_styles( const std::string &family )
 {
 	return _fmgr->get_styles( family );
-}
-
-////////////////////////////////////////
-
-std::shared_ptr<script::font> application::get_font( const std::string &family, const std::string &style, coord pixsize )
-{
-	return _fmgr->get_font( family, style, pixsize.as<script::points>() );
 }
 
 ////////////////////////////////////////

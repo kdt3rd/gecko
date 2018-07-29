@@ -126,7 +126,8 @@ std::set<std::string> font_manager::get_styles( const std::string &family )
 ////////////////////////////////////////
 
 std::shared_ptr<script::font>
-font_manager::get_font( const std::string &family, const std::string &style, points pts )
+font_manager::get_font( const std::string &family, const std::string &style, points pts,
+						int dpih, int dpiv, int maxGlyphW, int maxGlyphH )
 {
 	std::string lang = base::locale::language();
 	FcPattern *pat = FcPatternBuild( nullptr,
@@ -154,6 +155,7 @@ font_manager::get_font( const std::string &family, const std::string &style, poi
 		if ( FcPatternGetString( matched, FC_FILE, 0, &filename ) == FcResultMatch &&
 			 FcPatternGetInteger( matched, FC_INDEX, 0, &fontid ) == FcResultMatch )
 		{
+			std::lock_guard<std::mutex> lk( _mx );
 			FT_Face ftface;
 			auto error = FT_New_Face( _impl->ftlib, reinterpret_cast<const char*>( filename ), fontid, &ftface );
 			if ( error )
@@ -162,8 +164,8 @@ font_manager::get_font( const std::string &family, const std::string &style, poi
 			try
 			{
 				ret = std::make_shared<script::freetype2::font>( ftface, family, style, pts );
-				ret->load_dpi( _dpi_h, _dpi_v );
-				ret->max_glyph_store( _max_glyph_w, _max_glyph_h );
+				ret->load_dpi( dpih, dpiv );
+				ret->max_glyph_store( maxGlyphW, maxGlyphH );
 
 				ret->init_font();
 			}

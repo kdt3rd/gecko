@@ -91,7 +91,7 @@ std::set<std::string> font_manager::get_styles( const std::string &family )
 
 ////////////////////////////////////////
 
-std::shared_ptr<script::font> font_manager::get_font( const std::string &family, const std::string &style, points pts )
+std::shared_ptr<script::font> font_manager::get_font( const std::string &family, const std::string &style, points pts, int dpiw, int dpih, int maxGlyphW, int maxGlyphH )
 {
 	std::shared_ptr<script::font> ret;
 
@@ -121,8 +121,8 @@ std::shared_ptr<script::font> font_manager::get_font( const std::string &family,
 	if ( nsfont )
 	{
 		auto cret = std::make_shared<script::cocoa::font>( static_cast<void *>(nsfont), family, style, pts );
-		cret->load_dpi( _dpi_h, _dpi_v );
-		cret->max_glyph_store( _max_glyph_w, _max_glyph_h );
+		cret->load_dpi( dpiw, dpih );
+		cret->max_glyph_store( maxGlyphW, maxGlyphH );
         cret->init_font();
         ret = cret;
 	}

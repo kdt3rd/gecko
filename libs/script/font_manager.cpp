@@ -6,13 +6,6 @@
 //
 
 #include "font_manager.h"
-#include <mutex>
-
-namespace
-{
-	std::vector<std::shared_ptr<script::font_manager>> *managers = nullptr;
-	std::mutex lock;
-}
 
 namespace script
 {
@@ -31,43 +24,26 @@ font_manager::~font_manager( void )
 
 ////////////////////////////////////////
 
-namespace
+std::shared_ptr<font_dpi_cache>
+font_manager::get_cache( int dpih, int dpiv, int maxGlyphW, int maxGlyphH )
 {
-	std::once_flag flag;
-}
+	std::pair<int, int> id = std::make_pair( dpih, dpiv );
 
-const std::vector<std::shared_ptr<font_manager>> &font_manager::list( void )
-{
-	std::call_once( flag, [](){ init(); } );
+	std::shared_ptr<font_dpi_cache> ret;
 
-	std::lock_guard<std::mutex> guard( lock );
-
-	if ( managers == nullptr )
-		managers = new std::vector<std::shared_ptr<font_manager>>;
-	return *managers;
+	std::lock_guard<std::mutex> lk( _mx );
+	auto i = _dpi_cache.find( id );
+	if ( i == _dpi_cache.end() )
+	{
+		ret = font_dpi_cache::make( this, dpih, dpiv, maxGlyphW, maxGlyphH );
+		_dpi_cache[id] = ret;
+	}
+	else
+		ret = i->second;
+	return ret;
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<font_manager> font_manager::common( void )
-{
-	auto mgrs = list();
-	if ( !mgrs.empty() )
-		return mgrs.front();
-	return std::shared_ptr<font_manager>();
-}
-
-////////////////////////////////////////
-
-void font_manager::enroll( const std::shared_ptr<font_manager> &mgr )
-{
-	std::lock_guard<std::mutex> guard( lock );
-	if ( managers == nullptr )
-		managers = new std::vector<std::shared_ptr<font_manager>>;
-	managers->push_back( mgr );
-}
-
-////////////////////////////////////////
-
-}
+} // namespace script
 

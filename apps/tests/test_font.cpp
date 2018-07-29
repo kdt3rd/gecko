@@ -14,13 +14,13 @@ namespace
 
 int safemain( int /*argc*/, char * /*argv*/ [] )
 {
-	std::shared_ptr<script::font_manager> fontmgr = script::font_manager::common();
+	std::shared_ptr<script::font_manager> fontmgr = script::font_manager::make();
 
 	auto fams = fontmgr->get_families();
 	for ( auto f: fams )
 		std::cout << f << std::endl;
 
-	auto font = fontmgr->get_font( "Times", "bold", 16 );
+	auto font = fontmgr->get_font( "Times", "bold", 16, 95, 95, 1024, 1024 );
 
 	if ( font )
 	{

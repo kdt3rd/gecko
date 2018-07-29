@@ -87,6 +87,8 @@ public:
 
 	platform::context::render_guard bind( void );
 
+	inline const std::shared_ptr<platform::window> &native_window( void ) const { return _window; }
+
 protected:
 	void monitor_changed( void );
 

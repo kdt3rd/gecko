@@ -43,7 +43,6 @@ void shape::add( gl::api &ogl, const polylines &lines, const paint &c )
 		lines.stroked( c.get_stroke_width() ).filled( m.msh, "position" );
 		_meshes.push_back( std::move( m ) );
 	}
-
 }
 
 ////////////////////////////////////////

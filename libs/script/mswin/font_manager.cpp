@@ -71,6 +71,16 @@ namespace script { namespace mswin
 struct font_manager::pimpl
 {
 	FT_Library ftlib;
+
+	pimpl( void )
+	{
+		if ( FT_Init_FreeType( &(ftlib) ) != 0 )
+			throw std::runtime_error( "freetype initialization failed" );
+	}
+	~pimpl( void )
+	{
+		FT_Done_FreeType( ftlib );
+	}
 };
 
 ////////////////////////////////////////
@@ -78,16 +88,12 @@ struct font_manager::pimpl
 font_manager::font_manager( void )
 	: _impl( new pimpl )
 {
-	if ( FT_Init_FreeType( &(_impl->ftlib) ) != 0 )
-		throw std::runtime_error( "freetype initialization failed" );
 }
 
 ////////////////////////////////////////
 
 font_manager::~font_manager( void )
 {
-	FT_Done_FreeType( _impl->ftlib );
-
 	delete _impl;
 }
 
@@ -146,12 +152,14 @@ std::set<std::string> font_manager::get_styles( const std::string &family )
 ////////////////////////////////////////
 
 std::shared_ptr<script::font>
-font_manager::get_font( const std::string &family, const std::string &style, points pts )
+font_manager::get_font( const std::string &family, const std::string &style, points pts,
+						int dpih, int dpiv, int maxGlyphW, int maxGlyphH )
 {
 	std::string lang = base::locale::language();
 
 	std::shared_ptr<script::font> ret;
 
+	// TODO: is thie correct - an em could be different for different DPI??????
 	HDC dc = CreateCompatibleDC( NULL );
 	if ( dc == NULL )
 		throw_lasterror( "unable to create device for text query" );
@@ -211,6 +219,8 @@ font_manager::get_font( const std::string &family, const std::string &style, poi
 	if ( ttfsz == GDI_ERROR )
 		throw_lasterror( "unable to retrieve font data" );
 
+	std::lock_guard<std::mutex> lk( _mx );
+
 	FT_Face ftface;
 	auto error = FT_New_Memory_Face( _impl->ftlib, reinterpret_cast<const FT_Byte *>( ttfData.get() ), static_cast<FT_Long>( ttfsz ), 0, &ftface );
 	if ( error )
@@ -219,10 +229,11 @@ font_manager::get_font( const std::string &family, const std::string &style, poi
 	try
 	{
 		ret = std::make_shared<script::freetype2::font>( ftface, family, style, pts, ttfData );
-		ret->load_dpi( _dpi_h, _dpi_v );
-		ret->max_glyph_store( _max_glyph_w, _max_glyph_h );
+		ret->load_dpi( dpiw, dpih );
+		ret->max_glyph_store( maxGlyphW, maxGlyphH );
 
 		ret->init_font();
+		// the destruction of the library instance will clean up the face...
 	}
 	catch ( ... )
 	{

@@ -68,8 +68,8 @@ void font::init_font( void )
 
 	if ( FT_IS_SCALABLE( _face ) )
 	{
-		std::cout << "Scalable font, setting to " << _size << " points (" << int( _size.count() * 64.F )
-				  << " 26.6) hres " << _dpi_h << " vres " << _dpi_v << std::endl;
+//		std::cout << "Scalable font, setting to " << _size << " points (" << int( _size.count() * 64.F )
+//				  << " 26.6) hres " << _dpi_h << " vres " << _dpi_v << std::endl;
 		err = FT_Set_Char_Size( _face, static_cast<int>( _size.count() * 64.F ), 0,
 								_dpi_h, _dpi_v );
 		if ( err )
@@ -130,13 +130,14 @@ void font::init_font( void )
 		_extents.max_y_advance = 0.0;
 	}
 
-	std::cout << "font has width " << _extents.width << " height " << _extents.height << " PIXELS" << std::endl;
+//	std::cout << "font has width " << _extents.width << " height " << _extents.height << " PIXELS" << std::endl;
 }
 
 ////////////////////////////////////////
 
 font::~font( void )
 {
+	// the destruction of the library instance will clean up the face...
 //	FT_Done_Face( _face );
 }
 

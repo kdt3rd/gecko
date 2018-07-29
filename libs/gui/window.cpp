@@ -98,10 +98,13 @@ void window::set_widget( const std::shared_ptr<widget> &w )
 	in_context( [&,this]
 	{
 		_widget = w;
-		_widget->build( *this );
-		_widget->layout_target()->compute_bounds();
-		_widget->layout_target()->set_horizontal( 0.0, _window->width() - 1.0 );
-		_widget->layout_target()->set_vertical( 0.0, _window->height() - 1.0 );
+		if ( _widget )
+		{
+			_widget->build( *this );
+			_widget->layout_target()->compute_bounds();
+			_widget->layout_target()->set_horizontal( 0.0, _window->width() - 1.0 );
+			_widget->layout_target()->set_vertical( 0.0, _window->height() - 1.0 );
+		}
 	} );
 }
 
@@ -254,6 +257,10 @@ bool window::process_event( const event &e )
 	switch ( e.type() )
 	{
 		case event_type::DISPLAY_CHANGED:
+			// anything else to do?
+			application::current()->update_display( this );
+			if ( _widget )
+				in_context( [&,this] { _widget->monitor_changed( *this ); } );
 			break;
 
 		case event_type::APP_QUIT_REQUEST:

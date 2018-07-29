@@ -7,10 +7,16 @@
 
 #pragma once
 
+#include <memory>
 #include <gl/color.h>
 #include <draw/colors.h>
-#include <script/font_manager.h>
 #include "types.h"
+
+namespace script
+{
+class font;
+class font_dpi_cache;
+}
 
 namespace gui
 {
@@ -84,7 +90,7 @@ public:
 		return _version;
 	}
 
-	void set_font_manager( const std::shared_ptr<script::font_manager> &fmgr );
+	void set_font_cache( const std::shared_ptr<script::font_dpi_cache> &c );
 
 	void set_background_color( const color &c )
 	{
@@ -124,7 +130,7 @@ private:
 
 	size _min_widget_size{ 4.F, 4.F };
 
-	std::shared_ptr<script::font_manager> _fmgr;
+	std::shared_ptr<script::font_dpi_cache> _font_cache;
 
 	std::shared_ptr<script::font> _display;
 	std::shared_ptr<script::font> _title;

@@ -9,6 +9,7 @@ end
 lib = library "script"
   source{
 	"font.cpp",
+	"font_dpi_cache.cpp",
 	"font_manager.cpp"
   }
   optional_source{

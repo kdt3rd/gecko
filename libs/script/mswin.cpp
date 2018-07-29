@@ -13,9 +13,9 @@
 namespace script
 {
 
-void font_manager::init( void )
+std::shared_ptr<font_manager> font_manager::make( void )
 {
-	enroll( std::make_shared<script::mswin::font_manager>() );
+	return std::make_shared<script::mswin::font_manager>();
 }
 
 ////////////////////////////////////////

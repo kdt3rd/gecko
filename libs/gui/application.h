@@ -25,6 +25,7 @@ class font_manager;
 namespace platform
 {
 class system;
+class screen;
 }
 
 namespace gui
@@ -56,7 +57,8 @@ public:
 	void register_global_hotkey( platform::scancode sc, hotkey_handler f );
 	bool dispatch_global_hotkey( const event &e );
 
-	std::shared_ptr<window> new_window( void );
+	std::shared_ptr<window> new_window( const std::shared_ptr<platform::screen> &s = std::shared_ptr<platform::screen>() );
+	void update_display( window *w );
 
 	// provided in case we track windows in the future or a sub-class
 	void window_destroyed( window *w );
@@ -75,7 +77,6 @@ public:
 
 	std::set<std::string> get_font_families( void );
 	std::set<std::string> get_font_styles( const std::string &family );
-	std::shared_ptr<script::font> get_font( const std::string &family, const std::string &style, coord pixsize );
 
 	std::shared_ptr<platform::system> get_system( void );
 

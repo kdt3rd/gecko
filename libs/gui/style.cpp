@@ -6,21 +6,22 @@
 //
 
 #include "style.h"
+#include <script/font_manager.h>
 
 namespace gui
 {
 
 ////////////////////////////////////////
 
-void style::set_font_manager( const std::shared_ptr<script::font_manager> &fmgr )
+void style::set_font_cache( const std::shared_ptr<script::font_dpi_cache> &c )
 {
-	_fmgr = fmgr;
+	_font_cache = c;
 
 	// sizes should be in points (1/72 of an inch)
-	_display = _fmgr->get_font( "Arial", "Bold", 24 );
-	_title = _fmgr->get_font( "Arial", "Bold", 16 );
-	_body = _fmgr->get_font( "Arial", "Bold", 12 );
-	_caption = _fmgr->get_font( "Arial", "Bold", 12 );
+	_display = _font_cache->get_font( "Arial", "Bold", 24 );
+	_title = _font_cache->get_font( "Arial", "Bold", 16 );
+	_body = _font_cache->get_font( "Arial", "Bold", 12 );
+	_caption = _font_cache->get_font( "Arial", "Bold", 12 );
 }
 
 ////////////////////////////////////////

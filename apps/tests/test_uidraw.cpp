@@ -36,11 +36,11 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	gl::api &ogl = win->hw_context().api();
 	ogl.setup_debugging();
 
-	auto fm = script::font_manager::common();
+	auto fm = script::font_manager::make();
 	if ( ! fm )
 		throw std::runtime_error( "no font manager enrolled" );
 
-	draw::text samptext( fm->get_font( "Lucida Grande", "Regular", 28.0 ) );
+	draw::text samptext( fm->get_font( "Lucida Grande", "Regular", 28.0, 95, 95, 1024, 1024 ) );
 	samptext.set_text( "Hello, world!" );
 	samptext.set_position( draw::point( 90.F, 210.F ) );
 	samptext.set_color( draw::color( 1.F, 1.F, 1.F, 1.F ) );
