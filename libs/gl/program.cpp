@@ -66,7 +66,7 @@ void program::use( void )
 
 std::string program::log( void )
 {
-	GLint res;
+	GLint res = 0;
 	glGetProgramiv( _program, GL_INFO_LOG_LENGTH, &res );
 
 	if ( res > 0 )
