@@ -71,6 +71,9 @@ public:
 	{
 		push_context();
 		on_scope_exit { pop_context(); };
+
+		auto guard = hw_context().begin_render();
+
 		std::forward<func>(f)();
 	}
 

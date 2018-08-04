@@ -43,8 +43,8 @@ void radio_button_w::build( context &ctxt )
 
 	size sz = s.widget_minimum_size();
 	auto native = ctxt.to_native( sz );
-	_unchecked.shape_size( native.w(), native.h() );
-	_checked.shape_size( native.w(), native.h() );
+	_unchecked.shape_size( 24, 24 ); //native.w(), native.h() );
+	_checked.shape_size( 24, 24 ); //native.w(), native.h() );
 	_unchecked.set_size( sz.w(), sz.h() );
 	_checked.set_size( sz.w(), sz.h() );
 
@@ -59,13 +59,20 @@ void radio_button_w::paint( context &ctxt )
 {
 	_checked.set_position( x(), y() );
 	_unchecked.set_position( x(), y() );
+
 	bool c = _state;
 	if ( _tracking )
 		c = _current;
 	if ( c )
+	{
+		_checked.set_size( width(), height() );
 		_checked.draw( ctxt.hw_context() );
+	}
 	else
+	{
+		_unchecked.set_size( width(), height() );
 		_unchecked.draw( ctxt.hw_context() );
+	}
 }
 
 ////////////////////////////////////////
