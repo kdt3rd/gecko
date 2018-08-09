@@ -55,7 +55,7 @@ void choices_w::add_choice( const std::string &l )
 
 void choices_w::build( context &ctxt )
 {
-	_layout->set_spacing( ctxt.from_native_horiz( 3 ), ctxt.from_native_vert( 3 ) );
+	_layout->set_spacing( ctxt.from_native_horiz( 8 ), ctxt.from_native_vert( 8 ) );
 	composite::build( ctxt );
 }
 

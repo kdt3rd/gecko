@@ -42,9 +42,9 @@ void radio_button_w::build( context &ctxt )
 	_checked.add( ogl, draw::iconRadioButtonChecked(), c );
 
 	size sz = s.widget_minimum_size();
-	auto native = ctxt.to_native( sz );
-	_unchecked.shape_size( 24, 24 ); //native.w(), native.h() );
-	_checked.shape_size( 24, 24 ); //native.w(), native.h() );
+
+	_unchecked.shape_size( 24, 24 );
+	_checked.shape_size( 24, 24 );
 	_unchecked.set_size( sz.w(), sz.h() );
 	_checked.set_size( sz.w(), sz.h() );
 
@@ -57,20 +57,23 @@ void radio_button_w::build( context &ctxt )
 
 void radio_button_w::paint( context &ctxt )
 {
-	_checked.set_position( x(), y() );
-	_unchecked.set_position( x(), y() );
+	auto sz = std::min( width(), height() );
+	auto offx = x() + (width() - sz) / 2.f;
+	auto offy = y() + (height() - sz) / 2.f;
+	_checked.set_position( offx, offy );
+	_unchecked.set_position( offx, offy );
 
 	bool c = _state;
 	if ( _tracking )
 		c = _current;
 	if ( c )
 	{
-		_checked.set_size( width(), height() );
+		_checked.set_size( sz, sz );
 		_checked.draw( ctxt.hw_context() );
 	}
 	else
 	{
-		_unchecked.set_size( width(), height() );
+		_unchecked.set_size( sz, sz );
 		_unchecked.draw( ctxt.hw_context() );
 	}
 }
