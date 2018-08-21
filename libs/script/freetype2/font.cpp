@@ -143,16 +143,16 @@ font::~font( void )
 
 ////////////////////////////////////////
 
-extent_type
+points
 font::kerning( char32_t c1, char32_t c2 )
 {
 	FT_Vector kerning;
 	FT_UInt prev_index = FT_Get_Char_Index( _face, c1 );
 	FT_UInt next_index = FT_Get_Char_Index( _face, c2 );
 
-	FT_Get_Kerning( _face, prev_index, next_index, FT_KERNING_UNFITTED, &kerning );
+	FT_Get_Kerning( _face, prev_index, next_index, FT_KERNING_UNSCALED, &kerning );
 
-	return kerning.x / ( 64.0 * 64.0 );
+	return size() * points::value_type(kerning.x);
 }
 
 ////////////////////////////////////////
