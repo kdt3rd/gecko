@@ -32,22 +32,23 @@ void font::init_font( void )
 {
     // we have the dpi now, so we can convert points to dots...
     NSFont *nf = reinterpret_cast<NSFont *>( _font );
-    _extents.ascent = [nf ascender] * extent_type( _dpi_v ) / extent_type( 72.0 ); // in points?
-    _extents.descent = [nf descender] * extent_type( _dpi_v ) / extent_type( 72.0 );
+    _extents.ascent = [nf ascender];// * extent_type( _dpi_v ) / extent_type( 72.0 ); // in points?
+    _extents.descent = [nf descender];// * extent_type( _dpi_v ) / extent_type( 72.0 );
     NSRect bbox = [nf boundingRectForFont];
     NSSize madv = [nf maximumAdvancement];
     _extents.width = NSWidth( bbox );
     _extents.height = NSHeight( bbox );
     _extents.max_x_advance = madv.width;
     _extents.max_y_advance = madv.height;
+	std::cout << "font height: " << _extents.height << " asc desc " << _extents.ascent << ' ' << _extents.descent << std::endl;
 }
 
 ////////////////////////////////////////
 
-extent_type
+points
 font::kerning( char32_t /*c1*/, char32_t /*c2*/ )
 {
-	return extent_type(0);
+	return points(0);
 }
 
 ////////////////////////////////////////
@@ -99,16 +100,21 @@ font::get_glyph( char32_t char_code )
         CGFloat y = descent;
         CGContextSetTextPosition( ctx, x, y );
         CTLineDraw( line, ctx );
+        double ws = CTLineGetTrailingWhitespaceWidth( line );
         CFRelease( line );
 
+        std::cout << "add_glyph " << char_code << " w " << width << " h " << height << std::endl;
         add_glyph( char_code, static_cast<const uint8_t *>( data ), width, width, height );
         text_extents &gle = _glyph_cache[char_code];
-        gle.x_bearing = extent_type(0);
-        gle.y_bearing = std::floor( height / extent_type(2) ); //ascent + descent;
-        gle.width = static_cast<extent_type>( width );
-        gle.height = static_cast<extent_type>( height );
-        gle.x_advance = width;
-        gle.y_advance = extent_type(0);
+        // inch / dot * points / inch
+        extent_type ptw = extent_type(width) * extent_type(72) / _dpi_h;
+        extent_type pth = extent_type(height) * extent_type(72) / _dpi_v;
+        gle.x_bearing = points(0);
+        gle.y_bearing = std::floor( extent_type(pth) / extent_type(2) ); //ascent + descent;
+        gle.width = static_cast<points>( ptw );
+        gle.height = static_cast<points>( pth );
+        gle.x_advance = ptw + ws * extent_type(72) / _dpi_h;
+        gle.y_advance = points(0);
 
         // Save as JPEG
         /*

@@ -59,6 +59,3 @@ font_dpi_cache::get_font( const std::string &family, const std::string &style, p
 ////////////////////////////////////////
 
 } // script
-
-
-

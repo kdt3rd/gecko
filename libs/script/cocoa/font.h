@@ -25,7 +25,7 @@ public:
 
 	void init_font( void ) override;
 
-	extent_type kerning( char32_t c1, char32_t c2 ) override;
+	points kerning( char32_t c1, char32_t c2 ) override;
 
 protected:
 	const text_extents &get_glyph( char32_t char_code ) override;

@@ -73,7 +73,7 @@ dots_per_unit screen::dpi( void ) const
 	NSScreen *scr = static_cast<NSScreen *>( _nsscreen );
 	NSDictionary *desc = [scr deviceDescription];
 	NSValue *val = [desc objectForKey:NSDeviceResolution];
-	NSSize dpi;
+	NSSize dpi = { 100., 100. };
 	[val getValue:&dpi];
 	return dots_per_unit( dots_per_unit::coord_type(dpi.width),
 						  dots_per_unit::coord_type(dpi.height) );
@@ -84,8 +84,8 @@ dots_per_unit screen::dpi( void ) const
 dots_per_unit screen::dpmm( void ) const
 {
 	dots_per_unit inch = dpi();
-	return dots_per_unit( inch.w() * dots_per_unit::coord_type(25.4),
-						  inch.h() * dots_per_unit::coord_type(25.4) );
+	return dots_per_unit( inch.w() / dots_per_unit::coord_type(25.4),
+						  inch.h() / dots_per_unit::coord_type(25.4) );
 }
 
 ////////////////////////////////////////

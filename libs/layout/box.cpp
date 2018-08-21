@@ -126,16 +126,16 @@ void box::compute_layout( void )
 	switch ( _align )
 	{
 		case alignment::LEFT:
-			x = width() - _pad[1];
+			x = _pad[0];
 			y = _pad[2];
-			dx = coord(-1);
+			dx = coord(1);
 			dy = min_coord();
 			break;
 
 		case alignment::RIGHT:
-			x = _pad[0];
+			x = width() - _pad[1];
 			y = _pad[2];
-			dx = coord(1);
+			dx = coord(-1);
 			dy = min_coord();
 			break;
 
@@ -227,4 +227,3 @@ void box::compute_layout( void )
 ////////////////////////////////////////
 
 }
-

@@ -47,7 +47,7 @@ int safemain( int argc, char **argv )
 	{
 		using namespace gui;
 
-		auto fakemenu = box( alignment::RIGHT );
+		auto fakemenu = box( alignment::LEFT );
 		fakemenu->set_padding( 0, 0, win->from_native_vert( 2 ), win->from_native_vert( 2 ) );
 		fakemenu->set_spacing( win->from_native_horiz( 8 ), win->from_native_vert( 8 ) );
 		fakemenu->add( label( "File", alignment::LEFT ) );
@@ -65,7 +65,7 @@ int safemain( int argc, char **argv )
 		ch->add_choice( "Choice 1" );
 		ch->add_choice( "Choice 2" );
 		ch->add_choice( "Choice 3" );
-		ch->when_activated.connect( [&](size_t c) 
+		ch->when_activated.connect( [&](size_t c)
 									{
 										win->pop_cursor();
 										switch ( c )
@@ -144,4 +144,3 @@ int main( int argc, char *argv[] )
 }
 
 ////////////////////////////////////////
-

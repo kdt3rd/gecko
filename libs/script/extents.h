@@ -22,12 +22,12 @@ using points = base::units::points<extent_type>;
 /// @brief Extents of a glyph or string.
 struct text_extents
 {
-	extent_type x_bearing = extent_type(0);
-	extent_type y_bearing = extent_type(0);
-	extent_type width = extent_type(0);
-	extent_type height = extent_type(0);
-	extent_type x_advance = extent_type(0);
-	extent_type y_advance = extent_type(0);
+	points x_bearing = points(0);
+	points y_bearing = points(0);
+	points width = points(0);
+	points height = points(0);
+	points x_advance = points(0);
+	points y_advance = points(0);
 };
 
 ////////////////////////////////////////
@@ -35,14 +35,14 @@ struct text_extents
 /// @brief Extents of a font.
 struct font_extents
 {
-	extent_type ascent = extent_type(0);
-	extent_type descent = extent_type(0);
-	extent_type width = extent_type(0);
-	extent_type height = extent_type(0);
-	extent_type max_x_advance = extent_type(0);
-	extent_type max_y_advance = extent_type(0);
+	points ascent = points(0);
+	points descent = points(0);
+	points width = points(0);
+	points height = points(0);
+	points max_x_advance = points(0);
+	points max_y_advance = points(0);
 };
 
 ////////////////////////////////////////
 
-}
+} // namespace script

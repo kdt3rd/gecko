@@ -112,14 +112,14 @@ void window::set_widget( const std::shared_ptr<widget> &w )
 
 coord window::width( void ) const
 {
-	return _window->width();
+	return from_native_horiz( _window->width() );
 }
 
 ////////////////////////////////////////
 
 coord window::height( void ) const
 {
-	return _window->height();
+	return from_native_vert( _window->height() );
 }
 
 ////////////////////////////////////////
@@ -437,17 +437,10 @@ void window::paint( const rect &r )
 	if ( ! _window )
 		return;
 
-	auto winbounds = _window->phys_bounds();
-
 	platform::context &hwctxt = _window->hw_context();
 	auto guard = hwctxt.begin_render();
 
-	platform::rect native_winr = to_native( winbounds );
-	native_winr.set_x( 0 );
-	native_winr.set_y( 0 );
-	hwctxt.viewport( native_winr );
-
-	auto clipguard = hwctxt.push_clip( r.empty() ? native_winr : to_native( r ) );
+	auto clipguard = hwctxt.push_clip( r.empty() ? _window->bounds() : to_native( r ) );
 
 	gl::api &ogl = hwctxt.api();
 	ogl.reset();
@@ -456,8 +449,13 @@ void window::paint( const rect &r )
     ogl.blend_func( gl::blend_style::SRC_ALPHA, gl::blend_style::ONE_MINUS_SRC_ALPHA );
 
 	ogl.clear_color( _style.background_color() );
+	ogl.set_projection( gl::matrix4::ortho( 0, width().count(), 0, height().count() ) );
 	ogl.clear();
-	ogl.set_projection( gl::matrix4::ortho( 0, winbounds.width().count(), 0, winbounds.height().count() ) );
+
+//	std::cout << "model matrix: " << ogl.model_matrix() << std::endl;
+//	std::cout << "view matrix: " << ogl.view_matrix() << std::endl;
+//	std::cout << "projection matrix: " << ogl.projection_matrix() << std::endl;
+//	std::cout << "current matrix: " << ogl.current_matrix() << std::endl;
 
 	if ( _widget )
 	{
@@ -466,8 +464,8 @@ void window::paint( const rect &r )
 			if ( _internal_paint )
 			{
 				_widget->layout_target()->compute_bounds();
-				_widget->set_size( winbounds.width(), winbounds.height() );
-				_widget->layout_target()->set_size( winbounds.width(), winbounds.height() );
+				_widget->set_size( width(), height() );
+				_widget->layout_target()->set_size( width(), height() );
 				_widget->layout_target()->compute_layout();
 				if ( _widget->update_layout( 250.0 ) )
 					invalidate( *_widget );
@@ -490,6 +488,9 @@ void window::resized( const size &s )
 		in_context( [&,this]
 		{
 			rect r = { point(), s };
+
+			hw_context().viewport( 0, 0, _window->width(), _window->height() );
+
 			_widget->set( r );
 			_widget->layout_target()->set( r );
 			_widget->layout_target()->compute_layout();

@@ -12,6 +12,7 @@
 #include <stdexcept>
 
 #include "context.h"
+#include <platform/event.h>
 #include <platform/screen.h>
 
 #include <Cocoa/Cocoa.h>
@@ -88,6 +89,13 @@ void window::set_popup( void )
 void window::show( void )
 {
 	[_impl->win makeKeyAndOrderFront:nil];
+    rect r = query_geometry();
+    process_event(
+        event::window( nullptr,
+                       event_type::WINDOW_MOVE_RESIZE,
+                       r.x(), r.y(), r.width(), r.height() ) );
+//                       static_cast<coord_type>( newSize.width * scale ),
+//                       static_cast<coord_type>( newSize.height * scale ) ) );
 }
 
 ////////////////////////////////////////
@@ -174,8 +182,9 @@ rect window::query_geometry( void )
 	rect scrbounds = query_screen()->bounds( true );
 	auto y = scrbounds.height() - ( cgr.origin.y + cgr.size.height );
 
+    double sf = scale_factor();
 	// this includes the title bar?
-	return rect( cgr.origin.x, cgr.origin.y, cgr.size.width, cgr.size.height );
+	return rect( cgr.origin.x, cgr.origin.y, cgr.size.width * sf, cgr.size.height * sf );
 }
 
 ////////////////////////////////////////
@@ -183,11 +192,12 @@ rect window::query_geometry( void )
 bool
 window::update_geometry( rect &r )
 {
+    double sf = scale_factor();
 	NSRect cgr;
 	cgr.origin.x = r.x();
 	cgr.origin.y = r.y();
-	cgr.size.width = r.width();
-	cgr.size.height = r.height();
+	cgr.size.width = r.width() / sf;
+	cgr.size.height = r.height() / sf;
 
 	rect scrbounds = query_screen()->bounds( true );
 	auto y = scrbounds.height() - r.height() - r.y();
@@ -212,4 +222,3 @@ void window::submit_delayed_expose( const rect &r )
 
 } // namespace cocoa
 } // namespace platform
-

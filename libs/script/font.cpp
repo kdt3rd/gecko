@@ -54,7 +54,7 @@ font::extents( const std::string &utf8 )
 			break;
 
 		const text_extents &gext = get_glyph( static_cast<char32_t>( ccode ) );
-		extent_type k = kerning( static_cast<char32_t>( prev ), static_cast<char32_t>( ccode ) );
+		points k = kerning( static_cast<char32_t>( prev ), static_cast<char32_t>( ccode ) );
 
 		if ( prev == L'\0' )
 			retval.x_bearing = gext.x_bearing;
@@ -64,7 +64,7 @@ font::extents( const std::string &utf8 )
 		retval.height = std::max( retval.height, gext.height );
 		retval.x_advance += gext.x_advance;
 		retval.y_advance += gext.y_advance;
-		retval.width = retval.x_advance - gext.x_advance + gext.x_bearing + gext.width;
+		retval.width += retval.x_advance - gext.x_advance + gext.x_bearing + gext.width;
 
 		prev = ccode;
 	}
@@ -76,7 +76,7 @@ font::extents( const std::string &utf8 )
 
 void
 font::render(
-	const std::function<void(coord_type,coord_type,coord_type,coord_type)> &add_point,
+	const std::function<void(coord_type,coord_type,precision_type,precision_type)> &add_point,
 	const std::function<void(size_t,size_t,size_t)> &add_tri,
 	coord_type startX, coord_type startY, const std::string &utf8 )
 {
@@ -109,45 +109,45 @@ font::render(
 		get_glyph( static_cast<char32_t>( ccode ) );
 
 	wchar_t prev = L'\0';
-	extent_type curposX = startX;
-	size_t points = 0;
+	points curposX = startX;
+	size_t pts = 0;
 	for ( wchar_t ccode: tmp )
 	{
 		const text_extents &gext = get_glyph( static_cast<char32_t>( ccode ) );
-		extent_type k = kerning( static_cast<char32_t>( prev ), static_cast<char32_t>( ccode ) );
+		points k = kerning( static_cast<char32_t>( prev ), static_cast<char32_t>( ccode ) );
 		curposX -= k;
 
 		auto idx_base_i = _glyph_index_offset.find( static_cast<char32_t>( ccode ) );
 		if ( idx_base_i != _glyph_index_offset.end() )
 		{
 			size_t coordOff = idx_base_i->second;
-			size_t idx_base = points;
+			size_t idx_base = pts;
 
 			if ( ( idx_base / 2 + 3 ) > static_cast<size_t>( std::numeric_limits<uint16_t>::max() ) )
 				throw std::runtime_error( "String too long for OpenGL ES" );
 
-			extent_type upperY = startY - gext.y_bearing;
-			extent_type lowerY = upperY + gext.height;
-			extent_type leftX = curposX + gext.x_bearing;
-			extent_type rightX = leftX + gext.width;
+			points upperY = startY - gext.y_bearing;
+			points lowerY = upperY + gext.height;
+			points leftX = curposX + gext.x_bearing;
+			points rightX = leftX + gext.width;
 
 			add_point(
 				static_cast<coord_type>( leftX ), static_cast<coord_type>( upperY ),
-				_glyph_coords[coordOff + 0], _glyph_coords[coordOff + 1] );
+				_glyph_coords[coordOff + 0].count(), _glyph_coords[coordOff + 1].count() );
 
 			add_point(
 				static_cast<coord_type>( rightX ), static_cast<coord_type>( upperY ),
-				_glyph_coords[coordOff + 2], _glyph_coords[coordOff + 3] );
+				_glyph_coords[coordOff + 2].count(), _glyph_coords[coordOff + 3].count() );
 
 			add_point(
 				static_cast<coord_type>( rightX ), static_cast<coord_type>( lowerY ),
-				_glyph_coords[coordOff + 4], _glyph_coords[coordOff + 5] );
+				_glyph_coords[coordOff + 4].count(), _glyph_coords[coordOff + 5].count() );
 
 			add_point(
 				static_cast<coord_type>( leftX ), static_cast<coord_type>( lowerY ),
-				_glyph_coords[coordOff + 6], _glyph_coords[coordOff + 7] );
+				_glyph_coords[coordOff + 6].count(), _glyph_coords[coordOff + 7].count() );
 
-			points += 4;
+			pts += 4;
 
 			uint16_t idxVal = static_cast<uint16_t>( idx_base );
 			add_tri( idxVal, idxVal + 1, idxVal + 2 );
@@ -161,44 +161,40 @@ font::render(
 
 ////////////////////////////////////////
 
-std::pair<extent_type, extent_type>
-font::align_text( const std::string &utf8, extent_type x1, extent_type y1, extent_type x2, extent_type y2, base::alignment a )
+std::pair<points, points>
+font::align_text( const std::string &utf8, points x1, points y1, points x2, points y2, base::alignment a )
 {
-	base::rect<extent_type> rect;
-	rect.set_x1( std::ceil( x1 ) );
-	rect.set_y1( std::ceil( y1 ) );
-	rect.set_x2( std::floor( x2 ) );
-	rect.set_y2( std::floor( y2 ) );
+	base::rect<points> r{ x1, y1, x2 - x1, y2 - y1 };
 
 	if ( utf8.empty() )
-		return { rect.x(), rect.y() };
+		return { r.x(), r.y() };
 
 	// TODO: add multi-line support?
 
 	font_extents fex = extents();
 	text_extents tex = extents( utf8 );
 
-	extent_type y = extent_type(0), x = extent_type(0);
-	extent_type textHeight = fex.ascent - fex.descent;
+	points y = points(0), x = points(0);
+	points textHeight = fex.ascent - fex.descent;
 
 	switch ( a )
 	{
 		case base::alignment::CENTER:
 		case base::alignment::LEFT:
 		case base::alignment::RIGHT:
-			y = rect.y() + std::round( ( rect.height() + textHeight ) / extent_type(2) ) + fex.descent;
+			y = r.y() + ( r.height() + textHeight ) / points(2) + fex.descent;
 			break;
 
 		case base::alignment::BOTTOM:
 		case base::alignment::BOTTOM_RIGHT:
 		case base::alignment::BOTTOM_LEFT:
-			y = rect.y2() - fex.descent;
+			y = r.y2() - fex.descent;
 			break;
 
 		case base::alignment::TOP:
 		case base::alignment::TOP_RIGHT:
 		case base::alignment::TOP_LEFT:
-			y = rect.y1() + fex.ascent;
+			y = r.y1() + fex.ascent;
 			break;
 	}
 
@@ -207,19 +203,19 @@ font::align_text( const std::string &utf8, extent_type x1, extent_type y1, exten
 		case base::alignment::LEFT:
 		case base::alignment::TOP_LEFT:
 		case base::alignment::BOTTOM_LEFT:
-			x = rect.x() - tex.x_bearing;
+			x = r.x() - tex.x_bearing;
 			break;
 
 		case base::alignment::RIGHT:
 		case base::alignment::TOP_RIGHT:
 		case base::alignment::BOTTOM_RIGHT:
-			x = rect.x2() - tex.width;
+			x = r.x2() - tex.width;
 			break;
 
 		case base::alignment::CENTER:
 		case base::alignment::TOP:
 		case base::alignment::BOTTOM:
-			x = rect.x1() + std::round( ( rect.width() - tex.width ) / extent_type(2) );
+			x = r.x1() + ( r.width() - tex.width ) / points(2);
 			break;
 	}
 

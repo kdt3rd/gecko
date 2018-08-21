@@ -25,6 +25,20 @@
 
 #endif // HAVE_LIBPNG
 
+#include <media/riff/fourcc.h>
+
+namespace
+{
+    // tbd: move this to central place for reader and writer
+    struct chunk
+    {
+        // always have len, type and crc. crc includes type and (data)
+        uint32_t _len;
+        media::fourcc _type;
+        uint32_t _crc;
+        std::vector<uint8_t> data; // TBD: zero copy, subimage read
+    };
+}
 ////////////////////////////////////////
 
 namespace media
@@ -182,7 +196,7 @@ png_read_track::doRead( int64_t f )
         case PNG_COLOR_TYPE_RGB_ALPHA: c = 4; break;
         default: throw_runtime( "PNG color type not supported ({0})", color_type );
     }
-    
+
     image_buffer imgbuf;
     int offbits = 8;
     if ( bit_depth > 8 )
@@ -219,7 +233,7 @@ png_read_track::doRead( int64_t f )
 
     for ( png_uint_32 i = 0; i < temp_height; ++i )
         row_pointers[i] = static_cast<uint8_t *>( imgbuf.row( static_cast<int64_t>( i ) ) );
-    
+
     // read the png into image_data through row_pointers
     png_read_image( png_ptr, row_pointers.data() );
 
@@ -268,6 +282,3 @@ void register_png_reader( void )
 }
 
 } // media
-
-
-

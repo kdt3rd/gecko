@@ -14,6 +14,7 @@
 #include <dlfcn.h>
 
 #include <Cocoa/Cocoa.h>
+#include <base/backtrace.h>
 
 namespace
 {

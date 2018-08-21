@@ -124,7 +124,7 @@ public:
 
 private:
 	size_t _version = 0;
-	color _bg = gl::white;
+	color _bg = gl::gray;
 	color _dominant[3] = { draw::indigo[2], draw::indigo[5], draw::indigo[9] };
 	color _accent = draw::orange[5];
 
@@ -141,4 +141,3 @@ private:
 ////////////////////////////////////////
 
 }
-

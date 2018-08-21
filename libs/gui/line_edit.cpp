@@ -42,9 +42,8 @@ void line_edit_w::build( context &ctxt )
 	const auto &f = s.body_font();
 
 	script::font_extents fex = f->extents();
-	script::text_extents tex = f->extents( _text.get_text() );
-	const coord ht = ctxt.from_native_vert( fex.height + 2 );
-	const coord wt = ctxt.from_native_horiz( tex.width + 4 );
+	const coord ht = coord( fex.height ) + ctxt.from_native_vert( 2 );
+	const coord wt = coord( fex.width ) + ctxt.from_native_vert( 4 );
 	layout_target()->set_minimum( wt, ht );
 
 	_text.set_font( f );
@@ -61,7 +60,7 @@ void line_edit_w::paint( context &ctxt )
 {
 	script::font_extents fex = _text.get_font()->extents();
 
-	auto voff = ctxt.from_native_vert( static_cast<platform::coord_type>( fex.descent ) );
+	auto voff = coord( fex.descent );
 	auto inset = ctxt.from_native_horiz( static_cast<platform::coord_type>( 2 ) );
 
 	auto scalep = ctxt.from_native(
@@ -85,8 +84,8 @@ void line_edit_w::paint( context &ctxt )
 	const std::string &str = _text.get_text();
 	script::text_extents tex = _text.get_font()->extents( str.substr( 0, _cursor ) );
 
-	auto mpos = ctxt.from_native_horiz( static_cast<platform::coord_type>( tex.width ) );
-	auto moff = ctxt.from_native_vert( static_cast<platform::coord_type>( fex.ascent ) );
+	coord mpos = tex.width;
+	coord moff = fex.ascent;
 	_marker.set_position( x() + inset + mpos, y() + height() + voff - moff );
 	_marker.set_size( inset * 0.75F, moff - voff );
 	_marker.draw( hwc );

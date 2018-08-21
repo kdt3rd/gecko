@@ -91,7 +91,7 @@ void scroll_bar_w::paint( context &ctxt )
 	if ( _horizontal )
 	{
 		value_type x = translate_from_full_w( _value );
-		value_type w = _handle * width() / ( _max - _min );
+		value_type w = _handle * width().count() / ( _max - _min );
 		_knob.set_position( x, y() );
 		_knob.set_size( w, height() );
 		_knob.draw( hwc );
@@ -99,7 +99,7 @@ void scroll_bar_w::paint( context &ctxt )
 	else
 	{
 		value_type y = translate_from_full_h( _value );
-		value_type h = _handle * height() / ( _max - _min );
+		value_type h = _handle * height().count() / ( _max - _min );
 		_knob.set_position( x(), y );
 		_knob.set_size( width(), h );
 		_knob.draw( hwc );
@@ -119,20 +119,20 @@ bool scroll_bar_w::mouse_press( const event &e )
 	{
 		value_type x1 = translate_from_full_w( _value );
 		value_type x2 = translate_from_full_w( _value + _handle );
-		if ( p[0] >= x1 && p[0] <= x2 )
+		if ( p[0].count() >= x1 && p[0].count() <= x2 )
 		{
 			_tracking = true;
-			_start = p[0];
+			_start = p[0].count();
 			invalidate();
 		}
-		else if ( p[0] < x1 )
+		else if ( p[0].count() < x1 )
 		{
 			if ( _page > value_type(0) )
 				update_value( _value - _page );
 			else
 				update_value( _value - _handle/value_type(2) );
 		}
-		else if ( p[0] > x2 )
+		else if ( p[0].count() > x2 )
 		{
 			if ( _page > value_type(0) )
 				update_value( _value + _page );
@@ -144,20 +144,20 @@ bool scroll_bar_w::mouse_press( const event &e )
 	{
 		value_type y1 = translate_from_full_h( _value );
 		value_type y2 = translate_from_full_h( _value + _handle );
-		if ( p[1] >= y1 && p[1] <= y2 )
+		if ( p[1].count() >= y1 && p[1].count() <= y2 )
 		{
 			_tracking = true;
-			_start = p[1];
+			_start = p[1].count();
 			invalidate();
 		}
-		else if ( p[1] < y1 )
+		else if ( p[1].count() < y1 )
 		{
 			if ( _page > value_type(0) )
 				update_value( _value - _page );
 			else
 				update_value( _value - _handle/value_type(2) );
 		}
-		else if ( p[1] > y2 )
+		else if ( p[1].count() > y2 )
 		{
 			if ( _page > value_type(0) )
 				update_value( _value + _page );
@@ -182,16 +182,16 @@ bool scroll_bar_w::mouse_move( const event &e )
 
 		if ( _horizontal )
 		{
-			value_type delta = p[0] - _start;
-			_start = p[0];
+			value_type delta = p[0].count() - _start;
+			_start = p[0].count();
 			value_type x = translate_from_full_w( _value );
 			x += delta;
 			update_value( translate_to_full_w( x ) );
 		}
 		else
 		{
-			value_type delta = p[1] - _start;
-			_start = p[1];
+			value_type delta = p[1].count() - _start;
+			_start = p[1].count();
 			value_type y = translate_from_full_h( _value );
 			y += delta;
 			update_value( translate_to_full_h( y ) );

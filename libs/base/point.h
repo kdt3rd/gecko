@@ -225,7 +225,7 @@ inline std::ostream &operator<<( std::ostream &out, const point<T, N> &p )
 {
 	out << p[0];
 	for ( size_t i = 1; i != N; ++i )
-		out << ',' << p[i];
+		out << " , " << p[i];
 	return out;
 }
 

@@ -83,7 +83,7 @@ void scroll_area_w::paint( context &ctxt )
 			gl::api &ogl = hwc.api();
 			ogl.save_matrix();
 			{
-				coord dx = coord( 0 ), dy = coord( 0 );
+				value_type dx = value_type( 0 ), dy = value_type( 0 );
 				if ( _hscroll )
 					dx = _hscroll->value();
 				if ( _vscroll )
@@ -143,13 +143,13 @@ void scroll_area_w::update_widget( void )
 	{
 		if ( _widget->width() > coord( 0 ) )
 		{
-			_hscroll->set_range( _widget->x1(), _widget->x1() + _widget->width() );
-			_hscroll->set_handle( _main->width() );
+			_hscroll->set_range( _widget->x1().count(), _widget->x1().count() + _widget->width().count() );
+			_hscroll->set_handle( _main->width().count() );
 		}
 		if ( _widget->height() > coord( 0 ) )
 		{
-			_vscroll->set_range( _widget->y1(), _widget->y1() + _widget->height() );
-			_vscroll->set_handle( _main->height() );
+			_vscroll->set_range( _widget->y1().count(), _widget->y1().count() + _widget->height().count() );
+			_vscroll->set_handle( _main->height().count() );
 		}
 	}
 	else

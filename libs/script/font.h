@@ -13,11 +13,11 @@
 #include <string>
 #include <vector>
 
+#include "extents.h"
 #include <base/alignment.h>
 #include <base/point.h>
 #include <base/rect.h>
 #include <base/pack.h>
-#include "extents.h"
 
 namespace script
 {
@@ -35,7 +35,8 @@ public:
 	/// is currently a float, and passed to opengl as the same
 	/// (although this class doesn't use OpenGL). But this type is
 	/// here in case it needs to change in the future.
-	using coord_type = float;
+	using precision_type = float;
+	using coord_type = base::units::millimeters<precision_type>;
 
 	/// @brief Destructor.
 	virtual ~font( void );
@@ -85,14 +86,14 @@ public:
 	text_extents extents( const std::string &utf8 );
 
 	/// @brief Get kerning between two glyphs.
-	virtual extent_type kerning( char32_t c1, char32_t c2 ) = 0;
+	virtual points kerning( char32_t c1, char32_t c2 ) = 0;
 
 	/// @brief Renders the given text.
 	/// Given the start as the origin for the baseline, 'renders' the
 	/// given text by filling a set of output coordinates and vertex
 	/// indices to render.
 	void render(
-		const std::function<void(coord_type,coord_type,coord_type,coord_type)> &add_point,
+		const std::function<void(coord_type,coord_type,precision_type,precision_type)> &add_point,
 		const std::function<void(size_t,size_t,size_t)> &add_tri,
 		coord_type startX, coord_type startY, const std::string &utf8 );
 
@@ -123,14 +124,14 @@ public:
 
 	void load_glyphs( const std::string &utf8 );
 
-	std::pair<extent_type, extent_type> align_text( const std::string &utf8, extent_type x1, extent_type y1, extent_type x2, extent_type y2, base::alignment a );
+	std::pair<points, points> align_text( const std::string &utf8, points x1, points y1, points x2, points y2, base::alignment a );
 	template <typename T>
 	base::point<T, 2> align_text( const std::string &utf8, const base::rect<T> &rect, base::alignment a )
 	{
-		auto e = align_text( utf8, static_cast<extent_type>( rect.x1() ),
-		                     static_cast<extent_type>( rect.y1() ),
-							 static_cast<extent_type>( rect.x2() ),
-							 static_cast<extent_type>( rect.y2() ), a );
+		auto e = align_text( utf8, static_cast<points>( rect.x1() ),
+		                     static_cast<points>( rect.y1() ),
+							 static_cast<points>( rect.x2() ),
+							 static_cast<points>( rect.y2() ), a );
 		return base::point<T, 2>( static_cast<T>( e.first ), static_cast<T>( e.second ) );
 	}
 
@@ -172,4 +173,4 @@ protected:
 
 ////////////////////////////////////////
 
-}
+} // namespace script

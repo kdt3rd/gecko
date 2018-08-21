@@ -19,6 +19,8 @@ namespace gui
 class scroll_area_w : public widget
 {
 public:
+	using value_type = scroll_bar_w::value_type;
+
 	scroll_area_w( bool hscroll = true, bool vscroll = true, bool bounded = true );
 	~scroll_area_w( void ) override;
 

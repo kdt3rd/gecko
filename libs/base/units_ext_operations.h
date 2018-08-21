@@ -43,7 +43,7 @@ struct unit_math
     }
 };
 
-}
+} // namespace detail
 
 template <typename tA, typename rA>
 constexpr inline length<tA, rA> operator-( const length<tA, rA> &a )

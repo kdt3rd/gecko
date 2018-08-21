@@ -15,28 +15,28 @@ namespace draw
 ////////////////////////////////////////
 
 text::text( void )
-	: _scale( 1.F, 1.F )
+	: _scale( 1.F, 1.F ), _color( 0.f, 0.f, 0.f, 1.f )
 {
 }
 
 ////////////////////////////////////////
 
 text::text( const std::shared_ptr<script::font> &font )
-	: _font( font ), _scale( 1.F, 1.F )
+	: _font( font ), _scale( 1.F, 1.F ), _color( 0.f, 0.f, 0.f, 1.f )
 {
 }
 
 ////////////////////////////////////////
 
 text::text( const std::string &utf8 )
-	: _utf8( utf8 ), _scale( 1.F, 1.F )
+	: _utf8( utf8 ), _scale( 1.F, 1.F ), _color( 0.f, 0.f, 0.f, 1.f )
 {
 }
 
 ////////////////////////////////////////
 
 text::text( const std::shared_ptr<script::font> &font, const std::string &utf8 )
-	: _font( font ), _utf8( utf8 ), _scale( 1.F, 1.F )
+	: _font( font ), _utf8( utf8 ), _scale( 1.F, 1.F ), _color( 0.f, 0.f, 0.f, 1.f )
 {
 }
 
@@ -99,6 +99,11 @@ void text::draw( platform::context &ctxt )
 			auto txt = texture->bind();
 
 			auto b = _mesh.bind();
+//			std::cout << "scale: " << _scale[0] << " (" << to_api( _scale[0] ) << ")"
+//					  << _scale[1] << " (" << to_api(_scale[1]) << ")" << std::endl;
+//			std::cout << "pos: " << _pos[0] << " (" << to_api( _pos[0] ) << ")"
+//		  			  << _pos[1] << " (" << to_api(_pos[1]) << ")" << std::endl;
+//			std::cout << "draw matrix: " << ogl.current_matrix() << std::endl;
 			b.set_uniform( _mat_pos, ogl.current_matrix() );
 			b.set_uniform( _col_pos, _color );
 			b.set_uniform( _tex_pos, static_cast<int>( txt.unit() ) );
@@ -129,9 +134,10 @@ void text::update( platform::context &ctxt )
 	gl::vertex_buffer_data<gl::vec2,gl::vec2> coords;
 	gl::element_buffer_data tris;
 	{
-		auto add_point = [&]( float cx, float cy, float tx, float ty )
+		using ptype = script::font::coord_type;
+		auto add_point = [&]( ptype cx, ptype cy, ptype tx, ptype ty )
 		{
-			coords.push_back( { cx, cy }, { tx, ty } );
+			coords.push_back( { cx.count(), cy.count() }, { tx.count(), ty.count() } );
 		};
 
 		auto add_tri = [&]( uint32_t a, uint32_t b, uint32_t c )

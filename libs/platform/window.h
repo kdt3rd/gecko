@@ -151,6 +151,7 @@ public:
 	coord_type width( void ) const { return _rect.width(); }
 	coord_type height( void ) const { return _rect.height(); }
 
+	rect bounds( void ) const { return _rect; }
 	phys_rect phys_bounds( void ) const;
 
 	/// @brief Generic event handler

@@ -32,8 +32,8 @@ matrix4 matrix4::inverted( void ) const
     float c0 = get( 2, 0 ) * get( 3, 1 ) - get( 3, 0 ) * get( 2, 1 );
 
     // Should check for 0 determinant
-	float det = s0 * c5 - s1 * c4 + s2 * c3 + s3 * c2 - s4 * c1 + s5 * c0;
-	precondition( std::fabs( det ) > 0.00001F, "non-invertible matrix" );
+    float det = s0 * c5 - s1 * c4 + s2 * c3 + s3 * c2 - s4 * c1 + s5 * c0;
+    precondition( std::fabs( det ) > 0.00001F, "non-invertible matrix" );
 
     float invdet = 1.F / det;
 
@@ -66,163 +66,162 @@ matrix4 matrix4::inverted( void ) const
 
 matrix4 &matrix4::operator*=( const matrix4 &m )
 {
-	*this = *this * m;
-	return *this;
+    *this = *this * m;
+    return *this;
 }
 
 ////////////////////////////////////////
 
 matrix4 matrix4::zero( void )
 {
-	return matrix4
-	{
-		0, 0, 0, 0,
-		0, 0, 0, 0,
-		0, 0, 0, 0,
-		0, 0, 0, 0
-	};
+    return matrix4
+    {
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0
+    };
 }
 
 ////////////////////////////////////////
 
 matrix4 matrix4::translation( float x, float y, float z )
 {
-	return matrix4
-	{
-		1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 1, 0,
-		x, y, z, 1
-	};
+    return matrix4
+    {
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    x, y, z, 1
+    };
 }
 
 ////////////////////////////////////////
 
 matrix4 matrix4::scaling( float x, float y, float z )
 {
-	return matrix4
-	{
-		x, 0, 0, 0,
-		0, y, 0, 0,
-		0, 0, z, 0,
-		0, 0, 0, 1
-	};
+    return matrix4
+    {
+    x, 0, 0, 0,
+    0, y, 0, 0,
+    0, 0, z, 0,
+    0, 0, 0, 1
+    };
 }
 
 ////////////////////////////////////////
 
 matrix4 matrix4::rotation( const versor &v )
 {
-	float w = v[0];
-	float x = v[1];
-	float y = v[2];
-	float z = v[3];
+    float w = v[0];
+    float x = v[1];
+    float y = v[2];
+    float z = v[3];
 
-	return matrix4
-	{
-		1 - 2 * y * y - 2 * z * z,
-		2 * x * y + 2 * w * z,
-		2 * x * z - 2 * w * y,
-		0,
-		2 * x * y - 2 * w * z,
-		1 - 2 * x * x - 2 * z * z,
-		2 * y * z + 2 * w * x,
-		0,
-		2 * x * z + 2 * w * y,
-		2 * y * z - 2 * w * x,
-		1 - 2 * x * x - 2 * y * y,
-		0,
-		0,
-		0,
-		0,
-		1
-	};
+    return matrix4
+    {
+    1 - 2 * y * y - 2 * z * z,
+    2 * x * y + 2 * w * z,
+    2 * x * z - 2 * w * y,
+    0,
+    2 * x * y - 2 * w * z,
+    1 - 2 * x * x - 2 * z * z,
+    2 * y * z + 2 * w * x,
+    0,
+    2 * x * z + 2 * w * y,
+    2 * y * z - 2 * w * x,
+    1 - 2 * x * x - 2 * y * y,
+    0,
+    0,
+    0,
+    0,
+    1
+    };
 }
 
 ////////////////////////////////////////
 
 matrix4 matrix4::ortho( float left, float right, float top, float bottom )
 {
-	float x = 2.F / ( right - left );
-	float y = 2.F / ( top - bottom );
-	float z = -1.F;
-	float a = - ( right + left ) / ( right - left );
-	float b = - ( top + bottom ) / ( top - bottom );
+    float x = 2.F / ( right - left );
+    float y = 2.F / ( top - bottom );
+    float z = -1.F;
+    float a = - ( right + left ) / ( right - left );
+    float b = - ( top + bottom ) / ( top - bottom );
 
-	return matrix4
-	{
-		x, 0, 0, 0,
-		0, y, 0, 0,
-		0, 0, z, 0,
-		a, b, 0, 1
-	};
+    return matrix4
+    {
+    x, 0, 0, 0,
+    0, y, 0, 0,
+    0, 0, z, 0,
+    a, b, 0, 1
+    };
 }
 
 ////////////////////////////////////////
 
 matrix4 matrix4::perspective( float vertical_fov, float aspect, float near, float far )
 {
-	precondition( vertical_fov > 0.F, "invalid vertical FOV {0}", vertical_fov );
-	precondition( near < far, "invalide near/far distance ({0}/{1})", near, far );
+    precondition( vertical_fov > 0.F, "invalid vertical FOV {0}", vertical_fov );
+    precondition( near < far, "invalide near/far distance ({0}/{1})", near, far );
 
     float range = std::tan( vertical_fov / 2.F ) * near;
     float x = ( 2.F * near ) / ( range * aspect + range * aspect );
     float y = near / range;
     float z = -( far + near ) / ( far - near );
     float p = -(2.0f * far * near) / (far - near);
-	float n = -1.F;
+    float n = -1.F;
 
-	return matrix4
-	{
-		x, 0, 0, 0,
-		0, y, 0, 0,
-		0, 0, z, n,
-		0, 0, p, 0
-	};
+    return matrix4
+    {
+    x, 0, 0, 0,
+    0, y, 0, 0,
+    0, 0, z, n,
+    0, 0, p, 0
+    };
 }
 
 ////////////////////////////////////////
 
 matrix4 operator*( const matrix4 &a, const matrix4 &b )
 {
-	return matrix4
-	{
-		a.row0() * b.col0(),
-		a.row0() * b.col1(),
-		a.row0() * b.col2(),
-		a.row0() * b.col3(),
-		a.row1() * b.col0(),
-		a.row1() * b.col1(),
-		a.row1() * b.col2(),
-		a.row1() * b.col3(),
-		a.row2() * b.col0(),
-		a.row2() * b.col1(),
-		a.row2() * b.col2(),
-		a.row2() * b.col3(),
-		a.row3() * b.col0(),
-		a.row3() * b.col1(),
-		a.row3() * b.col2(),
-		a.row3() * b.col3()
-	};
+    return matrix4
+    {
+    a.row0() * b.col0(),
+    a.row0() * b.col1(),
+    a.row0() * b.col2(),
+    a.row0() * b.col3(),
+    a.row1() * b.col0(),
+    a.row1() * b.col1(),
+    a.row1() * b.col2(),
+    a.row1() * b.col3(),
+    a.row2() * b.col0(),
+    a.row2() * b.col1(),
+    a.row2() * b.col2(),
+    a.row2() * b.col3(),
+    a.row3() * b.col0(),
+    a.row3() * b.col1(),
+    a.row3() * b.col2(),
+    a.row3() * b.col3()
+    };
 }
 
 ////////////////////////////////////////
 
 std::ostream &operator<<( std::ostream &out, const matrix4 &m )
 {
-	const float *data = m.data();
-	for ( size_t i = 0; i < 4; ++i )
-	{
-		out << *data++ << ' ';
-		out << *data++ << ' ';
-		out << *data++ << ' ';
-		out << *data++ << '\n';
-	}
+    const float *data = m.data();
+    for ( size_t i = 0; i < 4; ++i )
+    {
+    out << *data++ << ' ';
+    out << *data++ << ' ';
+    out << *data++ << ' ';
+    out << *data++ << '\n';
+    }
 
-	return out;
+    return out;
 }
 
 ////////////////////////////////////////
 
 }
-

@@ -19,12 +19,12 @@ namespace gui
 class scroll_bar_w : public widget
 {
 public:
-	using value_type = coord;
+	using value_type = coord::value_type;
 
 	scroll_bar_w( bool bounded = true );
 	~scroll_bar_w( void ) override;
 
-	value_type value( void )
+	value_type value( void ) const
 	{
 		return _value;
 	}
@@ -58,30 +58,30 @@ private:
 
 	value_type translate_to_full_w( value_type v )
 	{
-		return _min + ( v - x1() ) * ( _max - _min ) / width();
+		return _min + ( v - x1().count() ) * ( _max - _min ) / width().count();
 	}
 
 	value_type translate_from_full_w( value_type v )
 	{
-		return x1() + ( v - _min ) * width() / ( _max - _min );
+		return x1().count() + ( v - _min ) * width().count() / ( _max - _min );
 	}
 
 	value_type translate_to_full_h( value_type v )
 	{
-		return _min + ( v - y1() ) * ( _max - _min ) / height();
+		return _min + ( v - y1().count() ) * ( _max - _min ) / height().count();
 	}
 
 	value_type translate_from_full_h( value_type v )
 	{
-		return y1() + ( v - _min ) * height() / ( _max - _min );
+		return y1().count() + ( v - _min ) * height().count() / ( _max - _min );
 	}
 
-	value_type _start = 0.0;
+	value_type _start = value_type(0);
 
-	value_type _value = 0.0;
-	value_type _handle = 20.0;
-	value_type _page = 0.0;
-	value_type _min = 0.0, _max = 100.0;
+	value_type _value = value_type(0);
+	value_type _handle = value_type(20);
+	value_type _page = value_type(0);
+	value_type _min = value_type(0), _max = value_type(100);
 
 	bool _tracking = false;
 	bool _horizontal = true;
