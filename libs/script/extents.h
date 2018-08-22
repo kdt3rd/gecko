@@ -35,9 +35,9 @@ struct text_extents
 /// @brief Extents of a font.
 struct font_extents
 {
-	points ascent = points(0);
-	points descent = points(0);
-	points width = points(0);
+	points ascent = points(0); // distance above the baseline
+	points descent = points(0); // distance below the baseline
+	points width = points(0); // maximum width of all glyphs
 	points height = points(0);
 	points max_x_advance = points(0);
 	points max_y_advance = points(0);

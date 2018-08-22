@@ -243,9 +243,12 @@ template <typename T> using leagues = length<T, std::ratio<254*12*5280*3,10000>>
 ////////////////////////////////////////
 // print units
 
-template <typename T> using points   = length<T, std::ratio<254,72*10000>>;
+// 6 pica in an inch
 template <typename T> using picas   = length<T, std::ratio<254,6*10000>>;
-template <typename T> using twips   = length<T, std::ratio<254,20*72*10000>>;
+// 1 pica = 12 points
+template <typename T> using points   = length<T, std::ratio<254,12*6*10000>>;
+// 240 twips to a pica
+template <typename T> using twips   = length<T, std::ratio<254,240*6*10000>>;
 
 ////////////////////////////////////////
 // marine units
