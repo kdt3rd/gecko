@@ -64,10 +64,10 @@ font::extents( const std::string &utf8 )
 		retval.height = std::max( retval.height, gext.height );
 		retval.x_advance += gext.x_advance;
 		retval.y_advance += gext.y_advance;
-		retval.width += retval.x_advance - gext.x_advance + gext.x_bearing + gext.width;
 
 		prev = ccode;
 	}
+	retval.width = retval.x_advance;
 
 	return retval;
 }
