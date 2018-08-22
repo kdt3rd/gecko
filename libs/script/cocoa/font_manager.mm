@@ -117,7 +117,7 @@ std::shared_ptr<script::font> font_manager::get_font( const std::string &family,
 	if ( style.find( "Fixed Pitch" ) != std::string::npos )
 		mask |= NSFixedPitchFontMask;
 
-	NSFont *nsfont = [fmgr fontWithFamily:fam traits:mask weight:5 size:static_cast<double>( pts.count() )];
+	NSFont *nsfont = [fmgr fontWithFamily:fam traits:mask weight:5 size:static_cast<double>( pts.count() )*2.0];
 	if ( nsfont )
 	{
 		auto cret = std::make_shared<script::cocoa::font>( static_cast<void *>(nsfont), family, style, pts );
