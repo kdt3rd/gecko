@@ -30,17 +30,19 @@ font::~font( void )
 
 void font::init_font( void )
 {
+    _scalePixToPointsHoriz = 72.0 / double( _dpi_h );
+    _scalePixToPointsVert = 72.0 / double( _dpi_v );
     // we have the dpi now, so we can convert points to dots...
     NSFont *nf = reinterpret_cast<NSFont *>( _font );
-    _extents.ascent = [nf ascender];// * extent_type( _dpi_v ) / extent_type( 72.0 ); // in points?
-    _extents.descent = [nf descender];// * extent_type( _dpi_v ) / extent_type( 72.0 );
+    _extents.ascent = [nf ascender] * _scalePixToPointsVert;
+    _extents.descent = [nf descender] * _scalePixToPointsHoriz;
     NSRect bbox = [nf boundingRectForFont];
     NSSize madv = [nf maximumAdvancement];
-    _extents.width = NSWidth( bbox );
-    _extents.height = NSHeight( bbox );
-    _extents.max_x_advance = madv.width;
-    _extents.max_y_advance = madv.height;
-	std::cout << "font height: " << _extents.height << " asc desc " << _extents.ascent << ' ' << _extents.descent << std::endl;
+    _extents.width = NSWidth( bbox ) * _scalePixToPointsHoriz;
+    _extents.height = NSHeight( bbox ) * _scalePixToPointsVert;
+    _extents.max_x_advance = madv.width * _scalePixToPointsHoriz;
+    _extents.max_y_advance = madv.height * _scalePixToPointsVert;
+	//std::cout << "font height: " << _extents.height << " asc desc " << _extents.ascent << ' ' << _extents.descent << " origin " << bbox.origin.x << ", " << bbox.origin.y << " size " << bbox.size.width << " x " << bbox.size.height << std::endl;
 }
 
 ////////////////////////////////////////
@@ -73,9 +75,11 @@ font::get_glyph( char32_t char_code )
         memset( data, 0, static_cast<size_t>( width * height ) );
 
         CGColorSpaceRef space = CGColorSpaceCreateDeviceGray();
+        on_scope_exit{ CGColorSpaceRelease( space ); };
         CGBitmapInfo bitmapInfo = 0;
         CGContextRef ctx = CGBitmapContextCreate(data, static_cast<size_t>( width ), static_cast<size_t>( height ), 8, static_cast<size_t>( width ), space, bitmapInfo );
-        CGColorSpaceRelease( space );
+        on_scope_exit{ CGContextRelease( ctx ); };
+
         CGContextSetRGBFillColor( ctx, 0.0, 0.0, 0.0, 0.0 ); // white background
         CGContextFillRect( ctx, CGRectMake( 0.0, 0.0, width, height ) );
 
@@ -103,17 +107,17 @@ font::get_glyph( char32_t char_code )
         double ws = CTLineGetTrailingWhitespaceWidth( line );
         CFRelease( line );
 
-        std::cout << "add_glyph " << char_code << " w " << width << " h " << height << std::endl;
+        //std::cout << "add_glyph " << char_code << " w " << width << " h " << height << " descent " << descent << " ascent " << ascent << " leading " << leading << std::endl;
         add_glyph( char_code, static_cast<const uint8_t *>( data ), width, width, height );
         text_extents &gle = _glyph_cache[char_code];
         // inch / dot * points / inch
-        extent_type ptw = extent_type(width) * extent_type(72) / _dpi_h;
-        extent_type pth = extent_type(height) * extent_type(72) / _dpi_v;
+        extent_type ptw = extent_type(width) * _scalePixToPointsHoriz;
+        extent_type pth = extent_type(height) * _scalePixToPointsVert;
         gle.x_bearing = points(0);
-        gle.y_bearing = std::floor( extent_type(pth) / extent_type(2) ); //ascent + descent;
+        gle.y_bearing = pth - extent_type(descent) * _scalePixToPointsVert;//std::floor( extent_type(pth) / extent_type(2) ); //ascent + descent;
         gle.width = static_cast<points>( ptw );
         gle.height = static_cast<points>( pth );
-        gle.x_advance = ptw + ws * extent_type(72) / _dpi_h;
+        gle.x_advance = ptw + ws * _scalePixToPointsVert;
         gle.y_advance = points(0);
 
         // Save as JPEG

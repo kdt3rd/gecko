@@ -32,6 +32,8 @@ protected:
 
 private:
 	void *_font;
+	double _scalePixToPointsHoriz = 1.0;
+	double _scalePixToPointsVert = 1.0;
 };
 
 } }
