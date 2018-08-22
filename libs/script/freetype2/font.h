@@ -45,6 +45,10 @@ protected:
 private:
 	FT_Face _face;
 	std::shared_ptr<uint8_t []> _font_data;
+	double _scaleUnitsToPointsHoriz = 1.0;
+	double _scaleUnitsToPointsVert = 1.0;
+	double _scalePixelsToPointsHoriz = 1.0;
+	double _scalePixelsToPointsVert = 1.0;
 };
 
 } // namespace freetype2

@@ -66,6 +66,9 @@ void font::init_font( void )
 			throw std::runtime_error( "Unable to select any character map" );
 	}
 
+	_scalePixelsToPointsHoriz = 72.0 / ( 64.0 * static_cast<double>( _dpi_h ) );
+	_scalePixelsToPointsVert = 72.0 / ( 64.0 * static_cast<double>( _dpi_v ) );
+
 	if ( FT_IS_SCALABLE( _face ) )
 	{
 //		std::cout << "Scalable font, setting to " << _size << " points (" << int( _size.count() * 64.F )
@@ -76,19 +79,19 @@ void font::init_font( void )
 			throw std::runtime_error( "Unable to set character size" );
 
 		// size values in units
-		double unitsToPointsX = ( static_cast<double>( _face->size->metrics.x_ppem ) * 72.0 /
-								  ( static_cast<double>( _face->units_per_EM ) *
-									static_cast<double>( _dpi_h ) ) );
-		double unitsToPointsY = ( static_cast<double>( _face->size->metrics.y_ppem ) * 72.0 /
-								  ( static_cast<double>( _face->units_per_EM ) *
-									static_cast<double>( _dpi_v ) ) );
-		_extents.ascent = static_cast<double>( _face->ascender ) * unitsToPointsY;
-		_extents.descent = static_cast<double>( _face->descender ) * unitsToPointsY;
-		_extents.width = static_cast<double>( _face->bbox.xMax - _face->bbox.xMin ) * unitsToPointsX;
-		//_extents.height = static_cast<double>( _face->bbox.yMax - _face->bbox.yMin ) * unitsToPointsY;
+		_scaleUnitsToPointsHoriz = ( static_cast<double>( _face->size->metrics.x_ppem ) * 72.0 /
+									 ( static_cast<double>( _face->units_per_EM ) *
+									   static_cast<double>( _dpi_h ) ) );
+		_scaleUnitsToPointsVert = ( static_cast<double>( _face->size->metrics.y_ppem ) * 72.0 /
+									( static_cast<double>( _face->units_per_EM ) *
+									  static_cast<double>( _dpi_v ) ) );
+		_extents.ascent = static_cast<double>( _face->ascender ) * _scaleUnitsToPointsVert;
+		_extents.descent = static_cast<double>( _face->descender ) * _scaleUnitsToPointsVert;
+		_extents.width = static_cast<double>( _face->bbox.xMax - _face->bbox.xMin ) * _scaleUnitsToPointsHoriz;
+		//_extents.height = static_cast<double>( _face->bbox.yMax - _face->bbox.yMin ) * _scaleUnitsToPointsVert;
 		_extents.height = _extents.ascent - _extents.descent;
-		_extents.max_x_advance = static_cast<double>( _face->max_advance_width ) * unitsToPointsX;
-		_extents.max_y_advance = static_cast<double>( _face->max_advance_height ) * unitsToPointsY;
+		_extents.max_x_advance = static_cast<double>( _face->max_advance_width ) * _scaleUnitsToPointsHoriz;
+		_extents.max_y_advance = static_cast<double>( _face->max_advance_height ) * _scaleUnitsToPointsVert;
 	}
 	else if ( _face->num_fixed_sizes > 1 )
 	{
@@ -122,8 +125,8 @@ void font::init_font( void )
 
 		_extents.ascent = 0;
 		_extents.descent = 0;
-		_extents.width = static_cast<double>( _face->size->metrics.max_advance ) / 64.0;
-		_extents.height = static_cast<double>( _face->size->metrics.height ) / 64.0;
+		_extents.width = static_cast<double>( _face->size->metrics.max_advance ) * _scalePixelsToPointsHoriz;
+		_extents.height = static_cast<double>( _face->size->metrics.height ) * _scalePixelsToPointsVert;
 		_extents.max_x_advance = _extents.width;
 		_extents.max_y_advance = _extents.height;
 	}
@@ -150,7 +153,8 @@ font::kerning( char32_t c1, char32_t c2 )
 
 	FT_Get_Kerning( _face, prev_index, next_index, FT_KERNING_UNSCALED, &kerning );
 
-	return size() * points::value_type(kerning.x);
+	// TODO: know about vertical layout
+	return static_cast<double>( kerning.x ) * _scaleUnitsToPointsHoriz;
 }
 
 ////////////////////////////////////////
@@ -196,14 +200,12 @@ font::get_glyph( char32_t char_code )
 
 //		err = FT_Load_Glyph( _face, nglyph->index(), FT_LOAD_TARGET_NORMAL | FT_LOAD_NO_HINTING );
 
-		const double fracPixToPointsX = 72.0 / ( 64.0 * static_cast<double>( _dpi_h ) );
-		const double fracPixToPointsY = 72.0 / ( 64.0 * static_cast<double>( _dpi_v ) );
-		gle.x_bearing = static_cast<double>( slot->metrics.horiBearingX ) * fracPixToPointsX;
-		gle.y_bearing = static_cast<double>( slot->metrics.horiBearingY ) * fracPixToPointsY;
-		gle.width = static_cast<double>( slot->metrics.width ) * fracPixToPointsX;
-		gle.height = static_cast<double>( slot->metrics.height ) * fracPixToPointsY;
-		gle.x_advance = static_cast<double>( slot->metrics.horiAdvance ) * fracPixToPointsX;
-		gle.y_advance = static_cast<double>( slot->metrics.vertAdvance ) * fracPixToPointsY;
+		gle.x_bearing = static_cast<double>( slot->metrics.horiBearingX ) * _scalePixelsToPointsHoriz;
+		gle.y_bearing = static_cast<double>( slot->metrics.horiBearingY ) * _scalePixelsToPointsVert;
+		gle.width = static_cast<double>( slot->metrics.width ) * _scalePixelsToPointsHoriz;
+		gle.height = static_cast<double>( slot->metrics.height ) * _scalePixelsToPointsVert;
+		gle.x_advance = static_cast<double>( slot->metrics.horiAdvance ) * _scalePixelsToPointsHoriz;
+		gle.y_advance = static_cast<double>( slot->metrics.vertAdvance ) * _scalePixelsToPointsVert;
 
 		return gle;
 	}
