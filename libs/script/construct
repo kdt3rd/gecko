@@ -37,7 +37,7 @@ lib = library "script"
 		  "freetype2/font.cpp",
 		  "mswin.cpp",
 	  };
-	  libs={"freetype2", "harfbuzz", "graphite2", "bzip2", "gdi32"};
+	  libs={"freetype2", "harfbuzz", "freetype", "graphite2", "bzip2", "gdi32"};
   }
   -- can also call optional_source all at once as on giant table
   libs{ "base", "utf" }

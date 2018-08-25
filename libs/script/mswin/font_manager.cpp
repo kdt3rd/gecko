@@ -229,7 +229,7 @@ font_manager::get_font( const std::string &family, const std::string &style, poi
 	try
 	{
 		ret = std::make_shared<script::freetype2::font>( ftface, family, style, pts, ttfData );
-		ret->load_dpi( dpiw, dpih );
+		ret->load_dpi( dpih, dpiv );
 		ret->max_glyph_store( maxGlyphW, maxGlyphH );
 
 		ret->init_font();
