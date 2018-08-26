@@ -8,7 +8,7 @@
 #pragma once
 
 #include "widget.h"
-#include "application.h"
+
 #include <draw/rectangle.h>
 #include <draw/text.h>
 #include <base/alignment.h>

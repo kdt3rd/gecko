@@ -173,7 +173,7 @@ public:
 	/// if no (null) screen is provided, uses the default screen.
 	///
 	/// @return A new window
-	virtual std::shared_ptr<window> new_window( const std::shared_ptr<screen> &s = std::shared_ptr<screen>() ) = 0;
+	virtual std::shared_ptr<window> new_window( window_type wintype = window_type::normal, const std::shared_ptr<screen> &s = std::shared_ptr<screen>() ) = 0;
 
 	/// @brief Forcibly destroy a window.
 	///

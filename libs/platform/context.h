@@ -76,8 +76,6 @@ public:
 
 	virtual render_query render_query_func( void ) = 0;
 
-	virtual void share( context &o ) = 0;
-
 	virtual void swap_buffers( void ) = 0;
 
 	inline void viewport( coord_type x, coord_type y, coord_type w, coord_type h )

@@ -58,8 +58,8 @@ namespace wayland
 
 ////////////////////////////////////////
 
-window::window( EGLDisplay disp, struct wl_compositor *comp, struct wl_shell *shell, const std::shared_ptr<::platform::screen> &scr, const rect &p )
-	: ::platform::window( scr, p ), _disp( disp )
+window::window( window_type wt, EGLDisplay disp, struct wl_compositor *comp, struct wl_shell *shell, const std::shared_ptr<::platform::screen> &scr, const rect &p )
+	: ::platform::window( wt, scr, p ), _disp( disp )
 {
 	TODO("add more error checks")
 	_surface = wl_compositor_create_surface( comp );
@@ -114,12 +114,6 @@ void window::raise( void )
 ////////////////////////////////////////
 
 void window::lower( void )
-{
-}
-
-////////////////////////////////////////
-
-void window::set_popup( void )
 {
 }
 

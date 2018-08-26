@@ -35,8 +35,36 @@ namespace base
 ///
 class context
 {
+protected:
+    using stash_type = std::map<std::type_index, any>;
+    using stash_ptr = std::shared_ptr<stash_type>;
+
 public:
+    context( void );
 	virtual ~context( void );
+
+    /// @brief Copy construction will create an implicitly shared context
+    context( const context & ) = default;
+    /// @brief Assignment will create an implicitly shared context
+    ///
+    /// NB: be careful of object slicing
+    context &operator=( const context & ) = default;
+
+    /// @brief Move construction will do the expected
+    context( context && ) = default;
+    /// @brief Move assignment will do the expected
+    ///
+    /// NB: be careful of object slicing
+    context &operator=( context && ) = default;
+
+    /// @brief routine meant to be decorated to share context information
+    ///
+    /// The base class version of this triggers the common stash of items to be shared.
+    ///
+    /// This is best used when the same objects may appear in multiple
+    /// contexts, such as icons or something, where there are system
+    /// resources attached to those objects.
+    virtual void share( const context &c );
 
     /// @brief returns true if it is a new object, false if it was
     /// previously stashed in the context.
@@ -44,7 +72,7 @@ public:
     bool retrieve_common( Storer &&, std::shared_ptr<StoreType> &v )
     {
         using fundamental_type = typename std::remove_pointer<typename std::decay<Storer>::type>::type;
-        any &sv = _stash[std::type_index( typeid(fundamental_type) )];
+        any &sv = stash()[std::type_index( typeid(fundamental_type) )];
         bool isnew = false;
         if ( !sv.has_value() )
         {
@@ -70,7 +98,7 @@ public:
     bool retrieve_common( Storer &&, std::shared_ptr<StoreType> &v, Factory &&factory )
     {
         using fundamental_type = typename std::remove_pointer<typename std::decay<Storer>::type>::type;
-        any &sv = _stash[std::type_index( typeid(fundamental_type) )];
+        any &sv = stash()[std::type_index( typeid(fundamental_type) )];
         bool isnew = false;
         if ( !sv.has_value() )
         {
@@ -86,9 +114,12 @@ public:
 
         return isnew;
     }
-    
+
+protected:
+    stash_type &stash( void );
+
 private:
-    std::map<std::type_index, any> _stash;
+    stash_ptr _stash;
 };
 
 } // namespace base

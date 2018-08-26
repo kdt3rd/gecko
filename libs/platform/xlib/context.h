@@ -31,19 +31,20 @@ public:
     explicit context( const std::shared_ptr<Display> &dpy );
 	~context( void ) override;
 
+	void share( const ::base::context &o ) override;
+
     XVisualInfo *choose_best_config( void );
-    void create( Window w );
+    void create( Window w, context *sharectxt );
 
     ////////////////////////////////////////
 
     render_query render_query_func( void ) override;
 
-	void share( ::platform::context &o ) override;
-
 	void set_viewport( coord_type x, coord_type y, coord_type w, coord_type h ) override;
 
     void swap_buffers( void ) override;
 
+    GLXContext os_context( void ) const { return _ctxt; }
 protected:
 	void acquire( void ) override;
 	void release( void ) override;

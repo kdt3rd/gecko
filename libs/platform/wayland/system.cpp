@@ -266,9 +266,9 @@ system::new_system_tray_item( void )
 
 ////////////////////////////////////////
 
-std::shared_ptr<::platform::window> system::new_window( const std::shared_ptr<::platform::screen> &s )
+std::shared_ptr<::platform::window> system::new_window( window_type wintype, const std::shared_ptr<::platform::screen> &s )
 {
-	auto ret = std::make_shared<window>( _egl_disp, _compositor, _shell, s );
+	auto ret = std::make_shared<window>( wintype, _egl_disp, _compositor, _shell, s );
 	_dispatcher->add_window( ret );
 	return ret;
 }

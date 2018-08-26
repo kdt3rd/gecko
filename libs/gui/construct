@@ -1,22 +1,22 @@
 
 lib = library "gui"
   source{
-	  "application.cpp";
-	  "button.cpp";
-	  "checkbox.cpp";
-	  "choices.cpp";
-	  "composite.cpp";
-	  "container.cpp";
-	  "context.cpp";
+    "application.cpp";
+    "button.cpp";
+    "checkbox.cpp";
+    "choices.cpp";
+    "composite.cpp";
+    "container.cpp";
+    "context.cpp";
     "event.cpp";
-	  "label.cpp";
-	  "line_edit.cpp";
-	  "radio_button.cpp";
-	  "scroll_area.cpp";
-	  "scroll_bar.cpp";
-	  "slider.cpp";
-	  "style.cpp";
-	  "window.cpp";
-	  "widget.cpp";
+    "label.cpp";
+    "line_edit.cpp";
+    "radio_button.cpp";
+    "scroll_area.cpp";
+    "scroll_bar.cpp";
+    "slider.cpp";
+    "style.cpp";
+    "window.cpp";
+    "widget.cpp";
   }
   libs{ "platform", "draw", "layout", "utf" }

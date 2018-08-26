@@ -318,9 +318,10 @@ system::new_system_tray_item( void )
 
 ////////////////////////////////////////
 
-std::shared_ptr<::platform::window> system::new_window( const std::shared_ptr<::platform::screen> &s )
+std::shared_ptr<::platform::window> system::new_window( window_type wintype, const std::shared_ptr<::platform::screen> &s )
 {
-	auto ret = std::make_shared<window>( *this, _display, s ? s : default_screen() );
+	auto ret = std::make_shared<window>( wintype, *this, _dispatcher->get_share_context(),
+										 _display, s ? s : default_screen() );
 	_dispatcher->add_window( ret );
 	return ret;
 }

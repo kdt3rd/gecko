@@ -31,14 +31,13 @@ class window : public ::platform::window
 {
 public:
 	/// @brief Constrcutor
-	window( system &s, const std::shared_ptr<Display> &dpy, const std::shared_ptr<::platform::screen> &scr, const rect &p = rect( 0, 0, 320, 243 ) );
+	window( window_type wt, system &s, context *sharectxt, const std::shared_ptr<Display> &dpy, const std::shared_ptr<::platform::screen> &scr, const rect &p = rect( 0, 0, 320, 243 ) );
 	~window( void );
 
 	::platform::context &hw_context( void ) override;
 
 	void raise( void ) override;
 	void lower( void ) override;
-	void set_popup( void ) override;
 
 	void show( void ) override;
 	void hide( void ) override;
@@ -65,6 +64,8 @@ protected:
 	bool update_geometry( rect &r ) override;
 
 private:
+	void set_win_manager_type( const char *type );
+
 	std::shared_ptr<Display> _display;
 	Window _win = 0;
 	XIC _xic = 0;
@@ -72,7 +73,6 @@ private:
 	coord_type _min_w = 0;
 	coord_type _min_h = 0;
 
-	bool _popup = false;
 	bool _fullscreen = false;
 
 	std::shared_ptr<context> _ctxt;

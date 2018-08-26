@@ -34,9 +34,9 @@ public:
 
     ////////////////////////////////////////
 
-    render_query render_query_func( void ) override;
+	void share( const ::base::context &o ) override;
 
-	void share( ::platform::context &o ) override;
+    render_query render_query_func( void ) override;
 
 	void set_viewport( coord_type x, coord_type y, coord_type w, coord_type h ) override;
 

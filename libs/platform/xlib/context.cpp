@@ -186,6 +186,16 @@ context::~context( void )
 
 ////////////////////////////////////////
 
+void context::share( const ::base::context &o )
+{
+    ::platform::context::share( o );
+
+    if ( _ctxt != None )
+        throw_runtime( "Attempt to share a context after creation" );
+}
+
+////////////////////////////////////////
+
 XVisualInfo *context::choose_best_config( void )
 {
     // should we check all of them?
@@ -224,7 +234,7 @@ XVisualInfo *context::choose_best_config( void )
 
 ////////////////////////////////////////
 
-void context::create( Window win )
+void context::create( Window win, context *sharectxt )
 {
     precondition( _bestFBC != None, "choose visual successful" );
 
@@ -240,7 +250,14 @@ void context::create( Window win )
 
     Display *disp = _display.get();
 
-    _ctxt = _glx_createctxt( disp, _bestFBC, 0, True, attributes );
+    if ( sharectxt )
+    {
+        share( *sharectxt );
+        _ctxt = _glx_createctxt( disp, _bestFBC, sharectxt->os_context(), True, attributes );
+    }
+    else
+        _ctxt = _glx_createctxt( disp, _bestFBC, None, True, attributes );
+
     if ( ! _ctxt )
         throw std::runtime_error( "Unable to create OpenGL context" );
 
@@ -258,13 +275,6 @@ void context::create( Window win )
 context::render_query context::render_query_func( void )
 {
     return queryGL;
-}
-
-////////////////////////////////////////
-
-void context::share( ::platform::context &o )
-{
-    throw_not_yet();
 }
 
 ////////////////////////////////////////

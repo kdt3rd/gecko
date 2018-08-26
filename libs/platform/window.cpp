@@ -15,8 +15,8 @@ namespace platform
 
 ////////////////////////////////////////
 
-window::window( const std::shared_ptr<screen> &screen, const rect &p )
-	: _rect( p ), _screen( screen )
+window::window( window_type wt, const std::shared_ptr<screen> &screen, const rect &p )
+	: _win_type( wt ), _rect( p ), _screen( screen )
 {
 }
 

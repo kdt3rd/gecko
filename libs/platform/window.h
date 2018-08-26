@@ -23,6 +23,14 @@ namespace platform
 class cursor;
 class screen;
 
+enum class window_type
+{
+	normal,
+	modal,
+	popup,
+	tooltip
+};
+
 ////////////////////////////////////////
 
 /// @brief A rectangular area of the screen.
@@ -30,10 +38,12 @@ class window : public event_target
 {
 public:
 	/// @brief Constructor.
-	explicit window( const std::shared_ptr<screen> &screen, const rect &p = rect( 0, 0, 512, 512 ) );
+	explicit window( window_type wt, const std::shared_ptr<screen> &screen, const rect &p = rect( 0, 0, 512, 512 ) );
 
 	/// @brief Destructor.
 	~window( void ) override;
+
+	window_type type( void ) const { return _win_type; }
 
 	/// @brief default event handler for windows.
 	///
@@ -45,10 +55,8 @@ public:
 
 	/// @brief creates a context (or returns a stashed version)
 	///
-	/// This is returned as a shared pointer, for caching
-	/// (performance) purposes, however, it is not intended to have a
-	/// lifetime longer than a window, and if used past the
-	/// destruction of a window, errors should be expected.
+	/// This is used to retrieve the rendering context appropriate for this
+	/// system / window, including the api with which to use for rendering
 	virtual context &hw_context( void ) = 0;
 
 	/// @brief Set a cursor as the default for the window
@@ -74,11 +82,6 @@ public:
 	///
 	/// Lower the window below all other windows.
 	virtual void lower( void ) = 0;
-
-	/// @brief Set window as popup.
-	///
-	/// Make the window without decorations.
-	virtual void set_popup( void ) = 0;
 
 	/// @brief Show the window.
 	///
@@ -185,6 +188,7 @@ protected:
 	rect _invalid_rgn;
 
 private:
+	window_type _win_type;
 	rect _rect;
 
 	std::stack< std::shared_ptr<cursor> > _cursors;

@@ -29,7 +29,7 @@ class context;
 class window : public ::platform::window
 {
 public:
-	window( EGLDisplay disp, struct wl_compositor *comp, struct wl_shell *shell,
+	window( window_type wt, EGLDisplay disp, struct wl_compositor *comp, struct wl_shell *shell,
 			const std::shared_ptr<::platform::screen> &scr,
 			const rect &p = rect( 0, 0, 320, 243 ) );
 	~window( void );
@@ -38,7 +38,6 @@ public:
 
 	void raise( void ) override;
 	void lower( void ) override;
-	void set_popup( void ) override;
 
 	void show( void ) override;
 	void hide( void ) override;

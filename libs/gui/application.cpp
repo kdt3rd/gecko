@@ -104,7 +104,7 @@ bool application::dispatch_global_hotkey( const event &e )
 
 std::shared_ptr<window> application::new_window( const std::shared_ptr<platform::screen> &s )
 {
-	auto result = std::make_shared<window>( _impl->sys->new_window( s ) );
+	auto result = std::make_shared<window>( _impl->sys->new_window( platform::window_type::normal, s ) );
 
 	update_display( result.get() );
 

@@ -78,16 +78,18 @@ void context::create( EGLNativeWindowType nwin )
 
 ////////////////////////////////////////
 
-context::render_query context::render_query_func( void )
+void context::share( const ::base::context &o )
 {
-	return reinterpret_cast<render_query>( eglGetProcAddress );
+	::platform::context::share( o );
+
+	throw_not_yet();
 }
 
 ////////////////////////////////////////
 
-void context::share( ::platform::context &o )
+context::render_query context::render_query_func( void )
 {
-    throw_not_yet();
+	return reinterpret_cast<render_query>( eglGetProcAddress );
 }
 
 ////////////////////////////////////////

@@ -63,6 +63,7 @@ public:
 																  const selection_type_function &chooseMimeType,
 																  const std::string &clipboardName );
 
+	context *get_share_context( void ) const;
 private:
 	void wake_up_executor( void );
 	void run_event_loop_until( std::atomic<bool> *b );

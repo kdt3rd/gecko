@@ -30,6 +30,7 @@
 #include <platform/event_queue.h>
 #include "system.h"
 #include "screen.h"
+#include "context.h"
 
 ////////////////////////////////////////
 
@@ -465,6 +466,19 @@ dispatcher::query_selection( selection_type sel,
 		throw_runtime( "Unable to retrieve clipboard atoms" );
 
 	return std::make_pair( std::move( r ), std::move( rtype ) );
+}
+
+////////////////////////////////////////
+
+context *
+dispatcher::get_share_context( void ) const
+{
+	if ( _windows.empty() )
+		return nullptr;
+
+	auto i = _windows.begin();
+	::platform::context *ctxt = &( i->second->hw_context() );
+	return dynamic_cast<context *>( ctxt );
 }
 
 ////////////////////////////////////////

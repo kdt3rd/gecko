@@ -16,6 +16,8 @@
 #include <stdexcept>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
+#include <X11/Xcursor/Xcursor.h>
+#include <X11/cursorfont.h>
 
 #include "system.h"
 #include "context.h"
@@ -62,8 +64,8 @@ namespace platform { namespace xlib
 
 ////////////////////////////////////////
 
-window::window( system &s, const std::shared_ptr<Display> &dpy, const std::shared_ptr<::platform::screen> &scr, const rect &p )
-	: ::platform::window( scr, p ), _display( dpy )
+window::window( window_type wt, system &s, context *sharectxt, const std::shared_ptr<Display> &dpy, const std::shared_ptr<::platform::screen> &scr, const rect &p )
+	: ::platform::window( wt, scr, p ), _display( dpy )
 {
 	precondition( _display, "null display" );
 
@@ -76,6 +78,7 @@ window::window( system &s, const std::shared_ptr<Display> &dpy, const std::share
 		throw std::runtime_error( "no visual found" );
 	on_scope_exit { XFree( vi ); };
 
+	unsigned long swamask = CWBorderPixel | CWColormap | CWEventMask;
 	XSetWindowAttributes swa;
 	swa.background_pixmap = None;
 	swa.border_pixel = 0;
@@ -91,12 +94,36 @@ window::window( system &s, const std::shared_ptr<Display> &dpy, const std::share
 		//ResizeRedirectMask |
 		//SubstructureNotifyMask | SubstructureRedirectMask |
 
+	if ( wt == window_type::popup || wt == window_type::tooltip )
+	{
+		swamask |= CWOverrideRedirect;
+		swa.override_redirect = True;
+		swamask |= CWCursor;
+		swa.cursor = XCreateFontCursor( disp, XC_left_ptr );
+		swamask |= CWSaveUnder;
+		swa.save_under = True;
+	}
+
 	Window root = DefaultRootWindow( disp );
 	swa.colormap = XCreateColormap( disp, root, vi->visual, AllocNone );
 
-	_win = XCreateWindow( disp, root, x(), y(), width(), height(), 0, vi->depth, InputOutput, vi->visual, CWBorderPixel | CWColormap | CWEventMask, &swa );
+	_win = XCreateWindow( disp, root, x(), y(), width(), height(), 0, vi->depth, InputOutput, vi->visual, swamask, &swa );
 
-	_ctxt->create( _win );
+	switch ( wt )
+	{
+		case window_type::normal:
+			break;
+		case window_type::modal:
+			set_win_manager_type( "_NET_WM_WINDOW_TYPE_DIALOG" );
+			break;
+		case window_type::popup:
+			set_win_manager_type( "_NET_WM_WINDOW_TYPE_POPUP_MENU" );
+			break;
+		case window_type::tooltip:
+			set_win_manager_type( "_NET_WM_WINDOW_TYPE_TOOLTIP" );
+			break;
+	}
+	_ctxt->create( _win, sharectxt );
 
 //	std::cout << "OpenGL:\n\tvendor " << glGetString( GL_VENDOR )
 //			  << "\n\trenderer " << glGetString( GL_RENDERER )
@@ -148,25 +175,10 @@ void window::lower( void )
 
 ////////////////////////////////////////
 
-void window::set_popup( void )
-{
-	XSetWindowAttributes swa;
-	swa.override_redirect = true;
-	XChangeWindowAttributes( _display.get(), _win, CWOverrideRedirect, &swa );
-
-	Atom winType = XInternAtom( _display.get(), "_NET_WM_WINDOW_TYPE", False );
-	Atom defType = XInternAtom( _display.get(), "_NET_WM_WINDOW_TYPE_POPUP_MENU", False );
-	XChangeProperty( _display.get(), _win, winType, XA_ATOM, 32, PropModeReplace,
-					 reinterpret_cast<unsigned char *>( &defType ), 1 );
-	_popup = true;
-}
-
-////////////////////////////////////////
-
 void window::show( void )
 {
 	XMapWindow( _display.get(), _win );
-	if ( _popup )
+	if ( type() != window_type::normal )
 		XRaiseWindow( _display.get(), _win );
 }
 
@@ -290,6 +302,16 @@ void window::make_current( const std::shared_ptr<::platform::cursor> &c )
 	}
 
 	XFlush( _display.get() );
+}
+
+////////////////////////////////////////
+
+void window::set_win_manager_type( const char *name )
+{
+	Atom winType = XInternAtom( _display.get(), "_NET_WM_WINDOW_TYPE", False );
+	Atom defType = XInternAtom( _display.get(), name, False );
+	XChangeProperty( _display.get(), _win, winType, XA_ATOM, 32, PropModeReplace,
+					 reinterpret_cast<unsigned char *>( &defType ), 1 );
 }
 
 ////////////////////////////////////////

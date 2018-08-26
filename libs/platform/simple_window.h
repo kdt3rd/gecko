@@ -56,11 +56,6 @@ public:
 	/// Lower the window below all other windows.
 	void lower( void ) { _win->lower() ; }
 
-	/// @brief Set window as popup.
-	///
-	/// Make the window without decorations.
-	void set_popup( void ) { _win->set_popup(); }
-
 	/// @brief Show the window.
 	///
 	/// Make the window visible.
