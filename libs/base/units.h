@@ -225,6 +225,10 @@ template <typename T> using micron = micrometers<T>;
 /// angstrom = 100 picometers
 template <typename T> using angstroms = length<T, std::ratio<1, 10000000000>>;
 
+/// parsec 3.08567758149137×10^16 - is this exact?
+/// per iau 2012
+template <typename T> using astronomical_units = length<T, std::ratio<149597870700, 1>>;
+
 ////////////////////////////////////////
 // imperial units
 
