@@ -597,7 +597,7 @@ add_plane_stats( engine::registry &r )
 	r.add( op( "p.local_variance", base::choose_runtime( compute_variance ), n_scanline_plane_adapter<false, decltype(compute_variance)>(), dispatch_scan_processing, op::n_to_one ) );
 
 	r.add( op( "p.mean_square_error", base::choose_runtime( compute_mse ), n_scanline_plane_adapter<false, decltype(compute_mse)>(), dispatch_scan_processing, op::n_to_one ) );
-	r.add( op( "p.mean_square_error", base::choose_runtime( compute_ssim ), n_scanline_plane_adapter<false, decltype(compute_ssim)>(), dispatch_scan_processing, op::n_to_one ) );
+	r.add( op( "p.ssim", base::choose_runtime( compute_ssim ), n_scanline_plane_adapter<false, decltype(compute_ssim)>(), dispatch_scan_processing, op::n_to_one ) );
 }
 
 } // image
