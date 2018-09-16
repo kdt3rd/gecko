@@ -63,8 +63,8 @@ constexpr inline H sum( H h, T ...t )
 }
 
 /// @brief End of recursive sum
-template<>
-constexpr inline size_t sum<size_t>( size_t h )
+template<typename H>
+constexpr inline H sum( H h )
 {
 	return h;
 }
@@ -176,6 +176,48 @@ template<int... I> struct make_int_sequence<0, I...>
 /// @brief used for making a variadic bind
 template <int> struct placeholder_template {};
 
+////////////////////////////////////////
+
+/// @defgroup manage sets of types
+/// @{
+
+/// @brief Keep a list of types
+template <typename ... Types>
+struct type_list
+{
+	static const size_t size = sizeof...(Types);
+
+	template <typename ... MoreTypes>
+	struct add
+	{
+		using type = type_list<Types..., MoreTypes...>;
+	};
+};
+
+template <typename T, size_t I, size_t Offset = 0> struct type_list_get;
+
+template <size_t I, size_t Offset, typename T, typename ... RestTypes>
+struct type_list_get< type_list<T, RestTypes...>, I, Offset>
+{
+	static_assert( I < sizeof...(RestTypes) + 1 + Offset, "index for type out of bounds" );
+	using type = typename std::conditional<I == Offset, T, typename type_list_get< type_list<RestTypes...>, I, Offset + 1 >::type >::type;
+};
+
+template <size_t I, size_t N>
+struct type_list_get< type_list<>, I, N > 
+{
+	using type = void;
+};
+
+template <size_t I>
+struct type_list_get< type_list<>, I, 0 > 
+{};
+
+#if __cplusplus >= 201402L
+template <typename T, size_t I> using type_list_get_t = typename type_list_get<T, I>::type;
+#endif
+
+/// @}
 } // namespace base
 
 namespace std
