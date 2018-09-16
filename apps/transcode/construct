@@ -2,3 +2,4 @@
 executable "transcode"
   source "main.cpp"
   libs "image"
+  system_libs("Linux", "atomic")

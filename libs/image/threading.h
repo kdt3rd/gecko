@@ -11,6 +11,7 @@
 #include <vector>
 #include <functional>
 #include <base/semaphore.h>
+#include <base/lock_free_list.h>
 #include <mutex>
 #include <condition_variable>
 #include <thread>
@@ -60,37 +61,70 @@ public:
 private:
 	void bee( size_t i );
 
-
-#if __cplusplus > 201402L
-	static constexpr size_t kAlign = std::hardware_destructive_interference_size;
-#else
-	static constexpr size_t kAlign = 64;
-#endif
-	bool participate( size_t tIdx );
-	static const int kDispatchEmpty = 0;
-	static const int kDispatchReady = 1;
-	static const int kDispatchInProcess = 2;
-	struct dispatch_logic
+	struct worker_bee
 	{
-		int start;
-		int end;
-		const std::function<void(size_t, int, int)> *f;
+		worker_bee( void );
+		worker_bee( std::thread::id selfthread );
 
-		/// if the dispatch mode is 0, function is invalid / nothing to do
-		/// if the dispatch mode is 1, ready for processing
-		/// if the dispatch mode is 2, in process
-		std::atomic<int> dispatch_mode;
+		std::atomic<worker_bee *> _next;
 
-		// prevent false sharing...
-		char padding[kAlign - sizeof(int)*3+sizeof(void *)];
+		size_t _index = 0;
+		int _start = 0;
+		int _end = 0;
+		const std::function<void(size_t, int, int)> *_func = nullptr;
+		std::atomic<bool> _finished;
+
+		std::thread _thread;
+		base::semaphore _sema;
+		std::atomic<bool> _shutdown;
+	private:
+		void run_bee( void );
 	};
 
+	inline worker_bee *try_steal( void )
+	{
+		worker_bee *cur = _avail_workers.load( std::memory_order_relaxed );
+		worker_bee *ret = nullptr;
+		while ( cur )
+		{
+            ret = cur;
+			// this avoids the ABA problem since we're always taking
+			// the whole list and assigning in nullptr, so there's no
+			// real 'B' to even start to have an ABA issue - if
+			// someone puts the same 'A' back on the list, that's
+			// fine, we're happy to use it since we're not deleting
+			// these or anything...
+			if ( _avail_workers.compare_exchange_weak( cur, nullptr, std::memory_order_release, std::memory_order_acquire ) )
+                break;
+		}
+		return ret;
+	}
+
+	inline void put_back( worker_bee *wb )
+	{
+		worker_bee *endcur = wb;
+		while ( endcur->_next.load( std::memory_order_relaxed ) )
+			endcur = endcur->_next.load( std::memory_order_relaxed );
+
+		worker_bee *curhead = _avail_workers.load( std::memory_order_relaxed );
+		while ( true )
+		{
+			endcur->_next = curhead;
+			if ( _avail_workers.compare_exchange_weak( curhead, wb, std::memory_order_release, std::memory_order_acquire ) )
+                break;
+		}
+	}
+
+	void donate( worker_bee &wb );
+
+	// we don't care so much about the ABA problem since we aren't
+	// deleting the items... and we want to checkout all the threads
+	// at once if we can so we are always assigning in a nullptr and
+	// taking or returning a chunk of a list
+	std::atomic<worker_bee *> _avail_workers;
+	//base::lock_free_list<worker_bee> _avail_workers;
+	std::vector< std::unique_ptr<worker_bee> > _threads;
 	int _count = 0;
-	std::unique_ptr<dispatch_logic []> _dispatch;
-	std::vector<std::thread> _threads;
-	alignas(kAlign) base::semaphore _thread_sema;
-	alignas(kAlign) base::semaphore _wait_sema;
-	alignas(kAlign) std::atomic<bool> _shutdown;
 };
 
 } // namespace image

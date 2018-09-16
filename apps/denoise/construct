@@ -2,3 +2,4 @@
 executable "denoise"
   source "main.cpp"
   libs{ "image", "media" }
+  system_libs("Linux", "atomic")

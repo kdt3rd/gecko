@@ -17,9 +17,11 @@
 #elif defined(__unix__)
 # include <semaphore.h>
 # include <cerrno>
+# include <time.h>
 #else
 # error "Unknown platform - add implementation of semaphore"
 #endif
+#include <chrono>
 
 ////////////////////////////////////////
 
@@ -43,8 +45,17 @@ public:
 	inline simple_semaphore( int initCount = 0 );
 	inline ~simple_semaphore( void );
 
+	/// wait for the semaphore to become signaled, decrementing the
+	/// signal count by one
 	inline void wait( void );
-	/// minor optimization to avoid loop setup, provide both a default single increment
+	/// similar to @sa wait, but waits for a maximum of the amount of
+	/// time provided before returning. Analogous to the mutex
+	/// try_lock_for (as opposed to try_lock_until)
+	template <typename R, typename P>
+	inline bool timed_wait( const std::chrono::duration<R, P> &dur );
+
+	/// minor optimization to avoid loop setup, provide both a default
+	/// single increment
 	inline void signal( void );
 	/// and a specific number
 	inline void signal( int num );
@@ -111,6 +122,9 @@ public:
 		if ( _count.fetch_sub( 1, std::memory_order_acquire ) <= 0 )
 			_os_sema.wait();
 	}
+
+	template <typename R, typename P>
+	inline bool timed_wait( const std::chrono::duration<R, P> &dur );
 
 	/// signal the semaphore, potentially waking up num threads
 	inline void signal( int num = 1 )
@@ -205,6 +219,66 @@ simple_semaphore::signal( int num )
 	while ( num-- > 0 )
 		sem_post( &_sem );
 #endif
+}
+
+////////////////////////////////////////
+
+template <typename R, typename P>
+inline bool simple_semaphore::timed_wait( const std::chrono::duration<R, P> &dur )
+{
+#ifdef _WIN32
+	auto ms = std::chrono::duration_cast<std::chrono::milliseconds>( dur );
+	DWORD r = WaitForSingleObject( _sem, static_cast<DWORD>( ms.count() ) );
+	if ( r == WAIT_TIMEOUT )
+		return false;
+	return true;
+#elif defined(__MACH__)
+	auto s = std::chrono::duration_cast<std::chrono::seconds>( dur );
+	auto nsec = std::chrono::duration_cast<std::chrono::nanoseconds>( dur );
+	long ns = nsec.count() % 1000000000;
+
+	mach_timespect_t ts;
+	ts.tv_sec = s;
+	ts.tv_nsec = ns;
+	kern_return_t r = semaphore_timedwait( _sem, ts );
+	if ( r == KERN_SUCCESS )
+		return true;
+//	if ( r != KERN_OPERATION_TIMED_OUT )
+//		throw_system;
+	return false;
+#elif defined(__unix__)
+	auto sec = std::chrono::duration_cast<std::chrono::seconds>( dur );
+	auto nsec = std::chrono::duration_cast<std::chrono::nanoseconds>( dur );
+	long ns = nsec.count() % 1000000000;
+	struct timespec ts = { 0, 0 };
+	clock_gettime( CLOCK_REALTIME, &ts );
+	ts.tv_sec += sec.count();
+	ts.tv_nsec += ns;
+	if ( ts.tv_nsec >= 1000000000 )
+	{
+		ts.tv_sec += 1;
+		ts.tv_nsec -= 1000000000;
+	}
+	int s;
+	do
+	{
+		s = sem_timedwait( &_sem, &ts );
+		if ( s < 0 && errno == ETIMEDOUT )
+			return false;
+	} while ( s < 0 && errno == EINTR );
+#endif
+}
+
+////////////////////////////////////////
+
+template <typename R, typename P>
+inline bool semaphore::timed_wait( const std::chrono::duration<R, P> &dur )
+{
+	if ( try_wait() )
+		return true;
+	if ( _count.fetch_sub( 1, std::memory_order_acquire ) <= 0 )
+		return _os_sema.timed_wait( dur );
+	return true;
 }
 
 } // namespace base

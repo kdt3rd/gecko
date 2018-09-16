@@ -21,6 +21,7 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	std::cout << "std::type_index = " << sizeof(std::type_index) << std::endl;
 	std::cout << "base::half = " << sizeof(base::half) << std::endl;
 	std::cout << "base::uri = " << sizeof(base::uri) << std::endl;
+	std::cout << "unsigned long long = " << sizeof(unsigned long long) << std::endl;
 	return 0;
 }
 
