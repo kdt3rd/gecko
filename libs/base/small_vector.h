@@ -391,7 +391,7 @@ public:
 			for ( pointer cur = _impl._start; cur != _impl._end; (void) ++cur )
 				allocator_traits::destroy( _impl, cur );
 			if ( ! is_small() )
-				_impl.deallocate( _impl._start, _impl._storage_end - _impl.start );
+				_impl.deallocate( _impl._start, _impl._storage_end - _impl._start );
 			_impl._start = news;
 			_impl._end = news + old;
 			_impl._storage_end = news + n;
