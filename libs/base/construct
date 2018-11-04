@@ -23,6 +23,7 @@ lib = library "base"
 	"sha256.cpp";
 	"skein512.cpp";
 	"spooky_hash.cpp";
+	"time_util.cpp";
 	"base64.cpp";
 	"backtrace.cpp";
 	"cmd_line.cpp";
