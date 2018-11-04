@@ -105,6 +105,14 @@ private:
 
 /// @brief Round size up following rounding rules
 template <typename T>
+inline size<T> abs( const size<T> &s )
+{
+	using namespace std;
+	return size<T>( static_cast<T>( abs( s.w() ) ), abs( s.h() ) );
+}
+
+/// @brief Round size up following rounding rules
+template <typename T>
 inline size<T> round( const size<T> &s )
 {
 	using namespace std;
@@ -181,6 +189,12 @@ using lsize = size<int64_t>;
 // provide std specialization of the functions above
 namespace std
 {
+
+template <typename T>
+inline base::size<T> abs( const base::size<T> &a )
+{
+	return base::abs( a );
+}
 
 template <typename T>
 inline base::size<T> round( const base::size<T> &a )
