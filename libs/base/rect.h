@@ -315,6 +315,17 @@ public:
 		r.set_y2( std::ceil( y2() ) );
 		return r;
 	}
+
+	static rect from_points( coord_type xx1, coord_type yy1, coord_type xx2, coord_type yy2 )
+	{
+		if ( xx2 < xx1 || yy2 < yy1 )
+		{
+			std::swap( xx1, xx2 );
+			std::swap( yy1, yy2 );
+		}
+		return rect( xx1, yy1, xx2 - xx1 + 1, yy2 - yy1 + 1 );
+	}
+
 private:
 	void fix_extent( void )
 	{
