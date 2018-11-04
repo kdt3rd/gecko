@@ -73,8 +73,8 @@ const any &
 graph::get_value( node_id n )
 {
 	precondition( n < _nodes.size(), "invalid node id {0}", n );
-	++_computing;
-	on_scope_exit{ --_computing; };
+	_computing.fetch_add( 1, std::memory_order_relaxed );
+	on_scope_exit{ _computing.fetch_sub( 1, std::memory_order_relaxed ); };
 
 	any &v = _nodes[n].value();
 	if ( ! v.has_value() )
