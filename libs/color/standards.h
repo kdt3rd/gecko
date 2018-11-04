@@ -94,11 +94,11 @@ public:
 
 	constexpr state capture_state( range r = range::FULL, bool isRGB = true ) const
 	{
-		return state( isRGB ? space::RGB : chroma_space(), _chroma, _peak_lum, state::value_type(0), r, _oetf_curve );
+		return state( isRGB ? space::RGB : chroma_space(), _chroma, _peak_lum, state::value_type(0), r, _oetf_curve, true );
 	}
 	constexpr state display_state( range r = range::FULL, bool isRGB = true ) const
 	{
-		return state( isRGB ? space::RGB : chroma_space(), _chroma, _peak_lum, state::value_type(0), r, _eotf_curve );
+		return state( isRGB ? space::RGB : chroma_space(), _chroma, _peak_lum, state::value_type(0), r, _eotf_curve, false );
 	}
 private:
 	cx _chroma;

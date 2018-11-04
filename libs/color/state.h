@@ -57,9 +57,11 @@ public:
 					 value_type lum,
 					 value_type black_off,
 					 range lumr,
-					 transfer crv ) noexcept
+					 transfer crv,
+					 bool scenerefer ) noexcept
 		: _space( s ), _range( lumr ), _curve( crv ), _chroma( c ), _lum_scale( lum ),
-		  _black_offset( black_off ), _curve_ctl( get_curve_defaults( crv ) )
+		  _black_offset( black_off ), _scene_referred( scenerefer ),
+		  _curve_ctl( get_curve_defaults( crv ) )
 	{}
 	constexpr state( const state &s ) noexcept = default;
 	constexpr state( state &&s ) noexcept = default;
@@ -71,23 +73,28 @@ public:
 		: _space( s ), _range( st._range ), _curve( st._curve ),
 		  _chroma( st._chroma ), _lum_scale( st._lum_scale ),
 		  _black_offset( st._black_offset ),
+		  _scene_referred( st._scene_referred ),
 		  _curve_ctl( st._curve_ctl )
 	{}
 	constexpr state( const state &st, range r )
 		: _space( st._space ), _range( r ), _curve( st._curve ),
 		  _chroma( st._chroma ), _lum_scale( st._lum_scale ),
-		  _black_offset( st._black_offset ), _curve_ctl( st._curve_ctl )
+		  _black_offset( st._black_offset ),
+		  _scene_referred( st._scene_referred ),
+		  _curve_ctl( st._curve_ctl )
 	{}
 	constexpr state( const state &st, transfer t, bool reset = true )
 		: _space( st._space ), _range( st._range ), _curve( t ),
 		  _chroma( st._chroma ), _lum_scale( st._lum_scale ),
 		  _black_offset( st._black_offset ),
+		  _scene_referred( st._scene_referred ),
 		  _curve_ctl( reset ? get_curve_defaults( t ) : st._curve_ctl )
 	{}
 	constexpr state( const state &st, transfer t, const transfer_curve_control &ctl )
 		: _space( st._space ), _range( st._range ), _curve( t ),
 		  _chroma( st._chroma ), _lum_scale( st._lum_scale ),
 		  _black_offset( st._black_offset ),
+		  _scene_referred( st._scene_referred ),
 		  _curve_ctl( ctl )
 	{}
 	/// @}
@@ -153,6 +160,18 @@ public:
 		_curve = crv;
 		_curve_ctl = ctl;
 	}
+
+	/// Indicates if the color state is scene referred, meaning the luminance
+	/// scale value is also scene referred.
+	///
+	/// By extension, if false, the color state is in a display referred state,
+	/// indicating the color has been rendered for a display
+	constexpr bool scene_referred( void ) const { return _scene_referred; }
+	/// Alternate / opposite way of querying if the color state is
+	/// rendered or in a scene referred state
+	constexpr bool rendered( void ) const { return ! scene_referred(); }
+	/// indicate the color has been rendered for a display or not
+	inline void rendered( bool r ) { _scene_referred = ! r; }
 
 	inline bool is_same_matrix( const state &o ) const
 	{
@@ -282,6 +301,7 @@ private:
 	cx _chroma = cx();
 	value_type _lum_scale = value_type(100.0);
 	value_type _black_offset = value_type(0.0);
+	bool _scene_referred = false;
 	transfer_curve_control _curve_ctl = transfer_curve_control();
 };
 
