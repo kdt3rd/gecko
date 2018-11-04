@@ -25,8 +25,8 @@ std::mutex theReaderMutex;
 void initReaders( void )
 {
 	media::register_exr_reader();
-	media::register_png_reader();
-	media::register_tiff_reader();
+//	media::register_png_reader();
+//	media::register_tiff_reader();
 }
 
 static std::vector<std::shared_ptr<media::reader>> theReaders;
@@ -35,37 +35,34 @@ static size_t theMaxHeaderMagicSize = 0;
 
 }
 
-
 ////////////////////////////////////////
-
 
 namespace media
 {
 
-
 ////////////////////////////////////////
-
 
 reader::reader( base::cstring n )
 	: _name( n )
 {
 }
 
-
 ////////////////////////////////////////
-
 
 reader::~reader( void )
 {
 }
 
+////////////////////////////////////////
+
+parameter_set reader::default_parameters( void ) const
+{
+	return initialize_parameters( parameters() );
+}
 
 ////////////////////////////////////////
 
-
-container
-reader::open( const base::uri &u,
-			  const metadata &openParams )
+container reader::open( const base::uri &u, const parameter_set &openParams )
 {
 	try
 	{
@@ -105,9 +102,42 @@ reader::open( const base::uri &u,
 	throw_not_yet();
 }
 
-
 ////////////////////////////////////////
 
+parameter_set
+reader::query_parameters( const base::uri &u, bool temp_open )
+{
+	if ( temp_open )
+	{
+		parameter_set r;
+		container c = open( u, r );
+		return c.parameters();
+	}
+
+	parameter_set r;
+	std::call_once( theInitReaders, &initReaders );
+
+	std::shared_ptr<reader> reader;
+	if ( ! u.path().empty() )
+	{
+		std::string ext = base::to_lower( base::file_extension( u.path().back() ) );
+
+		std::unique_lock<std::mutex> lk( theReaderMutex );
+		auto eh = theReadersByExtension.find( ext );
+		if ( eh != theReadersByExtension.end() )
+			reader = eh->second;
+	}
+
+	// because of scoping, we have unlocked the mutex
+	if ( reader )
+		r = reader->default_parameters();
+	else
+		throw_runtime( "Unable to determine media reader based on extension" );
+
+	return r;
+}
+
+////////////////////////////////////////
 
 void
 reader::register_reader( const std::shared_ptr<reader> &r )
@@ -136,7 +166,7 @@ reader::register_reader( const std::shared_ptr<reader> &r )
 ////////////////////////////////////////
 
 container
-reader::scan_header( const base::uri &u, const metadata &openParams )
+reader::scan_header( const base::uri &u, const parameter_set &openParams )
 {
 	if ( theMaxHeaderMagicSize == 0 )
 		throw_runtime( "Header scanning not possible: no readers registered with magic numbers" );
@@ -172,9 +202,7 @@ reader::scan_header( const base::uri &u, const metadata &openParams )
 	throw_runtime( "Unable to find reader by magic number" );
 }
 
-
 ////////////////////////////////////////
-
 
 } // media
 

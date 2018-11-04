@@ -8,6 +8,43 @@
 #include "media_io.h"
 #include <base/contract.h>
 #include <media/writer.h>
+#include <media/frame.h>
+#include <media/image.h>
+#include <media/image_buffer.h>
+
+////////////////////////////////////////
+
+namespace
+{
+
+void update_image_buffer(
+	media::image_buffer &buf,
+	const media::plane_layout &pl,
+	const media::area_rect &area )
+{
+	if ( area.x1() == buf.x1() && area.x2() == buf.x2() &&
+		 area.y1() == buf.y1() && area.y2() == buf.y2() &&
+		 buf.offset() == 0 )
+	{
+		int64_t bytes = static_cast<int64_t>( ( int64_t( pl._bits ) + 7 ) / 8 );
+		int64_t ystride = ( area.width() * bytes ) >> int64_t( pl._xsubsample_shift );
+		if ( buf.bits() == int64_t( pl._bits ) &&
+			 buf.xstride_bytes() == ( int64_t( pl._bits ) / 8 ) &&
+			 buf.ystride_bytes() == ystride )
+		{
+			// same buffer size, we can just return and re-use the buffer
+			return;
+		}
+	}
+	buf = media::image_buffer::full_plane( area.x1(), area.y1(),
+										   area.x2(), area.y2(),
+										   pl._bits,
+										   pl._xsubsample_shift,
+										   pl._ysubsample_shift,
+										   pl._floating, pl._unsigned );
+}
+
+} // empty namespace
 
 ////////////////////////////////////////
 
@@ -16,64 +53,92 @@ namespace image
 
 ////////////////////////////////////////
 
-image_buf
-extract_frame( const media::image_frame &f )
+image_buf extract_frame(
+	const media::frame &f,
+	const std::string &layer,
+	const std::string &view,
+	const std::vector<std::string> &planes )
 {
-	std::vector<std::string> chans;
-	chans.reserve( f.size() );
-	for ( size_t i = 0, N = f.size(); i != N; ++i )
-		chans.emplace_back( f.name( i ) );
-
-	return extract_frame( f, chans );
-}
-
-////////////////////////////////////////
-
-image_buf extract_frame( const media::image_frame &f, const std::vector<std::string> &chans )
-{
-	size_t nC = chans.size();
-	if ( f.size() < nC )
-		throw_runtime( "Request for {0} channels/planes, but media image only has {1}", nC, f.size() );
-
 	image_buf r;
-
-	int64_t dx1 = 0, dx2 = 0, dy1 = 0, dy2 = 0;
-	for ( size_t i = 0, N = nC; i != N; ++i )
+	std::shared_ptr<media::image> img = f.find_image( layer, view );
+	if ( img )
 	{
-		if ( ! f.has_channel( chans[i] ) )
-			throw_runtime( "media image does not have channel '{0}'", chans[i] );
-		const media::image_buffer &ib = f[chans[i]];
-		if ( i == 0 )
-		{
-			dx1 = ib.x1();
-			dx2 = ib.x2();
-			dy1 = ib.y1();
-			dy2 = ib.y2();
-		}
-		else if ( dx1 != ib.x1() || dx2 != ib.x2() )
-			throw_runtime( "media image channel {0} width {1} does not match channel 0 width {2} ({3} - {4})", i, ib.width(), dx2 - dx1 + 1, dx1, dx2 );
-		else if ( dy1 != ib.y1() || dy2 != ib.y2() )
-			throw_runtime( "media image channel {0} height {1} does not match channel 0 width {2} ({3} - {4})", i, ib.height(), dy2 - dy1 + 1, dy1, dy2 );
+		const media::area_rect active = img->active_area();
+		int64_t dx1 = active.x1(), dx2 = active.x2();
+		int64_t dy1 = active.y1(), dy2 = active.y2();
 
-		// TODO: do we want this?
-		//r.add_plane( plane( "m.conv_to_plane", d, f, c[i] ) );
-		// need to add hash functions, etc.
-		plane p( dx1, dy1, dx2, dy2 );
-		for ( int64_t y = dy1; y <= dy2; ++y )
-			ib.get_scanline( y, p.line( static_cast<int>( y ) ), 1 );
-		r.add_plane( std::move( p ) );
+		if ( img->interleaved() )
+		{
+			// all planes should be the same
+			// TODO: how do we handle 4:2:2 interleaved?
+			throw_not_yet();
+		}
+		else if ( planes.empty() )
+		{
+			media::image_buffer tmp;
+			for ( size_t p = 0, nP = img->size(); p != nP; ++p )
+			{
+				update_image_buffer( tmp, img->layout( p ), active );
+				img->retrieve( p, tmp );
+				plane pl( dx1, dy1, dx2, dy2 );
+				for ( int64_t y = dy1; y <= dy2; ++y )
+					tmp.get_scanline( y, pl.line( static_cast<int>( y ) ), 1 );
+				r.add_plane( std::move( pl ) );
+			}
+		}
+		else
+		{
+			std::vector<size_t> pMapping;
+			pMapping.reserve( planes.size() );
+			throw_not_yet();
+			media::image_buffer tmp;
+			for ( auto &plane: planes )
+			{
+				bool found = false;
+				for ( size_t p = 0, nP = img->size(); p != nP; ++p )
+				{
+					if ( img->plane_name( p ) == plane )
+					{
+						pMapping.push_back( p );
+						found = true;
+						break;
+					}
+				}
+				if ( ! found )
+					throw_runtime( "Request for channel '{0}' in layer '{0}', view '{1}' does not exist in frame {2}",
+								   plane, layer, view, f.number() );
+			}
+
+			for ( size_t idx: pMapping )
+			{
+				update_image_buffer( tmp, img->layout( idx ), active );
+				img->retrieve( idx, tmp );
+				plane pl( dx1, dy1, dx2, dy2 );
+				for ( int64_t y = dy1; y <= dy2; ++y )
+					tmp.get_scanline( y, pl.line( static_cast<int>( y ) ), 1 );
+				r.add_plane( std::move( pl ) );
+			}
+		}
+	}
+	else
+	{
+		// hrm, we no longer have the URL :(
+		throw_runtime( "Request for layer '{0}', view '{1}' does not exist in frame {2}",
+					   layer, view, f.number() );
 	}
 	return r;
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<media::image_frame>
+std::shared_ptr<media::frame>
 to_frame( const image_buf &i, const std::vector<std::string> &chans, const std::string &type, const media::metadata &meta )
 {
 	if ( i.size() < chans.size() )
 		throw_runtime( "image does not have enough channels ({0}) for requested channel list size ({1})", i.size(), chans.size() );
 
+	throw_not_yet();
+#if 0
 	engine::dimensions d = i.dims();
 	std::shared_ptr<media::image_frame> r = std::make_shared<media::image_frame>( d.x1, d.y1, d.x2, d.y2 );
 	for ( size_t c = 0, nC = chans.size(); c != nC; ++c )
@@ -100,12 +165,13 @@ to_frame( const image_buf &i, const std::vector<std::string> &chans, const std::
 	}
 	r->copy_meta( meta );
 	return r;
+#endif
 }
 
 ////////////////////////////////////////
 
 void
-debug_save_image( const image_buf &i, const std::string &fn, int64_t sampNum, const std::vector<std::string> &chans, const std::string &type, const media::metadata &options, const media::metadata &meta )
+debug_save_image( const image_buf &i, const std::string &fn, int64_t sampNum, const std::vector<std::string> &chans, const std::string &type, const media::parameter_set &params, const media::metadata &meta )
 {
 	std::vector<media::track_description> tds;
 
@@ -113,14 +179,11 @@ debug_save_image( const image_buf &i, const std::string &fn, int64_t sampNum, co
 	tds.back().rate( media::sample_rate( 1, 1 ) );
 	tds.back().offset( sampNum );
 	tds.back().duration( 1 );
-	for ( auto &o: options )
-		tds.back().set_option( o.first, o.second );
-
 	base::uri fnU( fn );
 	if ( ! fnU )
 		fnU.set_scheme( "file" );
 
-	media::container oc = media::writer::open( fnU, tds, options );
+	media::container oc = media::writer::open( fnU, tds, params );
 	oc.video_tracks()[0]->store( sampNum, to_frame( i, chans, type, meta ) );
 	std::cout << "Saved debug image to '" << fn << "', frame " << sampNum << std::endl;
 }

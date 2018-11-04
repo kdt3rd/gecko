@@ -11,6 +11,7 @@
 #include <functional>
 #include <memory>
 
+#include <base/units.h>
 #include <base/cmd_line.h>
 #include <base/posix_file_system.h>
 #include <media/reader.h>

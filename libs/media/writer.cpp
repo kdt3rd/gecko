@@ -15,9 +15,7 @@
 #include <atomic>
 #include <map>
 
-
 ////////////////////////////////////////
-
 
 namespace
 {
@@ -34,40 +32,34 @@ static std::map<std::string, std::shared_ptr<media::writer>> theWritersByExtensi
 
 }
 
-
 ////////////////////////////////////////
-
 
 namespace media
 {
 
-const std::string writer::ForceWriterMetadataName = "media::WriterName";
-
-
 ////////////////////////////////////////
-
 
 writer::writer( base::cstring n )
 	: _name( n )
 {
 }
 
-
 ////////////////////////////////////////
-
 
 writer::~writer( void )
 {
 }
 
+////////////////////////////////////////
+
+parameter_set writer::default_parameters( void ) const
+{
+	return initialize_parameters( parameters() );
+}
 
 ////////////////////////////////////////
 
-
-container
-writer::open( const base::uri &u,
-			  const std::vector<track_description> &td,
-			  const metadata &openParams )
+std::shared_ptr<writer> writer::find_by_ext( const base::uri &u )
 {
 	std::call_once( theInitWriters, &initWriters );
 
@@ -78,40 +70,91 @@ writer::open( const base::uri &u,
 
 		//std::cout << "output extension: " << ext << std::endl;
 		std::unique_lock<std::mutex> lk( theWriterMutex );
-		auto wOverride = openParams.find( ForceWriterMetadataName );
-		if ( wOverride != openParams.end() )
-		{
-			using namespace base;
-			const std::string &name = any_cast<const std::string &>( wOverride->second );
-			for ( auto &w: theWriters )
-			{
-				if ( w->name() == name )
-				{
-					writer = w;
-					break;
-				}
-			}
-			if ( ! writer )
-				throw_runtime( "Writer override set to {0}, but specified writer not found", name );
-		}
-		else
-		{
-			auto eh = theWritersByExtension.find( ext );
-			if ( eh != theWritersByExtension.end() )
-				writer = eh->second;
-		}
+		auto eh = theWritersByExtension.find( ext );
+		if ( eh != theWritersByExtension.end() )
+			writer = eh->second;
 	}
-
-	// because of scoping, we have unlocked the mutex so other writers can find the factory
-	if ( writer )
-		return writer->create( u, td, openParams );
-	else
-		throw_runtime( "No writer found for {0} with given parameters", u );
+	return writer;
 }
-
 
 ////////////////////////////////////////
 
+std::shared_ptr<writer> writer::find_by_name( const std::string &n )
+{
+	std::call_once( theInitWriters, &initWriters );
+
+	std::shared_ptr<writer> writer;
+	std::unique_lock<std::mutex> lk( theWriterMutex );
+
+	for ( auto &w: theWriters )
+	{
+		if ( w->name() == n )
+		{
+			writer = w;
+			break;
+		}
+	}
+	return writer;
+}
+
+////////////////////////////////////////
+
+parameter_set writer::parameters_by_ext( const base::uri &u, const std::string &opts )
+{
+	auto w = find_by_ext( u );
+	if ( w )
+		return initialize_parameters( w->parameters(), opts );
+	return parameter_set();
+}
+
+////////////////////////////////////////
+
+std::vector< std::shared_ptr<writer> > writer::available( void )
+{
+	std::call_once( theInitWriters, &initWriters );
+	std::unique_lock<std::mutex> lk( theWriterMutex );
+	return theWriters;
+}
+
+////////////////////////////////////////
+
+container
+writer::open(
+	const base::uri &u,
+	const parameter_set &params,
+	const std::string &forcewriter )
+{
+	std::vector<track_description> td;
+	return open( u, td, params, forcewriter );
+}
+
+////////////////////////////////////////
+
+container
+writer::open(
+	const base::uri &u,
+	const std::vector<track_description> &td,
+	const parameter_set &params,
+	const std::string &forcewriter )
+{
+	std::shared_ptr<writer> writer;
+	if ( forcewriter.empty() )
+	{
+		writer = find_by_ext( u );
+		if ( ! writer )
+			throw_runtime( "No writer found for output path {0}, please specify writer manually", u );
+	}
+	else
+	{
+		writer = find_by_name( forcewriter );
+		if ( ! writer )
+			throw_runtime( "Writer override set to {0}, but specified writer not found", forcewriter );
+	}
+
+	return writer->create( u, td, params );
+}
+
+////////////////////////////////////////
 
 void
 writer::register_writer( const std::shared_ptr<writer> &w )

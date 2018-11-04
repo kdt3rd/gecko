@@ -11,6 +11,8 @@
 #include <base/cmd_line.h>
 #include <base/posix_file_system.h>
 #include <media/reader.h>
+#include <media/image.h>
+#include <media/data.h>
 #include <media/sample.h>
 #include <sstream>
 #include <iostream>
@@ -45,7 +47,44 @@ int safemain( int argc, char *argv[] )
 				media::sample s( vt->begin(), vt->rate() );
 
 				auto f = s( vt );
-				std::cout << " size: " << f->width() << " x " << f->height() << ", " << f->size() << " channels" << std::endl;
+				std::cout << " layers: " << f->layer_count() << std::endl;
+				for ( size_t l = 0, L = f->layer_count(); l != L; ++l )
+				{
+					const auto &curl = f->layers()[l];
+					std::cout << "   layer " << l << ": '" << curl.name() << "' " << curl.view_count() << " views (default: '" << curl.default_view_name() << "')\n";
+					for ( size_t v = 0, V = curl.view_count(); v != V; ++v )
+					{
+						const auto &curv = curl[v];
+						std::cout << "      view " << v << ": " << curv.name() << '\n';
+						auto img = static_cast< std::shared_ptr<media::image> >( curv );
+						if ( img )
+						{
+							std::cout << "        image active_area: " << img->active_area() << '\n';
+							std::cout << "                   planes: ";
+							for ( size_t p = 0; p != img->size(); ++p )
+							{
+								if ( p > 0 )
+									std::cout << ", ";
+								std::cout << img->plane_name( p );
+							}
+							std::cout << '\n';
+						}
+						auto dt = static_cast< std::shared_ptr<media::data> >( curv );
+						if ( dt )
+						{
+							std::cout << "        deep active_area: " << dt->active_area() << '\n';
+							std::cout << "                  planes: ";
+							for ( size_t p = 0; p != dt->size(); ++p )
+							{
+								if ( p > 0 )
+									std::cout << ", ";
+								std::cout << dt->plane_name( p );
+							}
+							std::cout << '\n';
+						}
+					}
+				}
+				std::cout << std::endl;
 			}
 		}
 	}

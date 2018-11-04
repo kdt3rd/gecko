@@ -9,6 +9,7 @@
 
 #include <cstdint>
 #include <base/half.h>
+#include <base/rect.h>
 #include <base/pointer.h>
 #include <base/contract.h>
 #include <base/endian.h>
@@ -218,6 +219,20 @@ public:
 							 endi, isf, isu );
 	}
 
+	static image_buffer full_plane( int64_t x1, int64_t y1, int64_t x2, int64_t y2,
+									int8_t bits, int8_t xsubsamp_shift, int8_t ysubsamp_shift,
+									bool isfloat, bool isunsigned )
+	{
+		int64_t w = x2 - x1 + 1, h = y2 - y1 + 1;
+		int64_t bytes = static_cast<int64_t>( ( int64_t( bits ) + 7 ) / 8 );
+		int64_t ystride = ( w * bytes ) >> int64_t( xsubsamp_shift );
+		size_t sz = static_cast<size_t>( ystride * ( h >> int64_t( ysubsamp_shift ) ) );
+
+		std::shared_ptr<void> vdata = std::shared_ptr<uint8_t>(
+			new uint8_t[sz], base::array_deleter<uint8_t>() );
+		return image_buffer( vdata, int16_t( bits ), x1, y1, x2, y2, bits, ystride * 8, 0,
+							 base::endianness::NATIVE, isfloat, isunsigned );
+	}
 private:
 	void get_scanline_u8( int64_t y, float *line, int64_t stride ) const;
 	void get_scanline_u16( int64_t y, float *line, int64_t stride ) const;

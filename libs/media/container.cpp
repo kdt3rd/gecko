@@ -6,6 +6,7 @@
 //
 
 #include "container.h"
+#include "image_frame.h"
 
 namespace media
 {
@@ -51,6 +52,13 @@ container::add_track( const std::shared_ptr<track> &t )
 	auto dtrk = std::dynamic_pointer_cast<media::data_track>( t );
 	if ( dtrk )
 		_data_tracks.push_back( dtrk );
+}
+
+////////////////////////////////////////
+
+void container::set_parameters( const parameter_set &p )
+{
+	_parameters = p;
 }
 
 ////////////////////////////////////////

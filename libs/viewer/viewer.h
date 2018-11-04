@@ -17,7 +17,7 @@
 namespace media
 {
 class video_track;
-class sample;
+class frame;
 }
 
 // TODO: should we put it in it's own namespace???
@@ -73,7 +73,7 @@ private:
 	{
 		std::shared_ptr<media::video_track> _source;
 		media::sample _last_loaded;
-		std::shared_ptr<media::image_frame> _cur;
+		std::shared_ptr<media::frame> _cur;
 		std::shared_ptr<draw::image> _image;
 		bool _active = false;
 		size_t _above = kInvalidID;

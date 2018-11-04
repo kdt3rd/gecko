@@ -28,6 +28,10 @@ int safemain( int argc, char *argv[] )
 	base::cmd_line options(
 		argv[0],
 		base::cmd_line::option(
+			0, std::string( "output-settings" ),
+			"<string>", base::cmd_line::arg<1>,
+			"Comma separated name=value setting for output file format options", false ),
+		base::cmd_line::option(
 			0, std::string(),
 			"<input_file>", base::cmd_line::arg<1>,
 			"Input file pattern to transcode", true ),
@@ -41,7 +45,6 @@ int safemain( int argc, char *argv[] )
 	options.parse( argc, argv );
 	errhandler.dismiss();
 
-	media::metadata outputOptions;
 	auto &inP = options["<input_file>"];
 	auto &outP = options["<output_file>"];
 	if ( inP && outP )
@@ -65,8 +68,13 @@ int safemain( int argc, char *argv[] )
 			tds.back().rate( vt->rate() );
 			tds.back().offset( vt->begin() );
 			tds.back().duration( vt->end() - vt->begin() + 1 );
-			tds.back().set_option( "compression", "piz" );
 		}
+
+		std::string outOpts;
+		auto &outParams = options["output-settings"];
+		if ( outParams )
+			outOpts = outParams.value();
+		media::parameter_set outputOptions = media::writer::parameters_by_ext( outputU, outOpts );
 
 		media::container oc = media::writer::open( outputU, tds, outputOptions );
 		size_t ovt = 0;
@@ -77,11 +85,9 @@ int safemain( int argc, char *argv[] )
 				media::sample s( f, vt->rate() );
 
 				auto curFrm = s( vt );
-				if ( f == vt->begin() )
-					std::cout << " size: " << curFrm->width() << " x " << curFrm->height() << ", " << curFrm->size() << " channels" << std::endl;
 
 				using namespace image;
-				image_buf img = extract_frame( *curFrm, { "R", "G", "B" } );
+				image_buf img = extract_frame( *curFrm, std::string(), std::string(), { "R", "G", "B" } );
 				int origw = img.width();
 				int origh = img.height();
 				int neww = origw / 2;

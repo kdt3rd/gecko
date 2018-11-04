@@ -16,15 +16,29 @@
 #include "data_track.h"
 
 #include "metadata.h"
+#include "parameter.h"
 
 namespace media
 {
 
 ////////////////////////////////////////
 
-/// container is a media container. A sample of
-/// this would be a quicktime file, or an MXF,
-/// or AVC, etc.
+/// @brief container is a media container.
+///
+/// A sample of this would be a quicktime file, or an MXF, or AVC,
+/// etc. for single-frame image files this is sometimes clumsy,
+/// however provides unified access to both types of media.
+///
+/// There is an attempt to have this all be generic, however to make
+/// access a bit easier, tracks have been described as 3 types of
+/// tracks:
+///  - video track @sa video_track
+///  - audio track @sa audio_track
+///  - data track @sa data_track
+///
+/// Each level of item (container on down) will have metadata associated with it
+/// 
+///
 class container
 {
 public:
@@ -57,8 +71,13 @@ public:
 	inline const std::vector<std::shared_ptr<audio_track>> &audio_tracks( void ) const;
 	inline const std::vector<std::shared_ptr<data_track>> &data_tracks( void ) const;
 
+	inline const parameter_set &parameters( void ) const { return _parameters; }
+	void set_parameters( const parameter_set &p );
+
 private:
 	metadata _info;
+	parameter_set _parameters;
+
 	std::vector<std::shared_ptr<track>> _tracks;
 	std::vector<std::shared_ptr<video_track>> _video_tracks;
 	std::vector<std::shared_ptr<audio_track>> _audio_tracks;

@@ -19,47 +19,13 @@
 namespace media
 {
 
-class area_rect
-{
-public:
-	constexpr area_rect( void ) noexcept = default;
-	area_rect( int64_t x1, int64_t y1, int64_t x2, int64_t y2 )
-			: _x1( x1 ), _y1( y1 ), _x2( x2 ), _y2( y2 )
-	{
-		precondition( x2 >= x1, "Invalid x coordinate, x2 ({0}) >= x1({1})", x2, x1 );
-		precondition( y2 >= y1, "Invalid y coordinate, y2 ({0}) >= y1({1})", y2, y1 );
-	}
-	~area_rect( void ) = default;
-
-	constexpr bool valid( void ) const { return _x2 >= _x1; }
-	constexpr int64_t x1( void ) const { return _x1; }
-	constexpr int64_t y1( void ) const { return _y1; }
-	constexpr int64_t x2( void ) const { return _x2; }
-	constexpr int64_t y2( void ) const { return _y2; }
-
-	constexpr int64_t width( void ) const
-	{
-		return _x2 - _x1 + 1;
-	}
-
-	constexpr int64_t height( void ) const
-	{
-		return _y2 - _y1 + 1;
-	}
-private:
-	int64_t _x1 = 0;
-	int64_t _y1 = 0;
-	int64_t _x2 = -1;
-	int64_t _y2 = -1;
-};
-
 ////////////////////////////////////////
 
 class image_frame : public sample_data
 {
 public:
 	image_frame( int64_t x1, int64_t y1, int64_t x2, int64_t y2 )
-			: _area( x1, y1, x2, y2 )
+		: _area( area_rect::from_points( x1, y1, x2, y2 ) )
 	{
 	}
 	virtual ~image_frame( void );

@@ -147,6 +147,10 @@ int safemain( int argc, char *argv[] )
 			"<int>", base::cmd_line::arg<1>,
 			"Number of threads to use for processing", false ),
 		base::cmd_line::option(
+			0, std::string( "output-settings" ),
+			"<string>", base::cmd_line::arg<1>,
+			"Comma separated name=value setting for output file format options", false ),
+		base::cmd_line::option(
 			0, std::string(),
 			"<input_file>", base::cmd_line::arg<1>,
 			"Input file pattern to process", true ),
@@ -309,8 +313,6 @@ int safemain( int argc, char *argv[] )
 	if ( useLog )
 		std::cout << "Using log of image where appropriate" << std::endl;
 
-	media::metadata outputOptions;
-	outputOptions["compression"] = std::string( "piz" );
 	auto &frames = options["frames"];
 	if ( frames )
 	{
@@ -358,7 +360,7 @@ int safemain( int argc, char *argv[] )
 			tds.back().rate( vt->rate() );
 			tds.back().offset( vt->begin() );
 			tds.back().duration( vt->end() - vt->begin() + 1 );
-			tds.back().set_option( "compression", "piz" );
+			tds.back().set_option( "compression", media::meta_string_t::make( "piz" ) );
 		}
 
 		media::container v;
@@ -368,6 +370,12 @@ int safemain( int argc, char *argv[] )
 			v = media::reader::open( varU );
 			precondition( v.video_tracks().size() == c.video_tracks().size(), "mismatch in video tracks for image and variance image" );
 		}
+
+		std::string outOpts;
+		auto &outParams = options["output-settings"];
+		if ( outParams )
+			outOpts = outParams.value();
+		media::parameter_set outputOptions = media::writer::parameters_by_ext( outputU, outOpts );
 
 		media::container oc = media::writer::open( outputU, tds, outputOptions );
 		for ( size_t ci = 0; ci != c.video_tracks().size(); ++ci )
@@ -392,20 +400,20 @@ int safemain( int argc, char *argv[] )
 				{
 					media::sample cenSamp( f, vt->rate() );
 					auto centerFrm = cenSamp( vt );
-					centerImg = extract_frame( *centerFrm, { "R", "G", "B" } );
-					if ( centerFrm->has_channel( "A" ) )
+					centerImg = extract_frame( *centerFrm, std::string(), std::string(), { "R", "G", "B" } );
+					if ( 0 )//centerFrm->has_channel( "A" ) )
 					{
 						if ( f == fs )
 							std::cout << "Using alpha channel in integration map" << std::endl;
 
-						image_buf tmpCA = extract_frame( *centerFrm, { "A" } );
+						image_buf tmpCA = extract_frame( *centerFrm, std::string(), std::string(), { "A" } );
 						cenAlpha = tmpCA[0];
 					}
 
 					if ( varU )
 					{
 						auto curVarFrm = cenSamp( v.video_tracks()[ci] );
-						image_buf varimg = extract_frame( *curVarFrm, { "R", "G", "B" } );
+						image_buf varimg = extract_frame( *curVarFrm, std::string(), std::string(), { "R", "G", "B" } );
 //						plane varP = varimg[0];
 //						float varRng = ( varThreshHigh - varThreshLow );
 //						for ( int p = 0; p < 3; ++p )
@@ -546,10 +554,10 @@ int safemain( int argc, char *argv[] )
 					{
 						std::cout << "  reading temporal frame " << curF << std::endl;
 						auto curFrm = sCur( vt );
-						img = extract_frame( *curFrm, { "R", "G", "B" } );
-						if ( curFrm->has_channel( "A" ) )
+						img = extract_frame( *curFrm, std::string(), std::string(), { "R", "G", "B" } );
+						if ( 0 )//curFrm->has_channel( "A" ) )
 						{
-							image_buf tmpA = extract_frame( *curFrm, { "A" } );
+							image_buf tmpA = extract_frame( *curFrm, std::string(), std::string(), { "A" } );
 							curAlpha = tmpA[0];
 						}
 

@@ -105,8 +105,10 @@ void image::set_color_state( const ::color::state &s )
 
 ////////////////////////////////////////
 
-void image::convert( gl::api &ogl, const media::image_frame &fr )
+void image::convert( gl::api &ogl, const media::frame &fr )
 {
+	throw_not_yet();
+#if 0
 	// TODO: enable interleaved frame
 	size_t nChannels = fr.size();
 	_dx = fr.x1();
@@ -220,7 +222,7 @@ void image::convert( gl::api &ogl, const media::image_frame &fr )
 		if ( _stash )
 			_mesh.set_program( _stash->_planar_prog );
 	}
-
+#endif
 }
 
 ////////////////////////////////////////

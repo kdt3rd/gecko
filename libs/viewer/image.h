@@ -13,7 +13,7 @@
 
 namespace media
 {
-class image_frame;
+class frame;
 }
 
 namespace draw
@@ -46,7 +46,7 @@ public:
 //					 gl::image_type bit, void *blue,
 //					 gl::image_type ait = gl::image_type::FLOAT, void *alpha = nullptr );
 
-	void convert( gl::api &ogl, const media::image_frame &fr );
+	void convert( gl::api &ogl, const media::frame &fr );
 	void clear( void );
 
 	void set_filtering( zoom_filter f );
