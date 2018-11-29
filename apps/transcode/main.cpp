@@ -108,7 +108,7 @@ int safemain( int argc, char *argv[] )
 				}
 				
 
-				oc.video_tracks()[ovt]->store( f, to_frame( img, { "R", "G", "B" }, "f16" )  );
+				oc.video_tracks()[ovt]->store( f, to_frame( img, { "R", "G", "B" }, "f16" ), allocator::get() );
 //				oc.video_tracks()[ovt]->store( f, curFrm );
 			}
 			++ovt;

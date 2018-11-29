@@ -16,6 +16,11 @@
 
 #include "metadata.h"
 
+namespace base
+{
+class allocator;
+}
+
 ////////////////////////////////////////
 
 namespace media
@@ -23,6 +28,7 @@ namespace media
 
 class image_buffer;
 
+/// TODO: add packing (i.e. dpx 10-bit, 12-bit)
 struct plane_layout
 {
     base::endianness _endian = base::endianness::NATIVE;
@@ -80,14 +86,40 @@ public:
     inline const color::state &color_state( void ) const { return _color_state; }
     void color_state( const color::state &s );
 
-    size_t size( void ) const { return _planes.size(); }
+    inline bool empty( void ) const { return _planes.empty(); }
+
+    inline size_t size( void ) const { return _planes.size(); }
     plane_list available_planes( void ) const;
     const std::string &plane_name( size_t p ) const { return at( p )._name; }
     plane_layout layout( size_t p ) const { return at( p )._layout; }
     double outside_value( size_t p ) const { return at( p )._outside; }
 
-    void retrieve( size_t plane, image_buffer &buffer ) { fill_plane( plane, buffer ); }
-    void retrieve( image_buffer &buffer ) { fill_image( buffer ); }
+    /// utility function to create image buffers for the entire active
+    /// area. This may create an overlapped set of image_buffers that
+    /// use the same large memory block if the underlying format is
+    /// interleaved. Or if the image is planar, it will create
+    /// separate buffers.
+    ///
+    /// This routine is probably not the most efficient way to access
+    /// image data for processing, where it is more memory efficient
+    /// to access by scanline or tile. Instead, a consumer of this
+    /// image probably wants to allocate memory itself and pass that
+    /// in. This places a burden on the consumer to conform to the
+    /// plane layout, but is provided as a default path to get to as
+    /// close to zero-copy imaging as possible.
+    ///
+    /// @param planes place to store the image_buffers. if the incoming
+    ///               list is not empty, will re-use the image_buffer if
+    ///               they are the correct layout
+    /// @param a allocator to use when creating memory for the image_buffer
+    /// @param preferred_chunk only creates the image buffer large
+    ///                        enough for the preferred processing size.
+    void create_buffers( std::vector<image_buffer> &planes,
+                         base::allocator &a,
+                         bool preferred_chunk ) const;
+
+    void extract_plane( size_t plane, image_buffer &pbuf );
+    void extract_image( std::vector<image_buffer> &planes );
 
 	inline void set_meta( base::cstring name, metadata_value v ) { _metadata[name] = std::move( v ); }
 	inline const metadata &meta( void ) const { return _metadata; }
@@ -95,7 +127,7 @@ public:
 protected:
     virtual bool storage_interleaved( void ) const = 0;
     virtual void fill_plane( size_t plane, image_buffer &buffer ) = 0;
-    virtual void fill_image( image_buffer &buffer ) = 0;
+    virtual void fill_image( std::vector<image_buffer> &planes ) = 0;
     /// by default, returns the entire area
     virtual std::pair<int64_t, int64_t> compute_preferred_chunk( void ) const;
 

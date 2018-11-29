@@ -219,6 +219,19 @@ static inline void do_copy( D &out, const S &in )
 	memcpy( outP, inP, sizeof(D) );
 }
 
+template <typename ET, typename T>
+static inline void set_meta( EXR::Header &header, const std::string &mname, const T &val )
+{
+	header.insert( mname, ET( val ) );
+}
+
+template <typename ET, typename T>
+static inline void set_meta_copy( EXR::Header &header, const std::string &mname, const T &val )
+{
+	header.insert( mname, ET() );
+	do_copy( header.typedAttribute<ET>( mname ).value(), val );
+}
+
 static void
 test_meta_and_add( EXR::Header &header, const std::string &mname, const metadata_value &mval )
 {
@@ -226,90 +239,80 @@ test_meta_and_add( EXR::Header &header, const std::string &mname, const metadata
 	{
 		case meta_string_t::tag:
 			if ( mname != "compression" )
-				header.typedAttribute<EXR::StringAttribute>( mname ).value() = meta_string_t::retrieve( mval );
+				set_meta<EXR::StringAttribute>( header, mname, meta_string_t::retrieve( mval ) );
 			break;
 		case meta_stringlist_t::tag:
-			header.typedAttribute<EXR::StringVectorAttribute>( mname ).value() = meta_stringlist_t::retrieve( mval );
+			set_meta<EXR::StringVectorAttribute>( header, mname, meta_stringlist_t::retrieve( mval ) );
 			break;
 		case meta_int32_t::tag:
 			if ( mname != "lineOrder" )
-				header.typedAttribute<EXR::IntAttribute>( mname ).value() = meta_int32_t::retrieve( mval );
+				set_meta<EXR::IntAttribute>( header, mname, meta_int32_t::retrieve( mval ) );
 			break;
 		case meta_float32_t::tag:
 			if ( mname != "whiteLuminance" )
-				header.typedAttribute<EXR::FloatAttribute>( mname ).value() = meta_float32_t::retrieve( mval );
+				set_meta<EXR::FloatAttribute>( header, mname, meta_float32_t::retrieve( mval ) );
 			break;
 		case meta_m33f_t::tag:
-			do_copy( header.typedAttribute<EXR::M33fAttribute>( mname ).value(),
-					 meta_m33f_t::retrieve( mval ) );
+			set_meta_copy<EXR::M33fAttribute>( header, mname, meta_m33f_t::retrieve( mval ) );
 			break;
 		case meta_m44f_t::tag:
-			do_copy( header.typedAttribute<EXR::M44fAttribute>( mname ).value(),
-					 meta_m44f_t::retrieve( mval ) );
+			set_meta_copy<EXR::M44fAttribute>( header, mname, meta_m44f_t::retrieve( mval ) );
 			break;
 		case meta_vec3f_t::tag:
-			do_copy( header.typedAttribute<EXR::V3fAttribute>( mname ).value(),
-					 meta_vec3f_t::retrieve( mval ) );
+			set_meta_copy<EXR::V3fAttribute>( header, mname, meta_vec3f_t::retrieve( mval ) );
 			break;
 		case meta_vec3i_t::tag:
-			do_copy( header.typedAttribute<EXR::V3iAttribute>( mname ).value(),
-					 meta_vec3i_t::retrieve( mval ) );
+			set_meta_copy<EXR::V3iAttribute>( header, mname, meta_vec3i_t::retrieve( mval ) );
 			break;
 		case meta_vec2f_t::tag:
-			do_copy( header.typedAttribute<EXR::V2fAttribute>( mname ).value(),
-					 meta_vec2f_t::retrieve( mval ) );
+			set_meta_copy<EXR::V2fAttribute>( header, mname, meta_vec2f_t::retrieve( mval ) );
 			break;
 		case meta_vec2i_t::tag:
-			do_copy( header.typedAttribute<EXR::V2iAttribute>( mname ).value(),
-					 meta_vec2i_t::retrieve( mval ) );
+			set_meta_copy<EXR::V2iAttribute>( header, mname, meta_vec2i_t::retrieve( mval ) );
 			break;
 		case meta_float64_t::tag:
-			header.typedAttribute<EXR::DoubleAttribute>( mname ).value() = meta_float64_t::retrieve( mval );
+			set_meta<EXR::DoubleAttribute>( header, mname, meta_float64_t::retrieve( mval ) );
 			break;
 		case meta_vec2d_t::tag:
-			do_copy( header.typedAttribute<EXR::V2dAttribute>( mname ).value(),
-					 meta_vec2d_t::retrieve( mval ) );
+			set_meta_copy<EXR::V2dAttribute>( header, mname, meta_vec2d_t::retrieve( mval ) );
 			break;
 		case meta_vec3d_t::tag:
-			do_copy( header.typedAttribute<EXR::V3dAttribute>( mname ).value(),
-					 meta_vec3d_t::retrieve( mval ) );
+			set_meta_copy<EXR::V3dAttribute>( header, mname, meta_vec3d_t::retrieve( mval ) );
 			break;
 		case meta_m33d_t::tag:
-			do_copy( header.typedAttribute<EXR::M33dAttribute>( mname ).value(),
-					 meta_m33d_t::retrieve( mval ) );
+			set_meta_copy<EXR::M33dAttribute>( header, mname, meta_m33d_t::retrieve( mval ) );
 			break;
 		case meta_m44d_t::tag:
-			do_copy( header.typedAttribute<EXR::M44dAttribute>( mname ).value(),
-					 meta_m44d_t::retrieve( mval ) );
+			set_meta_copy<EXR::M44dAttribute>( header, mname, meta_m44d_t::retrieve( mval ) );
 			break;
 		case meta_recti_t::tag:
-			do_copy( header.typedAttribute<EXR::Box2iAttribute>( mname ).value(),
-					 meta_recti_t::retrieve( mval ) );
+			set_meta_copy<EXR::Box2iAttribute>( header, mname, meta_recti_t::retrieve( mval ) );
 			break;
 		case meta_rectf_t::tag:
-			do_copy( header.typedAttribute<EXR::Box2fAttribute>( mname ).value(),
-					 meta_rectf_t::retrieve( mval ) );
+			set_meta_copy<EXR::Box2fAttribute>( header, mname, meta_rectf_t::retrieve( mval ) );
 			break;
 		case meta_chromaticities_t::tag:
 			if ( mname != "chromaticities" )
-				do_copy( header.typedAttribute<EXR::ChromaticitiesAttribute>( mname ).value(),
-						 meta_chromaticities_t::retrieve( mval ) );
+				set_meta_copy<EXR::ChromaticitiesAttribute>(
+					header, mname,
+					meta_chromaticities_t::retrieve( mval ) );
 			break;
 		case meta_smpte_timecode_t::tag:
 		{
+			header.insert( mname, EXR::TimeCodeAttribute() );
 			EXR::TimeCode &tc = header.typedAttribute<EXR::TimeCodeAttribute>( mname ).value();
 			tc.setTimeAndFlags( meta_smpte_timecode_t::retrieve( mval ).first );
 			tc.setUserData( meta_smpte_timecode_t::retrieve( mval ).second );
 			break;
 		}
 		case meta_keycode_t::tag:
-			do_copy( header.typedAttribute<EXR::KeyCodeAttribute>( mname ).value(),
-					 meta_keycode_t::retrieve( mval ) );
+			set_meta_copy<EXR::KeyCodeAttribute>( header, mname, meta_keycode_t::retrieve( mval ) );
 			break;
 		case meta_rational32_t::tag:
-			header.typedAttribute<EXR::RationalAttribute>( mname ).value() =
+			set_meta<EXR::RationalAttribute>(
+				header, mname,
 				EXR::Rational( meta_rational32_t::retrieve( mval ).first,
-							   static_cast<int>( meta_rational32_t::retrieve( mval ).second ) );
+							   static_cast<int>( meta_rational32_t::retrieve( mval ).second ) ) );
 			break;
 		default:
 			std::cerr << "WARNING: Unknown metadata value type " << mval.type() << "('" << metadata_type_name( mval.type() ) << "') ignored writing EXR file" << std::endl;
@@ -347,6 +350,7 @@ frame_to_headers( std::vector<EXR::Header> &headers, const frame &frm, EXR::Comp
 		// TODO: handle screen center / width?
 		// it will naturally fall through if someone is doing an exr to an exr
 		// since we are copying metadata, but...
+		// TODO: handle anything but increasing_y???
 		headers.emplace_back( disp, data, img.aspect_ratio(),
 							  IMATH::V2f(0, 0), 1.f, EXR::INCREASING_Y,
 							  compression );
@@ -381,11 +385,13 @@ frame_to_headers( std::vector<EXR::Header> &headers, const frame &frm, EXR::Comp
 			addWhiteLuminance( curheader, static_cast<float>( img.color_state().luminance_scale() ) );
 
 		const auto &cx = img.color_state().chroma();
-		curheader.typedAttribute<EXR::ChromaticitiesAttribute>( EXR::ChromaticitiesAttribute::staticTypeName() )
-			.value() = EXR::Chromaticities( IMATH::V2f( cx.red.x, cx.red.y ),
-											IMATH::V2f( cx.green.x, cx.green.y ),
-											IMATH::V2f( cx.blue.x, cx.blue.y ),
-											IMATH::V2f( cx.white.x, cx.white.y ) );
+		set_meta<EXR::ChromaticitiesAttribute>(
+			curheader,
+			EXR::ChromaticitiesAttribute::staticTypeName(),
+			EXR::Chromaticities( IMATH::V2f( cx.red.x, cx.red.y ),
+								 IMATH::V2f( cx.green.x, cx.green.y ),
+								 IMATH::V2f( cx.blue.x, cx.blue.y ),
+								 IMATH::V2f( cx.white.x, cx.white.y ) ) );
 
 		std::string pname = i.access_layer().name();
 		if ( pname.empty() )
@@ -423,16 +429,8 @@ frame_to_headers( std::vector<EXR::Header> &headers, const frame &frm, EXR::Comp
 		throw_logic( "Writing of deep data not yet finished" );
 }
 
-////////////////////////////////////////
-
-static void
-calc_bufs( image &img, std::vector< std::shared_ptr<image_buffer> > &bufs, int y, int nscans )
-{
-	throw_not_yet();
-}
-
 static void rebuild_frame_buffer( EXR::FrameBuffer &fB, const image &img,
-								  const std::vector< std::shared_ptr<image_buffer> > &bufs )
+								  const std::vector<image_buffer> &bufs )
 {
 	precondition( bufs.size() == img.size(), "expecting calc_bufs to fill buffers" );
 
@@ -441,7 +439,7 @@ static void rebuild_frame_buffer( EXR::FrameBuffer &fB, const image &img,
 	int64_t baseOff = dataWin.x1() + dataWin.y1() * w;
 	for ( size_t p = 0; p < img.size(); ++p )
 	{
-		const image_buffer &ib = *(bufs[p]);
+		const image_buffer &ib = bufs[p];
 		int64_t curScanOff = ( ib.y1() - dataWin.y1() ) * w;
 		size_t offTotal = static_cast<size_t>( baseOff + curScanOff );
 		if ( ib.bits() == 16 && ib.is_floating() )
@@ -479,7 +477,7 @@ static void rebuild_frame_buffer( EXR::FrameBuffer &fB, const image &img,
 	}
 }
 
-class exr_write_track : public video_track
+class exr_write_track final : public video_track
 {
 public:
 	exr_write_track( const base::uri &files, const parameter_set &parms )
@@ -494,12 +492,16 @@ public:
 	{
 	}
 
-	virtual frame *doRead( int64_t )
+	~exr_write_track( void ) override
+	{
+	}
+
+	frame *doRead( int64_t ) override
 	{
 		throw_logic( "writer asked to read a frame" );
 	}
 
-	virtual void doWrite( int64_t f, const frame &frm )
+	void doWrite( int64_t f, const frame &frm, base::allocator &a ) override
 	{
 		auto fs = base::file_system::get( _files.uri() );
 		base::ostream stream = fs->open_write( _files.get_frame( f ) );
@@ -511,9 +513,11 @@ public:
 		EXR::MultiPartOutputFile outfile{ estr, headers.data(), static_cast<int>( headers.size() ) };
 
 		int partNum = 0;
+		// TODO: handle tiles
 		int numScans = num_scanlines( _compression );
 
-		std::vector< std::shared_ptr<image_buffer> > bufs;
+		// TODO: does this need to move up a level?
+		std::vector<image_buffer> bufs;
 		for ( auto i = frm.image_begin(); i != frm.image_end(); ++i, ++partNum )
 		{
 			EXR::OutputPart curOut( outfile, partNum );
@@ -521,25 +525,40 @@ public:
 			image &img = (*i);
 			auto prefchunk = img.preferred_chunk_size();
 
-			int curScans = std::max( numScans, prefchunk.second );
+			int pullScans = std::max( numScans, prefchunk.second );
 			int y = img.active_area().y1();
 			int yend = img.active_area().y2() + 1;
 
+			// TODO: handle tiles
+			precondition( prefchunk.first == img.active_area().width(),
+						  "Expect preferred chunk X size to be width of image" );
+			img.create_buffers( bufs, a, true );
+
+			area_rect curarea = img.active_area();
+			// TODO: support anything but increasing y?
 			while ( y < yend )
 			{
-				int ey = y + curScans;
+				int ey = y + pullScans;
 				if ( ey > yend )
 					ey = yend;
-				int curscans = ey - y;
+				int curScans = ey - y;
 
-				calc_bufs( img, bufs, y, curscans );
+				// TODO: handle tiles
+				for ( auto &p: bufs )
+				{
+					p.reset_position( curarea.x1(), y );
+					// at the end, we might make it shorter, but that's ok
+					p.force_height( curScans );
+				}
+
+				img.extract_image( bufs );
 
 				// hrm, this seems inefficient, but exr also copies all this stuff all the time
 				EXR::FrameBuffer fbuf;
 				rebuild_frame_buffer( fbuf, img, bufs );
 
 				curOut.setFrameBuffer( fbuf );
-				curOut.writePixels( curscans );
+				curOut.writePixels( curScans );
 
 				y = ey;
 			}

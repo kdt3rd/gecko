@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2014 Ian Godin
+// Copyright (c) 2014-2018 Kimball Thurston and Ian Godin
 // All rights reserved.
 // Copyrights licensed under the MIT License.
 // See the accompanying LICENSE.txt file for terms
@@ -15,13 +15,14 @@ namespace gui
 
 ////////////////////////////////////////
 
-class menu : public window
+class menu_w : public widget
 {
 public:
-	menu( const std::shared_ptr<platform::window> &w );
-	virtual ~menu( void );
+	menu_w( const window &w );
+	~menu_w( void ) override;
 
-	void add_entry( const std::string &n );
+	void add_entry( const std::string &utf8label, const action &a );
+	void add_separator( void );
 
 private:
 	std::shared_ptr<gui::simple_container> _container;
@@ -29,5 +30,6 @@ private:
 
 ////////////////////////////////////////
 
+using menu = widget_ptr<menu_w>;
 }
 

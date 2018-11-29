@@ -531,7 +531,7 @@ int safemain( int argc, char *argv[] )
 //				debug_save_image( filteredCenter, "filtered_center.#######.exr", f, { "R", "G", "B" }, "f16" );
 				if ( temporalRadius <= 0 )
 				{
-					oc.video_tracks()[ci]->store( f, to_frame( filteredCenter, { "R", "G", "B" }, "f16" ) );
+					oc.video_tracks()[ci]->store( f, to_frame( filteredCenter, { "R", "G", "B" }, "f16" ), allocator::get() );
 					std::cout << "Finished frame: " << f << std::endl;
 					continue;
 				}
@@ -747,12 +747,12 @@ int safemain( int argc, char *argv[] )
 //				accumImg[0].graph_ptr()->dump_refs( std::cout );
 				if ( ! integAmt.valid() )
 				{
-					oc.video_tracks()[ci]->store( f, to_frame( accumImg, { "R", "G", "B" }, "f16" ) );
+					oc.video_tracks()[ci]->store( f, to_frame( accumImg, { "R", "G", "B" }, "f16" ), allocator::get() );
 				}
 				else
 				{
 					accumImg.add_plane( integAmt / ( ( cnt - 1.F ) * 3.F ) );
-					oc.video_tracks()[ci]->store( f, to_frame( accumImg, { "R", "G", "B", "A" }, "f16" ) );
+					oc.video_tracks()[ci]->store( f, to_frame( accumImg, { "R", "G", "B", "A" }, "f16" ), allocator::get() );
 				}
 				std::cout << "Finished frame: " << f << std::endl;
 			}

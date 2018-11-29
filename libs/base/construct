@@ -1,6 +1,7 @@
 
 lib = library "base"
   source{
+	"allocator.cpp";
 	"any.cpp";
 	"env.cpp";
 	"format.cpp";

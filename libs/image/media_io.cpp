@@ -6,6 +6,7 @@
 //
 
 #include "media_io.h"
+#include "allocator.h"
 #include <base/contract.h>
 #include <media/writer.h>
 #include <media/frame.h>
@@ -44,6 +45,75 @@ void update_image_buffer(
 										   pl._floating, pl._unsigned );
 }
 
+class frame_image_adapter : public ::media::image
+{
+public:
+	using base = ::media::image;
+	using media_buf = ::media::image_buffer;
+	using img_buf = ::image::image_buf;
+	using rect = ::media::area_rect;
+
+	frame_image_adapter(
+		const img_buf &img,
+		const std::vector<std::string> &chans,
+		const std::string &type,
+		const media::metadata &meta
+						)
+		: base( rect::from_points( img.x1(), img.y1(), img.x2(), img.y2() ) )
+	{
+		for ( size_t c = 0, nC = chans.size(); c != nC; ++c )
+		{
+			media::plane_layout pl;
+			if ( type == "f16" )
+			{
+				pl._bits = 16;
+				pl._floating = true;
+				pl._unsigned = false;
+			}
+			else if ( type == "u16" )
+			{
+				pl._bits = 16;
+				pl._floating = false;
+				pl._unsigned = true;
+			}
+			else
+				throw_runtime( "Unknown/unhandled data type tag {0}", type );
+			register_plane( chans[c], pl, 0.0 );
+			_image.add_plane( img[c] );
+		}
+
+		for ( auto &mv: meta )
+			set_meta( mv.first, mv.second );
+	}
+
+protected:
+	// TODO: query this from the media container
+	bool storage_interleaved( void ) const { return false; }
+	void fill_plane( size_t pIdx, media_buf &buffer ) override
+	{
+		precondition( pIdx < _image.size(), "Invalid plane {0} requested ({1} available)", pIdx, _image.size() );
+
+		const ::image::plane &p = _image[pIdx];
+		if ( buffer.x1() != p.x1() || buffer.x2() != p.x2() )
+			throw_not_yet();
+
+		for ( int64_t y = buffer.y1(), ly = buffer.y2(); y <= ly; ++y )
+		{
+			const float *pL = p.line( static_cast<int>( y ) );
+			buffer.set_scanline( y, pL, 1 );
+		}
+	}
+	void fill_image( std::vector<media_buf> &planes ) override
+	{
+		precondition( planes.size() == size(), "expect all planes for output image" );
+		for ( size_t i = 0; i != planes.size(); ++i )
+			fill_plane( i, planes[i] );
+	}
+
+private:
+	img_buf _image;
+};
+
 } // empty namespace
 
 ////////////////////////////////////////
@@ -79,7 +149,7 @@ image_buf extract_frame(
 			for ( size_t p = 0, nP = img->size(); p != nP; ++p )
 			{
 				update_image_buffer( tmp, img->layout( p ), active );
-				img->retrieve( p, tmp );
+				img->extract_plane( p, tmp );
 				plane pl( dx1, dy1, dx2, dy2 );
 				for ( int64_t y = dy1; y <= dy2; ++y )
 					tmp.get_scanline( y, pl.line( static_cast<int>( y ) ), 1 );
@@ -90,7 +160,7 @@ image_buf extract_frame(
 		{
 			std::vector<size_t> pMapping;
 			pMapping.reserve( planes.size() );
-			throw_not_yet();
+
 			media::image_buffer tmp;
 			for ( auto &plane: planes )
 			{
@@ -112,7 +182,7 @@ image_buf extract_frame(
 			for ( size_t idx: pMapping )
 			{
 				update_image_buffer( tmp, img->layout( idx ), active );
-				img->retrieve( idx, tmp );
+				img->extract_plane( idx, tmp );
 				plane pl( dx1, dy1, dx2, dy2 );
 				for ( int64_t y = dy1; y <= dy2; ++y )
 					tmp.get_scanline( y, pl.line( static_cast<int>( y ) ), 1 );
@@ -137,7 +207,11 @@ to_frame( const image_buf &i, const std::vector<std::string> &chans, const std::
 	if ( i.size() < chans.size() )
 		throw_runtime( "image does not have enough channels ({0}) for requested channel list size ({1})", i.size(), chans.size() );
 
-	throw_not_yet();
+	auto r = std::make_shared<media::frame>();
+	// TODO: add layer / view names?
+	r->register_layer( base::cstring() ).add_view( base::cstring() ).store(
+		std::make_shared<frame_image_adapter>( i, chans, type, meta ) );
+	return r;
 #if 0
 	engine::dimensions d = i.dims();
 	std::shared_ptr<media::image_frame> r = std::make_shared<media::image_frame>( d.x1, d.y1, d.x2, d.y2 );
@@ -184,7 +258,7 @@ debug_save_image( const image_buf &i, const std::string &fn, int64_t sampNum, co
 		fnU.set_scheme( "file" );
 
 	media::container oc = media::writer::open( fnU, tds, params );
-	oc.video_tracks()[0]->store( sampNum, to_frame( i, chans, type, meta ) );
+	oc.video_tracks()[0]->store( sampNum, to_frame( i, chans, type, meta ), allocator::get() );
 	std::cout << "Saved debug image to '" << fn << "', frame " << sampNum << std::endl;
 }
 

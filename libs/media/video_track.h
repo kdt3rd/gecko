@@ -10,6 +10,11 @@
 #include "track.h"
 #include "frame.h"
 
+namespace base
+{
+class allocator;
+}
+
 namespace media
 {
 
@@ -43,10 +48,10 @@ public:
 		return std::shared_ptr<frame>( doRead( f ) );
 	}
 
-	inline void store( int64_t f, const std::shared_ptr<frame> &frm )
+	inline void store( int64_t f, const std::shared_ptr<frame> &frm, base::allocator &a )
 	{
 		if ( frm )
-			doWrite( f, *frm );
+			doWrite( f, *frm, a );
 	}
 
 	// to add
@@ -66,8 +71,8 @@ protected:
 	virtual frame *read( int64_t offset, const sample_rate &r );
 	virtual frame *doRead( int64_t offset ) = 0;
 
-	virtual void write( int64_t offset, const sample_rate &r, const sample_data &sd );
-	virtual void doWrite( int64_t offset, const frame &sd ) = 0;
+//	virtual void write( int64_t offset, const sample_rate &r, const sample_data &sd );
+	virtual void doWrite( int64_t offset, const frame &sd, base::allocator &a ) = 0;
 
 private:
 };

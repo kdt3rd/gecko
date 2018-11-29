@@ -210,8 +210,9 @@ frame::const_image_iterator::advance( bool incfirst )
 
 		while ( _cur_view < l.view_count() )
 		{
-			if ( ! static_cast<const std::shared_ptr<image> &>( l[_cur_view] ) )
-				++_cur_view;
+			if ( static_cast<const std::shared_ptr<image> &>( l[_cur_view] ) )
+				break;
+			++_cur_view;
 		}
 
 		if ( _cur_view >= l.view_count() )
@@ -219,6 +220,10 @@ frame::const_image_iterator::advance( bool incfirst )
 			_cur_view = 0;
 			++_cur_layer;
 			incfirst = false;
+		}
+		else
+		{
+			break;
 		}
 	}
 
@@ -286,8 +291,9 @@ frame::const_data_iterator::advance( bool incfirst )
 
 		while ( _cur_view < l.view_count() )
 		{
-			if ( ! static_cast<const std::shared_ptr<data> &>( l[_cur_view] ) )
-				++_cur_view;
+			if ( static_cast<const std::shared_ptr<data> &>( l[_cur_view] ) )
+				break;
+			++_cur_view;
 		}
 
 		if ( _cur_view >= l.view_count() )
@@ -295,6 +301,10 @@ frame::const_data_iterator::advance( bool incfirst )
 			_cur_view = 0;
 			++_cur_layer;
 			incfirst = false;
+		}
+		else
+		{
+			break;
 		}
 	}
 

@@ -229,6 +229,21 @@ inline std::ostream &operator<<( std::ostream &out, const point<T, N> &p )
 	return out;
 }
 
+template <typename T, size_t N>
+inline bool operator==( const point<T, N> &a, const point<T, N> &b )
+{
+	for ( size_t i = 0; i != N; ++i )
+		if ( ! std::equal_to<T>()( a[i], b[i] ) )
+			return false;
+	return true;
+}
+
+template <typename T, size_t N>
+inline bool operator!=( const point<T, N> &a, const point<T, N> &b )
+{
+	return !( a == b );
+}
+
 ////////////////////////////////////////
 
 /// @brief Scale point p by v.

@@ -38,13 +38,13 @@ video_track::read( int64_t offset, const sample_rate &r )
 ////////////////////////////////////////
 
 
-void
-video_track::write( int64_t offset, const sample_rate &, const sample_data &sd )
-{
-	const frame *frm = dynamic_cast<const frame *>( &sd );
-	if ( frm )
-		doWrite( offset, *frm );
-}
+//void
+//video_track::write( int64_t offset, const sample_rate &, const sample_data &sd )
+//{
+//	const frame *frm = dynamic_cast<const frame *>( &sd );
+//	if ( frm )
+//		doWrite( offset, *frm );
+//}
 
 
 ////////////////////////////////////////

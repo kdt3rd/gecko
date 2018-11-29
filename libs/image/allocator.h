@@ -13,6 +13,7 @@
 #include <ostream>
 #include <atomic>
 #include <list>
+#include <base/allocator.h>
 
 ////////////////////////////////////////
 
@@ -23,14 +24,14 @@ namespace image
 ///
 /// TODO: Add a cached_ptr type instead of using std::shared_ptr to
 /// abstract when something is cached out of main RAM?
-class allocator
+class allocator : public base::allocator
 {
 public:
 	static constexpr int doubleAlignCount = 8;
 	static constexpr int floatAlignCount = 16;
 	static constexpr size_t defaultAlign = 64;
 	allocator( void );
-	~allocator( void );
+	~allocator( void ) override;
 
 	/// Sets how much memory to keep around speculatively
 	void set_stash_size( size_t maxBytes );
@@ -45,7 +46,7 @@ public:
 	void set_skippiness( size_t s );
 
 	/// allocates a generic 1D buffer scanline with specified byte alignment
-	std::shared_ptr<void> allocate( size_t bytes, size_t align = defaultAlign );
+	std::shared_ptr<void> allocate( size_t bytes, size_t align = defaultAlign ) override;
 
 	/// allocates a scanline float buffer, stretching the width to
 	/// support AVX512 (stride) (well, whatever defaultAlign is set

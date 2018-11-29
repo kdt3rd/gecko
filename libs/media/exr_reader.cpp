@@ -474,7 +474,7 @@ static void fill_metadata( M &md, color::state &cs, const EXR::Header &header )
 
 ////////////////////////////////////////
 
-class exr_image : public image
+class exr_image final : public image
 {
 public:
 	exr_image(
@@ -595,77 +595,66 @@ protected:
 			throw_not_yet();
 	}
 
-	void fill_image( image_buffer &buffer ) override
+	void fill_image( std::vector<image_buffer> &planes ) override
 	{
-		size_t nChans = _full_plane_names.size();
-
-		IMATH::Box2i dataWin = _header.dataWindow();
-		// TODO: handle subsampling
-		size_t bytes = 0;
-		bool flt = false;
-
-		EXR::PixelType type = EXR::NUM_PIXELTYPES;
-		for ( auto i = _header.channels().begin(); i != _header.channels().end(); ++i )
-		{
-			const EXR::Channel &curc = i.channel();
-			if ( type == EXR::NUM_PIXELTYPES )
-				type = curc.type;
-
-			if ( type != curc.type )
-				throw_runtime( "Unhandled different pixel types for different planes retrieving all channels at once" );
-
-			if ( bytes == 0 )
-			{
-				switch ( type )
-				{
-					case EXR::UINT:
-						bytes = sizeof(uint32_t);
-						break;
-
-					case EXR::HALF:
-						bytes = sizeof(base::half);
-						flt = true;
-						break;
-
-					case EXR::FLOAT:
-						bytes = sizeof(float);
-						flt = true;
-						break;
-				
-					case EXR::NUM_PIXELTYPES:
-					default:
-						throw_logic( "Unknown OpenEXR pixel type {0}", static_cast<int>( type ) );
-				}
-			}
-		}
-
-		if ( buffer.is_floating() != flt || static_cast<size_t>( buffer.bits() ) != ( bytes * 8 ) )
-			throw_runtime( "Attempt to access EXR image with wrong buffer type" );
-
-		size_t width = static_cast<size_t>( dataWin.max.x - dataWin.min.x + 1 );
-
-		if ( static_cast<size_t>( buffer.width() ) != width * nChans )
-			throw_runtime( "Only reading of full image scanlines and planes supported in this path" );
-
-		size_t pixelbytes = bytes * nChans;
-		size_t scanlinebytes = width * pixelbytes;
-
-		char *data = static_cast<char *>( buffer.data() );
-		data -= dataWin.min.x * pixelbytes;
-		data -= buffer.y1() * scanlinebytes;
-		
+		image_buffer::rect readarea;
+		size_t pIdx = 0;
 		EXR::FrameBuffer fbuf;
-		for ( size_t c = 0; c != nChans; ++c )
+
+		for ( auto i = _header.channels().begin(); i != _header.channels().end(); ++i, ++pIdx )
 		{
-			fbuf.insert(
-				_full_plane_names[c],
-				EXR::Slice( type, data + c*bytes, pixelbytes, scanlinebytes ) );
+			// TODO: handle subsampling
+			const EXR::Channel &curc = i.channel();
+			EXR::PixelType type = curc.type;
+
+			image_buffer &buffer = planes[pIdx];
+			size_t bytes = 0;
+			bool flt = false;
+			switch ( type )
+			{
+				case EXR::UINT:
+					bytes = sizeof(uint32_t);
+					break;
+
+				case EXR::HALF:
+					bytes = sizeof(base::half);
+					flt = true;
+					break;
+
+				case EXR::FLOAT:
+					bytes = sizeof(float);
+					flt = true;
+					break;
+				
+				case EXR::NUM_PIXELTYPES:
+				default:
+					throw_logic( "Unknown OpenEXR pixel type {0}", static_cast<int>( type ) );
+			}
+			if ( pIdx == 0 )
+				readarea = buffer.active_area();
+			else if ( readarea != buffer.active_area() )
+				throw_runtime( "Image reads must request the same region for all planes" );
+
+			if ( buffer.is_floating() != flt )
+				throw_runtime( "Buffer and file differ in floating point interpretation of data" );
+
+			if ( static_cast<size_t>( buffer.bits() ) != bytes * 8 )
+				throw_runtime( "Mismatch in bits for provided memory buffer and on-disk plane definition" );
+
+			precondition( buffer.raw(), "Expect valid memory buffer to be provided to read" );
+
+			char *data = static_cast<char *>( buffer.data() );
+			data -= buffer.x1() * buffer.xstride_bytes();
+			data -= buffer.y1() * buffer.ystride_bytes();
+
+			fbuf.insert( _full_plane_names[pIdx],
+						 EXR::Slice( type, data, buffer.xstride_bytes(), buffer.ystride_bytes() ) );
 		}
 
 		if ( _scan_part )
 		{
 			_scan_part->setFrameBuffer( fbuf );
-			_scan_part->readPixels( buffer.y1(), buffer.y2() );
+			_scan_part->readPixels( readarea.y1(), readarea.y2() );
 		}
 		else if ( _tiled_part )
 			throw_not_yet();
@@ -688,7 +677,7 @@ protected:
 
 ////////////////////////////////////////
 
-class exr_deep : public data
+class exr_deep final : public data
 {
 public:
 	exr_deep(
@@ -759,7 +748,7 @@ protected:
 
 	std::pair<int64_t, int64_t> compute_preferred_chunk( void ) const
 	{
-		// TODO:
+		// TODO: base this on the compression present in the file
 		return data::compute_preferred_chunk();
 	}
 
@@ -774,7 +763,7 @@ protected:
 
 ////////////////////////////////////////
 
-class exr_frame : public frame
+class exr_frame final : public frame
 {
 public:
 	exr_frame( const std::shared_ptr<base::file_system> &fs, const base::uri &frm, int64_t num )
@@ -887,7 +876,7 @@ private:
 	std::shared_ptr<EXR::MultiPartInputFile> _file;
 };
 
-class exr_read_track : public video_track
+class exr_read_track final : public video_track
 {
 public:
 	// file per frame, don't have the sample rate or track description (yet)...
@@ -912,17 +901,18 @@ public:
 		return ret.release();
 	}
 
-	void doWrite( int64_t , const frame & ) override
+	void doWrite( int64_t , const frame &, base::allocator & ) override
 	{
 		throw_logic( "reader asked to write a frame" );
 	}
+
 private:
 	file_sequence _files;
 };
 
 ////////////////////////////////////////
 
-class OpenEXRReader : public file_per_sample_reader
+class OpenEXRReader final : public file_per_sample_reader
 {
 public:
 	OpenEXRReader( void )
@@ -944,25 +934,22 @@ public:
 		std::vector<uint8_t> m{0x76, 0x2f, 0x31, 0x01};
 		_magics.emplace_back( std::move( m ) );
 	}
+	~OpenEXRReader( void ) override = default;
 
-	virtual ~OpenEXRReader( void ) = default;
-	virtual container create( const base::uri &u, const parameter_set &params );
+	container create( const base::uri &u, const parameter_set &params ) override
+	{
+		container result;
+
+		int64_t start, last;
+		file_sequence fseq( u );
+		auto fs = scan_samples( start, last, fseq );
+
+		result.add_track( std::make_shared<exr_read_track>( std::move( fseq ), start, last ) );
+		result.set_parameters( params );
+
+		return result;
+	}
 };
-
-container
-OpenEXRReader::create( const base::uri &u, const parameter_set &p )
-{
-	container result;
-
-	int64_t start, last;
-	file_sequence fseq( u );
-	auto fs = scan_samples( start, last, fseq );
-
-	result.add_track( std::make_shared<exr_read_track>( std::move( fseq ), start, last ) );
-	result.set_parameters( p );
-
-	return result;
-}
 
 } // empty namespace
 #endif // HAVE_OPENEXR

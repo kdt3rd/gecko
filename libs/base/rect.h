@@ -351,6 +351,18 @@ inline std::ostream &operator<<( std::ostream &out, const rect<T> &r )
 }
 
 template <typename T>
+inline bool operator==( const rect<T> &a, const rect<T> &b )
+{
+	return a.position() == b.position() && a.extent() == b.extent();
+}
+
+template <typename T>
+inline bool operator!=( const rect<T> &a, const rect<T> &b )
+{
+	return !( a == b );
+}
+
+template <typename T>
 inline decltype(distance(point<T, 2>(), point<T, 2>()))
 distance( const rect<T> &r, const rect<T> &other )
 {

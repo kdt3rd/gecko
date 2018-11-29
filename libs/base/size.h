@@ -87,12 +87,12 @@ public:
 	}
 
 	/// @brief less than operator
-	bool operator<( const size &o ) const
+	inline bool operator<( const size &o ) const
 	{
 		return _w < o._w || ( std::equal_to<coord_type>()( _w, o._w ) && _h < o._h );
 	}
 
-	bool empty( void ) const
+	inline bool empty( void ) const
 	{
 		return _w <= coord_type( 0 ) && _h <= coord_type( 0 );
 	}
@@ -102,6 +102,18 @@ private:
 };
 
 ////////////////////////////////////////
+
+template <typename T>
+inline bool operator==( const size<T> &a, const size<T> &b )
+{
+	return std::equal_to<T>()( a.w(), b.w() ) && std::equal_to<T>()( a.h(), b.h() );
+}
+
+template <typename T>
+inline bool operator!=( const size<T> &a, const size<T> &b )
+{
+	return !( a == b );
+}
 
 /// @brief Round size up following rounding rules
 template <typename T>

@@ -139,9 +139,9 @@ void image_buffer::set_scanline( int64_t y, const float *line, int64_t stride )
 void image_buffer::get_scanline_u8( int64_t y, float *line, int64_t stride ) const
 {
 	const uint8_t *data = static_cast<const uint8_t*>( _data.get() );
-	data += ( _offset + ( ( y - _y1 ) >> _ysubsample_shift ) * _ystride ) / 8;
+	data += ( _offset + ( ( y - y1() ) >> _ysubsample_shift ) * _ystride ) / 8;
 
-	for ( int64_t x = 0; x < _width; ++x )
+	for ( int64_t x = 0, W = width(); x < W; ++x )
 	{
 		const uint8_t *curData = data + ( ( x >> _xsubsample_shift ) * _xstride ) / 8;
 		line[x*stride] = convert_pel( *curData );
@@ -153,11 +153,11 @@ void image_buffer::get_scanline_u8( int64_t y, float *line, int64_t stride ) con
 void image_buffer::get_scanline_u16( int64_t y, float *line, int64_t stride ) const
 {
 	const uint16_t *data = static_cast<const uint16_t*>( _data.get() );
-	data += ( _offset + ( ( y - _y1 ) >> _ysubsample_shift ) * _ystride ) / 16;
+	data += ( _offset + ( ( y - y1() ) >> _ysubsample_shift ) * _ystride ) / 16;
 
 	if ( _endian == base::endianness::NATIVE )
 	{
-		for ( int64_t x = 0; x < _width; ++x )
+		for ( int64_t x = 0, W = width(); x < W; ++x )
 		{
 			const uint16_t *curData = data + ( ( x >> _xsubsample_shift ) * _xstride ) / 16;
 			line[x*stride] = convert_pel( *curData );
@@ -165,7 +165,7 @@ void image_buffer::get_scanline_u16( int64_t y, float *line, int64_t stride ) co
 	}
 	else
 	{
-		for ( int64_t x = 0; x < _width; ++x )
+		for ( int64_t x = 0, W = width(); x < W; ++x )
 		{
 			const uint16_t *curData = data + ( ( x >> _xsubsample_shift ) * _xstride ) / 16;
 			line[x*stride] = convert_pel( bswap_16( *curData ) );
@@ -178,11 +178,11 @@ void image_buffer::get_scanline_u16( int64_t y, float *line, int64_t stride ) co
 void image_buffer::get_scanline_f16( int64_t y, float *line, int64_t stride ) const
 {
 	const base::half *data = static_cast<const base::half*>( _data.get() );
-	data += ( _offset + ( ( y - _y1 ) >> _ysubsample_shift ) * _ystride ) / 16;
+	data += ( _offset + ( ( y - y1() ) >> _ysubsample_shift ) * _ystride ) / 16;
 
 	if ( _endian == base::endianness::NATIVE )
 	{
-		for ( int64_t x = 0; x < _width; ++x )
+		for ( int64_t x = 0, W = width(); x < W; ++x )
 		{
 			const base::half *curData = data + ( ( x >> _xsubsample_shift ) * _xstride ) / 16;
 			line[x*stride] = convert_pel( *curData );
@@ -191,7 +191,7 @@ void image_buffer::get_scanline_f16( int64_t y, float *line, int64_t stride ) co
 	else
 	{
 		const uint16_t *udata = reinterpret_cast<const uint16_t *>( data );
-		for ( int64_t x = 0; x < _width; ++x )
+		for ( int64_t x = 0, W = width(); x < W; ++x )
 		{
 			const uint16_t *curData = udata + ( ( x >> _xsubsample_shift ) * _xstride ) / 16;
 			line[x*stride] = convert_pel( base::half( base::half::binary, bswap_16( *curData ) ) );
@@ -204,11 +204,11 @@ void image_buffer::get_scanline_f16( int64_t y, float *line, int64_t stride ) co
 void image_buffer::get_scanline_f32( int64_t y, float *line, int64_t stride ) const
 {
 	const float *data = static_cast<const float*>( _data.get() );
-	data += ( _offset + ( ( y - _y1 ) >> _ysubsample_shift ) * _ystride ) / 32;
+	data += ( _offset + ( ( y - y1() ) >> _ysubsample_shift ) * _ystride ) / 32;
 
 	if ( _endian == base::endianness::NATIVE )
 	{
-		for ( int64_t x = 0; x < _width; ++x )
+		for ( int64_t x = 0, W = width(); x < W; ++x )
 		{
 			const float *curData = data + ( ( x >> _xsubsample_shift ) * _xstride ) / 32;
 			line[x*stride] = convert_pel( *curData );
@@ -217,7 +217,7 @@ void image_buffer::get_scanline_f32( int64_t y, float *line, int64_t stride ) co
 	else
 	{
 		const uint32_t *udata = reinterpret_cast<const uint32_t *>( data );
-		for ( int64_t x = 0; x < _width; ++x )
+		for ( int64_t x = 0, W = width(); x < W; ++x )
 		{
 			const uint32_t *curData = udata + ( ( x >> _xsubsample_shift ) * _xstride ) / 32;
 			union 
@@ -236,11 +236,11 @@ void image_buffer::get_scanline_f32( int64_t y, float *line, int64_t stride ) co
 void image_buffer::get_scanline_f64( int64_t y, float *line, int64_t stride ) const
 {
 	const double *data = static_cast<const double*>( _data.get() );
-	data += ( _offset + ( ( y - _y1 ) >> _ysubsample_shift ) * _ystride ) / 64;
+	data += ( _offset + ( ( y - y1() ) >> _ysubsample_shift ) * _ystride ) / 64;
 
 	if ( _endian == base::endianness::NATIVE )
 	{
-		for ( int64_t x = 0; x < _width; ++x )
+		for ( int64_t x = 0, W = width(); x < W; ++x )
 		{
 			const double *curData = data + ( ( x >> _xsubsample_shift ) * _xstride ) / 64;
 			line[x*stride] = convert_pel( *curData );
@@ -249,7 +249,7 @@ void image_buffer::get_scanline_f64( int64_t y, float *line, int64_t stride ) co
 	else
 	{
 		const uint64_t *udata = reinterpret_cast<const uint64_t *>( data );
-		for ( int64_t x = 0; x < _width; ++x )
+		for ( int64_t x = 0, W = width(); x < W; ++x )
 		{
 			const uint64_t *curData = udata + ( ( x >> _xsubsample_shift ) * _xstride ) / 64;
 			union 
@@ -268,9 +268,9 @@ void image_buffer::get_scanline_f64( int64_t y, float *line, int64_t stride ) co
 void image_buffer::set_scanline_u8( int64_t y, const float *line, int64_t stride )
 {
 	uint8_t *data = static_cast<uint8_t*>( _data.get() );
-	data += ( _offset + ( ( y - _y1 ) >> _ysubsample_shift ) * _ystride ) / 8;
+	data += ( _offset + ( ( y - y1() ) >> _ysubsample_shift ) * _ystride ) / 8;
 
-	for ( int64_t x = 0; x < _width; ++x )
+	for ( int64_t x = 0, W = width(); x < W; ++x )
 	{
 		uint8_t *curData = data + ( ( x >> _xsubsample_shift ) * _xstride ) / 8;
 		unconvert_pel( *curData, line[x*stride] );
@@ -282,11 +282,11 @@ void image_buffer::set_scanline_u8( int64_t y, const float *line, int64_t stride
 void image_buffer::set_scanline_u16( int64_t y, const float *line, int64_t stride )
 {
 	uint16_t *data = static_cast<uint16_t *>( _data.get() );
-	data += ( _offset + ( ( y - _y1 ) >> _ysubsample_shift ) * _ystride ) / 16;
+	data += ( _offset + ( ( y - y1() ) >> _ysubsample_shift ) * _ystride ) / 16;
 
 	if ( _endian == base::endianness::NATIVE )
 	{
-		for ( int64_t x = 0; x < _width; ++x )
+		for ( int64_t x = 0, W = width(); x < W; ++x )
 		{
 			uint16_t *curData = data + ( ( x >> _xsubsample_shift ) * _xstride ) / 16;
 			unconvert_pel( *curData, line[x*stride] );
@@ -294,7 +294,7 @@ void image_buffer::set_scanline_u16( int64_t y, const float *line, int64_t strid
 	}
 	else
 	{
-		for ( int64_t x = 0; x < _width; ++x )
+		for ( int64_t x = 0, W = width(); x < W; ++x )
 		{
 			uint16_t *curData = data + ( ( x >> _xsubsample_shift ) * _xstride ) / 16;
 			uint16_t tmp;
@@ -309,11 +309,11 @@ void image_buffer::set_scanline_u16( int64_t y, const float *line, int64_t strid
 void image_buffer::set_scanline_f16( int64_t y, const float *line, int64_t stride )
 {
 	base::half *data = static_cast<base::half*>( _data.get() );
-	data += ( _offset + ( ( y - _y1 ) >> _ysubsample_shift ) * _ystride ) / 16;
+	data += ( _offset + ( ( y - y1() ) >> _ysubsample_shift ) * _ystride ) / 16;
 
 	if ( _endian == base::endianness::NATIVE )
 	{
-		for ( int64_t x = 0; x < _width; ++x )
+		for ( int64_t x = 0, W = width(); x < W; ++x )
 		{
 			base::half *curData = data + ( ( x >> _xsubsample_shift ) * _xstride ) / 16;
 			unconvert_pel( *curData, line[x*stride] );
@@ -321,7 +321,7 @@ void image_buffer::set_scanline_f16( int64_t y, const float *line, int64_t strid
 	}
 	else
 	{
-		for ( int64_t x = 0; x < _width; ++x )
+		for ( int64_t x = 0, W = width(); x < W; ++x )
 		{
 			base::half *curData = data + ( ( x >> _xsubsample_shift ) * _xstride ) / 16;
 			base::half tmp;
@@ -337,11 +337,11 @@ void image_buffer::set_scanline_f16( int64_t y, const float *line, int64_t strid
 void image_buffer::set_scanline_f32( int64_t y, const float *line, int64_t stride )
 {
 	float *data = static_cast<float*>( _data.get() );
-	data += ( _offset + ( ( y - _y1 ) >> _ysubsample_shift ) * _ystride ) / 32;
+	data += ( _offset + ( ( y - y1() ) >> _ysubsample_shift ) * _ystride ) / 32;
 
 	if ( _endian == base::endianness::NATIVE )
 	{
-		for ( int64_t x = 0; x < _width; ++x )
+		for ( int64_t x = 0, W = width(); x < W; ++x )
 		{
 			float *curData = data + ( ( x >> _xsubsample_shift ) * _xstride ) / 32;
 			unconvert_pel( *curData, line[x*stride] );
@@ -350,7 +350,7 @@ void image_buffer::set_scanline_f32( int64_t y, const float *line, int64_t strid
 	else
 	{
 		uint32_t *udata = reinterpret_cast<uint32_t *>( data );
-		for ( int64_t x = 0; x < _width; ++x )
+		for ( int64_t x = 0, W = width(); x < W; ++x )
 		{
 			uint32_t *curData = udata + ( ( x >> _xsubsample_shift ) * _xstride ) / 32;
 			union 
@@ -369,11 +369,11 @@ void image_buffer::set_scanline_f32( int64_t y, const float *line, int64_t strid
 void image_buffer::set_scanline_f64( int64_t y, const float *line, int64_t stride )
 {
 	double *data = static_cast<double*>( _data.get() );
-	data += ( _offset + ( ( y - _y1 ) >> _ysubsample_shift ) * _ystride ) / 64;
+	data += ( _offset + ( ( y - y1() ) >> _ysubsample_shift ) * _ystride ) / 64;
 
 	if ( _endian == base::endianness::NATIVE )
 	{
-		for ( int64_t x = 0; x < _width; ++x )
+		for ( int64_t x = 0, W = width(); x < W; ++x )
 		{
 			double *curData = data + ( ( x >> _xsubsample_shift ) * _xstride ) / 64;
 			unconvert_pel( *curData, line[x*stride] );
@@ -382,7 +382,7 @@ void image_buffer::set_scanline_f64( int64_t y, const float *line, int64_t strid
 	else
 	{
 		uint64_t *udata = reinterpret_cast<uint64_t *>( data );
-		for ( int64_t x = 0; x < _width; ++x )
+		for ( int64_t x = 0, W = width(); x < W; ++x )
 		{
 			uint64_t *curData = udata + ( ( x >> _xsubsample_shift ) * _xstride ) / 64;
 			union 
