@@ -1,8 +1,6 @@
 //
 // Copyright (c) 2015-2017 Ian Godin and Kimball Thurston
-// All rights reserved.
-// Copyrights licensed under the MIT License.
-// See the accompanying LICENSE.txt file for terms
+// SPDX-License-Identifier: MIT
 //
 
 #include "file_sequence.h"

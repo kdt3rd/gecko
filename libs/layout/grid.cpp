@@ -1,8 +1,6 @@
 //
 // Copyright (c) 2017 Ian Godin
-// All rights reserved.
-// Copyrights licensed under the MIT License.
-// See the accompanying LICENSE.txt file for terms
+// SPDX-License-Identifier: MIT
 //
 
 #include "grid.h"

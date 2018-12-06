@@ -1,8 +1,6 @@
 //
 // Copyright (c) 2015 Kimball Thurston
-// All rights reserved.
-// Copyrights licensed under the MIT License.
-// See the accompanying LICENSE.txt file for terms
+// SPDX-License-Identifier: MIT
 //
 
 #include "fs_watch.h"
