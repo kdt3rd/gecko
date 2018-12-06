@@ -28,7 +28,7 @@ template <typename SV,
 								 std::true_type >::type::value >
 struct shrink_helper
 {
-	static void do_it( SV &a ) {}
+	static void do_it( SV & ) {}
 };
 
 template <typename SV>
@@ -120,7 +120,7 @@ private:
 		void reset_to_small( apointer ptr, size_t n, size_t ls, bool dodealloc = true )
 		{
 			if ( dodealloc )
-				this->deallocate( _start, _storage_end - _start );
+				this->deallocate( _start, static_cast<size_type>( _storage_end - _start ) );
 			_start = ptr;
 			_end = ptr + n;
 			_storage_end = ptr + ls;
@@ -221,6 +221,7 @@ public:
 	}
 	template <typename InputIter, typename = typename std::enable_if< std::is_convertible< typename std::iterator_traits<InputIter>::iterator_category, std::input_iterator_tag >::value >::type>
 	small_vector( InputIter b, InputIter e, const allocator_type &a = allocator_type() )
+		: _impl( small_store(), store_count, a )
 	{
 		using iter_cat = typename std::iterator_traits<InputIter>::iterator_category;
 		range_init( b, e, iter_cat() );
@@ -391,7 +392,7 @@ public:
 			for ( pointer cur = _impl._start; cur != _impl._end; (void) ++cur )
 				allocator_traits::destroy( _impl, cur );
 			if ( ! is_small() )
-				_impl.deallocate( _impl._start, _impl._storage_end - _impl._start );
+				_impl.deallocate( _impl._start, static_cast<size_t>( _impl._storage_end - _impl._start ) );
 			_impl._start = news;
 			_impl._end = news + old;
 			_impl._storage_end = news + n;
@@ -557,7 +558,7 @@ public:
 private:
 	void erase_at_end( pointer p ) noexcept
 	{
-		size_t n = _impl._end - p;
+		size_type n = static_cast<size_type>( _impl._end - p );
 		pointer f = p;
 		for ( ; n > 0; (void) ++f, --n )
 			allocator_traits::destroy( _impl, f );
@@ -609,7 +610,7 @@ private:
 	void realloc_insert( iterator p, Args && ... args )
 	{
 		const size_type l = check_len( size_type( 1 ) );
-		const size_type nbefore = p - begin();
+		const size_type nbefore = static_cast<size_type>( p - begin() );
 		pointer start = _impl.allocate( l );
 		pointer e = start;
 		try
@@ -637,7 +638,7 @@ private:
 		for ( pointer cur = _impl._start; cur != _impl._end; (void) ++cur )
 			allocator_traits::destroy( _impl, cur );
 		if ( ! is_small() )
-			_impl.deallocate( _impl._start, _impl._storage_end - _impl._start );
+			_impl.deallocate( _impl._start, static_cast<size_type>( _impl._storage_end - _impl._start ) );
 		_impl._start = start;
 		_impl._end = e;
 		_impl._storage_end = start + l;

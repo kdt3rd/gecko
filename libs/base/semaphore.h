@@ -235,9 +235,9 @@ inline bool simple_semaphore::timed_wait( const std::chrono::duration<R, P> &dur
 #elif defined(__MACH__)
 	auto s = std::chrono::duration_cast<std::chrono::seconds>( dur );
 	auto nsec = std::chrono::duration_cast<std::chrono::nanoseconds>( dur );
-	long ns = nsec.count() % 1000000000;
+	int ns = static_cast<int>( nsec.count() % 1000000000 );
 
-	mach_timespect_t ts;
+	mach_timespec_t ts;
 	ts.tv_sec = s;
 	ts.tv_nsec = ns;
 	kern_return_t r = semaphore_timedwait( _sem, ts );

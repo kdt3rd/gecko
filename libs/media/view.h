@@ -30,10 +30,8 @@ public:
     const std::string &name( void ) const { return _name; }
 
     /// the image for this view
-    explicit operator std::shared_ptr<image> ( void ) const { return _image; }
     explicit operator const std::shared_ptr<image> &( void ) const { return _image; }
     /// deep data or whatever other data channels a view has
-    explicit operator std::shared_ptr<data> ( void ) const { return _data; }
     explicit operator const std::shared_ptr<data> &( void ) const { return _data; }
 
     void store( const std::shared_ptr<image> &i ) { _image = i; }
