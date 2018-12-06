@@ -14,6 +14,7 @@
 #include "window.h"
 #include "keyboard.h"
 #include "mouse.h"
+#include "platform.h"
 
 namespace platform { namespace cocoa
 {
@@ -42,6 +43,8 @@ private:
 	std::shared_ptr<keyboard> _keyboard;
 	std::shared_ptr<mouse> _mouse;
 	std::map<void*,std::shared_ptr<window>> _windows;
+
+	CGEventSourceRef _event_source;
 };
 
 ////////////////////////////////////////

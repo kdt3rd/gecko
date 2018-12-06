@@ -2,6 +2,7 @@ extra_source = optional_source{
 	system="Darwin",
 	source={
 		"context.mm",
+		"cursor.mm",
 		"system.mm",
 		"screen.mm",
 		"window.mm",

@@ -29,8 +29,8 @@ struct window::objcwrapper
 
 ////////////////////////////////////////
 
-window::window( const std::shared_ptr<::platform::screen> &s, const rect &p )
-	: ::platform::window( s, p ),
+window::window( window_type wt, const std::shared_ptr<::platform::screen> &s, const rect &p )
+	: ::platform::window( wt, s, p ),
 	  _impl( new objcwrapper ),
 	  _context( std::make_shared<context>() )
 {
@@ -77,12 +77,12 @@ void window::lower( void )
 
 ////////////////////////////////////////
 
-void window::set_popup( void )
-{
-//	NSUInteger mask = [_impl->win styleMask] | NSBorderlessWindowMask;
-	NSUInteger mask = NSWindowStyleMaskBorderless;
-	[_impl->win setStyleMask:mask];
-}
+//void window::set_popup( void )
+//{
+////	NSUInteger mask = [_impl->win styleMask] | NSBorderlessWindowMask;
+//	NSUInteger mask = NSWindowStyleMaskBorderless;
+//	[_impl->win setStyleMask:mask];
+//}
 
 ////////////////////////////////////////
 

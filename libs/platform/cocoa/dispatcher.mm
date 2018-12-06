@@ -267,12 +267,18 @@ dispatcher::dispatcher( ::platform::system *s )
 		_keyboard( std::make_shared<keyboard>( s ) ),
 		_mouse( std::make_shared<mouse>( s ) )
 {
+	_event_source = CGEventSourceCreate( kCGEventSourceStateHIDSystemState );
+	if ( ! _event_source )
+		throw_runtime( "Unable to initialize HID event source" );
+	CGEventSourceSetLocalEventsSuppressionInterval( _event_source, 0.0 );
 }
 
 ////////////////////////////////////////
 
 dispatcher::~dispatcher( void )
 {
+	if ( _event_source )
+		CFRelease( _event_source );
 }
 
 ////////////////////////////////////////

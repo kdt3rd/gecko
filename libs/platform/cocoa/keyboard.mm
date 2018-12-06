@@ -9,7 +9,163 @@
 #include "keyboard.h"
 #include <map>
 #include <base/pointer.h>
+#include <base/contract.h>
+#include <Carbon/Carbon.h>
 #include <AppKit/AppKit.h>
+#include <Foundation/Foundation.h>
+#include <Cocoa/Cocoa.h>
+
+//#include <IOKit/IOKitLib.h>
+//#include <IOKit/IOCFPlugIn.h>
+//#include <IOKit/hid/IOHIDLib.h>
+//#include <IOKit/hid/IOHIDKeys.h>
+namespace
+{
+
+struct keyboard_wrapper_base
+{
+	virtual ~keyboard_wrapper_base( void ) = default;
+
+	virtual void updateUnicodeData( void ) = 0;
+};
+
+} // empty namespace
+
+
+////////////////////////////////////////
+
+@interface privLayoutListener : NSObject
+@end
+
+////////////////////////////////////////
+
+@implementation privLayoutListener
+{
+	keyboard_wrapper_base *_key;
+}
+
+- (id)initWithKeyboard:(keyboard_wrapper_base *)k
+{
+	self = [super init];
+	if ( self )
+		[self setKeyboard: k];
+	return self;
+}
+
+- (keyboard_wrapper_base *)keyboard
+{
+	return self->_key;
+}
+
+- (void)setKeyboard: (keyboard_wrapper_base *)k
+{
+	self->_key = k;
+}
+
+- (void)keyboardInputSourceChanged: ( NSObject * )object
+{
+	if ( [self keyboard] )
+		[self keyboard]->updateUnicodeData();
+}
+
+@end
+
+////////////////////////////////////////
+
+namespace
+{
+
+struct keyboard_wrapper : public keyboard_wrapper_base
+{
+	keyboard_wrapper( void )
+	{
+		initializeTLS();
+
+		_listener = [[privLayoutListener alloc] initWithKeyboard: this];
+		[[NSNotificationCenter defaultCenter]
+			addObserver:_listener
+			   selector:@selector(keyboardInputSourceChanged:)
+				   name:NSTextInputContextKeyboardSelectionDidChangeNotification
+				 object:nil ];
+
+		updateUnicodeData();
+	}
+
+	~keyboard_wrapper( void ) override
+	{
+		if ( _listener )
+		{
+			[[NSNotificationCenter defaultCenter]
+				removeObserver: _listener
+						  name: NSTextInputContextKeyboardSelectionDidChangeNotification
+						object: nil ];
+			[[NSNotificationCenter defaultCenter]
+				removeObserver: _listener ];
+			[_listener release];
+		}
+
+		if ( _input_src )
+			CFRelease( _input_src );
+	}
+	keyboard_wrapper( const keyboard_wrapper & ) = delete;
+	keyboard_wrapper &operator=( const keyboard_wrapper & ) = delete;
+
+	void initializeTLS()
+	{
+		_bundle = CFBundleGetBundleWithIdentifier(
+			CFSTR( "com.apple.HIToolbox" ) );
+		if ( ! _bundle )
+			throw_runtime( "Unable to load the HIToolbox framework" );
+		CFStringRef *layoutDataPtr = (CFStringRef *)CFBundleGetDataPointerForName(
+			_bundle,
+			CFSTR( "kTISPropertyUnicodeKeyLayoutData" ) );
+		_copy_layout_fn = (TISInputSourceRef (*)(void))CFBundleGetFunctionPointerForName(
+			_bundle,
+			CFSTR( "TISCopyCurrentKeyboardLayoutInputSource" ) );
+		_input_src_fn = (id (*)(TISInputSourceRef, CFStringRef))CFBundleGetFunctionPointerForName(
+			_bundle,
+			CFSTR( "TISGetInputSourceProperty" ) );
+		_keyboard_type_fn = (UInt8 (*)(void))CFBundleGetFunctionPointerForName(
+			_bundle,
+			CFSTR( "LMGetKbdType" ) );
+		if ( ! layoutDataPtr || ! _copy_layout_fn ||
+			 ! _input_src_fn || ! _keyboard_type_fn )
+			throw_runtime( "Unable to load TIS API" );
+
+		_unicode_layout = *layoutDataPtr;
+	}
+
+	void updateUnicodeData( void ) override
+	{
+		if ( _input_src )
+		{
+			CFRelease( _input_src );
+			_input_src = nullptr;
+			_unicode_data = nil;
+		}
+
+		_input_src = (*_copy_layout_fn)();
+		if ( ! _input_src )
+			throw_runtime( "Unable to retrieve keyboard layout input source" );
+
+		_unicode_data = (*_input_src_fn)( _input_src, _unicode_layout );
+		if ( ! _unicode_data )
+			throw_runtime( "Failed to retrieve keyboard layout unicode data" );
+	}
+
+	CFBundleRef _bundle = nullptr;
+	TISInputSourceRef (*_copy_layout_fn)( void ) = nullptr;
+	id (*_input_src_fn)( TISInputSourceRef, CFStringRef ) = nullptr;
+	UInt8 (*_keyboard_type_fn)( void ) = nullptr;
+	CFStringRef _unicode_layout = nullptr;
+
+	TISInputSourceRef _input_src = nullptr;
+	id _unicode_data = nil;
+	id _listener = nil;
+};
+
+} // empty namespace
+
 
 ////////////////////////////////////////
 
@@ -75,7 +231,7 @@ const std::map<unsigned short,platform::scancode> keycode2scancode =
 	{ 0x2b, platform::scancode::KEY_COMMA },
 	{ 0x41, platform::scancode::KEY_KP_PERIOD },
 	{ 0x2f, platform::scancode::KEY_PERIOD },
-//	{ 0x27, platform::scancode::KEY_QUOTE },
+	{ 0x27, platform::scancode::KEY_APOSTROPHE },
 	{ 0x2c, platform::scancode::KEY_SLASH },
 	{ 0x2a, platform::scancode::KEY_BACKSLASH },
 
@@ -173,15 +329,21 @@ const std::map<unsigned short,platform::scancode> keycode2scancode =
 
 ////////////////////////////////////////
 
-namespace platform { namespace cocoa
+namespace platform
 {
+namespace cocoa
+{
+
+struct keyboard::keylayout_wrapper : public keyboard_wrapper
+{
+};
 
 ////////////////////////////////////////
 
 keyboard::keyboard( ::platform::system *s )
-	: ::platform::keyboard( s )
+	: ::platform::keyboard( s ),
+	_key_wrapper( new keylayout_wrapper )
 {
-	update_mapping();
 }
 
 ////////////////////////////////////////
@@ -194,6 +356,7 @@ keyboard::~keyboard( void )
 
 void keyboard::update_mapping( void )
 {
+	_key_wrapper->updateUnicodeData();
 }
 
 ////////////////////////////////////////
@@ -244,6 +407,44 @@ platform::scancode keyboard::get_scancode( unsigned short key )
 		return c->second;
 
 	return platform::scancode::KEY_UNKNOWN;
+}
+
+////////////////////////////////////////
+
+const char *keyboard::scancode_name( int scancode )
+{
+	UInt32 dKey = 0;
+	UniChar chars[8];
+	UniCharCount charCount = 0;
+
+	if ( UCKeyTranslate(
+			 reinterpret_cast<const UCKeyboardLayout *>( [_key_wrapper->_unicode_data bytes] ),
+			 scancode,
+			 kUCKeyActionDisplay,
+			 0,
+			 (*_key_wrapper->_keyboard_type_fn)(),
+			 kUCKeyTranslateNoDeadKeysBit,
+			 &dKey,
+			 sizeof(chars) / sizeof(chars[0]),
+			 &charCount,
+			 chars ) != noErr )
+		return nullptr;
+
+	if ( charCount == 0 )
+		return nullptr;
+
+	CFStringRef cfstr = CFStringCreateWithCharactersNoCopy(
+		kCFAllocatorDefault,
+		chars, charCount,
+		kCFAllocatorNull );
+	CFStringGetCString(
+		cfstr,
+		_uni_keys,
+		sizeof(_uni_keys),
+		kCFStringEncodingUTF8 );
+	CFRelease( cfstr );
+
+	return _uni_keys;
 }
 
 ////////////////////////////////////////

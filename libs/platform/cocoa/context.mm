@@ -98,7 +98,7 @@ context::render_query_func( void )
 
 ////////////////////////////////////////
 
-void context::share( ::platform::context & )
+void context::share( const ::base::context & )
 {
 }
 

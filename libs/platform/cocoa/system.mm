@@ -8,12 +8,11 @@
 #include "system.h"
 #include "screen.h"
 #include "window.h"
+#include "cursor.h"
 #include "dispatcher.h"
 #include <gl/gl3w.h>
 
-#include <mutex>
 #include <stdexcept>
-#include <dlfcn.h>
 
 #include <base/contract.h>
 
@@ -99,6 +98,46 @@ system::new_cursor( void )
 std::shared_ptr<::platform::cursor>
 system::builtin_cursor( standard_cursor sc )
 {
+	id curs;
+	switch ( sc )
+	{
+		case standard_cursor::TEXT: curs = [NSCursor IBeamCursor]; break;
+//		case standard_cursor::URL_LINK_POINTER: break;
+//		case standard_cursor::HELP: break;
+//		case standard_cursor::CONTEXT_MENU: break;
+//		case standard_cursor::PROGRESS: break;
+//		case standard_cursor::WAIT: break;
+//		case standard_cursor::DND_COPY: break;
+//		case standard_cursor::DND_ALIAS: break;
+//		case standard_cursor::DND_NO_DROP: break;
+//		case standard_cursor::NOT_ALLOWED: break;
+//		case standard_cursor::ALL_SCROLL: break;
+//		case standard_cursor::RESIZE_ROW: break;
+//		case standard_cursor::RESIZE_COL: break;
+//		case standard_cursor::RESIZE_EAST: break;
+//		case standard_cursor::RESIZE_NORTH_EAST: break;
+//		case standard_cursor::RESIZE_NORTH: break;
+//		case standard_cursor::RESIZE_NORTH_WEST: break;
+//		case standard_cursor::RESIZE_WEST: break;
+//		case standard_cursor::RESIZE_SOUTH_WEST: break;
+//		case standard_cursor::RESIZE_SOUTH: break;
+//		case standard_cursor::RESIZE_SOUTH_EAST: break;
+		case standard_cursor::RESIZE_EAST_WEST: curs = [NSCursor resizeLeftRightCursor]; break;
+		case standard_cursor::RESIZE_NORTH_SOUTH: curs = [NSCursor resizeUpDownCursor]; break;
+//		case standard_cursor::RESIZE_NORTH_EAST_SOUTH_WEST: break;
+//		case standard_cursor::RESIZE_NORTH_WEST_SOUTH_EAST: break;
+//		case standard_cursor::VERTICAL_TEXT: break;
+		case standard_cursor::CROSSHAIR: curs = [NSCursor crosshairCursor]; break;
+//		case standard_cursor::CELL: break;
+
+		case standard_cursor::DEFAULT:
+		default:
+			curs = [NSCursor arrowCursor];
+			break;
+	}
+
+	if ( curs )
+		return std::make_shared<cursor>( curs );
 	std::cout << "TODO" << std::endl;
 	return std::shared_ptr<::platform::cursor>();
 }
@@ -218,10 +257,10 @@ std::shared_ptr<tray> system::new_system_tray_item( void )
 
 ////////////////////////////////////////
 
-std::shared_ptr<platform::window> system::new_window( const std::shared_ptr<::platform::screen> &s )
+std::shared_ptr<platform::window> system::new_window( window_type wintype, const std::shared_ptr<::platform::screen> &s )
 {
 	rect p{ 0, 0, 320, 240 };
-	auto ret = std::make_shared<::platform::cocoa::window>( s ? s : default_screen(), p );
+	auto ret = std::make_shared<::platform::cocoa::window>( wintype, s ? s : default_screen(), p );
 	_dispatcher->add_window( ret );
 	return ret;
 }

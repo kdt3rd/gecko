@@ -10,6 +10,7 @@
 #include <memory>
 
 #include <platform/window.h>
+#include "platform.h"
 
 namespace platform { namespace cocoa
 {
@@ -22,15 +23,13 @@ class context;
 class window : public ::platform::window
 {
 public:
-	window( const std::shared_ptr<::platform::screen> &s, const rect &p );
+	window( window_type wt, const std::shared_ptr<::platform::screen> &s, const rect &p );
 	~window( void ) override;
 
 	::platform::context &hw_context( void ) override;
 
 	void raise( void ) override;
 	void lower( void ) override;
-
-	void set_popup( void ) override;
 
 	void show( void ) override;
 	void hide( void ) override;
