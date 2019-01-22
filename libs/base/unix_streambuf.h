@@ -46,6 +46,8 @@ public:
 
 	void swap( unix_streambuf &u );
 
+	int get_native_handle( void ) const { return _fd; }
+
 protected:
 	virtual bool is_open( void ) const override;
 	virtual void close( void ) noexcept override;
