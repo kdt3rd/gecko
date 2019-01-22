@@ -10,6 +10,7 @@
 
 #include <windows.h>
 #include <base/contract.h>
+#include <base/scope_guard.h>
 
 #include "context.h"
 
@@ -21,6 +22,10 @@ namespace platform { namespace mswin
 window::window( const std::shared_ptr<screen> &screen, const rect &p )
 	: base( screen, p )
 {
+	// TODO: do we need to do this globally????
+	DPI_AWARENESS_CONTEXT context = SetThreadDpiAwarenessContext( DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE );
+	on_scope_exit{ SetThreadDpiAwarenessContext(context); };
+	
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 	_hwnd = CreateWindowEx(
 		WS_EX_CLIENTEDGE,
