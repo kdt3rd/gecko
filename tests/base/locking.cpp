@@ -48,7 +48,7 @@ struct sem_test_struct
 };
 
 template <typename T>
-std::atomic<int> sem_test_struct<T>::cnt;
+std::atomic<int> sem_test_struct<T>::cnt = {1};
 
 static int shareCount = 0;
 void shared_writer( base::shared_mutex &m )
