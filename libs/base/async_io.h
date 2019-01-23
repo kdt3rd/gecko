@@ -7,6 +7,7 @@
 
 #include <cerrno>
 #include "streambuf.h"
+#include "contract.h"
 #ifdef __linux__
 #include <atomic>
 #include <memory>
@@ -36,10 +37,16 @@ public:
 
     template <typename F, typename C>
     ssize_t idle_read( F &&idlefunc, void *outbuf, size_t bytes,
-                       base_streambuf<C> &sbuf, ssize_t fileoff )
+                       base_streambuf<C> *sbuf, ssize_t fileoff )
     {
+        if ( bytes == 0 )
+            return 0;
+
+        precondition( outbuf, "invalid output buffer provided" );
+        precondition( sbuf, "invalid streambuf object" );
+        precondition( fileoff >= 0, "invalid file offset value {0}", fileoff );
 #ifdef __linux__
-        auto ubuf = dynamic_cast<unix_streambuf *>( &sbuf );
+        auto ubuf = dynamic_cast<unix_streambuf *>( sbuf );
         if ( ubuf )
         {
             uint64_t id = generate_request_id();
@@ -54,9 +61,9 @@ public:
             }
         }
 #endif
-        if ( fileoff == static_cast<size_t>( sbuf.pubseekoff( fileoff, std::ios_base::beg, std::ios_base::in ) ) )
+        if ( fileoff == sbuf->pubseekoff( fileoff, std::ios_base::beg, std::ios_base::in ) )
         {
-            return sbuf.sgetn( reinterpret_cast<C *>( outbuf ), bytes / sizeof(C) );
+            return sbuf->sgetn( reinterpret_cast<C *>( outbuf ), bytes / sizeof(C) );
         }
         errno = ESPIPE;
         return -1;
