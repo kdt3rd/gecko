@@ -5,6 +5,7 @@
 
 #include <cstddef>
 #include <atomic>
+#include <memory>
 #include <stdexcept>
 
 ////////////////////////////////////////

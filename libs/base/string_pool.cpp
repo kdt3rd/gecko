@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "string_pool.h"
+#include <limits>
 
 ////////////////////////////////////////
 
