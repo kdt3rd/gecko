@@ -78,10 +78,27 @@ inline constexpr bool equal( F a, F b, int ulp = 2 ) noexcept
 template <typename F>
 inline F lerp( F a, F b, F perc )
 {
-	return a * ( 1.F - perc ) + b * perc;
+	return a * ( F(1) - perc ) + b * perc;
 }
 
-/// @sa lerp
+inline float lerp( float a, float b, float perc )
+{
+#ifdef __FMA__
+	// a * (1 - perc) + b * perc
+	// == fma( perc, b, a * (1 - perc)
+	// but a * 1 - perc * a
+	//   == a - perc * a
+	//   == fnmadd( perc, a, a )
+	// == fma( perc, b, fnmadd( perc, a, a ) )
+	__m128 t = _mm_set_ss( perc );
+	__m128 av = _mm_set_ss( a );
+	return _mm_cvtss_f32( _mm_fmadd_ss( t, _mm_set_ss( b ), _mm_fnmadd_ss( t, av, av ) ) );
+#else
+	return a * ( 1.f - perc ) + b * perc;
+#endif
+}
+
+/// @sa lerp that isn't as precise when a / b are far apart
 template <typename F>
 inline F lerp_fast( F a, F b, F perc )
 {

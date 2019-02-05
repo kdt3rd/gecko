@@ -3,10 +3,14 @@
 
 #pragma once
 
+#include <media/sample_rate.h>
+
 ////////////////////////////////////////
 
 namespace scene
 {
+
+using sample_rate = media::sample_rate;
 
 class time
 {

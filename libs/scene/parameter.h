@@ -3,19 +3,24 @@
 
 #pragma once
 
-#include "time.h"
-
 ////////////////////////////////////////
 
 namespace scene
 {
 
-class evaluation_context
+///
+/// @brief Class parameter provides...
+///
+class parameter
 {
 public:
-	const time &current_time( void ) const;
-	time offset_time( double offset ) const;
+	parameter( void );
+	~parameter( void );
+private:
+
 };
 
 } // namespace scene
+
+
 

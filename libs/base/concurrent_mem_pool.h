@@ -7,15 +7,45 @@
 #include <atomic>
 #include <memory>
 #include <stdexcept>
+#include "lock_free_list.h"
 
 ////////////////////////////////////////
 
 namespace base
 {
 
+namespace memory_detail
+{
+
+template <size_t a>
+struct aligner
+{
+	template <typename T>
+	static inline T *calc( void *ptr )
+	{
+		uintptr_t pVal = reinterpret_cast<uintptr_t>( ptr );
+		size_t nOut = pVal & a;
+		if ( nOut != 0 )
+		{
+			pVal += (a - nOut);
+			return reinterpret_cast<void *>( pVal );
+		}
+		return ptr;
+	}
+};
+
+template <>
+struct aligner<1>
+{
+	static inline void *calc( void *ptr ) { return ptr; }
+};
+
+}
+
 template <size_t sz, size_t alignment = alignof(uint8_t), size_t chunk_size = 4096>
 class concurrent_mem_pool
 {
+	using aligner = memory_detail::aligner<alignment>;
 public:
 	~concurrent_mem_pool( void )
 	{
@@ -30,36 +60,54 @@ public:
 	template <typename T>
 	T *get( size_t n )
 	{
+		n += alignment - 1;
 		if ( block::too_large( n ) )
 		{
 			std::unique_ptr<uint8_t[]> data{ new uint8_t[n * sz + sizeof(big_block)] };
 			big_block *bb = new (data.get()) big_block( n * sz );
-			push( bb, _big_blocks );
+			_big_blocks.push( bb );
 			data.release();
-			return reinterpret_cast<T *>( bb->data() );
+			return reinterpret_cast<T *>( aligner::calc( bb->data() ) );
 		}
 
 		void *ptr = nullptr;
 		bool full = false;
-		block *cur = pop( _live );
-
+		// this is not so unsafe for us, since blocks are always valid
+		// (well, until clear), and if it's already been moved from
+		// the list to full, that's fine, the alloc will fail gracefully
+		// and continue on below
+		block *cur = _live.unsafe_front();
 		if ( cur )
 		{
 			ptr = cur->alloc( n, full );
 			if ( ptr )
 			{
-				push( cur, full ? _full : _live );
-				return reinterpret_cast<T *>( ptr );
+				if ( full )
+					move_to_full( cur );
+				return reinterpret_cast<T *>( aligner::calc( ptr ) );
 			}
+		}
+
+		cur = _live.try_pop();
+		if ( cur )
+		{
+			// the list may have changed, try again
+			ptr = cur->alloc( n, full );
+			if ( ptr )
+				return finish<T>( cur, full, ptr );
 
 			// hrm, couldn't allocate from this block, keep it on
 			// the stack and recurse
-			return get<T>( n );
+			T *x = get<T>( n );
+
+			return_block( cur, full );
+			return x;
 		}
+
+		// fall back to 
 		cur = new block;
 		ptr = cur->alloc( n, full );
-		push( cur, full ? _full : _live );
-		return reinterpret_cast<T *>( ptr );
+		return finish<T>( cur, full, ptr );
 	}
 
 	/// NB: This assumes you know that all users of any memory contained
@@ -71,32 +119,39 @@ public:
 	std::pair<size_t, size_t> clear( void )
 	{
 		size_t nbasic = 0;
-		block *cur;
-		while ( ( cur = pop( _live ) ) != nullptr )
+		block *cur = _live.steal();
+		while ( cur )
 		{
 			++nbasic;
-			delete cur;
+			block *old = cur;
+			cur = cur->next();
+			delete old;
 		}
 
-		while ( ( cur = pop( _full ) ) != nullptr )
+		cur = _full.steal();
+		while ( cur )
 		{
 			++nbasic;
-			delete cur;
+			block *old = cur;
+			cur = cur->next();
+			delete old;
 		}
 
 		size_t bytes = 0;
-		big_block *bb;
-		while ( ( bb = pop( _big_blocks ) ) != nullptr )
+		big_block *bb = _big_blocks.steal();
+		while ( bb )
 		{
 			bytes += bb->_sz;
-			delete bb;
+			big_block *old = bb;
+			bb = bb->next();
+			delete old;
 		}
 
 		return std::make_pair( nbasic * chunk_size, bytes );
 	}
 
 private:
-	struct big_block
+	struct big_block : lock_free_list_node<big_block>
 	{
 		big_block *_next = nullptr;
 		size_t _sz = 0;
@@ -104,9 +159,9 @@ private:
 		void *data() { uint8_t *raw = reinterpret_cast<uint8_t *>( this ); return raw + sizeof(big_block); }
 	};
 
-	struct block
+	struct block : lock_free_list_node<block>
 	{
-		static constexpr size_t kDataSize = chunk_size - ( sizeof(std::atomic<block *>) + sizeof(std::atomic<size_t>) );
+		static constexpr size_t kDataSize = chunk_size - ( sizeof(lock_free_list_node<block>) + sizeof(std::atomic<size_t>) );
 
 		static constexpr bool too_large( size_t n ) { return n * sz >= kDataSize; }
 
@@ -124,44 +179,44 @@ private:
 			return _data + x;
 		}
 
-		block *_next = nullptr;
 		std::atomic<size_t> _offset{ 0 };
 		uint8_t _data[kDataSize];
 	};
 	static_assert( sizeof(block) == chunk_size, "Invalid data size / alignment computation" );
 
-	template <typename B>
-	inline B *pop( std::atomic<B *> &head )
+	inline void move_to_full( block *cur )
 	{
-		B *old = head.load( std::memory_order_acquire );
-
-		B *repl;
-		do {
-			if ( old == nullptr )
-				return nullptr;
-
-			repl = old->_next;
-		} while( ! head.compare_exchange_weak( old, repl,
-											   std::memory_order_acquire,
-											   std::memory_order_relaxed ) );
-		return old;
-	}
-
-	template <typename B>
-	inline void push( B *p, std::atomic<B *> &head )
-	{
-		B *old = head.load( std::memory_order_acquire );
-		do
+		block *liveblocks = _live.steal( );
+		block *curlive = liveblocks;
+		while ( curlive )
 		{
-			p->_next = old;
-		} while ( ! head.compare_exchange_weak( old, p,
-												std::memory_order_acquire,
-												std::memory_order_relaxed ) );
+			block *next = curlive->next();
+			if ( cur == curlive )
+				_full.push( curlive );
+			else
+				_live.push( curlive );
+			curlive = next;
+		}
 	}
 
-	std::atomic<block *> _live;
-	std::atomic<block *> _full;
-	std::atomic<big_block *> _big_blocks;
+	inline void return_block( block *b, bool full )
+	{
+		if ( full )
+			_full.push( b );
+		else
+			_live.push( b );
+	}
+
+	template <typename T>
+	inline T *finish( block *b, bool full, void *ptr )
+	{
+		return_block( b, full );
+		return reinterpret_cast<T *>( aligner::calc( ptr ) );
+	}
+
+	lock_free_list<block> _live;
+	lock_free_list<block> _full;
+	lock_free_list<big_block> _big_blocks;
 };
 
 } // namespace scene

@@ -5,6 +5,7 @@
 
 #include <cstring>
 #include <string>
+#include <ostream>
 #include "concurrent_mem_pool.h"
 
 ////////////////////////////////////////
@@ -45,11 +46,71 @@ public:
 	bool empty( void ) const { return _str == nullptr; }
 	const char *c_str( void ) const { return _str; }
 
+	explicit operator std::string( void ) const { return std::string( c_str(), size() ); }
+
 	static size_tagged_string create( string_pool &p, const char *src, size_t len );
 
 private:
 	const char *_str = nullptr;
 };
+
+////////////////////////////////////////
+
+inline bool operator==( const size_tagged_string &a, const size_tagged_string &b )
+{
+	return a.size() == b.size() && std::memcmp( a.c_str(), b.c_str(), a.size() * sizeof(char) ) == 0;
+}
+inline bool operator==( const char *s, const size_tagged_string &sts )
+{
+	return 0 == strcmp( sts.c_str(), s );
+}
+inline bool operator==( const size_tagged_string &sts, const char *s ) { return s == sts; }
+inline bool operator==( const std::string &s, const size_tagged_string &sts )
+{
+	return a.size() == b.size() && std::memcmp( a.c_str(), b.c_str(), a.size() * sizeof(char) ) == 0;
+}
+inline bool operator==( const size_tagged_string &sts, const std::string &s ) { return s == sts; }
+
+////////////////////////////////////////
+
+inline bool operator!=( const size_tagged_string &a, const size_tagged_string &b ) { return !( a == b ); }
+inline bool operator!=( const char *s, const size_tagged_string &sts ) { return !( s == sts ); }
+inline bool operator!=( const size_tagged_string &sts, const char *s ) { return s != sts; }
+inline bool operator==( const std::string &s, const size_tagged_string &sts ) { return !( s == sts ); }
+inline bool operator==( const size_tagged_string &sts, const std::string &s ) { return s != sts; }
+
+////////////////////////////////////////
+
+
+inline bool operator<( const size_tagged_string &a, const size_tagged_string &b )
+{
+	return a.size() < b.size() || ( a.size() == b.size() && std::memcmp( a.c_str(), b.c_str(), a.size() * sizeof(char) ) < 0 );
+}
+inline bool operator<( const size_tagged_string &a, const std::string &b )
+{
+	return a.size() < b.size() || ( a.size() == b.size() && std::memcmp( a.c_str(), b.c_str(), a.size() * sizeof(char) ) < 0 );
+}
+inline bool operator<( const std::string &a, const size_tagged_string &b )
+{
+	return a.size() < b.size() || ( a.size() == b.size() && std::memcmp( a.c_str(), b.c_str(), a.size() * sizeof(char) ) < 0 );
+}
+inline bool operator<( const size_tagged_string &a, const char *b )
+{
+	size_t lenb = strlen( b );
+	return a.size() < lenb || ( a.size() == lenb && std::memcmp( a.c_str(), b, lenb * sizeof(char) ) < 0 );
+}
+inline bool operator<( const char *a, const size_tagged_string &b )
+{
+	size_t lena = strlen( a );
+	return lena < b.size() || ( lena == b.size() && std::memcmp( a, b.c_str(), lena * sizeof(char) ) < 0 );
+}
+
+////////////////////////////////////////
+
+inline std::ostream &operator<<( std::ostream &os, const size_tagged_string &s )
+{ os << s.c_str(); return os; }
+
+////////////////////////////////////////////////////////////////////////////////
 
 class string_pool
 {
