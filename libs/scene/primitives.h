@@ -8,8 +8,10 @@
 namespace scene
 {
 
-enum class primitive
+/// TBD: rman has solid geometry ops (difference, intersection, union)
+enum class primitive_type
 {
+	transform, // meta node used for transform all of it's children at once
     convex_polygon, // special case for performance? rman has this
     general_polygon, // concave or with holes
     bilinear_patch,
@@ -30,19 +32,6 @@ enum class primitive
     procedural,
     group, ///< can be used to group primitives together
     instance ///< instance of another named / id primitive, but has it's own additional values
-};
-
-/// TBD: rman has solid geometry ops (difference, intersection, union)
-///
-/// @brief Class primitives provides...
-///
-class primitives
-{
-public:
-	primitives( void );
-	virtual ~primitives( void );
-private:
-
 };
 
 } // namespace scene

@@ -25,14 +25,14 @@ public:
 	/// assumes the names of the levels are separated by '/'
 	node *find( const char *n ) const;
 
+	void add_dependency( const node &n );
 	transform_stack &get_transform_stack( const time &ctxt );
 	matrix &model_to_world( const time &ctxt ) const;
 
-	void expand( const evaluation_context &ctxt );
+	void process( const evaluation_context &ctxt );
 
-	size_t child_count( void ) const;
-	node &child( size_t i ) const;
-	node &operator[]( size_t i ) const;
+protected:
+	virtual void evaluate( const evaluation_context &ctxt );
 
 private:
 	uint64_t _id;
