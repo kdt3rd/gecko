@@ -88,5 +88,5 @@ namespace detail
 
 /// @brief Execute a code block on scope exit
 #define on_scope_exit \
-	auto ANONYMOUS_VARIABLE(SCOPE_EXIT_STATE) = base::detail::scope_guardOnExit() += [&](void)
+	auto ANONYMOUS_VARIABLE(SCOPE_EXIT_STATE) = ::base::detail::scope_guardOnExit() += [&](void)
 

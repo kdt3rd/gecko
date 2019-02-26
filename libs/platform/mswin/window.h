@@ -22,15 +22,13 @@ class window : public ::platform::window
 	using base = ::platform::window;
 
 public:
-	window( const std::shared_ptr<screen> &screen, const rect &p = rect( 0, 0, 512, 512 ) );
+	window( window_type wintype, const std::shared_ptr<screen> &screen, const rect &p = rect( 0, 0, 512, 512 ) );
 	~window( void );
 
 	::platform::context &hw_context( void ) override;
 
 	void raise( void ) override;
 	void lower( void ) override;
-
-	void set_popup( void ) override;
 
 	void show( void ) override;
 	void hide( void ) override;

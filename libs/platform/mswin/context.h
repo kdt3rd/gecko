@@ -31,7 +31,7 @@ public:
 	render_query render_query_func( void ) override;
 
 	void init( HWND hwnd );
-	void share( base &o ) override;
+	void share( const ::base::context &o ) override;
 
 	void set_viewport( coord_type x, coord_type y, coord_type w, coord_type h ) override;
 	void swap_buffers( void ) override;

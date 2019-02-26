@@ -63,7 +63,7 @@ add_toolset "mingw-w64-gcc"
 		  };
 		  os_version={
 			  default={};
-			  vista={"-DWINVER=0x0600"};
+			  vista={"-DWINVER=0x0A00"};
 		  };
 		  vectorize={
 			  none={};

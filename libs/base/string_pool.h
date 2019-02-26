@@ -65,7 +65,7 @@ inline bool operator==( const char *s, const size_tagged_string &sts )
 	return 0 == strcmp( sts.c_str(), s );
 }
 inline bool operator==( const size_tagged_string &sts, const char *s ) { return s == sts; }
-inline bool operator==( const std::string &s, const size_tagged_string &sts )
+inline bool operator==( const std::string &a, const size_tagged_string &b )
 {
 	return a.size() == b.size() && std::memcmp( a.c_str(), b.c_str(), a.size() * sizeof(char) ) == 0;
 }
@@ -76,8 +76,8 @@ inline bool operator==( const size_tagged_string &sts, const std::string &s ) { 
 inline bool operator!=( const size_tagged_string &a, const size_tagged_string &b ) { return !( a == b ); }
 inline bool operator!=( const char *s, const size_tagged_string &sts ) { return !( s == sts ); }
 inline bool operator!=( const size_tagged_string &sts, const char *s ) { return s != sts; }
-inline bool operator==( const std::string &s, const size_tagged_string &sts ) { return !( s == sts ); }
-inline bool operator==( const size_tagged_string &sts, const std::string &s ) { return s != sts; }
+inline bool operator!=( const std::string &s, const size_tagged_string &sts ) { return !( s == sts ); }
+inline bool operator!=( const size_tagged_string &sts, const std::string &s ) { return s != sts; }
 
 ////////////////////////////////////////
 

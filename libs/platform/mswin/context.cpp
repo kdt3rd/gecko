@@ -235,7 +235,7 @@ void context::init( HWND hwnd )
 
 ////////////////////////////////////////
 
-void context::share( ::platform::context &o )
+void context::share( const ::base::context &o )
 {
 }
 

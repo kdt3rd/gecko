@@ -8,7 +8,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <windows.h>
+#include <winuser.h>
 #include <base/contract.h>
 #include <base/scope_guard.h>
 
@@ -19,13 +19,15 @@ namespace platform { namespace mswin
 
 ////////////////////////////////////////
 
-window::window( const std::shared_ptr<screen> &screen, const rect &p )
-	: base( screen, p )
+window::window( window_type wintype, const std::shared_ptr<screen> &screen, const rect &p )
+	: base( wintype, screen, p )
 {
-	// TODO: do we need to do this globally????
+	std::cout << "pay attention to window type" << std::endl;
+#ifndef MINGW_SDK_INIT
+	// TODO: do we need to do this globally???? and MingW does not yet have it
 	DPI_AWARENESS_CONTEXT context = SetThreadDpiAwarenessContext( DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE );
 	on_scope_exit{ SetThreadDpiAwarenessContext(context); };
-	
+#endif
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 	_hwnd = CreateWindowEx(
 		WS_EX_CLIENTEDGE,
@@ -113,12 +115,6 @@ void window::apply_minimum_size( coord_type w, coord_type h )
 ////////////////////////////////////////
 
 void window::set_title( const std::string &t )
-{
-}
-
-////////////////////////////////////////
-
-void window::set_popup( void )
 {
 }
 

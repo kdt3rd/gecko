@@ -41,7 +41,7 @@ if toolset_active( "mingw-w64-archiver" ) and toolset_active( "mingw-w64-gcc" ) 
       warnings "most"
 	  style "app"
       --os_version "vista"
-      defines { "NDEBUG", "_USE_MATH_DEFINES", "WINVER=0x0600" }
+      defines { "NDEBUG", "_USE_MATH_DEFINES", "WINVER=0x0A00" }
 
 end
 
