@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2017 Ian Godin
 // SPDX-License-Identifier: MIT
-//
 
 #include "quadrant.h"
 #include "polylines.h"

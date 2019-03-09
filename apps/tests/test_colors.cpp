@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2014-2017 Ian Godin
 // SPDX-License-Identifier: MIT
-//
 
 #include <gui/application.h>
 #include <gui/window.h>

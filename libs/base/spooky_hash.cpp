@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2016 Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include "spooky_hash.h"
 #include "compiler_abi.h"

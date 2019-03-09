@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2015-2017 Ian Godin
 // SPDX-License-Identifier: MIT
-//
 
 #include <web/json_rpc.h>
 #include <base/unit_test.h>

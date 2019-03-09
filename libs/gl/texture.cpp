@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2016 Ian Godin and Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include "texture.h"
 #include <limits>

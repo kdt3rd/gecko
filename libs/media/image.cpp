@@ -1,8 +1,5 @@
-//
 // Copyright (c) 2018 Kimball Thurston
 // SPDX-License-Identifier: MIT
-// Copyrights licenced under the MIT License.
-//
 
 #include "image.h"
 #include <base/allocator.h>

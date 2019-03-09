@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2015-2017 Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include <base/contract.h>
 #include <base/string_util.h>

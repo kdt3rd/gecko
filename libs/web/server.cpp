@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2015 Ian Godin
 // SPDX-License-Identifier: MIT
-//
 
 #include "server.h"
 #include <base/thread_pool.h>

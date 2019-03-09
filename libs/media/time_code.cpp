@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2016 Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include "time_code.h"
 #include <base/contract.h>

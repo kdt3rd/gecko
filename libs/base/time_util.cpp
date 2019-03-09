@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2018 Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include "time_util.h"
 #include "contract.h"

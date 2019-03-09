@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2016 Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include "variable_set.h"
 #include "string_variable_util.h"

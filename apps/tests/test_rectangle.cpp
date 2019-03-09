@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2016-2017 Ian Godin and Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include <platform/platform.h>
 #include <platform/simple_window.h>

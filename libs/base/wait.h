@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2017 Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #pragma once
 
@@ -25,27 +23,31 @@ class wait
 {
 public:
 #ifdef _WIN32
-	using wait_type = LONG_PTR;
-	using poll_type = HANDLE;
-	static const wait_type INVALID_WAIT = LONG_PTR(-1);
+    using wait_type = LONG_PTR;
+    using poll_type = HANDLE;
+    static const wait_type INVALID_WAIT = LONG_PTR(-1);
 #else
-	using wait_type = int;
-	using poll_type = int;
-	static constexpr wait_type INVALID_WAIT = -1;
+    using wait_type = int;
+    using poll_type = int;
+    static constexpr wait_type INVALID_WAIT = -1;
 #endif
-	wait( void ) = default;
-	wait( wait_type w ) : _w( w ) {}
-	wait( const wait & ) = default;
-	wait( wait && ) = default;
-	wait &operator=( const wait & ) = default;
-	wait &operator=( wait && ) = default;
-	~wait( void ) = default;
+    wait( void ) = default;
+    wait( wait_type w ) : _w( w ) {}
+    wait( const wait & ) = default;
+    wait( wait && ) = default;
+    wait &operator=( const wait & ) = default;
+    wait &operator=( wait && ) = default;
+    ~wait( void ) = default;
 
-	bool is_valid( void ) const { return _w != INVALID_WAIT; }
-	poll_type waitable( void ) const { return reinterpret_cast<poll_type>(_w); }
+    bool is_valid( void ) const {
+        return _w != INVALID_WAIT;
+    }
+    poll_type waitable( void ) const {
+        return reinterpret_cast<poll_type>(_w);
+    }
 
 private:
-	wait_type _w = INVALID_WAIT;
+    wait_type _w = INVALID_WAIT;
 };
 
 void wait_for( const wait &w );
@@ -54,9 +56,9 @@ wait wait_for_any( const std::vector<wait> &w );
 template <typename ...Args>
 wait wait_for_any( const wait &w, Args &&... ew )
 {
-	return wait_for_any( std::vector<wait>{ w, ew... } );
+    return wait_for_any( std::vector<wait> { w, ew... } );
 }
-						 
+
 } // namespace base
 
 

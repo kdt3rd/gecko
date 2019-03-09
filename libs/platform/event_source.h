@@ -1,8 +1,5 @@
-//
 // Copyright (c) 2015 Kimball Thurston
 // SPDX-License-Identifier: MIT
-// Copyrights licenced under the MIT License.
-//
 
 #pragma once
 #include <cstdint>

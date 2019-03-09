@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2017 Ian Godin
 // SPDX-License-Identifier: MIT
-//
 
 #include "style.h"
 #include <script/font_manager.h>

@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2014 Ian Godin
 // SPDX-License-Identifier: MIT
-//
 
 
 template<typename Type, size_t N>

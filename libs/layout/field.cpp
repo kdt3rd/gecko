@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2017 Ian Godin
 // SPDX-License-Identifier: MIT
-//
 
 #include "field.h"
 #include <base/contract.h>

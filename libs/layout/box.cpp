@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2017 Ian Godin and Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include "box.h"
 #include <base/contract.h>

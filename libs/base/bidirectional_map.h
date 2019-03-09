@@ -1,8 +1,5 @@
-//
 // Copyright (c) 2017 Kimball Thurston
 // SPDX-License-Identifier: MIT
-// Copyrights licenced under the MIT License.
-//
 
 #pragma once
 
@@ -219,5 +216,3 @@ inline void swap( base::bidirectional_map<A, B, Allocator> &a,
 }
 
 }
-
-

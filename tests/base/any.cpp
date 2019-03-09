@@ -1,8 +1,5 @@
-//
 // Copyright (c) 2017 Kimball Thurston
 // SPDX-License-Identifier: MIT
-// Copyrights licenced under the MIT License.
-//
 
 #include <base/contract.h>
 #include <base/unit_test.h>

@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2015-2016 Ian Godin and Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include "posix_file_system.h"
 #include "contract.h"

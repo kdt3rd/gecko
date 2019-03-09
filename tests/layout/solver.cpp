@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2016-2017 Ian Godin
 // SPDX-License-Identifier: MIT
-//
 
 #include <base/contract.h>
 #include <base/unit_test.h>

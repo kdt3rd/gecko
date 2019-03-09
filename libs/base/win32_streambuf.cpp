@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2017 Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include "win32_streambuf.h"
 #include "contract.h"

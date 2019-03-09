@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2015 Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include "widget.h"
 #include <base/animation.h>

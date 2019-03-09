@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2015-2017 Ian Godin and Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include <base/uri.h>
 #include <base/contract.h>

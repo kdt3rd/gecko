@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2014 Ian Godin and Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include "event.h"
 #include "window.h"

@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2015 Ian Godin
 // SPDX-License-Identifier: MIT
-//
 
 #include "response.h"
 #include <base/scope_guard.h>

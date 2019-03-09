@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2018 Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include "metadata.h"
 #include <mutex>

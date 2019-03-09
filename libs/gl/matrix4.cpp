@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2014-2016 Ian Godin
 // SPDX-License-Identifier: MIT
-//
 
 #include "matrix4.h"
 #include <cstddef>

@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2015 Ian Godin
 // SPDX-License-Identifier: MIT
-//
 
 #include "backtrace.h"
 #ifdef _WIN32

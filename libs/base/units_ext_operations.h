@@ -1,8 +1,5 @@
-//
 // Copyright (c) 2018 Kimball Thurston
 // SPDX-License-Identifier: MIT
-// Copyrights licenced under the MIT License.
-//
 
 #ifndef GK_BASE_UNITS_H
 # error "Do not include units_ext_operations.h by itself, meant as a helper for units.h"

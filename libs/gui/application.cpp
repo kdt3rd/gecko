@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2014 Ian Godin and Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include "application.h"
 #include "window.h"

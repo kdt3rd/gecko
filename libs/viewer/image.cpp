@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2014-2017 Ian Godin and Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include "image.h"
 #include "shaders.h"

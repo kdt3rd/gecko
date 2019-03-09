@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2014-2015 Ian Godin
 // SPDX-License-Identifier: MIT
-//
 
 #include <base/sha256.h>
 #include <base/sha160.h>

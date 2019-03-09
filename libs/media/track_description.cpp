@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2016-2017 Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include "track_description.h"
 

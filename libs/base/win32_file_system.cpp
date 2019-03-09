@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2017 Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include "win32_file_system.h"
 #include <windows.h>

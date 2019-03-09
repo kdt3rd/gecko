@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2015-2016 Ian Godin and Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include "uri.h"
 #include "string_util.h"

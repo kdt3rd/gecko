@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2014 Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 //
 // Based on the following by Jukka Jylänki

@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2012 Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include "pack.h"
 #include <limits>

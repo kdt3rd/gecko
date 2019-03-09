@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2016 Ian Godin
 // SPDX-License-Identifier: MIT
-//
 
 #include "framebuffer.h"
 

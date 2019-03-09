@@ -1,8 +1,5 @@
-//
 // Copyright (c) 2017 Kimball Thurston
 // SPDX-License-Identifier: MIT
-// Copyrights licenced under the MIT License.
-//
 
 #include "cursor.h"
 
@@ -55,6 +52,3 @@ cursor::is_animated( void ) const
 
 } // namespace xlib
 } // namespace platform
-
-
-

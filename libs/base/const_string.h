@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2014-2016 Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #pragma once
 

@@ -1,14 +1,11 @@
-//
 // Copyright (c) 2017 Kimball Thurston
 // SPDX-License-Identifier: MIT
-// Copyrights licenced under the MIT License.
-//
 
 #pragma once
 
 #include "spectral_density.h"
 #include <vector>
-#include "triple.h"
+#include "triplet.h"
 
 ////////////////////////////////////////
 
@@ -48,11 +45,11 @@ public:
 	value_type sample_z( value_type l, value_type d ) const { return _z_bar.sample( l, d ); }
 
 	template <typename OT>
-	triple<typename std::common_type<value_type, typename OT::value_type>::type>
+	triplet<typename std::common_type<value_type, typename OT::value_type>::type>
 	integrate( const spectral_density<OT> &d )
 	{
 		using rettype = typename std::common_type<value_type, typename OT::value_type>::type;
-		return triple<rettype>{ _x_bar.dot( d ), _y_bar.dot( d ), _z_bar.dot( d ) };
+		return triplet<rettype>{ _x_bar.dot( d ), _y_bar.dot( d ), _z_bar.dot( d ) };
 	}
 
 	const table &x_bar( void ) const { return _x_bar; }

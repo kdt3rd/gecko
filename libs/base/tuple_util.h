@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2014-2015 Ian Godin
 // SPDX-License-Identifier: MIT
-//
 
 #pragma once
 

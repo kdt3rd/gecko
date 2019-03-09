@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2015 Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include "unix_streambuf.h"
 

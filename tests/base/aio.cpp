@@ -1,7 +1,5 @@
-//
 // Copyright (c) 2019 Kimball Thurston
 // SPDX-License-Identifier: MIT
-//
 
 #include <sys/types.h>
 #include <sys/stat.h>
