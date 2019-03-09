@@ -112,7 +112,7 @@ public:
 		value_type radius = static_cast<value_type>( nSamples ) / value_type(2);
 
 		value_type ret = value_type(0);
-		for ( long i = 0; i < nSamples; ++i, curL += delta() )
+		for ( long i = 0; i < nSamples; ++i )
 		{
 			value_type x = ( static_cast<value_type>( i ) - radius + value_type(0.5) );
 			ret += sample( l + x * delta() );
@@ -141,6 +141,7 @@ public:
 	{
 		using rettype = typename std::common_type<value_type, typename OT::value_type>::type;
 		rettype ret = rettype(0);
+		value_type curL = start_wavelength();
 		for ( size_t i = 0; i != size(); ++i, curL += delta() )
 			ret += _table[i] * o.sample( curL, delta() );
 		return ret;
