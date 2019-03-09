@@ -119,16 +119,19 @@ size_t type_sizeof( type_id t );
 std::istream &operator>>( std::istream &i, type_id &t );
 std::ostream &operator<<( std::ostream &o, type_id &t );
 
-namespace detal
+namespace detail
 {
 
 enum class value_flags : uint8_t
 {
     at_default = 0,
-    valid = 0,
-    animated
+    valid,
+    animated,
+    has_expression,
 };
 
+class interp
+{
 public:
     using calc_type = double;
 
@@ -256,6 +259,7 @@ public:
     inline constexpr bool is_default( void ) const { return _flags.is_set<value_flags::at_default>(); }
     inline constexpr bool is_valid( void ) const { return _flags.is_set<value_flags::valid>(); }
     inline constexpr bool is_animated( void ) const { return _flags.is_set<value_flags::animated>(); }
+    inline constexpr bool has_expression( void ) const { return _flags.is_set<value_flags::has_expression>(); }
 
     inline value_type evaluate( const time &t )
     {
@@ -269,6 +273,7 @@ public:
         {
             
         }
+    }
     inline void reset( const value_type &v );
 
 private:
@@ -291,6 +296,7 @@ class value
 {
 public:
     using storage_type = Storage;
+    using value_type = typename storage_type::value_type;
     static constexpr type_id k_type = storage_type::k_type;
 
     value( void );
@@ -305,10 +311,13 @@ public:
     bool is_animated( void ) const;
     std::vector<time> keyframes( void ) const;
 
+    /// returns the range of time that should be invalidated based on setting the
+    /// value at time t
+    std::pair<time, time> set( const time &t, const value_type &v );
     template <typename T>
     T evaluate( const time &t ) const
     {
-        return _storage->access<T>( t );
+        return _storage->evaluate<T>( t );
     }
 private:
 
