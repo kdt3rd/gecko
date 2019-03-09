@@ -2,6 +2,7 @@
 base = subdir "base"
 gl = subdir "gl"
 utf = subdir "utf"
+color = subdir "color"
 script = subdir "script"
 engine = subdir "engine"
 imgproc = subdir "imgproc"
