@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 #ifdef _WIN32
-#include <malloc.h>
+#    include <malloc.h>
 #endif
 #include <cstdlib>
 
@@ -21,7 +21,7 @@ namespace base
 class allocator
 {
 public:
-    static constexpr size_t max_align = alignof(std::max_align_t);
+    static constexpr size_t max_align = alignof( std::max_align_t );
 
     allocator( void );
     virtual ~allocator( void );
@@ -32,10 +32,8 @@ public:
     allocator( allocator && ) = delete;
     allocator &operator=( allocator && ) = delete;
 
-    virtual std::shared_ptr<void> allocate( size_t bytes, size_t alignment = max_align ) = 0;
+    virtual std::shared_ptr<void>
+    allocate( size_t bytes, size_t alignment = max_align ) = 0;
 };
 
 } // namespace base
-
-
-

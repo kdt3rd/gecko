@@ -5,44 +5,43 @@
 #include "contract.h"
 #ifndef _WIN32
 
-# define HAS_CXXABI
-# include <cxxabi.h>
+#    define HAS_CXXABI
+#    include <cxxabi.h>
 
-# define HAS_DLFCN
-#include <dlfcn.h>
+#    define HAS_DLFCN
+#    include <dlfcn.h>
 
-# ifdef __linux__
-#  define HAS_VSYM
-#  define HAS_ELF_DLFCN
-#  include <sys/types.h>
-#  include <sys/stat.h>
-#  include <fcntl.h>
-#  include <elf.h>
-#  include <link.h>
-# endif
+#    ifdef __linux__
+#        define HAS_VSYM
+#        define HAS_ELF_DLFCN
+#        include <elf.h>
+#        include <fcntl.h>
+#        include <link.h>
+#        include <sys/stat.h>
+#        include <sys/types.h>
+#    endif
 
 #else
-# include <windows.h>
+#    include <windows.h>
 #endif
 
 #include "memory_map.h"
 
 ////////////////////////////////////////
 
-namespace {
+namespace
+{
 
 #ifdef HAS_CXXABI
-std::string
-demangle(const char *sym)
+std::string demangle( const char *sym )
 {
     if ( sym && sym[0] != '\0' )
     {
         if ( sym[0] == '_' )
         {
             int status = -42;
-            std::unique_ptr<char, void(*)(void*)> realname {
-                abi::__cxa_demangle( sym, nullptr, nullptr, &status ),
-                std::free
+            std::unique_ptr<char, void ( * )( void * )> realname{
+                abi::__cxa_demangle( sym, nullptr, nullptr, &status ), std::free
             };
 
             if ( status == 0 )
@@ -55,7 +54,7 @@ demangle(const char *sym)
 }
 #endif
 
-}
+} // namespace
 
 ////////////////////////////////////////
 
@@ -64,23 +63,18 @@ namespace base
 
 ////////////////////////////////////////
 
-dso::dso( const char *fn, bool makeGlobal )
-{
-    load( fn, makeGlobal );
-}
+dso::dso( const char *fn, bool makeGlobal ) { load( fn, makeGlobal ); }
 
 ////////////////////////////////////////
 
-dso::~dso( void )
-{
-    reset();
-}
+dso::~dso( void ) { reset(); }
 
 ////////////////////////////////////////
 
 dso::dso( dso &&o )
-    : _fn( std::move( o._fn ) ), _last_err( std::move( o._last_err ) ),
-      _handle( base::exchange( o._handle, nullptr ) )
+    : _fn( std::move( o._fn ) )
+    , _last_err( std::move( o._last_err ) )
+    , _handle( base::exchange( o._handle, nullptr ) )
 {
 }
 
@@ -102,12 +96,12 @@ void dso::reset( void )
     if ( _handle )
         dlclose( _handle );
 #else
-# ifdef _WIN32
+#    ifdef _WIN32
     if ( _handle )
         FreeLibrary( (HMODULE)_handle );
-# else
-#  error Unknown dynamic object system
-# endif
+#    else
+#        error Unknown dynamic object system
+#    endif
 #endif
     _handle = nullptr;
     _fn.clear();
@@ -126,75 +120,85 @@ void dso::load( const char *fn, bool makeGlobal )
     if ( makeGlobal )
         flags |= RTLD_GLOBAL;
     _handle = dlopen( fn, flags );
-    if ( ! _handle )
+    if ( !_handle )
         _last_err = dlerror();
 #else
-# ifdef _WIN32
+#    ifdef _WIN32
     HMODULE t = nullptr;
     bool haderr = false;
     if ( fn )
     {
         t = LoadLibrary( fn );
-        haderr = (t == nullptr);
+        haderr = ( t == nullptr );
     }
     else
-        haderr = ! GetModuleHandleEx( 0, NULL, &t );
+        haderr = !GetModuleHandleEx( 0, NULL, &t );
 
     if ( haderr )
     {
         char *msg = nullptr;
-        FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER, nullptr, GetLastError(), 0,
-                       (LPSTR)&msg, 0, nullptr );
+        FormatMessage(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER,
+            nullptr,
+            GetLastError(),
+            0,
+            (LPSTR)&msg,
+            0,
+            nullptr );
         if ( msg )
             _last_err = msg;
 
         LocalFree( msg );
     }
-# else
-#  error Unknown dynamic object system
-# endif
+#    else
+#        error Unknown dynamic object system
+#    endif
 #endif
 }
 
-
 ////////////////////////////////////////
 
-void *
-dso::find( const char *symn, const char *symver )
+void *dso::find( const char *symn, const char *symver )
 {
     precondition( _handle, "dso failed to load, check valid state" );
     void *ret = nullptr;
     if ( _handle )
     {
 #ifdef HAS_DLFCN
-# ifdef HAS_VSYM
+#    ifdef HAS_VSYM
         if ( symver )
             ret = dlvsym( _handle, symn, symver );
         else
             ret = dlsym( _handle, symn );
-#else
+#    else
         unused( symver );
-		ret = dlsym( _handle, symn );
-#endif
-        if ( ! ret )
+        ret = dlsym( _handle, symn );
+#    endif
+        if ( !ret )
             _last_err = dlerror();
 #else
-# ifdef _WIN32
+#    ifdef _WIN32
         // todo symbol versioning???
-		FARPROC ptr = GetProcAddress( (HMODULE)_handle, symn );
+        FARPROC ptr = GetProcAddress( (HMODULE)_handle, symn );
         ret = reinterpret_cast<void *>( ptr );
-        if ( ! ret )
+        if ( !ret )
         {
             char *msg = nullptr;
-            FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER, nullptr, GetLastError(), 0,
-                           (LPSTR)&msg, 0, nullptr );
+            FormatMessage(
+                FORMAT_MESSAGE_ALLOCATE_BUFFER,
+                nullptr,
+                GetLastError(),
+                0,
+                (LPSTR)&msg,
+                0,
+                nullptr );
             if ( msg )
                 _last_err = msg;
             LocalFree( msg );
         }
-# else
-#  error Unknown dynamic object system
-# endif
+#    else
+#        error Unknown dynamic object system
+#    endif
 #endif
     }
     return ret;
@@ -205,15 +209,19 @@ dso::find( const char *symn, const char *symver )
 namespace dl_extra
 {
 
-
 #ifdef HAS_ELF_DLFCN
 
-namespace {
+namespace
+{
 
 class symbol_table
 {
 public:
-    void reset(int fd, const ElfW(Shdr) &st, const ElfW(Shdr) *segHdrs, size_t nSegs)
+    void reset(
+        int fd,
+        const ElfW( Shdr ) & st,
+        const ElfW( Shdr ) * segHdrs,
+        size_t nSegs )
     {
         // precondition( st.sh_type == SHT_SYMTAB || st.sh_type == SHT_DYNSYM, "valid segment" );
         _syms.reset( fd, st.sh_offset, st.sh_size );
@@ -225,58 +233,67 @@ public:
         {
             if ( strings >= nSegs )
             {
-                std::cerr << "string table link " << strings << " beyond on number of segments " << nSegs << std::endl;
-                throw std::runtime_error( "String table beyond end of segment header list, suspect corrupt file" );
+                std::cerr << "string table link " << strings
+                          << " beyond on number of segments " << nSegs
+                          << std::endl;
+                throw std::runtime_error(
+                    "String table beyond end of segment header list, suspect corrupt file" );
             }
 
-            const ElfW(Shdr) &strTab = segHdrs[strings];
+            const ElfW( Shdr ) &strTab = segHdrs[strings];
             if ( strTab.sh_type != SHT_STRTAB )
             {
-                std::cerr << "Invalid string table " << strings << " numsegs " << nSegs << " for symbol table, type " << strTab.sh_type << " (" << std::hex << strTab.sh_type << std::dec << ")" << std::endl;
+                std::cerr << "Invalid string table " << strings << " numsegs "
+                          << nSegs << " for symbol table, type "
+                          << strTab.sh_type << " (" << std::hex
+                          << strTab.sh_type << std::dec << ")" << std::endl;
             }
 
-            _strings.reset( fd, segHdrs[strings].sh_offset, segHdrs[strings].sh_size );
+            _strings.reset(
+                fd, segHdrs[strings].sh_offset, segHdrs[strings].sh_size );
         }
     }
 
     size_t size( void ) const { return _num_syms; }
 
-    const ElfW(Sym) &symbol( size_t x ) const { return _syms[x]; }
-    const char *name( size_t x ) const { return _strings.get() + symbol( x ).st_name; }
+    const ElfW( Sym ) & symbol( size_t x ) const { return _syms[x]; }
+    const char *name( size_t x ) const
+    {
+        return _strings.get() + symbol( x ).st_name;
+    }
 
-    const ElfW(Sym) &operator[]( size_t x ) const { return symbol( x ); }
+    const ElfW( Sym ) &operator[]( size_t x ) const { return symbol( x ); }
+
 private:
-    read_memory_map<ElfW(Sym)> _syms;
+    read_memory_map<ElfW( Sym )> _syms;
     read_memory_map<char> _strings;
     size_t _num_syms = 0;
     size_t _last_local = 0;
 };
 
-}
+} // namespace
 
 class active_shared_object::impl
 {
 public:
-    impl( const char *name, uintptr_t base_addr )
-        : _base( base_addr )
+    impl( const char *name, uintptr_t base_addr ) : _base( base_addr )
     {
         load_syms( name );
     }
 
-    explicit impl( struct dl_phdr_info *phdr )
-        : _base( phdr->dlpi_addr )
+    explicit impl( struct dl_phdr_info *phdr ) : _base( phdr->dlpi_addr )
     {
         load_syms( phdr->dlpi_name );
 
-//        for ( size_t i = 0; i < phdr->dlpi_phnum; ++i )
-//        {
-//            auto &phd = phdr->dlpi_phdr[i];
-//            if ( phd.p_type == PT_LOAD )
-//            {
-//                _vaddr_to_seg_fileoffset[phd.p_vaddr] = phd.p_offset;
-//                _seg_fileoffset_to_vaddr[phd.p_offset] = phd.p_vaddr;
-//            }
-//        }
+        //        for ( size_t i = 0; i < phdr->dlpi_phnum; ++i )
+        //        {
+        //            auto &phd = phdr->dlpi_phdr[i];
+        //            if ( phd.p_type == PT_LOAD )
+        //            {
+        //                _vaddr_to_seg_fileoffset[phd.p_vaddr] = phd.p_offset;
+        //                _seg_fileoffset_to_vaddr[phd.p_offset] = phd.p_vaddr;
+        //            }
+        //        }
     }
 
     ~impl( void )
@@ -291,7 +308,7 @@ public:
 
     bool is_closest( void *addr, const impl *curdso )
     {
-        uintptr_t aint = reinterpret_cast<uintptr_t>(addr);
+        uintptr_t aint = reinterpret_cast<uintptr_t>( addr );
         if ( _base < aint )
         {
             uintptr_t off = aint - _base;
@@ -330,34 +347,38 @@ public:
         }
         _fd = open( _path.c_str(), O_RDONLY | O_CLOEXEC );
         if ( _fd < 0 )
-            throw std::runtime_error( "Unable to open dso '" + _path + "' for read" );
+            throw std::runtime_error(
+                "Unable to open dso '" + _path + "' for read" );
 
-        std::string::size_type ls = _path.find_last_of('/');
+        std::string::size_type ls = _path.find_last_of( '/' );
         if ( ls != std::string::npos )
             _name = _path.substr( ls + 1 );
         else
             _name = _path;
 
         //std::cout << "loading symbols from: '" << _path << "'..." << std::endl;
-        read_memory_map<ElfW(Ehdr)> hdr( _fd, 0, sizeof(ElfW(Ehdr)) );
+        read_memory_map<ElfW( Ehdr )> hdr( _fd, 0, sizeof( ElfW( Ehdr ) ) );
 
         size_t numSegHdrs = hdr->e_shnum;
         off64_t segHdrOff = hdr->e_shoff;
-        size_t segHdrSize = numSegHdrs * sizeof(ElfW(Shdr));
+        size_t segHdrSize = numSegHdrs * sizeof( ElfW( Shdr ) );
         bool isElf = ( 0 == memcmp( hdr->e_ident, ELFMAG, SELFMAG ) );
 
-        if ( ! isElf )
-            throw std::runtime_error( "Entry in link map does not seem to be an elf file" );
+        if ( !isElf )
+            throw std::runtime_error(
+                "Entry in link map does not seem to be an elf file" );
 
-        const unsigned char nativeClass = __ELF_NATIVE_CLASS == 64 ? ELFCLASS64 : ELFCLASS32;
+        const unsigned char nativeClass = __ELF_NATIVE_CLASS == 64 ? ELFCLASS64
+                                                                   : ELFCLASS32;
         if ( nativeClass != hdr->e_ident[EI_CLASS] )
-            throw std::runtime_error( "Elf class is not for native elf binary size (32/64) bit mismatch" );
+            throw std::runtime_error(
+                "Elf class is not for native elf binary size (32/64) bit mismatch" );
 
         // don't need the header anymore...
         hdr.reset();
 
         //std::cout << " numSegHdrs: " << numSegHdrs << " hdroff: " << std::hex << segHdrOff << std::dec << " hdrsz: " << segHdrSize << std::endl;
-        read_memory_map<ElfW(Shdr)> segHdrs( _fd, segHdrOff, segHdrSize );
+        read_memory_map<ElfW( Shdr )> segHdrs( _fd, segHdrOff, segHdrSize );
 
         // there should only be one of each of these (non dynamic and dynamic symbol tables)
         size_t numSymTabs = 0;
@@ -373,41 +394,42 @@ public:
                 // for now, just keep a count and error out if we get more than the two
                 case SHT_SYMTAB:
                     if ( numSymTabs > 0 )
-                        throw std::runtime_error( "Binary format looks like this has multiple symbol tables - the spec allows for that as a future expansion, but not yet implemented" );
+                        throw std::runtime_error(
+                            "Binary format looks like this has multiple symbol tables - the spec allows for that as a future expansion, but not yet implemented" );
                     ++numSymTabs;
-                    _nondyn_syms.reset( _fd, segHdrs[i], segHdrs.get(), numSegHdrs );
+                    _nondyn_syms.reset(
+                        _fd, segHdrs[i], segHdrs.get(), numSegHdrs );
                     break;
                 case SHT_DYNSYM:
                     if ( numSymTabs > 0 )
-                        throw std::runtime_error( "Binary format looks like this has multiple dynamic symbol tables - the spec allows for that as a future expansion, but not yet implemented" );
+                        throw std::runtime_error(
+                            "Binary format looks like this has multiple dynamic symbol tables - the spec allows for that as a future expansion, but not yet implemented" );
                     ++numDynSymTabs;
-                    _dyn_syms.reset( _fd, segHdrs[i], segHdrs.get(), numSegHdrs );
+                    _dyn_syms.reset(
+                        _fd, segHdrs[i], segHdrs.get(), numSegHdrs );
                     break;
-                case SHT_PROGBITS:
-
-                    break;
+                case SHT_PROGBITS: break;
             }
         }
     }
 
     std::string find_symbol( void *addr, bool include_offset = true )
     {
-        uintptr_t off = uintptr_t(addr) - _base;
+        uintptr_t off = uintptr_t( addr ) - _base;
         std::string ret;
 
         uintptr_t symoff = 0;
         for ( size_t s = 0; ret.empty() && s < _dyn_syms.size(); ++s )
         {
-            const ElfW(Sym) &t = _dyn_syms[s];
+            const ElfW( Sym ) &t = _dyn_syms[s];
             if ( t.st_name &&
                  ( ELF64_ST_TYPE( t.st_info ) == STT_FUNC ||
                    ELF64_ST_TYPE( t.st_info ) == STT_OBJECT ) &&
-                 t.st_shndx != SHN_UNDEF &&
-                 t.st_size > 0 )
+                 t.st_shndx != SHN_UNDEF && t.st_size > 0 )
             {
-                if ( t.st_value <= off && off <= (t.st_value + t.st_size) )
+                if ( t.st_value <= off && off <= ( t.st_value + t.st_size ) )
                 {
-                    ret = demangle(_dyn_syms.name( s ));
+                    ret = demangle( _dyn_syms.name( s ) );
                     symoff = off - t.st_value;
                 }
             }
@@ -415,16 +437,15 @@ public:
 
         for ( size_t s = 0; ret.empty() && s < _nondyn_syms.size(); ++s )
         {
-            const ElfW(Sym) &t = _nondyn_syms[s];
+            const ElfW( Sym ) &t = _nondyn_syms[s];
             if ( t.st_name &&
                  ( ELF64_ST_TYPE( t.st_info ) == STT_FUNC ||
                    ELF64_ST_TYPE( t.st_info ) == STT_OBJECT ) &&
-                 t.st_shndx != SHN_UNDEF &&
-                 t.st_size > 0 )
+                 t.st_shndx != SHN_UNDEF && t.st_size > 0 )
             {
-                if ( t.st_value <= off && off <= (t.st_value + t.st_size) )
+                if ( t.st_value <= off && off <= ( t.st_value + t.st_size ) )
                 {
-                    ret = demangle(_nondyn_syms.name( s ));
+                    ret = demangle( _nondyn_syms.name( s ) );
                     symoff = off - t.st_value;
                 }
             }
@@ -448,7 +469,8 @@ public:
     symbol_table _nondyn_syms;
 };
 
-namespace {
+namespace
+{
 
 static int fillActiveCB( struct dl_phdr_info *phdr, size_t size, void *data )
 {
@@ -462,34 +484,38 @@ static int fillActiveCB( struct dl_phdr_info *phdr, size_t size, void *data )
     return 1;
 }
 
-}
+} // namespace
 
 #else
 class active_shared_object::impl
 {
 public:
-	impl( const char *name, uintptr_t baseaddr ) : _name( name ), _base( baseaddr ) {}
+    impl( const char *name, uintptr_t baseaddr )
+        : _name( name ), _base( baseaddr )
+    {
+    }
     inline const std::string &path( void ) const { return _path; }
     inline const std::string &name( void ) const { return _name; }
     inline uintptr_t base( void ) const { return _base; }
 
-    bool is_closest( void *addr, const impl *curdso )
-    { throw_not_yet(); }
-    void load_syms( const char *fn )
-	{ throw_not_yet(); }
+    bool is_closest( void *addr, const impl *curdso ) { throw_not_yet(); }
+    void load_syms( const char *fn ) { throw_not_yet(); }
     std::string find_symbol( void *addr, bool include_offset = true )
-	{ throw_not_yet(); }
+    {
+        throw_not_yet();
+    }
 
 private:
-	std::string _path;
-	std::string _name;
-	uintptr_t _base = 0;
+    std::string _path;
+    std::string _name;
+    uintptr_t _base = 0;
 };
 #endif // HAS_ELF_DLFCN
 
 ////////////////////////////////////////
 
-active_shared_object::active_shared_object( const char *name, uintptr_t base_addr )
+active_shared_object::active_shared_object(
+    const char *name, uintptr_t base_addr )
     : _impl( new impl( name, base_addr ) )
 {
 }
@@ -519,14 +545,12 @@ const std::string &active_shared_object::name( void ) const
 
 ////////////////////////////////////////
 
-uintptr_t active_shared_object::base( void ) const
-{
-    return _impl->base();
-}
+uintptr_t active_shared_object::base( void ) const { return _impl->base(); }
 
 ////////////////////////////////////////
 
-bool active_shared_object::is_closest( void *addr, const active_shared_object *curdso )
+bool active_shared_object::is_closest(
+    void *addr, const active_shared_object *curdso )
 {
     return _impl->is_closest( addr, curdso->_impl.get() );
 }
@@ -546,13 +570,14 @@ active_objects::active_objects()
 #ifdef HAS_ELF_DLFCN
     dl_iterate_phdr( &fillActiveCB, &_dsos );
 #else
-	throw_not_yet();
+    throw_not_yet();
 #endif
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<active_shared_object> active_objects::find_dso( void *addr ) const
+std::shared_ptr<active_shared_object>
+active_objects::find_dso( void *addr ) const
 {
     std::shared_ptr<active_shared_object> cur;
     for ( const auto &i: _dsos )
@@ -570,14 +595,15 @@ void *find_next( const char *sig, const char *ver )
 {
 #ifdef HAS_DLFCN
 
-#ifdef HAS_VSYM
+#    ifdef HAS_VSYM
     if ( ver )
         return dlvsym( RTLD_NEXT, sig, ver );
-#endif
+#    endif
 
-	return dlsym( RTLD_NEXT, sig );
+    return dlsym( RTLD_NEXT, sig );
 #else
-	return reinterpret_cast<void *>( GetProcAddress( GetModuleHandle( nullptr ), sig ) );
+    return reinterpret_cast<void *>(
+        GetProcAddress( GetModuleHandle( nullptr ), sig ) );
 #endif
 }
 

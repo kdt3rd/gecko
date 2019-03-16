@@ -11,17 +11,10 @@ namespace base
 
 ////////////////////////////////////////
 
-allocator::allocator( void )
-{
-}
+allocator::allocator( void ) {}
 
 ////////////////////////////////////////
 
-allocator::~allocator( void )
-{
-}
+allocator::~allocator( void ) {}
 
-} // base
-
-
-
+} // namespace base

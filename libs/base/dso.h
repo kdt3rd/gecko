@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include <cstdint>
 #include <cstddef>
-#include <string>
+#include <cstdint>
 #include <memory>
+#include <string>
 #include <vector>
 
 ////////////////////////////////////////
@@ -27,8 +27,8 @@ public:
     /// if fn is nullptr, the main application is loaded, enabling symbol lookup in
     /// the application and loaded (global) objects
     ///
-	explicit dso( const char *fn, bool makeGlobal = false );
-	~dso( void );
+    explicit dso( const char *fn, bool makeGlobal = false );
+    ~dso( void );
     dso( const dso & ) = delete;
     dso &operator=( const dso & ) = delete;
     dso( dso && );
@@ -113,6 +113,3 @@ void *find_next( const char *sig, const char *vers = nullptr );
 } // namespace dl_extra
 
 } // namespace base
-
-
-
