@@ -3,36 +3,38 @@
 
 #pragma once
 
+#include "contract.h"
+
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
-#include "contract.h"
 
 ////////////////////////////////////////
 
 namespace base
 {
-
-template <typename T>
-class lock_free_list_node
+template <typename T> class lock_free_list_node
 {
 public:
     lock_free_list_node( void ) : _lf_list_next( nullptr ) {}
 
-    inline T *next( void ) const { return _lf_list_next.load( std::memory_order_relaxed ); }
+    inline T *next( void ) const
+    {
+        return _lf_list_next.load( std::memory_order_relaxed );
+    }
     std::atomic<T *> _lf_list_next;
 };
 
 /// @brief keeps a simple single linked list of items
 ///
 /// values are not owned by the list in any way
-template <typename T>
-class lock_free_list
+template <typename T> class lock_free_list
 {
 public:
     using value_type = T;
-    static_assert( std::is_base_of<lock_free_list_node<value_type>, value_type>::value,
-                   "list value must be derived from lock_free_list_node using CRTP" );
+    static_assert(
+        std::is_base_of<lock_free_list_node<value_type>, value_type>::value,
+        "list value must be derived from lock_free_list_node using CRTP" );
 
     lock_free_list( void ) : _head( lf_head() ) {}
 
@@ -44,23 +46,27 @@ public:
         {
             head.ptr = nullptr;
             head.tag = cur.tag + 1;
-            if ( ! _head.compare_exchange_weak( cur, head, std::memory_order_release, std::memory_order_acquire ) )
+            if ( !_head.compare_exchange_weak(
+                     cur,
+                     head,
+                     std::memory_order_release,
+                     std::memory_order_acquire ) )
                 continue;
-        }
-        while ( false );
+        } while ( false );
 
         return cur.ptr;
     }
-    
+
     inline void push( value_type *v )
     {
-        lf_head cur = _head.load( std::memory_order_relaxed );
+        lf_head cur  = _head.load( std::memory_order_relaxed );
         lf_head head = { v };
         do
         {
             head.tag = cur.tag + 1;
             v->_lf_list_next.store( cur.ptr, std::memory_order_relaxed );
-        } while ( ! _head.compare_exchange_weak( cur, head, std::memory_order_release, std::memory_order_relaxed ) );
+        } while ( !_head.compare_exchange_weak(
+            cur, head, std::memory_order_release, std::memory_order_relaxed ) );
     }
 
     value_type *try_pop( void )
@@ -71,7 +77,11 @@ public:
         {
             head.ptr = cur.ptr->_lf_list_next.load( std::memory_order_relaxed );
             head.tag = cur.tag + 1;
-            if ( _head.compare_exchange_weak( cur, head, std::memory_order_release, std::memory_order_acquire ) )
+            if ( _head.compare_exchange_weak(
+                     cur,
+                     head,
+                     std::memory_order_release,
+                     std::memory_order_acquire ) )
                 break;
         }
         return cur.ptr;
@@ -83,16 +93,21 @@ public:
         _head.store( head );
     }
 
-    value_type *unsafe_front( void ) const { return _head.load( std::memory_order_relaxed ).ptr; }
+    value_type *unsafe_front( void ) const
+    {
+        return _head.load( std::memory_order_relaxed ).ptr;
+    }
 
 private:
     struct lf_head
     {
-        value_type *ptr = nullptr;
+        value_type *   ptr = nullptr;
         std::uintptr_t tag = 0;
     };
-    static_assert( sizeof(lf_head) == (2 * sizeof(void *)), "invalid size for head pointer" );
-    alignas(2 * sizeof(void *)) std::atomic<lf_head> _head;
+    static_assert(
+        sizeof( lf_head ) == ( 2 * sizeof( void * ) ),
+        "invalid size for head pointer" );
+    alignas( 2 * sizeof( void * ) ) std::atomic<lf_head> _head;
 };
 
 // what about a double linked list
@@ -101,7 +116,7 @@ private:
 // large enough atomic operation to effect the change.
 //
 // given a list
-// 
+//
 // a -> b -> c
 //
 // rcu (read copy update) removes b by updating a to point to c
@@ -141,6 +156,3 @@ private:
 //
 //
 } // namespace base
-
-
-

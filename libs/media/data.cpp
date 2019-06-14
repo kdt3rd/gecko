@@ -7,32 +7,22 @@
 
 namespace media
 {
+////////////////////////////////////////
+
+data::data( void ) {}
 
 ////////////////////////////////////////
 
-data::data( void )
-{
-}
+data::data( const area_rect &area ) : _full_area( area ), _active_area( area )
+{}
 
 ////////////////////////////////////////
 
-data::data( const area_rect &area )
-    : _full_area( area ), _active_area( area )
-{
-}
+data::~data( void ) {}
 
 ////////////////////////////////////////
 
-data::~data( void )
-{
-}
-
-////////////////////////////////////////
-
-void data::color_state( const color::state &s )
-{
-    _color_state = s;
-}
+void data::color_state( const color::state &s ) { _color_state = s; }
 
 ////////////////////////////////////////
 
@@ -56,7 +46,4 @@ std::pair<int64_t, int64_t> data::compute_preferred_chunk( void ) const
 
 ////////////////////////////////////////
 
-} // media
-
-
-
+} // namespace media

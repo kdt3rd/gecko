@@ -3,73 +3,70 @@
 
 #include "window.h"
 
-#include <base/pointer.h>
-#include <base/contract.h>
-#include <stdexcept>
-
 #include "context.h"
-#include <platform/event.h>
-#include <platform/screen.h>
 
 #include <Cocoa/Cocoa.h>
+#include <base/contract.h>
+#include <base/pointer.h>
+#include <platform/event.h>
+#include <platform/screen.h>
+#include <stdexcept>
 
-namespace platform { namespace cocoa
+namespace platform
 {
-
+namespace cocoa
+{
 struct window::objcwrapper
 {
-	NSWindow *win = nullptr;
-	NSOpenGLView *view = nullptr;
-	CGContext *ctxt = nullptr;
+    NSWindow *    win  = nullptr;
+    NSOpenGLView *view = nullptr;
+    CGContext *   ctxt = nullptr;
 };
 
 ////////////////////////////////////////
 
-window::window( window_type wt, const std::shared_ptr<::platform::screen> &s, const rect &p )
-	: ::platform::window( wt, s, p ),
-	  _impl( new objcwrapper ),
-	  _context( std::make_shared<context>() )
+window::window(
+    window_type                                wt,
+    const std::shared_ptr<::platform::screen> &s,
+    const rect &                               p )
+    : ::platform::window( wt, s, p )
+    , _impl( new objcwrapper )
+    , _context( std::make_shared<context>() )
 {
-	int style = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
+    int style = NSTitledWindowMask | NSClosableWindowMask |
+                NSMiniaturizableWindowMask | NSResizableWindowMask;
 
-	// window coordinates are flipped - 0 is at lower left
-	rect scrbounds = s->bounds( true );
+    // window coordinates are flipped - 0 is at lower left
+    rect scrbounds = s->bounds( true );
 
-	auto y = scrbounds.height() - p.height() - p.y();
-	NSWindow *nswin = [[[NSWindow alloc] initWithContentRect:NSMakeRect( p.x(), y, p.width(), p.height() )
-		styleMask:style backing:NSBackingStoreBuffered defer:YES] autorelease];
-	_impl->win = nswin;
+    auto      y     = scrbounds.height() - p.height() - p.y();
+    NSWindow *nswin = [[[NSWindow alloc]
+        initWithContentRect:NSMakeRect( p.x(), y, p.width(), p.height() )
+                  styleMask:style
+                    backing:NSBackingStoreBuffered
+                      defer:YES] autorelease];
+    _impl->win      = nswin;
 
-	[nswin orderOut:nil];
-	[nswin cascadeTopLeftFromPoint:NSMakePoint(20,20)];
-	[nswin setIgnoresMouseEvents:NO];
+    [nswin orderOut:nil];
+    [nswin cascadeTopLeftFromPoint:NSMakePoint( 20, 20 )];
+    [nswin setIgnoresMouseEvents:NO];
 }
 
 ////////////////////////////////////////
 
-window::~window( void )
-{
-}
+window::~window( void ) {}
 
 ////////////////////////////////////////
 
-::platform::context &
-window::hw_context( void )
-{
-	return *_context;
-}
+::platform::context &window::hw_context( void ) { return *_context; }
 
 ////////////////////////////////////////
 
-void window::raise( void )
-{
-}
+void window::raise( void ) {}
 
 ////////////////////////////////////////
 
-void window::lower( void )
-{
-}
+void window::lower( void ) {}
 
 ////////////////////////////////////////
 
@@ -84,134 +81,132 @@ void window::lower( void )
 
 void window::show( void )
 {
-	[_impl->win makeKeyAndOrderFront:nil];
+    [_impl->win makeKeyAndOrderFront:nil];
     rect r = query_geometry();
-    process_event(
-        event::window( nullptr,
-                       event_type::WINDOW_MOVE_RESIZE,
-                       r.x(), r.y(), r.width(), r.height() ) );
-//                       static_cast<coord_type>( newSize.width * scale ),
-//                       static_cast<coord_type>( newSize.height * scale ) ) );
+    process_event( event::window(
+        nullptr,
+        event_type::WINDOW_MOVE_RESIZE,
+        r.x(),
+        r.y(),
+        r.width(),
+        r.height() ) );
+    //                       static_cast<coord_type>( newSize.width * scale ),
+    //                       static_cast<coord_type>( newSize.height * scale ) ) );
 }
 
 ////////////////////////////////////////
 
-void window::hide( void )
-{
-	[_impl->win orderOut:nil];
-}
+void window::hide( void ) { [_impl->win orderOut:nil]; }
 
 ////////////////////////////////////////
 
 bool window::is_visible( void )
 {
-	// TODO fix this
-	return true;
+    // TODO fix this
+    return true;
 }
 
 ////////////////////////////////////////
 
 void window::fullscreen( bool fs )
 {
-	// TODO:
+    // TODO:
 }
 
 ////////////////////////////////////////
 
-double window::scale_factor( void )
-{
-	return [_impl->win backingScaleFactor];
-}
+double window::scale_factor( void ) { return [_impl->win backingScaleFactor]; }
 
 ////////////////////////////////////////
 
 void window::apply_minimum_size( coord_type w, coord_type h )
 {
-//	NSSize size;
-//	size.width = w;
-//	size.height = h;
-//	[_impl->win setMinSize:size];
+    //	NSSize size;
+    //	size.width = w;
+    //	size.height = h;
+    //	[_impl->win setMinSize:size];
 }
 
 ////////////////////////////////////////
 
 void window::set_title( const std::string &t )
 {
-	NSString *tstring = [[NSString alloc] initWithUTF8String:t.c_str()];
-	[_impl->win setTitle:tstring];
+    NSString *tstring = [[NSString alloc] initWithUTF8String:t.c_str()];
+    [_impl->win setTitle:tstring];
 }
 
 ////////////////////////////////////////
 
 void window::set_ns( void *v )
 {
-	NSOpenGLView *view = static_cast<NSOpenGLView *>( v );
-	[_impl->win setContentView:view];
-	[_impl->win setInitialFirstResponder:view];
+    NSOpenGLView *view = static_cast<NSOpenGLView *>( v );
+    [_impl->win setContentView:view];
+    [_impl->win setInitialFirstResponder:view];
 
-	_context->set_ns( _impl->win, v );
-	_impl->view = view;
-	if ( [view respondsToSelector:@selector(setWantsBestResolutionOpenGLSurface:)] )
-		[view setWantsBestResolutionOpenGLSurface:YES];
+    _context->set_ns( _impl->win, v );
+    _impl->view = view;
+    if ( [view respondsToSelector:@selector
+               ( setWantsBestResolutionOpenGLSurface: )] )
+        [view setWantsBestResolutionOpenGLSurface:YES];
 
-//	double scale = scale_factor();
-//	NSSize size = [_impl->view bounds].size;
-//	_last_w = size.width * scale;
-//	_last_h = size.height * scale;
+    //	double scale = scale_factor();
+    //	NSSize size = [_impl->view bounds].size;
+    //	_last_w = size.width * scale;
+    //	_last_h = size.height * scale;
 }
 
 ////////////////////////////////////////
 
 void window::make_current( const std::shared_ptr<cursor> & )
 {
-	// TODO
+    // TODO
 }
 
 ////////////////////////////////////////
 
 rect window::query_geometry( void )
 {
-	NSRect cgr = [_impl->win frame];
+    NSRect cgr = [_impl->win frame];
 
-	cgr = [_impl->win contentRectForFrameRect:cgr];
+    cgr = [_impl->win contentRectForFrameRect:cgr];
 
-	rect scrbounds = query_screen()->bounds( true );
-	auto y = scrbounds.height() - ( cgr.origin.y + cgr.size.height );
+    rect scrbounds = query_screen()->bounds( true );
+    auto y         = scrbounds.height() - ( cgr.origin.y + cgr.size.height );
 
     double sf = scale_factor();
-	// this includes the title bar?
-	return rect( cgr.origin.x, cgr.origin.y, cgr.size.width * sf, cgr.size.height * sf );
+    // this includes the title bar?
+    return rect(
+        cgr.origin.x, cgr.origin.y, cgr.size.width * sf, cgr.size.height * sf );
 }
 
 ////////////////////////////////////////
 
-bool
-window::update_geometry( rect &r )
+bool window::update_geometry( rect &r )
 {
     double sf = scale_factor();
-	NSRect cgr;
-	cgr.origin.x = r.x();
-	cgr.origin.y = r.y();
-	cgr.size.width = r.width() / sf;
-	cgr.size.height = r.height() / sf;
+    NSRect cgr;
+    cgr.origin.x    = r.x();
+    cgr.origin.y    = r.y();
+    cgr.size.width  = r.width() / sf;
+    cgr.size.height = r.height() / sf;
 
-	rect scrbounds = query_screen()->bounds( true );
-	auto y = scrbounds.height() - r.height() - r.y();
+    rect scrbounds = query_screen()->bounds( true );
+    auto y         = scrbounds.height() - r.height() - r.y();
 
-	cgr = [_impl->win frameRectForContentRect:cgr];
+    cgr = [_impl->win frameRectForContentRect:cgr];
 
-	[_impl->win setFrame:cgr display:true];
+    [_impl->win setFrame:cgr display:true];
 
-	r = query_geometry();
-	return true;
+    r = query_geometry();
+    return true;
 }
 
 ////////////////////////////////////////
 
 void window::submit_delayed_expose( const rect &r )
 {
-	//[_impl->view performSelector:@selector(forceRedraw) withObject:nil afterDelay:0.0];
-	[_impl->view setNeedsDisplay:YES];
+    //[_impl->view performSelector:@selector(forceRedraw) withObject:nil afterDelay:0.0];
+    [_impl->view setNeedsDisplay:YES];
 }
 
 ////////////////////////////////////////

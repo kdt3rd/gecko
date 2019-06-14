@@ -5,29 +5,38 @@
 
 #include <script/font_manager.h>
 
-namespace script { namespace cocoa
+namespace script
 {
-
+namespace cocoa
+{
 ////////////////////////////////////////
 
 /// @brief Cocoa implementation of font_manager.
 class font_manager : public script::font_manager
 {
 public:
-	/// @brief Constructor.
-	font_manager( void );
+    /// @brief Constructor.
+    font_manager( void );
 
-	/// @brief Destructor.
-	~font_manager( void ) override;
+    /// @brief Destructor.
+    ~font_manager( void ) override;
 
-	std::set<std::string> get_families( void ) override;
-	std::set<std::string> get_styles( const std::string &family ) override;
+    std::set<std::string> get_families( void ) override;
+    std::set<std::string> get_styles( const std::string &family ) override;
 
-	std::shared_ptr<script::font> get_font( const std::string &family, const std::string &style, points pts, int dpiw, int dpih, int maxGlyphW, int maxGlyphH ) override;
+    std::shared_ptr<script::font> get_font(
+        const std::string &family,
+        const std::string &style,
+        points             pts,
+        int                dpiw,
+        int                dpih,
+        int                maxGlyphW,
+        int                maxGlyphH ) override;
 
 private:
 };
 
 ////////////////////////////////////////
 
-} }
+} // namespace cocoa
+} // namespace script

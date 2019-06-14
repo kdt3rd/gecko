@@ -5,15 +5,15 @@
 
 #include "event.h"
 #include "waitable.h"
+
 #include <base/pipe.h>
-#include <mutex>
 #include <deque>
+#include <mutex>
 
 ////////////////////////////////////////
 
 namespace platform
 {
-
 class system;
 
 ///
@@ -35,30 +35,30 @@ class system;
 class event_queue : public waitable
 {
 public:
-	event_queue( system *s );
-	virtual ~event_queue( void );
+    event_queue( system *s );
+    virtual ~event_queue( void );
 
-	void start( void ) final;
-	void cancel( void ) final;
-	void shutdown( void ) final;
+    void start( void ) final;
+    void cancel( void ) final;
+    void shutdown( void ) final;
 
-	wait poll_object( void ) final;
-	bool poll_timeout( duration &when, const time_point &curtime ) final;
+    wait poll_object( void ) final;
+    bool poll_timeout( duration &when, const time_point &curtime ) final;
 
-	void emit( const time_point &curtime ) final;
+    void emit( const time_point &curtime ) final;
 
-	void queue( const event &e, const std::shared_ptr<event_target> &targ = std::shared_ptr<event_target>() );
-	void drain( const std::shared_ptr<event_target> &et );
+    void queue(
+        const event &                        e,
+        const std::shared_ptr<event_target> &targ =
+            std::shared_ptr<event_target>() );
+    void drain( const std::shared_ptr<event_target> &et );
 
 private:
-	std::mutex _mutex;
+    std::mutex _mutex;
 
-	std::deque< std::pair<std::shared_ptr<event_target>, event> > _events;
-	bool _signalled = false;
-	base::pipe _pipe;
+    std::deque<std::pair<std::shared_ptr<event_target>, event>> _events;
+    bool       _signalled = false;
+    base::pipe _pipe;
 };
 
 } // namespace platform
-
-
-

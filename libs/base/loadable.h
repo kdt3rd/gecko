@@ -4,13 +4,13 @@
 #pragma once
 
 #include "const_string.h"
+
 #include <memory>
 
 ////////////////////////////////////////
 
 namespace base
 {
-
 ///
 /// @brief Class loadable provides a wrapper around a dynamically
 /// loaded executable file (i.e. plugin or other dso).
@@ -26,31 +26,32 @@ namespace base
 class loadable
 {
 public:
-	enum class isolation
-	{
-		NORMAL,
-		GLOBALIZE,
-		ISOLATE
-	};
+    enum class isolation
+    {
+        NORMAL,
+        GLOBALIZE,
+        ISOLATE
+    };
 
-	loadable( std::string lpath, isolation iso = isolation::NORMAL );
-	loadable( void ) = default;
-	loadable( const loadable & ) = default;
-	loadable( loadable && ) = default;
-	loadable &operator=( const loadable & ) = default;
-	loadable &operator=( loadable && ) = default;
-	~loadable( void );
+    loadable( std::string lpath, isolation iso = isolation::NORMAL );
+    loadable( void )             = default;
+    loadable( const loadable & ) = default;
+    loadable( loadable && )      = default;
+    loadable &operator=( const loadable & ) = default;
+    loadable &operator=( loadable && ) = default;
+    ~loadable( void );
 
-	void *symbol( const cstring &symName, const cstring &symVersion = cstring() );
+    void *
+    symbol( const cstring &symName, const cstring &symVersion = cstring() );
 
-	static void *find_app_symbol( const cstring &symName, const cstring &symVersion = cstring() );
-	static void *find_next_symbol( const cstring &symName, const cstring &symVersion = cstring() );
+    static void *find_app_symbol(
+        const cstring &symName, const cstring &symVersion = cstring() );
+    static void *find_next_symbol(
+        const cstring &symName, const cstring &symVersion = cstring() );
+
 private:
-	std::string _loadpath;
-	std::shared_ptr<void> _dso;
+    std::string           _loadpath;
+    std::shared_ptr<void> _dso;
 };
 
 } // namespace base
-
-
-

@@ -10,36 +10,37 @@
 //
 // some patterns use !!(cond), others just use (cond), hard to
 // say which is better
-#if defined(__clang__)
+#if defined( __clang__ )
 
-# if __has_builtin(__builtin_expect)
-#  define GK_LIKELY(condition) __builtin_expect( (condition), 1 )
-#  define GK_UNLIKELY(condition) __builtin_expect( (condition), 0 )
-#  define GK_EXPECT(condition, outcome) __builtin_expect( (condition), (outcome) )
-# endif
+#    if __has_builtin( __builtin_expect )
+#        define GK_LIKELY( condition ) __builtin_expect( ( condition ), 1 )
+#        define GK_UNLIKELY( condition ) __builtin_expect( ( condition ), 0 )
+#        define GK_EXPECT( condition, outcome )                                \
+            __builtin_expect( ( condition ), ( outcome ) )
+#    endif
 
-#elif defined(__GNUC__) && (__GNUC__ >= 3)
+#elif defined( __GNUC__ ) && ( __GNUC__ >= 3 )
 
-# define GK_LIKELY(condition) __builtin_expect( (condition), 1 )
-# define GK_UNLIKELY(condition) __builtin_expect( (condition), 0 )
-# define GK_EXPECT(condition, outcome) __builtin_expect( (condition), (outcome) )
+#    define GK_LIKELY( condition ) __builtin_expect( ( condition ), 1 )
+#    define GK_UNLIKELY( condition ) __builtin_expect( ( condition ), 0 )
+#    define GK_EXPECT( condition, outcome )                                    \
+        __builtin_expect( ( condition ), ( outcome ) )
 
-#elif defined(__INTEL_COMPILER)
+#elif defined( __INTEL_COMPILER )
 
-# define GK_LIKELY(condition) __builtin_expect( (condition), 1 )
-# define GK_UNLIKELY(condition) __builtin_expect( (condition), 0 )
-# define GK_EXPECT(condition, outcome) __builtin_expect( (condition), (outcome) )
+#    define GK_LIKELY( condition ) __builtin_expect( ( condition ), 1 )
+#    define GK_UNLIKELY( condition ) __builtin_expect( ( condition ), 0 )
+#    define GK_EXPECT( condition, outcome )                                    \
+        __builtin_expect( ( condition ), ( outcome ) )
 
 #endif
 
 #ifndef GK_LIKELY
-# define GK_LIKELY(condition) (condition)
+#    define GK_LIKELY( condition ) ( condition )
 #endif
 #ifndef GK_UNLIKELY
-# define GK_UNLIKELY(condition) (condition)
+#    define GK_UNLIKELY( condition ) ( condition )
 #endif
 #ifndef GK_EXPECT
-# define GK_EXPECT(condition, outcome) (condition)
+#    define GK_EXPECT( condition, outcome ) ( condition )
 #endif
-
-

@@ -13,7 +13,6 @@
 
 namespace base
 {
-
 ///
 /// @brief Class dso provides...
 ///
@@ -51,12 +50,11 @@ public:
 private:
     std::string _fn;
     std::string _last_err;
-    void *_handle = nullptr;
+    void *      _handle = nullptr;
 };
 
 namespace dl_extra
 {
-
 /// @brief abstraction around an active shared object.
 ///
 /// This can be used to query against for things like backtrace. This
@@ -71,7 +69,7 @@ public:
 
     const std::string &path( void ) const;
     const std::string &name( void ) const;
-    uintptr_t base( void ) const;
+    uintptr_t          base( void ) const;
 
     bool is_closest( void *addr, const active_shared_object *curdso );
 

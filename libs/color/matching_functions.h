@@ -9,13 +9,11 @@
 
 namespace color
 {
-
-using matching_function = spectral_sensitivity<double>;
+using matching_function            = spectral_sensitivity<double>;
 using luminous_efficiency_function = spectral_density<double>;
 
 namespace two_deg
 {
-
 const matching_function &cie_1931_cmf( void );
 //const matching_function &cie_1931_judd_1951( void );
 //const matching_function &cie_1931_judd_vos( void );
@@ -27,7 +25,7 @@ const matching_function &cie_1931_cmf( void );
 //const luminous_efficiency_function &stockman_2005_Vlambda( void );
 //const luminous_efficiency_function &stockman_2011_Vlambda( void );
 
-}
+} // namespace two_deg
 
 //const luminous_efficiency_function &cie_1924_photopic_Vlambda( void );
 //const luminous_efficiency_function &cie_1924_photopic_Vlambda_judd_1951( void );
@@ -35,7 +33,6 @@ const matching_function &cie_1931_cmf( void );
 
 namespace ten_deg
 {
-
 //const matching_function &cie_1964_cmf( void );
 
 /// LMS cone fundamental intensity function (not yet ratified)
@@ -44,9 +41,6 @@ namespace ten_deg
 
 //const luminous_efficiency_function &stockman_2005_Vlambda( void );
 //const luminous_efficiency_function &stockman_2011_Vlambda( void );
-}
+} // namespace ten_deg
 
 } // namespace color
-
-
-

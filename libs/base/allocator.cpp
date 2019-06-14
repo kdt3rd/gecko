@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 #include "allocator.h"
+
 #include <atomic>
 
 ////////////////////////////////////////
 
 namespace base
 {
-
 ////////////////////////////////////////
 
 allocator::allocator( void ) {}

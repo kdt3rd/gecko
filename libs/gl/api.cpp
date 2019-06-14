@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 #include "api.h"
+
 #include <map>
 
 namespace gl
 {
-
 ////////////////////////////////////////
 
 api::api( void ) { _matrix.emplace_back(); }
@@ -173,7 +173,7 @@ void api::reset( void )
 {
     _matrix.clear();
     _matrix.emplace_back();
-    _view = gl::matrix4::identity();
+    _view       = gl::matrix4::identity();
     _projection = gl::matrix4::identity();
 }
 
@@ -215,8 +215,8 @@ void gldebugging(
     GLenum source,
     GLenum type,
     GLuint,
-    GLenum severity,
-    GLsizei length,
+    GLenum        severity,
+    GLsizei       length,
     const GLchar *message,
     const void * )
 {

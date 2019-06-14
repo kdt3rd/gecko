@@ -7,8 +7,6 @@
 
 namespace scene
 {
-
 ////////////////////////////////////////
 
 } // namespace scene
-

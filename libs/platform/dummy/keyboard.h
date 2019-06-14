@@ -5,20 +5,21 @@
 
 #include <platform/keyboard.h>
 
-namespace platform { namespace dummy
+namespace platform
 {
-
+namespace dummy
+{
 ////////////////////////////////////////
 
 /// @brief Dummy keyboard class
 class keyboard : public platform::keyboard
 {
 public:
-	keyboard( void );
-	~keyboard( void );
+    keyboard( void );
+    ~keyboard( void );
 };
 
 ////////////////////////////////////////
 
-} }
-
+} // namespace dummy
+} // namespace platform

@@ -9,11 +9,10 @@
 
 namespace
 {
-
 int safemain( int argc, char *argv[] )
 {
     base::unit_test test( "small_vector" );
-    base::cmd_line options( argv[0] );
+    base::cmd_line  options( argv[0] );
     test.setup( options );
 
     try

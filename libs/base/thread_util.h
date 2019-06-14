@@ -3,16 +3,12 @@
 
 #pragma once
 
-
 ////////////////////////////////////////
-
 
 namespace base
 {
-
 namespace thread
 {
-
 /// @brief Returns the best guess as to the number of cores existing
 /// on the system.
 ///
@@ -32,6 +28,3 @@ void override_core_count( long cnt = -1 );
 } // namespace thread
 
 } // namespace base
-
-
-

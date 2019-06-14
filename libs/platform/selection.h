@@ -11,7 +11,6 @@
 
 namespace platform
 {
-
 enum class selection_type
 {
     MOUSE,
@@ -35,9 +34,9 @@ public:
     using mime_converter = std::function<data_container(
         const data_container &, const std::string &, const std::string & )>;
 
-    selection( void ) = default;
+    selection( void )              = default;
     selection( const selection & ) = default;
-    selection( selection && ) = default;
+    selection( selection && )      = default;
     selection &operator=( const selection & ) = default;
     selection &operator=( selection && ) = default;
 
@@ -52,7 +51,7 @@ public:
     /// provided, only if the application wishes to use a custom
     /// clipboard
     selection(
-        selection_type st,
+        selection_type     st,
         const std::string &s,
         const std::string &customSelType = std::string() );
 
@@ -66,15 +65,15 @@ public:
     /// - another program gains the selection
     /// - the program exits
     selection(
-        selection_type st,
-        const data_container &data,
-        const std::string &mime_type,
+        selection_type                  st,
+        const data_container &          data,
+        const std::string &             mime_type,
         const std::vector<std::string> &avail_mime,
-        const mime_converter &converter,
-        const std::string &customSelType = std::string() );
+        const mime_converter &          converter,
+        const std::string &             customSelType = std::string() );
     ~selection( void );
 
-    selection_type which_clip( void ) const { return _type; }
+    selection_type     which_clip( void ) const { return _type; }
     const std::string &custom_clipboard( void ) const
     {
         return _custom_selection_name;
@@ -96,16 +95,16 @@ public:
 
 private:
     data_container _data;
-    std::string _data_type;
+    std::string    _data_type;
 
     data_container _convert_cache;
-    std::string _cache_type;
+    std::string    _cache_type;
 
     std::vector<std::string> _avail_mime;
-    mime_converter _convert_func;
+    mime_converter           _convert_func;
 
     selection_type _type = selection_type::MOUSE;
-    std::string _custom_selection_name;
+    std::string    _custom_selection_name;
 };
 
 } // namespace platform

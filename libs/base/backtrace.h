@@ -3,13 +3,12 @@
 
 #pragma once
 
-#include <vector>
 #include <iostream>
 #include <string>
+#include <vector>
 
 namespace base
 {
-
 /// @brief Retrieves a backtrace of 10 functions and outputs to stderr
 ///
 /// This involves no calls to malloc, so can be used in scenarios
@@ -28,5 +27,4 @@ void backtrace( std::ostream &os, size_t nLevels = 10 );
 /// it is called from
 void backtrace( std::vector<std::string> &l, size_t nLevels = 10 );
 
-}
-
+} // namespace base

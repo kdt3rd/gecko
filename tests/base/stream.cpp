@@ -7,12 +7,10 @@
 #include <base/string_util.h>
 #include <base/unit_test.h>
 #include <base/uri.h>
-
 #include <fstream>
 
 namespace
 {
-
 int safemain( int argc, char *argv[] )
 {
     base::unit_test test( "stream" );
@@ -38,7 +36,7 @@ int safemain( int argc, char *argv[] )
 
     test["system_stream"] = [&]( void ) {
         std::ifstream in( "/tmp/test.txt" );
-        char buf[8];
+        char          buf[8];
         while ( !in.eof() )
         {
             in.read( buf, 8 );
@@ -46,7 +44,7 @@ int safemain( int argc, char *argv[] )
     };
 
     test["posix_stream"] = [&]( void ) {
-        auto fs = base::file_system::get( std::string( "file" ) );
+        auto          fs = base::file_system::get( std::string( "file" ) );
         base::istream in =
             fs->open_read( base::uri( base::cstring( "/tmp/test.txt" ) ) );
         char buf[8];

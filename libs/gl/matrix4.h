@@ -3,15 +3,15 @@
 
 #pragma once
 
-#include <iostream>
 #include "vector.h"
 #include "versor.h"
-#include <base/point.h>
+
 #include <base/contract.h>
+#include <base/point.h>
+#include <iostream>
 
 namespace gl
 {
-
 ////////////////////////////////////////
 
 /// @brief A 4x4 float matrix
@@ -30,10 +30,7 @@ public:
     }
 
     /// @brief Get float data
-    const float *data( void ) const
-    {
-        return _data;
-    }
+    const float *data( void ) const { return _data; }
 
     matrix4 inverted( void ) const;
 
@@ -88,30 +85,15 @@ public:
         return { _data[3], _data[7], _data[11], _data[15] };
     }
 
-    float get( size_t x, size_t y ) const
-    {
-        return _data[y*4+x];
-    }
+    float get( size_t x, size_t y ) const { return _data[y * 4 + x]; }
 
-    float &get( size_t x, size_t y )
-    {
-        return _data[y*4+x];
-    }
+    float &get( size_t x, size_t y ) { return _data[y * 4 + x]; }
 
-    void translate_x( float dx )
-    {
-        _data[12] += dx;
-    }
+    void translate_x( float dx ) { _data[12] += dx; }
 
-    void translate_y( float dy )
-    {
-        _data[13] += dy;
-    }
+    void translate_y( float dy ) { _data[13] += dy; }
 
-    void translate_z( float dz )
-    {
-        _data[14] += dz;
-    }
+    void translate_z( float dz ) { _data[14] += dz; }
 
     void translate( float dx, float dy, float dz = 0.F )
     {
@@ -128,10 +110,7 @@ public:
     }
 
     /// @brief Construct identity matrix
-    static matrix4 identity( void )
-    {
-        return matrix4();
-    }
+    static matrix4 identity( void ) { return matrix4(); }
 
     /// @brief Construct zero matrix
     static matrix4 zero( void );
@@ -142,16 +121,17 @@ public:
     template <typename T>
     static inline matrix4 translation( const base::point<T, 2> &p )
     {
-        return translation( static_cast<float>( p[0] ),
-        static_cast<float>( p[1] ) );
+        return translation(
+            static_cast<float>( p[0] ), static_cast<float>( p[1] ) );
     }
 
     template <typename T>
     static inline matrix4 translation( const base::point<T, 3> &p )
     {
-        return translation( static_cast<float>( p[0] ),
-                            static_cast<float>( p[1] ),
-                            static_cast<float>( p[2] ) );
+        return translation(
+            static_cast<float>( p[0] ),
+            static_cast<float>( p[1] ),
+            static_cast<float>( p[2] ) );
     }
 
     /// @brief Construct scale matrix
@@ -163,7 +143,8 @@ public:
     static matrix4 ortho( float left, float right, float top, float bottom );
 
     /// @brief Construct perspective projection matrix
-    static matrix4 perspective( float vertical_fov, float aspect, float near, float far );
+    static matrix4
+    perspective( float vertical_fov, float aspect, float near, float far );
 
 private:
     float _data[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
@@ -243,4 +224,4 @@ inline vec2 operator*( const matrix4 &a, const vec2 &b2 )
 /// @relates gl::matrix4
 std::ostream &operator<<( std::ostream &out, const matrix4 &m );
 
-}
+} // namespace gl

@@ -4,15 +4,15 @@
 #pragma once
 
 #include "fourcc.h"
-#include <iostream>
-#include <cstdint>
+
 #include <base/contract.h>
+#include <cstdint>
+#include <iostream>
 
 namespace media
 {
 namespace riff
 {
-
 #if 0
 template <typename crtp_child>
 class base_chunk
@@ -60,32 +60,25 @@ private:
 class chunk
 {
 public:
-	chunk( std::istream &in );
+    chunk( std::istream &in );
 
-	const fourcc &id( void ) const
-	{
-		return _id;
-	}
+    const fourcc &id( void ) const { return _id; }
 
-	size_t size( void ) const
-	{
-		return _size;
-	}
+    size_t size( void ) const { return _size; }
 
-	std::istream &seek( std::istream &in )
-	{
-		in.seekg( _data );
-		return in;
-	}
+    std::istream &seek( std::istream &in )
+    {
+        in.seekg( _data );
+        return in;
+    }
 
 private:
-	fourcc _id;
-	size_t _size;
-	std::istream::pos_type _data;
+    fourcc                 _id;
+    size_t                 _size;
+    std::istream::pos_type _data;
 };
 
 ////////////////////////////////////////
 
-}
-}
-
+} // namespace riff
+} // namespace media

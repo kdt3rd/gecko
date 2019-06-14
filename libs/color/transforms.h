@@ -7,7 +7,6 @@
 
 namespace color
 {
-
 /// basic transforms that a color undergoes:
 /// - conversion to/from non-linear encoding to linear RGB
 ///   * conversion from one non-linear encoding to another
@@ -62,48 +61,55 @@ namespace color
 /// in an operation that is defined across a buffer of values.
 ///
 template <typename T>
-inline void convert( T &a, T &b, T &c, const state &from, const state &to, const int bits, cone_response cr = cone_response::NONE )
+inline void convert(
+    T &           a,
+    T &           b,
+    T &           c,
+    const state & from,
+    const state & to,
+    const int     bits,
+    cone_response cr = cone_response::NONE )
 {
-	// TODO: handle integral values and loss of precision
-	to_full( a, b, c, a, b, c, from.current_space(), from.signal(), bits );
-	if ( has_opponency( from.current_space() ) )
-		remove_opponency( a, b, c, a, b, c, from.current_space() );
-	if ( from.curve() != to.curve() || !( to.is_same_matrix( from ) ) )
-	{
-		triplet<T> v;
-		v.x = linearize( a, from.curve() );
-		v.y = linearize( b, from.curve() );
-		v.z = linearize( c, from.curve() );
-		matrix<T> m = to.get_from_xyz_mat() * to.adaptation( from, cr ) * from.get_to_xyz_mat();
-		v = m * v;
-		a = encode( v.x, to.curve() );
-		b = encode( v.y, to.curve() );
-		c = encode( v.z, to.curve() );
-	}
-	if ( has_opponency( to.current_space() ) )
-		add_opponency( a, b, c, a, b, c, to.current_space() );
-	// TODO: should we clamp SDI values ever?
-	from_full( a, b, c, a, b, c, to.current_space(), to.signal(), bits, false );
+    // TODO: handle integral values and loss of precision
+    to_full( a, b, c, a, b, c, from.current_space(), from.signal(), bits );
+    if ( has_opponency( from.current_space() ) )
+        remove_opponency( a, b, c, a, b, c, from.current_space() );
+    if ( from.curve() != to.curve() || !( to.is_same_matrix( from ) ) )
+    {
+        triplet<T> v;
+        v.x         = linearize( a, from.curve() );
+        v.y         = linearize( b, from.curve() );
+        v.z         = linearize( c, from.curve() );
+        matrix<T> m = to.get_from_xyz_mat() * to.adaptation( from, cr ) *
+                      from.get_to_xyz_mat();
+        v = m * v;
+        a = encode( v.x, to.curve() );
+        b = encode( v.y, to.curve() );
+        c = encode( v.z, to.curve() );
+    }
+    if ( has_opponency( to.current_space() ) )
+        add_opponency( a, b, c, a, b, c, to.current_space() );
+    // TODO: should we clamp SDI values ever?
+    from_full( a, b, c, a, b, c, to.current_space(), to.signal(), bits, false );
 }
 
 template <typename T, int fbits>
-inline tristimulus_value<T, fbits> convert( const tristimulus_value<T, fbits> &v, const state &to )
+inline tristimulus_value<T, fbits>
+convert( const tristimulus_value<T, fbits> &v, const state &to )
 {
-	using component_type = T;
-	using v_t = tristimulus_value<component_type, fbits>;
-	v_t r{ v.x(), v.y(), v.z(), to };
-	convert( r.x(), r.y(), r.z(), v.current_state(), v_t::valid_bits, to );
-	return r;
+    using component_type = T;
+    using v_t            = tristimulus_value<component_type, fbits>;
+    v_t r{ v.x(), v.y(), v.z(), to };
+    convert( r.x(), r.y(), r.z(), v.current_state(), v_t::valid_bits, to );
+    return r;
 }
 
 /// short cut when you just want to convert the space
 template <typename T, int fbits>
-inline tristimulus_value<T, fbits> convert_space( const tristimulus_value<T, fbits> &v, space tospace )
+inline tristimulus_value<T, fbits>
+convert_space( const tristimulus_value<T, fbits> &v, space tospace )
 {
-	return convert( v, state{ v.current_state(), tospace } );
+    return convert( v, state{ v.current_state(), tospace } );
 }
 
 } // namespace color
-
-
-

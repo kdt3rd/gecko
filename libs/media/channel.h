@@ -7,22 +7,17 @@
 
 namespace media
 {
-
 ////////////////////////////////////////
 
 class channel
 {
 public:
-	channel( const std::string &n )
-		: _name( n )
-	{
-	}
+    channel( const std::string &n ) : _name( n ) {}
 
 private:
-	std::string _name;
+    std::string _name;
 };
 
 ////////////////////////////////////////
 
-}
-
+} // namespace media

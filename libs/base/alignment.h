@@ -5,7 +5,6 @@
 
 namespace base
 {
-
 ////////////////////////////////////////
 
 enum class alignment

@@ -2,20 +2,20 @@
 // SPDX-License-Identifier: MIT
 
 #include "time_util.h"
+
 #include "contract.h"
-#include <time.h>
-#include <sstream>
+
 #include <iomanip>
+#include <sstream>
+#include <time.h>
 
 ////////////////////////////////////////
 
 namespace base
 {
-
 ////////////////////////////////////////
 
-std::string
-as_ISO8601( std::chrono::system_clock::time_point tp )
+std::string as_ISO8601( std::chrono::system_clock::time_point tp )
 {
     auto stime = std::chrono::system_clock::to_time_t( tp );
 
@@ -29,7 +29,7 @@ as_ISO8601( std::chrono::system_clock::time_point tp )
     struct tm ltime;
 #ifdef _WIN32
     struct tm *ltimep = &ltime;
-    errno_t e = localtime_s( ltimep, &stime );
+    errno_t    e      = localtime_s( ltimep, &stime );
     if ( e != 0 )
         throw_errno( "Unable to convert to local time" );
 #else
@@ -44,7 +44,8 @@ as_ISO8601( std::chrono::system_clock::time_point tp )
 
 int64_t local_offset_to_UTC( void )
 {
-    auto stime = std::chrono::system_clock::to_time_t( std::chrono::system_clock::now() );
+    auto stime = std::chrono::system_clock::to_time_t(
+        std::chrono::system_clock::now() );
 
     // don't use std::localtime as it is not thread safe
     // according to docs, need to call tzset first to make sure it's initialized
@@ -63,9 +64,11 @@ int64_t local_offset_to_UTC( void )
     gmtime_r( &stime, &gtime );
     localtime_r( &stime, &ltime );
 #endif
-    int64_t diff = ( ( ( ltime.tm_hour - gtime.tm_hour ) * 60L +
-                       ( ltime.tm_min - gtime.tm_min ) ) * 60L +
-                     ( ltime.tm_sec - gtime.tm_sec ) );
+    int64_t diff =
+        ( ( ( ltime.tm_hour - gtime.tm_hour ) * 60L +
+            ( ltime.tm_min - gtime.tm_min ) ) *
+              60L +
+          ( ltime.tm_sec - gtime.tm_sec ) );
     int daydelt = ltime.tm_mday - gtime.tm_mday;
     if ( daydelt == 1 || ( daydelt < -1 ) )
         diff += 24L * 60 * 60;
@@ -75,7 +78,4 @@ int64_t local_offset_to_UTC( void )
     return diff;
 }
 
-} // base
-
-
-
+} // namespace base

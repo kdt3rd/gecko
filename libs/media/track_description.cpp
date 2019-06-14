@@ -3,27 +3,14 @@
 
 #include "track_description.h"
 
-
 ////////////////////////////////////////
-
 
 namespace media
 {
+////////////////////////////////////////
 
+track_description::track_description( track_type tt ) : _type( tt ) {}
 
 ////////////////////////////////////////
 
-
-track_description::track_description( track_type tt )
-	: _type( tt )
-{
-}
-
-
-////////////////////////////////////////
-
-
-} // media
-
-
-
+} // namespace media

@@ -2,340 +2,418 @@
 // SPDX-License-Identifier: MIT
 
 #include "system.h"
-#include "screen.h"
-#include "window.h"
+
 #include "cursor.h"
 #include "dispatcher.h"
+#include "screen.h"
+#include "window.h"
+
 #include <X11/Xcursor/Xcursor.h>
 #include <X11/cursorfont.h>
-
+#include <base/contract.h>
+#include <base/env.h>
+#include <base/string_util.h>
+#include <platform/menu.h>
 #include <platform/platform.h>
 #include <platform/scancode.h>
-#include <platform/menu.h>
 #include <platform/tray.h>
-#include <base/contract.h>
-#include <base/string_util.h>
-#include <base/env.h>
 
 ////////////////////////////////////////
 
-namespace {
-
-int
-xErrorCB( Display *d, XErrorEvent *e )
+namespace
 {
-	char errorBuf[4096];
+int xErrorCB( Display *d, XErrorEvent *e )
+{
+    char errorBuf[4096];
 
-	XGetErrorText( d, e->error_code, errorBuf, 4096 );
-	std::cerr << "ERROR: Xlib Error"
-			  << "\n  Major/Minor: " << int(e->request_code) << " / " << int(e->minor_code)
-			  << "\n   Error code: " << int(e->error_code)
-			  << "\n      Message: " << errorBuf << std::endl;
+    XGetErrorText( d, e->error_code, errorBuf, 4096 );
+    std::cerr << "ERROR: Xlib Error"
+              << "\n  Major/Minor: " << int( e->request_code ) << " / "
+              << int( e->minor_code )
+              << "\n   Error code: " << int( e->error_code )
+              << "\n      Message: " << errorBuf << std::endl;
 
-	return 0;
+    return 0;
 }
 
-int
-xIOErrorCB( Display * )
+int xIOErrorCB( Display * )
 {
-	std::cerr << "ERROR: I/O error w/ X server (connection lost?)" << std::endl;
-	exit( -1 );
+    std::cerr << "ERROR: I/O error w/ X server (connection lost?)" << std::endl;
+    exit( -1 );
 }
 
 void CloseDisplay( Display *disp )
 {
-	if ( disp != nullptr )
-		XCloseDisplay( disp );
+    if ( disp != nullptr )
+        XCloseDisplay( disp );
 }
 
+} // namespace
 
-}
-
-
-namespace platform { namespace xlib
+namespace platform
 {
-
+namespace xlib
+{
 ////////////////////////////////////////
 
-system::system( const std::string &d )
-		: ::platform::system( "x11", "X11/XLib" )
+system::system( const std::string &d ) : ::platform::system( "x11", "X11/XLib" )
 {
-	// TODO: do we want this or not????
-	//XInitThreads();
+    // TODO: do we want this or not????
+    //XInitThreads();
 
-	const char *dname = nullptr;
-	if ( ! d.empty() )
-		dname = d.c_str();
-	std::string disenv = base::env::global().get( "DISPLAY" );
-	if ( ! dname && ! disenv.empty() )
-		dname = disenv.c_str();
+    const char *dname = nullptr;
+    if ( !d.empty() )
+        dname = d.c_str();
+    std::string disenv = base::env::global().get( "DISPLAY" );
+    if ( !dname && !disenv.empty() )
+        dname = disenv.c_str();
 
-	XSetErrorHandler( &xErrorCB );
-	XSetIOErrorHandler( &xIOErrorCB );
+    XSetErrorHandler( &xErrorCB );
+    XSetIOErrorHandler( &xIOErrorCB );
 
-	_display.reset( XOpenDisplay( dname ), &CloseDisplay );
-	if (  !_display )
-		return;
+    _display.reset( XOpenDisplay( dname ), &CloseDisplay );
+    if ( !_display )
+        return;
 
-	if ( ! XSupportsLocale() )
-		throw_runtime( "Current locale not supported by X" );
+    if ( !XSupportsLocale() )
+        throw_runtime( "Current locale not supported by X" );
 
-	if ( XSetLocaleModifiers( "@im=none" ) == nullptr )
-		throw_runtime( "Unable to set locale modifiers for Xlib" );
+    if ( XSetLocaleModifiers( "@im=none" ) == nullptr )
+        throw_runtime( "Unable to set locale modifiers for Xlib" );
 
-	// TODO: add detection for remote X?
-//	int xFD = ConnectionNumber( _display.get() );
-//	int stype = -1;
-//	int rs = getsockopt( xFD, SOL_SOCKET, SO_TYPE, &stype );
+    // TODO: add detection for remote X?
+    //	int xFD = ConnectionNumber( _display.get() );
+    //	int stype = -1;
+    //	int rs = getsockopt( xFD, SOL_SOCKET, SO_TYPE, &stype );
 
-	// TODO: this is really only half the story. In that probably 99%
-	// of multi-monitor setups use some form of twinview / xinerama
-	// setup. As such, the screen idea is sort of antiquated -
-	// although perhaps an unmanaged x screen could be interesting for
-	// an external monitor / playback setup?
-	//
-	// TODO: consider the idea we may actually have screens that are
-	// NOT X screens, but are alive to the nvidia drivers. this is
-	// certainly the case for windows, and may be coming to the nvidia
-	// drivers for linux...
-	_screens.resize( static_cast<size_t>( ScreenCount( _display.get() ) ) );
-	for ( int i = 0; i < ScreenCount( _display.get() ); ++i )
-		_screens[i] = std::make_shared<screen>( _display, i );
+    // TODO: this is really only half the story. In that probably 99%
+    // of multi-monitor setups use some form of twinview / xinerama
+    // setup. As such, the screen idea is sort of antiquated -
+    // although perhaps an unmanaged x screen could be interesting for
+    // an external monitor / playback setup?
+    //
+    // TODO: consider the idea we may actually have screens that are
+    // NOT X screens, but are alive to the nvidia drivers. this is
+    // certainly the case for windows, and may be coming to the nvidia
+    // drivers for linux...
+    _screens.resize( static_cast<size_t>( ScreenCount( _display.get() ) ) );
+    for ( int i = 0; i < ScreenCount( _display.get() ); ++i )
+        _screens[i] = std::make_shared<screen>( _display, i );
 
-	_dispatcher = std::make_shared<dispatcher>( this, _display );
+    _dispatcher = std::make_shared<dispatcher>( this, _display );
 }
 
 ////////////////////////////////////////
 
 system::~system( void )
 {
-	_dispatcher.reset();
-	_screens.clear();
+    _dispatcher.reset();
+    _screens.clear();
 }
 
 ////////////////////////////////////////
 
-bool system::is_working( void ) const
+bool system::is_working( void ) const { return static_cast<bool>( _display ); }
+
+////////////////////////////////////////
+
+std::vector<std::shared_ptr<::platform::screen>> system::screens( void )
 {
-	return static_cast<bool>( _display );
+    return _screens;
 }
 
 ////////////////////////////////////////
 
-std::vector<std::shared_ptr<::platform::screen>>
-system::screens( void )
+const std::shared_ptr<::platform::screen> &system::default_screen( void )
 {
-	return _screens;
+    return _screens.front();
 }
 
 ////////////////////////////////////////
 
-const std::shared_ptr<::platform::screen> &
-system::default_screen( void )
+std::shared_ptr<::platform::cursor> system::new_cursor( void )
 {
-	return _screens.front();
+    throw_not_yet();
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<::platform::cursor>
-system::new_cursor( void )
+std::shared_ptr<::platform::cursor> system::builtin_cursor( standard_cursor sc )
 {
-	throw_not_yet();
+    auto lc = _cursors.find( sc );
+    if ( lc == _cursors.end() )
+    {
+        //		std::cout << "Current cursor theme: '" << XcursorGetTheme( _display.get() ) << "'" << std::endl;
+        const char * cname = nullptr;
+        unsigned int cchar = 0;
+        switch ( sc )
+        {
+            case standard_cursor::DEFAULT:
+                cname = "default";
+                cchar = XC_X_cursor;
+                break;
+            case standard_cursor::TEXT:
+                cname = "text";
+                cchar = XC_xterm;
+                break;
+            case standard_cursor::URL_LINK_POINTER:
+                cname = "pointer";
+                cchar = XC_hand1;
+                break;
+            case standard_cursor::HELP:
+                cname = "help";
+                cchar = XC_question_arrow;
+                break;
+            case standard_cursor::CONTEXT_MENU:
+                cname = "context-menu";
+                cchar = XC_arrow;
+                break;
+            case standard_cursor::PROGRESS:
+                cname = "progress";
+                cchar = XC_coffee_mug;
+                break;
+            case standard_cursor::WAIT:
+                cname = "wait";
+                cchar = XC_watch;
+                break;
+            case standard_cursor::DND_COPY:
+                cname = "copy";
+                cchar = XC_arrow;
+                break;
+            case standard_cursor::DND_ALIAS:
+                cname = "alias";
+                cchar = XC_arrow;
+                break;
+            case standard_cursor::DND_NO_DROP:
+                cname = "no-drop";
+                cchar = XC_arrow;
+                break;
+            case standard_cursor::NOT_ALLOWED:
+                cname = "not-allowed";
+                cchar = XC_pirate;
+                break;
+            case standard_cursor::ALL_SCROLL:
+                cname = "all-scroll";
+                cchar = XC_arrow;
+                break;
+            case standard_cursor::RESIZE_ROW:
+                cname = "row-resize";
+                cchar = XC_arrow;
+                break;
+            case standard_cursor::RESIZE_COL:
+                cname = "col-resize";
+                cchar = XC_arrow;
+                break;
+            case standard_cursor::RESIZE_EAST:
+                cname = "e-resize";
+                cchar = XC_right_side;
+                break;
+            case standard_cursor::RESIZE_NORTH_EAST:
+                cname = "ne-resize";
+                cchar = XC_top_right_corner;
+                break;
+            case standard_cursor::RESIZE_NORTH:
+                cname = "n-resize";
+                cchar = XC_top_side;
+                break;
+            case standard_cursor::RESIZE_NORTH_WEST:
+                cname = "nw-resize";
+                cchar = XC_top_left_corner;
+                break;
+            case standard_cursor::RESIZE_WEST:
+                cname = "w-resize";
+                cchar = XC_left_side;
+                break;
+            case standard_cursor::RESIZE_SOUTH_WEST:
+                cname = "sw-resize";
+                cchar = XC_bottom_left_corner;
+                break;
+            case standard_cursor::RESIZE_SOUTH:
+                cname = "s-resize";
+                cchar = XC_bottom_side;
+                break;
+            case standard_cursor::RESIZE_SOUTH_EAST:
+                cname = "se-resize";
+                cchar = XC_bottom_right_corner;
+                break;
+            case standard_cursor::RESIZE_EAST_WEST:
+                cname = "ew-resize";
+                cchar = XC_sb_h_double_arrow;
+                break;
+            case standard_cursor::RESIZE_NORTH_SOUTH:
+                cname = "ns-resize";
+                cchar = XC_sb_v_double_arrow;
+                break;
+            case standard_cursor::RESIZE_NORTH_EAST_SOUTH_WEST:
+                cname = "nesw-resize";
+                cchar = XC_arrow;
+                break;
+            case standard_cursor::RESIZE_NORTH_WEST_SOUTH_EAST:
+                cname = "nwse-resize";
+                cchar = XC_arrow;
+                break;
+            case standard_cursor::VERTICAL_TEXT:
+                cname = "vertical-text";
+                cchar = XC_arrow;
+                break;
+            case standard_cursor::CROSSHAIR:
+                cname = "crosshair";
+                cchar = XC_crosshair;
+                break;
+            case standard_cursor::CELL:
+                cname = "cell";
+                cchar = XC_arrow;
+                break;
+
+            default:
+                cname = "default";
+                cchar = XC_arrow;
+                break;
+        }
+
+        Cursor c = XcursorLibraryLoadCursor( _display.get(), cname );
+        if ( c == None )
+            c = XCreateFontCursor( _display.get(), cchar );
+
+        auto r       = std::make_shared<::platform::xlib::cursor>( c );
+        _cursors[sc] = r;
+        return r;
+    }
+    return lc->second;
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<::platform::cursor>
-system::builtin_cursor( standard_cursor sc )
+void system::set_selection( selection sel )
 {
-	auto lc = _cursors.find( sc );
-	if ( lc == _cursors.end() )
-	{
-//		std::cout << "Current cursor theme: '" << XcursorGetTheme( _display.get() ) << "'" << std::endl;
-		const char *cname = nullptr;
-		unsigned int cchar = 0;
-		switch ( sc )
-		{
-			case standard_cursor::DEFAULT: cname = "default"; cchar = XC_X_cursor; break;
-			case standard_cursor::TEXT: cname = "text"; cchar = XC_xterm; break;
-			case standard_cursor::URL_LINK_POINTER: cname = "pointer"; cchar = XC_hand1; break;
-			case standard_cursor::HELP: cname = "help"; cchar = XC_question_arrow; break;
-			case standard_cursor::CONTEXT_MENU: cname = "context-menu"; cchar = XC_arrow; break;
-			case standard_cursor::PROGRESS: cname = "progress"; cchar = XC_coffee_mug; break;
-			case standard_cursor::WAIT: cname = "wait"; cchar = XC_watch; break;
-			case standard_cursor::DND_COPY: cname = "copy"; cchar = XC_arrow; break;
-			case standard_cursor::DND_ALIAS: cname = "alias"; cchar = XC_arrow; break;
-			case standard_cursor::DND_NO_DROP: cname = "no-drop"; cchar = XC_arrow; break;
-			case standard_cursor::NOT_ALLOWED: cname = "not-allowed"; cchar = XC_pirate; break;
-			case standard_cursor::ALL_SCROLL: cname = "all-scroll"; cchar = XC_arrow; break;
-			case standard_cursor::RESIZE_ROW: cname = "row-resize"; cchar = XC_arrow; break;
-			case standard_cursor::RESIZE_COL: cname = "col-resize"; cchar = XC_arrow; break;
-			case standard_cursor::RESIZE_EAST: cname = "e-resize"; cchar = XC_right_side; break;
-			case standard_cursor::RESIZE_NORTH_EAST: cname = "ne-resize"; cchar = XC_top_right_corner; break;
-			case standard_cursor::RESIZE_NORTH: cname = "n-resize"; cchar = XC_top_side; break;
-			case standard_cursor::RESIZE_NORTH_WEST: cname = "nw-resize"; cchar = XC_top_left_corner; break;
-			case standard_cursor::RESIZE_WEST: cname = "w-resize"; cchar = XC_left_side; break;
-			case standard_cursor::RESIZE_SOUTH_WEST: cname = "sw-resize"; cchar = XC_bottom_left_corner; break;
-			case standard_cursor::RESIZE_SOUTH: cname = "s-resize"; cchar = XC_bottom_side; break;
-			case standard_cursor::RESIZE_SOUTH_EAST: cname = "se-resize"; cchar = XC_bottom_right_corner; break;
-			case standard_cursor::RESIZE_EAST_WEST: cname = "ew-resize"; cchar = XC_sb_h_double_arrow; break;
-			case standard_cursor::RESIZE_NORTH_SOUTH: cname = "ns-resize"; cchar = XC_sb_v_double_arrow; break;
-			case standard_cursor::RESIZE_NORTH_EAST_SOUTH_WEST: cname = "nesw-resize"; cchar = XC_arrow; break;
-			case standard_cursor::RESIZE_NORTH_WEST_SOUTH_EAST: cname = "nwse-resize"; cchar = XC_arrow; break;
-			case standard_cursor::VERTICAL_TEXT: cname = "vertical-text"; cchar = XC_arrow; break;
-			case standard_cursor::CROSSHAIR: cname = "crosshair"; cchar = XC_crosshair; break;
-			case standard_cursor::CELL: cname = "cell"; cchar = XC_arrow; break;
-
-			default: cname = "default"; cchar = XC_arrow; break;
-		}
-
-		Cursor c = XcursorLibraryLoadCursor( _display.get(), cname );
-		if ( c == None )
-			c = XCreateFontCursor( _display.get(), cchar );
-
-		auto r = std::make_shared<::platform::xlib::cursor>( c );
-		_cursors[sc] = r;
-		return r;
-	}
-	return lc->second;
+    _dispatcher->set_selection( std::move( sel ) );
 }
 
 ////////////////////////////////////////
 
-void
-system::set_selection( selection sel )
+std::pair<std::vector<uint8_t>, std::string> system::query_selection(
+    selection_type                  sel,
+    const std::vector<std::string> &allowedMimeTypes,
+    const std::string &             clipboardName )
 {
-	_dispatcher->set_selection( std::move( sel ) );
+    return _dispatcher->query_selection( sel, allowedMimeTypes, clipboardName );
 }
 
 ////////////////////////////////////////
 
-std::pair<std::vector<uint8_t>, std::string>
-system::query_selection( selection_type sel,
-						 const std::vector<std::string> &allowedMimeTypes,
-						 const std::string &clipboardName )
+std::pair<std::vector<uint8_t>, std::string> system::query_selection(
+    selection_type                 sel,
+    const selection_type_function &chooseMimeType,
+    const std::string &            clipboardName )
 {
-	return _dispatcher->query_selection( sel, allowedMimeTypes, clipboardName );
+    return _dispatcher->query_selection( sel, chooseMimeType, clipboardName );
 }
 
 ////////////////////////////////////////
 
-std::pair<std::vector<uint8_t>, std::string>
-system::query_selection( selection_type sel,
-						 const selection_type_function &chooseMimeType,
-						 const std::string &clipboardName )
+const std::vector<std::string> &system::default_string_types( void )
 {
-	return _dispatcher->query_selection( sel, chooseMimeType, clipboardName );
+    static std::vector<std::string> xlibTypes{ "text/plain;charset=utf-8",
+                                               "text/plain" };
+    return xlibTypes;
 }
 
 ////////////////////////////////////////
 
-const std::vector<std::string> &
-system::default_string_types( void )
+selection_type_function system::default_string_selector( void )
 {
-	static std::vector<std::string> xlibTypes{ "text/plain;charset=utf-8", "text/plain" };
-	return xlibTypes;
+    auto selFun = []( const std::vector<std::string> &l ) -> std::string {
+        std::string ret{ "text/plain;charset=utf-8" };
+        if ( std::find( l.begin(), l.end(), ret ) != l.end() )
+            return ret;
+        ret = "text/plain";
+        if ( std::find( l.begin(), l.end(), ret ) != l.end() )
+            return ret;
+        return std::string();
+    };
+    return selection_type_function{ selFun };
 }
 
 ////////////////////////////////////////
 
-selection_type_function
-system::default_string_selector( void )
+system::mime_converter system::default_string_converter( void )
 {
-	auto selFun = [](const std::vector<std::string> &l) -> std::string 
-		{
-			std::string ret{ "text/plain;charset=utf-8" };
-			if ( std::find( l.begin(), l.end(), ret ) != l.end() )
-				return ret;
-			ret = "text/plain";
-			if ( std::find( l.begin(), l.end(), ret ) != l.end() )
-				return ret;
-			return std::string();
-		};
-	return selection_type_function{ selFun };
+    auto convFun = []( const std::vector<uint8_t> &d,
+                       const std::string &         cur,
+                       const std::string &to ) -> std::vector<uint8_t> {
+        if ( base::begins_with( cur, "text/plain" ) )
+        {
+            if ( base::begins_with( to, "text/plain" ) )
+                return d;
+
+            if ( to == "UTF8_STRING" || to == "STRING" || to == "STRING" ||
+                 to == "C_STRING" || to == "TEXT" || to == "COMPOUND_TEXT" )
+                return d;
+        }
+        return std::vector<uint8_t>();
+    };
+    return mime_converter{ convFun };
 }
 
 ////////////////////////////////////////
 
-system::mime_converter
-system::default_string_converter( void )
-{
-	auto convFun = [](const std::vector<uint8_t> &d, const std::string &cur, const std::string &to) -> std::vector<uint8_t> 
-		{
-			if ( base::begins_with( cur, "text/plain" ) )
-			{
-				if ( base::begins_with( to, "text/plain" ) )
-					return d;
-
-				if ( to == "UTF8_STRING" || to == "STRING" || to == "STRING" ||
-					 to == "C_STRING" || to == "TEXT" || to == "COMPOUND_TEXT" )
-					return d;
-			}
-			return std::vector<uint8_t>();
-		};
-	return mime_converter{ convFun };
-}
-
-////////////////////////////////////////
-
-void
-system::begin_drag( selection sel,
-					const std::shared_ptr<::platform::cursor> &cursor )
-{
-}
+void system::begin_drag(
+    selection sel, const std::shared_ptr<::platform::cursor> &cursor )
+{}
 
 ////////////////////////////////////////
 
 std::pair<std::vector<uint8_t>, std::string>
 system::query_drop( const selection_type_function &chooseMimeType )
 {
-	std::vector<uint8_t> d;
-	std::string mtype;
+    std::vector<uint8_t> d;
+    std::string          mtype;
 
-	return std::make_pair( std::move( d ), std::move( mtype ) );
+    return std::make_pair( std::move( d ), std::move( mtype ) );
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<::platform::menu>
-system::new_system_menu( void )
+std::shared_ptr<::platform::menu> system::new_system_menu( void )
 {
-	return std::make_shared<::platform::menu>();
+    return std::make_shared<::platform::menu>();
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<::platform::tray>
-system::new_system_tray_item( void )
+std::shared_ptr<::platform::tray> system::new_system_tray_item( void )
 {
-	return std::make_shared<::platform::tray>();
+    return std::make_shared<::platform::tray>();
 }
 
 ////////////////////////////////////////
 
-std::shared_ptr<::platform::window> system::new_window( window_type wintype, const std::shared_ptr<::platform::screen> &s )
+std::shared_ptr<::platform::window> system::new_window(
+    window_type wintype, const std::shared_ptr<::platform::screen> &s )
 {
-	auto ret = std::make_shared<window>( wintype, *this, _dispatcher->get_share_context(),
-										 _display, s ? s : default_screen() );
-	_dispatcher->add_window( ret );
-	return ret;
+    auto ret = std::make_shared<window>(
+        wintype,
+        *this,
+        _dispatcher->get_share_context(),
+        _display,
+        s ? s : default_screen() );
+    _dispatcher->add_window( ret );
+    return ret;
 }
 
 ////////////////////////////////////////
 
-void
-system::destroy_window( const std::shared_ptr<::platform::window> &w )
+void system::destroy_window( const std::shared_ptr<::platform::window> &w )
 {
-	auto x = std::static_pointer_cast<window>( w );
-	_dispatcher->remove_window( x );
+    auto x = std::static_pointer_cast<window>( w );
+    _dispatcher->remove_window( x );
 }
 
 ////////////////////////////////////////
 
 std::shared_ptr<::platform::dispatcher> system::get_dispatcher( void )
 {
-	return _dispatcher;
+    return _dispatcher;
 }
 
 ////////////////////////////////////////
@@ -360,7 +438,7 @@ std::shared_ptr<::platform::dispatcher> system::get_dispatcher( void )
 //
 //	static const KeySym modkeys[8] = {
 //		XK_Control_L, XK_Shift_L, XK_Alt_L, XK_Super_L,
-//		XK_Control_R, XK_Shift_R, XK_Alt_R, XK_Super_R 
+//		XK_Control_R, XK_Shift_R, XK_Alt_R, XK_Super_R
 //	};
 //	for ( uint8_t i = 0; i < 8; ++i )
 //	{
@@ -411,4 +489,5 @@ std::shared_ptr<::platform::dispatcher> system::get_dispatcher( void )
 
 ////////////////////////////////////////
 
-} }
+} // namespace xlib
+} // namespace platform

@@ -16,12 +16,10 @@
 #endif
 #include <iostream>
 #include <sstream>
-
 #include <unistd.h>
 
 namespace
 {
-
 int safemain( int argc, char *argv[] )
 {
     base::cmd_line options( argv[0] );
@@ -60,7 +58,7 @@ int safemain( int argc, char *argv[] )
     base::uri file1( tmppath, "test1" );
     base::uri file2( tmppath, "test2" );
     base::uri badpath( tmppath, "extra/bad" );
-    auto fs = base::file_system::get( tmppath );
+    auto      fs = base::file_system::get( tmppath );
 
     fstest["mkdir"] = [&]( void ) {
         try
@@ -139,7 +137,7 @@ int safemain( int argc, char *argv[] )
     fstest["istream"] = [&]( void ) {
         fstest.run( "ostream" );
         base::istream testinput = fs->open_read( file1 );
-        std::string l;
+        std::string   l;
         std::getline( testinput, l );
         if ( l == "Hello, world!" )
             fstest.success( "data read from {0}", file1 );

@@ -3,8 +3,10 @@
 
 #include <platform/fc/font_manager.h>
 
-namespace platform { namespace xcb
+namespace platform
 {
-	using fc::font_manager;
-} }
-
+namespace xcb
+{
+using fc::font_manager;
+}
+} // namespace platform

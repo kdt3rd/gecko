@@ -5,21 +5,14 @@
 
 namespace platform
 {
+////////////////////////////////////////
+
+keyboard::keyboard( system *s ) : waitable( s ) {}
 
 ////////////////////////////////////////
 
-keyboard::keyboard( system *s )
-    : waitable( s )
-{
-}
+keyboard::~keyboard( void ) {}
 
 ////////////////////////////////////////
 
-keyboard::~keyboard( void )
-{
-}
-
-////////////////////////////////////////
-
-}
-
+} // namespace platform

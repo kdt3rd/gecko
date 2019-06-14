@@ -13,7 +13,6 @@
 
 namespace
 {
-
 static std::atomic<int> tdCount{ 0 };
 static std::atomic<int> tdErrCount{ 0 };
 
@@ -32,17 +31,15 @@ struct CustomThreadData
 
 struct ThreadData
 {
-    ThreadData( void ) = delete;
+    ThreadData( void )               = delete;
     ThreadData( const ThreadData & ) = default;
-    ThreadData( ThreadData && ) = default;
     ThreadData &operator=( const ThreadData & ) = default;
-    ThreadData &operator=( ThreadData && ) = default;
 
     explicit ThreadData( const char *ptr ) : _ptr( ptr ) { ++tdCount; }
     ~ThreadData( void ) { --tdCount; }
 
     const char *_ptr;
-    int dummy = 1;
+    int         dummy = 1;
 };
 
 using DefThreadDataPtr = base::thread_ptr<
@@ -108,8 +105,8 @@ int safemain( int argc, char *argv[] )
     test["basic"] = [&]( void ) {
         {
             DefThreadDataPtr p{ new DefThreadData };
-            std::thread t1( defthread1, std::cref( p ) );
-            std::thread t2( defthread2, std::cref( p ) );
+            std::thread      t1( defthread1, std::cref( p ) );
+            std::thread      t2( defthread2, std::cref( p ) );
             t1.join();
             t2.join();
         }

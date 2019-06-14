@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 #include "plane_stats.h"
+
 #include "scanline_process.h"
+#include "sse3/plane_stats.h"
 #include "threading.h"
+
 #include <base/contract.h>
 #include <base/cpu_features.h>
-
-#include "sse3/plane_stats.h"
 
 ////////////////////////////////////////
 
@@ -19,7 +20,7 @@ static void sum_thread(
     size_t tIdx, int s, int e, const plane &p, std::vector<double> &vals )
 {
     double v = 0.0;
-    int w = p.width();
+    int    w = p.width();
     for ( int y = s; y < e; ++y )
     {
         const float *lineP = p.line( y );
@@ -53,22 +54,22 @@ static double sum_plane( const plane &p )
 static void
 compute_mean_sat( scanline &dest, int y, const accum_buf &sat, int radius )
 {
-    int wm1 = sat.width() - 1;
-    int y0 = y - radius - 1;
-    int y1 = std::max( sat.y1(), std::min( sat.y2(), y + radius ) );
-    int nY = y1 - ( y0 < sat.y1() ? -1 : y0 );
+    int           wm1 = sat.width() - 1;
+    int           y0  = y - radius - 1;
+    int           y1  = std::max( sat.y1(), std::min( sat.y2(), y + radius ) );
+    int           nY  = y1 - ( y0 < sat.y1() ? -1 : y0 );
     const double *y1line = sat.line( y1 );
     if ( y0 < sat.y1() )
     {
         for ( int x = 0; x <= wm1; ++x )
         {
-            int x0 = x - radius - 1;
-            int x1 = std::max( int( 0 ), std::min( wm1, x + radius ) );
-            int nX = x1 - ( x0 < 0 ? -1 : x0 );
-            double C = 0.0;
+            int    x0 = x - radius - 1;
+            int    x1 = std::max( int( 0 ), std::min( wm1, x + radius ) );
+            int    nX = x1 - ( x0 < 0 ? -1 : x0 );
+            double C  = 0.0;
             if ( x0 >= 0 )
                 C = y1line[x0];
-            double D = y1line[x1];
+            double D   = y1line[x1];
             double sum = D - C;
             dest[x] =
                 static_cast<float>( sum / static_cast<double>( nX * nY ) );
@@ -77,12 +78,12 @@ compute_mean_sat( scanline &dest, int y, const accum_buf &sat, int radius )
     else
     {
         const double *y0line = sat.line( y0 );
-        int x1 = std::min( wm1, radius );
+        int           x1     = std::min( wm1, radius );
         for ( int x = 0; x <= radius; ++x )
         {
-            int nX = x1 + 1;
-            double B = y0line[x1];
-            double D = y1line[x1];
+            int    nX  = x1 + 1;
+            double B   = y0line[x1];
+            double D   = y1line[x1];
             double sum = D - B;
             dest[x] =
                 static_cast<float>( sum / static_cast<double>( nX * nY ) );
@@ -91,11 +92,11 @@ compute_mean_sat( scanline &dest, int y, const accum_buf &sat, int radius )
         int x0 = 0;
         for ( int x = ( radius + 1 ); x <= wm1; ++x, ++x0 )
         {
-            int nX = x1 - x0;
-            double A = y0line[x0];
-            double B = y0line[x1];
-            double C = y1line[x0];
-            double D = y1line[x1];
+            int    nX  = x1 - x0;
+            double A   = y0line[x0];
+            double B   = y0line[x1];
+            double C   = y1line[x0];
+            double D   = y1line[x1];
             double sum = A + D - B - C;
             dest[x] =
                 static_cast<float>( sum / static_cast<double>( nX * nY ) );
@@ -107,7 +108,7 @@ compute_mean_sat( scanline &dest, int y, const accum_buf &sat, int radius )
 static void compute_mean( scanline &dest, int y, const plane &p, int radius )
 {
     int64_t scaleI = ( radius * 2 + 1 ) * ( radius * 2 + 1 );
-    int minY = y - radius, maxY = y + radius;
+    int     minY = y - radius, maxY = y + radius;
     for ( int cy = minY; cy <= ( y + radius ); ++cy )
     {
         if ( cy < p.y1() )
@@ -127,8 +128,8 @@ static void compute_mean( scanline &dest, int y, const plane &p, int radius )
         double sum = 0.0;
 
         int64_t xscale = scaleI;
-        int minX = x - radius;
-        int maxX = x + radius;
+        int     minX   = x - radius;
+        int     maxX   = x + radius;
         if ( minX < 0 )
         {
             xscale += minX * ( maxY - minY + 1 );
@@ -153,21 +154,21 @@ static void compute_mean( scanline &dest, int y, const plane &p, int radius )
 ////////////////////////////////////////
 
 static void compute_variance_sat(
-    scanline &dest,
-    int y,
+    scanline &       dest,
+    int              y,
     const accum_buf &sat,
     const accum_buf &sat2,
-    int radius )
+    int              radius )
 {
     int wm1 = sat.width() - 1;
-    int y0 = y - radius - 1;
-    int y1 = std::max( sat.y1(), std::min( sat.y2(), y + radius ) );
-    int nY = y1 - ( y0 < sat.y1() ? -1 : y0 );
+    int y0  = y - radius - 1;
+    int y1  = std::max( sat.y1(), std::min( sat.y2(), y + radius ) );
+    int nY  = y1 - ( y0 < sat.y1() ? -1 : y0 );
     for ( int x = 0; x <= wm1; ++x )
     {
-        int x0 = x - radius - 1;
-        int x1 = std::max( int( 0 ), std::min( wm1, x + radius ) );
-        int nX = x1 - ( x0 < 0 ? -1 : x0 );
+        int    x0 = x - radius - 1;
+        int    x1 = std::max( int( 0 ), std::min( wm1, x + radius ) );
+        int    nX = x1 - ( x0 < 0 ? -1 : x0 );
         double Am = 0.0, Bm = 0.0, Cm = 0.0;
         double As = 0.0, Bs = 0.0, Cs = 0.0;
         if ( y0 >= sat.y1() )
@@ -188,10 +189,10 @@ static void compute_variance_sat(
         double Dm = sat.get( x1 + sat.x1(), y1 );
         double Ds = sat2.get( x1 + sat.x1(), y1 );
 
-        double Ex = Am + Dm - Bm - Cm;
+        double Ex  = Am + Dm - Bm - Cm;
         double Ex2 = As + Ds - Bs - Cs;
-        int n = nX * nY;
-        double v = ( Ex2 - ( Ex * Ex ) / static_cast<double>( n ) ) /
+        int    n   = nX * nY;
+        double v   = ( Ex2 - ( Ex * Ex ) / static_cast<double>( n ) ) /
                    static_cast<double>( n - 1 );
         dest[x] = static_cast<float>( v );
     }
@@ -208,26 +209,26 @@ compute_variance( scanline &dest, int y, const plane &p, int radius )
     int wm1 = dest.width() - 1;
     for ( int x = 0; x <= wm1; ++x )
     {
-        double K = 0.0;
-        double ex = 0.0;
+        double K   = 0.0;
+        double ex  = 0.0;
         double ex2 = 0.0;
         for ( int cy = y - radius; cy <= ( y + radius ); ++cy )
         {
-            int rY = std::max( p.y1(), std::min( p.y2(), cy ) );
+            int          rY   = std::max( p.y1(), std::min( p.y2(), cy ) );
             const float *srcL = p.line( rY );
             if ( cy == ( y - radius ) )
                 K = static_cast<double>(
                     srcL[std::max( int( 0 ), x - radius )] );
             for ( int cx = x - radius; cx <= x + radius; ++cx )
             {
-                int rx = std::max( int( 0 ), std::min( wm1, cx ) );
-                double v = static_cast<double>( srcL[rx] ) - K;
+                int    rx = std::max( int( 0 ), std::min( wm1, cx ) );
+                double v  = static_cast<double>( srcL[rx] ) - K;
                 ex += v;
                 ex2 += v * v;
             }
         }
         double v = ( ex2 - ( ex * ex ) / n ) / ( n - 1.0 );
-        dest[x] = static_cast<float>( v );
+        dest[x]  = static_cast<float>( v );
     }
 }
 
@@ -238,11 +239,11 @@ sat_cols( size_t, int s, int e, accum_buf &dest, const plane &p, int power )
 {
     int dS = dest.stride();
     int pS = p.stride();
-    int h = dest.height();
+    int h  = dest.height();
     for ( int x = s; x < e; ++x )
     {
-        double sum = 0.0;
-        double *out = dest.data() + ( x - p.x1() );
+        double       sum = 0.0;
+        double *     out = dest.data() + ( x - p.x1() );
         const float *col = p.cdata() + ( x - p.x1() );
         switch ( power )
         {
@@ -294,7 +295,7 @@ static void sat_rows( size_t, int s, int e, accum_buf &dest )
     for ( int y = s; y < e; ++y )
     {
         double *out = dest.line( y );
-        double sum = 0.0;
+        double  sum = 0.0;
         for ( int x = 0; x < w; ++x )
         {
             sum += out[x];
@@ -343,23 +344,23 @@ static accum_buf compute_SAT( const plane &p, int power )
 ////////////////////////////////////////
 
 static void add_histo(
-    size_t tIdx,
-    int s,
-    int e,
-    const plane &p,
+    size_t                              tIdx,
+    int                                 s,
+    int                                 e,
+    const plane &                       p,
     std::vector<std::vector<uint64_t>> &vals,
-    float lowV,
-    float highV )
+    float                               lowV,
+    float                               highV )
 {
-    std::vector<uint64_t> &histo = vals[tIdx];
-    float binScale = static_cast<float>( histo.size() - 1 );
-    int w = p.width();
+    std::vector<uint64_t> &histo    = vals[tIdx];
+    float                  binScale = static_cast<float>( histo.size() - 1 );
+    int                    w        = p.width();
     for ( int y = s; y < e; ++y )
     {
         const float *in = p.line( y );
         for ( int x = 0; x < w; ++x )
         {
-            float v = binScale * ( in[x] - lowV ) / ( highV - lowV );
+            float  v = binScale * ( in[x] - lowV ) / ( highV - lowV );
             size_t idx =
                 static_cast<size_t>( std::max( 0.F, std::min( binScale, v ) ) );
             ++histo[idx];
@@ -370,7 +371,7 @@ static void add_histo(
 static std::vector<uint64_t>
 compute_histogram( const plane &p, int bins, float lowV, float highV )
 {
-    size_t n = threading::get().size();
+    size_t                             n = threading::get().size();
     std::vector<std::vector<uint64_t>> vals;
     if ( n > 1 )
     {
@@ -411,7 +412,7 @@ static void compute_mse(
     scanline &dest, int y, const plane &p, const plane &p2, int radius )
 {
     int wm1 = dest.width() - 1;
-    int n2 = radius * 2 + 1;
+    int n2  = radius * 2 + 1;
     n2 *= n2;
     float norm = 1.F / static_cast<float>( n2 );
     for ( int x = 0; x <= wm1; ++x )
@@ -419,14 +420,14 @@ static void compute_mse(
         float sum = 0.F;
         for ( int cy = y - radius; cy <= ( y + radius ); ++cy )
         {
-            int rY = std::max( p.y1(), std::min( p.y2(), cy ) );
-            const float *srcL = p.line( rY );
+            int          rY    = std::max( p.y1(), std::min( p.y2(), cy ) );
+            const float *srcL  = p.line( rY );
             const float *srcL2 = p2.line( rY );
 
             for ( int cx = x - radius; cx <= x + radius; ++cx )
             {
-                int rx = std::max( int( 0 ), std::min( wm1, cx ) );
-                float v = srcL[rx] - srcL2[rx];
+                int   rx = std::max( int( 0 ), std::min( wm1, cx ) );
+                float v  = srcL[rx] - srcL2[rx];
                 sum += v * v;
             }
         }
@@ -437,18 +438,18 @@ static void compute_mse(
 ////////////////////////////////////////
 
 static void compute_ssim(
-    scanline &dest,
-    int y,
+    scanline &   dest,
+    int          y,
     const plane &p,
     const plane &p2,
-    int radius,
-    const float L,
-    const float k1,
-    const float k2,
-    const float sigma )
+    int          radius,
+    const float  L,
+    const float  k1,
+    const float  k2,
+    const float  sigma )
 {
     int wm1 = dest.width() - 1;
-    int n2 = radius * 2 + 1;
+    int n2  = radius * 2 + 1;
     n2 *= n2;
     const double c1 =
         static_cast<double>( k1 * L ) * static_cast<double>( k1 * L );
@@ -492,9 +493,9 @@ static void compute_ssim(
         size_t widxy = 0;
         for ( int cy = yRangeB; cy <= yRangeE; ++cy )
         {
-            const float *srcL = p.line( cy );
-            const float *srcL2 = p2.line( cy );
-            double weightY = static_cast<double>( gweight[widxy++] );
+            const float *srcL    = p.line( cy );
+            const float *srcL2   = p2.line( cy );
+            double       weightY = static_cast<double>( gweight[widxy++] );
             if ( cy == yRangeB )
             {
                 K = 0.5 * static_cast<double>( srcL[xrb] ) +
@@ -518,7 +519,7 @@ static void compute_ssim(
             }
         }
         double norm = 1.0 / weightsum;
-        double cov = ( Exy - Ex * Ey * norm ) * norm;
+        double cov  = ( Exy - Ex * Ey * norm ) * norm;
         // should the second norm be (n - 1)???? radius is usually small, so keep it at n
         double var1 = ( Exx - ( Ex * Ex ) * norm ) * norm;
         double var2 = ( Eyy - ( Ey * Ey ) * norm ) * norm;
@@ -535,7 +536,7 @@ static void compute_ssim(
             double num2 = ( 2.0 * cov + c2 );
             double den1 = ( ave1 * ave1 + ave2 * ave2 + c1 );
             double den2 = ( var1 + var2 + c2 );
-            double den = den1 * den2;
+            double den  = den1 * den2;
             if ( den > 0.0 )
                 ssval = num1 * num2 / den;
             else if ( den1 > 0.0 )
@@ -553,7 +554,6 @@ static void compute_ssim(
 
 namespace image
 {
-
 ////////////////////////////////////////
 
 TODO(
@@ -624,11 +624,11 @@ plane mse( const plane &p, const plane &p2, int radius )
 plane ssim(
     const plane &p,
     const plane &p2,
-    int radius,
-    float L,
-    float k1,
-    float k2,
-    float sigma )
+    int          radius,
+    float        L,
+    float        k1,
+    float        k2,
+    float        sigma )
 {
     precondition(
         p.dims() == p2.dims(),

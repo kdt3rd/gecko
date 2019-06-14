@@ -7,7 +7,6 @@
 
 ////////////////////////////////////////
 
-imgproc::buffer<float,2> png_read( const char *file_name );
+imgproc::buffer<float, 2> png_read( const char *file_name );
 
 ////////////////////////////////////////
-

@@ -3,14 +3,15 @@
 
 #include "platform.h"
 #ifdef HAVE_XLIB
-# include <platform/xlib/system.h>
+#    include <platform/xlib/system.h>
 #endif
 #ifdef HAVE_WAYLAND
-# include <platform/wayland/system.h>
+#    include <platform/wayland/system.h>
 #endif
 
-#if !defined(HAVE_WAYLAND) && !defined(HAVE_XLIB)
-# error "No valid platform libraries found, please install necessary libraries"
+#if !defined( HAVE_WAYLAND ) && !defined( HAVE_XLIB )
+#    error                                                                     \
+        "No valid platform libraries found, please install necessary libraries"
 #endif
 
 //#include <platform/xcb/system.h>
@@ -23,36 +24,40 @@
 
 namespace
 {
-
 static std::once_flag lin_init_flag;
 
-static void initialize( void )
-{
-	std::setlocale( LC_ALL, "" );
-}
+static void initialize( void ) { std::setlocale( LC_ALL, "" ); }
 
-}
+} // namespace
 
 namespace platform
 {
-
 ////////////////////////////////////////
 
 std::vector<platform> &platform::init( void )
 {
-	std::call_once( lin_init_flag, &initialize );
+    std::call_once( lin_init_flag, &initialize );
 
-	static std::vector<platform> plat
-	{
+    static std::vector<platform> plat{
 #ifdef HAVE_WAYLAND
-		platform( "wayland", "egl", [](const std::string &d) { return std::make_shared<wayland::system>( d ); } ),
+        platform(
+            "wayland",
+            "egl",
+            []( const std::string &d ) {
+                return std::make_shared<wayland::system>( d );
+            } ),
 #endif
 #ifdef HAVE_XLIB
-		platform( "xlib", "gl", [](const std::string &d) { return std::make_shared<xlib::system>( d ); } ),
+        platform(
+            "xlib",
+            "gl",
+            []( const std::string &d ) {
+                return std::make_shared<xlib::system>( d );
+            } ),
 #endif
-	};
+    };
 
-	return plat;
+    return plat;
 }
 
-}
+} // namespace platform

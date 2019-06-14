@@ -2,33 +2,31 @@
 // SPDX-License-Identifier: MIT
 
 #include <base/contract.h>
-#include <base/unit_test.h>
 #include <base/math_functions.h>
-#include <draw/path.h>
+#include <base/unit_test.h>
 #include <draw/clipper.h>
+#include <draw/path.h>
 #include <draw/polylines.h>
 #include <draw/tessellator.h>
-
 #include <iostream>
 
 namespace
 {
-
 int safemain( int argc, char *argv[] )
 {
-	base::cmd_line options( argv[0] );
+    base::cmd_line options( argv[0] );
 
-	base::unit_test test( "tess" );
-	test.setup( options );
+    base::unit_test test( "tess" );
+    test.setup( options );
 
-	options.add_help();
-	options.parse( argc, argv );
+    options.add_help();
+    options.parse( argc, argv );
 
-	if ( options["help"] )
-	{
-		std::cerr << options << std::endl;
-		return -1;
-	}
+    if ( options["help"] )
+    {
+        std::cerr << options << std::endl;
+        return -1;
+    }
 
 #if 0
 	test["holes"] = [&]( void )
@@ -68,52 +66,52 @@ int safemain( int argc, char *argv[] )
 		test.success( "successful" );
 	};
 #endif
-	test["star"] = [&]( void )
-	{
-		using namespace base;
-		base::dpoint center { 500, 500 };
-		double side = 450;
-		std::vector<base::dpoint> points;
-		size_t p = 5;
-		size_t q = 2;
-		for ( size_t i = 0; i < p; ++i )
-			points.push_back( center + polar( side, 360_deg * double(i) / double(p) ) );
+    test["star"] = [&]( void ) {
+        using namespace base;
+        base::dpoint              center{ 500, 500 };
+        double                    side = 450;
+        std::vector<base::dpoint> points;
+        size_t                    p = 5;
+        size_t                    q = 2;
+        for ( size_t i = 0; i < p; ++i )
+            points.push_back(
+                center + polar( side, 360_deg * double( i ) / double( p ) ) );
 
-		draw::path path;
-		size_t i = q % points.size();
-		path.move_to( points[0] );
-		while( i != 0 )
-		{
-			path.line_to( points[i] );
-			i = ( i + q ) % points.size();
-		}
-		path.close();
+        draw::path path;
+        size_t     i = q % points.size();
+        path.move_to( points[0] );
+        while ( i != 0 )
+        {
+            path.line_to( points[i] );
+            i = ( i + q ) % points.size();
+        }
+        path.close();
 
-		draw::polylines lines;
-		path.replay( lines );
+        draw::polylines lines;
+        path.replay( lines );
 
-		gl::mesh m;
-		lines.stroked( 10 ).filled( m, "position" );
-		test.success( "successful" );
-	};
+        gl::mesh m;
+        lines.stroked( 10 ).filled( m, "position" );
+        test.success( "successful" );
+    };
 
-	test.run( options );
-	test.clean();
+    test.run( options );
+    test.clean();
 
-	return - static_cast<int>( test.failure_count() );
+    return -static_cast<int>( test.failure_count() );
 }
 
-}
+} // namespace
 
 int main( int argc, char *argv[] )
 {
-	try
-	{
-		return safemain( argc, argv );
-	}
-	catch ( const std::exception &e )
-	{
-		std::cerr << '\n';
-		base::print_exception( std::cerr, e );
-	}
+    try
+    {
+        return safemain( argc, argv );
+    }
+    catch ( const std::exception &e )
+    {
+        std::cerr << '\n';
+        base::print_exception( std::cerr, e );
+    }
 }

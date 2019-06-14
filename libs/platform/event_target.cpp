@@ -7,22 +7,14 @@
 
 namespace platform
 {
+////////////////////////////////////////
+
+event_target::event_target( void ) {}
 
 ////////////////////////////////////////
 
-event_target::event_target( void )
-{
-}
+event_target::~event_target( void ) {}
 
 ////////////////////////////////////////
 
-event_target::~event_target( void )
-{
-}
-
-////////////////////////////////////////
-
-} // platform
-
-
-
+} // namespace platform

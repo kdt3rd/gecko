@@ -3,21 +3,21 @@
 
 #pragma once
 
+#include "flags.h"
+
+#include <base/const_string.h>
 #include <iosfwd>
 #include <memory>
-#include <base/const_string.h>
-#include "flags.h"
 
 ////////////////////////////////////////
 
 namespace scene
 {
-
 // hrm, see the types in media/metadata.h
 enum class type_id
 {
     v_reference, ///< reference to another value or shader output
-    v_list, ///< list of values
+    v_list,      ///< list of values
 
     v_string,
     v_filename,
@@ -113,15 +113,14 @@ enum class type_id
 };
 
 base::cstring type_name( type_id t );
-type_id type_from_name( base::cstring s );
-size_t type_sizeof( type_id t );
+type_id       type_from_name( base::cstring s );
+size_t        type_sizeof( type_id t );
 
 std::istream &operator>>( std::istream &i, type_id &t );
 std::ostream &operator<<( std::ostream &o, type_id &t );
 
 namespace detail
 {
-
 enum class value_flags : uint8_t
 {
     at_default = 0,
@@ -138,11 +137,11 @@ public:
     interp( void ) = default;
     virtual ~interp( void );
 
-    virtual calc_type offset( const time &start, const time &end, const time &t ) const = 0;
+    virtual calc_type
+    offset( const time &start, const time &end, const time &t ) const = 0;
 };
 
-template <typename T>
-struct value_segment
+template <typename T> struct value_segment
 {
     using value_type = T;
 
@@ -155,16 +154,15 @@ struct value_segment
         return _value + delta * _interp->offset( _start, next._start, t );
     }
 
-    time _start;
+    time                    _start;
     std::unique_ptr<interp> _interp;
 
     value_type _value;
 };
 
-template <typename T>
-struct value_storage
+template <typename T> struct value_storage
 {
-    using segment = value_segment<T>;
+    using segment    = value_segment<T>;
     using value_type = typename segment::value_type;
 
     std::vector<segment> _segments;
@@ -173,8 +171,7 @@ struct value_storage
 // TBD: move from vector to centralized storage pools
 template <typename T> using value_array_storage = std::vector<T>;
 
-template <typename T>
-class rle_array_storage
+template <typename T> class rle_array_storage
 {
 public:
     using value_type = T;
@@ -183,15 +180,15 @@ public:
 
     inline const value_type &operator[]( size_t idx ) const
     {
-        auto offset = _segments.begin();
-        size_t sum = 0;
-        auto ri = _runs.begin();
-        while ( ( sum + static_cast<size_t>(*ri) ) < idx )
+        auto   offset = _segments.begin();
+        size_t sum    = 0;
+        auto   ri     = _runs.begin();
+        while ( ( sum + static_cast<size_t>( *ri ) ) < idx )
         {
             sum += *ri++;
             ++offset;
         }
-        return (*offset);
+        return ( *offset );
     }
 
     value_array_storage expand( void ) const
@@ -211,19 +208,19 @@ public:
         if ( v.empty() )
             return ret;
 
-        ret._size = v.size();
-        auto i = v.begin();
-        value_type last_value = (*i);
-        uint32_t count = 1;
+        ret._size             = v.size();
+        auto       i          = v.begin();
+        value_type last_value = ( *i );
+        uint32_t   count      = 1;
         ++i;
         while ( i != v.end() )
         {
-            if ( (*i) != last_value )
+            if ( ( *i ) != last_value )
             {
                 ret._segments.push_back( last_value );
                 ret._runs.push_back( count );
-                last_value = (*i);
-                count = 1;
+                last_value = ( *i );
+                count      = 1;
             }
             else
                 ++count;
@@ -236,18 +233,23 @@ public:
 private:
     // TBD: move from vector to centralized storage pools
     std::vector<value_type> _segments;
-    std::vector<uint32_t> _runs;
-    size_t _size = 0;
+    std::vector<uint32_t>   _runs;
+    size_t                  _size = 0;
 };
 
-template <typename T, type_id TID>
-struct value_storage
+template <typename T, type_id TID> struct value_storage
 {
 public:
-    static_assert( std::is_default_constructible<T>::value, "expect value type to be default constructible" );
-    static_assert( std::is_copy_constructible<T>::value, "expect value type to be copy constructible" );
-    static_assert( std::is_move_constructible<T>::value, "expect value type to be move constructible" );
-    using value_type = T;
+    static_assert(
+        std::is_default_constructible<T>::value,
+        "expect value type to be default constructible" );
+    static_assert(
+        std::is_copy_constructible<T>::value,
+        "expect value type to be copy constructible" );
+    static_assert(
+        std::is_move_constructible<T>::value,
+        "expect value type to be move constructible" );
+    using value_type          = T;
     using animated_value_type = typename anim_curve<value_type>;
 
     static constexpr type_id k_type = TID;
@@ -256,10 +258,22 @@ public:
 
     static inline constexpr type_id type( void ) const { return k_type; }
 
-    inline constexpr bool is_default( void ) const { return _flags.is_set<value_flags::at_default>(); }
-    inline constexpr bool is_valid( void ) const { return _flags.is_set<value_flags::valid>(); }
-    inline constexpr bool is_animated( void ) const { return _flags.is_set<value_flags::animated>(); }
-    inline constexpr bool has_expression( void ) const { return _flags.is_set<value_flags::has_expression>(); }
+    inline constexpr bool is_default( void ) const
+    {
+        return _flags.is_set<value_flags::at_default>();
+    }
+    inline constexpr bool is_valid( void ) const
+    {
+        return _flags.is_set<value_flags::valid>();
+    }
+    inline constexpr bool is_animated( void ) const
+    {
+        return _flags.is_set<value_flags::animated>();
+    }
+    inline constexpr bool has_expression( void ) const
+    {
+        return _flags.is_set<value_flags::has_expression>();
+    }
 
     inline value_type evaluate( const time &t )
     {
@@ -269,19 +283,15 @@ public:
     inline void assign( const value_type &v );
     inline void assign( const time &t, const value_type &v )
     {
-        if ( is_animated() )
-        {
-            
-        }
+        if ( is_animated() ) {}
     }
     inline void reset( const value_type &v );
 
 private:
-
     flags<value_flags> _flags; // 8-bit
     union
     {
-        value_type _value;
+        value_type           _value;
         animated_value_type *_animation;
     };
 };
@@ -291,39 +301,34 @@ private:
 ///
 /// @brief Class value provides...
 ///
-template <typename Storage>
-class value
+template <typename Storage> class value
 {
 public:
-    using storage_type = Storage;
-    using value_type = typename storage_type::value_type;
+    using storage_type              = Storage;
+    using value_type                = typename storage_type::value_type;
     static constexpr type_id k_type = storage_type::k_type;
 
     value( void );
-	~value( void );
+    ~value( void );
     // TBD:
     value( const value & ) = delete;
     value &operator=( const value & ) = delete;
-    value( value && ) = delete;
+    value( value && )                 = delete;
     value &operator=( value && ) = delete;
 
     inline constexpr type_id type( void ) const noexcept { return k_type; }
-    bool is_animated( void ) const;
-    std::vector<time> keyframes( void ) const;
+    bool                     is_animated( void ) const;
+    std::vector<time>        keyframes( void ) const;
 
     /// returns the range of time that should be invalidated based on setting the
     /// value at time t
-    std::pair<time, time> set( const time &t, const value_type &v );
-    template <typename T>
-    T evaluate( const time &t ) const
+    std::pair<time, time>   set( const time &t, const value_type &v );
+    template <typename T> T evaluate( const time &t ) const
     {
         return _storage->evaluate<T>( t );
     }
-private:
 
+private:
 };
 
 } // namespace scene
-
-
-

@@ -15,7 +15,6 @@
 
 namespace
 {
-
 template <typename T> struct sem_test_struct
 {
     static std::atomic<int> cnt;
@@ -46,7 +45,7 @@ template <typename T> struct sem_test_struct
 template <typename T> std::atomic<int> sem_test_struct<T>::cnt = { 1 };
 
 static int shareCount = 0;
-void shared_writer( base::shared_mutex &m )
+void       shared_writer( base::shared_mutex &m )
 {
     while ( true )
     {
@@ -153,7 +152,7 @@ int safemain( int argc, char *argv[] )
     test["simple_semaphore"] = [&]( void ) {
         base::simple_semaphore s;
         using stest = sem_test_struct<base::simple_semaphore>;
-        stest::cnt = int( 0 );
+        stest::cnt  = int( 0 );
         std::thread t1( stest::thread_bump1, std::ref( s ) );
         std::thread t2( stest::thread_bump1, std::ref( s ) );
         std::thread t3( stest::thread_counter, std::ref( s ) );
@@ -171,7 +170,7 @@ int safemain( int argc, char *argv[] )
     test["semaphore"] = [&]( void ) {
         base::semaphore s;
         using stest = sem_test_struct<base::semaphore>;
-        stest::cnt = int( 0 );
+        stest::cnt  = int( 0 );
         std::thread t1( stest::thread_bump1, std::ref( s ) );
         std::thread t2( stest::thread_bump1, std::ref( s ) );
         std::thread t3( stest::thread_counter, std::ref( s ) );
@@ -188,9 +187,9 @@ int safemain( int argc, char *argv[] )
 
     test["shared_mutex"] = [&]( void ) {
         base::shared_mutex m;
-        std::thread t1( &shared_reader, std::ref( m ) );
-        std::thread t2( &shared_reader, std::ref( m ) );
-        std::thread t3( &shared_writer, std::ref( m ) );
+        std::thread        t1( &shared_reader, std::ref( m ) );
+        std::thread        t2( &shared_reader, std::ref( m ) );
+        std::thread        t3( &shared_writer, std::ref( m ) );
         t3.join();
         t2.join();
         t1.join();
@@ -213,8 +212,8 @@ int safemain( int argc, char *argv[] )
 
     test["auto_reset_event"] = [&]( void ) {
         base::auto_reset_event e1, e2;
-        std::thread t1( &auto_e1, std::ref( e1 ), std::ref( e2 ) );
-        std::thread t2( &auto_e2, std::ref( e1 ), std::ref( e2 ) );
+        std::thread            t1( &auto_e1, std::ref( e1 ), std::ref( e2 ) );
+        std::thread            t2( &auto_e2, std::ref( e1 ), std::ref( e2 ) );
         t2.join();
         t1.join();
 

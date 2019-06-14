@@ -5,23 +5,17 @@
 
 #include "track.h"
 
-
 ////////////////////////////////////////
-
 
 namespace media
 {
-
 class audio_track : public track
 {
 public:
-	using track::track;
-	virtual ~audio_track( void );
+    using track::track;
+    virtual ~audio_track( void );
 
 private:
 };
 
 } // namespace media
-
-
-

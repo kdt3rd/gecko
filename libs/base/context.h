@@ -3,17 +3,17 @@
 
 #pragma once
 
-#include <type_traits>
-#include <typeinfo>
-#include <typeindex>
-#include <map>
 #include "any.h"
+
+#include <map>
+#include <type_traits>
+#include <typeindex>
+#include <typeinfo>
 
 ////////////////////////////////////////
 
 namespace base
 {
-
 ///
 /// @brief Class context provides a super low level container to store data.
 ///
@@ -25,7 +25,7 @@ namespace base
 /// context and retrieve it. This eliminates the need for static data,
 /// and enables different instances of the same type to share data.
 ///
-/// TODO: sharing 
+/// TODO: sharing
 ///
 /// TODO: thread safety
 ///
@@ -33,11 +33,11 @@ class context
 {
 protected:
     using stash_type = std::map<std::type_index, any>;
-    using stash_ptr = std::shared_ptr<stash_type>;
+    using stash_ptr  = std::shared_ptr<stash_type>;
 
 public:
     context( void );
-	virtual ~context( void );
+    virtual ~context( void );
 
     /// @brief Copy construction will create an implicitly shared context
     context( const context & ) = default;
@@ -67,18 +67,21 @@ public:
     template <typename Storer, typename StoreType>
     bool retrieve_common( Storer &&, std::shared_ptr<StoreType> &v )
     {
-        using fundamental_type = typename std::remove_pointer<typename std::decay<Storer>::type>::type;
-        any &sv = stash()[std::type_index( typeid(fundamental_type) )];
+        using fundamental_type = typename std::remove_pointer<
+            typename std::decay<Storer>::type>::type;
+        any &sv    = stash()[std::type_index( typeid( fundamental_type ) )];
         bool isnew = false;
         if ( !sv.has_value() )
         {
-            static_assert( std::is_default_constructible<StoreType>::value, "non-default constructible objects must use alternate function w provided factory function" );
-            v = std::make_shared<StoreType>();
-            sv = v;
+            static_assert(
+                std::is_default_constructible<StoreType>::value,
+                "non-default constructible objects must use alternate function w provided factory function" );
+            v     = std::make_shared<StoreType>();
+            sv    = v;
             isnew = true;
         }
         else
-            v = any_cast< std::shared_ptr<StoreType> >( sv );
+            v = any_cast<std::shared_ptr<StoreType>>( sv );
 
         return isnew;
     }
@@ -91,22 +94,29 @@ public:
     /// otherwise don't require construction or passing of argument
     /// like a standard make_shared or similar).
     template <typename Storer, typename StoreType, typename Factory>
-    bool retrieve_common( Storer &&, std::shared_ptr<StoreType> &v, Factory &&factory )
+    bool retrieve_common(
+        Storer &&, std::shared_ptr<StoreType> &v, Factory &&factory )
     {
-        using fundamental_type = typename std::remove_pointer<typename std::decay<Storer>::type>::type;
-        any &sv = stash()[std::type_index( typeid(fundamental_type) )];
+        using fundamental_type = typename std::remove_pointer<
+            typename std::decay<Storer>::type>::type;
+        any &sv    = stash()[std::type_index( typeid( fundamental_type ) )];
         bool isnew = false;
         if ( !sv.has_value() )
         {
-            static_assert( std::is_same<std::shared_ptr<StoreType>, decltype(std::forward<Factory>(factory)())>::value ||
-                           std::is_convertible<decltype(std::forward<Factory>(factory)()), std::shared_ptr<StoreType> >::value,
-                           "factory not returning a shared_ptr of the requested storage type" );
-            v = std::forward<Factory>(factory)();
-            sv = v;
+            static_assert(
+                std::is_same<
+                    std::shared_ptr<StoreType>,
+                    decltype( std::forward<Factory>( factory )() )>::value ||
+                    std::is_convertible<
+                        decltype( std::forward<Factory>( factory )() ),
+                        std::shared_ptr<StoreType>>::value,
+                "factory not returning a shared_ptr of the requested storage type" );
+            v     = std::forward<Factory>( factory )();
+            sv    = v;
             isnew = true;
         }
         else
-            v = any_cast< std::shared_ptr<StoreType> >( sv );
+            v = any_cast<std::shared_ptr<StoreType>>( sv );
 
         return isnew;
     }

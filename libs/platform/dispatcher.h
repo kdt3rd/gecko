@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include <vector>
-#include <memory>
-#include "waitable.h"
 #include "event_source.h"
+#include "waitable.h"
+
+#include <memory>
+#include <vector>
 
 namespace platform
 {
-
 class event_queue;
 
 ////////////////////////////////////////
@@ -23,40 +23,39 @@ class event_queue;
 class dispatcher
 {
 public:
-	/// @brief Constructor.
-	dispatcher( system *s );
+    /// @brief Constructor.
+    dispatcher( system *s );
 
-	/// @brief Destructor.
-	virtual ~dispatcher( void );
+    /// @brief Destructor.
+    virtual ~dispatcher( void );
 
-	/// @brief Execute the dispatcher.
-	///
-	/// The dispatcher will begin sending out events until the exit() method is called.
-	/// @return The exit code
-	virtual int execute( void ) = 0;
+    /// @brief Execute the dispatcher.
+    ///
+    /// The dispatcher will begin sending out events until the exit() method is called.
+    /// @return The exit code
+    virtual int execute( void ) = 0;
 
-	/// @brief Cause execute to stop.
-	///
-	/// The execute method will return the given code.
-	/// @param code Exit code
-	virtual void exit( int code ) = 0;
+    /// @brief Cause execute to stop.
+    ///
+    /// The execute method will return the given code.
+    /// @param code Exit code
+    virtual void exit( int code ) = 0;
 
-	/// @brief registers a waitable object
-	///
-	/// execution loops are expected to pay attention to these
-	virtual void add_waitable( const std::shared_ptr<waitable> &w );
+    /// @brief registers a waitable object
+    ///
+    /// execution loops are expected to pay attention to these
+    virtual void add_waitable( const std::shared_ptr<waitable> &w );
 
-	/// @brief unregisters a waitable object
-	///
-	/// execution loops are expected to pay attention to these
-	virtual void remove_waitable( const std::shared_ptr<waitable> &w );
+    /// @brief unregisters a waitable object
+    ///
+    /// execution loops are expected to pay attention to these
+    virtual void remove_waitable( const std::shared_ptr<waitable> &w );
 
 protected:
-	std::vector<std::shared_ptr<waitable>> _waitables;
-	std::shared_ptr<event_queue> _ext_events;
+    std::vector<std::shared_ptr<waitable>> _waitables;
+    std::shared_ptr<event_queue>           _ext_events;
 };
 
 ////////////////////////////////////////
 
-}
-
+} // namespace platform

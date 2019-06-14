@@ -8,15 +8,11 @@
 
 namespace script
 {
-
 std::shared_ptr<font_manager> font_manager::make( void )
 {
-	return std::make_shared<script::mswin::font_manager>();
+    return std::make_shared<script::mswin::font_manager>();
 }
 
 ////////////////////////////////////////
 
-} // script
-
-
-
+} // namespace script

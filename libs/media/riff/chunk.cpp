@@ -7,22 +7,20 @@ namespace media
 {
 namespace riff
 {
-
 ////////////////////////////////////////
 
 chunk::chunk( std::istream &in )
 {
-	in >> _id;
+    in >> _id;
 
-	uint32_t s;
-	in.read( reinterpret_cast<char*>( &s ), 4 );
-	_size = s;
+    uint32_t s;
+    in.read( reinterpret_cast<char *>( &s ), 4 );
+    _size = s;
 
-	_data = in.tellg();
+    _data = in.tellg();
 }
 
 ////////////////////////////////////////
 
-}
-}
-
+} // namespace riff
+} // namespace media

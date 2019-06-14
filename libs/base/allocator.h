@@ -8,16 +8,15 @@
 #ifdef _WIN32
 #    include <malloc.h>
 #endif
-#include <cstdlib>
-
 #include "contract.h"
 #include "pointer.h"
+
+#include <cstdlib>
 
 ////////////////////////////////////////
 
 namespace base
 {
-
 class allocator
 {
 public:
@@ -29,7 +28,7 @@ public:
     // not copy-able
     allocator( const allocator & ) = delete;
     allocator &operator=( const allocator & ) = delete;
-    allocator( allocator && ) = delete;
+    allocator( allocator && )                 = delete;
     allocator &operator=( allocator && ) = delete;
 
     virtual std::shared_ptr<void>

@@ -11,16 +11,15 @@
 
 namespace
 {
-
 void check(
-    base::unit_test &ut,
+    base::unit_test &  ut,
     const std::string &test,
-    bool should = true,
-    bool except = false )
+    bool               should = true,
+    bool               except = false )
 {
     try
     {
-        base::uri u( test );
+        base::uri   u( test );
         std::string match = base::to_string( u );
 
         if ( test == match )

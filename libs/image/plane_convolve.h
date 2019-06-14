@@ -3,15 +3,15 @@
 
 #pragma once
 
-#include <base/contract.h>
-#include "plane.h"
 #include "op_registry.h"
+#include "plane.h"
+
+#include <base/contract.h>
 
 ////////////////////////////////////////
 
 namespace image
 {
-
 /// [-1, 1]
 plane instant_gradient_horiz( const plane &p );
 /// [-1, 1]'
@@ -40,13 +40,10 @@ plane convolve_vert( const plane &p, const std::vector<float> &k );
 
 inline plane separable_convolve( const plane &p, const std::vector<float> &k )
 {
-	// do the vert pass first so we get n:1, 1:1 group behavior
-	return convolve_horiz( convolve_vert( p, k ), k );
+    // do the vert pass first so we get n:1, 1:1 group behavior
+    return convolve_horiz( convolve_vert( p, k ), k );
 }
 
 void add_convolve( engine::registry &r );
 
 } // namespace image
-
-
-

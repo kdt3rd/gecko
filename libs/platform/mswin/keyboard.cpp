@@ -1,66 +1,48 @@
 // Copyright (c) 2013-2017 Ian Godin and Kimball Thurston
 // SPDX-License-Identifier: MIT
 
-#include <iostream>
-#include <map>
 #include "keyboard.h"
 
-namespace platform { namespace mswin
+#include <iostream>
+#include <map>
+
+namespace platform
 {
+namespace mswin
+{
+////////////////////////////////////////
+
+keyboard::keyboard( ::platform::system *s ) : ::platform::keyboard( s ) {}
 
 ////////////////////////////////////////
 
-keyboard::keyboard( ::platform::system *s )
-	: ::platform::keyboard( s )
-{
-}
+keyboard::~keyboard( void ) {}
 
 ////////////////////////////////////////
 
-keyboard::~keyboard( void )
-{
-}
+void keyboard::start( void ) {}
 
 ////////////////////////////////////////
 
-void keyboard::start( void )
-{
-}
+void keyboard::cancel( void ) {}
 
 ////////////////////////////////////////
 
-void keyboard::cancel( void )
-{
-}
+void keyboard::shutdown( void ) {}
 
 ////////////////////////////////////////
 
-void keyboard::shutdown( void )
-{
-}
+waitable::wait keyboard::poll_object( void ) { return INVALID_WAIT; }
 
 ////////////////////////////////////////
 
-waitable::wait
-keyboard::poll_object( void )
-{
-	return INVALID_WAIT;
-}
+bool keyboard::poll_timeout( duration &, const time_point & ) { return false; }
 
 ////////////////////////////////////////
 
-bool keyboard::poll_timeout( duration &, const time_point & )
-{
-	return false;
-}
+void keyboard::emit( const time_point &curtime ) {}
 
 ////////////////////////////////////////
 
-void keyboard::emit( const time_point &curtime )
-{
-}
-
-////////////////////////////////////////
-
-} }
-
+} // namespace mswin
+} // namespace platform

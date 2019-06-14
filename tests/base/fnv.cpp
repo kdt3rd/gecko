@@ -9,11 +9,10 @@
 
 namespace
 {
-
 class Random
 {
 private:
-    uint64_t _a, _b, _c, _d;
+    uint64_t                         _a, _b, _c, _d;
     static inline constexpr uint64_t rot64( uint64_t x, int k )
     {
         return ( x << k ) | ( x >> ( 64 - k ) );
@@ -23,10 +22,10 @@ public:
     inline uint64_t value( void )
     {
         uint64_t e = _a - rot64( _b, 23 );
-        _a = _b ^ rot64( _c, 16 );
-        _b = _c + rot64( _d, 11 );
-        _c = _d + e;
-        _d = e + _a;
+        _a         = _b ^ rot64( _c, 16 );
+        _b         = _c + rot64( _d, 11 );
+        _c         = _d + e;
+        _d         = e + _a;
         return _d;
     }
 
@@ -56,7 +55,7 @@ int safemain( int argc, char *argv[] )
     }
 
     test["smoke_32"] = [&]( void ) {
-        float x = 3.14F;
+        float          x = 3.14F;
         base::fnv1a_32 h;
         h << x << "foobar";
         std::stringstream strb;
@@ -65,7 +64,7 @@ int safemain( int argc, char *argv[] )
     };
 
     test["smoke_64"] = [&]( void ) {
-        float x = 3.14F;
+        float          x = 3.14F;
         base::fnv1a_64 h;
         h << x << "foobar";
         std::stringstream strb;

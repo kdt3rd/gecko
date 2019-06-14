@@ -13,7 +13,6 @@
 
 namespace
 {
-
 ////////////////////////////////////////
 
 int safemain( int argc, char *argv[] )

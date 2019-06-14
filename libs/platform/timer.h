@@ -3,13 +3,13 @@
 
 #pragma once
 
-#include <functional>
-#include <chrono>
 #include "waitable.h"
+
+#include <chrono>
+#include <functional>
 
 namespace platform
 {
-
 ////////////////////////////////////////
 
 /// @brief Timer 'device'.
@@ -21,79 +21,77 @@ namespace platform
 class timer : public waitable
 {
 public:
-	typedef std::function<void(void)> function;
-	using waitable::clock;
-	using waitable::time_point;
-	using waitable::duration;
+    typedef std::function<void( void )> function;
+    using waitable::clock;
+    using waitable::duration;
+    using waitable::time_point;
 
-	timer( void );
-	/// @brief Destructor.
-	~timer( void ) override;
+    timer( void );
+    /// @brief Destructor.
+    ~timer( void ) override;
 
-	/// @brief activates (continues) a timer
-	///
-	/// if the timer has elapsed since it was paused, it will trigger
-	/// the next time through the event loop unless a reset is called
-	void activate( bool on );
+    /// @brief activates (continues) a timer
+    ///
+    /// if the timer has elapsed since it was paused, it will trigger
+    /// the next time through the event loop unless a reset is called
+    void activate( bool on );
 
-	/// @brief resets to one_off timer expiring in given seconds
-	///
-	/// NB: this does not change the pause state
-	void reset_one_off( double in_seconds );
-	/// @brief resets to one_off timer expiring in given seconds
-	///
-	/// NB: this does not change the pause state
-	void reset_one_off( duration in_seconds );
-	/// @brief resets to one_off timer expire at given time (one-off)
-	///
-	/// NB: this does not change the pause state
-	void reset_one_off( time_point when );
+    /// @brief resets to one_off timer expiring in given seconds
+    ///
+    /// NB: this does not change the pause state
+    void reset_one_off( double in_seconds );
+    /// @brief resets to one_off timer expiring in given seconds
+    ///
+    /// NB: this does not change the pause state
+    void reset_one_off( duration in_seconds );
+    /// @brief resets to one_off timer expire at given time (one-off)
+    ///
+    /// NB: this does not change the pause state
+    void reset_one_off( time_point when );
 
-	/// @brief resets repeat to duration seconds from now
-	///
-	/// NB: this does not change the pause state
-	void reset_repeat( double dur_sec );
+    /// @brief resets repeat to duration seconds from now
+    ///
+    /// NB: this does not change the pause state
+    void reset_repeat( double dur_sec );
 
-	/// @brief resets repeat to duration seconds from now
-	///
-	/// NB: this does not change the pause state
-	void reset_repeat( duration dur );
+    /// @brief resets repeat to duration seconds from now
+    ///
+    /// NB: this does not change the pause state
+    void reset_repeat( duration dur );
 
-	/// @brief pauses the timer
-	/// @sa waitable::start
-	void start( void ) override;
-	/// @sa waitable::cancel
-	void cancel( void ) override;
-	/// @sa waitable::shutdown
-	void shutdown( void ) override;
-	/// @sa waitable::poll_object
-	wait poll_object( void ) override;
-	/// @sa waitable::poll_timeout
-	bool poll_timeout( duration &when, const time_point &curtime ) override;
-	/// @sa waitable::emit
-	void emit( const time_point &curtime ) override;
+    /// @brief pauses the timer
+    /// @sa waitable::start
+    void start( void ) override;
+    /// @sa waitable::cancel
+    void cancel( void ) override;
+    /// @sa waitable::shutdown
+    void shutdown( void ) override;
+    /// @sa waitable::poll_object
+    wait poll_object( void ) override;
+    /// @sa waitable::poll_timeout
+    bool poll_timeout( duration &when, const time_point &curtime ) override;
+    /// @sa waitable::emit
+    void emit( const time_point &curtime ) override;
 
-	/// @brief Callback for the timer.
-	///
-	/// The callback will be called once the timer is elapsed.
-	function elapsed;
+    /// @brief Callback for the timer.
+    ///
+    /// The callback will be called once the timer is elapsed.
+    function elapsed;
 
 private:
-	// not copyable to suggest that people use
-	// a shared_ptr and register it appropriately
-	// with the dispatcher
-	timer( const timer & ) = delete;
-	timer( timer && ) = delete;
-	timer &operator=( const timer & ) = delete;
-	timer &operator=( timer && ) = delete;
+    // not copyable to suggest that people use
+    // a shared_ptr and register it appropriately
+    // with the dispatcher
+    timer( const timer & ) = delete;
+    timer( timer && )      = delete;
+    timer &operator=( const timer & ) = delete;
+    timer &operator=( timer && ) = delete;
 
-	time_point _expire_time;
-	duration _repeat_dur = duration::zero();
-	bool _active = false;
+    time_point _expire_time;
+    duration   _repeat_dur = duration::zero();
+    bool       _active     = false;
 };
-
 
 ////////////////////////////////////////
 
-}
-
+} // namespace platform

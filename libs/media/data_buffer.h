@@ -7,20 +7,16 @@
 
 namespace media
 {
-
 ///
 /// @brief Class data_buffer provides...
 ///
 class data_buffer
 {
 public:
-	data_buffer( void );
-	virtual ~data_buffer( void );
-private:
+    data_buffer( void );
+    virtual ~data_buffer( void );
 
+private:
 };
 
 } // namespace media
-
-
-

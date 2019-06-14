@@ -3,22 +3,19 @@
 
 #pragma once
 
-#include <string>
-#include <iostream>
-#include <iterator>
-#include <sstream>
-#include <tuple>
-#include <vector>
-#include <string>
-#include <stdexcept>
 #include "ansi.h"
 #include "string_util.h"
 
+#include <iostream>
+#include <iterator>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <tuple>
+#include <vector>
+
 namespace base
 {
-
-////////////////////////////////////////
-
 namespace detail
 {
 
@@ -26,38 +23,38 @@ namespace detail
 class format_specifier
 {
 public:
-	/// @brief Parse the format specifier given.
-	format_specifier( const char *&fmt, const char *end );
+    /// @brief Parse the format specifier given.
+    format_specifier( const char *&fmt, const char *end );
 
-	/// @brief Index of specifier.
-	int index;
+    /// @brief Index of specifier.
+    int index;
 
-	/// @brief Width of specifier.
-	int width;
+    /// @brief Width of specifier.
+    int width;
 
-	/// @brief Base for numbers.
-	int radix;
+    /// @brief Base for numbers.
+    int radix;
 
-	/// @brief Precision for numbers.
-	int precision;
+    /// @brief Precision for numbers.
+    int precision;
 
-	/// @brief Alignment withing width.
-	int alignment;
+    /// @brief Alignment withing width.
+    int alignment;
 
-	/// @brief Fill character.
-	char fill;
+    /// @brief Fill character.
+    char fill;
 
-	/// @brief Use uppercase for numbers with base > 10.
-	bool upper_case;
+    /// @brief Use uppercase for numbers with base > 10.
+    bool upper_case;
 
-	/// @brief Show plus sign for positive numbers.
-	bool show_plus;
+    /// @brief Show plus sign for positive numbers.
+    bool show_plus;
 
-	/// @brief Apply output stream settings for this specifier.
-	void apply( std::ostream &out );
+    /// @brief Apply output stream settings for this specifier.
+    void apply( std::ostream &out );
 
 private:
-	static int parse_number( const char * &fmt, const char *end );
+    static int parse_number( const char *&fmt, const char *end );
 };
 
 } // namespace detail
@@ -66,108 +63,106 @@ private:
 
 /// @brief Holds a format string with attached arguments.
 /// @sa base::format
-template<typename ... Args>
-class format_holder
+template <typename... Args> class format_holder
 {
 public:
-	/// @brief Construct format holder.
-	explicit format_holder( std::string fmt, const Args &...args )
-		: _fmt( std::move( fmt ) ), _args( std::tie( args... ) )
-	{
-	}
+    /// @brief Construct format holder.
+    explicit format_holder( std::string fmt, const Args &... args )
+        : _fmt( std::move( fmt ) ), _args( std::tie( args... ) )
+    {}
 
-	/// @brief Convert to a string.
-	operator std::string() const // NOLINT
-	{
-		std::ostringstream str;
-		write( str );
-		return str.str();
-	}
+    /// @brief Convert to a string.
+    operator std::string() const // NOLINT
+    {
+        std::ostringstream str;
+        write( str );
+        return str.str();
+    }
 
-	/// @brief Write the string to output stream.
-	template <typename CharT>
-	void write( std::basic_ostream<CharT> &out ) const
-	{
-		const char *start = format_begin();
-		const char *end = format_end();
-		const char *cur = start;
-		const char *prev = start;
+    /// @brief Write the string to output stream.
+    template <typename CharT> void write( std::basic_ostream<CharT> &out ) const
+    {
+        const char *start = format_begin();
+        const char *end   = format_end();
+        const char *cur   = start;
+        const char *prev  = start;
 
-		try
-		{
-			while ( begin( cur, end ) )
-			{
-				out.write( prev, int( cur - prev ) );
-				std::ios::fmtflags flags( out.flags() );
+        try
+        {
+            while ( begin( cur, end ) )
+            {
+                out.write( prev, int( cur - prev ) );
+                std::ios::fmtflags flags( out.flags() );
 
-				detail::format_specifier spec( cur, end );
-				spec.apply( out );
+                detail::format_specifier spec( cur, end );
+                spec.apply( out );
 
-				output( out, size_t(spec.index) );
-				prev = cur + 1;
+                output( out, size_t( spec.index ) );
+                prev = cur + 1;
 
-				out.flags( flags );
-			}
-			out.write( prev, int( cur - prev ) );
-		}
-		catch ( ... )
-		{
-			std::string tmp( start, end );
-			size_t errpos = static_cast<size_t>( cur - start );
-			tmp.insert( errpos + 1, ansi::reset );
-			tmp.insert( errpos, ansi::invert );
-			tmp = replace( std::move( tmp ), '\n', "\\n" );
-			std::throw_with_nested( std::runtime_error( "parse error in format \"" + tmp + '\"' ) );
-		}
-	}
+                out.flags( flags );
+            }
+            out.write( prev, int( cur - prev ) );
+        }
+        catch ( ... )
+        {
+            std::string tmp( start, end );
+            size_t      errpos = static_cast<size_t>( cur - start );
+            tmp.insert( errpos + 1, ansi::reset );
+            tmp.insert( errpos, ansi::invert );
+            tmp = replace( std::move( tmp ), '\n', "\\n" );
+            std::throw_with_nested(
+                std::runtime_error( "parse error in format \"" + tmp + '\"' ) );
+        }
+    }
 
 private:
-	template <typename CharT>
-	void output( std::basic_ostream<CharT> &out, size_t x ) const
-	{
-		get_arg<CharT, 0, std::tuple_size<std::tuple<Args...>>::value>::output( out, _args, x );
-	}
+    template <typename CharT>
+    void output( std::basic_ostream<CharT> &out, size_t x ) const
+    {
+        get_arg<CharT, 0, std::tuple_size<std::tuple<Args...>>::value>::output(
+            out, _args, x );
+    }
 
-	const char *format_begin( void ) const { return _fmt.c_str(); }
-	const char *format_end( void ) const { return _fmt.c_str() + _fmt.size(); }
+    const char *format_begin( void ) const { return _fmt.c_str(); }
+    const char *format_end( void ) const { return _fmt.c_str() + _fmt.size(); }
 
-	template <typename CharT, size_t I, size_t N>
-	struct get_arg
-	{
-		using base_class = get_arg<CharT,I+1,N-1>;
+    template <typename CharT, size_t I, size_t N> struct get_arg
+    {
+        using base_class = get_arg<CharT, I + 1, N - 1>;
 
-		template<typename Tuple>
-		static void output( std::basic_ostream<CharT> &out, const Tuple &t, size_t x )
-		{
-			if ( x == I )
-			{
-				out << std::get<I>( t );
-				return;
-			}
-			base_class::output( out, t, x );
-		}
-	};
+        template <typename Tuple>
+        static void
+        output( std::basic_ostream<CharT> &out, const Tuple &t, size_t x )
+        {
+            if ( x == I )
+            {
+                out << std::get<I>( t );
+                return;
+            }
+            base_class::output( out, t, x );
+        }
+    };
 
-	template <typename CharT, size_t I>
-	struct get_arg<CharT,I,0>
-	{
-		template<typename Tuple>
-		static void output( std::basic_ostream<CharT> &, const Tuple &, size_t )
-		{
-			throw std::runtime_error( "Invalid fmt format string or missing argument" );
-		}
-	};
+    template <typename CharT, size_t I> struct get_arg<CharT, I, 0>
+    {
+        template <typename Tuple>
+        static void output( std::basic_ostream<CharT> &, const Tuple &, size_t )
+        {
+            throw std::runtime_error(
+                "Invalid fmt format string or missing argument" );
+        }
+    };
 
-	bool begin( const char * &fmt, const char *end ) const
-	{
-		while ( fmt != end && *fmt != '{' )
-			++fmt;
-		return fmt != end;
-	}
+    bool begin( const char *&fmt, const char *end ) const
+    {
+        while ( fmt != end && *fmt != '{' )
+            ++fmt;
+        return fmt != end;
+    }
 
-
-	std::string _fmt;
-	std::tuple<const Args&...> _args;
+    std::string                 _fmt;
+    std::tuple<const Args &...> _args;
 };
 
 ////////////////////////////////////////
@@ -192,21 +187,22 @@ private:
 /// @param data Data to format.
 /// @returns An object that can be converted/casted to a string, or streamed to an std::stream.
 /// @example base/format.cpp
-template<typename ... Args>
-format_holder<Args...> format( std::string fmt, const Args &...data )
+template <typename... Args>
+format_holder<Args...> format( std::string fmt, const Args &... data )
 {
-	return format_holder<Args...>( std::move( fmt ), data... );
+    return format_holder<Args...>( std::move( fmt ), data... );
 }
 
 ////////////////////////////////////////
 
 /// @brief Stream output operator for format.
 /// @relates base::format_holder
-template<typename CharT, typename ... Args>
-std::basic_ostream<CharT> &operator<<( std::basic_ostream<CharT> &out, const format_holder<Args...> &fmt )
+template <typename CharT, typename... Args>
+std::basic_ostream<CharT> &
+operator<<( std::basic_ostream<CharT> &out, const format_holder<Args...> &fmt )
 {
-	fmt.write( out );
-	return out;
+    fmt.write( out );
+    return out;
 }
 
 ////////////////////////////////////////
@@ -214,37 +210,35 @@ std::basic_ostream<CharT> &operator<<( std::basic_ostream<CharT> &out, const for
 /// @brief Print container values with separator.
 /// Commonly used to print vector values separated by a comma.
 /// @sa base::infix_separated
-template<typename Container>
-class infix_separated_printer
+template <typename Container> class infix_separated_printer
 {
 public:
-	/// @brief Constructor
-	/// A reference to the container is kept, so make sure the container outlives this class.
-	infix_separated_printer( std::string sep, const Container &v )
-		: _sep( std::move( sep ) ), _container( v )
-	{
-	}
+    /// @brief Constructor
+    /// A reference to the container is kept, so make sure the container outlives this class.
+    infix_separated_printer( std::string sep, const Container &v )
+        : _sep( std::move( sep ) ), _container( v )
+    {}
 
-	/// @brief Write the container values with separator.
-	void write( std::ostream &out ) const
-	{
-		if ( !_container.empty() )
-		{
-			bool first = true;
-			for ( auto &i: _container )
-			{
-				if ( !first )
-					out << _sep << i;
-				else
-					out << i;
-				first = false;
-			}
-		}
-	}
+    /// @brief Write the container values with separator.
+    void write( std::ostream &out ) const
+    {
+        if ( !_container.empty() )
+        {
+            bool first = true;
+            for ( auto &i: _container )
+            {
+                if ( !first )
+                    out << _sep << i;
+                else
+                    out << i;
+                first = false;
+            }
+        }
+    }
 
 private:
-	std::string _sep;
-	const Container &_container;
+    std::string      _sep;
+    const Container &_container;
 };
 
 ////////////////////////////////////////
@@ -252,11 +246,12 @@ private:
 /// @brief Print infix separated container.
 /// @relates base::infix_separated_printer
 /// @sa base::infix_separated
-template<typename C>
-std::ostream &operator<<( std::ostream &out, const infix_separated_printer<C> &tmp )
+template <typename C>
+std::ostream &
+operator<<( std::ostream &out, const infix_separated_printer<C> &tmp )
 {
-	tmp.write( out );
-	return out;
+    tmp.write( out );
+    return out;
 }
 
 ////////////////////////////////////////
@@ -267,13 +262,12 @@ std::ostream &operator<<( std::ostream &out, const infix_separated_printer<C> &t
 /// @tparam C Container type to print.
 /// @snippet base/format.cpp infix_separated
 /// @relates base::infix_separated_printer
-template<typename C>
+template <typename C>
 infix_separated_printer<C> infix_separated( std::string sep, const C &c )
 {
-	return infix_separated_printer<C>( std::move( sep ), c );
+    return infix_separated_printer<C>( std::move( sep ), c );
 }
 
 ////////////////////////////////////////
 
 } // namespace base
-

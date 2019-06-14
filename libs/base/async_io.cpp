@@ -3,109 +3,128 @@
 
 #include "async_io.h"
 #ifdef __linux__
-# include <unistd.h>
-# include <sys/syscall.h>
-# include <linux/aio_abi.h>
-# include <cerrno>
-# include <thread>
-# include <mutex>
-# include <map>
-# include "contract.h"
+#    include "contract.h"
+
+#    include <cerrno>
+#    include <linux/aio_abi.h>
+#    include <map>
+#    include <mutex>
+#    include <sys/syscall.h>
+#    include <thread>
+#    include <unistd.h>
 #endif
 
 ////////////////////////////////////////
 
 namespace base
 {
-
 ////////////////////////////////////////
 
 #ifdef __linux__
 inline int io_setup( int maxev, aio_context_t *ctx )
 {
-#ifdef __x86_64__
+#    ifdef __x86_64__
     long res;
-    __asm__ volatile( "syscall"
-                      : "=a" (res)
-                      : "0" (__NR_io_setup), "D" ((long)maxev), "S" ((long)ctx)
-                      : "r11","rcx","memory"
-                      );
+    __asm__ volatile(
+        "syscall"
+        : "=a"( res )
+        : "0"( __NR_io_setup ), "D"( (long)maxev ), "S"( (long)ctx )
+        : "r11", "rcx", "memory" );
     return res;
-#else
+#    else
     return syscall( __NR_io_setup, (long)maxev, (long)ctx );
-#endif
+#    endif
 }
 
 inline int io_destroy( aio_context_t ctx )
 {
-#ifdef __x86_64__
+#    ifdef __x86_64__
     long res;
     __asm__ volatile( "syscall"
-                      : "=a" (res)
-                      : "0" (__NR_io_destroy), "D" ((long)ctx)
-                      : "r11","rcx","memory"
-                      );
+                      : "=a"( res )
+                      : "0"( __NR_io_destroy ), "D"( (long)ctx )
+                      : "r11", "rcx", "memory" );
     return res;
-#else
+#    else
     return syscall( __NR_io_destroy, (long)ctx );
-#endif
+#    endif
 }
 
 inline int io_submit( aio_context_t ctx, long nr, struct iocb **cbs )
 {
-#ifdef __x86_64__
+#    ifdef __x86_64__
     long res;
     __asm__ volatile( "syscall"
-                      : "=a" (res)
-                      : "0" (__NR_io_submit), "D" ((long)ctx), "S" ((long)nr), "d" ((long)cbs)
-                      : "r11","rcx","memory"
-                      );
+                      : "=a"( res )
+                      : "0"( __NR_io_submit ),
+                        "D"( (long)ctx ),
+                        "S"( (long)nr ),
+                        "d"( (long)cbs )
+                      : "r11", "rcx", "memory" );
     return res;
-#else
+#    else
     return syscall( __NR_io_submit, (long)ctx, (long)nr, (long)cbs );
-#endif
+#    endif
 }
 
 inline int io_cancel( aio_context_t ctx, struct iocb *cb, struct io_event *ev )
 {
-#ifdef __x86_64__
+#    ifdef __x86_64__
     long res;
     __asm__ volatile( "syscall"
-                      : "=a" (res)
-                      : "0" (__NR_io_cancel), "D" ((long)ctx), "S" ((long)cb), "d" ((long)ev)
-                      : "r11","rcx","memory"
-                      );
+                      : "=a"( res )
+                      : "0"( __NR_io_cancel ),
+                        "D"( (long)ctx ),
+                        "S"( (long)cb ),
+                        "d"( (long)ev )
+                      : "r11", "rcx", "memory" );
     return res;
-#else
+#    else
     return syscall( __NR_io_cancel, (long)ctx, (long)cb, (long)ev );
-#endif
+#    endif
 }
 
-inline int io_getevents( aio_context_t ctx, long min_nr, long nr, struct io_event *evs, struct timespec *tout )
+inline int io_getevents(
+    aio_context_t    ctx,
+    long             min_nr,
+    long             nr,
+    struct io_event *evs,
+    struct timespec *tout )
 {
-#ifdef __x86_64__
+#    ifdef __x86_64__
     long res;
     __asm__ volatile( "movq %5,%%r10 ; movq %6,%%r8 ; syscall"
-                      : "=a" (res)
-                      : "0" (__NR_io_getevents), "D" ((long)ctx), "S" ((long)min_nr), "d" ((long)nr), "g" ((long)evs), "g" ((long)tout)
-                      : "r11","rcx","memory","r8","r10"
-                      );
+                      : "=a"( res )
+                      : "0"( __NR_io_getevents ),
+                        "D"( (long)ctx ),
+                        "S"( (long)min_nr ),
+                        "d"( (long)nr ),
+                        "g"( (long)evs ),
+                        "g"( (long)tout )
+                      : "r11", "rcx", "memory", "r8", "r10" );
     return res;
-#else
-    return syscall( __NR_io_getevents, (long)ctx, (long)min_nr, (long)nr, (long)evs, (long)tout );
-#endif
+#    else
+    return syscall(
+        __NR_io_getevents,
+        (long)ctx,
+        (long)min_nr,
+        (long)nr,
+        (long)evs,
+        (long)tout );
+#    endif
 }
 
 class async_io::context
 {
 public:
     context( void )
-        : _pfd(-1) // eventually eventfd(0, EFD_CLOEXEC|EFD_NONBLOCK|EFD_SEMAPHORE)
-        , _ctxt(0)
+        : _pfd(
+              -1 ) // eventually eventfd(0, EFD_CLOEXEC|EFD_NONBLOCK|EFD_SEMAPHORE)
+        , _ctxt( 0 )
         , _max_live( 0 )
     {
         int nev = static_cast<int>( std::thread::hardware_concurrency() );
-        nev = std::max( nev * 2, 2 );
+        nev     = std::max( nev * 2, 2 );
         if ( io_setup( nev, &_ctxt ) < 0 )
             throw_errno( "Unable to create asynchronous I/O kernel buffers" );
         _max_live = static_cast<uint64_t>( nev );
@@ -118,23 +137,24 @@ public:
             ::close( _pfd );
     }
 
-    bool submit_read( uint64_t id, void *outbuf, size_t bytes, int fd, ssize_t offset )
+    bool submit_read(
+        uint64_t id, void *outbuf, size_t bytes, int fd, ssize_t offset )
     {
-        struct iocb d = {};
-        d.aio_data = id;
+        struct iocb d    = {};
+        d.aio_data       = id;
         d.aio_lio_opcode = IOCB_CMD_PREAD;
-        d.aio_reqprio = 0;
-        d.aio_fildes = fd;
-        d.aio_buf = (__u64)outbuf;
-        d.aio_nbytes = bytes;
-        d.aio_offset = offset;
+        d.aio_reqprio    = 0;
+        d.aio_fildes     = fd;
+        d.aio_buf        = (__u64)outbuf;
+        d.aio_nbytes     = bytes;
+        d.aio_offset     = offset;
         if ( _pfd >= 0 )
         {
             d.aio_flags = IOCB_FLAG_RESFD;
             d.aio_resfd = _pfd;
         }
         struct iocb *ds[] = { &d };
-        int n = 0;
+        int          n    = 0;
         do
         {
             n = io_submit( _ctxt, 1, ds );
@@ -143,7 +163,7 @@ public:
                 if ( errno == EAGAIN )
                 {
                     struct io_event ev = {};
-                    int nr = io_getevents( _ctxt, 0, 1, &ev, NULL );
+                    int             nr = io_getevents( _ctxt, 0, 1, &ev, NULL );
                     if ( nr < 0 )
                     {
                         if ( errno != EINTR )
@@ -157,10 +177,10 @@ public:
                     continue;
                 }
                 else
-                    throw_errno( "Unable to submit asynchronous I/O read request" );
+                    throw_errno(
+                        "Unable to submit asynchronous I/O read request" );
             }
-        }
-        while ( false );
+        } while ( false );
 
         return 1 == n;
     }
@@ -169,7 +189,7 @@ public:
     {
         {
             std::lock_guard<std::mutex> lk( _mutex );
-            auto i = _completed.find( id );
+            auto                        i = _completed.find( id );
             if ( i != _completed.end() )
             {
                 retval = i->second;
@@ -179,9 +199,9 @@ public:
         }
         do
         {
-            struct io_event ev = {};
-            struct timespec tout = {0, 0};
-            int nr = io_getevents( _ctxt, 0, 1, &ev, &tout );
+            struct io_event ev   = {};
+            struct timespec tout = { 0, 0 };
+            int             nr   = io_getevents( _ctxt, 0, 1, &ev, &tout );
             if ( nr < 0 )
             {
                 if ( errno == EINTR )
@@ -205,11 +225,12 @@ public:
     }
 
 private:
-    int _pfd = -1; // todo: when we add polling and true async, we can use IOCB_FLAG_RESFD
-    aio_context_t _ctxt = 0;
-    std::mutex _mutex;
+    int _pfd =
+        -1; // todo: when we add polling and true async, we can use IOCB_FLAG_RESFD
+    aio_context_t               _ctxt = 0;
+    std::mutex                  _mutex;
     std::map<uint64_t, ssize_t> _completed;
-    uint64_t _max_live = 0;
+    uint64_t                    _max_live = 0;
 };
 #endif
 
@@ -217,22 +238,19 @@ private:
 
 async_io::async_io( void )
 #ifdef __linux__
-    : _request_id( 1 ),
-      _ctxt( new context )
+    : _request_id( 1 ), _ctxt( new context )
 #endif
-{
-}
+{}
 
 ////////////////////////////////////////
 
-async_io::~async_io( void )
-{
-}
+async_io::~async_io( void ) {}
 
 ////////////////////////////////////////
 
 #ifdef __linux__
-bool async_io::submit_read( uint64_t id, void *outbuf, size_t bytes, int fd, ssize_t offset )
+bool async_io::submit_read(
+    uint64_t id, void *outbuf, size_t bytes, int fd, ssize_t offset )
 {
     return _ctxt->submit_read( id, outbuf, bytes, fd, offset );
 }
@@ -245,7 +263,4 @@ bool async_io::finished( uint64_t id, ssize_t &retval )
 }
 #endif
 
-} // base
-
-
-
+} // namespace base

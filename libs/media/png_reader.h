@@ -7,10 +7,6 @@
 
 namespace media
 {
-
 void register_png_reader( void );
 
 } // namespace media
-
-
-

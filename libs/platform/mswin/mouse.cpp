@@ -3,61 +3,46 @@
 
 #include "mouse.h"
 
-namespace platform { namespace mswin
+namespace platform
 {
+namespace mswin
+{
+////////////////////////////////////////
+
+mouse::mouse( ::platform::system *s ) : ::platform::mouse( s ) {}
 
 ////////////////////////////////////////
 
-mouse::mouse( ::platform::system *s )
-	: ::platform::mouse( s )
-{
-}
+mouse::~mouse( void ) {}
 
 ////////////////////////////////////////
 
-mouse::~mouse( void )
-{
-}
+void mouse::start( void ) {}
 
 ////////////////////////////////////////
 
-void mouse::start( void )
-{
-}
+void mouse::cancel( void ) {}
 
 ////////////////////////////////////////
 
-void mouse::cancel( void )
-{
-}
+void mouse::shutdown( void ) {}
 
 ////////////////////////////////////////
 
-void mouse::shutdown( void )
-{
-}
-
-////////////////////////////////////////
-
-waitable::wait mouse::poll_object( void )
-{
-	return INVALID_WAIT;
-}
+waitable::wait mouse::poll_object( void ) { return INVALID_WAIT; }
 
 ////////////////////////////////////////
 
 bool mouse::poll_timeout( duration &when, const time_point &curtime )
 {
-	return false;
+    return false;
 }
 
 ////////////////////////////////////////
 
-void mouse::emit( const time_point &curtime )
-{
-}
+void mouse::emit( const time_point &curtime ) {}
 
 ////////////////////////////////////////
 
-} }
-
+} // namespace mswin
+} // namespace platform

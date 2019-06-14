@@ -3,7 +3,4 @@
 
 #include <signal.h>
 
-int main( void )
-{
-	raise( SIGSEGV );
-}
+int main( void ) { raise( SIGSEGV ); }

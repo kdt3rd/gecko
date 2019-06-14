@@ -9,7 +9,6 @@
 
 namespace
 {
-
 [[noreturn]] void bad_function( void )
 {
     try

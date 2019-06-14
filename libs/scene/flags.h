@@ -3,15 +3,13 @@
 
 #pragma once
 
-#include <type_traits>
 #include <atomic>
+#include <type_traits>
 
 ////////////////////////////////////////
 
 namespace scene
 {
-
-
 /// @brief Stores a (fixed) boolean flag set, changes are done thread
 /// safely in a lock-free manner
 ///
@@ -35,47 +33,45 @@ namespace scene
 /// they change. The bits in here are changed atomically, but with no
 /// other ordering implied ("relaxed" ordering).
 ///
-template <typename EnumOrIntType, size_t Bytes = sizeof(EnumOrIntType)>
+template <typename EnumOrIntType, size_t Bytes = sizeof( EnumOrIntType )>
 class flags
 {
 public:
     static constexpr size_t storage_bytes = Bytes;
 
     /// Default construction is with no flags set
-    constexpr flags( void ) noexcept : _storage( storage_type(0) ) {}
+    constexpr flags( void ) noexcept : _storage( storage_type( 0 ) ) {}
 
     /// Initialize with a set of flags
     template <typename Val>
-    explicit flags( Val initval ) : _storage( bit_location( initval ) ) {}
+    explicit flags( Val initval ) : _storage( bit_location( initval ) )
+    {}
 
     /// TBD: This should work to check multiple flags at the same time but only
     /// in the integer case, how to handle enums?
-    template <typename Val>
-    inline constexpr bool is_set( void ) const noexcept
+    template <typename Val> inline constexpr bool is_set( void ) const noexcept
     {
-        return ( _storage.load( std::memory_order_relaxed ) & bit_location<Val>() ) == bit_location<Val>();
+        return ( _storage.load( std::memory_order_relaxed ) &
+                 bit_location<Val>() ) == bit_location<Val>();
     }
 
-    template <typename Val>
-    inline void set( void ) noexcept
+    template <typename Val> inline void set( void ) noexcept
     {
         _storage.fetch_or( bit_location<Val>(), std::memory_order_relaxed );
     }
 
-    template <typename Val>
-    inline void unset( void ) noexcept
+    template <typename Val> inline void unset( void ) noexcept
     {
-        _storage.fetch_and( ~ bit_location<Val>(), std::memory_order_relaxed );
+        _storage.fetch_and( ~bit_location<Val>(), std::memory_order_relaxed );
     }
 
-    template <typename Val>
-    inline void flip( void ) noexcept
+    template <typename Val> inline void flip( void ) noexcept
     {
         _storage.fetch_xor( bit_location<Val>(), std::memory_order_relaxed );
     }
 
 private:
-    template <size_t N> storage {};
+    template <size_t N> storage{};
     template <> storage<1> { using type = uint8_t; };
     template <> storage<2> { using type = uint16_t; };
     template <> storage<4> { using type = uint32_t; };
@@ -86,24 +82,24 @@ private:
     template <typename Val>
     static inline constexpr storage_type bit_location( Val v ) noexcept
     {
-        return std::is_enum<Val>::value ?
-            static_cast<storage_type>( 1 << static_cast<int>( v ) ) :
-            static_cast<storage_type>( v );
+        return std::is_enum<Val>::value
+                   ? static_cast<storage_type>( 1 << static_cast<int>( v ) )
+                   : static_cast<storage_type>( v );
     }
 
     template <typename Val>
     static inline constexpr storage_type bit_location( void ) noexcept
     {
-        static_assert( (! std::is_enum<Val>::value) || (size_t(Val) < (8 * storage_bytes)), "invalid enum beyond storage size" );
-        return std::is_enum<Val>::value ?
-            static_cast<storage_type>( 1 << static_cast<int>( Val ) ) :
-            static_cast<storage_type>( Val );
+        static_assert(
+            ( !std::is_enum<Val>::value ) ||
+                ( size_t( Val ) < ( 8 * storage_bytes ) ),
+            "invalid enum beyond storage size" );
+        return std::is_enum<Val>::value
+                   ? static_cast<storage_type>( 1 << static_cast<int>( Val ) )
+                   : static_cast<storage_type>( Val );
     }
 
     std::atomic<storage_type> _storage;
 };
 
 } // namespace scene
-
-
-

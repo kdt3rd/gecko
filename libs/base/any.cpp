@@ -5,18 +5,12 @@
 
 namespace base
 {
+////////////////////////////////////////
+
+bad_any_cast::~bad_any_cast( void ) {}
 
 ////////////////////////////////////////
 
-bad_any_cast::~bad_any_cast( void )
-{
-}
+const char *bad_any_cast::what() const noexcept { return "bad any cast"; }
 
-////////////////////////////////////////
-
-const char *bad_any_cast::what() const noexcept
-{
-	return "bad any cast";
-}
-
-} // base namespace
+} // namespace base

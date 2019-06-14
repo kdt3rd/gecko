@@ -6,6 +6,5 @@
 #include "gl3w.h"
 
 #if defined _WIN32
-# include <GL/wglext.h>
+#    include <GL/wglext.h>
 #endif
-

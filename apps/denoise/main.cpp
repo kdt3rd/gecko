@@ -36,26 +36,26 @@ using namespace image;
 TODO( "Do something" )
 int safemain( int argc, char *argv[] )
 {
-    int spatX = 7;
-    int spatY = -1;
-    int waveletLevels = 1;
-    float spatSigmaD = 1.5F;
-    float spatSigmaI = 0.025F;
-    float mseThresh = 0.0075F;
-    float confThresh = 0.0F;
-    int conservativeness = 0;
-    float vecFilter = 0.0F;
-    int mseRadius = 5;
-    int matchRadius = 4;
-    int tempIters = 5;
-    int temporalRadius = 0;
-    bool estimateNoise = false;
-    bool useLog = false;
-    std::string spatmethod = "guided_color";
-    std::string temporalmethod;
-    std::string integmethod = "mse";
-    int64_t frameStart = std::numeric_limits<int64_t>::min();
-    int64_t frameEnd = std::numeric_limits<int64_t>::min();
+    int            spatX            = 7;
+    int            spatY            = -1;
+    int            waveletLevels    = 1;
+    float          spatSigmaD       = 1.5F;
+    float          spatSigmaI       = 0.025F;
+    float          mseThresh        = 0.0075F;
+    float          confThresh       = 0.0F;
+    int            conservativeness = 0;
+    float          vecFilter        = 0.0F;
+    int            mseRadius        = 5;
+    int            matchRadius      = 4;
+    int            tempIters        = 5;
+    int            temporalRadius   = 0;
+    bool           estimateNoise    = false;
+    bool           useLog           = false;
+    std::string    spatmethod       = "guided_color";
+    std::string    temporalmethod;
+    std::string    integmethod = "mse";
+    int64_t        frameStart  = std::numeric_limits<int64_t>::min();
+    int64_t        frameEnd    = std::numeric_limits<int64_t>::min();
     base::cmd_line options(
         argv[0],
         base::cmd_line::option(
@@ -384,7 +384,7 @@ int safemain( int argc, char *argv[] )
         vecFilter = static_cast<float>( atof( vecFiltV.value() ) );
 
     estimateNoise = static_cast<bool>( options["estimate-noise"] );
-    useLog = static_cast<bool>( options["use-log"] );
+    useLog        = static_cast<bool>( options["use-log"] );
     if ( useLog )
         std::cout << "Using log of image where appropriate" << std::endl;
 
@@ -396,7 +396,7 @@ int safemain( int argc, char *argv[] )
         else
         {
             frameStart = atoll( frames.values()[0] );
-            frameEnd = atoll( frames.values()[1] );
+            frameEnd   = atoll( frames.values()[1] );
         }
         if ( frameStart > frameEnd )
             throw_runtime(
@@ -405,9 +405,9 @@ int safemain( int argc, char *argv[] )
                 frameEnd );
     }
 
-    auto &inP = options["<input_file>"];
-    auto &outP = options["<output_file>"];
-    auto &varP = options["variance"];
+    auto &inP       = options["<input_file>"];
+    auto &outP      = options["<output_file>"];
+    auto &varP      = options["variance"];
     auto &debugVecP = options["debug-vectors"];
     if ( debugVecP && temporalRadius <= 0 )
         throw_runtime( "Debug vectors requested, but temporal radius is 0" );
@@ -428,7 +428,7 @@ int safemain( int argc, char *argv[] )
         if ( !outputU )
             outputU.set_scheme( "file" );
 
-        media::container c = media::reader::open( inputU );
+        media::container                      c = media::reader::open( inputU );
         std::vector<media::track_description> tds;
         for ( auto &vt: c.video_tracks() )
         {
@@ -453,7 +453,7 @@ int safemain( int argc, char *argv[] )
         }
 
         std::string outOpts;
-        auto &outParams = options["output-settings"];
+        auto &      outParams = options["output-settings"];
         if ( outParams )
             outOpts = outParams.value();
         media::parameter_set outputOptions =
@@ -463,7 +463,7 @@ int safemain( int argc, char *argv[] )
             media::writer::open( outputU, tds, outputOptions );
         for ( size_t ci = 0; ci != c.video_tracks().size(); ++ci )
         {
-            auto &vt = c.video_tracks()[ci];
+            auto &  vt = c.video_tracks()[ci];
             int64_t fs = vt->begin();
             int64_t fe = vt->end();
             if ( frameStart != std::numeric_limits<int64_t>::min() )
@@ -481,11 +481,11 @@ int safemain( int argc, char *argv[] )
                 std::cout << "Processing frame: " << f << std::endl;
                 image_buf centerImg;
                 image_buf weight;
-                plane cenAlpha;
+                plane     cenAlpha;
                 {
                     media::sample cenSamp( f, vt->rate() );
-                    auto centerFrm = cenSamp( vt );
-                    centerImg = extract_frame(
+                    auto          centerFrm = cenSamp( vt );
+                    centerImg               = extract_frame(
                         *centerFrm,
                         std::string(),
                         std::string(),
@@ -504,8 +504,8 @@ int safemain( int argc, char *argv[] )
 
                     if ( varU )
                     {
-                        auto curVarFrm = cenSamp( v.video_tracks()[ci] );
-                        image_buf varimg = extract_frame(
+                        auto      curVarFrm = cenSamp( v.video_tracks()[ci] );
+                        image_buf varimg    = extract_frame(
                             *curVarFrm,
                             std::string(),
                             std::string(),
@@ -641,7 +641,7 @@ int safemain( int argc, char *argv[] )
                 }
                 else if ( spatmethod == "savgol" )
                 {
-                    int rad = spatX;
+                    int rad   = spatX;
                     int order = spatY;
                     if ( order < 0 )
                     {
@@ -656,7 +656,7 @@ int safemain( int argc, char *argv[] )
                 }
                 else if ( spatmethod == "savgolmin" )
                 {
-                    int rad = spatX;
+                    int rad   = spatX;
                     int order = spatY;
                     if ( order < 0 )
                     {
@@ -687,9 +687,9 @@ int safemain( int argc, char *argv[] )
                     continue;
                 }
 
-                float cnt = 0.F;
+                float     cnt = 0.F;
                 image_buf accumImg;
-                plane integAmt;
+                plane     integAmt;
                 for ( int64_t curF = f - temporalRadius;
                       curF <= ( f + temporalRadius );
                       ++curF )
@@ -700,7 +700,7 @@ int safemain( int argc, char *argv[] )
                     media::sample sCur( curF, vt->rate() );
 
                     image_buf img;
-                    plane curAlpha;
+                    plane     curAlpha;
                     if ( curF == f )
                         img = centerImg;
                     else
@@ -708,7 +708,7 @@ int safemain( int argc, char *argv[] )
                         std::cout << "  reading temporal frame " << curF
                                   << std::endl;
                         auto curFrm = sCur( vt );
-                        img = extract_frame(
+                        img         = extract_frame(
                             *curFrm,
                             std::string(),
                             std::string(),
@@ -758,15 +758,15 @@ int safemain( int argc, char *argv[] )
                         else if ( temporalmethod == "ahtvl1" )
                         {
                             TODO( "expose tracking parameters" );
-                            float lambda = 200.F;
-                            float theta = 0.1F;
-                            float epsilon = 0.005F;
-                            float edgePower = 3.F;
-                            float edgeAlpha = 50.F;
-                            int edgeBorder = 5;
-                            int tvl1Iters = 100;
-                            int warpIters = 3;
-                            float eta = 0.65F;
+                            float lambda     = 200.F;
+                            float theta      = 0.1F;
+                            float epsilon    = 0.005F;
+                            float edgePower  = 3.F;
+                            float edgeAlpha  = 50.F;
+                            int   edgeBorder = 5;
+                            int   tvl1Iters  = 100;
+                            int   warpIters  = 3;
+                            float eta        = 0.65F;
 
                             plane lumA = tmpCen[0] * 0.3F + tmpCen[1] * 0.6F +
                                          tmpCen[2] * 0.1F;
@@ -807,12 +807,12 @@ int safemain( int argc, char *argv[] )
                         else if ( temporalmethod == "pdtncc" )
                         {
                             TODO( "expose tracking parameters" );
-                            float lambda = 20.F;
-                            float theta = 0.1F;
-                            float gamma = 0.001F; //0.001F;
-                            int innerIters = 200;
-                            int warpIters = 5;
-                            float eta = 0.65F;
+                            float lambda     = 20.F;
+                            float theta      = 0.1F;
+                            float gamma      = 0.001F; //0.001F;
+                            int   innerIters = 200;
+                            int   warpIters  = 5;
+                            float eta        = 0.65F;
 
                             plane lumA = tmpCen[0] * 0.3F + tmpCen[1] * 0.6F +
                                          tmpCen[2] * 0.1F;
@@ -874,7 +874,7 @@ int safemain( int argc, char *argv[] )
                         if ( cenAlpha.valid() && curAlpha.valid() )
                         {
                             plane warpA = warp_bilinear( curAlpha, vf );
-                            alpPlane = 1.F - erode( warpA * cenAlpha, 1 );
+                            alpPlane    = 1.F - erode( warpA * cenAlpha, 1 );
                         }
 
                         plane vecConf;
@@ -896,7 +896,7 @@ int safemain( int argc, char *argv[] )
                         if ( debugVecP )
                         {
                             std::stringstream fnb;
-                            int offset = f - curF;
+                            int               offset = f - curF;
                             fnb << debugVecP.value() << "_frm_"
                                 << std::setw( 7 ) << std::setfill( '0' ) << f
                                 << '_' << ( offset < 0 ? 'p' : 'm' )

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "dso.h"
+
 #include "contract.h"
 #ifndef _WIN32
 
@@ -31,7 +32,6 @@
 
 namespace
 {
-
 #ifdef HAS_CXXABI
 std::string demangle( const char *sym )
 {
@@ -39,7 +39,7 @@ std::string demangle( const char *sym )
     {
         if ( sym[0] == '_' )
         {
-            int status = -42;
+            int                                         status = -42;
             std::unique_ptr<char, void ( * )( void * )> realname{
                 abi::__cxa_demangle( sym, nullptr, nullptr, &status ), std::free
             };
@@ -60,7 +60,6 @@ std::string demangle( const char *sym )
 
 namespace base
 {
-
 ////////////////////////////////////////
 
 dso::dso( const char *fn, bool makeGlobal ) { load( fn, makeGlobal ); }
@@ -75,8 +74,7 @@ dso::dso( dso &&o )
     : _fn( std::move( o._fn ) )
     , _last_err( std::move( o._last_err ) )
     , _handle( base::exchange( o._handle, nullptr ) )
-{
-}
+{}
 
 ////////////////////////////////////////
 
@@ -124,11 +122,11 @@ void dso::load( const char *fn, bool makeGlobal )
         _last_err = dlerror();
 #else
 #    ifdef _WIN32
-    HMODULE t = nullptr;
-    bool haderr = false;
+    HMODULE t      = nullptr;
+    bool    haderr = false;
     if ( fn )
     {
-        t = LoadLibrary( fn );
+        t      = LoadLibrary( fn );
         haderr = ( t == nullptr );
     }
     else
@@ -180,7 +178,7 @@ void *dso::find( const char *symn, const char *symver )
 #    ifdef _WIN32
         // todo symbol versioning???
         FARPROC ptr = GetProcAddress( (HMODULE)_handle, symn );
-        ret = reinterpret_cast<void *>( ptr );
+        ret         = reinterpret_cast<void *>( ptr );
         if ( !ret )
         {
             char *msg = nullptr;
@@ -208,12 +206,10 @@ void *dso::find( const char *symn, const char *symver )
 
 namespace dl_extra
 {
-
 #ifdef HAS_ELF_DLFCN
 
 namespace
 {
-
 class symbol_table
 {
 public:
@@ -225,7 +221,7 @@ public:
     {
         // precondition( st.sh_type == SHT_SYMTAB || st.sh_type == SHT_DYNSYM, "valid segment" );
         _syms.reset( fd, st.sh_offset, st.sh_size );
-        _num_syms = st.sh_size / st.sh_entsize;
+        _num_syms   = st.sh_size / st.sh_entsize;
         _last_local = st.sh_info;
 
         size_t strings = st.sh_link;
@@ -266,9 +262,9 @@ public:
 
 private:
     read_memory_map<ElfW( Sym )> _syms;
-    read_memory_map<char> _strings;
-    size_t _num_syms = 0;
-    size_t _last_local = 0;
+    read_memory_map<char>        _strings;
+    size_t                       _num_syms   = 0;
+    size_t                       _last_local = 0;
 };
 
 } // namespace
@@ -304,7 +300,7 @@ public:
 
     inline const std::string &path( void ) const { return _path; }
     inline const std::string &name( void ) const { return _name; }
-    inline uintptr_t base( void ) const { return _base; }
+    inline uintptr_t          base( void ) const { return _base; }
 
     bool is_closest( void *addr, const impl *curdso )
     {
@@ -359,10 +355,10 @@ public:
         //std::cout << "loading symbols from: '" << _path << "'..." << std::endl;
         read_memory_map<ElfW( Ehdr )> hdr( _fd, 0, sizeof( ElfW( Ehdr ) ) );
 
-        size_t numSegHdrs = hdr->e_shnum;
-        off64_t segHdrOff = hdr->e_shoff;
-        size_t segHdrSize = numSegHdrs * sizeof( ElfW( Shdr ) );
-        bool isElf = ( 0 == memcmp( hdr->e_ident, ELFMAG, SELFMAG ) );
+        size_t  numSegHdrs = hdr->e_shnum;
+        off64_t segHdrOff  = hdr->e_shoff;
+        size_t  segHdrSize = numSegHdrs * sizeof( ElfW( Shdr ) );
+        bool    isElf      = ( 0 == memcmp( hdr->e_ident, ELFMAG, SELFMAG ) );
 
         if ( !isElf )
             throw std::runtime_error(
@@ -381,7 +377,7 @@ public:
         read_memory_map<ElfW( Shdr )> segHdrs( _fd, segHdrOff, segHdrSize );
 
         // there should only be one of each of these (non dynamic and dynamic symbol tables)
-        size_t numSymTabs = 0;
+        size_t numSymTabs    = 0;
         size_t numDynSymTabs = 0;
         for ( size_t i = 0; i != numSegHdrs; ++i )
         {
@@ -415,7 +411,7 @@ public:
 
     std::string find_symbol( void *addr, bool include_offset = true )
     {
-        uintptr_t off = uintptr_t( addr ) - _base;
+        uintptr_t   off = uintptr_t( addr ) - _base;
         std::string ret;
 
         uintptr_t symoff = 0;
@@ -429,7 +425,7 @@ public:
             {
                 if ( t.st_value <= off && off <= ( t.st_value + t.st_size ) )
                 {
-                    ret = demangle( _dyn_syms.name( s ) );
+                    ret    = demangle( _dyn_syms.name( s ) );
                     symoff = off - t.st_value;
                 }
             }
@@ -445,7 +441,7 @@ public:
             {
                 if ( t.st_value <= off && off <= ( t.st_value + t.st_size ) )
                 {
-                    ret = demangle( _nondyn_syms.name( s ) );
+                    ret    = demangle( _nondyn_syms.name( s ) );
                     symoff = off - t.st_value;
                 }
             }
@@ -461,17 +457,16 @@ public:
         return ret;
     }
 
-    std::string _path;
-    std::string _name;
-    uintptr_t _base = 0;
-    int _fd = -1;
+    std::string  _path;
+    std::string  _name;
+    uintptr_t    _base = 0;
+    int          _fd   = -1;
     symbol_table _dyn_syms;
     symbol_table _nondyn_syms;
 };
 
 namespace
 {
-
 static int fillActiveCB( struct dl_phdr_info *phdr, size_t size, void *data )
 {
     using listtype = std::vector<std::shared_ptr<active_shared_object>>;
@@ -492,8 +487,7 @@ class active_shared_object::impl
 public:
     impl( const char *name, uintptr_t baseaddr )
         : _name( name ), _base( baseaddr )
-    {
-    }
+    {}
     inline const std::string &path( void ) const { return _path; }
     inline const std::string &name( void ) const { return _name; }
     inline uintptr_t base( void ) const { return _base; }
@@ -517,8 +511,7 @@ private:
 active_shared_object::active_shared_object(
     const char *name, uintptr_t base_addr )
     : _impl( new impl( name, base_addr ) )
-{
-}
+{}
 
 ////////////////////////////////////////
 
@@ -526,8 +519,7 @@ active_shared_object::active_shared_object( void *phdr )
 #ifdef HAS_ELF_DLFCN
     : _impl( new impl( static_cast<struct dl_phdr_info *>( phdr ) ) )
 #endif
-{
-}
+{}
 
 ////////////////////////////////////////
 

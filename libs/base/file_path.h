@@ -7,7 +7,6 @@
 
 namespace base
 {
-
 ////////////////////////////////////////
 
 /// if the file name is blah.exr, the extension
@@ -23,5 +22,4 @@ std::string basename( const std::string &file );
 
 ////////////////////////////////////////
 
-}
-
+} // namespace base

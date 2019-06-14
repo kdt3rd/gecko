@@ -8,7 +8,6 @@
 
 namespace
 {
-
 ////////////////////////////////////////
 
 int safemain( int argc, char *argv[] )
@@ -41,7 +40,7 @@ int safemain( int argc, char *argv[] )
 
     test["change_type"] = [&]( void ) {
         using namespace base::units;
-        auto x = 3000_mm;
+        auto                            x = 3000_mm;
         base::units::millimeters<float> y = x;
         if ( x.count() == static_cast<uint64_t>( y.count() ) )
             test.success( "success" );
@@ -51,7 +50,7 @@ int safemain( int argc, char *argv[] )
 
     test["complex_conversion"] = [&]( void ) {
         using namespace base::units;
-        auto x = 1_in;
+        auto                            x = 1_in;
         base::units::centimeters<float> y = x;
         if ( base::equal( y.count(), 2.54f ) )
             test.success( "success" );

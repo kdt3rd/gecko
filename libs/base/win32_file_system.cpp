@@ -2,71 +2,67 @@
 // SPDX-License-Identifier: MIT
 
 #include "win32_file_system.h"
-#include <windows.h>
-#include "scope_guard.h"
+
 #include "contract.h"
+#include "scope_guard.h"
+
+#include <windows.h>
 
 ////////////////////////////////////////
 
 namespace base
 {
-
 ////////////////////////////////////////
 
-uri
-win32_file_system::current_path( void ) const
+uri win32_file_system::current_path( void ) const
 {
-	TCHAR buf[1024];
-	// NB: not thread safe
-	DWORD len = GetCurrentDirectory( 1024, buf );
-	if ( len > 1024 )
-	{
-		std::unique_ptr<TCHAR[]> tmp( new TCHAR[len + 1] );
-		len = GetCurrentDirectory( len + 1, tmp.get() );
-		if ( len == 0 )
-			throw_lasterror( "Unable to retrieve current directory" );
-		return uri( tmp.get() );
-	}
-	else if ( len == 0 )
-		throw_lasterror( "Unable to retrieve current directory" );
+    TCHAR buf[1024];
+    // NB: not thread safe
+    DWORD len = GetCurrentDirectory( 1024, buf );
+    if ( len > 1024 )
+    {
+        std::unique_ptr<TCHAR[]> tmp( new TCHAR[len + 1] );
+        len = GetCurrentDirectory( len + 1, tmp.get() );
+        if ( len == 0 )
+            throw_lasterror( "Unable to retrieve current directory" );
+        return uri( tmp.get() );
+    }
+    else if ( len == 0 )
+        throw_lasterror( "Unable to retrieve current directory" );
 
-	return uri( buf );
+    return uri( buf );
 }
 
 ////////////////////////////////////////
 
-void
-win32_file_system::lstat( const uri &path, struct stat *buf )
+void win32_file_system::lstat( const uri &path, struct stat *buf )
 {
-	precondition( path.scheme() == "file", "win32_file_system expected \"file\" uri" );
-	std::string fpath = path.full_path();
-	throw_not_yet();
-	//GetFileAttributesEx()?
+    precondition(
+        path.scheme() == "file", "win32_file_system expected \"file\" uri" );
+    std::string fpath = path.full_path();
+    throw_not_yet();
+    //GetFileAttributesEx()?
 }
-
 
 ////////////////////////////////////////
 
-
-void
-win32_file_system::statfs( const uri &path, struct statvfs *s )
+void win32_file_system::statfs( const uri &path, struct statvfs *s )
 {
-	precondition( path.scheme() == "file", "win32_file_system expected \"file\" uri" );
-	throw_not_yet();
-	//GetDiskFreeSpaceEx()
+    precondition(
+        path.scheme() == "file", "win32_file_system expected \"file\" uri" );
+    throw_not_yet();
+    //GetDiskFreeSpaceEx()
 }
-
 
 ////////////////////////////////////////
 
-
-uri
-win32_file_system::readlink( const uri &path, size_t sz )
+uri win32_file_system::readlink( const uri &path, size_t sz )
 {
-	precondition( path.scheme() == "file", "win32_file_system expected \"file\" uri" );
-	std::string fpath = path.full_path();
+    precondition(
+        path.scheme() == "file", "win32_file_system expected \"file\" uri" );
+    std::string fpath = path.full_path();
 
-	throw_not_yet();
+    throw_not_yet();
 #if 0
 	if ( sz == 0 )
 	{
@@ -108,34 +104,33 @@ win32_file_system::readlink( const uri &path, size_t sz )
 #endif
 }
 
-
 ////////////////////////////////////////
-
 
 bool win32_file_system::access( const uri &path, int mode )
 {
-	precondition( path.scheme() == "file", "win32_file_system expected \"file\" uri" );
-	throw_not_yet();
-//	std::string fpath = path.full_path();
-//	return ::access( fpath.c_str(), mode ) == 0;
+    precondition(
+        path.scheme() == "file", "win32_file_system expected \"file\" uri" );
+    throw_not_yet();
+    //	std::string fpath = path.full_path();
+    //	return ::access( fpath.c_str(), mode ) == 0;
 }
-
 
 ////////////////////////////////////////
 
-
 directory_iterator win32_file_system::readdir( const uri &path )
 {
-	precondition( path.scheme() == "file", "win32_file_system expected \"file\" uri" );
-	std::string fpath = path.full_path();
-	throw_not_yet();
+    precondition(
+        path.scheme() == "file", "win32_file_system expected \"file\" uri" );
+    std::string fpath = path.full_path();
+    throw_not_yet();
 #if 0
 	std::shared_ptr<DIR> dir( ::opendir( fpath.c_str() ), []( DIR *d ) { ::closedir( d ); } );
 	if ( !dir )
 		throw_errno( "opendir failed on {0}", fpath );
 
 	// glibc deprecates readdir_r in 2.24, handle that
-#if defined(__GNU_LIBRARY__) && ( __GLIBC__ > 2 || ( __GLIBC__ == 2 && __GLIBC_MINOR__ >= 24 ) ) 
+#    if defined( __GNU_LIBRARY__ ) &&                                          \
+        ( __GLIBC__ > 2 || ( __GLIBC__ == 2 && __GLIBC_MINOR__ >= 24 ) ) 
 	// glibc deprecates readdir_r as readdir is safe to call in a multi-threaded environment
 	// apparently using an internal lock on the temporary buffers used to make system calls
 	// (with different DIR)
@@ -165,7 +160,7 @@ directory_iterator win32_file_system::readdir( const uri &path )
 		}
 		return uri();
 	};
-#else
+#    else
 	size_t n = static_cast<size_t>( std::max( fpathconf( dirfd( dir.get() ), _PC_NAME_MAX ), long(255) ) ) + 1;
 	n += offsetof( struct dirent, d_name );
 	std::shared_ptr<struct dirent> dir_ent( reinterpret_cast<dirent*>( new char[n] ), []( struct dirent *d ) { delete [] reinterpret_cast<char*>( d ); } );
@@ -191,21 +186,19 @@ directory_iterator win32_file_system::readdir( const uri &path )
 		}
 		throw_errno( "reading directory {0}", path );
 	};
-#endif
+#    endif
 	return directory_iterator( next_entry );
 #endif
 }
 
-
 ////////////////////////////////////////
 
-
-void
-win32_file_system::mkdir( const uri &path, mode_t mode )
+void win32_file_system::mkdir( const uri &path, mode_t mode )
 {
-	precondition( path.scheme() == "file", "win32_file_system expected \"file\" uri" );
-	std::string fpath = path.full_path();
-	throw_not_yet();
+    precondition(
+        path.scheme() == "file", "win32_file_system expected \"file\" uri" );
+    std::string fpath = path.full_path();
+    throw_not_yet();
 #if 0
 	if ( ::mkdir( fpath.c_str(), mode ) == -1 )
 	{
@@ -225,16 +218,16 @@ win32_file_system::mkdir( const uri &path, mode_t mode )
 #endif
 }
 
-
 ////////////////////////////////////////
 
-
-void
-win32_file_system::mkdir_all( const uri &path, mode_t mode )
+void win32_file_system::mkdir_all( const uri &path, mode_t mode )
 {
-	precondition( path.scheme() == "file", "win32_file_system expected \"file\" uri, got {0}", path.scheme() );
-	base::uri curpath( path.root() );
-	throw_not_yet();
+    precondition(
+        path.scheme() == "file",
+        "win32_file_system expected \"file\" uri, got {0}",
+        path.scheme() );
+    base::uri curpath( path.root() );
+    throw_not_yet();
 #if 0
 	for ( auto &p: path.path() )
 	{
@@ -258,16 +251,14 @@ win32_file_system::mkdir_all( const uri &path, mode_t mode )
 #endif
 }
 
-
 ////////////////////////////////////////
 
-
-void
-win32_file_system::rmdir( const uri &path )
+void win32_file_system::rmdir( const uri &path )
 {
-	precondition( path.scheme() == "file", "win32_file_system expected \"file\" uri" );
-	std::string fpath = path.full_path();
-	throw_not_yet();
+    precondition(
+        path.scheme() == "file", "win32_file_system expected \"file\" uri" );
+    std::string fpath = path.full_path();
+    throw_not_yet();
 #if 0
 	if ( ::rmdir( fpath.c_str() ) == -1 )
 	{
@@ -277,16 +268,14 @@ win32_file_system::rmdir( const uri &path )
 #endif
 }
 
-
 ////////////////////////////////////////
 
-
-void
-win32_file_system::unlink( const uri &path )
+void win32_file_system::unlink( const uri &path )
 {
-	precondition( path.scheme() == "file", "win32_file_system expected \"file\" uri" );
-	std::string fpath = path.full_path();
-	throw_not_yet();
+    precondition(
+        path.scheme() == "file", "win32_file_system expected \"file\" uri" );
+    std::string fpath = path.full_path();
+    throw_not_yet();
 #if 0
 	if ( ::unlink( fpath.c_str() ) == -1 )
 	{
@@ -296,73 +285,72 @@ win32_file_system::unlink( const uri &path )
 #endif
 }
 
-
 ////////////////////////////////////////
 
-
-void
-win32_file_system::symlink( const uri &curpath, const uri &newpath )
+void win32_file_system::symlink( const uri &curpath, const uri &newpath )
 {
-	precondition( newpath.scheme() == "file", "win32_file_system expected \"file\" uri" );
-	std::string newfpath = newpath.full_path();
-	std::stringstream pathbuf;
-	if ( curpath.scheme() == "file" )
-		pathbuf << curpath.full_path();
-	else
-		pathbuf << curpath;
-	std::string curfpath = pathbuf.str();
-	throw_not_yet();
+    precondition(
+        newpath.scheme() == "file", "win32_file_system expected \"file\" uri" );
+    std::string       newfpath = newpath.full_path();
+    std::stringstream pathbuf;
+    if ( curpath.scheme() == "file" )
+        pathbuf << curpath.full_path();
+    else
+        pathbuf << curpath;
+    std::string curfpath = pathbuf.str();
+    throw_not_yet();
 #if 0
 	if ( ::symlink( curfpath.c_str(), newfpath.c_str() ) == -1 )
 		throw_errno( "creating symlink {0} to {1}", newfpath, curfpath );
 #endif
 }
 
-
 ////////////////////////////////////////
 
-
-void
-win32_file_system::link( const uri &curpath, const uri &newpath )
+void win32_file_system::link( const uri &curpath, const uri &newpath )
 {
-	precondition( curpath.scheme() == "file", "win32_file_system expected \"file\" uri, got {0}", curpath.scheme() );
-	precondition( newpath.scheme() == "file", "win32_file_system expected \"file\" uri, got {0}", newpath.scheme() );
-	std::string curfpath = curpath.full_path();
-	std::string newfpath = newpath.full_path();
-	throw_not_yet();
+    precondition(
+        curpath.scheme() == "file",
+        "win32_file_system expected \"file\" uri, got {0}",
+        curpath.scheme() );
+    precondition(
+        newpath.scheme() == "file",
+        "win32_file_system expected \"file\" uri, got {0}",
+        newpath.scheme() );
+    std::string curfpath = curpath.full_path();
+    std::string newfpath = newpath.full_path();
+    throw_not_yet();
 #if 0
 	if ( ::link( curfpath.c_str(), newfpath.c_str() ) != 0 )
 		throw_errno( "creating hard link from {0} to {1}", curfpath, newfpath );
 #endif
 }
 
-
 ////////////////////////////////////////
 
-
-void
-win32_file_system::rename( const uri &oldpath, const uri &newpath )
+void win32_file_system::rename( const uri &oldpath, const uri &newpath )
 {
-	precondition( oldpath.scheme() == "file", "win32_file_system expected \"file\" uri" );
-	precondition( newpath.scheme() == "file", "win32_file_system expected \"file\" uri" );
-	std::string oldfpath = oldpath.full_path();
-	std::string newfpath = newpath.full_path();
-	throw_not_yet();
+    precondition(
+        oldpath.scheme() == "file", "win32_file_system expected \"file\" uri" );
+    precondition(
+        newpath.scheme() == "file", "win32_file_system expected \"file\" uri" );
+    std::string oldfpath = oldpath.full_path();
+    std::string newfpath = newpath.full_path();
+    throw_not_yet();
 #if 0
 	if ( ::rename( oldfpath.c_str(), newfpath.c_str() ) != 0 )
 		throw_errno( "renaming {0} to {1}", oldfpath, newfpath );
 #endif
 }
 
-
 ////////////////////////////////////////
-
 
 istream
 win32_file_system::open_read( const base::uri &path, std::ios_base::openmode m )
 {
-	precondition( path.scheme() == "file", "win32_file_system expected \"file\" uri" );
-	throw_not_yet();
+    precondition(
+        path.scheme() == "file", "win32_file_system expected \"file\" uri" );
+    throw_not_yet();
 #if 0
 	std::unique_ptr<unix_streambuf> sb( new unix_streambuf( m, path, page_size ) );
 	istream ret( std::move( sb ) );
@@ -371,46 +359,43 @@ win32_file_system::open_read( const base::uri &path, std::ios_base::openmode m )
 #endif
 }
 
-
 ////////////////////////////////////////
 
-
-ostream
-win32_file_system::open_write( const base::uri &path, std::ios_base::openmode m )
+ostream win32_file_system::open_write(
+    const base::uri &path, std::ios_base::openmode m )
 {
-	precondition( path.scheme() == "file", "win32_file_system expected \"file\" uri" );
-	throw_not_yet();
+    precondition(
+        path.scheme() == "file", "win32_file_system expected \"file\" uri" );
+    throw_not_yet();
 #if 0
 	std::unique_ptr<unix_streambuf> sb( new unix_streambuf( m, path, page_size ) );
 	return ostream( std::move( sb ) );
 #endif
 }
 
-
 ////////////////////////////////////////
-
 
 iostream
 win32_file_system::open( const base::uri &path, std::ios_base::openmode m )
 {
-	precondition( path.scheme() == "file", "win32_file_system expected \"file\" uri" );
-	throw_not_yet();
+    precondition(
+        path.scheme() == "file", "win32_file_system expected \"file\" uri" );
+    throw_not_yet();
 #if 0
 	std::unique_ptr<unix_streambuf> sb( new unix_streambuf( m, path, page_size ) );
 	return iostream( std::move( sb ) );
 #endif
 }
 
-
 ////////////////////////////////////////
 
-
-fs_watch
-win32_file_system::watch( const base::uri &path,
-						  const fs_watch::event_handler &evtcb,
-						  fs_event evt_mask, bool recursive )
+fs_watch win32_file_system::watch(
+    const base::uri &              path,
+    const fs_watch::event_handler &evtcb,
+    fs_event                       evt_mask,
+    bool                           recursive )
 {
-	throw_not_yet();
+    throw_not_yet();
 #if 0
 	auto fsw = getWatcher();
 	fs_watch retval( fsw, evtcb );
@@ -421,7 +406,4 @@ win32_file_system::watch( const base::uri &path,
 
 ////////////////////////////////////////
 
-} // base
-
-
-
+} // namespace base

@@ -6,7 +6,6 @@
 ////////////////////////////////////////
 namespace platform
 {
-
 ////////////////////////////////////////
 
 selection::selection( selection_type st, const std::string &customSelType )
@@ -26,12 +25,12 @@ selection::selection(
 ////////////////////////////////////////
 
 selection::selection(
-    selection_type st,
-    const data_container &data,
-    const std::string &mime_type,
+    selection_type                  st,
+    const data_container &          data,
+    const std::string &             mime_type,
     const std::vector<std::string> &avail_mime,
-    const mime_converter &converter,
-    const std::string &customSelType )
+    const mime_converter &          converter,
+    const std::string &             customSelType )
     : _data( data )
     , _data_type( mime_type )
     , _avail_mime( avail_mime )
@@ -63,7 +62,7 @@ const std::vector<uint8_t> &selection::as( const std::string &mime_type )
     if ( _convert_func )
     {
         _convert_cache = _convert_func( _data, _data_type, mime_type );
-        _cache_type = mime_type;
+        _cache_type    = mime_type;
         return _convert_cache;
     }
 

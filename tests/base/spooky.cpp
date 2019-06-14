@@ -9,11 +9,10 @@
 
 namespace
 {
-
 class Random
 {
 private:
-    uint64_t _a, _b, _c, _d;
+    uint64_t                         _a, _b, _c, _d;
     static inline constexpr uint64_t rot64( uint64_t x, int k )
     {
         return ( x << k ) | ( x >> ( 64 - k ) );
@@ -23,10 +22,10 @@ public:
     inline uint64_t value( void )
     {
         uint64_t e = _a - rot64( _b, 23 );
-        _a = _b ^ rot64( _c, 16 );
-        _b = _c + rot64( _d, 11 );
-        _c = _d + e;
-        _d = e + _a;
+        _a         = _b ^ rot64( _c, 16 );
+        _b         = _c + rot64( _d, 11 );
+        _c         = _d + e;
+        _d         = e + _a;
         return _d;
     }
 
@@ -39,7 +38,7 @@ public:
     }
 };
 
-constexpr int BUFSIZE = 512;
+constexpr int         BUFSIZE           = 512;
 static const uint64_t expected[BUFSIZE] = {
     0x6bf50919, 0x70de1d26, 0xa2b37298, 0x35bc5fbf, 0x8223b279, 0x5bcb315e,
     0x53fe88a1, 0xf9f1a233, 0xee193982, 0x54f86f29, 0xc8772d36, 0x9ed60886,
@@ -155,7 +154,7 @@ int safemain( int argc, char *argv[] )
     }
 
     test["results"] = [&]( void ) {
-        uint8_t buf[BUFSIZE];
+        uint8_t  buf[BUFSIZE];
         uint32_t saw[BUFSIZE];
         for ( int i = 0; i != BUFSIZE; ++i )
         {
@@ -178,8 +177,8 @@ int safemain( int argc, char *argv[] )
 
     test["alignment"] = [&]( void ) {
         constexpr int aBUFSIZE = 1024;
-        char buf[aBUFSIZE];
-        uint64_t hash[8];
+        char          buf[aBUFSIZE];
+        uint64_t      hash[8];
         for ( int i = 0; i != aBUFSIZE; ++i )
         {
             for ( int j = 0; j != 8; ++j )
@@ -189,7 +188,7 @@ int safemain( int argc, char *argv[] )
                     buf[j + k] = k;
 
                 buf[j + i + 1] = static_cast<char>( i + j );
-                hash[j] = base::spooky_hash::hash64( buf + j + 1, i, 0 );
+                hash[j]        = base::spooky_hash::hash64( buf + j + 1, i, 0 );
             }
             for ( int j = 1; j < 8; ++j )
             {
@@ -203,8 +202,8 @@ int safemain( int argc, char *argv[] )
 
     test["deltas"] = [&]( void ) {
         //		constexpr int dBUFSIZE = 256;
-        constexpr int dBUFSIZE = 64;
-        constexpr int dTRIES = 50;
+        constexpr int dBUFSIZE  = 64;
+        constexpr int dTRIES    = 50;
         constexpr int dMEASURES = 6;
 
         Random random;
@@ -239,7 +238,7 @@ int safemain( int argc, char *argv[] )
                     {
                         uint8_t buf1[dBUFSIZE];
                         uint8_t buf2[dBUFSIZE];
-                        int done = 1;
+                        int     done = 1;
                         for ( int l = 0; l != h; ++l )
                             buf1[l] = buf2[l] = random.value();
 
@@ -293,7 +292,7 @@ int safemain( int argc, char *argv[] )
 
     test["pieces"] = [&]( void ) {
         constexpr int pBUFSIZE = 1024;
-        char buf[pBUFSIZE];
+        char          buf[pBUFSIZE];
         for ( int i = 0; i != pBUFSIZE; ++i )
             buf[i] = static_cast<char>( i );
 

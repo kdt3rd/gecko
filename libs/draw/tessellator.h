@@ -37,10 +37,9 @@
 
 namespace draw
 {
-
 ////////////////////////////////////////
 
-template<typename Key> class dict;
+template <typename Key> class dict;
 class tess_mesh;
 class active_region;
 class half_edge;
@@ -49,87 +48,98 @@ class vertex;
 class tessellator
 {
 public:
-	tessellator( const std::function<void(double,double)> &add_point, const std::function<void(size_t,size_t,size_t)> &add_tri );
-	~tessellator( void );
+    tessellator(
+        const std::function<void( double, double )> &        add_point,
+        const std::function<void( size_t, size_t, size_t )> &add_tri );
+    ~tessellator( void );
 
-	void *begin_contour( void );
-	void contour_point( void *&contour, double x, double y, double z );
-	void end_contour( void *&contour );
+    void *begin_contour( void );
+    void  contour_point( void *&contour, double x, double y, double z );
+    void  end_contour( void *&contour );
 
-	void tessellate( void );
+    void tessellate( void );
 
 private:
-	bool is_winding_inside( int n )
-	{
-		return ( n & 1 );
-	}
+    bool is_winding_inside( int n ) { return ( n & 1 ); }
 
-	void compute_bounding_box( void );
-	void output_polymesh( void );
+    void compute_bounding_box( void );
+    void output_polymesh( void );
 
-	bool edge_leq( active_region *reg1, active_region *reg2 );
+    bool edge_leq( active_region *reg1, active_region *reg2 );
 
-	void delete_region( active_region *reg );
-	int fix_upper_edge( active_region *reg, half_edge *newEdge );
+    void delete_region( active_region *reg );
+    int  fix_upper_edge( active_region *reg, half_edge *newEdge );
 
-	active_region *top_left_region( active_region *reg );
-	active_region *top_right_region( active_region *reg );
-	active_region *add_region_below( active_region *regAbove, half_edge *eNewUp );
-	void compute_winding( active_region *reg );
-	void finish_region( active_region *reg );
-	half_edge *finish_left_regions( active_region *regFirst, active_region *regLast );
-	void add_right_edges( active_region *regUp, half_edge *eFirst, half_edge *eLast, half_edge *eTopLeft, bool cleanUp );
-	bool check_for_right_splice( active_region *regUp );
-	bool check_for_left_splice( active_region *regUp );
-	bool check_for_intersect( active_region *regUp );
-	void walk_dirty_regions( active_region *regUp );
-	void connect_right_vertex( active_region *regUp, half_edge *eBottomLeft );
-	void connect_left_vertex( vertex *vEvent );
-	void connect_left_degenerate( active_region *regUp, vertex *vEvent );
-	void sweep_event( vertex *vEvent );
-	void add_sentinel( double smin, double smax, double t );
-	void init_edge_dict( void );
-	void done_edge_dict( void );
-	bool init_priorityq( void );
-	void done_priorityq( void );
+    active_region *top_left_region( active_region *reg );
+    active_region *top_right_region( active_region *reg );
+    active_region *
+         add_region_below( active_region *regAbove, half_edge *eNewUp );
+    void compute_winding( active_region *reg );
+    void finish_region( active_region *reg );
+    half_edge *
+         finish_left_regions( active_region *regFirst, active_region *regLast );
+    void add_right_edges(
+        active_region *regUp,
+        half_edge *    eFirst,
+        half_edge *    eLast,
+        half_edge *    eTopLeft,
+        bool           cleanUp );
+    bool check_for_right_splice( active_region *regUp );
+    bool check_for_left_splice( active_region *regUp );
+    bool check_for_intersect( active_region *regUp );
+    void walk_dirty_regions( active_region *regUp );
+    void connect_right_vertex( active_region *regUp, half_edge *eBottomLeft );
+    void connect_left_vertex( vertex *vEvent );
+    void connect_left_degenerate( active_region *regUp, vertex *vEvent );
+    void sweep_event( vertex *vEvent );
+    void add_sentinel( double smin, double smax, double t );
+    void init_edge_dict( void );
+    void done_edge_dict( void );
+    bool init_priorityq( void );
+    void done_priorityq( void );
 
-	// tessComputeInterior( tess ) computes the planar arrangement specified
-	// by the given contours, and further subdivides this arrangement
-	// into regions.  Each region is marked "inside" if it belongs
-	// to the polygon, according to the rule given by tess->windingRule.
-	// Each interior region is guaranteed be monotone.
-	bool compute_interior( void );
+    // tessComputeInterior( tess ) computes the planar arrangement specified
+    // by the given contours, and further subdivides this arrangement
+    // into regions.  Each region is marked "inside" if it belongs
+    // to the polygon, according to the rule given by tess->windingRule.
+    // Each interior region is guaranteed be monotone.
+    bool compute_interior( void );
 
-	void get_intersect_data( vertex *isect, vertex *orgUp, vertex *dstUp, vertex *orgLo, vertex *dstLo );
+    void get_intersect_data(
+        vertex *isect,
+        vertex *orgUp,
+        vertex *dstUp,
+        vertex *orgLo,
+        vertex *dstLo );
 
-	// state needed for collecting the input data
+    // state needed for collecting the input data
 
-	// stores the input contours, and eventually the tessellation itself
-	tess_mesh	*_mesh;
+    // stores the input contours, and eventually the tessellation itself
+    tess_mesh *_mesh;
 
-	// state needed for projecting onto the sweep plane
+    // state needed for projecting onto the sweep plane
 
-	double _bmin[2];
-	double _bmax[2];
+    double _bmin[2];
+    double _bmax[2];
 
-	// state needed for the line sweep
+    // state needed for the line sweep
 
-	// edge dictionary for sweep line
-	dict<active_region*> *_dict;
+    // edge dictionary for sweep line
+    dict<active_region *> *_dict;
 
-	// priority queue of vertex events
-	base::priority_queue<vertex *> _pq;
+    // priority queue of vertex events
+    base::priority_queue<vertex *> _pq;
 
-	// current sweep event being processed
-	vertex *_event;
+    // current sweep event being processed
+    vertex *_event;
 
-	base::memory_pool<active_region,256> _regionPool;
+    base::memory_pool<active_region, 256> _regionPool;
 
-	std::function<void(double,double)> _add_point;
-	std::function<void(size_t,size_t,size_t)> _add_tri;
+    std::function<void( double, double )>         _add_point;
+    std::function<void( size_t, size_t, size_t )> _add_tri;
 };
 
 ////////////////////////////////////////
 
-}
+} // namespace draw
 /// @endcond

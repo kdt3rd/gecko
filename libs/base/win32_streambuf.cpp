@@ -2,19 +2,24 @@
 // SPDX-License-Identifier: MIT
 
 #include "win32_streambuf.h"
+
 #include "contract.h"
 
 ////////////////////////////////////////
 
 namespace base
 {
-
 ////////////////////////////////////////
 
-win32_streambuf::win32_streambuf( std::ios_base::openmode m, HANDLE f, bool doDup, const std::string &path, std::streamsize bufSz )
-	: streambuf( m, bufSz ), _f( INVALID_HANDLE_VALUE ), _path( path )
+win32_streambuf::win32_streambuf(
+    std::ios_base::openmode m,
+    HANDLE                  f,
+    bool                    doDup,
+    const std::string &     path,
+    std::streamsize         bufSz )
+    : streambuf( m, bufSz ), _f( INVALID_HANDLE_VALUE ), _path( path )
 {
-	throw_not_yet();
+    throw_not_yet();
 #if 0
 	if ( doDup )
 	{
@@ -41,86 +46,86 @@ win32_streambuf::win32_streambuf( std::ios_base::openmode m, HANDLE f, bool doDu
 
 ////////////////////////////////////////
 
-win32_streambuf::win32_streambuf( std::ios_base::openmode m, const uri &path, std::streamsize bufSz )
-		: streambuf( m, bufSz ), _path( path.full_path() )
+win32_streambuf::win32_streambuf(
+    std::ios_base::openmode m, const uri &path, std::streamsize bufSz )
+    : streambuf( m, bufSz ), _path( path.full_path() )
 {
-	stash_uri( path.pretty() );
-	initFile( m );
+    stash_uri( path.pretty() );
+    initFile( m );
 }
 
 ////////////////////////////////////////
 
-win32_streambuf::win32_streambuf( std::ios_base::openmode m, const std::string &path, std::streamsize bufSz )
-		: streambuf( m, bufSz ), _path( path )
+win32_streambuf::win32_streambuf(
+    std::ios_base::openmode m, const std::string &path, std::streamsize bufSz )
+    : streambuf( m, bufSz ), _path( path )
 {
-	initFile( m );
+    initFile( m );
 }
 
 ////////////////////////////////////////
 
-win32_streambuf::win32_streambuf( std::ios_base::openmode m, std::string &&path, std::streamsize bufSz )
-		: streambuf( m, bufSz ), _path( std::move( path ) )
+win32_streambuf::win32_streambuf(
+    std::ios_base::openmode m, std::string &&path, std::streamsize bufSz )
+    : streambuf( m, bufSz ), _path( std::move( path ) )
 {
-	initFile( m );
+    initFile( m );
 }
 
 ////////////////////////////////////////
 
 win32_streambuf::win32_streambuf( win32_streambuf &&u )
-		: streambuf( std::move( u ) ), _f( base::exchange( u._f, INVALID_HANDLE_VALUE ) ),
-		  _path( std::move( u._path ) )
-{
-}
+    : streambuf( std::move( u ) )
+    , _f( base::exchange( u._f, INVALID_HANDLE_VALUE ) )
+    , _path( std::move( u._path ) )
+{}
 
 ////////////////////////////////////////
 
 win32_streambuf &win32_streambuf::operator=( win32_streambuf &&u )
 {
-	streambuf::operator=( std::move( u ) );
-	_f = base::exchange( u._f, INVALID_HANDLE_VALUE );
-	_path = std::move( u._path );
-	return *this;
+    streambuf::operator=( std::move( u ) );
+    _f                 = base::exchange( u._f, INVALID_HANDLE_VALUE );
+    _path              = std::move( u._path );
+    return *this;
 }
 
 ////////////////////////////////////////
 
-win32_streambuf::~win32_streambuf( void )
-{
-	this->close();
-}
+win32_streambuf::~win32_streambuf( void ) { this->close(); }
 
 ////////////////////////////////////////
 
 void win32_streambuf::swap( win32_streambuf &u )
 {
-	streambuf::swap( u );
-	std::swap( _f, u._f );
-	std::swap( _path, u._path );
+    streambuf::swap( u );
+    std::swap( _f, u._f );
+    std::swap( _path, u._path );
 }
 
 ////////////////////////////////////////
 
 bool win32_streambuf::is_open( void ) const
 {
-	return ( _f != INVALID_HANDLE_VALUE );
+    return ( _f != INVALID_HANDLE_VALUE );
 }
 
 ////////////////////////////////////////
 
 void win32_streambuf::close( void ) noexcept
 {
-	if ( _f != INVALID_HANDLE_VALUE )
-	{
-		::CloseHandle( _f );
-		_f = INVALID_HANDLE_VALUE;
-	}
+    if ( _f != INVALID_HANDLE_VALUE )
+    {
+        ::CloseHandle( _f );
+        _f = INVALID_HANDLE_VALUE;
+    }
 }
 
 ////////////////////////////////////////
 
 win32_streambuf::off_type win32_streambuf::bytes_avail( void )
 {
-	throw_not_yet();
+    throw_not_yet();
 #if 0
 	if ( _fd < 0 )
 		return 0;
@@ -150,9 +155,10 @@ win32_streambuf::off_type win32_streambuf::bytes_avail( void )
 
 ////////////////////////////////////////
 
-win32_streambuf::off_type win32_streambuf::seek( off_type off, std::ios_base::seekdir dir )
+win32_streambuf::off_type
+win32_streambuf::seek( off_type off, std::ios_base::seekdir dir )
 {
-	throw_not_yet();
+    throw_not_yet();
 #if 0
 	off_type ret = -1;
 	if ( _fd >= 0 )
@@ -165,7 +171,7 @@ win32_streambuf::off_type win32_streambuf::seek( off_type off, std::ios_base::se
 
 std::streamsize win32_streambuf::read( void *outBuf, size_t numBytes )
 {
-	throw_not_yet();
+    throw_not_yet();
 #if 0
 	std::streamsize ret = -1;
 	if ( _fd >= 0 )
@@ -183,7 +189,7 @@ std::streamsize win32_streambuf::read( void *outBuf, size_t numBytes )
 
 std::streamsize win32_streambuf::write( const void *outBuf, size_t numBytes )
 {
-	throw_not_yet();
+    throw_not_yet();
 #if 0
 	size_t nleft = numBytes;
 
@@ -214,9 +220,13 @@ std::streamsize win32_streambuf::write( const void *outBuf, size_t numBytes )
 
 ////////////////////////////////////////
 
-std::streamsize win32_streambuf::writev( const void *outBuf1, size_t numBytes1, const void *outBuf2, size_t numBytes2 )
+std::streamsize win32_streambuf::writev(
+    const void *outBuf1,
+    size_t      numBytes1,
+    const void *outBuf2,
+    size_t      numBytes2 )
 {
-	throw_not_yet();
+    throw_not_yet();
 #if 0
 	const char *s1 = reinterpret_cast<const char *>( outBuf1 );
 	const char *s2 = reinterpret_cast<const char *>( outBuf2 );
@@ -267,12 +277,12 @@ std::streamsize win32_streambuf::writev( const void *outBuf1, size_t numBytes1, 
 
 void win32_streambuf::initFile( std::ios_base::openmode m )
 {
-	if ( _f == INVALID_HANDLE_VALUE )
-	{
-		if ( _path.empty() )
-			throw_logic( "invalid path to open file" );
+    if ( _f == INVALID_HANDLE_VALUE )
+    {
+        if ( _path.empty() )
+            throw_logic( "invalid path to open file" );
 
-		throw_not_yet();
+        throw_not_yet();
 #if 0
 		int flags = 0;
 
@@ -303,15 +313,15 @@ void win32_streambuf::initFile( std::ios_base::openmode m )
 			throw_runtime( "unable to open '{0}'", _path );
 		_fd = nfd;
 #endif
-	}
+    }
 
-	if ( m & std::ios_base::ate )
-	{
-		if ( this->seek( 0, std::ios_base::end ) == -1 )
-			throw_runtime( "unable to seek to the end of the stream" );
-	}
+    if ( m & std::ios_base::ate )
+    {
+        if ( this->seek( 0, std::ios_base::end ) == -1 )
+            throw_runtime( "unable to seek to the end of the stream" );
+    }
 }
 
 ////////////////////////////////////////
 
-} // base
+} // namespace base

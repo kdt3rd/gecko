@@ -8,9 +8,8 @@
 /// @brief Orientations
 enum class orientation
 {
-	HORIZONTAL,
-	VERTICAL,
+    HORIZONTAL,
+    VERTICAL,
 };
 
 ////////////////////////////////////////
-

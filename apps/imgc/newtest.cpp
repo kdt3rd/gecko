@@ -1,28 +1,26 @@
 // Copyright (c) 2016 Ian Godin
 // SPDX-License-Identifier: MIT
 
-
-#include <imgproc/expr.h>
 #include <imgproc/environment.h>
+#include <imgproc/expr.h>
 #include <imgproc/function.h>
 
 namespace
 {
-
-int safemain( int /*argc*/, char * /*argv*/ [] )
+int safemain( int /*argc*/, char * /*argv*/[] )
 {
-	using namespace imgproc;
+    using namespace imgproc;
 
-	auto x = std::make_shared<expr>( identifier_expr( U"x" ) );
-	auto y = std::make_shared<expr>( identifier_expr( U"y" ) );
-	auto e = std::make_shared<expr>( infix_expr( U"+", x, y ) );
+    auto x = std::make_shared<expr>( identifier_expr( U"x" ) );
+    auto y = std::make_shared<expr>( identifier_expr( U"y" ) );
+    auto e = std::make_shared<expr>( infix_expr( U"+", x, y ) );
 
-	function f( U"add", U"x", U"y" );
-	f.set_result( e );
-//	auto args = { type_primary( pod_type::FLOAT32 ), type_primary( pod_type::FLOAT32 ) };
-//	std::cout << e << " = " << infer( f, args )->get_type() << std::endl;
+    function f( U"add", U"x", U"y" );
+    f.set_result( e );
+    //	auto args = { type_primary( pod_type::FLOAT32 ), type_primary( pod_type::FLOAT32 ) };
+    //	std::cout << e << " = " << infer( f, args )->get_type() << std::endl;
 
-	/*
+    /*
 	environment env;
 	env[U"true"] = make_type<bool>();
 	env[U"false"] = make_type<bool>();
@@ -40,19 +38,19 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 	std::cout << end << ": " << t << std::endl;
 	*/
 
-	return 0;
+    return 0;
 }
 
-}
+} // namespace
 
 int main( int argc, char *argv[] )
 {
-	try
-	{
-		return safemain( argc, argv );
-	}
-	catch ( const std::exception &e )
-	{
-		base::print_exception( std::cerr, e );
-	}
+    try
+    {
+        return safemain( argc, argv );
+    }
+    catch ( const std::exception &e )
+    {
+        base::print_exception( std::cerr, e );
+    }
 }

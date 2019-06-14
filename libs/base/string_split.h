@@ -4,16 +4,15 @@
 #pragma once
 
 #include "const_string.h"
-#include <vector>
-#include <string>
+
 #include <iostream>
+#include <string>
+#include <vector>
 
 ////////////////////////////////////////
 
 namespace base
 {
-
-
 ////////////////////////////////////////////////////////////////////////////////
 // Utility functions to split on either the individual separator or a set of
 // separator characters
@@ -22,44 +21,47 @@ namespace base
 ////////////////////////////////////////
 
 template <typename stringT, typename Delim, typename Inserter>
-inline void
-split( const stringT &str, const Delim &delim, Inserter insert, bool skip_empty = false )
+inline void split(
+    const stringT &str,
+    const Delim &  delim,
+    Inserter       insert,
+    bool           skip_empty = false )
 {
-	if ( skip_empty )
-	{
-		typename stringT::size_type last = str.find_first_not_of( delim, 0 );
-		typename stringT::size_type cur = str.find_first_of( delim, last );
+    if ( skip_empty )
+    {
+        typename stringT::size_type last = str.find_first_not_of( delim, 0 );
+        typename stringT::size_type cur  = str.find_first_of( delim, last );
 
-		while ( cur != stringT::npos || last < str.size() )
-		{
-			if ( cur != last )
-				insert = str.substr( last, cur - last );
-			last = str.find_first_not_of( delim, cur );
-			cur = str.find_first_of( delim, last );
-		}
-	}
-	else
-	{
-		typename stringT::size_type last = 0;
-		typename stringT::size_type cur = str.find_first_of( delim, last );
+        while ( cur != stringT::npos || last < str.size() )
+        {
+            if ( cur != last )
+                insert = str.substr( last, cur - last );
+            last = str.find_first_not_of( delim, cur );
+            cur  = str.find_first_of( delim, last );
+        }
+    }
+    else
+    {
+        typename stringT::size_type last = 0;
+        typename stringT::size_type cur  = str.find_first_of( delim, last );
 
-		do
-		{
-			if ( cur == stringT::npos )
-			{
-				if ( last == str.size() )
-					insert = stringT();
-				else
-					insert = str.substr( last );
+        do
+        {
+            if ( cur == stringT::npos )
+            {
+                if ( last == str.size() )
+                    insert = stringT();
+                else
+                    insert = str.substr( last );
 
-				break;
-			}
+                break;
+            }
 
-			insert = str.substr( last, cur - last );
-			last = cur + 1;
-			cur = str.find_first_of( delim, last );
-		} while ( last != stringT::npos );
-	}
+            insert = str.substr( last, cur - last );
+            last   = cur + 1;
+            cur    = str.find_first_of( delim, last );
+        } while ( last != stringT::npos );
+    }
 }
 
 //template<typename Inserter>
@@ -73,28 +75,30 @@ split( const stringT &str, const Delim &delim, Inserter insert, bool skip_empty 
 //		insert = item;
 //}
 
-
 ////////////////////////////////////////
 
-
 template <typename stringT>
-inline void
-split( std::vector<stringT> &ret, const stringT &str, const stringT &sep, bool skip_empty = false )
+inline void split(
+    std::vector<stringT> &ret,
+    const stringT &       str,
+    const stringT &       sep,
+    bool                  skip_empty = false )
 {
-	ret.clear();
+    ret.clear();
 
-	split( str, sep, std::back_inserter( ret ), skip_empty );
+    split( str, sep, std::back_inserter( ret ), skip_empty );
 }
 
 ////////////////////////////////////////
 
 template <typename stringT>
-inline void
-split( std::vector<stringT> &ret, const stringT &str,
-	   const typename stringT::value_type *sep,
-	   bool skip_empty = false )
+inline void split(
+    std::vector<stringT> &              ret,
+    const stringT &                     str,
+    const typename stringT::value_type *sep,
+    bool                                skip_empty = false )
 {
-	split( ret, str, stringT( sep ), skip_empty );
+    split( ret, str, stringT( sep ), skip_empty );
 }
 
 ////////////////////////////////////////
@@ -103,51 +107,51 @@ template <typename stringT>
 inline std::vector<stringT>
 split( const stringT &str, const stringT &sep, bool skip_empty = false )
 {
-	std::vector<stringT> retval;
-	if ( sep.size() == 1 )
-		split( str, sep[0], std::back_inserter( retval ), skip_empty );
-	else
-		split( str, sep, std::back_inserter( retval ), skip_empty );
-	return retval;
+    std::vector<stringT> retval;
+    if ( sep.size() == 1 )
+        split( str, sep[0], std::back_inserter( retval ), skip_empty );
+    else
+        split( str, sep, std::back_inserter( retval ), skip_empty );
+    return retval;
 }
 
 ////////////////////////////////////////
 
 template <typename stringT>
-inline std::vector<stringT>
-split( const stringT &str, const typename stringT::value_type *sep,
-	   bool skip_empty = false )
+inline std::vector<stringT> split(
+    const stringT &                     str,
+    const typename stringT::value_type *sep,
+    bool                                skip_empty = false )
 {
-	return split( str, stringT( sep ), skip_empty );
+    return split( str, stringT( sep ), skip_empty );
 }
 
 ////////////////////////////////////////
 
 template <typename stringT>
-inline void
-split( std::vector<stringT> &ret, const stringT &str,
-	   typename stringT::value_type sep,
-	   bool skip_empty = false )
+inline void split(
+    std::vector<stringT> &       ret,
+    const stringT &              str,
+    typename stringT::value_type sep,
+    bool                         skip_empty = false )
 {
-	ret.clear();
-	split( str, sep, std::back_inserter( ret ), skip_empty );
+    ret.clear();
+    split( str, sep, std::back_inserter( ret ), skip_empty );
 }
 
 ////////////////////////////////////////
 
 template <typename stringT>
-inline std::vector<stringT>
-split( const stringT &str, typename stringT::value_type sep,
-	   bool skip_empty = false )
+inline std::vector<stringT> split(
+    const stringT &              str,
+    typename stringT::value_type sep,
+    bool                         skip_empty = false )
 {
-	std::vector<stringT> ret;
-	split( str, sep, std::back_inserter( ret ), skip_empty );
-	return ret;
+    std::vector<stringT> ret;
+    split( str, sep, std::back_inserter( ret ), skip_empty );
+    return ret;
 }
 
 ////////////////////////////////////////
 
 } // namespace base
-
-
-

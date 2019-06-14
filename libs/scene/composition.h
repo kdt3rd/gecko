@@ -7,22 +7,16 @@
 
 namespace scene
 {
-
 ///
 /// @brief Class composition provides...
 ///
 class composition
 {
 public:
-	composition( void );
-	~composition( void );
+    composition( void );
+    ~composition( void );
 
-    void add
-private:
-
+    void add private:
 };
 
 } // namespace scene
-
-
-

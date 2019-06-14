@@ -32,120 +32,97 @@
 #include "tessellator.h"
 
 #include <base/contract.h>
-
-#include <stddef.h>
-#include <stdexcept>
 #include <cmath>
 #include <functional>
-
 #include <math.h>
+#include <stddef.h>
+#include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h>
 
 namespace draw
 {
-
 // START OF DICT.H
 // Search returns the node with the smallest key greater than or equal
 // to the given key.  If there is no such key, returns a node whose
 // key is nullptr.  Similarly, Succ(Max(d)) has a nullptr key, etc.
-template<typename Key>
-class dict
+template <typename Key> class dict
 {
 public:
-	class node
-	{
-	public:
-		node *next( void )
-		{
-			return _next;
-		}
+    class node
+    {
+    public:
+        node *next( void ) { return _next; }
 
-		node *prev( void )
-		{
-			return _prev;
-		}
+        node *prev( void ) { return _prev; }
 
-		Key key( void ) const
-		{
-			return _key;
-		}
+        Key key( void ) const { return _key; }
 
-	private:
-		friend dict<Key>;
+    private:
+        friend dict<Key>;
 
-		Key	_key = Key();
-		node *_next = nullptr;
-		node *_prev = nullptr;
-	};
+        Key   _key  = Key();
+        node *_next = nullptr;
+        node *_prev = nullptr;
+    };
 
-	dict( const std::function<bool(Key,Key)> &comp )
-		: _comp( comp )
-	{
-		_head._key = nullptr;
-		_head._next = _head._prev = &_head;
-	}
+    dict( const std::function<bool( Key, Key )> &comp ) : _comp( comp )
+    {
+        _head._key  = nullptr;
+        _head._next = _head._prev = &_head;
+    }
 
-	node *search( Key key )
-	{
-		node *n = &_head;
-		do
-		{
-			n = n->next();
-		} while ( n->key() != nullptr && !_comp( key, n->key() ) );
+    node *search( Key key )
+    {
+        node *n = &_head;
+        do
+        {
+            n = n->next();
+        } while ( n->key() != nullptr && !_comp( key, n->key() ) );
 
-		return n;
-	}
+        return n;
+    }
 
-	node *insert_before( node *n, Key key )
-	{
-		do
-		{
-			n = n->prev();
-		} while ( n->key() != nullptr && !_comp( n->key(), key ) );
+    node *insert_before( node *n, Key key )
+    {
+        do
+        {
+            n = n->prev();
+        } while ( n->key() != nullptr && !_comp( n->key(), key ) );
 
-		node *newNode = _node_pool.allocate();
-		newNode->_key = key;
-		newNode->_next = n->next();
-		newNode->_prev = n;
-		n->_next->_prev = newNode;
-		n->_next = newNode;
+        node *newNode   = _node_pool.allocate();
+        newNode->_key   = key;
+        newNode->_next  = n->next();
+        newNode->_prev  = n;
+        n->_next->_prev = newNode;
+        n->_next        = newNode;
 
-		return newNode;
-	}
+        return newNode;
+    }
 
-	void erase( node *n )
-	{
-		n->_next->_prev = n->_prev;
-		n->_prev->_next = n->_next;
-		_node_pool.deallocate( n );
-	}
+    void erase( node *n )
+    {
+        n->_next->_prev = n->_prev;
+        n->_prev->_next = n->_next;
+        _node_pool.deallocate( n );
+    }
 
-	node *min( void )
-	{
-		return _head.next();
-	}
+    node *min( void ) { return _head.next(); }
 
-	node *max( void )
-	{
-		return _head.prev();
-	}
+    node *max( void ) { return _head.prev(); }
 
-	node *insert( Key k )
-	{
-		return insert_before( &_head, k );
-	}
+    node *insert( Key k ) { return insert_before( &_head, k ); }
 
 private:
-	node _head;
-	base::memory_pool<node,512> _node_pool;
-	std::function<bool(Key,Key)> _comp;
+    node                            _head;
+    base::memory_pool<node, 512>    _node_pool;
+    std::function<bool( Key, Key )> _comp;
 };
 // END OF DICT.H
 
 // START OF MESH.H
 
-const size_t TESS_UNDEF = ~size_t(0);
+const size_t TESS_UNDEF = ~size_t( 0 );
 class face;
 
 // The mesh structure is similar in spirit, notation, and operations
@@ -211,232 +188,175 @@ class face;
 // before the mesh is returned to the client; then a nullptr face indicates
 // a region which is not part of the output polygon.
 
-template<typename T>
-class geom_base
+template <typename T> class geom_base
 {
 public:
-	T *next( void ) const
-	{
-		return _next;
-	}
+    T *next( void ) const { return _next; }
 
-	T *prev( void ) const
-	{
-		return _prev;
-	}
+    T *prev( void ) const { return _prev; }
 
-	half_edge *edge( void ) const
-	{
-		return _edge;
-	}
+    half_edge *edge( void ) const { return _edge; }
 
-	void set_next( T *n )
-	{
-		_next = n;
-	}
+    void set_next( T *n ) { _next = n; }
 
-	void set_prev( T *p )
-	{
-		_prev = p;
-	}
+    void set_prev( T *p ) { _prev = p; }
 
-	void set_edge( half_edge *e )
-	{
-		_edge = e;
-	}
+    void set_edge( half_edge *e ) { _edge = e; }
 
-	size_t index( void ) const
-	{
-		return _index;
-	}
+    size_t index( void ) const { return _index; }
 
-	void set_index( size_t i )
-	{
-		_index = i;
-	}
+    void set_index( size_t i ) { _index = i; }
 
 private:
-	T *_next; // next item (never nullptr)
-	T *_prev; // previous item (never nullptr)
-	half_edge *_edge; // a half-edge with this origin
-	size_t _index; // to allow identify unique items
+    T *        _next;  // next item (never nullptr)
+    T *        _prev;  // previous item (never nullptr)
+    half_edge *_edge;  // a half-edge with this origin
+    size_t     _index; // to allow identify unique items
 };
 
 class vertex : public geom_base<vertex>
 {
 public:
-	double x( void ) const
-	{
-		return _x;
-	}
+    double x( void ) const { return _x; }
 
-	double y( void ) const
-	{
-		return _y;
-	}
+    double y( void ) const { return _y; }
 
-	double z( void ) const
-	{
-		return _z;
-	}
+    double z( void ) const { return _z; }
 
-	void set_x( double x )
-	{
-		_x = x;
-	}
+    void set_x( double x ) { _x = x; }
 
-	void set_y( double y )
-	{
-		_y = y;
-	}
+    void set_y( double y ) { _y = y; }
 
-	void set_z( double z )
-	{
-		_z = z;
-	}
+    void set_z( double z ) { _z = z; }
 
-	void set( double x, double y, double z )
-	{
-		_x = x;
-		_y = y;
-		_z = z;
-	}
+    void set( double x, double y, double z )
+    {
+        _x = x;
+        _y = y;
+        _z = z;
+    }
 
 private:
-	double _x, _y, _z; // projection onto the sweep plane
+    double _x, _y, _z; // projection onto the sweep plane
 };
 
 class face : public geom_base<face>
 {
 public:
-	face *trail( void ) const
-	{
-		return _trail;
-	}
+    face *trail( void ) const { return _trail; }
 
-	void set_trail( face *t )
-	{
-		_trail = t;
-	}
+    void set_trail( face *t ) { _trail = t; }
 
-	bool marked( void ) const
-	{
-		return _marked;
-	}
+    bool marked( void ) const { return _marked; }
 
-	bool inside( void ) const
-	{
-		return _inside;
-	}
+    bool inside( void ) const { return _inside; }
 
-	void set_marked( bool m = true )
-	{
-		_marked = m;
-	}
+    void set_marked( bool m = true ) { _marked = m; }
 
-	void set_inside( bool i = true )
-	{
-		_inside = i;
-	}
+    void set_inside( bool i = true ) { _inside = i; }
 
 private:
-	face *_trail; // "stack" for conversion to strips
-	bool _marked; // flag for conversion to strips
-	bool _inside; // this face is in the polygon interior
+    face *_trail;  // "stack" for conversion to strips
+    bool  _marked; // flag for conversion to strips
+    bool  _inside; // this face is in the polygon interior
 };
 
 class half_edge
 {
 public:
-	half_edge *next( void ) const { return _next; }
-	half_edge *prev( void ) const { return _sym->_next; }
-	half_edge *sym( void ) const { return _sym; }
+    half_edge *next( void ) const { return _next; }
+    half_edge *prev( void ) const { return _sym->_next; }
+    half_edge *sym( void ) const { return _sym; }
 
-	void next( half_edge *n ) { _next = n; }
-	void prev( half_edge *p ) { _sym->_next = p; }
-	void sym( half_edge *s ) { _sym = s; }
+    void next( half_edge *n ) { _next = n; }
+    void prev( half_edge *p ) { _sym->_next = p; }
+    void sym( half_edge *s ) { _sym = s; }
 
-	half_edge *onext( void ) const { return _onext; }
-	half_edge *oprev( void ) const { return sym()->lnext(); }
+    half_edge *onext( void ) const { return _onext; }
+    half_edge *oprev( void ) const { return sym()->lnext(); }
 
-	half_edge *rnext( void ) const { return oprev()->sym(); }
-	half_edge *rprev( void ) const { return sym()->onext(); }
+    half_edge *rnext( void ) const { return oprev()->sym(); }
+    half_edge *rprev( void ) const { return sym()->onext(); }
 
-	void onext( half_edge *o ) { _onext = o; }
-	void oprev( half_edge *p ) { sym()->onext( p ); }
+    void onext( half_edge *o ) { _onext = o; }
+    void oprev( half_edge *p ) { sym()->onext( p ); }
 
-	half_edge *lnext( void ) const { return _lnext; }
-	half_edge *lprev( void ) const { return onext()->sym(); }
+    half_edge *lnext( void ) const { return _lnext; }
+    half_edge *lprev( void ) const { return onext()->sym(); }
 
-	void lnext( half_edge *l ) { _lnext = l; }
-	void lprev( half_edge *p ) { sym()->_lnext = p; }
+    void lnext( half_edge *l ) { _lnext = l; }
+    void lprev( half_edge *p ) { sym()->_lnext = p; }
 
-	half_edge *dprev( void ) const { return lnext()->sym(); }
-	half_edge *dnext( void ) const { return rprev()->sym(); }
+    half_edge *dprev( void ) const { return lnext()->sym(); }
+    half_edge *dnext( void ) const { return rprev()->sym(); }
 
-	vertex *org( void ) const { return _org; }
-	vertex *dst( void ) const { return sym()->org(); }
+    vertex *org( void ) const { return _org; }
+    vertex *dst( void ) const { return sym()->org(); }
 
-	void org( vertex *o ) { _org = o; }
-	void dst( vertex *d ) { sym()->org( d ); }
+    void org( vertex *o ) { _org = o; }
+    void dst( vertex *d ) { sym()->org( d ); }
 
-	face *lface( void ) const { return _lface; }
-	face *rface( void ) const { return sym()->lface(); }
+    face *lface( void ) const { return _lface; }
+    face *rface( void ) const { return sym()->lface(); }
 
-	void lface( face *f ) { _lface = f; }
-	void rface( face *f ) { sym()->lface( f ); }
+    void lface( face *f ) { _lface = f; }
+    void rface( face *f ) { sym()->lface( f ); }
 
-	int winding( void ) const { return _winding; }
-	void winding( int w ) { _winding = w; }
-	void add_winding( int w ) { _winding += w; }
+    int  winding( void ) const { return _winding; }
+    void winding( int w ) { _winding = w; }
+    void add_winding( int w ) { _winding += w; }
 
-	active_region *region( void ) const { return _active_region; }
-	void region( active_region *r ) { _active_region = r; }
+    active_region *region( void ) const { return _active_region; }
+    void           region( active_region *r ) { _active_region = r; }
 
 private:
-	half_edge *_next = nullptr;      // doubly-linked list (prev==Sym->next)
-	half_edge *_sym = nullptr;       // same edge, opposite direction
-	half_edge *_onext = nullptr;     // next edge CCW around origin
-	half_edge *_lnext = nullptr;     // next edge CCW around left face
-	vertex *_org = nullptr;       // origin vertex (Overtex too long)
-	face *_lface = nullptr;     // left face
+    half_edge *_next  = nullptr; // doubly-linked list (prev==Sym->next)
+    half_edge *_sym   = nullptr; // same edge, opposite direction
+    half_edge *_onext = nullptr; // next edge CCW around origin
+    half_edge *_lnext = nullptr; // next edge CCW around left face
+    vertex *   _org   = nullptr; // origin vertex (Overtex too long)
+    face *     _lface = nullptr; // left face
 
-	active_region *_active_region = nullptr;  // a region with this upper edge (sweep.c)
-	int _winding = 0;    // change in winding number when crossing from the right face to the left face
+    active_region *_active_region =
+        nullptr; // a region with this upper edge (sweep.c)
+    int _winding =
+        0; // change in winding number when crossing from the right face to the left face
 };
 
 // START OF GEOM.H
 namespace
 {
-
 inline bool VertEq( const vertex *u, const vertex *v )
 {
-	return std::equal_to<double>()( u->x(), v->x() ) && std::equal_to<double>()( u->y(), v->y() );
+    return std::equal_to<double>()( u->x(), v->x() ) &&
+           std::equal_to<double>()( u->y(), v->y() );
 }
 
 inline bool VertLeq( const vertex *u, const vertex *v )
 {
-	return ( u->x() < v->x() ) || ( std::equal_to<double>()( u->x(), v->x() ) && ( u->y() <= v->y() ) );
+    return ( u->x() < v->x() ) || ( std::equal_to<double>()( u->x(), v->x() ) &&
+                                    ( u->y() <= v->y() ) );
 }
 
 inline bool TransLeq( const vertex *u, const vertex *v )
 {
-	return ( u->y() < v->y() ) || ( std::equal_to<double>()( u->y(), v->y() ) && u->x() <= v->x() );
+    return ( u->y() < v->y() ) ||
+           ( std::equal_to<double>()( u->y(), v->y() ) && u->x() <= v->x() );
 }
 
 inline bool EdgeGoesLeft( const half_edge *e )
 {
-	return VertLeq( e->dst(), e->org() );
+    return VertLeq( e->dst(), e->org() );
 }
 
 inline bool EdgeGoesRight( half_edge *e )
 {
-	return VertLeq( e->org(), e->dst() );
+    return VertLeq( e->org(), e->dst() );
 }
 
 inline double VertL1dist( vertex *u, vertex *v )
 {
-	return std::abs( u->x() - v->x() ) + std::abs( u->y() - v->y() );
+    return std::abs( u->x() - v->x() ) + std::abs( u->y() - v->y() );
 }
 
 // Given three vertices u,v,w such that VertLeq(u,v) && VertLeq(v,w),
@@ -450,20 +370,22 @@ inline double VertL1dist( vertex *u, vertex *v )
 // r is guaranteed to satisfy MIN(u->y(),w->y()) <= r <= MAX(u->y(),w->y()).
 double EdgeEval( vertex *u, vertex *v, vertex *w )
 {
-	precondition( VertLeq( u, v ) && VertLeq( v, w ), "points not ordered" );
+    precondition( VertLeq( u, v ) && VertLeq( v, w ), "points not ordered" );
 
-	double gapL = v->x() - u->x();
-	double gapR = w->x() - v->x();
+    double gapL = v->x() - u->x();
+    double gapR = w->x() - v->x();
 
-	if ( gapL + gapR > 0 )
-	{
-		if ( gapL < gapR )
-			return ( v->y() - u->y() ) + ( u->y() - w->y() ) * ( gapL / ( gapL + gapR ) );
-		else
-			return ( v->y() - w->y() ) + ( w->y() - u->y() ) * ( gapR / ( gapL + gapR ) );
-	}
-	// vertical line
-	return 0;
+    if ( gapL + gapR > 0 )
+    {
+        if ( gapL < gapR )
+            return ( v->y() - u->y() ) +
+                   ( u->y() - w->y() ) * ( gapL / ( gapL + gapR ) );
+        else
+            return ( v->y() - w->y() ) +
+                   ( w->y() - u->y() ) * ( gapR / ( gapL + gapR ) );
+    }
+    // vertical line
+    return 0;
 }
 
 // Returns a number whose sign matches EdgeEval(u,v,w) but which
@@ -471,16 +393,16 @@ double EdgeEval( vertex *u, vertex *v, vertex *w )
 // as v is above, on, or below the edge uw.
 double EdgeSign( vertex *u, vertex *v, vertex *w )
 {
-	precondition( VertLeq( u, v ) && VertLeq( v, w ), "points not ordered" );
+    precondition( VertLeq( u, v ) && VertLeq( v, w ), "points not ordered" );
 
-	double gapL = v->x() - u->x();
-	double gapR = w->x() - v->x();
+    double gapL = v->x() - u->x();
+    double gapR = w->x() - v->x();
 
-	if ( gapL + gapR > 0 )
-		return ( v->y() - w->y() ) * gapL + ( v->y() - u->y() ) * gapR;
+    if ( gapL + gapR > 0 )
+        return ( v->y() - w->y() ) * gapL + ( v->y() - u->y() ) * gapR;
 
-	// vertical line
-	return 0;
+    // vertical line
+    return 0;
 }
 
 // Given three vertices u,v,w such that TransLeq(u,v) && TransLeq(v,w),
@@ -494,20 +416,22 @@ double EdgeSign( vertex *u, vertex *v, vertex *w )
 // r is guaranteed to satisfy MIN(u->x(),w->x()) <= r <= MAX(u->x(),w->x()).
 double TransEval( vertex *u, vertex *v, vertex *w )
 {
-	assert( TransLeq( u, v ) && TransLeq( v, w ) );
+    assert( TransLeq( u, v ) && TransLeq( v, w ) );
 
-	double gapL = v->y() - u->y();
-	double gapR = w->y() - v->y();
+    double gapL = v->y() - u->y();
+    double gapR = w->y() - v->y();
 
-	if ( gapL + gapR > 0 )
-	{
-		if ( gapL < gapR )
-			return ( v->x() - u->x() ) + ( u->x() - w->x() ) * gapL / ( gapL + gapR );
-		else
-			return ( v->x() - w->x() ) + ( w->x() - u->x() ) * gapR / ( gapL + gapR );
-	}
-	// vertical line
-	return 0;
+    if ( gapL + gapR > 0 )
+    {
+        if ( gapL < gapR )
+            return ( v->x() - u->x() ) +
+                   ( u->x() - w->x() ) * gapL / ( gapL + gapR );
+        else
+            return ( v->x() - w->x() ) +
+                   ( w->x() - u->x() ) * gapR / ( gapL + gapR );
+    }
+    // vertical line
+    return 0;
 }
 
 // Returns a number whose sign matches TransEval(u,v,w) but which
@@ -515,17 +439,17 @@ double TransEval( vertex *u, vertex *v, vertex *w )
 // as v is above, on, or below the edge uw.
 double TransSign( vertex *u, vertex *v, vertex *w )
 {
-	double gapL, gapR;
+    double gapL, gapR;
 
-	assert( TransLeq( u, v ) && TransLeq( v, w ) );
+    assert( TransLeq( u, v ) && TransLeq( v, w ) );
 
-	gapL = v->y() - u->y();
-	gapR = w->y() - v->y();
+    gapL = v->y() - u->y();
+    gapR = w->y() - v->y();
 
-	if ( gapL + gapR > 0 )
-		return ( v->x() - w->x() ) * gapL + ( v->x() - u->x() ) * gapR;
-	// vertical line
-	return 0;
+    if ( gapL + gapR > 0 )
+        return ( v->x() - w->x() ) * gapL + ( v->x() - u->x() ) * gapR;
+    // vertical line
+    return 0;
 }
 
 // For almost-degenerate situations, the results are not reliable.
@@ -535,7 +459,8 @@ double TransSign( vertex *u, vertex *v, vertex *w )
 // handle this situation.
 bool VertCCW( vertex *u, vertex *v, vertex *w )
 {
-	return ( u->x() * ( v->y() - w->y() ) + v->x() * ( w->y() - u->y() ) + w->x() * ( u->y() - v->y() ) ) >= 0;
+    return ( u->x() * ( v->y() - w->y() ) + v->x() * ( w->y() - u->y() ) +
+             w->x() * ( u->y() - v->y() ) ) >= 0;
 }
 
 // Given parameters a,x,b,y returns the value (b*x+a*y)/(a+b),
@@ -547,111 +472,114 @@ bool VertCCW( vertex *u, vertex *v, vertex *w )
 // even when a and b differ greatly in magnitude.
 inline double Interpolate( double a, double x, double b, double y )
 {
-	a = std::max( a, 0.0 );
-	b = std::max( b, 0.0 );
-	return ((a <= b) ? (std::equal_to<double>()(b, 0) ? ((x+y) / 2)
-				  : (x + (y-x) * (a/(a+b))))
-	  : (y + (x-y) * (b/(a+b))));
+    a = std::max( a, 0.0 );
+    b = std::max( b, 0.0 );
+    return (
+        ( a <= b ) ? ( std::equal_to<double>()( b, 0 )
+                           ? ( ( x + y ) / 2 )
+                           : ( x + ( y - x ) * ( a / ( a + b ) ) ) )
+                   : ( y + ( x - y ) * ( b / ( a + b ) ) ) );
 }
 
 // Given edges (o1,d1) and (o2,d2), compute their point of intersection.
 // The computed point is guaranteed to lie in the intersection of the
 // bounding rectangles defined by each edge.
-void tesedgeIntersect( vertex *o1, vertex *d1, vertex *o2, vertex *d2, vertex *v )
+void tesedgeIntersect(
+    vertex *o1, vertex *d1, vertex *o2, vertex *d2, vertex *v )
 {
-	double z1, z2;
+    double z1, z2;
 
-	// This is certainly not the most efficient way to find the intersection
-	// of two line segments, but it is very numerically stable.
-	//
-	// Strategy: find the two middle vertices in the VertLeq ordering,
-	// and interpolate the intersection s-value from these.  Then repeat
-	// using the TransLeq ordering to find the intersection t-value.
+    // This is certainly not the most efficient way to find the intersection
+    // of two line segments, but it is very numerically stable.
+    //
+    // Strategy: find the two middle vertices in the VertLeq ordering,
+    // and interpolate the intersection s-value from these.  Then repeat
+    // using the TransLeq ordering to find the intersection t-value.
 
-	if ( ! VertLeq( o1, d1 ) )
-		std::swap( o1, d1 );
-	if ( ! VertLeq( o2, d2 ) )
-		std::swap( o2, d2 );
-	if ( ! VertLeq( o1, o2 ) )
-	{
-		std::swap( o1, o2 );
-		std::swap( d1, d2 );
-	}
+    if ( !VertLeq( o1, d1 ) )
+        std::swap( o1, d1 );
+    if ( !VertLeq( o2, d2 ) )
+        std::swap( o2, d2 );
+    if ( !VertLeq( o1, o2 ) )
+    {
+        std::swap( o1, o2 );
+        std::swap( d1, d2 );
+    }
 
-	if ( ! VertLeq( o2, d1 ) )
-	{
-		// Technically, no intersection -- do our best
-		v->set_x( ( o2->x() + d1->x() ) / 2.0 );
-	}
-	else if ( VertLeq( d1, d2 ) )
-	{
-		// Interpolate between o2 and d1
-		z1 = EdgeEval( o1, o2, d1 );
-		z2 = EdgeEval( o2, d1, d2 );
-		if ( z1 + z2 < 0 )
-		{
-			z1 = -z1;
-			z2 = -z2;
-		}
-		v->set_x( Interpolate( z1, o2->x(), z2, d1->x() ) );
-	}
-	else
-	{
-		// Interpolate between o2 and d2
-		z1 = EdgeSign( o1, o2, d1 );
-		z2 = -EdgeSign( o1, d2, d1 );
-		if ( z1 + z2 < 0 )
-		{
-			z1 = -z1;
-			z2 = -z2;
-		}
-		v->set_x( Interpolate( z1, o2->x(), z2, d2->x() ) );
-	}
+    if ( !VertLeq( o2, d1 ) )
+    {
+        // Technically, no intersection -- do our best
+        v->set_x( ( o2->x() + d1->x() ) / 2.0 );
+    }
+    else if ( VertLeq( d1, d2 ) )
+    {
+        // Interpolate between o2 and d1
+        z1 = EdgeEval( o1, o2, d1 );
+        z2 = EdgeEval( o2, d1, d2 );
+        if ( z1 + z2 < 0 )
+        {
+            z1 = -z1;
+            z2 = -z2;
+        }
+        v->set_x( Interpolate( z1, o2->x(), z2, d1->x() ) );
+    }
+    else
+    {
+        // Interpolate between o2 and d2
+        z1 = EdgeSign( o1, o2, d1 );
+        z2 = -EdgeSign( o1, d2, d1 );
+        if ( z1 + z2 < 0 )
+        {
+            z1 = -z1;
+            z2 = -z2;
+        }
+        v->set_x( Interpolate( z1, o2->x(), z2, d2->x() ) );
+    }
 
-	// Now repeat the process for t
+    // Now repeat the process for t
 
-	if ( ! TransLeq( o1, d1 ) )
-		std::swap( o1, d1 );
-	if ( ! TransLeq( o2, d2 ) )
-		std::swap( o2, d2 );
-	if ( ! TransLeq( o1, o2 ) )
-	{
-		std::swap( o1, o2 );
-		std::swap( d1, d2 );
-	}
+    if ( !TransLeq( o1, d1 ) )
+        std::swap( o1, d1 );
+    if ( !TransLeq( o2, d2 ) )
+        std::swap( o2, d2 );
+    if ( !TransLeq( o1, o2 ) )
+    {
+        std::swap( o1, o2 );
+        std::swap( d1, d2 );
+    }
 
-	if ( ! TransLeq( o2, d1 ) )
-	{
-		// Technically, no intersection -- do our best
-		v->set_y( ( o2->y() + d1->y() ) / 2.0 );
-	}
-	else if ( TransLeq( d1, d2 ) )
-	{
-		// Interpolate between o2 and d1
-		z1 = TransEval( o1, o2, d1 );
-		z2 = TransEval( o2, d1, d2 );
-		if ( z1 + z2 < 0 )
-		{
-			z1 = -z1;
-			z2 = -z2;
-		}
-		v->set_y( Interpolate( z1, o2->y(), z2, d1->y() ) );
-	}
-	else
-	{
-		// Interpolate between o2 and d2
-		z1 = TransSign( o1, o2, d1 );
-		z2 = -TransSign( o1, d2, d1 );
-		if ( z1 + z2 < 0 )
-		{
-			z1 = -z1;
-			z2 = -z2;
-		}
-		v->set_y( Interpolate( z1, o2->y(), z2, d2->y() ) );
-	}
+    if ( !TransLeq( o2, d1 ) )
+    {
+        // Technically, no intersection -- do our best
+        v->set_y( ( o2->y() + d1->y() ) / 2.0 );
+    }
+    else if ( TransLeq( d1, d2 ) )
+    {
+        // Interpolate between o2 and d1
+        z1 = TransEval( o1, o2, d1 );
+        z2 = TransEval( o2, d1, d2 );
+        if ( z1 + z2 < 0 )
+        {
+            z1 = -z1;
+            z2 = -z2;
+        }
+        v->set_y( Interpolate( z1, o2->y(), z2, d1->y() ) );
+    }
+    else
+    {
+        // Interpolate between o2 and d2
+        z1 = TransSign( o1, o2, d1 );
+        z2 = -TransSign( o1, d2, d1 );
+        if ( z1 + z2 < 0 )
+        {
+            z1 = -z1;
+            z2 = -z2;
+        }
+        v->set_y( Interpolate( z1, o2->y(), z2, d2->y() ) );
+    }
 }
 
-}
+} // namespace
 // END OF GEOM.H
 
 // Splice( a, b ) is best described by the Guibas/Stolfi paper or the
@@ -661,13 +589,13 @@ void tesedgeIntersect( vertex *o1, vertex *d1, vertex *o2, vertex *d2, vertex *v
 // For more explanation see tessMeshSplice() below.
 static void Splice( half_edge *a, half_edge *b )
 {
-	half_edge *aOnext = a->onext();
-	half_edge *bOnext = b->onext();
+    half_edge *aOnext = a->onext();
+    half_edge *bOnext = b->onext();
 
-	aOnext->lprev( b );
-	bOnext->lprev( a );
-	a->onext( bOnext );
-	b->onext( aOnext );
+    aOnext->lprev( b );
+    bOnext->lprev( a );
+    a->onext( bOnext );
+    b->onext( aOnext );
 }
 
 // MakeVertex( newVertex, eOrig, vNext ) attaches a new vertex and makes it the
@@ -677,28 +605,28 @@ static void Splice( half_edge *a, half_edge *b )
 // list will not see the newly created vertices.
 static void MakeVertex( vertex *newVertex, half_edge *eOrig, vertex *vNext )
 {
-	vertex *vNew = newVertex;
+    vertex *vNew = newVertex;
 
-	assert( vNew != nullptr );
+    assert( vNew != nullptr );
 
-	// insert in circular doubly-linked list before vNext
-	vertex *vPrev = vNext->prev();
-	vNew->set_prev( vPrev );
-	vPrev->set_next( vNew );
-	vNew->set_next( vNext );
-	vNext->set_prev( vNew );
+    // insert in circular doubly-linked list before vNext
+    vertex *vPrev = vNext->prev();
+    vNew->set_prev( vPrev );
+    vPrev->set_next( vNew );
+    vNew->set_next( vNext );
+    vNext->set_prev( vNew );
 
-	vNew->set_edge( eOrig );
+    vNew->set_edge( eOrig );
 
-	// leave s, t undefined
+    // leave s, t undefined
 
-	// fix other edges on this vertex loop
-	half_edge *e = eOrig;
-	do
-	{
-		e->org( vNew );
-		e = e->onext();
-	} while ( e != eOrig );
+    // fix other edges on this vertex loop
+    half_edge *e = eOrig;
+    do
+    {
+        e->org( vNew );
+        e = e->onext();
+    } while ( e != eOrig );
 }
 
 // MakeFace( newFace, eOrig, fNext ) attaches a new face and makes it the left
@@ -708,736 +636,746 @@ static void MakeVertex( vertex *newVertex, half_edge *eOrig, vertex *vNext )
 // list will not see the newly created faces.
 static void MakeFace( face *newFace, half_edge *eOrig, face *fNext )
 {
-	half_edge *e;
-	face *fPrev;
-	face *fNew = newFace;
+    half_edge *e;
+    face *     fPrev;
+    face *     fNew = newFace;
 
-	assert( fNew != nullptr );
+    assert( fNew != nullptr );
 
-	// insert in circular doubly-linked list before fNext
-	fPrev = fNext->prev();
-	fNew->set_prev( fPrev );
-	fPrev->set_next( fNew );
-	fNew->set_next( fNext );
-	fNext->set_prev( fNew );
+    // insert in circular doubly-linked list before fNext
+    fPrev = fNext->prev();
+    fNew->set_prev( fPrev );
+    fPrev->set_next( fNew );
+    fNew->set_next( fNext );
+    fNext->set_prev( fNew );
 
-	fNew->set_edge( eOrig );
-	fNew->set_trail( nullptr );
-	fNew->set_marked( false );
+    fNew->set_edge( eOrig );
+    fNew->set_trail( nullptr );
+    fNew->set_marked( false );
 
-	// The new face is marked "inside" if the old one was.  This is a
-	// convenience for the common case where a face has been split in two.
-	fNew->set_inside( fNext->inside() );
+    // The new face is marked "inside" if the old one was.  This is a
+    // convenience for the common case where a face has been split in two.
+    fNew->set_inside( fNext->inside() );
 
-	// fix other edges on this face loop
-	e = eOrig;
-	do
-	{
-		e->lface( fNew );
-		e = e->lnext();
-	} while ( e != eOrig );
+    // fix other edges on this face loop
+    e = eOrig;
+    do
+    {
+        e->lface( fNew );
+        e = e->lnext();
+    } while ( e != eOrig );
 }
 
 static size_t CountFaceVerts( face *f )
 {
-	half_edge *eCur = f->edge();
-	size_t n = 0;
-	do
-	{
-		n++;
-		eCur = eCur->lnext();
-	} while ( eCur != f->edge() );
+    half_edge *eCur = f->edge();
+    size_t     n    = 0;
+    do
+    {
+        n++;
+        eCur = eCur->lnext();
+    } while ( eCur != f->edge() );
 
-	return n;
+    return n;
 }
-
 
 class tess_mesh
 {
 public:
-	// tessMeshNewMesh() creates a new mesh with no edges, no vertices,
-	// and no loops (what we usually call a "face").
-	tess_mesh( void )
-	{
-		vertex *v = &_vertex_list;
-		face *f = &_face_list;
-		half_edge *e = &_edge_list;
-		half_edge *eSym = &_edge_sym_list;
-
-		v->set_next( v );
-		v->set_prev( v );
-		v->set_edge( nullptr );
-
-		f->set_next( f );
-		f->set_prev( f );
-		f->set_edge( nullptr );
-		f->set_trail( nullptr );
-		f->set_marked( false );
-		f->set_inside( false );
-
-		e->next( e );
-		e->sym(  eSym );
-
-		eSym->next( eSym );
-		eSym->sym( e );
-	}
-
-	// mesh::make_edge creates one edge, two vertices, and a loop (face).
-	// The loop consists of the two new half-edges.
-	half_edge *make_edge( void )
-	{
-		vertex *newVertex1 = _vertex_pool.allocate();
-		vertex *newVertex2 = _vertex_pool.allocate();
-		face *newFace = _face_pool.allocate();
-
-		half_edge *e = make_edge( &_edge_list );
-
-		MakeVertex( newVertex1, e, &_vertex_list );
-		MakeVertex( newVertex2, e->sym(), &_vertex_list );
-		MakeFace( newFace, e, &_face_list );
-		return e;
-	}
-
-	// mesh::splice( eOrg, eDst ) is the basic operation for changing the
-	// mesh connectivity and topology.  It changes the mesh so that
-	//	eOrg->Onext <- OLD( eDst->Onext )
-	//	eDst->Onext <- OLD( eOrg->Onext )
-	// where OLD(...) means the value before the meshSplice operation.
-	//
-	// This can have two effects on the vertex structure:
-	//  - if eOrg->Org != eDst->Org, the two vertices are merged together
-	//  - if eOrg->Org == eDst->Org, the origin is split into two vertices
-	// In both cases, eDst->Org is changed and eOrg->Org is untouched.
-	//
-	// Similarly (and independently) for the face structure,
-	//  - if eOrg->Lface == eDst->Lface, one loop is split into two
-	//  - if eOrg->Lface != eDst->Lface, two distinct loops are joined into one
-	// In both cases, eDst->Lface is changed and eOrg->Lface is unaffected.
-	//
-	// Some special cases:
-	// If eDst == eOrg, the operation has no effect.
-	// If eDst == eOrg->Lnext, the new face will have a single edge.
-	// If eDst == eOrg->Lprev, the old face will have a single edge.
-	// If eDst == eOrg->Onext, the new vertex will have a single edge.
-	// If eDst == eOrg->Oprev, the old vertex will have a single edge.
-	void splice( half_edge *eOrg, half_edge *eDst )
-	{
-		bool joiningLoops = false;
-		bool joiningVertices = false;
-
-		if ( eOrg == eDst )
-			return;
-
-		if ( eDst->org() != eOrg->org() )
-		{
-			// We are merging two disjoint vertices -- destroy eDst->Org
-			joiningVertices = true;
-			kill_vertex( eDst->org(), eOrg->org() );
-		}
-		if ( eDst->lface() != eOrg->lface() )
-		{
-			// We are connecting two disjoint loops -- destroy eDst->Lface
-			joiningLoops = true;
-			kill_face( eDst->lface(), eOrg->lface() );
-		}
-
-		// Change the edge structure
-		Splice( eDst, eOrg );
-
-		if ( ! joiningVertices )
-		{
-			vertex *newVertex = _vertex_pool.allocate();
-
-			// We split one vertex into two -- the new vertex is eDst->Org.
-			// Make sure the old vertex points to a valid half-edge.
-			MakeVertex( newVertex, eDst, eOrg->org() );
-			eOrg->org()->set_edge( eOrg );
-		}
-		if ( ! joiningLoops )
-		{
-			face *newFace = _face_pool.allocate();
-
-			// We split one loop into two -- the new loop is eDst->Lface.
-			// Make sure the old face points to a valid half-edge.
-			MakeFace( newFace, eDst, eOrg->lface() );
-			eOrg->lface()->set_edge( eOrg );
-		}
-	}
-
-	// @brief Removes the edge eDel.
-	// There are several cases:
-	// if eDel->lface() != eDel->rface(), we join two loops into one; the loop
-	// eDel->lface() is deleted.  Otherwise, we are splitting one loop into two;
-	// the newly created loop will contain eDel->dst().  If the deletion of eDel
-	// would create isolated vertices, those are deleted as well.
-	//
-	// This function could be implemented as two calls to tessMeshSplice
-	// plus a few calls to memFree, but this would allocate and delete
-	// unnecessary vertices and faces.
-	void delete_edge( half_edge *eDel )
-	{
-		half_edge *eDelSym = eDel->sym();
-		bool joiningLoops = false;
-
-		// First step: disconnect the origin vertex eDel->Org.  We make all
-		// changes to get a consistent mesh in this "intermediate" state.
-		if ( eDel->lface() != eDel->rface() )
-		{
-			// We are joining two loops into one -- remove the left face
-			joiningLoops = true;
-			kill_face( eDel->lface(), eDel->rface() );
-		}
-
-		if ( eDel->onext() == eDel )
-			kill_vertex( eDel->org(), nullptr );
-		else
-		{
-			// Make sure that eDel->Org and eDel->Rface point to valid half-edges
-			eDel->rface()->set_edge( eDel->oprev() );
-			eDel->org()->set_edge( eDel->onext() );
-
-			Splice( eDel, eDel->oprev() );
-			if ( ! joiningLoops )
-			{
-				face *newFace = _face_pool.allocate();
-
-				// We are splitting one loop into two -- create a new loop for eDel.
-				MakeFace( newFace, eDel, eDel->lface() );
-			}
-		}
-
-		// Claim: the mesh is now in a consistent state, except that eDel->Org
-		// may have been deleted.  Now we disconnect eDel->Dst.
-		if ( eDelSym->onext() == eDelSym )
-		{
-			kill_vertex( eDelSym->org(), nullptr );
-			kill_face( eDelSym->lface(), nullptr );
-		}
-		else
-		{
-			// Make sure that eDel->Dst and eDel->Lface point to valid half-edges
-			eDel->lface()->set_edge( eDelSym->oprev() );
-			eDelSym->org()->set_edge( eDelSym->onext() );
-			Splice( eDelSym, eDelSym->oprev() );
-		}
-
-		// Any isolated vertices or faces have already been freed.
-		kill_edge( eDel );
-	}
-
-	////////////////////////////////////////
-	// Other Edge Operations
-	// All these routines can be implemented with the basic edge
-	// operations above.  They are provided for convenience and efficiency.
-	////////////////////////////////////////
-
-	// tessMeshAddEdgeVertex( eOrg ) creates a new edge eNew such that
-	// eNew == eOrg->Lnext, and eNew->Dst is a newly created vertex.
-	// eOrg and eNew will have the same left face.
-	half_edge *add_edge_vertex( half_edge *eOrg )
-	{
-		half_edge *eNewSym;
-		half_edge *eNew = make_edge( eOrg );
-		if ( eNew == nullptr ) return nullptr;
-
-		eNewSym = eNew->sym();
-
-		// Connect the new edge appropriately
-		Splice( eNew, eOrg->lnext() );
-
-		// Set the vertex and face information
-		eNew->org( eOrg->dst() );
-		{
-			vertex *newVertex = _vertex_pool.allocate();
-			if ( newVertex == nullptr ) return nullptr;
-
-			MakeVertex( newVertex, eNewSym, eNew->org() );
-		}
-		eNew->lface( eOrg->lface() );
-		eNewSym->lface( eOrg->lface() );
-
-		return eNew;
-	}
-
-	// tessMeshSplitEdge( eOrg ) splits eOrg into two edges eOrg and eNew,
-	// such that eNew == eOrg->Lnext.  The new vertex is eOrg->Dst == eNew->Org.
-	// eOrg and eNew will have the same left face.
-	half_edge *split_edge( half_edge *eOrg )
-	{
-		half_edge *eNew;
-		half_edge *tempHalfEdge = add_edge_vertex( eOrg );
-
-		eNew = tempHalfEdge->sym();
-
-		// Disconnect eOrg from eOrg->Dst and connect it to eNew->Org
-		Splice( eOrg->sym(), eOrg->sym()->oprev() );
-		Splice( eOrg->sym(), eNew );
-
-		// Set the vertex and face information
-		eOrg->dst( eNew->org() );
-		eNew->dst()->set_edge( eNew->sym() ); // may have pointed to eOrg->Sym
-		eNew->rface( eOrg->rface() );
-		eNew->winding( eOrg->winding() ); // copy old winding information
-		eNew->sym()->winding( eOrg->sym()->winding() );
-		return eNew;
-	}
-
-	// tessMeshConnect( eOrg, eDst ) creates a new edge from eOrg->Dst
-	// to eDst->Org, and returns the corresponding half-edge eNew.
-	// If eOrg->Lface == eDst->Lface, this splits one loop into two,
-	// and the newly created loop is eNew->Lface.  Otherwise, two disjoint
-	// loops are merged into one, and the loop eDst->Lface is destroyed.
-	//
-	// If (eOrg == eDst), the new face will have only two edges.
-	// If (eOrg->Lnext == eDst), the old face is reduced to a single edge.
-	// If (eOrg->Lnext->Lnext == eDst), the old face is reduced to two edges.
-	half_edge *connect( half_edge *eOrg, half_edge *eDst )
-	{
-		half_edge *eNewSym;
-		bool joiningLoops = false;
-		half_edge *eNew = make_edge( eOrg );
-		if ( eNew == nullptr ) return nullptr;
-
-		eNewSym = eNew->sym();
-
-		if ( eDst->lface() != eOrg->lface() )
-		{
-			// We are connecting two disjoint loops -- destroy eDst->Lface
-			joiningLoops = true;
-			kill_face( eDst->lface(), eOrg->lface() );
-		}
-
-		// Connect the new edge appropriately
-		Splice( eNew, eOrg->lnext() );
-		Splice( eNewSym, eDst );
-
-		// Set the vertex and face information
-		eNew->org( eOrg->dst() );
-		eNewSym->org( eDst->org() );
-		eNew->lface( eOrg->lface() );
-		eNewSym->lface( eOrg->lface() );
-
-		// Make sure the old face points to a valid half-edge
-		eOrg->lface()->set_edge( eNewSym );
-
-		if ( ! joiningLoops )
-		{
-			face *newFace = _face_pool.allocate();
-			if ( newFace == nullptr ) return nullptr;
-
-			// We split one loop into two -- the new loop is eNew->Lface
-			MakeFace( newFace, eNew, eOrg->lface() );
-		}
-		return eNew;
-	}
-
-	// mesh::check_mesh() checks a mesh for self-consistency.
-	void check_mesh( void )
-	{
-		face *fH = &_face_list;
-		vertex *vH = &_vertex_list;
-		half_edge *eH = &_edge_list;
-		face *f;
-		vertex *v, *vPrev;
-
-		face *fPrev = fH;
-		for ( fPrev = fH; ( f = fPrev->next() ) != fH; fPrev = f )
-		{
-			assert( f->prev() == fPrev );
-			half_edge *e = f->edge();
-			do
-			{
-				assert( e->sym() != e );
-				assert( e->sym()->sym() == e );
-				assert( e->lnext()->onext()->sym() == e );
-				assert( e->onext()->sym()->lnext() == e );
-				assert( e->lface() == f );
-				e = e->lnext();
-			} while ( e != f->edge() );
-		}
-		assert( f->prev() == fPrev && f->edge() == nullptr );
-
-		vPrev = vH;
-		half_edge *e;
-		for ( vPrev = vH ; ( v = vPrev->next() ) != vH; vPrev = v )
-		{
-			assert( v->prev() == vPrev );
-			e = v->edge();
-			do
-			{
-				assert( e->sym() != e );
-				assert( e->sym()->sym() == e );
-				assert( e->lnext()->onext()->sym() == e );
-				assert( e->onext()->sym()->lnext() == e );
-				assert( e->org() == v );
-				e = e->onext();
-			}
-			while ( e != v->edge() );
-		}
-		assert( v->prev() == vPrev && v->edge() == nullptr );
-
-		half_edge *ePrev = eH;
-		for ( ePrev = eH; ( e = ePrev->next() ) != eH; ePrev = e )
-		{
-			assert( e->sym()->next() == ePrev->sym() );
-			assert( e->sym() != e );
-			assert( e->sym()->sym() == e );
-			assert( e->org() != nullptr );
-			assert( e->dst() != nullptr );
-			assert( e->lnext()->onext()->sym() == e );
-			assert( e->onext()->sym()->lnext() == e );
-		}
-		assert( e->sym()->next() == ePrev->sym()
-				&& e->sym() == &_edge_sym_list
-				&& e->sym()->sym() == e
-				&& e->org() == nullptr && e->dst() == nullptr
-				&& e->lface() == nullptr && e->rface() == nullptr );
-	}
-
-	int merge_convex_faces( size_t maxVertsPerFace )
-	{
-		face *f;
-		half_edge *eCur, *eNext, *eSym;
-		vertex *vStart;
-		size_t curNv, symNv;
-
-		for ( f = _face_list.next(); f != &_face_list; f = f->next() )
-		{
-			// Skip faces which are outside the result.
-			if ( !f->inside() )
-				continue;
-
-			eCur = f->edge();
-			vStart = eCur->org();
-
-			while ( 1 )
-			{
-				eNext = eCur->lnext();
-				eSym = eCur->sym();
-
-				// Try to merge if the neighbour face is valid.
-				if ( eSym && eSym->lface() && eSym->lface()->inside() )
-				{
-					// Try to merge the neighbour faces if the resulting polygons
-					// does not exceed maximum number of vertices.
-					curNv = CountFaceVerts( f );
-					symNv = CountFaceVerts( eSym->lface() );
-					if ( ( curNv + symNv - 2 ) <= maxVertsPerFace )
-					{
-						// Merge if the resulting poly is convex.
-						if ( VertCCW( eCur->lprev()->org(), eCur->org(), eSym->lnext()->lnext()->org() ) &&
-								VertCCW( eSym->lprev()->org(), eSym->org(), eCur->lnext()->lnext()->org() ) )
-						{
-							eNext = eSym->lnext();
-							delete_edge( eSym );
-							eCur = nullptr;
-						}
-					}
-				}
-
-				if ( eCur && eCur->lnext()->org() == vStart )
-					break;
-
-				// Continue to next edge.
-				eCur = eNext;
-			}
-		}
-
-		return 1;
-	}
-
-	// Remove zero-length edges, and contours with fewer than 3 vertices.
-	void remove_degenerate_edges( void )
-	{
-		half_edge *eH = &_edge_list;
-		half_edge *eNext;
-
-		for ( half_edge *e = eH->next(); e != eH; e = eNext )
-		{
-			eNext = e->next();
-			half_edge *eLnext = e->lnext();
-
-			if ( VertEq( e->org(), e->dst() ) && e->lnext()->lnext() != e )
-			{
-				// Zero-length edge, contour has at least 3 edges
-
-				splice( eLnext, e );
-				delete_edge( e );
-				e = eLnext;
-				eLnext = e->lnext();
-			}
-			if ( eLnext->lnext() == e )
-			{
-				// Degenerate contour (one or two edges)
-
-				if ( eLnext != e )
-				{
-					if ( eLnext == eNext || eLnext == eNext->sym() )
-						eNext = eNext->next();
-					delete_edge( eLnext );
-				}
-				if ( e == eNext || e == eNext->sym() )
-					eNext = eNext->next();
-				delete_edge( e );
-			}
-		}
-	}
-
-	// tessMeshTessellateInterior( mesh ) tessellates each region of
-	// the mesh which is marked "inside" the polygon.  Each such region
-	// must be monotone.
-	bool tessellate_interior( void )
-	{
-		face *next;
-		for ( face *f = _face_list.next(); f != &_face_list; f = next )
-		{
-			// Make sure we don''t try to tessellate the new triangles.
-			next = f->next();
-			if ( f->inside() )
-			{
-				if ( !tessellate_mono_region( f ) )
-					return false;
-			}
-		}
-
-		return true;
-	}
-
-	// tessMeshTessellateMonoRegion( face ) tessellates a monotone region
-	// (what else would it do??)  The region must consist of a single
-	// loop of half-edges (see mesh.h) oriented CCW.  "Monotone" in this
-	// case means that any vertical line intersects the interior of the
-	// region in a single interval.
-	//
-	// Tessellation consists of adding interior edges (actually pairs of
-	// half-edges), to split the region into non-overlapping triangles.
-	//
-	// The basic idea is explained in Preparata and Shamos (which I don''t
-	// have handy right now), although their implementation is more
-	// complicated than this one.  The are two edge chains, an upper chain
-	// and a lower chain.  We process all vertices from both chains in order,
-	// from right to left.
-	//
-	// The algorithm ensures that the following invariant holds after each
-	// vertex is processed: the untessellated region consists of two
-	// chains, where one chain (say the upper) is a single edge, and
-	// the other chain is concave.  The left vertex of the single edge
-	// is always to the left of all vertices in the concave chain.
-	//
-	// Each step consists of adding the rightmost unprocessed vertex to one
-	// of the two chains, and forming a fan of triangles from the rightmost
-	// of two chain endpoints.  Determining whether we can add each triangle
-	// to the fan is a simple orientation test.  By making the fan as large
-	// as possible, we restore the invariant (check it yourself).
-	int tessellate_mono_region( face *f )
-	{
-		half_edge *up, *lo;
-
-		// All edges are oriented CCW around the boundary of the region.
-		// First, find the half-edge whose origin vertex is rightmost.
-		// Since the sweep goes from left to right, f->anEdge should
-		// be close to the edge we want.
-		up = f->edge();
-		assert( up->lnext() != up && up->lnext()->lnext() != up );
-
-		for ( ; VertLeq( up->dst(), up->org() ); up = up->lprev() )
-			;
-		for ( ; VertLeq( up->org(), up->dst() ); up = up->lnext() )
-			;
-		lo = up->lprev();
-
-		while ( up->lnext() != lo )
-		{
-			if ( VertLeq( up->dst(), lo->org() ) )
-			{
-				// up->Dst is on the left.  It is safe to form triangles from lo->Org.
-				// The EdgeGoesLeft test guarantees progress even when some triangles
-				// are CW, given that the upper and lower chains are truly monotone.
-				while ( lo->lnext() != up && ( EdgeGoesLeft( lo->lnext() )
-											 || EdgeSign( lo->org(), lo->dst(), lo->lnext()->dst() ) <= 0 ) )
-				{
-					half_edge *tempHalfEdge = connect( lo->lnext(), lo );
-					if ( tempHalfEdge == nullptr ) return 0;
-					lo = tempHalfEdge->sym();
-				}
-				lo = lo->lprev();
-			}
-			else
-			{
-				// lo->Org is on the left.  We can make CCW triangles from up->Dst.
-				while ( lo->lnext() != up && ( EdgeGoesRight( up->lprev() )
-											 || EdgeSign( up->dst(), up->org(), up->lprev()->org() ) >= 0 ) )
-				{
-					half_edge *tempHalfEdge = connect( up, up->lprev() );
-					if ( tempHalfEdge == nullptr ) return 0;
-					up = tempHalfEdge->sym();
-				}
-				up = up->lnext();
-			}
-		}
-
-		// Now lo->Org == up->Dst == the leftmost vertex.  The remaining region
-		// can be tessellated in a fan from this leftmost vertex.
-		assert( lo->lnext() != up );
-		while ( lo->lnext()->lnext() != up )
-		{
-			half_edge *tempHalfEdge = connect( lo->lnext(), lo );
-			if ( tempHalfEdge == nullptr ) return 0;
-			lo = tempHalfEdge->sym();
-		}
-
-		return 1;
-	}
-
-	// Delete any degenerate faces with only two edges.  WalkDirtyRegions()
-	// will catch almost all of these, but it won't catch degenerate faces
-	// produced by splice operations on already-processed edges.
-	// The two places this can happen are in FinishLeftRegions(), when
-	// we splice in a "temporary" edge produced by ConnectRightVertex(),
-	// and in CheckForLeftSplice(), where we splice already-processed
-	// edges to ensure that our dictionary invariants are not violated
-	// by numerical errors.
-	//
-	// In both these cases it is *very* dangerous to delete the offending
-	// edge at the time, since one of the routines further up the stack
-	// will sometimes be keeping a pointer to that edge.
-	int remove_degenerate_faces( void )
-	{
-		face *f, *fNext;
-
-		for ( f = _face_list.next(); f != &_face_list; f = fNext )
-		{
-			fNext = f->next();
-			half_edge *e = f->edge();
-			assert( e->lnext() != e );
-
-			if ( e->lnext()->lnext() == e )
-			{
-				// A face with only two edges
-				half_edge *on = e->onext();
-				on->add_winding( e->winding() );
-				on->sym()->add_winding( e->sym()->winding() );
-				delete_edge( e );
-			}
-		}
-		return 1;
-	}
-
-	// KillEdge( eDel ) destroys an edge (the half-edges eDel and eDel->Sym),
-	// and removes from the global edge list.
-	void kill_edge( half_edge *eDel )
-	{
-		half_edge *ePrev, *eNext;
-
-		// delete from circular doubly-linked list
-		eNext = eDel->next();
-		ePrev = eDel->sym()->next();
-		eNext->sym()->next( ePrev );
-		ePrev->sym()->next( eNext );
-
-		_edge_pool.deallocate( eDel->sym() );
-		_edge_pool.deallocate( eDel );
-	}
-
-	// KillVertex( vDel ) destroys a vertex and removes it from the global
-	// vertex list.  It updates the vertex loop to point to a given new vertex.
-	void kill_vertex( vertex *vDel, vertex *newOrg )
-	{
-		half_edge *e, *eStart = vDel->edge();
-		vertex *vPrev, *vNext;
-
-		// change the origin of all affected edges
-		e = eStart;
-		do
-		{
-			e->org( newOrg );
-			e = e->onext();
-		}
-		while ( e != eStart );
-
-		// delete from circular doubly-linked list
-		vPrev = vDel->prev();
-		vNext = vDel->next();
-		vNext->set_prev( vPrev );
-		vPrev->set_next( vNext );
-
-		_vertex_pool.deallocate( vDel );
-	}
-
-	// KillFace( fDel ) destroys a face and removes it from the global face
-	// list.  It updates the face loop to point to a given new face.
-	void kill_face( face *fDel, face *newLface )
-	{
-		half_edge *e, *eStart = fDel->edge();
-		face *fPrev, *fNext;
-
-		// change the left face of all affected edges
-		e = eStart;
-		do
-		{
-			e->lface( newLface );
-			e = e->lnext();
-		} while ( e != eStart );
-
-		// delete from circular doubly-linked list
-		fPrev = fDel->prev();
-		fNext = fDel->next();
-		fNext->set_prev( fPrev );
-		fPrev->set_next( fNext );
-
-		_face_pool.deallocate( fDel );
-	}
-
-	face *face_list( void )
-	{
-		return &_face_list;
-	}
-
-	vertex *vertex_list( void )
-	{
-		return &_vertex_list;
-	}
+    // tessMeshNewMesh() creates a new mesh with no edges, no vertices,
+    // and no loops (what we usually call a "face").
+    tess_mesh( void )
+    {
+        vertex *   v    = &_vertex_list;
+        face *     f    = &_face_list;
+        half_edge *e    = &_edge_list;
+        half_edge *eSym = &_edge_sym_list;
+
+        v->set_next( v );
+        v->set_prev( v );
+        v->set_edge( nullptr );
+
+        f->set_next( f );
+        f->set_prev( f );
+        f->set_edge( nullptr );
+        f->set_trail( nullptr );
+        f->set_marked( false );
+        f->set_inside( false );
+
+        e->next( e );
+        e->sym( eSym );
+
+        eSym->next( eSym );
+        eSym->sym( e );
+    }
+
+    // mesh::make_edge creates one edge, two vertices, and a loop (face).
+    // The loop consists of the two new half-edges.
+    half_edge *make_edge( void )
+    {
+        vertex *newVertex1 = _vertex_pool.allocate();
+        vertex *newVertex2 = _vertex_pool.allocate();
+        face *  newFace    = _face_pool.allocate();
+
+        half_edge *e = make_edge( &_edge_list );
+
+        MakeVertex( newVertex1, e, &_vertex_list );
+        MakeVertex( newVertex2, e->sym(), &_vertex_list );
+        MakeFace( newFace, e, &_face_list );
+        return e;
+    }
+
+    // mesh::splice( eOrg, eDst ) is the basic operation for changing the
+    // mesh connectivity and topology.  It changes the mesh so that
+    //	eOrg->Onext <- OLD( eDst->Onext )
+    //	eDst->Onext <- OLD( eOrg->Onext )
+    // where OLD(...) means the value before the meshSplice operation.
+    //
+    // This can have two effects on the vertex structure:
+    //  - if eOrg->Org != eDst->Org, the two vertices are merged together
+    //  - if eOrg->Org == eDst->Org, the origin is split into two vertices
+    // In both cases, eDst->Org is changed and eOrg->Org is untouched.
+    //
+    // Similarly (and independently) for the face structure,
+    //  - if eOrg->Lface == eDst->Lface, one loop is split into two
+    //  - if eOrg->Lface != eDst->Lface, two distinct loops are joined into one
+    // In both cases, eDst->Lface is changed and eOrg->Lface is unaffected.
+    //
+    // Some special cases:
+    // If eDst == eOrg, the operation has no effect.
+    // If eDst == eOrg->Lnext, the new face will have a single edge.
+    // If eDst == eOrg->Lprev, the old face will have a single edge.
+    // If eDst == eOrg->Onext, the new vertex will have a single edge.
+    // If eDst == eOrg->Oprev, the old vertex will have a single edge.
+    void splice( half_edge *eOrg, half_edge *eDst )
+    {
+        bool joiningLoops    = false;
+        bool joiningVertices = false;
+
+        if ( eOrg == eDst )
+            return;
+
+        if ( eDst->org() != eOrg->org() )
+        {
+            // We are merging two disjoint vertices -- destroy eDst->Org
+            joiningVertices = true;
+            kill_vertex( eDst->org(), eOrg->org() );
+        }
+        if ( eDst->lface() != eOrg->lface() )
+        {
+            // We are connecting two disjoint loops -- destroy eDst->Lface
+            joiningLoops = true;
+            kill_face( eDst->lface(), eOrg->lface() );
+        }
+
+        // Change the edge structure
+        Splice( eDst, eOrg );
+
+        if ( !joiningVertices )
+        {
+            vertex *newVertex = _vertex_pool.allocate();
+
+            // We split one vertex into two -- the new vertex is eDst->Org.
+            // Make sure the old vertex points to a valid half-edge.
+            MakeVertex( newVertex, eDst, eOrg->org() );
+            eOrg->org()->set_edge( eOrg );
+        }
+        if ( !joiningLoops )
+        {
+            face *newFace = _face_pool.allocate();
+
+            // We split one loop into two -- the new loop is eDst->Lface.
+            // Make sure the old face points to a valid half-edge.
+            MakeFace( newFace, eDst, eOrg->lface() );
+            eOrg->lface()->set_edge( eOrg );
+        }
+    }
+
+    // @brief Removes the edge eDel.
+    // There are several cases:
+    // if eDel->lface() != eDel->rface(), we join two loops into one; the loop
+    // eDel->lface() is deleted.  Otherwise, we are splitting one loop into two;
+    // the newly created loop will contain eDel->dst().  If the deletion of eDel
+    // would create isolated vertices, those are deleted as well.
+    //
+    // This function could be implemented as two calls to tessMeshSplice
+    // plus a few calls to memFree, but this would allocate and delete
+    // unnecessary vertices and faces.
+    void delete_edge( half_edge *eDel )
+    {
+        half_edge *eDelSym      = eDel->sym();
+        bool       joiningLoops = false;
+
+        // First step: disconnect the origin vertex eDel->Org.  We make all
+        // changes to get a consistent mesh in this "intermediate" state.
+        if ( eDel->lface() != eDel->rface() )
+        {
+            // We are joining two loops into one -- remove the left face
+            joiningLoops = true;
+            kill_face( eDel->lface(), eDel->rface() );
+        }
+
+        if ( eDel->onext() == eDel )
+            kill_vertex( eDel->org(), nullptr );
+        else
+        {
+            // Make sure that eDel->Org and eDel->Rface point to valid half-edges
+            eDel->rface()->set_edge( eDel->oprev() );
+            eDel->org()->set_edge( eDel->onext() );
+
+            Splice( eDel, eDel->oprev() );
+            if ( !joiningLoops )
+            {
+                face *newFace = _face_pool.allocate();
+
+                // We are splitting one loop into two -- create a new loop for eDel.
+                MakeFace( newFace, eDel, eDel->lface() );
+            }
+        }
+
+        // Claim: the mesh is now in a consistent state, except that eDel->Org
+        // may have been deleted.  Now we disconnect eDel->Dst.
+        if ( eDelSym->onext() == eDelSym )
+        {
+            kill_vertex( eDelSym->org(), nullptr );
+            kill_face( eDelSym->lface(), nullptr );
+        }
+        else
+        {
+            // Make sure that eDel->Dst and eDel->Lface point to valid half-edges
+            eDel->lface()->set_edge( eDelSym->oprev() );
+            eDelSym->org()->set_edge( eDelSym->onext() );
+            Splice( eDelSym, eDelSym->oprev() );
+        }
+
+        // Any isolated vertices or faces have already been freed.
+        kill_edge( eDel );
+    }
+
+    ////////////////////////////////////////
+    // Other Edge Operations
+    // All these routines can be implemented with the basic edge
+    // operations above.  They are provided for convenience and efficiency.
+    ////////////////////////////////////////
+
+    // tessMeshAddEdgeVertex( eOrg ) creates a new edge eNew such that
+    // eNew == eOrg->Lnext, and eNew->Dst is a newly created vertex.
+    // eOrg and eNew will have the same left face.
+    half_edge *add_edge_vertex( half_edge *eOrg )
+    {
+        half_edge *eNewSym;
+        half_edge *eNew = make_edge( eOrg );
+        if ( eNew == nullptr )
+            return nullptr;
+
+        eNewSym = eNew->sym();
+
+        // Connect the new edge appropriately
+        Splice( eNew, eOrg->lnext() );
+
+        // Set the vertex and face information
+        eNew->org( eOrg->dst() );
+        {
+            vertex *newVertex = _vertex_pool.allocate();
+            if ( newVertex == nullptr )
+                return nullptr;
+
+            MakeVertex( newVertex, eNewSym, eNew->org() );
+        }
+        eNew->lface( eOrg->lface() );
+        eNewSym->lface( eOrg->lface() );
+
+        return eNew;
+    }
+
+    // tessMeshSplitEdge( eOrg ) splits eOrg into two edges eOrg and eNew,
+    // such that eNew == eOrg->Lnext.  The new vertex is eOrg->Dst == eNew->Org.
+    // eOrg and eNew will have the same left face.
+    half_edge *split_edge( half_edge *eOrg )
+    {
+        half_edge *eNew;
+        half_edge *tempHalfEdge = add_edge_vertex( eOrg );
+
+        eNew = tempHalfEdge->sym();
+
+        // Disconnect eOrg from eOrg->Dst and connect it to eNew->Org
+        Splice( eOrg->sym(), eOrg->sym()->oprev() );
+        Splice( eOrg->sym(), eNew );
+
+        // Set the vertex and face information
+        eOrg->dst( eNew->org() );
+        eNew->dst()->set_edge( eNew->sym() ); // may have pointed to eOrg->Sym
+        eNew->rface( eOrg->rface() );
+        eNew->winding( eOrg->winding() ); // copy old winding information
+        eNew->sym()->winding( eOrg->sym()->winding() );
+        return eNew;
+    }
+
+    // tessMeshConnect( eOrg, eDst ) creates a new edge from eOrg->Dst
+    // to eDst->Org, and returns the corresponding half-edge eNew.
+    // If eOrg->Lface == eDst->Lface, this splits one loop into two,
+    // and the newly created loop is eNew->Lface.  Otherwise, two disjoint
+    // loops are merged into one, and the loop eDst->Lface is destroyed.
+    //
+    // If (eOrg == eDst), the new face will have only two edges.
+    // If (eOrg->Lnext == eDst), the old face is reduced to a single edge.
+    // If (eOrg->Lnext->Lnext == eDst), the old face is reduced to two edges.
+    half_edge *connect( half_edge *eOrg, half_edge *eDst )
+    {
+        half_edge *eNewSym;
+        bool       joiningLoops = false;
+        half_edge *eNew         = make_edge( eOrg );
+        if ( eNew == nullptr )
+            return nullptr;
+
+        eNewSym = eNew->sym();
+
+        if ( eDst->lface() != eOrg->lface() )
+        {
+            // We are connecting two disjoint loops -- destroy eDst->Lface
+            joiningLoops = true;
+            kill_face( eDst->lface(), eOrg->lface() );
+        }
+
+        // Connect the new edge appropriately
+        Splice( eNew, eOrg->lnext() );
+        Splice( eNewSym, eDst );
+
+        // Set the vertex and face information
+        eNew->org( eOrg->dst() );
+        eNewSym->org( eDst->org() );
+        eNew->lface( eOrg->lface() );
+        eNewSym->lface( eOrg->lface() );
+
+        // Make sure the old face points to a valid half-edge
+        eOrg->lface()->set_edge( eNewSym );
+
+        if ( !joiningLoops )
+        {
+            face *newFace = _face_pool.allocate();
+            if ( newFace == nullptr )
+                return nullptr;
+
+            // We split one loop into two -- the new loop is eNew->Lface
+            MakeFace( newFace, eNew, eOrg->lface() );
+        }
+        return eNew;
+    }
+
+    // mesh::check_mesh() checks a mesh for self-consistency.
+    void check_mesh( void )
+    {
+        face *     fH = &_face_list;
+        vertex *   vH = &_vertex_list;
+        half_edge *eH = &_edge_list;
+        face *     f;
+        vertex *   v, *vPrev;
+
+        face *fPrev = fH;
+        for ( fPrev = fH; ( f = fPrev->next() ) != fH; fPrev = f )
+        {
+            assert( f->prev() == fPrev );
+            half_edge *e = f->edge();
+            do
+            {
+                assert( e->sym() != e );
+                assert( e->sym()->sym() == e );
+                assert( e->lnext()->onext()->sym() == e );
+                assert( e->onext()->sym()->lnext() == e );
+                assert( e->lface() == f );
+                e = e->lnext();
+            } while ( e != f->edge() );
+        }
+        assert( f->prev() == fPrev && f->edge() == nullptr );
+
+        vPrev = vH;
+        half_edge *e;
+        for ( vPrev = vH; ( v = vPrev->next() ) != vH; vPrev = v )
+        {
+            assert( v->prev() == vPrev );
+            e = v->edge();
+            do
+            {
+                assert( e->sym() != e );
+                assert( e->sym()->sym() == e );
+                assert( e->lnext()->onext()->sym() == e );
+                assert( e->onext()->sym()->lnext() == e );
+                assert( e->org() == v );
+                e = e->onext();
+            } while ( e != v->edge() );
+        }
+        assert( v->prev() == vPrev && v->edge() == nullptr );
+
+        half_edge *ePrev = eH;
+        for ( ePrev = eH; ( e = ePrev->next() ) != eH; ePrev = e )
+        {
+            assert( e->sym()->next() == ePrev->sym() );
+            assert( e->sym() != e );
+            assert( e->sym()->sym() == e );
+            assert( e->org() != nullptr );
+            assert( e->dst() != nullptr );
+            assert( e->lnext()->onext()->sym() == e );
+            assert( e->onext()->sym()->lnext() == e );
+        }
+        assert(
+            e->sym()->next() == ePrev->sym() && e->sym() == &_edge_sym_list &&
+            e->sym()->sym() == e && e->org() == nullptr &&
+            e->dst() == nullptr && e->lface() == nullptr &&
+            e->rface() == nullptr );
+    }
+
+    int merge_convex_faces( size_t maxVertsPerFace )
+    {
+        face *     f;
+        half_edge *eCur, *eNext, *eSym;
+        vertex *   vStart;
+        size_t     curNv, symNv;
+
+        for ( f = _face_list.next(); f != &_face_list; f = f->next() )
+        {
+            // Skip faces which are outside the result.
+            if ( !f->inside() )
+                continue;
+
+            eCur   = f->edge();
+            vStart = eCur->org();
+
+            while ( 1 )
+            {
+                eNext = eCur->lnext();
+                eSym  = eCur->sym();
+
+                // Try to merge if the neighbour face is valid.
+                if ( eSym && eSym->lface() && eSym->lface()->inside() )
+                {
+                    // Try to merge the neighbour faces if the resulting polygons
+                    // does not exceed maximum number of vertices.
+                    curNv = CountFaceVerts( f );
+                    symNv = CountFaceVerts( eSym->lface() );
+                    if ( ( curNv + symNv - 2 ) <= maxVertsPerFace )
+                    {
+                        // Merge if the resulting poly is convex.
+                        if ( VertCCW(
+                                 eCur->lprev()->org(),
+                                 eCur->org(),
+                                 eSym->lnext()->lnext()->org() ) &&
+                             VertCCW(
+                                 eSym->lprev()->org(),
+                                 eSym->org(),
+                                 eCur->lnext()->lnext()->org() ) )
+                        {
+                            eNext = eSym->lnext();
+                            delete_edge( eSym );
+                            eCur = nullptr;
+                        }
+                    }
+                }
+
+                if ( eCur && eCur->lnext()->org() == vStart )
+                    break;
+
+                // Continue to next edge.
+                eCur = eNext;
+            }
+        }
+
+        return 1;
+    }
+
+    // Remove zero-length edges, and contours with fewer than 3 vertices.
+    void remove_degenerate_edges( void )
+    {
+        half_edge *eH = &_edge_list;
+        half_edge *eNext;
+
+        for ( half_edge *e = eH->next(); e != eH; e = eNext )
+        {
+            eNext             = e->next();
+            half_edge *eLnext = e->lnext();
+
+            if ( VertEq( e->org(), e->dst() ) && e->lnext()->lnext() != e )
+            {
+                // Zero-length edge, contour has at least 3 edges
+
+                splice( eLnext, e );
+                delete_edge( e );
+                e      = eLnext;
+                eLnext = e->lnext();
+            }
+            if ( eLnext->lnext() == e )
+            {
+                // Degenerate contour (one or two edges)
+
+                if ( eLnext != e )
+                {
+                    if ( eLnext == eNext || eLnext == eNext->sym() )
+                        eNext = eNext->next();
+                    delete_edge( eLnext );
+                }
+                if ( e == eNext || e == eNext->sym() )
+                    eNext = eNext->next();
+                delete_edge( e );
+            }
+        }
+    }
+
+    // tessMeshTessellateInterior( mesh ) tessellates each region of
+    // the mesh which is marked "inside" the polygon.  Each such region
+    // must be monotone.
+    bool tessellate_interior( void )
+    {
+        face *next;
+        for ( face *f = _face_list.next(); f != &_face_list; f = next )
+        {
+            // Make sure we don''t try to tessellate the new triangles.
+            next = f->next();
+            if ( f->inside() )
+            {
+                if ( !tessellate_mono_region( f ) )
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    // tessMeshTessellateMonoRegion( face ) tessellates a monotone region
+    // (what else would it do??)  The region must consist of a single
+    // loop of half-edges (see mesh.h) oriented CCW.  "Monotone" in this
+    // case means that any vertical line intersects the interior of the
+    // region in a single interval.
+    //
+    // Tessellation consists of adding interior edges (actually pairs of
+    // half-edges), to split the region into non-overlapping triangles.
+    //
+    // The basic idea is explained in Preparata and Shamos (which I don''t
+    // have handy right now), although their implementation is more
+    // complicated than this one.  The are two edge chains, an upper chain
+    // and a lower chain.  We process all vertices from both chains in order,
+    // from right to left.
+    //
+    // The algorithm ensures that the following invariant holds after each
+    // vertex is processed: the untessellated region consists of two
+    // chains, where one chain (say the upper) is a single edge, and
+    // the other chain is concave.  The left vertex of the single edge
+    // is always to the left of all vertices in the concave chain.
+    //
+    // Each step consists of adding the rightmost unprocessed vertex to one
+    // of the two chains, and forming a fan of triangles from the rightmost
+    // of two chain endpoints.  Determining whether we can add each triangle
+    // to the fan is a simple orientation test.  By making the fan as large
+    // as possible, we restore the invariant (check it yourself).
+    int tessellate_mono_region( face *f )
+    {
+        half_edge *up, *lo;
+
+        // All edges are oriented CCW around the boundary of the region.
+        // First, find the half-edge whose origin vertex is rightmost.
+        // Since the sweep goes from left to right, f->anEdge should
+        // be close to the edge we want.
+        up = f->edge();
+        assert( up->lnext() != up && up->lnext()->lnext() != up );
+
+        for ( ; VertLeq( up->dst(), up->org() ); up = up->lprev() )
+            ;
+        for ( ; VertLeq( up->org(), up->dst() ); up = up->lnext() )
+            ;
+        lo = up->lprev();
+
+        while ( up->lnext() != lo )
+        {
+            if ( VertLeq( up->dst(), lo->org() ) )
+            {
+                // up->Dst is on the left.  It is safe to form triangles from lo->Org.
+                // The EdgeGoesLeft test guarantees progress even when some triangles
+                // are CW, given that the upper and lower chains are truly monotone.
+                while (
+                    lo->lnext() != up &&
+                    ( EdgeGoesLeft( lo->lnext() ) ||
+                      EdgeSign( lo->org(), lo->dst(), lo->lnext()->dst() ) <=
+                          0 ) )
+                {
+                    half_edge *tempHalfEdge = connect( lo->lnext(), lo );
+                    if ( tempHalfEdge == nullptr )
+                        return 0;
+                    lo = tempHalfEdge->sym();
+                }
+                lo = lo->lprev();
+            }
+            else
+            {
+                // lo->Org is on the left.  We can make CCW triangles from up->Dst.
+                while (
+                    lo->lnext() != up &&
+                    ( EdgeGoesRight( up->lprev() ) ||
+                      EdgeSign( up->dst(), up->org(), up->lprev()->org() ) >=
+                          0 ) )
+                {
+                    half_edge *tempHalfEdge = connect( up, up->lprev() );
+                    if ( tempHalfEdge == nullptr )
+                        return 0;
+                    up = tempHalfEdge->sym();
+                }
+                up = up->lnext();
+            }
+        }
+
+        // Now lo->Org == up->Dst == the leftmost vertex.  The remaining region
+        // can be tessellated in a fan from this leftmost vertex.
+        assert( lo->lnext() != up );
+        while ( lo->lnext()->lnext() != up )
+        {
+            half_edge *tempHalfEdge = connect( lo->lnext(), lo );
+            if ( tempHalfEdge == nullptr )
+                return 0;
+            lo = tempHalfEdge->sym();
+        }
+
+        return 1;
+    }
+
+    // Delete any degenerate faces with only two edges.  WalkDirtyRegions()
+    // will catch almost all of these, but it won't catch degenerate faces
+    // produced by splice operations on already-processed edges.
+    // The two places this can happen are in FinishLeftRegions(), when
+    // we splice in a "temporary" edge produced by ConnectRightVertex(),
+    // and in CheckForLeftSplice(), where we splice already-processed
+    // edges to ensure that our dictionary invariants are not violated
+    // by numerical errors.
+    //
+    // In both these cases it is *very* dangerous to delete the offending
+    // edge at the time, since one of the routines further up the stack
+    // will sometimes be keeping a pointer to that edge.
+    int remove_degenerate_faces( void )
+    {
+        face *f, *fNext;
+
+        for ( f = _face_list.next(); f != &_face_list; f = fNext )
+        {
+            fNext        = f->next();
+            half_edge *e = f->edge();
+            assert( e->lnext() != e );
+
+            if ( e->lnext()->lnext() == e )
+            {
+                // A face with only two edges
+                half_edge *on = e->onext();
+                on->add_winding( e->winding() );
+                on->sym()->add_winding( e->sym()->winding() );
+                delete_edge( e );
+            }
+        }
+        return 1;
+    }
+
+    // KillEdge( eDel ) destroys an edge (the half-edges eDel and eDel->Sym),
+    // and removes from the global edge list.
+    void kill_edge( half_edge *eDel )
+    {
+        half_edge *ePrev, *eNext;
+
+        // delete from circular doubly-linked list
+        eNext = eDel->next();
+        ePrev = eDel->sym()->next();
+        eNext->sym()->next( ePrev );
+        ePrev->sym()->next( eNext );
+
+        _edge_pool.deallocate( eDel->sym() );
+        _edge_pool.deallocate( eDel );
+    }
+
+    // KillVertex( vDel ) destroys a vertex and removes it from the global
+    // vertex list.  It updates the vertex loop to point to a given new vertex.
+    void kill_vertex( vertex *vDel, vertex *newOrg )
+    {
+        half_edge *e, *eStart = vDel->edge();
+        vertex *   vPrev, *vNext;
+
+        // change the origin of all affected edges
+        e = eStart;
+        do
+        {
+            e->org( newOrg );
+            e = e->onext();
+        } while ( e != eStart );
+
+        // delete from circular doubly-linked list
+        vPrev = vDel->prev();
+        vNext = vDel->next();
+        vNext->set_prev( vPrev );
+        vPrev->set_next( vNext );
+
+        _vertex_pool.deallocate( vDel );
+    }
+
+    // KillFace( fDel ) destroys a face and removes it from the global face
+    // list.  It updates the face loop to point to a given new face.
+    void kill_face( face *fDel, face *newLface )
+    {
+        half_edge *e, *eStart = fDel->edge();
+        face *     fPrev, *fNext;
+
+        // change the left face of all affected edges
+        e = eStart;
+        do
+        {
+            e->lface( newLface );
+            e = e->lnext();
+        } while ( e != eStart );
+
+        // delete from circular doubly-linked list
+        fPrev = fDel->prev();
+        fNext = fDel->next();
+        fNext->set_prev( fPrev );
+        fPrev->set_next( fNext );
+
+        _face_pool.deallocate( fDel );
+    }
+
+    face *face_list( void ) { return &_face_list; }
+
+    vertex *vertex_list( void ) { return &_vertex_list; }
 
 private:
-	// MakeEdge creates a new pair of half-edges which form their own loop.
-	// No vertex or face structures are allocated, but these must be assigned
-	// before the current edge operation is completed.
-	half_edge *make_edge( half_edge *eNext )
-	{
-		half_edge *e = _edge_pool.allocate();
-		half_edge *eSym = _edge_pool.allocate();
+    // MakeEdge creates a new pair of half-edges which form their own loop.
+    // No vertex or face structures are allocated, but these must be assigned
+    // before the current edge operation is completed.
+    half_edge *make_edge( half_edge *eNext )
+    {
+        half_edge *e    = _edge_pool.allocate();
+        half_edge *eSym = _edge_pool.allocate();
 
-		// Make sure eNext points to the first edge of the edge pair
-		if ( eNext->sym() < eNext )
-			eNext = eNext->sym();
+        // Make sure eNext points to the first edge of the edge pair
+        if ( eNext->sym() < eNext )
+            eNext = eNext->sym();
 
-		// Insert in circular doubly-linked list before eNext.
-		// Note that the prev pointer is stored in Sym->next.
-		half_edge *ePrev = eNext->prev();
-		eSym->next( ePrev );
-		ePrev->prev( e );
-		e->next( eNext );
-		eNext->prev( eSym );
+        // Insert in circular doubly-linked list before eNext.
+        // Note that the prev pointer is stored in Sym->next.
+        half_edge *ePrev = eNext->prev();
+        eSym->next( ePrev );
+        ePrev->prev( e );
+        e->next( eNext );
+        eNext->prev( eSym );
 
-		e->sym( eSym );
-		e->onext( e );
-		e->lnext( eSym );
+        e->sym( eSym );
+        e->onext( e );
+        e->lnext( eSym );
 
-		eSym->sym( e );
-		eSym->onext( eSym );
-		eSym->lnext( e );
+        eSym->sym( e );
+        eSym->onext( eSym );
+        eSym->lnext( e );
 
-		return e;
-	}
+        return e;
+    }
 
-	vertex _vertex_list; // dummy header for vertex list
-	face _face_list; // dummy header for face list
-	half_edge _edge_list; // dummy header for edge list
-	half_edge _edge_sym_list; // and its symmetric counterpart
+    vertex    _vertex_list;   // dummy header for vertex list
+    face      _face_list;     // dummy header for face list
+    half_edge _edge_list;     // dummy header for edge list
+    half_edge _edge_sym_list; // and its symmetric counterpart
 
-	base::memory_pool<half_edge,512> _edge_pool;
-	base::memory_pool<vertex,512> _vertex_pool;
-	base::memory_pool<face,256> _face_pool;
+    base::memory_pool<half_edge, 512> _edge_pool;
+    base::memory_pool<vertex, 512>    _vertex_pool;
+    base::memory_pool<face, 256>      _face_pool;
 };
 
 // The mesh operations below have three motivations: completeness,
@@ -1524,29 +1462,25 @@ private:
 class active_region
 {
 public:
-	active_region *below( void )
-	{
-		return nodeUp->prev()->key();
-	}
+    active_region *below( void ) { return nodeUp->prev()->key(); }
 
-	active_region *above( void )
-	{
-		return nodeUp->next()->key();
-	}
+    active_region *above( void ) { return nodeUp->next()->key(); }
 
-	half_edge *eUp; // upper edge, directed right to left
-	dict<active_region*>::node *nodeUp;	// dictionary node corresponding to eUp
-	int windingNumber; // used to determine which regions are inside the polygon
-	bool inside; // is this region inside the polygon?
-	bool sentinel; // marks fake edges at t = +/-infinity
-	bool dirty;	// marks regions where the upper or lower edge has changed, but we haven't checked whether they intersect yet
-	bool fixUpperEdge; // marks temporary edges introduced when we process a "right vertex" (one without any edges leaving to the right)
+    half_edge *                  eUp;    // upper edge, directed right to left
+    dict<active_region *>::node *nodeUp; // dictionary node corresponding to eUp
+    int windingNumber; // used to determine which regions are inside the polygon
+    bool inside;       // is this region inside the polygon?
+    bool sentinel;     // marks fake edges at t = +/-infinity
+    bool
+        dirty; // marks regions where the upper or lower edge has changed, but we haven't checked whether they intersect yet
+    bool
+        fixUpperEdge; // marks temporary edges introduced when we process a "right vertex" (one without any edges leaving to the right)
 };
 
 inline bool tesvertLeq( vertex *u, vertex *v )
 {
-	// Returns true if u is lexicographically <= v.
-	return VertLeq( u, v );
+    // Returns true if u is lexicographically <= v.
+    return VertLeq( u, v );
 }
 
 // Find some weights which describe how the intersection vertex is
@@ -1554,224 +1488,236 @@ inline bool tesvertLeq( vertex *u, vertex *v )
 // which generated "isect" is allocated 50% of the weight; each edge
 // splits the weight between its org and dst according to the
 // relative distance to "isect".
-static void VertexWeights( vertex *isect, vertex *org, vertex *dst, double *weights )
+static void
+VertexWeights( vertex *isect, vertex *org, vertex *dst, double *weights )
 {
-	double t1 = VertL1dist( org, isect );
-	double t2 = VertL1dist( dst, isect );
+    double t1 = VertL1dist( org, isect );
+    double t2 = VertL1dist( dst, isect );
 
-	weights[0] = 0.5 * t2 / ( t1 + t2 );
-	weights[1] = 0.5 * t1 / ( t1 + t2 );
-	isect->set_x( isect->x() + weights[0] * org->x() + weights[1] * dst->x() );
-	isect->set_y( isect->y() + weights[0] * org->y() + weights[1] * dst->y() );
+    weights[0] = 0.5 * t2 / ( t1 + t2 );
+    weights[1] = 0.5 * t1 / ( t1 + t2 );
+    isect->set_x( isect->x() + weights[0] * org->x() + weights[1] * dst->x() );
+    isect->set_y( isect->y() + weights[0] * org->y() + weights[1] * dst->y() );
 }
-
 
 // Determine the polygon normal and project vertices onto the plane
 // of the polygon.
 void tessellator::compute_bounding_box( void )
 {
-	vertex *vHead = _mesh->vertex_list();
-	bool first = true;
+    vertex *vHead = _mesh->vertex_list();
+    bool    first = true;
 
-	for ( vertex *v = vHead->next(); v != vHead; v = v->next() )
-	{
-		if ( first )
-		{
-			_bmin[0] = _bmax[0] = v->x();
-			_bmin[1] = _bmax[1] = v->y();
-			first = false;
-		}
-		else
-		{
-			if ( v->x() < _bmin[0] ) _bmin[0] = v->x();
-			if ( v->x() > _bmax[0] ) _bmax[0] = v->x();
-			if ( v->y() < _bmin[1] ) _bmin[1] = v->y();
-			if ( v->y() > _bmax[1] ) _bmax[1] = v->y();
-		}
-	}
+    for ( vertex *v = vHead->next(); v != vHead; v = v->next() )
+    {
+        if ( first )
+        {
+            _bmin[0] = _bmax[0] = v->x();
+            _bmin[1] = _bmax[1] = v->y();
+            first               = false;
+        }
+        else
+        {
+            if ( v->x() < _bmin[0] )
+                _bmin[0] = v->x();
+            if ( v->x() > _bmax[0] )
+                _bmax[0] = v->x();
+            if ( v->y() < _bmin[1] )
+                _bmin[1] = v->y();
+            if ( v->y() > _bmax[1] )
+                _bmax[1] = v->y();
+        }
+    }
 }
 
-namespace {
-	bool greater_than( const vertex *a, const vertex *b )
-	{
-		// Swap a & b to get greater than
-		return !VertLeq( a, b );
-	}
-}
-
-tessellator::tessellator( const std::function<void(double,double)> &add_point, const std::function<void(size_t,size_t,size_t)> &add_tri )
-	: _pq( &greater_than ), _add_point( add_point ), _add_tri( add_tri )
+namespace
 {
-	_pq.set_default( nullptr );
+bool greater_than( const vertex *a, const vertex *b )
+{
+    // Swap a & b to get greater than
+    return !VertLeq( a, b );
+}
+} // namespace
 
-	// Only initialize fields which can be changed by the api.  Other fields
-	// are initialized where they are used.
-	_bmin[0] = 0;
-	_bmin[1] = 0;
-	_bmax[0] = 0;
-	_bmax[1] = 0;
+tessellator::tessellator(
+    const std::function<void( double, double )> &        add_point,
+    const std::function<void( size_t, size_t, size_t )> &add_tri )
+    : _pq( &greater_than ), _add_point( add_point ), _add_tri( add_tri )
+{
+    _pq.set_default( nullptr );
 
-	// Initialize to begin polygon.
-	_mesh = nullptr;
+    // Only initialize fields which can be changed by the api.  Other fields
+    // are initialized where they are used.
+    _bmin[0] = 0;
+    _bmin[1] = 0;
+    _bmax[0] = 0;
+    _bmax[1] = 0;
 
-	_dict = nullptr;
-	_event = nullptr;
+    // Initialize to begin polygon.
+    _mesh = nullptr;
+
+    _dict  = nullptr;
+    _event = nullptr;
 }
 
 tessellator::~tessellator( void )
 {
-	delete _mesh;
-	_mesh = nullptr;
+    delete _mesh;
+    _mesh = nullptr;
 }
 
 void tessellator::output_polymesh( void )
 {
-	size_t maxFaceCount = 0;
-	size_t maxVertexCount = 0;
+    size_t maxFaceCount   = 0;
+    size_t maxVertexCount = 0;
 
-	// Mark unused
-	for ( vertex *v = _mesh->vertex_list()->next(); v != _mesh->vertex_list(); v = v->next() )
-		v->set_index( TESS_UNDEF );
+    // Mark unused
+    for ( vertex *v = _mesh->vertex_list()->next(); v != _mesh->vertex_list();
+          v         = v->next() )
+        v->set_index( TESS_UNDEF );
 
-	// Create unique IDs for all vertices and faces.
-	for ( face *f = _mesh->face_list()->next(); f != _mesh->face_list(); f = f->next() )
-	{
-		f->set_index( TESS_UNDEF );
-		if ( !f->inside() )
-			continue;
+    // Create unique IDs for all vertices and faces.
+    for ( face *f = _mesh->face_list()->next(); f != _mesh->face_list();
+          f       = f->next() )
+    {
+        f->set_index( TESS_UNDEF );
+        if ( !f->inside() )
+            continue;
 
-		half_edge *edge = f->edge();
-		size_t faceVerts = 0;
-		do
-		{
-			vertex *v = edge->org();
-			if ( v->index() == TESS_UNDEF )
-			{
-				v->set_index( maxVertexCount );
-				maxVertexCount++;
-			}
-			faceVerts++;
-			edge = edge->lnext();
-		} while ( edge != f->edge() );
+        half_edge *edge      = f->edge();
+        size_t     faceVerts = 0;
+        do
+        {
+            vertex *v = edge->org();
+            if ( v->index() == TESS_UNDEF )
+            {
+                v->set_index( maxVertexCount );
+                maxVertexCount++;
+            }
+            faceVerts++;
+            edge = edge->lnext();
+        } while ( edge != f->edge() );
 
-		assert( faceVerts <= 3 );
+        assert( faceVerts <= 3 );
 
-		f->set_index( maxFaceCount );
-		++maxFaceCount;
-	}
+        f->set_index( maxFaceCount );
+        ++maxFaceCount;
+    }
 
-	std::vector<size_t> indexmap;
-	indexmap.resize( maxVertexCount );
+    std::vector<size_t> indexmap;
+    indexmap.resize( maxVertexCount );
 
-	// Output vertices.
-	size_t count = 0;
-	for ( vertex *v = _mesh->vertex_list()->next(); v != _mesh->vertex_list(); v = v->next() )
-	{
-		if ( v->index() != TESS_UNDEF )
-		{
-			// Store coordinate
-			_add_point( v->x(), v->y() );
-			indexmap[v->index()] = count;
-			++count;
-		}
-	}
+    // Output vertices.
+    size_t count = 0;
+    for ( vertex *v = _mesh->vertex_list()->next(); v != _mesh->vertex_list();
+          v         = v->next() )
+    {
+        if ( v->index() != TESS_UNDEF )
+        {
+            // Store coordinate
+            _add_point( v->x(), v->y() );
+            indexmap[v->index()] = count;
+            ++count;
+        }
+    }
 
-	// Output indices.
-	for ( face *f = _mesh->face_list()->next(); f != _mesh->face_list(); f = f->next() )
-	{
-		if ( !f->inside() )
-			continue;
+    // Output indices.
+    for ( face *f = _mesh->face_list()->next(); f != _mesh->face_list();
+          f       = f->next() )
+    {
+        if ( !f->inside() )
+            continue;
 
-		// Store polygon
-		half_edge *edge = f->edge();
+        // Store polygon
+        half_edge *edge = f->edge();
 
-		vertex *v1 = edge->org();
-		edge = edge->lnext();
-		logic_check( edge != f->edge(), "not a triangle" );
+        vertex *v1 = edge->org();
+        edge       = edge->lnext();
+        logic_check( edge != f->edge(), "not a triangle" );
 
-		vertex *v2 = edge->org();
-		edge = edge->lnext();
-		logic_check( edge != f->edge(), "not a triangle" );
+        vertex *v2 = edge->org();
+        edge       = edge->lnext();
+        logic_check( edge != f->edge(), "not a triangle" );
 
-		vertex *v3 = edge->org();
-		edge = edge->lnext();
-		logic_check( edge == f->edge(), "not a triangle" );
+        vertex *v3 = edge->org();
+        edge       = edge->lnext();
+        logic_check( edge == f->edge(), "not a triangle" );
 
-		_add_tri( indexmap[v1->index()], indexmap[v2->index()], indexmap[v3->index()] );
-	}
+        _add_tri(
+            indexmap[v1->index()],
+            indexmap[v2->index()],
+            indexmap[v3->index()] );
+    }
 }
 
 void *tessellator::begin_contour( void )
 {
-	if ( _mesh == nullptr )
-		_mesh = new tess_mesh();
-	return nullptr;
+    if ( _mesh == nullptr )
+        _mesh = new tess_mesh();
+    return nullptr;
 }
 
 void tessellator::contour_point( void *&contour, double x, double y, double z )
 {
-	half_edge *e = reinterpret_cast<half_edge *>( contour );
-	bool first = ( e == nullptr );
+    half_edge *e     = reinterpret_cast<half_edge *>( contour );
+    bool       first = ( e == nullptr );
 
-	if ( first )
-	{
-		// Make a self-loop (one vertex, one edge).
-		e = _mesh->make_edge();
-		_mesh->splice( e, e->sym() );
-	}
-	else
-	{
-		// Create a new vertex and edge which immediately follow e
-		// in the ordering around the left face.
-		_mesh->split_edge( e );
-		e = e->lnext();
-	}
+    if ( first )
+    {
+        // Make a self-loop (one vertex, one edge).
+        e = _mesh->make_edge();
+        _mesh->splice( e, e->sym() );
+    }
+    else
+    {
+        // Create a new vertex and edge which immediately follow e
+        // in the ordering around the left face.
+        _mesh->split_edge( e );
+        e = e->lnext();
+    }
 
-	// The new vertex is now e->Org.
-	vertex *v = e->org();
-	v->set( x, y, z );
+    // The new vertex is now e->Org.
+    vertex *v = e->org();
+    v->set( x, y, z );
 
-	// The winding of an edge says how the winding number changes as we
-	// cross from the edge''s right face to its left face.  We add the
-	// vertices in such an order that a CCW contour will add +1 to
-	// the winding number of the region inside the contour.
-	e->winding( 1 );
-	e->sym()->winding( -1 );
+    // The winding of an edge says how the winding number changes as we
+    // cross from the edge''s right face to its left face.  We add the
+    // vertices in such an order that a CCW contour will add +1 to
+    // the winding number of the region inside the contour.
+    e->winding( 1 );
+    e->sym()->winding( -1 );
 
-	contour = e;
+    contour = e;
 }
 
-void tessellator::end_contour( void *& )
-{
-}
+void tessellator::end_contour( void *& ) {}
 
 void tessellator::tessellate( void )
 {
-	precondition( _mesh, "no contours added to tessellate" );
+    precondition( _mesh, "no contours added to tessellate" );
 
-	// Determine the polygon normal and project vertices onto the plane of the polygon.
-	compute_bounding_box();
+    // Determine the polygon normal and project vertices onto the plane of the polygon.
+    compute_bounding_box();
 
-	// tessComputeInterior( tess ) computes the planar arrangement specified
-	// by the given contours, and further subdivides this arrangement
-	// into regions.  Each region is marked "inside" if it belongs
-	// to the polygon, according to the rule given by tess->windingRule.
-	// Each interior region is guaranteed be monotone.
-	if ( !compute_interior() )
-		throw std::runtime_error( "interior computation failed" );
+    // tessComputeInterior( tess ) computes the planar arrangement specified
+    // by the given contours, and further subdivides this arrangement
+    // into regions.  Each region is marked "inside" if it belongs
+    // to the polygon, according to the rule given by tess->windingRule.
+    // Each interior region is guaranteed be monotone.
+    if ( !compute_interior() )
+        throw std::runtime_error( "interior computation failed" );
 
-	// If the user wants only the boundary contours, we throw away all edges
-	// except those which separate the interior from the exterior.
-	// Otherwise we tessellate all the regions marked "inside".
-	if ( !_mesh->tessellate_interior() )
-		throw std::runtime_error( "interior tessellation failed" );
+    // If the user wants only the boundary contours, we throw away all edges
+    // except those which separate the interior from the exterior.
+    // Otherwise we tessellate all the regions marked "inside".
+    if ( !_mesh->tessellate_interior() )
+        throw std::runtime_error( "interior tessellation failed" );
 
-	_mesh->check_mesh();
+    _mesh->check_mesh();
 
-	output_polymesh();
+    output_polymesh();
 
-	delete _mesh;
-	_mesh = nullptr;
+    delete _mesh;
+    _mesh = nullptr;
 }
 
 // Both edges must be directed from right to left (this is the canonical
@@ -1785,126 +1731,124 @@ void tessellator::tessellate( void )
 // we sort the edges by slope (they would otherwise compare equally).
 bool tessellator::edge_leq( active_region *reg1, active_region *reg2 )
 {
-	half_edge *e1, *e2;
-	double t1, t2;
+    half_edge *e1, *e2;
+    double     t1, t2;
 
-	e1 = reg1->eUp;
-	e2 = reg2->eUp;
+    e1 = reg1->eUp;
+    e2 = reg2->eUp;
 
-	if ( e1->dst() == _event )
-	{
-		if ( e2->dst() == _event )
-		{
-			// Two edges right of the sweep line which meet at the sweep event.
-			// Sort them by slope.
-			if ( VertLeq( e1->org(), e2->org() ) )
-				return EdgeSign( e2->dst(), e1->org(), e2->org() ) <= 0;
-			return EdgeSign( e1->dst(), e2->org(), e1->org() ) >= 0;
-		}
-		return EdgeSign( e2->dst(), _event, e2->org() ) <= 0;
-	}
-	if ( e2->dst() == _event )
-		return EdgeSign( e1->dst(), _event, e1->org() ) >= 0;
+    if ( e1->dst() == _event )
+    {
+        if ( e2->dst() == _event )
+        {
+            // Two edges right of the sweep line which meet at the sweep event.
+            // Sort them by slope.
+            if ( VertLeq( e1->org(), e2->org() ) )
+                return EdgeSign( e2->dst(), e1->org(), e2->org() ) <= 0;
+            return EdgeSign( e1->dst(), e2->org(), e1->org() ) >= 0;
+        }
+        return EdgeSign( e2->dst(), _event, e2->org() ) <= 0;
+    }
+    if ( e2->dst() == _event )
+        return EdgeSign( e1->dst(), _event, e1->org() ) >= 0;
 
-	// General case - compute signed distance *from* e1, e2 to event
-	t1 = EdgeEval( e1->dst(), _event, e1->org() );
-	t2 = EdgeEval( e2->dst(), _event, e2->org() );
-	return ( t1 >= t2 );
+    // General case - compute signed distance *from* e1, e2 to event
+    t1 = EdgeEval( e1->dst(), _event, e1->org() );
+    t2 = EdgeEval( e2->dst(), _event, e2->org() );
+    return ( t1 >= t2 );
 }
 
 void tessellator::delete_region( active_region *reg )
 {
-	if ( reg->fixUpperEdge )
-	{
-		// It was created with zero winding number, so it better be
-		// deleted with zero winding number (ie. it better not get merged
-		// with a real edge).
-		assert( reg->eUp->winding() == 0 );
-	}
-	reg->eUp->region( nullptr );
-	_dict->erase( reg->nodeUp );
-	_regionPool.deallocate( reg );
+    if ( reg->fixUpperEdge )
+    {
+        // It was created with zero winding number, so it better be
+        // deleted with zero winding number (ie. it better not get merged
+        // with a real edge).
+        assert( reg->eUp->winding() == 0 );
+    }
+    reg->eUp->region( nullptr );
+    _dict->erase( reg->nodeUp );
+    _regionPool.deallocate( reg );
 }
-
 
 // Replace an upper edge which needs fixing (see ConnectRightVertex).
 int tessellator::fix_upper_edge( active_region *reg, half_edge *newEdge )
 {
-	assert( reg->fixUpperEdge );
-	_mesh->delete_edge( reg->eUp );
-	reg->fixUpperEdge = false;
-	reg->eUp = newEdge;
-	newEdge->region( reg );
+    assert( reg->fixUpperEdge );
+    _mesh->delete_edge( reg->eUp );
+    reg->fixUpperEdge = false;
+    reg->eUp          = newEdge;
+    newEdge->region( reg );
 
-	return 1;
+    return 1;
 }
 
 active_region *tessellator::top_left_region( active_region *reg )
 {
-	vertex *org = reg->eUp->org();
+    vertex *org = reg->eUp->org();
 
-	// Find the region above the uppermost edge with the same origin
-	do
-	{
-		reg = reg->above();
-	}
-	while ( reg->eUp->org() == org );
+    // Find the region above the uppermost edge with the same origin
+    do
+    {
+        reg = reg->above();
+    } while ( reg->eUp->org() == org );
 
-	// If the edge above was a temporary edge introduced by ConnectRightVertex,
-	// now is the time to fix it.
-	if ( reg->fixUpperEdge )
-	{
-		half_edge *e = _mesh->connect( reg->below()->eUp->sym(), reg->eUp->lnext() );
-		if ( e == nullptr )
-			return nullptr;
-		if ( !fix_upper_edge( reg, e ) )
-			return nullptr;
-		reg = reg->above();
-	}
-	return reg;
+    // If the edge above was a temporary edge introduced by ConnectRightVertex,
+    // now is the time to fix it.
+    if ( reg->fixUpperEdge )
+    {
+        half_edge *e =
+            _mesh->connect( reg->below()->eUp->sym(), reg->eUp->lnext() );
+        if ( e == nullptr )
+            return nullptr;
+        if ( !fix_upper_edge( reg, e ) )
+            return nullptr;
+        reg = reg->above();
+    }
+    return reg;
 }
 
 active_region *tessellator::top_right_region( active_region *reg )
 {
-	vertex *dst = reg->eUp->dst();
+    vertex *dst = reg->eUp->dst();
 
-	// Find the region above the uppermost edge with the same destination
-	do
-	{
-		reg = reg->above();
-	}
-	while ( reg->eUp->dst() == dst );
-	return reg;
+    // Find the region above the uppermost edge with the same destination
+    do
+    {
+        reg = reg->above();
+    } while ( reg->eUp->dst() == dst );
+    return reg;
 }
 
 // Add a new active region to the sweep line, *somewhere* below "regAbove"
 // (according to where the new edge belongs in the sweep-line dictionary).
 // The upper edge of the new region will be "eNewUp".
 // Winding number and "inside" flag are not updated.
-active_region *tessellator::add_region_below( active_region *regAbove, half_edge *eNewUp )
+active_region *
+tessellator::add_region_below( active_region *regAbove, half_edge *eNewUp )
 {
-	active_region *regNew = _regionPool.allocate();
-	if ( regNew == nullptr )
-		throw std::runtime_error( "alloc failed" );
+    active_region *regNew = _regionPool.allocate();
+    if ( regNew == nullptr )
+        throw std::runtime_error( "alloc failed" );
 
-	regNew->eUp = eNewUp;
-	regNew->nodeUp = _dict->insert_before( regAbove->nodeUp, regNew );
-	if ( regNew->nodeUp == nullptr )
-		throw std::runtime_error( "dictionary insert failed" );
-	regNew->fixUpperEdge = false;
-	regNew->sentinel = false;
-	regNew->dirty = false;
+    regNew->eUp    = eNewUp;
+    regNew->nodeUp = _dict->insert_before( regAbove->nodeUp, regNew );
+    if ( regNew->nodeUp == nullptr )
+        throw std::runtime_error( "dictionary insert failed" );
+    regNew->fixUpperEdge = false;
+    regNew->sentinel     = false;
+    regNew->dirty        = false;
 
-	eNewUp->region( regNew );
-	return regNew;
+    eNewUp->region( regNew );
+    return regNew;
 }
 
 void tessellator::compute_winding( active_region *reg )
 {
-	reg->windingNumber = reg->above()->windingNumber + reg->eUp->winding();
-	reg->inside = is_winding_inside( reg->windingNumber );
+    reg->windingNumber = reg->above()->windingNumber + reg->eUp->winding();
+    reg->inside        = is_winding_inside( reg->windingNumber );
 }
-
 
 // Delete a region from the sweep line.  This happens when the upper
 // and lower chains of a region meet (at a vertex on the sweep line).
@@ -1913,14 +1857,13 @@ void tessellator::compute_winding( active_region *reg )
 // changing, this face may not have even existed until now).
 void tessellator::finish_region( active_region *reg )
 {
-	half_edge *e = reg->eUp;
-	face *f = e->lface();
+    half_edge *e = reg->eUp;
+    face *     f = e->lface();
 
-	f->set_inside( reg->inside );
-	f->set_edge( e ); // optimization for tessMeshTessellateMonoRegion()
-	delete_region( reg );
+    f->set_inside( reg->inside );
+    f->set_edge( e ); // optimization for tessMeshTessellateMonoRegion()
+    delete_region( reg );
 }
-
 
 // We are given a vertex with one or more left-going edges.  All affected
 // edges should be in the edge dictionary.  Starting at regFirst->eUp,
@@ -1932,53 +1875,54 @@ void tessellator::finish_region( active_region *reg )
 // is nullptr we walk as far as possible.  At the same time we relink the
 // mesh if necessary, so that the ordering of edges around vOrg is the
 // same as in the dictionary.
-half_edge *tessellator::finish_left_regions( active_region *regFirst, active_region *regLast )
+half_edge *tessellator::finish_left_regions(
+    active_region *regFirst, active_region *regLast )
 {
-	active_region *regPrev = regFirst;
-	half_edge *ePrev = regFirst->eUp;
-	while ( regPrev != regLast )
-	{
-		regPrev->fixUpperEdge = false; // placement was OK
-		active_region *reg = regPrev->below();
-		half_edge *e = reg->eUp;
-		if ( e->org() != ePrev->org() )
-		{
-			if ( ! reg->fixUpperEdge )
-			{
-				// Remove the last left-going edge.  Even though there are no further
-				// edges in the dictionary with this origin, there may be further
-				// such edges in the mesh (if we are adding left edges to a vertex
-				// that has already been processed).  Thus it is important to call
-				// FinishRegion rather than just DeleteRegion.
-				finish_region( regPrev );
-				break;
-			}
-			// If the edge below was a temporary edge introduced by
-			// ConnectRightVertex, now is the time to fix it.
-			e = _mesh->connect( ePrev->lprev(), e->sym() );
-			if ( e == nullptr )
-				throw std::runtime_error( "mesh connect failed" );
-			if ( !fix_upper_edge( reg, e ) )
-				throw std::runtime_error( "couldn't fix upper edge" );
-		}
+    active_region *regPrev = regFirst;
+    half_edge *    ePrev   = regFirst->eUp;
+    while ( regPrev != regLast )
+    {
+        regPrev->fixUpperEdge = false; // placement was OK
+        active_region *reg    = regPrev->below();
+        half_edge *    e      = reg->eUp;
+        if ( e->org() != ePrev->org() )
+        {
+            if ( !reg->fixUpperEdge )
+            {
+                // Remove the last left-going edge.  Even though there are no further
+                // edges in the dictionary with this origin, there may be further
+                // such edges in the mesh (if we are adding left edges to a vertex
+                // that has already been processed).  Thus it is important to call
+                // FinishRegion rather than just DeleteRegion.
+                finish_region( regPrev );
+                break;
+            }
+            // If the edge below was a temporary edge introduced by
+            // ConnectRightVertex, now is the time to fix it.
+            e = _mesh->connect( ePrev->lprev(), e->sym() );
+            if ( e == nullptr )
+                throw std::runtime_error( "mesh connect failed" );
+            if ( !fix_upper_edge( reg, e ) )
+                throw std::runtime_error( "couldn't fix upper edge" );
+        }
 
-		// Relink edges so that ePrev->Onext == e
-		if ( ePrev->onext() != e )
-		{
-			_mesh->splice( e->oprev(), e );
-			_mesh->splice( ePrev, e );
-		}
-		finish_region( regPrev ); // may change reg->eUp
-		ePrev = reg->eUp;
-		regPrev = reg;
-	}
-	return ePrev;
+        // Relink edges so that ePrev->Onext == e
+        if ( ePrev->onext() != e )
+        {
+            _mesh->splice( e->oprev(), e );
+            _mesh->splice( ePrev, e );
+        }
+        finish_region( regPrev ); // may change reg->eUp
+        ePrev   = reg->eUp;
+        regPrev = reg;
+    }
+    return ePrev;
 }
 
 inline void AddWinding( half_edge *eDst, half_edge *eSrc )
 {
-	eDst->add_winding( eSrc->winding() );
-	eDst->sym()->add_winding( eSrc->sym()->winding() );
+    eDst->add_winding( eSrc->winding() );
+    eDst->sym()->add_winding( eSrc->sym()->winding() );
 }
 
 // Purpose: insert right-going edges into the edge dictionary, and update
@@ -1989,66 +1933,71 @@ inline void AddWinding( half_edge *eDst, half_edge *eSrc )
 // such that an imaginary upward vertical segment from vOrg would be
 // contained between eTopLeft->Oprev and eTopLeft; otherwise eTopLeft
 // should be nullptr.
-void tessellator::add_right_edges( active_region *regUp, half_edge *eFirst, half_edge *eLast, half_edge *eTopLeft, bool cleanUp )
+void tessellator::add_right_edges(
+    active_region *regUp,
+    half_edge *    eFirst,
+    half_edge *    eLast,
+    half_edge *    eTopLeft,
+    bool           cleanUp )
 {
-	active_region *reg, *regPrev;
-	half_edge *e, *ePrev;
-	bool firstTime = true;
+    active_region *reg, *regPrev;
+    half_edge *    e, *ePrev;
+    bool           firstTime = true;
 
-	// Insert the new right-going edges in the dictionary
-	e = eFirst;
-	do
-	{
-		assert( VertLeq( e->org(), e->dst() ) );
-		add_region_below( regUp, e->sym() );
-		e = e->onext();
-	}
-	while ( e != eLast );
+    // Insert the new right-going edges in the dictionary
+    e = eFirst;
+    do
+    {
+        assert( VertLeq( e->org(), e->dst() ) );
+        add_region_below( regUp, e->sym() );
+        e = e->onext();
+    } while ( e != eLast );
 
-	// Walk *all* right-going edges from e->Org, in the dictionary order,
-	// updating the winding numbers of each region, and re-linking the mesh
-	// edges to match the dictionary ordering (if necessary).
-	if ( eTopLeft == nullptr )
-		eTopLeft = regUp->below()->eUp->rprev();
-	regPrev = regUp;
-	ePrev = eTopLeft;
-	for ( ;; )
-	{
-		reg = regPrev->below();
-		e = reg->eUp->sym();
-		if ( e->org() != ePrev->org() ) break;
+    // Walk *all* right-going edges from e->Org, in the dictionary order,
+    // updating the winding numbers of each region, and re-linking the mesh
+    // edges to match the dictionary ordering (if necessary).
+    if ( eTopLeft == nullptr )
+        eTopLeft = regUp->below()->eUp->rprev();
+    regPrev = regUp;
+    ePrev   = eTopLeft;
+    for ( ;; )
+    {
+        reg = regPrev->below();
+        e   = reg->eUp->sym();
+        if ( e->org() != ePrev->org() )
+            break;
 
-		if ( e->onext() != ePrev )
-		{
-			// Unlink e from its current position, and relink below ePrev
-			_mesh->splice( e->oprev(), e );
-			_mesh->splice( ePrev->oprev(), e );
-		}
-		// Compute the winding number and "inside" flag for the new regions
-		reg->windingNumber = regPrev->windingNumber - e->winding();
-		reg->inside = is_winding_inside( reg->windingNumber );
+        if ( e->onext() != ePrev )
+        {
+            // Unlink e from its current position, and relink below ePrev
+            _mesh->splice( e->oprev(), e );
+            _mesh->splice( ePrev->oprev(), e );
+        }
+        // Compute the winding number and "inside" flag for the new regions
+        reg->windingNumber = regPrev->windingNumber - e->winding();
+        reg->inside        = is_winding_inside( reg->windingNumber );
 
-		// Check for two outgoing edges with same slope -- process these
-		// before any intersection tests (see example in tessComputeInterior).
-		regPrev->dirty = true;
-		if ( ! firstTime && check_for_right_splice( regPrev ) )
-		{
-			AddWinding( e, ePrev );
-			delete_region( regPrev );
-			_mesh->delete_edge( ePrev );
-		}
-		firstTime = false;
-		regPrev = reg;
-		ePrev = e;
-	}
-	regPrev->dirty = true;
-	assert( regPrev->windingNumber - e->winding() == reg->windingNumber );
+        // Check for two outgoing edges with same slope -- process these
+        // before any intersection tests (see example in tessComputeInterior).
+        regPrev->dirty = true;
+        if ( !firstTime && check_for_right_splice( regPrev ) )
+        {
+            AddWinding( e, ePrev );
+            delete_region( regPrev );
+            _mesh->delete_edge( ePrev );
+        }
+        firstTime = false;
+        regPrev   = reg;
+        ePrev     = e;
+    }
+    regPrev->dirty = true;
+    assert( regPrev->windingNumber - e->winding() == reg->windingNumber );
 
-	if ( cleanUp )
-	{
-		// Check for intersections between newly adjacent edges.
-		walk_dirty_regions( regPrev );
-	}
+    if ( cleanUp )
+    {
+        // Check for intersections between newly adjacent edges.
+        walk_dirty_regions( regPrev );
+    }
 }
 
 // Check the upper and lower edge of "regUp", to make sure that the
@@ -2076,40 +2025,41 @@ void tessellator::add_right_edges( active_region *regUp, half_edge *eFirst, half
 // Basically this is a combinatorial solution to a numerical problem.
 bool tessellator::check_for_right_splice( active_region *regUp )
 {
-	active_region *regLo = regUp->below();
-	half_edge *eUp = regUp->eUp;
-	half_edge *eLo = regLo->eUp;
+    active_region *regLo = regUp->below();
+    half_edge *    eUp   = regUp->eUp;
+    half_edge *    eLo   = regLo->eUp;
 
-	if ( VertLeq( eUp->org(), eLo->org() ) )
-	{
-		if ( EdgeSign( eLo->dst(), eUp->org(), eLo->org() ) > 0 ) return false;
+    if ( VertLeq( eUp->org(), eLo->org() ) )
+    {
+        if ( EdgeSign( eLo->dst(), eUp->org(), eLo->org() ) > 0 )
+            return false;
 
-		// eUp->Org appears to be below eLo
-		if ( ! VertEq( eUp->org(), eLo->org() ) )
-		{
-			// Splice eUp->Org into eLo
-			_mesh->split_edge( eLo->sym() );
-			_mesh->splice( eUp, eLo->oprev() );
-			regUp->dirty = regLo->dirty = true;
+        // eUp->Org appears to be below eLo
+        if ( !VertEq( eUp->org(), eLo->org() ) )
+        {
+            // Splice eUp->Org into eLo
+            _mesh->split_edge( eLo->sym() );
+            _mesh->splice( eUp, eLo->oprev() );
+            regUp->dirty = regLo->dirty = true;
+        }
+        else if ( eUp->org() != eLo->org() )
+        {
+            // merge the two vertices, discarding eUp->Org
+            _pq.erase( eUp->org() );
+            _mesh->splice( eLo->oprev(), eUp );
+        }
+    }
+    else
+    {
+        if ( EdgeSign( eUp->dst(), eLo->org(), eUp->org() ) < 0 )
+            return false;
 
-		}
-		else if ( eUp->org() != eLo->org() )
-		{
-			// merge the two vertices, discarding eUp->Org
-			_pq.erase( eUp->org() );
-			_mesh->splice( eLo->oprev(), eUp );
-		}
-	}
-	else
-	{
-		if ( EdgeSign( eUp->dst(), eLo->org(), eUp->org() ) < 0 ) return false;
-
-		// eLo->Org appears to be above eUp, so splice eLo->Org into eUp
-		regUp->above()->dirty = regUp->dirty = true;
-		_mesh->split_edge( eUp->sym() );
-		_mesh->splice( eLo->oprev(), eUp );
-	}
-	return true;
+        // eLo->Org appears to be above eUp, so splice eLo->Org into eUp
+        regUp->above()->dirty = regUp->dirty = true;
+        _mesh->split_edge( eUp->sym() );
+        _mesh->splice( eLo->oprev(), eUp );
+    }
+    return true;
 }
 
 // Check the upper and lower edge of "regUp", to make sure that the
@@ -2130,40 +2080,41 @@ bool tessellator::check_for_right_splice( active_region *regUp )
 // other edge.
 bool tessellator::check_for_left_splice( active_region *regUp )
 {
-	active_region *regLo = regUp->below();
-	half_edge *eUp = regUp->eUp;
-	half_edge *eLo = regLo->eUp;
-	half_edge *e;
+    active_region *regLo = regUp->below();
+    half_edge *    eUp   = regUp->eUp;
+    half_edge *    eLo   = regLo->eUp;
+    half_edge *    e;
 
-	assert( ! VertEq( eUp->dst(), eLo->dst() ) );
+    assert( !VertEq( eUp->dst(), eLo->dst() ) );
 
-	if ( VertLeq( eUp->dst(), eLo->dst() ) )
-	{
-		if ( EdgeSign( eUp->dst(), eLo->dst(), eUp->org() ) < 0 ) return false;
+    if ( VertLeq( eUp->dst(), eLo->dst() ) )
+    {
+        if ( EdgeSign( eUp->dst(), eLo->dst(), eUp->org() ) < 0 )
+            return false;
 
-		// eLo->Dst is above eUp, so splice eLo->Dst into eUp
-		regUp->above()->dirty = regUp->dirty = true;
-		e = _mesh->split_edge( eUp );
-		if ( e == nullptr )
-			throw std::runtime_error( "mesh edge split failed" );
-		_mesh->splice( eLo->sym(), e );
-		e->lface()->set_inside( regUp->inside );
-	}
-	else
-	{
-		if ( EdgeSign( eLo->dst(), eUp->dst(), eLo->org() ) > 0 ) return false;
+        // eLo->Dst is above eUp, so splice eLo->Dst into eUp
+        regUp->above()->dirty = regUp->dirty = true;
+        e                                    = _mesh->split_edge( eUp );
+        if ( e == nullptr )
+            throw std::runtime_error( "mesh edge split failed" );
+        _mesh->splice( eLo->sym(), e );
+        e->lface()->set_inside( regUp->inside );
+    }
+    else
+    {
+        if ( EdgeSign( eLo->dst(), eUp->dst(), eLo->org() ) > 0 )
+            return false;
 
-		// eUp->Dst is below eLo, so splice eUp->Dst into eLo
-		regUp->dirty = regLo->dirty = true;
-		e = _mesh->split_edge( eLo );
-		if ( e == nullptr )
-			throw std::runtime_error( "mesh split failed" );
-		_mesh->splice( eUp->lnext(), eLo->sym() );
-		e->rface()->set_inside( regUp->inside );
-	}
-	return true;
+        // eUp->Dst is below eLo, so splice eUp->Dst into eLo
+        regUp->dirty = regLo->dirty = true;
+        e                           = _mesh->split_edge( eLo );
+        if ( e == nullptr )
+            throw std::runtime_error( "mesh split failed" );
+        _mesh->splice( eUp->lnext(), eLo->sym() );
+        e->rface()->set_inside( regUp->inside );
+    }
+    return true;
 }
-
 
 // Check the upper and lower edges of the given region to see if
 // they intersect.  If so, create the intersection and add it
@@ -2174,147 +2125,149 @@ bool tessellator::check_for_left_splice( active_region *regUp )
 // checked for intersections, and possibly regUp has been deleted.
 bool tessellator::check_for_intersect( active_region *regUp )
 {
-	active_region *regLo = regUp->below();
-	half_edge *eUp = regUp->eUp;
-	half_edge *eLo = regLo->eUp;
-	vertex *orgUp = eUp->org();
-	vertex *orgLo = eLo->org();
-	vertex *dstUp = eUp->dst();
-	vertex *dstLo = eLo->dst();
-	double tMinUp, tMaxLo;
-	vertex isect, *orgMin;
+    active_region *regLo = regUp->below();
+    half_edge *    eUp   = regUp->eUp;
+    half_edge *    eLo   = regLo->eUp;
+    vertex *       orgUp = eUp->org();
+    vertex *       orgLo = eLo->org();
+    vertex *       dstUp = eUp->dst();
+    vertex *       dstLo = eLo->dst();
+    double         tMinUp, tMaxLo;
+    vertex         isect, *orgMin;
 
-	assert( ! VertEq( dstLo, dstUp ) );
-	assert( EdgeSign( dstUp, _event, orgUp ) <= 0 );
-	assert( EdgeSign( dstLo, _event, orgLo ) >= 0 );
-	assert( orgUp != _event && orgLo != _event );
-	assert( ! regUp->fixUpperEdge && ! regLo->fixUpperEdge );
+    assert( !VertEq( dstLo, dstUp ) );
+    assert( EdgeSign( dstUp, _event, orgUp ) <= 0 );
+    assert( EdgeSign( dstLo, _event, orgLo ) >= 0 );
+    assert( orgUp != _event && orgLo != _event );
+    assert( !regUp->fixUpperEdge && !regLo->fixUpperEdge );
 
-	if ( orgUp == orgLo )
-		return false;	// right endpoints are the same
+    if ( orgUp == orgLo )
+        return false; // right endpoints are the same
 
-	tMinUp = std::min( orgUp->y(), dstUp->y() );
-	tMaxLo = std::max( orgLo->y(), dstLo->y() );
-	if ( tMinUp > tMaxLo )
-		return false;	// t ranges do not overlap
+    tMinUp = std::min( orgUp->y(), dstUp->y() );
+    tMaxLo = std::max( orgLo->y(), dstLo->y() );
+    if ( tMinUp > tMaxLo )
+        return false; // t ranges do not overlap
 
-	if ( VertLeq( orgUp, orgLo ) )
-	{
-		if ( EdgeSign( dstLo, orgUp, orgLo ) > 0 ) return false;
-	}
-	else
-	{
-		if ( EdgeSign( dstUp, orgLo, orgUp ) < 0 ) return false;
-	}
+    if ( VertLeq( orgUp, orgLo ) )
+    {
+        if ( EdgeSign( dstLo, orgUp, orgLo ) > 0 )
+            return false;
+    }
+    else
+    {
+        if ( EdgeSign( dstUp, orgLo, orgUp ) < 0 )
+            return false;
+    }
 
-	// At this point the edges intersect, at least marginally
+    // At this point the edges intersect, at least marginally
 
-	tesedgeIntersect( dstUp, orgUp, dstLo, orgLo, &isect );
-	// The following properties are guaranteed:
-	assert( std::min( orgUp->y(), dstUp->y() ) <= isect.y() );
-	assert( isect.y() <= std::max( orgLo->y(), dstLo->y() ) );
-	assert( std::min( dstLo->x(), dstUp->x() ) <= isect.x() );
-	assert( isect.x() <= std::max( orgLo->x(), orgUp->x() ) );
+    tesedgeIntersect( dstUp, orgUp, dstLo, orgLo, &isect );
+    // The following properties are guaranteed:
+    assert( std::min( orgUp->y(), dstUp->y() ) <= isect.y() );
+    assert( isect.y() <= std::max( orgLo->y(), dstLo->y() ) );
+    assert( std::min( dstLo->x(), dstUp->x() ) <= isect.x() );
+    assert( isect.x() <= std::max( orgLo->x(), orgUp->x() ) );
 
-	if ( VertLeq( &isect, _event ) )
-	{
-		// The intersection point lies slightly to the left of the sweep line,
-		// so move it until it''s slightly to the right of the sweep line.
-		// (If we had perfect numerical precision, this would never happen
-		// in the first place).  The easiest and safest thing to do is
-		// replace the intersection by tess->event.
-		isect.set( _event->x(), _event->y(), _event->z() );
-	}
-	// Similarly, if the computed intersection lies to the right of the
-	// rightmost origin (which should rarely happen), it can cause
-	// unbelievable inefficiency on sufficiently degenerate inputs.
-	// (If you have the test program, try running test54.d with the
-	// "X zoom" option turned on).
-	orgMin = VertLeq( orgUp, orgLo ) ? orgUp : orgLo;
-	if ( VertLeq( orgMin, &isect ) )
-	{
-		isect.set( orgMin->x(), orgMin->y(), orgMin->z() );
-	}
+    if ( VertLeq( &isect, _event ) )
+    {
+        // The intersection point lies slightly to the left of the sweep line,
+        // so move it until it''s slightly to the right of the sweep line.
+        // (If we had perfect numerical precision, this would never happen
+        // in the first place).  The easiest and safest thing to do is
+        // replace the intersection by tess->event.
+        isect.set( _event->x(), _event->y(), _event->z() );
+    }
+    // Similarly, if the computed intersection lies to the right of the
+    // rightmost origin (which should rarely happen), it can cause
+    // unbelievable inefficiency on sufficiently degenerate inputs.
+    // (If you have the test program, try running test54.d with the
+    // "X zoom" option turned on).
+    orgMin = VertLeq( orgUp, orgLo ) ? orgUp : orgLo;
+    if ( VertLeq( orgMin, &isect ) )
+    {
+        isect.set( orgMin->x(), orgMin->y(), orgMin->z() );
+    }
 
-	if ( VertEq( &isect, orgUp ) || VertEq( &isect, orgLo ) )
-	{
-		// Easy case -- intersection at one of the right endpoints
-		( void ) check_for_right_splice( regUp );
-		return false;
-	}
+    if ( VertEq( &isect, orgUp ) || VertEq( &isect, orgLo ) )
+    {
+        // Easy case -- intersection at one of the right endpoints
+        (void)check_for_right_splice( regUp );
+        return false;
+    }
 
-	if (    ( ! VertEq( dstUp, _event )
-	          && EdgeSign( dstUp, _event, &isect ) >= 0 )
-	        || ( ! VertEq( dstLo, _event )
-	             && EdgeSign( dstLo, _event, &isect ) <= 0 ) )
-	{
-		// Very unusual -- the new upper or lower edge would pass on the
-		// wrong side of the sweep event, or through it.  This can happen
-		// due to very small numerical errors in the intersection calculation.
-		if ( dstLo == _event )
-		{
-			// Splice dstLo into eUp, and process the new region(s)
-			if ( _mesh->split_edge( eUp->sym() ) == nullptr )
-				throw std::runtime_error( "mesh split failed" );
-			_mesh->splice( eLo->sym(), eUp );
-			regUp = top_left_region( regUp );
-			if ( regUp == nullptr )
-				throw std::runtime_error( "top left region failed" );
-			eUp = regUp->below()->eUp;
-			finish_left_regions( regUp->below(), regLo );
-			add_right_edges( regUp, eUp->oprev(), eUp, eUp, true );
-			return true;
-		}
-		if ( dstUp == _event )
-		{
-			// Splice dstUp into eLo, and process the new region(s)
-			_mesh->split_edge( eLo->sym() );
-			_mesh->splice( eUp->lnext(), eLo->oprev() );
-			regLo = regUp;
-			regUp = top_right_region( regUp );
-			auto e = regUp->below()->eUp->rprev();
-			regLo->eUp = eLo->oprev();
-			eLo = finish_left_regions( regLo, nullptr );
-			add_right_edges( regUp, eLo->onext(), eUp->rprev(), e, true );
-			return true;
-		}
-		// Special case: called from ConnectRightVertex.  If either
-		// edge passes on the wrong side of tess->event, split it
-		// (and wait for ConnectRightVertex to splice it appropriately).
-		if ( EdgeSign( dstUp, _event, &isect ) >= 0 )
-		{
-			regUp->above()->dirty = regUp->dirty = true;
-			_mesh->split_edge( eUp->sym() );
-			eUp->org()->set( _event->x(), _event->y(), _event->z() );
-		}
-		if ( EdgeSign( dstLo, _event, &isect ) <= 0 )
-		{
-			regUp->dirty = regLo->dirty = true;
-			_mesh->split_edge( eLo->sym() );
-			eLo->org()->set( _event->x(), _event->y(), _event->z() );
-		}
-		// leave the rest for ConnectRightVertex
-		return false;
-	}
+    if ( ( !VertEq( dstUp, _event ) &&
+           EdgeSign( dstUp, _event, &isect ) >= 0 ) ||
+         ( !VertEq( dstLo, _event ) &&
+           EdgeSign( dstLo, _event, &isect ) <= 0 ) )
+    {
+        // Very unusual -- the new upper or lower edge would pass on the
+        // wrong side of the sweep event, or through it.  This can happen
+        // due to very small numerical errors in the intersection calculation.
+        if ( dstLo == _event )
+        {
+            // Splice dstLo into eUp, and process the new region(s)
+            if ( _mesh->split_edge( eUp->sym() ) == nullptr )
+                throw std::runtime_error( "mesh split failed" );
+            _mesh->splice( eLo->sym(), eUp );
+            regUp = top_left_region( regUp );
+            if ( regUp == nullptr )
+                throw std::runtime_error( "top left region failed" );
+            eUp = regUp->below()->eUp;
+            finish_left_regions( regUp->below(), regLo );
+            add_right_edges( regUp, eUp->oprev(), eUp, eUp, true );
+            return true;
+        }
+        if ( dstUp == _event )
+        {
+            // Splice dstUp into eLo, and process the new region(s)
+            _mesh->split_edge( eLo->sym() );
+            _mesh->splice( eUp->lnext(), eLo->oprev() );
+            regLo      = regUp;
+            regUp      = top_right_region( regUp );
+            auto e     = regUp->below()->eUp->rprev();
+            regLo->eUp = eLo->oprev();
+            eLo        = finish_left_regions( regLo, nullptr );
+            add_right_edges( regUp, eLo->onext(), eUp->rprev(), e, true );
+            return true;
+        }
+        // Special case: called from ConnectRightVertex.  If either
+        // edge passes on the wrong side of tess->event, split it
+        // (and wait for ConnectRightVertex to splice it appropriately).
+        if ( EdgeSign( dstUp, _event, &isect ) >= 0 )
+        {
+            regUp->above()->dirty = regUp->dirty = true;
+            _mesh->split_edge( eUp->sym() );
+            eUp->org()->set( _event->x(), _event->y(), _event->z() );
+        }
+        if ( EdgeSign( dstLo, _event, &isect ) <= 0 )
+        {
+            regUp->dirty = regLo->dirty = true;
+            _mesh->split_edge( eLo->sym() );
+            eLo->org()->set( _event->x(), _event->y(), _event->z() );
+        }
+        // leave the rest for ConnectRightVertex
+        return false;
+    }
 
-	// General case -- split both edges, splice into new vertex.
-	// When we do the splice operation, the order of the arguments is
-	// arbitrary as far as correctness goes.  However, when the operation
-	// creates a new face, the work done is proportional to the size of
-	// the new face.  We expect the faces in the processed part of
-	// the mesh (ie. eUp->Lface) to be smaller than the faces in the
-	// unprocessed original contours (which will be eLo->Oprev->Lface).
-	_mesh->split_edge( eUp->sym() );
-	_mesh->split_edge( eLo->sym() );
-	_mesh->splice( eLo->oprev(), eUp );
+    // General case -- split both edges, splice into new vertex.
+    // When we do the splice operation, the order of the arguments is
+    // arbitrary as far as correctness goes.  However, when the operation
+    // creates a new face, the work done is proportional to the size of
+    // the new face.  We expect the faces in the processed part of
+    // the mesh (ie. eUp->Lface) to be smaller than the faces in the
+    // unprocessed original contours (which will be eLo->Oprev->Lface).
+    _mesh->split_edge( eUp->sym() );
+    _mesh->split_edge( eLo->sym() );
+    _mesh->splice( eLo->oprev(), eUp );
 
-	vertex *v = eUp->org();
-	v->set( isect.x(), isect.y(), isect.z() );
+    vertex *v = eUp->org();
+    v->set( isect.x(), isect.y(), isect.z() );
 
-	_pq.push( v );
-	get_intersect_data( v, orgUp, dstUp, orgLo, dstLo );
-	regUp->above()->dirty = regUp->dirty = regLo->dirty = true;
-	return false;
+    _pq.push( v );
+    get_intersect_data( v, orgUp, dstUp, orgLo, dstLo );
+    regUp->above()->dirty = regUp->dirty = regLo->dirty = true;
+    return false;
 }
 
 // When the upper or lower edge of any region changes, the region is
@@ -2325,92 +2278,90 @@ bool tessellator::check_for_intersect( active_region *regUp )
 // the invariants.
 void tessellator::walk_dirty_regions( active_region *regUp )
 {
-	active_region *regLo = regUp->below();
+    active_region *regLo = regUp->below();
 
-	for ( ;; )
-	{
-		// Find the lowest dirty region (we walk from the bottom up).
-		while ( regLo->dirty )
-		{
-			regUp = regLo;
-			regLo = regLo->below();
-		}
-		if ( ! regUp->dirty )
-		{
-			regLo = regUp;
-			regUp = regUp->above();
-			if ( regUp == nullptr || ! regUp->dirty )
-			{
-				// We've walked all the dirty regions
-				return;
-			}
-		}
-		regUp->dirty = false;
-		auto eUp = regUp->eUp;
-		auto eLo = regLo->eUp;
+    for ( ;; )
+    {
+        // Find the lowest dirty region (we walk from the bottom up).
+        while ( regLo->dirty )
+        {
+            regUp = regLo;
+            regLo = regLo->below();
+        }
+        if ( !regUp->dirty )
+        {
+            regLo = regUp;
+            regUp = regUp->above();
+            if ( regUp == nullptr || !regUp->dirty )
+            {
+                // We've walked all the dirty regions
+                return;
+            }
+        }
+        regUp->dirty = false;
+        auto eUp     = regUp->eUp;
+        auto eLo     = regLo->eUp;
 
-		if ( eUp->dst() != eLo->dst() )
-		{
-			// Check that the edge ordering is obeyed at the Dst vertices.
-			if ( check_for_left_splice( regUp ) )
-			{
-
-				// If the upper or lower edge was marked fixUpperEdge, then
-				// we no longer need it (since these edges are needed only for
-				// vertices which otherwise have no right-going edges).
-				if ( regLo->fixUpperEdge )
-				{
-					delete_region( regLo );
-					_mesh->delete_edge( eLo );
-					regLo = regUp->below();
-					eLo = regLo->eUp;
-				}
-				else if ( regUp->fixUpperEdge )
-				{
-					delete_region( regUp );
-					_mesh->delete_edge( eUp );
-					regUp = regLo->above();
-					eUp = regUp->eUp;
-				}
-			}
-		}
-		if ( eUp->org() != eLo->org() )
-		{
-			if (    eUp->dst() != eLo->dst()
-			        && ! regUp->fixUpperEdge && ! regLo->fixUpperEdge
-			        && ( eUp->dst() == _event || eLo->dst() == _event ) )
-			{
-				// When all else fails in CheckForIntersect(), it uses tess->event
-				// as the intersection location.  To make this possible, it requires
-				// that tess->event lie between the upper and lower edges, and also
-				// that neither of these is marked fixUpperEdge (since in the worst
-				// case it might splice one of these edges into tess->event, and
-				// violate the invariant that fixable edges are the only right-going
-				// edge from their associated vertex).
-				if ( check_for_intersect( regUp ) )
-				{
-					// WalkDirtyRegions() was called recursively; we're done
-					return;
-				}
-			}
-			else
-			{
-				// Even though we can't use CheckForIntersect(), the Org vertices
-				// may violate the dictionary edge ordering.  Check and correct this.
-				( void ) check_for_right_splice( regUp );
-			}
-		}
-		if ( eUp->org() == eLo->org() && eUp->dst() == eLo->dst() )
-		{
-			// A degenerate loop consisting of only two edges -- delete it.
-			AddWinding( eLo, eUp );
-			delete_region( regUp );
-			_mesh->delete_edge( eUp );
-			regUp = regLo->above();
-		}
-	}
+        if ( eUp->dst() != eLo->dst() )
+        {
+            // Check that the edge ordering is obeyed at the Dst vertices.
+            if ( check_for_left_splice( regUp ) )
+            {
+                // If the upper or lower edge was marked fixUpperEdge, then
+                // we no longer need it (since these edges are needed only for
+                // vertices which otherwise have no right-going edges).
+                if ( regLo->fixUpperEdge )
+                {
+                    delete_region( regLo );
+                    _mesh->delete_edge( eLo );
+                    regLo = regUp->below();
+                    eLo   = regLo->eUp;
+                }
+                else if ( regUp->fixUpperEdge )
+                {
+                    delete_region( regUp );
+                    _mesh->delete_edge( eUp );
+                    regUp = regLo->above();
+                    eUp   = regUp->eUp;
+                }
+            }
+        }
+        if ( eUp->org() != eLo->org() )
+        {
+            if ( eUp->dst() != eLo->dst() && !regUp->fixUpperEdge &&
+                 !regLo->fixUpperEdge &&
+                 ( eUp->dst() == _event || eLo->dst() == _event ) )
+            {
+                // When all else fails in CheckForIntersect(), it uses tess->event
+                // as the intersection location.  To make this possible, it requires
+                // that tess->event lie between the upper and lower edges, and also
+                // that neither of these is marked fixUpperEdge (since in the worst
+                // case it might splice one of these edges into tess->event, and
+                // violate the invariant that fixable edges are the only right-going
+                // edge from their associated vertex).
+                if ( check_for_intersect( regUp ) )
+                {
+                    // WalkDirtyRegions() was called recursively; we're done
+                    return;
+                }
+            }
+            else
+            {
+                // Even though we can't use CheckForIntersect(), the Org vertices
+                // may violate the dictionary edge ordering.  Check and correct this.
+                (void)check_for_right_splice( regUp );
+            }
+        }
+        if ( eUp->org() == eLo->org() && eUp->dst() == eLo->dst() )
+        {
+            // A degenerate loop consisting of only two edges -- delete it.
+            AddWinding( eLo, eUp );
+            delete_region( regUp );
+            _mesh->delete_edge( eUp );
+            regUp = regLo->above();
+        }
+    }
 }
-
 
 // Purpose: connect a "right" vertex vEvent (one where all edges go left)
 // to the unprocessed portion of the mesh.  Since there are no right-going
@@ -2441,116 +2392,118 @@ void tessellator::walk_dirty_regions( active_region *regUp )
 // to the next processed vertex on the boundary of the combined region.
 // Quite possibly the vertex we connected to will turn out to be the
 // closest one, in which case we won''t need to make any changes.
-void tessellator::connect_right_vertex( active_region *regUp, half_edge *eBottomLeft )
+void tessellator::connect_right_vertex(
+    active_region *regUp, half_edge *eBottomLeft )
 {
-	half_edge *eNew;
-	half_edge *eTopLeft = eBottomLeft->onext();
-	active_region *regLo = regUp->below();
-	half_edge *eUp = regUp->eUp;
-	half_edge *eLo = regLo->eUp;
-	int degenerate = false;
+    half_edge *    eNew;
+    half_edge *    eTopLeft   = eBottomLeft->onext();
+    active_region *regLo      = regUp->below();
+    half_edge *    eUp        = regUp->eUp;
+    half_edge *    eLo        = regLo->eUp;
+    int            degenerate = false;
 
-	if ( eUp->dst() != eLo->dst() )
-		( void ) check_for_intersect( regUp );
+    if ( eUp->dst() != eLo->dst() )
+        (void)check_for_intersect( regUp );
 
-	// Possible new degeneracies: upper or lower edge of regUp may pass
-	// through vEvent, or may coincide with new intersection vertex
-	if ( VertEq( eUp->org(), _event ) )
-	{
-		_mesh->splice( eTopLeft->oprev(), eUp );
-		regUp = top_left_region( regUp );
-		if ( regUp == nullptr )
-			throw std::runtime_error( "top left region failed" );
-		eTopLeft = regUp->below()->eUp;
-		finish_left_regions( regUp->below(), regLo );
-		degenerate = true;
-	}
-	if ( VertEq( eLo->org(), _event ) )
-	{
-		_mesh->splice( eBottomLeft, eLo->oprev() );
-		eBottomLeft = finish_left_regions( regLo, nullptr );
-		degenerate = true;
-	}
-	if ( degenerate )
-	{
-		add_right_edges( regUp, eBottomLeft->onext(), eTopLeft, eTopLeft, true );
-		return;
-	}
+    // Possible new degeneracies: upper or lower edge of regUp may pass
+    // through vEvent, or may coincide with new intersection vertex
+    if ( VertEq( eUp->org(), _event ) )
+    {
+        _mesh->splice( eTopLeft->oprev(), eUp );
+        regUp = top_left_region( regUp );
+        if ( regUp == nullptr )
+            throw std::runtime_error( "top left region failed" );
+        eTopLeft = regUp->below()->eUp;
+        finish_left_regions( regUp->below(), regLo );
+        degenerate = true;
+    }
+    if ( VertEq( eLo->org(), _event ) )
+    {
+        _mesh->splice( eBottomLeft, eLo->oprev() );
+        eBottomLeft = finish_left_regions( regLo, nullptr );
+        degenerate  = true;
+    }
+    if ( degenerate )
+    {
+        add_right_edges(
+            regUp, eBottomLeft->onext(), eTopLeft, eTopLeft, true );
+        return;
+    }
 
-	// Non-degenerate situation -- need to add a temporary, fixable edge.
-	// Connect to the closer of eLo->Org, eUp->Org.
-	if ( VertLeq( eLo->org(), eUp->org() ) )
-		eNew = eLo->oprev();
-	else
-		eNew = eUp;
-	eNew = _mesh->connect( eBottomLeft->lprev(), eNew );
-	if ( eNew == nullptr )
-		throw std::runtime_error( "mesh connect failed" );
+    // Non-degenerate situation -- need to add a temporary, fixable edge.
+    // Connect to the closer of eLo->Org, eUp->Org.
+    if ( VertLeq( eLo->org(), eUp->org() ) )
+        eNew = eLo->oprev();
+    else
+        eNew = eUp;
+    eNew = _mesh->connect( eBottomLeft->lprev(), eNew );
+    if ( eNew == nullptr )
+        throw std::runtime_error( "mesh connect failed" );
 
-	// Prevent cleanup, otherwise eNew might disappear before we've even
-	// had a chance to mark it as a temporary edge.
-	add_right_edges( regUp, eNew, eNew->onext(), eNew->onext(), false );
-	eNew->sym()->region()->fixUpperEdge = true;
-	walk_dirty_regions( regUp );
+    // Prevent cleanup, otherwise eNew might disappear before we've even
+    // had a chance to mark it as a temporary edge.
+    add_right_edges( regUp, eNew, eNew->onext(), eNew->onext(), false );
+    eNew->sym()->region()->fixUpperEdge = true;
+    walk_dirty_regions( regUp );
 }
 
 // The event vertex lies exacty on an already-processed edge or vertex.
 // Adding the new vertex involves splicing it into the already-processed
 // part of the mesh.
-void tessellator::connect_left_degenerate( active_region *regUp, vertex *vEvent )
+void tessellator::connect_left_degenerate(
+    active_region *regUp, vertex *vEvent )
 {
-	half_edge *e, *eTopLeft, *eTopRight, *eLast;
-	active_region *reg;
+    half_edge *    e, *eTopLeft, *eTopRight, *eLast;
+    active_region *reg;
 
-	e = regUp->eUp;
-	if ( VertEq( e->org(), vEvent ) )
-	{
-		// e->Org is an unprocessed vertex - just combine them, and wait
-		// for e->Org to be pulled from the queue
-		_mesh->splice( e, vEvent->edge() );
-		return;
-	}
+    e = regUp->eUp;
+    if ( VertEq( e->org(), vEvent ) )
+    {
+        // e->Org is an unprocessed vertex - just combine them, and wait
+        // for e->Org to be pulled from the queue
+        _mesh->splice( e, vEvent->edge() );
+        return;
+    }
 
-	if ( ! VertEq( e->dst(), vEvent ) )
-	{
-		// General case -- splice vEvent into edge e which passes through it
-		if ( _mesh->split_edge( e->sym() ) == nullptr )
-			throw std::runtime_error( "mesh split failed" );
-		if ( regUp->fixUpperEdge )
-		{
-			// This edge was fixable -- delete unused portion of original edge
-			_mesh->delete_edge( e->onext() );
-			regUp->fixUpperEdge = false;
-		}
-		_mesh->splice( vEvent->edge(), e );
-		sweep_event( vEvent );	// recurse
-		return;
-	}
+    if ( !VertEq( e->dst(), vEvent ) )
+    {
+        // General case -- splice vEvent into edge e which passes through it
+        if ( _mesh->split_edge( e->sym() ) == nullptr )
+            throw std::runtime_error( "mesh split failed" );
+        if ( regUp->fixUpperEdge )
+        {
+            // This edge was fixable -- delete unused portion of original edge
+            _mesh->delete_edge( e->onext() );
+            regUp->fixUpperEdge = false;
+        }
+        _mesh->splice( vEvent->edge(), e );
+        sweep_event( vEvent ); // recurse
+        return;
+    }
 
-	// vEvent coincides with e->Dst, which has already been processed.
-	// Splice in the additional right-going edges.
-	regUp = top_right_region( regUp );
-	reg = regUp->below();
-	eTopRight = reg->eUp->sym();
-	eTopLeft = eLast = eTopRight->onext();
-	if ( reg->fixUpperEdge )
-	{
-		// Here e->Dst has only a single fixable edge going right.
-		// We can delete it since now we have some real right-going edges.
-		assert( eTopLeft != eTopRight );   // there are some left edges too
-		delete_region( reg );
-		_mesh->delete_edge( eTopRight );
-		eTopRight = eTopLeft->oprev();
-	}
-	_mesh->splice( vEvent->edge(), eTopRight );
-	if ( ! EdgeGoesLeft( eTopLeft ) )
-	{
-		// e->Dst had no left-going edges -- indicate this to AddRightEdges()
-		eTopLeft = nullptr;
-	}
-	add_right_edges( regUp, eTopRight->onext(), eLast, eTopLeft, true );
+    // vEvent coincides with e->Dst, which has already been processed.
+    // Splice in the additional right-going edges.
+    regUp     = top_right_region( regUp );
+    reg       = regUp->below();
+    eTopRight = reg->eUp->sym();
+    eTopLeft = eLast = eTopRight->onext();
+    if ( reg->fixUpperEdge )
+    {
+        // Here e->Dst has only a single fixable edge going right.
+        // We can delete it since now we have some real right-going edges.
+        assert( eTopLeft != eTopRight ); // there are some left edges too
+        delete_region( reg );
+        _mesh->delete_edge( eTopRight );
+        eTopRight = eTopLeft->oprev();
+    }
+    _mesh->splice( vEvent->edge(), eTopRight );
+    if ( !EdgeGoesLeft( eTopLeft ) )
+    {
+        // e->Dst had no left-going edges -- indicate this to AddRightEdges()
+        eTopLeft = nullptr;
+    }
+    add_right_edges( regUp, eTopRight->onext(), eLast, eTopLeft, true );
 }
-
 
 // Purpose: connect a "left" vertex (one where both edges go right)
 // to the processed portion of the mesh.  Let R be the active region
@@ -2567,120 +2520,121 @@ void tessellator::connect_left_degenerate( active_region *regUp, vertex *vEvent 
 //	- merging with an already-processed portion of U or L
 void tessellator::connect_left_vertex( vertex *vEvent )
 {
-	active_region *regUp, *regLo, *reg;
-	active_region tmp;
+    active_region *regUp, *regLo, *reg;
+    active_region  tmp;
 
-	// assert( vEvent->edge()->Onext->Onext == vEvent->edge() );
+    // assert( vEvent->edge()->Onext->Onext == vEvent->edge() );
 
-	// Get a pointer to the active region containing vEvent
-	tmp.eUp = vEvent->edge()->sym();
-	regUp = _dict->search( &tmp )->key();
-	regLo = regUp->below();
-	if ( !regLo )
-	{
-		// This may happen if the input polygon is coplanar.
-		return;
-	}
-	half_edge *eUp = regUp->eUp;
-	half_edge *eLo = regLo->eUp;
+    // Get a pointer to the active region containing vEvent
+    tmp.eUp = vEvent->edge()->sym();
+    regUp   = _dict->search( &tmp )->key();
+    regLo   = regUp->below();
+    if ( !regLo )
+    {
+        // This may happen if the input polygon is coplanar.
+        return;
+    }
+    half_edge *eUp = regUp->eUp;
+    half_edge *eLo = regLo->eUp;
 
-	// Try merging with U or L first
-	if ( std::equal_to<double>()(EdgeSign( eUp->dst(), vEvent, eUp->org() ), 0) )
-	{
-		connect_left_degenerate( regUp, vEvent );
-		return;
-	}
+    // Try merging with U or L first
+    if ( std::equal_to<double>()(
+             EdgeSign( eUp->dst(), vEvent, eUp->org() ), 0 ) )
+    {
+        connect_left_degenerate( regUp, vEvent );
+        return;
+    }
 
-	// Connect vEvent to rightmost processed vertex of either chain.
-	// e->Dst is the vertex that we will connect to vEvent.
-	reg = VertLeq( eLo->dst(), eUp->dst() ) ? regUp : regLo;
+    // Connect vEvent to rightmost processed vertex of either chain.
+    // e->Dst is the vertex that we will connect to vEvent.
+    reg = VertLeq( eLo->dst(), eUp->dst() ) ? regUp : regLo;
 
-	if ( regUp->inside || reg->fixUpperEdge )
-	{
-		half_edge *eNew;
-		if ( reg == regUp )
-		{
-			eNew = _mesh->connect( vEvent->edge()->sym(), eUp->lnext() );
-			if ( eNew == nullptr )
-				throw std::runtime_error( "mesh connect failed" );
-		}
-		else
-		{
-			half_edge *tempHalfEdge = _mesh->connect( eLo->dnext(), vEvent->edge() );
-			if ( tempHalfEdge == nullptr )
-				throw std::runtime_error( "mesh connect failed" );
+    if ( regUp->inside || reg->fixUpperEdge )
+    {
+        half_edge *eNew;
+        if ( reg == regUp )
+        {
+            eNew = _mesh->connect( vEvent->edge()->sym(), eUp->lnext() );
+            if ( eNew == nullptr )
+                throw std::runtime_error( "mesh connect failed" );
+        }
+        else
+        {
+            half_edge *tempHalfEdge =
+                _mesh->connect( eLo->dnext(), vEvent->edge() );
+            if ( tempHalfEdge == nullptr )
+                throw std::runtime_error( "mesh connect failed" );
 
-			eNew = tempHalfEdge->sym();
-		}
+            eNew = tempHalfEdge->sym();
+        }
 
-		if ( reg->fixUpperEdge )
-		{
-			if ( !fix_upper_edge( reg, eNew ) )
-				throw std::runtime_error( "fix upper edge failed" );
-		}
-		else
-			compute_winding( add_region_below( regUp, eNew ) );
-		sweep_event( vEvent );
-	}
-	else
-	{
-		// The new vertex is in a region which does not belong to the polygon.
-		// We don''t need to connect this vertex to the rest of the mesh.
-		add_right_edges( regUp, vEvent->edge(), vEvent->edge(), nullptr, true );
-	}
+        if ( reg->fixUpperEdge )
+        {
+            if ( !fix_upper_edge( reg, eNew ) )
+                throw std::runtime_error( "fix upper edge failed" );
+        }
+        else
+            compute_winding( add_region_below( regUp, eNew ) );
+        sweep_event( vEvent );
+    }
+    else
+    {
+        // The new vertex is in a region which does not belong to the polygon.
+        // We don''t need to connect this vertex to the rest of the mesh.
+        add_right_edges( regUp, vEvent->edge(), vEvent->edge(), nullptr, true );
+    }
 }
-
 
 // Does everything necessary when the sweep line crosses a vertex.
 // Updates the mesh and the edge dictionary.
 void tessellator::sweep_event( vertex *vEvent )
 {
-	active_region *regUp, *reg;
-	half_edge *e, *eTopLeft, *eBottomLeft;
+    active_region *regUp, *reg;
+    half_edge *    e, *eTopLeft, *eBottomLeft;
 
-	_event = vEvent; // for access in EdgeLeq()
+    _event = vEvent; // for access in EdgeLeq()
 
-	// Check if this vertex is the right endpoint of an edge that is
-	// already in the dictionary.  In this case we don't need to waste
-	// time searching for the location to insert new edges.
-	e = vEvent->edge();
-	while ( e->region() == nullptr )
-	{
-		e = e->onext();
-		if ( e == vEvent->edge() )
-		{
-			// All edges go right -- not incident to any processed edges
-			connect_left_vertex( vEvent );
-			return;
-		}
-	}
+    // Check if this vertex is the right endpoint of an edge that is
+    // already in the dictionary.  In this case we don't need to waste
+    // time searching for the location to insert new edges.
+    e = vEvent->edge();
+    while ( e->region() == nullptr )
+    {
+        e = e->onext();
+        if ( e == vEvent->edge() )
+        {
+            // All edges go right -- not incident to any processed edges
+            connect_left_vertex( vEvent );
+            return;
+        }
+    }
 
-	// Processing consists of two phases: first we "finish" all the
-	// active regions where both the upper and lower edges terminate
-	// at vEvent (ie. vEvent is closing off these regions).
-	// We mark these faces "inside" or "outside" the polygon according
-	// to their winding number, and delete the edges from the dictionary.
-	// This takes care of all the left-going edges from vEvent.
-	regUp = top_left_region( e->region() );
-	if ( regUp == nullptr )
-		throw std::runtime_error( "top left region failed" );
-	reg = regUp->below();
-	eTopLeft = reg->eUp;
-	eBottomLeft = finish_left_regions( reg, nullptr );
+    // Processing consists of two phases: first we "finish" all the
+    // active regions where both the upper and lower edges terminate
+    // at vEvent (ie. vEvent is closing off these regions).
+    // We mark these faces "inside" or "outside" the polygon according
+    // to their winding number, and delete the edges from the dictionary.
+    // This takes care of all the left-going edges from vEvent.
+    regUp = top_left_region( e->region() );
+    if ( regUp == nullptr )
+        throw std::runtime_error( "top left region failed" );
+    reg         = regUp->below();
+    eTopLeft    = reg->eUp;
+    eBottomLeft = finish_left_regions( reg, nullptr );
 
-	// Next we process all the right-going edges from vEvent.  This
-	// involves adding the edges to the dictionary, and creating the
-	// associated "active regions" which record information about the
-	// regions between adjacent dictionary edges.
-	if ( eBottomLeft->onext() == eTopLeft )
-	{
-		// No right-going edges -- add a temporary "fixable" edge
-		connect_right_vertex( regUp, eBottomLeft );
-	}
-	else
-		add_right_edges( regUp, eBottomLeft->onext(), eTopLeft, eTopLeft, true );
+    // Next we process all the right-going edges from vEvent.  This
+    // involves adding the edges to the dictionary, and creating the
+    // associated "active regions" which record information about the
+    // regions between adjacent dictionary edges.
+    if ( eBottomLeft->onext() == eTopLeft )
+    {
+        // No right-going edges -- add a temporary "fixable" edge
+        connect_right_vertex( regUp, eBottomLeft );
+    }
+    else
+        add_right_edges(
+            regUp, eBottomLeft->onext(), eTopLeft, eTopLeft, true );
 }
-
 
 // Make the sentinel coordinates big enough that they will never be
 // merged with real input features.
@@ -2689,98 +2643,94 @@ void tessellator::sweep_event( vertex *vEvent )
 // to avoid special cases at the top and bottom.
 void tessellator::add_sentinel( double xmin, double xmax, double y )
 {
-	half_edge *e = _mesh->make_edge();
-	e->org()->set( xmax, y, 0 );
-	e->dst()->set( xmin, y, 0 );
+    half_edge *e = _mesh->make_edge();
+    e->org()->set( xmax, y, 0 );
+    e->dst()->set( xmin, y, 0 );
 
-	_event = e->dst();
+    _event = e->dst();
 
-	active_region *reg = _regionPool.allocate();
-	reg->eUp = e;
-	reg->windingNumber = 0;
-	reg->inside = false;
-	reg->fixUpperEdge = false;
-	reg->sentinel = true;
-	reg->dirty = false;
-	reg->nodeUp = _dict->insert( reg );
-	if ( reg->nodeUp == nullptr )
-		throw std::runtime_error( "dictionary insert failed" );
+    active_region *reg = _regionPool.allocate();
+    reg->eUp           = e;
+    reg->windingNumber = 0;
+    reg->inside        = false;
+    reg->fixUpperEdge  = false;
+    reg->sentinel      = true;
+    reg->dirty         = false;
+    reg->nodeUp        = _dict->insert( reg );
+    if ( reg->nodeUp == nullptr )
+        throw std::runtime_error( "dictionary insert failed" );
 }
-
 
 // We maintain an ordering of edge intersections with the sweep line.
 // This order is maintained in a dynamic dictionary.
 void tessellator::init_edge_dict( void )
 {
-	_dict = new dict<active_region*>( [=](active_region *r1, active_region *r2) -> bool { return edge_leq( r1, r2 ); } );
+    _dict = new dict<active_region *>(
+        [=]( active_region *r1, active_region *r2 ) -> bool {
+            return edge_leq( r1, r2 );
+        } );
 
-	double w = ( _bmax[0] - _bmin[0] );
-	double h = ( _bmax[1] - _bmin[1] );
+    double w = ( _bmax[0] - _bmin[0] );
+    double h = ( _bmax[1] - _bmin[1] );
 
-	double smin = _bmin[0] - w;
-	double smax = _bmax[0] + w;
-	double tmin = _bmin[1] - h;
-	double tmax = _bmax[1] + h;
+    double smin = _bmin[0] - w;
+    double smax = _bmax[0] + w;
+    double tmin = _bmin[1] - h;
+    double tmax = _bmax[1] + h;
 
-	add_sentinel( smin, smax, tmin );
-	add_sentinel( smin, smax, tmax );
+    add_sentinel( smin, smax, tmin );
+    add_sentinel( smin, smax, tmax );
 }
-
 
 void tessellator::done_edge_dict( void )
 {
 #ifndef NDEBUG
-	int fixedEdges = 0;
+    int fixedEdges = 0;
 #endif
-	active_region *reg;
-	while ( ( reg = _dict->min()->key() ) != nullptr )
-	{
-		// At the end of all processing, the dictionary should contain
-		// only the two sentinel edges, plus at most one "fixable" edge
-		// created by ConnectRightVertex().
-		if ( ! reg->sentinel )
-		{
-			assert( reg->fixUpperEdge );
-			assert( ++fixedEdges == 1 );
-		}
-		assert( reg->windingNumber == 0 );
-		delete_region( reg );
-	}
-	delete _dict;
-	_dict = nullptr;
+    active_region *reg;
+    while ( ( reg = _dict->min()->key() ) != nullptr )
+    {
+        // At the end of all processing, the dictionary should contain
+        // only the two sentinel edges, plus at most one "fixable" edge
+        // created by ConnectRightVertex().
+        if ( !reg->sentinel )
+        {
+            assert( reg->fixUpperEdge );
+            assert( ++fixedEdges == 1 );
+        }
+        assert( reg->windingNumber == 0 );
+        delete_region( reg );
+    }
+    delete _dict;
+    _dict = nullptr;
 }
 
 // Insert all vertices into the priority queue which determines the
 // order in which vertices cross the sweep line.
 bool tessellator::init_priorityq( void )
 {
-	vertex *vHead = _mesh->vertex_list();
-	size_t count = 0;
-	for ( vertex *v = vHead->next(); v != vHead; v = v->next() )
-		count++;
-	// Make sure there is enough space for sentinels.
-	count += 8; // MAX( 8, tess->alloc.extraVertices );
+    vertex *vHead = _mesh->vertex_list();
+    size_t  count = 0;
+    for ( vertex *v = vHead->next(); v != vHead; v = v->next() )
+        count++;
+    // Make sure there is enough space for sentinels.
+    count += 8; // MAX( 8, tess->alloc.extraVertices );
 
-	_pq.reserve( count );
+    _pq.reserve( count );
 
-	vHead = _mesh->vertex_list();
-	vertex *v;
-	for ( v = vHead->next(); v != vHead; v = v->next() )
-		_pq.push( v );
+    vHead = _mesh->vertex_list();
+    vertex *v;
+    for ( v = vHead->next(); v != vHead; v = v->next() )
+        _pq.push( v );
 
-	_pq.init();
-	if ( v != vHead )
-		return false;
+    _pq.init();
+    if ( v != vHead )
+        return false;
 
-	return true;
+    return true;
 }
 
-
-void tessellator::done_priorityq( void )
-{
-	_pq.clear();
-}
-
+void tessellator::done_priorityq( void ) { _pq.clear(); }
 
 // tessComputeInterior( tess ) computes the planar arrangement specified
 // by the given contours, and further subdivides this arrangement
@@ -2789,71 +2739,70 @@ void tessellator::done_priorityq( void )
 // Each interior region is guaranteed be monotone.
 bool tessellator::compute_interior( void )
 {
-	vertex *v, *vNext;
+    vertex *v, *vNext;
 
-	// Each vertex defines an event for our sweep line.  Start by inserting
-	// all the vertices in a priority queue.  Events are processed in
-	// lexicographic order, ie.
-	//	e1 < e2  iff  e1.x < e2.x || (e1.x == e2.x && e1.y < e2.y)
-	_mesh->remove_degenerate_edges();
-	if ( !init_priorityq() )
-		return false; // if error
-	init_edge_dict();
+    // Each vertex defines an event for our sweep line.  Start by inserting
+    // all the vertices in a priority queue.  Events are processed in
+    // lexicographic order, ie.
+    //	e1 < e2  iff  e1.x < e2.x || (e1.x == e2.x && e1.y < e2.y)
+    _mesh->remove_degenerate_edges();
+    if ( !init_priorityq() )
+        return false; // if error
+    init_edge_dict();
 
-	v = _pq.top();
-	while ( v != nullptr )
-	{
-		_pq.pop();
-		while ( true )
-		{
-			vNext = _pq.top();
-			if ( vNext == nullptr || ! VertEq( vNext, v ) )
-				break;
+    v = _pq.top();
+    while ( v != nullptr )
+    {
+        _pq.pop();
+        while ( true )
+        {
+            vNext = _pq.top();
+            if ( vNext == nullptr || !VertEq( vNext, v ) )
+                break;
 
-			// Merge together all vertices at exactly the same location.
-			// This is more efficient than processing them one at a time,
-			// simplifies the code (see ConnectLeftDegenerate), and is also
-			// important for correct handling of certain degenerate cases.
-			// For example, suppose there are two identical edges A and B
-			// that belong to different contours (so without this code they would
-			// be processed by separate sweep events).  Suppose another edge C
-			// crosses A and B from above.  When A is processed, we split it
-			// at its intersection point with C.  However this also splits C,
-			// so when we insert B we may compute a slightly different
-			// intersection point.  This might leave two edges with a small
-			// gap between them.  This kind of error is especially obvious
-			// when using boundary extraction (TESS_BOUNDARY_ONLY).
-			_pq.pop();
-			_mesh->splice( v->edge(), vNext->edge() );
-		}
-		sweep_event( v );
-		v = _pq.top();
-	}
+            // Merge together all vertices at exactly the same location.
+            // This is more efficient than processing them one at a time,
+            // simplifies the code (see ConnectLeftDegenerate), and is also
+            // important for correct handling of certain degenerate cases.
+            // For example, suppose there are two identical edges A and B
+            // that belong to different contours (so without this code they would
+            // be processed by separate sweep events).  Suppose another edge C
+            // crosses A and B from above.  When A is processed, we split it
+            // at its intersection point with C.  However this also splits C,
+            // so when we insert B we may compute a slightly different
+            // intersection point.  This might leave two edges with a small
+            // gap between them.  This kind of error is especially obvious
+            // when using boundary extraction (TESS_BOUNDARY_ONLY).
+            _pq.pop();
+            _mesh->splice( v->edge(), vNext->edge() );
+        }
+        sweep_event( v );
+        v = _pq.top();
+    }
 
-	// Set tess->event for debugging purposes
-	_event = _dict->min()->key()->eUp->org();
-	done_edge_dict();
-	done_priorityq();
+    // Set tess->event for debugging purposes
+    _event = _dict->min()->key()->eUp->org();
+    done_edge_dict();
+    done_priorityq();
 
-	if ( !_mesh->remove_degenerate_faces() )
-		return false;
-	_mesh->check_mesh();
+    if ( !_mesh->remove_degenerate_faces() )
+        return false;
+    _mesh->check_mesh();
 
-	return true;
+    return true;
 }
 
 // We've computed a new intersection point, now we need a "data" pointer
 // from the user so that we can refer to this new vertex in the
 // rendering callbacks.
-void tessellator::get_intersect_data( vertex *isect,
-		vertex *orgUp, vertex *dstUp,
-		vertex *orgLo, vertex *dstLo )
+void tessellator::get_intersect_data(
+    vertex *isect, vertex *orgUp, vertex *dstUp, vertex *orgLo, vertex *dstLo )
 {
-	double weights[4];
+    double weights[4];
 
-	isect->set( 0, 0, 0 );
-	VertexWeights( isect, orgUp, dstUp, &weights[0] );
-	VertexWeights( isect, orgLo, dstLo, &weights[2] );
+    isect->set( 0, 0, 0 );
+    VertexWeights( isect, orgUp, dstUp, &weights[0] );
+    VertexWeights( isect, orgLo, dstLo, &weights[2] );
 }
 
 // Invariants for the Edge Dictionary.
@@ -2887,4 +2836,4 @@ void tessellator::get_intersect_data( vertex *isect,
 // When we merge two edges into one, we need to compute the combined
 // winding of the new edge.
 
-}
+} // namespace draw

@@ -3,13 +3,13 @@
 
 #pragma once
 
-#include <functional>
-#include "waitable.h"
 #include "scancode.h"
+#include "waitable.h"
+
+#include <functional>
 
 namespace platform
 {
-
 ////////////////////////////////////////
 
 /// @brief Keyboard device.
@@ -18,16 +18,15 @@ namespace platform
 class keyboard : public waitable
 {
 public:
-	/// @brief Constructor.
-	keyboard( system *s );
+    /// @brief Constructor.
+    keyboard( system *s );
 
-	/// @brief Destructor.
-	virtual ~keyboard( void );
+    /// @brief Destructor.
+    virtual ~keyboard( void );
 
 private:
 };
 
 ////////////////////////////////////////
 
-}
-
+} // namespace platform

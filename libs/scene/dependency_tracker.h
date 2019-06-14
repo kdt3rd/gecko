@@ -7,7 +7,6 @@
 
 namespace scene
 {
-
 ///
 /// @brief Class dependency_tracker provides a lightweight mechanism to track dependencies between otherwise un-connected objects.
 ///
@@ -31,7 +30,7 @@ public:
     };
 
     void notify_dependents_changed( dependent *dep );
-    
+
 protected:
     // will be auto-registered / removed in the
     // constructor / destructor of dependent
@@ -39,10 +38,6 @@ protected:
     void remove_object( dependent *dep );
 
     friend class dependent;
-
 };
 
 } // namespace scene
-
-
-

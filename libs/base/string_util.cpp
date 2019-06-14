@@ -5,7 +5,6 @@
 
 namespace base
 {
-
 ////////////////////////////////////////
 
 std::string trim( const std::string &str, const std::string &ws )
@@ -34,8 +33,8 @@ std::string ltrim( const std::string &str, const std::string &ws )
 std::string rtrim( const std::string &str, const std::string &ws )
 {
     auto end = str.find_last_not_of( ws );
-	if ( end == std::string::npos )
-		return std::string();
+    if ( end == std::string::npos )
+        return std::string();
 
     return str.substr( 0, end + 1 );
 }
@@ -44,33 +43,32 @@ std::string rtrim( const std::string &str, const std::string &ws )
 
 std::string replace( std::string &&str, char c, const std::string &replacement )
 {
-	std::string result( std::move( str ) );
-	size_t pos = 0;
-	pos = result.find( c, pos );
-	while ( pos != std::string::npos )
-	{
-		result.replace( pos, 1, replacement );
-		pos = result.find( c, pos + replacement.size() );
-	}
-	return result;
+    std::string result( std::move( str ) );
+    size_t      pos = 0;
+    pos             = result.find( c, pos );
+    while ( pos != std::string::npos )
+    {
+        result.replace( pos, 1, replacement );
+        pos = result.find( c, pos + replacement.size() );
+    }
+    return result;
 }
 
 ////////////////////////////////////////
 
 std::string replace( std::string &&str, char c, const cstring &replacement )
 {
-	std::string result( std::move( str ) );
-	size_t pos = 0;
-	pos = result.find( c, pos );
-	while ( pos != std::string::npos )
-	{
-		result.replace( pos, 1, replacement.c_str(), replacement.size() );
-		pos = result.find( c, pos + replacement.size() );
-	}
-	return result;
+    std::string result( std::move( str ) );
+    size_t      pos = 0;
+    pos             = result.find( c, pos );
+    while ( pos != std::string::npos )
+    {
+        result.replace( pos, 1, replacement.c_str(), replacement.size() );
+        pos = result.find( c, pos + replacement.size() );
+    }
+    return result;
 }
 
 ////////////////////////////////////////
 
-}
-
+} // namespace base

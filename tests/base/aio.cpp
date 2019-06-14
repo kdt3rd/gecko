@@ -1,16 +1,15 @@
 // Copyright (c) 2019 Kimball Thurston
 // SPDX-License-Identifier: MIT
 
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-
 #include <base/async_io.h>
 #include <base/contract.h>
 #include <base/file_system.h>
 #include <base/scope_guard.h>
 #include <base/unit_test.h>
 #include <cstring>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #ifdef _WIN32
 #    include <base/win32_file_system.h>
 #else
@@ -19,7 +18,6 @@
 
 namespace
 {
-
 ////////////////////////////////////////
 
 int safemain( int argc, char *argv[] )
@@ -39,7 +37,7 @@ int safemain( int argc, char *argv[] )
     }
 
     base::uri tmppath( "file", "", "tmp", "test_async_io" );
-    auto fs = base::file_system::get( tmppath );
+    auto      fs = base::file_system::get( tmppath );
     on_scope_exit { fs->unlink( tmppath ); };
 
     {
@@ -50,11 +48,11 @@ int safemain( int argc, char *argv[] )
 #ifdef __linux__
     test["linux_aio"] = [&]( void ) {
         base::async_io aiodriver;
-        base::istream testinput = fs->open_read( tmppath );
-        char buf[14];
-        buf[13] = '\0';
-        int idle_count = 0;
-        ssize_t nread = aiodriver.idle_read(
+        base::istream  testinput = fs->open_read( tmppath );
+        char           buf[14];
+        buf[13]            = '\0';
+        int     idle_count = 0;
+        ssize_t nread      = aiodriver.idle_read(
             [&]() { ++idle_count; }, buf, 13, testinput.rdbuf(), 0 );
         if ( nread == 13 && 0 == strcmp( buf, "Hello, world!" ) &&
              idle_count > 0 )
@@ -65,7 +63,7 @@ int safemain( int argc, char *argv[] )
                 idle_count,
                 buf );
         idle_count = 0;
-        nread = aiodriver.idle_read(
+        nread      = aiodriver.idle_read(
             [&]() { ++idle_count; }, buf, 1, testinput.rdbuf(), 12 );
         buf[1] = '\0';
         if ( nread == 1 && buf[0] == '!' && idle_count > 0 )

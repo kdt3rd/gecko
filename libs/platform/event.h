@@ -3,18 +3,17 @@
 
 #pragma once
 
-#include <cstdint>
-#include <string>
-
 #include "scancode.h"
 #include "system.h"
 #include "types.h"
+
+#include <cstdint>
+#include <string>
 
 ////////////////////////////////////////
 
 namespace platform
 {
-
 class event_source;
 
 enum event_type : uint8_t
@@ -90,7 +89,7 @@ public:
     struct mouse_info
     {
         coord_type x, y;
-        int button;
+        int        button;
     };
     struct key_info
     {
@@ -101,13 +100,13 @@ public:
     struct text_info
     {
         coord_type x, y; // pointer position
-        char32_t text;
+        char32_t   text;
     };
     struct tablet_info
     {
         coord_type x, y;
         int16_t
-            button; // TODO: do we need to differentiate pad ring / buttons from tool buttons?
+                button; // TODO: do we need to differentiate pad ring / buttons from tool buttons?
         int16_t pressure; // negative indicates distance
         int16_t angle;
     };
@@ -116,20 +115,20 @@ public:
         // TODO: is negative useful for element or should this be
         // uint16_t, w/ uint16_t(-1) meaning something special (all,
         // none, unknown)?
-        coord_type x, y;  // pointer position
-        int16_t element;  // which one of the buttons / dials / thingies
-        int16_t position; // what's the detent / delta
+        coord_type x, y;     // pointer position
+        int16_t    element;  // which one of the buttons / dials / thingies
+        int16_t    position; // what's the detent / delta
     };
     struct user_info
     {
         uint32_t id;
-        void *data;
+        void *   data;
     };
 
     inline event_type type( void ) const { return _type; }
 
     inline uint8_t modifiers( void ) const { return _modifiers; }
-    inline bool has_only_mod( uint8_t mask ) const
+    inline bool    has_only_mod( uint8_t mask ) const
     {
         return ( _modifiers & mask ) == _modifiers;
     }
@@ -155,66 +154,66 @@ public:
     }
 
     const window_info &window( void ) const { return _data.window; }
-    const mouse_info &mouse( void ) const { return _data.mouse; }
-    const key_info &key( void ) const { return _data.key; }
-    const text_info &text( void ) const { return _data.text; }
+    const mouse_info & mouse( void ) const { return _data.mouse; }
+    const key_info &   key( void ) const { return _data.key; }
+    const text_info &  text( void ) const { return _data.text; }
     const tablet_info &tablet( void ) const { return _data.tablet; }
-    const hid_info &hid( void ) const { return _data.hid; }
-    const user_info &user( void ) const { return _data.user; }
+    const hid_info &   hid( void ) const { return _data.hid; }
+    const user_info &  user( void ) const { return _data.user; }
 
-    system &sys( void ) const { return *( _source->get_system() ); }
+    system &      sys( void ) const { return *( _source->get_system() ); }
     event_source &source( void ) const { return *_source; }
 
     static inline event window(
         event_source *src,
-        event_type et,
-        coord_type x,
-        coord_type y,
-        coord_type w,
-        coord_type h )
+        event_type    et,
+        coord_type    x,
+        coord_type    y,
+        coord_type    w,
+        coord_type    h )
     {
         event r;
-        r._source = src;
-        r._type = et;
+        r._source      = src;
+        r._type        = et;
         r._data.window = { x, y, w, h };
-        r._modifiers = 0;
+        r._modifiers   = 0;
         return r;
     }
 
     static inline event
     key( event_source *src,
-         event_type et,
-         coord_type x,
-         coord_type y,
-         scancode kc,
-         uint8_t mods )
+         event_type    et,
+         coord_type    x,
+         coord_type    y,
+         scancode      kc,
+         uint8_t       mods )
     {
         event r;
-        r._source = src;
-        r._type = et;
-        r._data.key.x = x;
-        r._data.key.y = y;
+        r._source           = src;
+        r._type             = et;
+        r._data.key.x       = x;
+        r._data.key.y       = y;
         r._data.key.keys[0] = kc;
         r._data.key.keys[1] = scancode::KEY_NO_EVENT;
         r._data.key.keys[2] = scancode::KEY_NO_EVENT;
         r._data.key.keys[3] = scancode::KEY_NO_EVENT;
         r._data.key.keys[4] = scancode::KEY_NO_EVENT;
         r._data.key.keys[5] = scancode::KEY_NO_EVENT;
-        r._modifiers = mods;
+        r._modifiers        = mods;
         return r;
     }
 
     static inline event
     key( event_source *src,
-         event_type et,
-         coord_type x,
-         coord_type y,
-         scancode kc[6],
-         uint8_t mods )
+         event_type    et,
+         coord_type    x,
+         coord_type    y,
+         scancode      kc[6],
+         uint8_t       mods )
     {
         event r;
-        r._source = src;
-        r._type = et;
+        r._source     = src;
+        r._type       = et;
         r._data.key.x = x;
         r._data.key.y = y;
         for ( int i = 0; i < 6; ++i )
@@ -225,66 +224,66 @@ public:
 
     static inline event mouse(
         event_source *src,
-        event_type et,
-        coord_type x,
-        coord_type y,
-        int b,
-        uint8_t mods )
+        event_type    et,
+        coord_type    x,
+        coord_type    y,
+        int           b,
+        uint8_t       mods )
     {
         event r;
-        r._source = src;
-        r._type = et;
-        r._data.mouse.x = x;
-        r._data.mouse.y = y;
+        r._source            = src;
+        r._type              = et;
+        r._data.mouse.x      = x;
+        r._data.mouse.y      = y;
         r._data.mouse.button = b;
-        r._modifiers = mods;
+        r._modifiers         = mods;
         return r;
     }
 
     static inline event text(
         event_source *src,
-        event_type et,
-        coord_type x,
-        coord_type y,
-        char32_t c,
-        uint8_t mods )
+        event_type    et,
+        coord_type    x,
+        coord_type    y,
+        char32_t      c,
+        uint8_t       mods )
     {
         event r;
-        r._source = src;
-        r._type = et;
-        r._data.text.x = x;
-        r._data.text.y = y;
+        r._source         = src;
+        r._type           = et;
+        r._data.text.x    = x;
+        r._data.text.y    = y;
         r._data.text.text = c;
-        r._modifiers = mods;
+        r._modifiers      = mods;
         return r;
     }
 
     static inline event
     hid( event_source *src,
-         event_type et,
-         coord_type x,
-         coord_type y,
-         int16_t elt,
-         int16_t pos,
-         uint8_t mods )
+         event_type    et,
+         coord_type    x,
+         coord_type    y,
+         int16_t       elt,
+         int16_t       pos,
+         uint8_t       mods )
     {
         event r;
-        r._source = src;
-        r._type = et;
-        r._data.hid.x = x;
-        r._data.hid.y = y;
-        r._data.hid.element = elt;
+        r._source            = src;
+        r._type              = et;
+        r._data.hid.x        = x;
+        r._data.hid.y        = y;
+        r._data.hid.element  = elt;
         r._data.hid.position = pos;
-        r._modifiers = mods;
+        r._modifiers         = mods;
         return r;
     }
 
     static inline event user( event_source *src, uint32_t id, void *data )
     {
         event r;
-        r._source = src;
-        r._type = USER_EVENT;
-        r._data.user.id = id;
+        r._source         = src;
+        r._type           = USER_EVENT;
+        r._data.user.id   = id;
         r._data.user.data = data;
         return r;
     }
@@ -297,16 +296,16 @@ private:
     union
     {
         window_info window;
-        mouse_info mouse;
-        key_info key;
-        text_info text;
+        mouse_info  mouse;
+        key_info    key;
+        text_info   text;
         tablet_info tablet;
-        hid_info hid;
-        user_info user;
+        hid_info    hid;
+        user_info   user;
     } _data;
 
     event_type _type;
-    uint8_t _modifiers = 0;
+    uint8_t    _modifiers = 0;
 };
 
 } // namespace platform

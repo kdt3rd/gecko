@@ -9,7 +9,6 @@
 
 namespace
 {
-
 int safemain( int argc, char *argv[] )
 {
     base::cmd_line options(

@@ -9,7 +9,6 @@
 
 namespace
 {
-
 int safemain( void )
 {
     /// The first format specifiers indicates a width 5, use '0' as the fill character, right aligned.

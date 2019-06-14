@@ -3,22 +3,19 @@
 
 #include "mouse.h"
 
-namespace platform { namespace dummy
+namespace platform
 {
+namespace dummy
+{
+////////////////////////////////////////
+
+mouse::mouse( void ) {}
 
 ////////////////////////////////////////
 
-mouse::mouse( void )
-{
-}
+mouse::~mouse( void ) {}
 
 ////////////////////////////////////////
 
-mouse::~mouse( void )
-{
-}
-
-////////////////////////////////////////
-
-} }
-
+} // namespace dummy
+} // namespace platform

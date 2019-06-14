@@ -7,23 +7,14 @@
 
 namespace platform
 {
+////////////////////////////////////////
+
+waitable::waitable( system *s ) : event_source( s ) {}
 
 ////////////////////////////////////////
 
-waitable::waitable( system *s )
-    : event_source( s )
-{
-}
+waitable::~waitable( void ) {}
 
 ////////////////////////////////////////
 
-waitable::~waitable( void )
-{
-}
-
-////////////////////////////////////////
-
-} // platform
-
-
-
+} // namespace platform

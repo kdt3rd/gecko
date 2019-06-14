@@ -3,84 +3,76 @@
 
 #include <base/contract.h>
 #include <base/unit_test.h>
-
+#include <gl/api.h>
+#include <iostream>
 #include <platform/platform.h>
 #include <platform/system.h>
-#include <gl/api.h>
-
-#include <iostream>
 
 namespace
 {
-
 int safemain( int argc, char *argv[] )
 {
-	base::cmd_line options( argv[0] );
+    base::cmd_line options( argv[0] );
 
-	base::unit_test test( "info" );
-	test.setup( options );
+    base::unit_test test( "info" );
+    test.setup( options );
 
-	options.add_help();
-	options.parse( argc, argv );
+    options.add_help();
+    options.parse( argc, argv );
 
-	if ( options["help"] )
-	{
-		std::cerr << options << std::endl;
-		return -1;
-	}
+    if ( options["help"] )
+    {
+        std::cerr << options << std::endl;
+        return -1;
+    }
 
-	auto sys = platform::platform::common().create();
-	auto win = sys->new_window();
+    auto sys = platform::platform::common().create();
+    auto win = sys->new_window();
 
-	win->acquire();
+    win->acquire();
 
-	test["version"] = [&]( void )
-	{
-		gl::api ogl;
-		test.success( "{0}", ogl.get_version() );
-	};
+    test["version"] = [&]( void ) {
+        gl::api ogl;
+        test.success( "{0}", ogl.get_version() );
+    };
 
-	test["vendor"] = [&]( void )
-	{
-		gl::api ogl;
-		test.success( "{0}", ogl.get_vendor() );
-	};
+    test["vendor"] = [&]( void ) {
+        gl::api ogl;
+        test.success( "{0}", ogl.get_vendor() );
+    };
 
-	test["renderer"] = [&]( void )
-	{
-		gl::api ogl;
-		test.success( "{0}", ogl.get_renderer() );
-	};
+    test["renderer"] = [&]( void ) {
+        gl::api ogl;
+        test.success( "{0}", ogl.get_renderer() );
+    };
 
-	test["shading_version"] = [&]( void )
-	{
-		gl::api ogl;
-		test.success( "{0}", ogl.get_shading_version() );
-	};
+    test["shading_version"] = [&]( void ) {
+        gl::api ogl;
+        test.success( "{0}", ogl.get_shading_version() );
+    };
 
-	test["uniform_buffer"] = [&]( void )
-	{
-		gl::api ogl;
-		test.success( "{0}", ogl.get_max_uniform_buffer_bindings() );
-	};
+    test["uniform_buffer"] = [&]( void ) {
+        gl::api ogl;
+        test.success( "{0}", ogl.get_max_uniform_buffer_bindings() );
+    };
 
-	test.run( options );
-	test.clean();
+    test.run( options );
+    test.clean();
 
-	return - static_cast<int>( test.failure_count() );
+    return -static_cast<int>( test.failure_count() );
 }
 
-}
+} // namespace
 
 int main( int argc, char *argv[] )
 {
-	try
-	{
-		return safemain( argc, argv );
-	}
-	catch ( const std::exception &e )
-	{
-		std::cerr << '\n';
-		base::print_exception( std::cerr, e );
-	}
+    try
+    {
+        return safemain( argc, argv );
+    }
+    catch ( const std::exception &e )
+    {
+        std::cerr << '\n';
+        base::print_exception( std::cerr, e );
+    }
 }

@@ -3,20 +3,19 @@
 
 #pragma once
 
-#include <vector>
-#include <base/uri.h>
-#include <functional>
-#include "track.h"
-#include "video_track.h"
 #include "audio_track.h"
 #include "data_track.h"
-
 #include "metadata.h"
 #include "parameter.h"
+#include "track.h"
+#include "video_track.h"
+
+#include <base/uri.h>
+#include <functional>
+#include <vector>
 
 namespace media
 {
-
 ////////////////////////////////////////
 
 /// @brief container is a media container.
@@ -33,81 +32,75 @@ namespace media
 ///  - data track @sa data_track
 ///
 /// Each level of item (container on down) will have metadata associated with it
-/// 
+///
 ///
 class container
 {
 public:
-//	container( void );
-//	~container( void );
+    //	container( void );
+    //	~container( void );
 
-	size_t size( void )
-	{
-		return _tracks.size();
-	}
+    size_t size( void ) { return _tracks.size(); }
 
-	/// There is some amount of container info
-	/// such as creator and such
-	inline const metadata &info( void ) const;
-	inline void add_info( base::cstring n, metadata_value v );
+    /// There is some amount of container info
+    /// such as creator and such
+    inline const metadata &info( void ) const;
+    inline void            add_info( base::cstring n, metadata_value v );
 
-	std::shared_ptr<track> operator[]( size_t i )
-	{
-		return _tracks.at( i );
-	}
+    std::shared_ptr<track> operator[]( size_t i ) { return _tracks.at( i ); }
 
-	std::shared_ptr<track> at( size_t i )
-	{
-		return _tracks.at( i );
-	}
+    std::shared_ptr<track> at( size_t i ) { return _tracks.at( i ); }
 
-	void add_track( const std::shared_ptr<track> &t );
+    void add_track( const std::shared_ptr<track> &t );
 
-	inline const std::vector<std::shared_ptr<video_track>> &video_tracks( void ) const;
-	inline const std::vector<std::shared_ptr<audio_track>> &audio_tracks( void ) const;
-	inline const std::vector<std::shared_ptr<data_track>> &data_tracks( void ) const;
+    inline const std::vector<std::shared_ptr<video_track>> &
+    video_tracks( void ) const;
+    inline const std::vector<std::shared_ptr<audio_track>> &
+    audio_tracks( void ) const;
+    inline const std::vector<std::shared_ptr<data_track>> &
+    data_tracks( void ) const;
 
-	inline const parameter_set &parameters( void ) const { return _parameters; }
-	void set_parameters( const parameter_set &p );
+    inline const parameter_set &parameters( void ) const { return _parameters; }
+    void                        set_parameters( const parameter_set &p );
 
 private:
-	metadata _info;
-	parameter_set _parameters;
+    metadata      _info;
+    parameter_set _parameters;
 
-	std::vector<std::shared_ptr<track>> _tracks;
-	std::vector<std::shared_ptr<video_track>> _video_tracks;
-	std::vector<std::shared_ptr<audio_track>> _audio_tracks;
-	std::vector<std::shared_ptr<data_track>> _data_tracks;
+    std::vector<std::shared_ptr<track>>       _tracks;
+    std::vector<std::shared_ptr<video_track>> _video_tracks;
+    std::vector<std::shared_ptr<audio_track>> _audio_tracks;
+    std::vector<std::shared_ptr<data_track>>  _data_tracks;
 };
 
 ////////////////////////////////////////
 
-inline const metadata &container::info( void ) const
-{ return _info; }
-inline void container::add_info( base::cstring n, metadata_value v )
-{ _info[n] = std::move( v ); }
-
+inline const metadata &container::info( void ) const { return _info; }
+inline void            container::add_info( base::cstring n, metadata_value v )
+{
+    _info[n] = std::move( v );
+}
 
 ////////////////////////////////////////
 
-inline const std::vector<std::shared_ptr<video_track>> &container::video_tracks( void ) const
+inline const std::vector<std::shared_ptr<video_track>> &
+container::video_tracks( void ) const
 {
-	return _video_tracks;
+    return _video_tracks;
 }
 
-inline const std::vector<std::shared_ptr<audio_track>> &container::audio_tracks( void ) const
+inline const std::vector<std::shared_ptr<audio_track>> &
+container::audio_tracks( void ) const
 {
-	return _audio_tracks;
+    return _audio_tracks;
 }
 
-inline const std::vector<std::shared_ptr<data_track>> &container::data_tracks( void ) const
+inline const std::vector<std::shared_ptr<data_track>> &
+container::data_tracks( void ) const
 {
-	return _data_tracks;
+    return _data_tracks;
 }
-
-
 
 ////////////////////////////////////////
 
-}
-
+} // namespace media

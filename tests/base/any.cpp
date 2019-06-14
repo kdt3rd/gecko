@@ -11,7 +11,6 @@
 
 namespace
 {
-
 ////////////////////////////////////////
 
 int safemain( int argc, char *argv[] )
@@ -34,7 +33,7 @@ int safemain( int argc, char *argv[] )
     }
 
     test["small_value"] = [&]( void ) {
-        int foo = 3;
+        int       foo = 3;
         base::any x{ foo };
         try
         {
@@ -68,7 +67,7 @@ int safemain( int argc, char *argv[] )
     };
 
     test["change_type"] = [&]( void ) {
-        int foo = 3;
+        int       foo = 3;
         base::any x{ foo };
 
         std::string bar;
@@ -83,10 +82,10 @@ int safemain( int argc, char *argv[] )
     test["large"] = [&]( void ) {
         struct Foo
         {
-            double a = 0., b = 0., c = 0.;
+            double   a = 0., b = 0., c = 0.;
             uint64_t d = 0, e = 0, f = 0;
         };
-        Foo foo;
+        Foo       foo;
         base::any x{ foo };
 
         try

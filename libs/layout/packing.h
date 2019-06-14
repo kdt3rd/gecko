@@ -4,13 +4,13 @@
 #pragma once
 
 #include "layout.h"
+
 #include <base/alignment.h>
 #include <list>
 #include <memory>
 
 namespace layout
 {
-
 ////////////////////////////////////////
 
 /// @brief Layout which packs areas arounds the sides of a shrinking center area.
@@ -21,35 +21,33 @@ namespace layout
 class packing : public layout
 {
 public:
-	/// @brief Default constructor.
-	packing( void );
+    /// @brief Default constructor.
+    packing( void );
 
-	/// @brief Add area to one side.
-	//
-	/// @param a Area to add.
-	/// @param where Which side to add to.
-	void add( const std::shared_ptr<area> &a, alignment where );
+    /// @brief Add area to one side.
+    //
+    /// @param a Area to add.
+    /// @param where Which side to add to.
+    void add( const std::shared_ptr<area> &a, alignment where );
 
-	void compute_bounds( void ) override;
+    void compute_bounds( void ) override;
 
-	void compute_layout( void ) override;
+    void compute_layout( void ) override;
 
 private:
-	struct section
-	{
-		section( const std::shared_ptr<area> &ar, alignment al )
-			: _area( ar ), _align( al )
-		{
-		}
+    struct section
+    {
+        section( const std::shared_ptr<area> &ar, alignment al )
+            : _area( ar ), _align( al )
+        {}
 
-		std::weak_ptr<area> _area;
-		alignment _align;
-	};
+        std::weak_ptr<area> _area;
+        alignment           _align;
+    };
 
-	std::list<section> _areas;
+    std::list<section> _areas;
 };
 
 ////////////////////////////////////////
 
-}
-
+} // namespace layout

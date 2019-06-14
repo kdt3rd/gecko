@@ -4,6 +4,7 @@
 #pragma once
 
 #include "node_reference.h"
+
 #include <memory>
 #include <vector>
 
@@ -11,7 +12,6 @@
 
 namespace scene
 {
-
 class light_hierarchy;
 class provider;
 class backend;
@@ -20,7 +20,7 @@ class backend;
 ///
 /// a scene should have representative entities for every component going into the scene - the common database to store it all. This includes:
 ///
-/// "Assets" for this scene 
+/// "Assets" for this scene
 /// - Camera definitions (left, right, etc.)
 /// - Renderable geometry / volumes / etc. with their relevant animation, layout, and material definitions
 /// - Textures, shaders, etc. used for the above
@@ -118,78 +118,80 @@ class backend;
 class scene
 {
 public:
-	node_reference world( void ) const;
-	/// shortcuts into the world for concepts that inherently exist
-	node_reference media( void ) const;
-	node_reference geo( void ) const;
-	node_reference lights( void ) const;
-	node_reference cameras( void ) const;
+    node_reference world( void ) const;
+    /// shortcuts into the world for concepts that inherently exist
+    node_reference media( void ) const;
+    node_reference geo( void ) const;
+    node_reference lights( void ) const;
+    node_reference cameras( void ) const;
 
-	/// TODO: Are materials a "thing", or are they a graph, and the
-	/// output can be assigned to things?
-	///
-	/// TODO:
-	/// 
-	/// have render graphs, composite graphs (same kind of thing, just
-	/// a graph) as a separate entity. Like maybe the backend thing
-	/// isn't quite the base, but rather a scene consumer or some such
-	///
+    /// TODO: Are materials a "thing", or are they a graph, and the
+    /// output can be assigned to things?
+    ///
+    /// TODO:
+    ///
+    /// have render graphs, composite graphs (same kind of thing, just
+    /// a graph) as a separate entity. Like maybe the backend thing
+    /// isn't quite the base, but rather a scene consumer or some such
+    ///
 
-	/// for in-built providers, such that a plugin can load and override them
-	void register_builtin_provider( const char *n, provider &p );
-	void register_provider( const char *n, provider &p );
-	void unregister_provider( const char *n );
-	const std::vector<provider> &providers( void ) const;
+    /// for in-built providers, such that a plugin can load and override them
+    void register_builtin_provider( const char *n, provider &p );
+    void register_provider( const char *n, provider &p );
+    void unregister_provider( const char *n );
+    const std::vector<provider> &providers( void ) const;
 
-	void register_backend( const std::shared_ptr<backend> &b );
-	void unregister_backend( const std::shared_ptr<backend> &b );
-	const std::vector< std::shared_ptr<backend> > &backends( void ) const;
-	
-	/// assumes the names of the levels are separated by '/'
-	node_reference find( uint64_t id ) const;
-	node_reference find( const char *name ) const { return root()->find( name ); }
+    void register_backend( const std::shared_ptr<backend> &b );
+    void unregister_backend( const std::shared_ptr<backend> &b );
+    const std::vector<std::shared_ptr<backend>> &backends( void ) const;
 
-	/// This is equivalent to calling
-	///   find_or_create( root(), name, provider, type, version )
-	///
-	/// @sa find_or_create   
-	inline node_reference find_or_create(
-		const char *name,
-		const char *provider,
-		const char *type,
-		const char *version )
-	{
-		return find_or_create( root(), name, provider, type, version );
-	}
+    /// assumes the names of the levels are separated by '/'
+    node_reference find( uint64_t id ) const;
+    node_reference find( const char *name ) const
+    {
+        return root()->find( name );
+    }
 
-	/// provider might be a name of a plugin
-	///
-	/// type is the type of node to create
-	///
-	/// version is the version of the object last saved (may be NULL
-	/// to get latest)
-	///
-	/// subname is the location name to create underneath parent. This
-	/// can still be a tree path (a/b/c), which is considered relative
-	/// to the parent.  if any intermediate levels do not exist, this
-	/// will fail
-	///
-	/// This is safe to do regardless of whether the provider / type /
-	/// version actually exists. This allows a script to be loaded in
-	/// a context where a plugin may not correctly exist
-	node_reference find_or_create(
-		const writable_node_reference &parent,
-		const char *subname,
-		const char *provider,
-		const char *type,
-		const char *version );
+    /// This is equivalent to calling
+    ///   find_or_create( root(), name, provider, type, version )
+    ///
+    /// @sa find_or_create
+    inline node_reference find_or_create(
+        const char *name,
+        const char *provider,
+        const char *type,
+        const char *version )
+    {
+        return find_or_create( root(), name, provider, type, version );
+    }
 
-	void reparent( const node_reference &n, const node_reference &newparent );
-	void remove( const node_reference &r, bool reparent_children );
+    /// provider might be a name of a plugin
+    ///
+    /// type is the type of node to create
+    ///
+    /// version is the version of the object last saved (may be NULL
+    /// to get latest)
+    ///
+    /// subname is the location name to create underneath parent. This
+    /// can still be a tree path (a/b/c), which is considered relative
+    /// to the parent.  if any intermediate levels do not exist, this
+    /// will fail
+    ///
+    /// This is safe to do regardless of whether the provider / type /
+    /// version actually exists. This allows a script to be loaded in
+    /// a context where a plugin may not correctly exist
+    node_reference find_or_create(
+        const writable_node_reference &parent,
+        const char *                   subname,
+        const char *                   provider,
+        const char *                   type,
+        const char *                   version );
+
+    void reparent( const node_reference &n, const node_reference &newparent );
+    void remove( const node_reference &r, bool reparent_children );
 
 private:
-	node *_root;
+    node *_root;
 };
 
 } // namespace scene
-

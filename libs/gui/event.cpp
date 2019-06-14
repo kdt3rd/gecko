@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 #include "event.h"
+
 #include "window.h"
 
 namespace gui
 {
-
 coord event::from_native_horiz( const platform::coord_type &c ) const
 {
     return _w.from_native_horiz( c );

@@ -5,21 +5,14 @@
 
 namespace platform
 {
+////////////////////////////////////////
+
+mouse::mouse( system *s ) : waitable( s ) {}
 
 ////////////////////////////////////////
 
-mouse::mouse( system *s )
-    : waitable( s )
-{
-}
+mouse::~mouse( void ) {}
 
 ////////////////////////////////////////
 
-mouse::~mouse( void )
-{
-}
-
-////////////////////////////////////////
-
-}
-
+} // namespace platform

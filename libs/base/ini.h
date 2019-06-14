@@ -4,16 +4,15 @@
 #pragma once
 
 #include <iosfwd>
-#include <string>
 #include <map>
-#include <vector>
 #include <memory>
+#include <string>
+#include <vector>
 
 ////////////////////////////////////////
 
 namespace base
 {
-
 /// @brief a grouping of key/value pairs belonging to an ini file
 class ini_section
 {
@@ -27,8 +26,7 @@ public:
 
     void parse( std::string v );
 
-    template <typename K>
-    bool has_key( const K &k ) const
+    template <typename K> bool has_key( const K &k ) const
     {
         auto i = _keys.find( k );
         if ( i != _keys.end() )
@@ -36,7 +34,8 @@ public:
     }
 
     template <typename K>
-    std::string defaulted_value( const K &k, std::string defaultVal = std::string() ) const
+    std::string
+    defaulted_value( const K &k, std::string defaultVal = std::string() ) const
     {
         auto i = _keys.find( k );
         if ( i != _keys.end() )
@@ -44,8 +43,7 @@ public:
         return defaultVal;
     }
 
-    template <typename K>
-    const std::string &operator[]( const K &k ) const
+    template <typename K> const std::string &operator[]( const K &k ) const
     {
         auto i = _keys.find( k );
         if ( i != _keys.end() )
@@ -58,9 +56,9 @@ public:
     void save( std::ostream &os ) const;
 
 private:
-    std::string _name;
-    std::map<std::string, size_t> _keys;
-    std::vector< std::pair<std::string, std::string> > _values;
+    std::string                                      _name;
+    std::map<std::string, size_t>                    _keys;
+    std::vector<std::pair<std::string, std::string>> _values;
 };
 
 ///
@@ -72,15 +70,14 @@ private:
 ///
 /// [section]
 /// bar=baz
-/// 
+///
 ///
 class ini
 {
 public:
     const ini_section &globals( void ) const { return _globals; }
 
-    template <typename K>
-    bool has_section( const K &k ) const
+    template <typename K> bool has_section( const K &k ) const
     {
         auto i = _sections.find( k );
         if ( i != _sections.end() )
@@ -88,12 +85,11 @@ public:
         return false;
     }
 
-    template <typename K>
-    const ini_section &operator[]( const K &k ) const
+    template <typename K> const ini_section &operator[]( const K &k ) const
     {
         auto i = _sections.find( k );
         if ( i != _sections.end() )
-            return *(i->second);
+            return *( i->second );
 
         return _globals;
     }
@@ -104,12 +100,9 @@ public:
     static ini load( std::istream &is );
 
 private:
-    ini_section _globals;
-    std::map<std::string, std::shared_ptr<ini_section> > _sections;
-    std::vector<std::string> _sec_order;
+    ini_section                                         _globals;
+    std::map<std::string, std::shared_ptr<ini_section>> _sections;
+    std::vector<std::string>                            _sec_order;
 };
 
 } // namespace base
-
-
-

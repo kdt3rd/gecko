@@ -3,14 +3,10 @@
 
 #pragma once
 
-
 ////////////////////////////////////////
-
 
 namespace media
 {
-
 void register_tiff_reader( void );
 
 } // namespace media
-

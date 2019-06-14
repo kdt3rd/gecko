@@ -8,7 +8,10 @@
 		"C_Cpp.default.cppStandard": "c++14",
 		"C_Cpp.default.cStandard": "c11",
 		"files.associations": {
-			"memory": "cpp"
+			"memory": "cpp",
+			"iostream": "cpp",
+			"cstdlib": "cpp",
+			"algorithm": "cpp"
 		}
 	}
 }

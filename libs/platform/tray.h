@@ -7,14 +7,11 @@
 
 namespace platform
 {
-
 class tray
 {
 public:
-	tray( void ) = default;
-	virtual ~tray( void );
-
+    tray( void ) = default;
+    virtual ~tray( void );
 };
 
 } // namespace platform
-

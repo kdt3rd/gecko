@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 #include "optical_flow.h"
+
 #include "debug_util.h"
 #include "media_io.h"
 #include "plane_ops.h"
 #include "threading.h"
+
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
@@ -122,17 +124,17 @@ inline plane doGradY( const plane &a, const plane &alpha, float lambda = 10.F )
 
 static void doKillAlpha(
     size_t,
-    int s,
-    int e,
-    plane_buffer &u,
-    plane_buffer &v,
+    int                       s,
+    int                       e,
+    plane_buffer &            u,
+    plane_buffer &            v,
     const const_plane_buffer &alpha )
 {
     int w = u.width();
     for ( int y = s; y < e; ++y )
     {
-        float *uLine = u.line( y );
-        float *vLine = v.line( y );
+        float *      uLine     = u.line( y );
+        float *      vLine     = v.line( y );
         const float *alphaLine = alpha.line( y );
         for ( int x = 0; x < w; ++x )
         {
@@ -149,8 +151,8 @@ static void killAlpha( plane &u, plane &v, const plane &alpha )
 {
     if ( alpha.valid() )
     {
-        plane_buffer uB = u;
-        plane_buffer vB = v;
+        plane_buffer       uB   = u;
+        plane_buffer       vB   = v;
         const_plane_buffer alpB = alpha;
         threading::get().dispatch(
             std::bind(
@@ -169,17 +171,17 @@ static void killAlpha( plane &u, plane &v, const plane &alpha )
 
 static void doZilchAlpha(
     size_t,
-    int s,
-    int e,
-    plane_buffer &u,
-    plane_buffer &v,
+    int                       s,
+    int                       e,
+    plane_buffer &            u,
+    plane_buffer &            v,
     const const_plane_buffer &alpha )
 {
     int w = u.width();
     for ( int y = s; y < e; ++y )
     {
-        float *uLine = u.line( y );
-        float *vLine = v.line( y );
+        float *      uLine     = u.line( y );
+        float *      vLine     = v.line( y );
         const float *alphaLine = alpha.line( y );
         for ( int x = 0; x < w; ++x )
         {
@@ -196,8 +198,8 @@ static void zilchAlpha( plane &u, plane &v, const plane &alpha )
 {
     if ( alpha.valid() )
     {
-        plane_buffer uB = u;
-        plane_buffer vB = v;
+        plane_buffer       uB   = u;
+        plane_buffer       vB   = v;
         const_plane_buffer alpB = alpha;
         threading::get().dispatch(
             std::bind(
@@ -216,15 +218,15 @@ static void zilchAlpha( plane &u, plane &v, const plane &alpha )
 
 static void ahtvl1_edgeWeight_thread(
     size_t,
-    int s,
-    int e,
-    plane_buffer &ew,
+    int                       s,
+    int                       e,
+    plane_buffer &            ew,
     const const_plane_buffer &eb,
-    float ePower,
-    float eWeight,
-    int border )
+    float                     ePower,
+    float                     eWeight,
+    int                       border )
 {
-    int w = eb.width();
+    int w    = eb.width();
     int exm1 = w - border - 1;
 
     for ( int y = s; y < e; ++y )
@@ -236,7 +238,7 @@ static void ahtvl1_edgeWeight_thread(
                 ewLine[x] = 1.F;
             continue;
         }
-        const float *ebLine = eb.line( y );
+        const float *ebLine   = eb.line( y );
         const float *ebm1Line = eb.line( y - 1 );
         const float *ebp1Line = eb.line( y + 1 );
 
@@ -245,12 +247,12 @@ static void ahtvl1_edgeWeight_thread(
 
         for ( int x = border; x <= exm1; ++x )
         {
-            float emx = ebLine[x - 1];
-            float epx = ebLine[x + 1];
-            float emy = ebm1Line[x];
-            float epy = ebp1Line[x];
-            float gxv = ( epx - emx ) * 0.5F;
-            float gyv = ( epy - emy ) * 0.5F;
+            float emx  = ebLine[x - 1];
+            float epx  = ebLine[x + 1];
+            float emy  = ebm1Line[x];
+            float epy  = ebp1Line[x];
+            float gxv  = ( epx - emx ) * 0.5F;
+            float gyv  = ( epy - emy ) * 0.5F;
             float norm = sqrtf( gxv * gxv + gyv * gyv );
             // eWeight negated in call, so we can just scale by it here
             ewLine[x] = expf( eWeight * powf( norm, ePower ) );
@@ -265,29 +267,29 @@ static void ahtvl1_edgeWeight_thread(
 
 static void ahtvl1_edgeWeight_alpha_thread(
     size_t,
-    int s,
-    int e,
-    plane_buffer &ew,
+    int                       s,
+    int                       e,
+    plane_buffer &            ew,
     const const_plane_buffer &alpha,
     const const_plane_buffer &eb,
-    float ePower,
-    float eWeight,
-    int border )
+    float                     ePower,
+    float                     eWeight,
+    int                       border )
 {
-    int w = eb.width();
+    int w    = eb.width();
     int exm1 = w - border - 1;
 
     for ( int y = s; y < e; ++y )
     {
-        const float *aLine = alpha.line( y );
-        float *ewLine = ew.line( y );
+        const float *aLine  = alpha.line( y );
+        float *      ewLine = ew.line( y );
         if ( y < ( ew.y1() + border ) || y > ( eb.y2() - border ) )
         {
             for ( int x = 0; x < w; ++x )
                 ewLine[x] = aLine[x];
             continue;
         }
-        const float *ebLine = eb.line( y );
+        const float *ebLine   = eb.line( y );
         const float *ebm1Line = eb.line( y - 1 );
         const float *ebp1Line = eb.line( y + 1 );
 
@@ -302,12 +304,12 @@ static void ahtvl1_edgeWeight_alpha_thread(
                 continue;
             }
 
-            float emx = ebLine[x - 1];
-            float epx = ebLine[x + 1];
-            float emy = ebm1Line[x];
-            float epy = ebp1Line[x];
-            float gxv = ( epx - emx ) * 0.5F;
-            float gyv = ( epy - emy ) * 0.5F;
+            float emx  = ebLine[x - 1];
+            float epx  = ebLine[x + 1];
+            float emy  = ebm1Line[x];
+            float epy  = ebp1Line[x];
+            float gxv  = ( epx - emx ) * 0.5F;
+            float gyv  = ( epy - emy ) * 0.5F;
             float norm = sqrtf( gxv * gxv + gyv * gyv );
             // eWeight negated in call, so we can just scale by it here
             ewLine[x] = expf( eWeight * powf( norm, ePower ) );
@@ -319,16 +321,16 @@ static void ahtvl1_edgeWeight_alpha_thread(
 }
 
 static plane ahtvl1_edgeWeight(
-    const plane &curA,
-    const plane &alpha,
+    const plane &             curA,
+    const plane &             alpha,
     const std::vector<float> &edgeKern,
-    float edgePower,
-    float edgeAlpha,
-    int edgeBorder )
+    float                     edgePower,
+    float                     edgeAlpha,
+    int                       edgeBorder )
 {
-    plane ret( curA.x1(), curA.y1(), curA.x2(), curA.y2() );
-    plane ba = separable_convolve( curA, edgeKern );
-    plane_buffer eb = ret;
+    plane              ret( curA.x1(), curA.y1(), curA.x2(), curA.y2() );
+    plane              ba  = separable_convolve( curA, edgeKern );
+    plane_buffer       eb  = ret;
     const_plane_buffer bab = ba;
 
     if ( alpha.valid() )
@@ -372,21 +374,21 @@ static plane ahtvl1_edgeWeight(
 
 static void peakThread(
     size_t,
-    int s,
-    int e,
-    plane_buffer &u,
+    int                       s,
+    int                       e,
+    plane_buffer &            u,
     const const_plane_buffer &origu,
-    int r )
+    int                       r )
 {
-    int w = u.width();
-    int ew = w - r;
+    int w        = u.width();
+    int ew       = w - r;
     int numSamps = 2 * r + 1;
     numSamps *= numSamps;
-    float norm = 1.F / static_cast<float>( numSamps );
-    int halfIdx = numSamps / 2;
+    float norm    = 1.F / static_cast<float>( numSamps );
+    int   halfIdx = numSamps / 2;
     for ( int hy = s; hy < e; ++hy )
     {
-        float *uLine = u.line( hy );
+        float *      uLine    = u.line( hy );
         const float *origLine = origu.line( hy );
         if ( hy < ( u.y1() + r ) || hy > ( u.y2() - r ) )
         {
@@ -398,24 +400,24 @@ static void peakThread(
             uLine[hx] = origLine[hx];
         for ( int hx = r; hx < ew; ++hx )
         {
-            int maxIdx = 0, curIdx = 0;
-            float maxV = 0.F;
+            int   maxIdx = 0, curIdx = 0;
+            float maxV     = 0.F;
             float prevMaxV = 0.F;
-            float uV = origLine[hx];
-            float sumMU = 0.F;
+            float uV       = origLine[hx];
+            float sumMU    = 0.F;
             for ( int y = -r; y <= r; ++y )
             {
-                int sy = hy + y;
+                int          sy       = hy + y;
                 const float *filtLine = origu.line( sy );
                 for ( int x = -r; x <= r; ++x )
                 {
-                    float v = filtLine[hx + x];
+                    float v  = filtLine[hx + x];
                     float av = fabsf( v );
                     if ( av > maxV )
                     {
                         prevMaxV = maxV;
-                        maxV = av;
-                        maxIdx = curIdx;
+                        maxV     = av;
+                        maxIdx   = curIdx;
                     }
                     else if ( av > prevMaxV )
                         prevMaxV = av;
@@ -454,9 +456,9 @@ removePeaks( plane &u, plane &v, const plane &origU, const plane &origV, int dia
 static void removePeaks( plane &u, plane &v, int diam )
 {
     {
-        plane u0 = u.copy();
+        plane              u0  = u.copy();
         const_plane_buffer mub = u0;
-        plane_buffer ub = u;
+        plane_buffer       ub  = u;
         threading::get().dispatch(
             std::bind(
                 peakThread,
@@ -469,9 +471,9 @@ static void removePeaks( plane &u, plane &v, int diam )
             u );
     }
 
-    plane v0 = v.copy();
+    plane              v0  = v.copy();
     const_plane_buffer mvb = v0;
-    plane_buffer vb = v;
+    plane_buffer       vb  = v;
     threading::get().dispatch(
         std::bind(
             peakThread,
@@ -488,23 +490,23 @@ static void removePeaks( plane &u, plane &v, int diam )
 
 static void ahtvl1_T_thread(
     size_t,
-    int s,
-    int e,
-    plane_buffer &t,
+    int                       s,
+    int                       e,
+    plane_buffer &            t,
     const const_plane_buffer &b,
     const const_plane_buffer &a,
-    plane_buffer &u0,
-    plane_buffer &v0,
+    plane_buffer &            u0,
+    plane_buffer &            v0,
     const const_plane_buffer &u,
     const const_plane_buffer &v )
 {
-    int w = t.width();
+    int   w    = t.width();
     float offX = static_cast<float>( b.x1() );
     for ( int y = s; y < e; ++y )
     {
-        float *__restrict__ tLine = t.line( y );
-        float *__restrict__ u0Line = u0.line( y );
-        float *__restrict__ v0Line = v0.line( y );
+        float *__restrict__ tLine       = t.line( y );
+        float *__restrict__ u0Line      = u0.line( y );
+        float *__restrict__ v0Line      = v0.line( y );
         const float *__restrict__ uLine = u.line( y );
         const float *__restrict__ vLine = v.line( y );
         const float *__restrict__ aLine = a.line( y );
@@ -516,8 +518,8 @@ static void ahtvl1_T_thread(
         {
             float warpX = uLine[x];
             float warpY = vLine[x];
-            u0Line[x] = warpX;
-            v0Line[x] = warpY;
+            u0Line[x]   = warpX;
+            v0Line[x]   = warpY;
 
             warpX += curX;
             warpY += curY;
@@ -531,38 +533,38 @@ static void ahtvl1_T_thread(
 
 static void ahtvl1_T_alpha_thread(
     size_t,
-    int s,
-    int e,
-    plane_buffer &t,
+    int                       s,
+    int                       e,
+    plane_buffer &            t,
     const const_plane_buffer &b,
     const const_plane_buffer &a,
     const const_plane_buffer &alpha,
-    plane_buffer &u0,
-    plane_buffer &v0,
+    plane_buffer &            u0,
+    plane_buffer &            v0,
     const const_plane_buffer &u,
     const const_plane_buffer &v )
 {
-    int w = t.width();
+    int   w    = t.width();
     float offX = static_cast<float>( b.x1() );
     for ( int y = s; y < e; ++y )
     {
-        float *__restrict__ tLine = t.line( y );
-        float *__restrict__ u0Line = u0.line( y );
-        float *__restrict__ v0Line = v0.line( y );
-        const float *__restrict__ uLine = u.line( y );
-        const float *__restrict__ vLine = v.line( y );
-        const float *__restrict__ aLine = a.line( y );
+        float *__restrict__ tLine         = t.line( y );
+        float *__restrict__ u0Line        = u0.line( y );
+        float *__restrict__ v0Line        = v0.line( y );
+        const float *__restrict__ uLine   = u.line( y );
+        const float *__restrict__ vLine   = v.line( y );
+        const float *__restrict__ aLine   = a.line( y );
         const float *__restrict__ alpLine = alpha.line( y );
 
         float curY = static_cast<float>( y );
         float curX = offX;
         for ( int x = 0; x < w; ++x, curX += 1.F )
         {
-            float out = 0.F;
+            float out   = 0.F;
             float warpX = uLine[x];
             float warpY = vLine[x];
-            u0Line[x] = warpX;
-            v0Line[x] = warpY;
+            u0Line[x]   = warpX;
+            v0Line[x]   = warpY;
 
             if ( alpLine[x] <= 0.F )
             {
@@ -585,22 +587,22 @@ static void ahtvl1_T_alpha_thread(
 }
 
 static void ahtvl1_T(
-    plane &t,
+    plane &      t,
     const plane &curB,
     const plane &curA,
     const plane &curAlpha,
-    plane &u0,
-    plane &v0,
+    plane &      u0,
+    plane &      v0,
     const plane &u,
     const plane &v )
 {
-    plane_buffer tb = t;
-    const_plane_buffer bb = curB;
-    const_plane_buffer ab = curA;
-    const_plane_buffer ub = u;
-    const_plane_buffer vb = v;
-    plane_buffer u0b = u0;
-    plane_buffer v0b = v0;
+    plane_buffer       tb  = t;
+    const_plane_buffer bb  = curB;
+    const_plane_buffer ab  = curA;
+    const_plane_buffer ub  = u;
+    const_plane_buffer vb  = v;
+    plane_buffer       u0b = u0;
+    plane_buffer       v0b = v0;
 
     if ( curAlpha.valid() )
     {
@@ -647,20 +649,20 @@ static void ahtvl1_T(
 
 static void ahtvl1_gradAve_thread(
     size_t,
-    int s,
-    int e,
-    plane_buffer &gx,
+    int                       s,
+    int                       e,
+    plane_buffer &            gx,
     const const_plane_buffer &bx,
     const const_plane_buffer &ax,
     const const_plane_buffer &u,
     const const_plane_buffer &v )
 {
-    int w = gx.width();
+    int   w    = gx.width();
     float offX = static_cast<float>( gx.x1() );
 
     for ( int y = s; y < e; ++y )
     {
-        float *__restrict__ gxLine = gx.line( y );
+        float *__restrict__ gxLine      = gx.line( y );
         const float *__restrict__ uLine = u.line( y );
         const float *__restrict__ vLine = v.line( y );
         const float *__restrict__ aLine = ax.line( y );
@@ -682,17 +684,17 @@ static void ahtvl1_gradAve_thread(
 }
 
 static void ahtvl1_gradAve(
-    plane &gxAve,
+    plane &      gxAve,
     const plane &bx,
     const plane &ax,
     const plane &u,
     const plane &v )
 {
-    plane_buffer gxb = gxAve;
-    const_plane_buffer bb = bx;
-    const_plane_buffer ab = ax;
-    const_plane_buffer ub = u;
-    const_plane_buffer vb = v;
+    plane_buffer       gxb = gxAve;
+    const_plane_buffer bb  = bx;
+    const_plane_buffer ab  = ax;
+    const_plane_buffer ub  = u;
+    const_plane_buffer vb  = v;
 
     threading::get().dispatch(
         std::bind(
@@ -713,10 +715,10 @@ static void ahtvl1_gradAve(
 
 static void ahtvl1_updateU_thread(
     size_t,
-    int s,
-    int e,
-    plane_buffer &u,
-    plane_buffer &v,
+    int                       s,
+    int                       e,
+    plane_buffer &            u,
+    plane_buffer &            v,
     const const_plane_buffer &puu,
     const const_plane_buffer &puv,
     const const_plane_buffer &pvu,
@@ -726,16 +728,16 @@ static void ahtvl1_updateU_thread(
     const const_plane_buffer &t,
     const const_plane_buffer &gx,
     const const_plane_buffer &gy,
-    float lamTheta,
-    float theta )
+    float                     lamTheta,
+    float                     theta )
 {
     int w = u.width();
 
     for ( int y = s; y < e; ++y )
     {
-        float *__restrict__ uLine = u.line( y );
-        float *__restrict__ vLine = v.line( y );
-        const float *__restrict__ tLine = t.line( y );
+        float *__restrict__ uLine        = u.line( y );
+        float *__restrict__ vLine        = v.line( y );
+        const float *__restrict__ tLine  = t.line( y );
         const float *__restrict__ gxLine = gx.line( y );
         const float *__restrict__ gyLine = gy.line( y );
         const float *__restrict__ u0Line = u0.line( y );
@@ -749,7 +751,7 @@ static void ahtvl1_updateU_thread(
         {
             for ( int x = 0; x < w; ++x )
             {
-                float rho = tLine[x];
+                float rho   = tLine[x];
                 float gXAve = gxLine[x];
                 float gYAve = gyLine[x];
                 float initU = uLine[x];
@@ -796,11 +798,11 @@ static void ahtvl1_updateU_thread(
         const float *__restrict__ pvvm1L = pvv.line( y - 1 );
 
 #if defined( __SSSE3__ )
-        int sseChunks = ( w + 3 ) / 4;
-        sseChunks = sseChunks * 4;
+        int sseChunks          = ( w + 3 ) / 4;
+        sseChunks              = sseChunks * 4;
         const __m128 lamThetaV = _mm_set1_ps( lamTheta );
-        const __m128 thetaV = _mm_set1_ps( theta );
-        const __m128 negZeroV = _mm_set1_ps( -0.F );
+        const __m128 thetaV    = _mm_set1_ps( theta );
+        const __m128 negZeroV  = _mm_set1_ps( -0.F );
 
         __m128i puuPrev =
             _mm_set1_epi32( *( reinterpret_cast<const int *>( puuLine ) ) );
@@ -808,17 +810,17 @@ static void ahtvl1_updateU_thread(
             _mm_set1_epi32( *( reinterpret_cast<const int *>( pvuLine ) ) );
         for ( int x = 0; x < sseChunks; x += 4 )
         {
-            __m128 rho = _mm_load_ps( tLine + x );
-            __m128 u_ = _mm_load_ps( uLine + x );
-            __m128 u0v = _mm_load_ps( u0Line + x );
+            __m128 rho   = _mm_load_ps( tLine + x );
+            __m128 u_    = _mm_load_ps( uLine + x );
+            __m128 u0v   = _mm_load_ps( u0Line + x );
             __m128 gXAve = _mm_load_ps( gxLine + x );
-            __m128 v_ = _mm_load_ps( vLine + x );
-            __m128 v0v = _mm_load_ps( v0Line + x );
+            __m128 v_    = _mm_load_ps( vLine + x );
+            __m128 v0v   = _mm_load_ps( v0Line + x );
             __m128 gYAve = _mm_load_ps( gyLine + x );
 
             __m128i tmppuu = _mm_load_si128(
                 reinterpret_cast<const __m128i *>( puuLine + x ) );
-            __m128 puv_v = _mm_load_ps( puvLine + x );
+            __m128 puv_v   = _mm_load_ps( puvLine + x );
             __m128 puvm1_v = _mm_load_ps( puvm1L + x );
 
             rho = _mm_add_ps( rho, _mm_mul_ps( gXAve, _mm_sub_ps( u_, u0v ) ) );
@@ -834,7 +836,7 @@ static void ahtvl1_updateU_thread(
             __m128 rhoMagSq = _mm_cmpgt_ps( magSq, _mm_setzero_ps() );
             rhoMagSq = _mm_andnot_ps( _mm_or_ps( rhoLT, rhoGT ), rhoMagSq );
 
-            __m128 gxScale = _mm_mul_ps( gXAve, lamThetaV );
+            __m128 gxScale    = _mm_mul_ps( gXAve, lamThetaV );
             __m128 gxScaleRho = _mm_min_ps(
                 thetaV, _mm_mul_ps( rho, _mm_div_ps( gXAve, magSq ) ) );
 
@@ -852,13 +854,13 @@ static void ahtvl1_updateU_thread(
 
             __m128i tmppvu = _mm_load_si128(
                 reinterpret_cast<const __m128i *>( pvuLine + x ) );
-            __m128 pvv_v = _mm_load_ps( pvvLine + x );
+            __m128 pvv_v   = _mm_load_ps( pvvLine + x );
             __m128 pvvm1_v = _mm_load_ps( pvvm1L + x );
 
             u_ = _mm_add_ps( u_, _mm_mul_ps( thetaV, _mm_add_ps( p0, p1 ) ) );
             _mm_store_ps( uLine + x, u_ );
 
-            __m128 gyScale = _mm_mul_ps( gYAve, lamThetaV );
+            __m128 gyScale    = _mm_mul_ps( gYAve, lamThetaV );
             __m128 gyScaleRho = _mm_min_ps(
                 thetaV, _mm_mul_ps( rho, _mm_div_ps( gYAve, magSq ) ) );
 
@@ -880,7 +882,7 @@ static void ahtvl1_updateU_thread(
 #else
         for ( int x = 0; x < w; ++x )
         {
-            float rho = tLine[x];
+            float rho   = tLine[x];
             float gXAve = gxLine[x];
             float gYAve = gyLine[x];
             float initU = uLine[x];
@@ -927,8 +929,8 @@ static void ahtvl1_updateU_thread(
 }
 
 static void ahtvl1_updateU(
-    plane &u,
-    plane &v,
+    plane &      u,
+    plane &      v,
     const plane &puu,
     const plane &puv,
     const plane &pvu,
@@ -938,20 +940,20 @@ static void ahtvl1_updateU(
     const plane &t,
     const plane &gxAve,
     const plane &gyAve,
-    float lamTheta,
-    float theta )
+    float        lamTheta,
+    float        theta )
 {
-    plane_buffer ub = u;
-    plane_buffer vb = v;
+    plane_buffer       ub   = u;
+    plane_buffer       vb   = v;
     const_plane_buffer puub = puu;
     const_plane_buffer puvb = puv;
     const_plane_buffer pvub = pvu;
     const_plane_buffer pvvb = pvv;
-    const_plane_buffer u0b = u0;
-    const_plane_buffer v0b = v0;
-    const_plane_buffer tb = t;
-    const_plane_buffer gxb = gxAve;
-    const_plane_buffer gyb = gyAve;
+    const_plane_buffer u0b  = u0;
+    const_plane_buffer v0b  = v0;
+    const_plane_buffer tb   = t;
+    const_plane_buffer gxb  = gxAve;
+    const_plane_buffer gyb  = gyAve;
 
     threading::get().dispatch(
         std::bind(
@@ -987,7 +989,7 @@ GK_FORCE_INLINE __m128 rsqrtSafe( __m128 x )
 
     // avoid infinity
     __m128 notZero = _mm_cmpgt_ps( x, zeroV );
-    y = _mm_and_ps( notZero, y );
+    y              = _mm_and_ps( notZero, y );
 #    define SUPER_FAST 1
 #    if SUPER_FAST
     return y;
@@ -1020,13 +1022,13 @@ GK_FORCE_INLINE __m128 rsqrtSafe( __m128 x )
 
 static void ahtvl1_updatePnoedge_thread(
     size_t,
-    int s,
-    int e,
-    plane_buffer &pu,
-    plane_buffer &pv,
+    int                       s,
+    int                       e,
+    plane_buffer &            pu,
+    plane_buffer &            pv,
     const const_plane_buffer &u,
-    float tau,
-    float epsilon )
+    float                     tau,
+    float                     epsilon )
 {
     int w = pu.width();
 #if defined( __SSSE3__ )
@@ -1036,8 +1038,8 @@ static void ahtvl1_updatePnoedge_thread(
 #endif
     for ( int y = s; y < e; ++y )
     {
-        float *__restrict__ puLine = pu.line( y );
-        float *__restrict__ pvLine = pv.line( y );
+        float *__restrict__ puLine      = pu.line( y );
+        float *__restrict__ pvLine      = pv.line( y );
         const float *__restrict__ uLine = u.line( y );
 
         if ( y < pu.y2() )
@@ -1058,11 +1060,11 @@ static void ahtvl1_updatePnoedge_thread(
 
                 __m128 outU = _mm_load_ps( puLine + x );
                 __m128 outV = _mm_load_ps( pvLine + x );
-                __m128 uY = _mm_load_ps( up1Line + x );
+                __m128 uY   = _mm_load_ps( up1Line + x );
 
-                __m128i rot = _mm_alignr_epi8( nextUx, curUx, 4 );
-                __m128 uXp1 = _mm_castsi128_ps( rot );
-                curUx = nextUx;
+                __m128i rot  = _mm_alignr_epi8( nextUx, curUx, 4 );
+                __m128  uXp1 = _mm_castsi128_ps( rot );
+                curUx        = nextUx;
 
                 uY = _mm_sub_ps( uY, uX );
                 uX = _mm_sub_ps( uXp1, uX );
@@ -1078,7 +1080,7 @@ static void ahtvl1_updatePnoedge_thread(
 
                 __m128 scale = rsqrtSafe( _mm_add_ps(
                     _mm_mul_ps( outU, outU ), _mm_mul_ps( outV, outV ) ) );
-                scale = _mm_min_ps( scale, oneV );
+                scale        = _mm_min_ps( scale, oneV );
                 _mm_store_ps( puLine + x, _mm_mul_ps( scale, outU ) );
                 _mm_store_ps( pvLine + x, _mm_mul_ps( scale, outV ) );
             }
@@ -1089,8 +1091,8 @@ static void ahtvl1_updatePnoedge_thread(
             {
                 float outU = puLine[x];
                 float outV = pvLine[x];
-                float uX = uLine[x];
-                float uY = up1Line[x] - uX;
+                float uX   = uLine[x];
+                float uY   = up1Line[x] - uX;
                 if ( x < ( w - 1 ) )
                     uX = uLine[x + 1] - uX;
                 else
@@ -1100,10 +1102,10 @@ static void ahtvl1_updatePnoedge_thread(
                 outV = outV + tau * ( uY - epsilon * outV );
 
                 float scale = mymaxf( 1.F, sqrtf( outU * outU + outV * outV ) );
-                outU = outU / scale;
-                outV = outV / scale;
-                puLine[x] = outU;
-                pvLine[x] = outV;
+                outU        = outU / scale;
+                outV        = outV / scale;
+                puLine[x]   = outU;
+                pvLine[x]   = outV;
             }
         }
         else
@@ -1112,8 +1114,8 @@ static void ahtvl1_updatePnoedge_thread(
             {
                 float outU = puLine[x];
                 float outV = pvLine[x];
-                float uX = uLine[x];
-                float uY = 0.F;
+                float uX   = uLine[x];
+                float uY   = 0.F;
                 if ( x < ( w - 1 ) )
                     uX = uLine[x + 1] - uX;
                 else
@@ -1124,8 +1126,8 @@ static void ahtvl1_updatePnoedge_thread(
 
                 float scale =
                     std::max( 1.F, sqrtf( outU * outU + outV * outV ) );
-                outU = outU / scale;
-                outV = outV / scale;
+                outU      = outU / scale;
+                outV      = outV / scale;
                 puLine[x] = outU;
                 pvLine[x] = outV;
             }
@@ -1135,22 +1137,22 @@ static void ahtvl1_updatePnoedge_thread(
 
 static void ahtvl1_updatePedge_thread(
     size_t,
-    int s,
-    int e,
-    plane_buffer &pu,
-    plane_buffer &pv,
+    int                       s,
+    int                       e,
+    plane_buffer &            pu,
+    plane_buffer &            pv,
     const const_plane_buffer &u,
     const const_plane_buffer &edgeW,
-    float tau,
-    float epsilon )
+    float                     tau,
+    float                     epsilon )
 {
     int w = pu.width();
     for ( int y = s; y < e; ++y )
     {
-        float *puLine = pu.line( y );
-        float *pvLine = pv.line( y );
-        const float *uLine = u.line( y );
-        const float *eLine = edgeW.line( y );
+        float *      puLine = pu.line( y );
+        float *      pvLine = pv.line( y );
+        const float *uLine  = u.line( y );
+        const float *eLine  = edgeW.line( y );
 
         if ( y < pu.y2() )
         {
@@ -1159,9 +1161,9 @@ static void ahtvl1_updatePedge_thread(
             {
                 float outU = puLine[x];
                 float outV = pvLine[x];
-                float eW = eLine[x];
-                float uX = uLine[x];
-                float uY = up1Line[x] - uX;
+                float eW   = eLine[x];
+                float uX   = uLine[x];
+                float uY   = up1Line[x] - uX;
                 if ( x < ( w - 1 ) )
                     uX = uLine[x + 1] - uX;
                 else
@@ -1172,8 +1174,8 @@ static void ahtvl1_updatePedge_thread(
 
                 float scale =
                     eW / mymaxf( 1.F, sqrtf( outU * outU + outV * outV ) );
-                outU = outU * scale;
-                outV = outV * scale;
+                outU      = outU * scale;
+                outV      = outV * scale;
                 puLine[x] = outU;
                 pvLine[x] = outV;
             }
@@ -1184,9 +1186,9 @@ static void ahtvl1_updatePedge_thread(
             {
                 float outU = puLine[x];
                 float outV = pvLine[x];
-                float eW = eLine[x];
-                float uX = uLine[x];
-                float uY = 0.F;
+                float eW   = eLine[x];
+                float uX   = uLine[x];
+                float uY   = 0.F;
                 if ( x < ( w - 1 ) )
                     uX = uLine[x + 1] - uX;
                 else
@@ -1197,8 +1199,8 @@ static void ahtvl1_updatePedge_thread(
 
                 float scale =
                     eW / mymaxf( 1.F, sqrtf( outU * outU + outV * outV ) );
-                outU = outU * scale;
-                outV = outV * scale;
+                outU      = outU * scale;
+                outV      = outV * scale;
                 puLine[x] = outU;
                 pvLine[x] = outV;
             }
@@ -1207,17 +1209,17 @@ static void ahtvl1_updatePedge_thread(
 }
 
 static void ahtvl1_updateP(
-    plane &puu,
-    plane &puv,
+    plane &      puu,
+    plane &      puv,
     const plane &u,
     const plane &edgeW,
-    float tau,
-    float epsilon )
+    float        tau,
+    float        epsilon )
 {
-    plane_buffer puub = puu;
-    plane_buffer puvb = puv;
-    const_plane_buffer ub = u;
-    const_plane_buffer eb = edgeW;
+    plane_buffer       puub = puu;
+    plane_buffer       puvb = puv;
+    const_plane_buffer ub   = u;
+    const_plane_buffer eb   = edgeW;
 
     if ( edgeW.valid() )
     {
@@ -1259,28 +1261,28 @@ static std::string kPyramidFilter = "bilinear";
 ////////////////////////////////////////
 
 vector_field runAHTVL1(
-    const plane &a,
-    const plane &b,
-    const plane &alpha,
-    const plane &alphaNext,
+    const plane &       a,
+    const plane &       b,
+    const plane &       alpha,
+    const plane &       alphaNext,
     const vector_field &initUV,
-    float lambda,
-    float theta,
-    float epsilon,
-    float edgePower,
-    float edgeAlpha,
-    int edgeBorder,
-    int tvl1Iters,
-    int warpIters,
-    bool adaptiveIters,
-    float eta )
+    float               lambda,
+    float               theta,
+    float               epsilon,
+    float               edgePower,
+    float               edgeAlpha,
+    int                 edgeBorder,
+    int                 tvl1Iters,
+    int                 warpIters,
+    bool                adaptiveIters,
+    float               eta )
 {
     std::vector<plane> hierA = make_pyramid( a, kPyramidFilter, eta, 0, 16 );
     std::vector<plane> hierB = make_pyramid( b, kPyramidFilter, eta, 0, 16 );
     std::vector<plane> hierAlpha, hierAlphaNext;
     if ( alpha.valid() && alphaNext.valid() )
     {
-        hierAlpha = make_pyramid( alpha, kPyramidFilter, eta, 0, 16 );
+        hierAlpha     = make_pyramid( alpha, kPyramidFilter, eta, 0, 16 );
         hierAlphaNext = make_pyramid( alphaNext, kPyramidFilter, eta, 0, 16 );
     }
 
@@ -1299,7 +1301,7 @@ vector_field runAHTVL1(
         edgeKern[2] = 7.F / 17.F;
         edgeKern[3] = 4.F / 17.F;
         edgeKern[4] = 1.F / 17.F;
-        edgeBorder = std::max( 1, edgeBorder );
+        edgeBorder  = std::max( 1, edgeBorder );
     }
     plane u, v;
     float lScale = 1.F + 1.F / static_cast<float>( hierA.size() );
@@ -1489,13 +1491,13 @@ vector_field runAHTVL1(
 
 static void pdtncc_gradAve_thread(
     size_t,
-    int s,
-    int e,
-    plane_buffer &gx,
+    int                       s,
+    int                       e,
+    plane_buffer &            gx,
     const const_plane_buffer &ax,
     const const_plane_buffer &bx )
 {
-    int w = gx.width();
+    int w   = gx.width();
     int wm1 = w - 1;
     for ( int y = s; y < e; ++y )
     {
@@ -1518,9 +1520,9 @@ static void pdtncc_gradAve_thread(
 
 static void pdtncc_gradAve( plane &gxAve, const plane &ax, const plane &bx )
 {
-    plane_buffer gxb = gxAve;
-    const_plane_buffer ab = ax;
-    const_plane_buffer bb = bx;
+    plane_buffer       gxb = gxAve;
+    const_plane_buffer ab  = ax;
+    const_plane_buffer bb  = bx;
 
     threading::get().dispatch(
         std::bind(
@@ -1539,32 +1541,32 @@ static void pdtncc_gradAve( plane &gxAve, const plane &ax, const plane &bx )
 
 static void pdtncc_dualUpdate_thread(
     size_t,
-    int s,
-    int e,
-    plane_buffer &p1,
-    plane_buffer &p2,
-    plane_buffer &p3,
-    plane_buffer &p4,
-    plane_buffer &p5,
-    plane_buffer &p6,
+    int                       s,
+    int                       e,
+    plane_buffer &            p1,
+    plane_buffer &            p2,
+    plane_buffer &            p3,
+    plane_buffer &            p4,
+    plane_buffer &            p5,
+    plane_buffer &            p6,
     const const_plane_buffer &u_,
     const const_plane_buffer &v_,
     const const_plane_buffer &w_,
-    float sigma )
+    float                     sigma )
 {
-    int w = p1.width();
+    int w   = p1.width();
     int wm1 = w - 1;
     for ( int y = s; y < e; ++y )
     {
-        float *p1L = p1.line( y );
-        float *p2L = p2.line( y );
-        float *p3L = p3.line( y );
-        float *p4L = p4.line( y );
-        float *p5L = p5.line( y );
-        float *p6L = p6.line( y );
-        const float *uL = u_.line( y );
-        const float *vL = v_.line( y );
-        const float *wL = w_.line( y );
+        float *      p1L = p1.line( y );
+        float *      p2L = p2.line( y );
+        float *      p3L = p3.line( y );
+        float *      p4L = p4.line( y );
+        float *      p5L = p5.line( y );
+        float *      p6L = p6.line( y );
+        const float *uL  = u_.line( y );
+        const float *vL  = v_.line( y );
+        const float *wL  = w_.line( y );
         const float *nuL = nullptr;
         const float *nvL = nullptr;
         const float *nwL = nullptr;
@@ -1635,34 +1637,34 @@ static void pdtncc_dualUpdate_thread(
 
 static void pdtncc_dualUpdateAlpha_thread(
     size_t,
-    int s,
-    int e,
-    plane_buffer &p1,
-    plane_buffer &p2,
-    plane_buffer &p3,
-    plane_buffer &p4,
-    plane_buffer &p5,
-    plane_buffer &p6,
+    int                       s,
+    int                       e,
+    plane_buffer &            p1,
+    plane_buffer &            p2,
+    plane_buffer &            p3,
+    plane_buffer &            p4,
+    plane_buffer &            p5,
+    plane_buffer &            p6,
     const const_plane_buffer &u_,
     const const_plane_buffer &v_,
     const const_plane_buffer &w_,
     const const_plane_buffer &alpha,
-    float sigma )
+    float                     sigma )
 {
-    int w = p1.width();
+    int w   = p1.width();
     int wm1 = w - 1;
     for ( int y = s; y < e; ++y )
     {
-        float *p1L = p1.line( y );
-        float *p2L = p2.line( y );
-        float *p3L = p3.line( y );
-        float *p4L = p4.line( y );
-        float *p5L = p5.line( y );
-        float *p6L = p6.line( y );
-        const float *uL = u_.line( y );
-        const float *vL = v_.line( y );
-        const float *wL = w_.line( y );
-        const float *aL = alpha.line( y );
+        float *      p1L = p1.line( y );
+        float *      p2L = p2.line( y );
+        float *      p3L = p3.line( y );
+        float *      p4L = p4.line( y );
+        float *      p5L = p5.line( y );
+        float *      p6L = p6.line( y );
+        const float *uL  = u_.line( y );
+        const float *vL  = v_.line( y );
+        const float *wL  = w_.line( y );
+        const float *aL  = alpha.line( y );
         const float *nuL = nullptr;
         const float *nvL = nullptr;
         const float *nwL = nullptr;
@@ -1677,12 +1679,12 @@ static void pdtncc_dualUpdateAlpha_thread(
         for ( int x = 0; x < w; ++x )
         {
             float curSig = aL[x] * sigma;
-            float p1v = p1L[x];
-            float p2v = p2L[x];
-            float p3v = p3L[x];
-            float p4v = p4L[x];
-            float p5v = p5L[x];
-            float p6v = p6L[x];
+            float p1v    = p1L[x];
+            float p2v    = p2L[x];
+            float p3v    = p3L[x];
+            float p4v    = p4L[x];
+            float p5v    = p5L[x];
+            float p6v    = p6L[x];
 
             float uX = uL[x];
             float uY = uX;
@@ -1733,27 +1735,27 @@ static void pdtncc_dualUpdateAlpha_thread(
 }
 
 static void pdtncc_dualUpdate(
-    plane &p0,
-    plane &p1,
-    plane &p2,
-    plane &p3,
-    plane &p4,
-    plane &p5,
+    plane &      p0,
+    plane &      p1,
+    plane &      p2,
+    plane &      p3,
+    plane &      p4,
+    plane &      p5,
     const plane &u,
     const plane &v,
     const plane &w,
     const plane &alpha,
-    float sigma )
+    float        sigma )
 {
-    plane_buffer p0b = p0;
-    plane_buffer p1b = p1;
-    plane_buffer p2b = p2;
-    plane_buffer p3b = p3;
-    plane_buffer p4b = p4;
-    plane_buffer p5b = p5;
-    const_plane_buffer ub = u;
-    const_plane_buffer vb = v;
-    const_plane_buffer wb = w;
+    plane_buffer       p0b = p0;
+    plane_buffer       p1b = p1;
+    plane_buffer       p2b = p2;
+    plane_buffer       p3b = p3;
+    plane_buffer       p4b = p4;
+    plane_buffer       p5b = p5;
+    const_plane_buffer ub  = u;
+    const_plane_buffer vb  = v;
+    const_plane_buffer wb  = w;
 
     if ( alpha.valid() )
     {
@@ -1806,14 +1808,14 @@ static void pdtncc_dualUpdate(
 
 static void pdtncc_primalRho2_thread(
     size_t,
-    int s,
-    int e,
-    plane_buffer &u_,
-    plane_buffer &u,
-    plane_buffer &v_,
-    plane_buffer &v,
-    plane_buffer &w_,
-    plane_buffer &w,
+    int                       s,
+    int                       e,
+    plane_buffer &            u_,
+    plane_buffer &            u,
+    plane_buffer &            v_,
+    plane_buffer &            v,
+    plane_buffer &            w_,
+    plane_buffer &            w,
     const const_plane_buffer &p0,
     const const_plane_buffer &p1,
     const const_plane_buffer &p2,
@@ -1825,32 +1827,32 @@ static void pdtncc_primalRho2_thread(
     const const_plane_buffer &v0,
     const const_plane_buffer &dX,
     const const_plane_buffer &dY,
-    float tau,
-    float lambda,
-    float gamv )
+    float                     tau,
+    float                     lambda,
+    float                     gamv )
 {
-    int wNS = u.width();
+    int         wNS = u.width();
     const float eps = 1e-9F;
 
     for ( int y = s; y < e; ++y )
     {
-        float *u_L = u_.line( y );
-        float *uL = u.line( y );
-        float *v_L = v_.line( y );
-        float *vL = v.line( y );
-        float *w_L = w_.line( y );
-        float *wL = w.line( y );
-        const float *p0L = p0.line( y );
-        const float *p1L = p1.line( y );
-        const float *p2L = p2.line( y );
-        const float *p3L = p3.line( y );
-        const float *p4L = p4.line( y );
-        const float *p5L = p5.line( y );
-        const float *dTL = dT.line( y );
-        const float *u0L = u0.line( y );
-        const float *v0L = v0.line( y );
-        const float *dXL = dX.line( y );
-        const float *dYL = dY.line( y );
+        float *      u_L  = u_.line( y );
+        float *      uL   = u.line( y );
+        float *      v_L  = v_.line( y );
+        float *      vL   = v.line( y );
+        float *      w_L  = w_.line( y );
+        float *      wL   = w.line( y );
+        const float *p0L  = p0.line( y );
+        const float *p1L  = p1.line( y );
+        const float *p2L  = p2.line( y );
+        const float *p3L  = p3.line( y );
+        const float *p4L  = p4.line( y );
+        const float *p5L  = p5.line( y );
+        const float *dTL  = dT.line( y );
+        const float *u0L  = u0.line( y );
+        const float *v0L  = v0.line( y );
+        const float *dXL  = dX.line( y );
+        const float *dYL  = dY.line( y );
         const float *pp1L = nullptr;
         const float *pp3L = nullptr;
         const float *pp5L = nullptr;
@@ -1864,9 +1866,9 @@ static void pdtncc_primalRho2_thread(
         for ( int x = 0; x < wNS; ++x )
         {
             float rho = dTL[x];
-            float uV = uL[x];
-            float vV = vL[x];
-            float wV = wL[x];
+            float uV  = uL[x];
+            float vV  = vL[x];
+            float wV  = wL[x];
             float u_v = uV;
             float v_v = vV;
             float w_v = wV;
@@ -1923,11 +1925,11 @@ static void pdtncc_primalRho2_thread(
                 wV -= rho * gamv / gradSqr;
             }
 
-            uL[x] = uV;
+            uL[x]  = uV;
             u_L[x] = 2.F * uV - u_v;
-            vL[x] = vV;
+            vL[x]  = vV;
             v_L[x] = 2.F * vV - v_v;
-            wL[x] = wV;
+            wL[x]  = wV;
             w_L[x] = 2.F * wV - w_v;
         }
     }
@@ -1937,14 +1939,14 @@ static void pdtncc_primalRho2_thread(
 
 static void pdtncc_primalRho2alpha_thread(
     size_t,
-    int s,
-    int e,
-    plane_buffer &u_,
-    plane_buffer &u,
-    plane_buffer &v_,
-    plane_buffer &v,
-    plane_buffer &w_,
-    plane_buffer &w,
+    int                       s,
+    int                       e,
+    plane_buffer &            u_,
+    plane_buffer &            u,
+    plane_buffer &            v_,
+    plane_buffer &            v,
+    plane_buffer &            w_,
+    plane_buffer &            w,
     const const_plane_buffer &p0,
     const const_plane_buffer &p1,
     const const_plane_buffer &p2,
@@ -1957,32 +1959,32 @@ static void pdtncc_primalRho2alpha_thread(
     const const_plane_buffer &dX,
     const const_plane_buffer &dY,
     const const_plane_buffer &alpha,
-    float tau,
-    float lambda,
-    float gamv )
+    float                     tau,
+    float                     lambda,
+    float                     gamv )
 {
     int wNS = u.width();
 
     for ( int y = s; y < e; ++y )
     {
-        float *u_L = u_.line( y );
-        float *uL = u.line( y );
-        float *v_L = v_.line( y );
-        float *vL = v.line( y );
-        float *w_L = w_.line( y );
-        float *wL = w.line( y );
-        const float *p0L = p0.line( y );
-        const float *p1L = p1.line( y );
-        const float *p2L = p2.line( y );
-        const float *p3L = p3.line( y );
-        const float *p4L = p4.line( y );
-        const float *p5L = p5.line( y );
-        const float *dTL = dT.line( y );
-        const float *u0L = u0.line( y );
-        const float *v0L = v0.line( y );
-        const float *dXL = dX.line( y );
-        const float *dYL = dY.line( y );
-        const float *aL = alpha.line( y );
+        float *      u_L  = u_.line( y );
+        float *      uL   = u.line( y );
+        float *      v_L  = v_.line( y );
+        float *      vL   = v.line( y );
+        float *      w_L  = w_.line( y );
+        float *      wL   = w.line( y );
+        const float *p0L  = p0.line( y );
+        const float *p1L  = p1.line( y );
+        const float *p2L  = p2.line( y );
+        const float *p3L  = p3.line( y );
+        const float *p4L  = p4.line( y );
+        const float *p5L  = p5.line( y );
+        const float *dTL  = dT.line( y );
+        const float *u0L  = u0.line( y );
+        const float *v0L  = v0.line( y );
+        const float *dXL  = dX.line( y );
+        const float *dYL  = dY.line( y );
+        const float *aL   = alpha.line( y );
         const float *pp1L = nullptr;
         const float *pp3L = nullptr;
         const float *pp5L = nullptr;
@@ -1999,9 +2001,9 @@ static void pdtncc_primalRho2alpha_thread(
         for ( int x = 0; x < wNS; ++x )
         {
             float rho = dTL[x];
-            float uV = uL[x];
-            float vV = vL[x];
-            float wV = wL[x];
+            float uV  = uL[x];
+            float vV  = vL[x];
+            float wV  = wL[x];
             float u_v = uV;
             float v_v = vV;
             float w_v = wV;
@@ -2065,23 +2067,23 @@ static void pdtncc_primalRho2alpha_thread(
                 wV -= rho * gamv / gradSqr;
             }
 
-            uL[x] = uV;
+            uL[x]  = uV;
             u_L[x] = 2.F * uV - u_v;
-            vL[x] = vV;
+            vL[x]  = vV;
             v_L[x] = 2.F * vV - v_v;
-            wL[x] = wV;
+            wL[x]  = wV;
             w_L[x] = 2.F * wV - w_v;
         }
     }
 }
 
 static void pdtncc_primalRho2(
-    plane &u_,
-    plane &u,
-    plane &v_,
-    plane &v,
-    plane &w_,
-    plane &w,
+    plane &      u_,
+    plane &      u,
+    plane &      v_,
+    plane &      v,
+    plane &      w_,
+    plane &      w,
     const plane &p0,
     const plane &p1,
     const plane &p2,
@@ -2094,16 +2096,16 @@ static void pdtncc_primalRho2(
     const plane &dX,
     const plane &dY,
     const plane &alpha,
-    float tau,
-    float lambda,
-    float gamv )
+    float        tau,
+    float        lambda,
+    float        gamv )
 {
-    plane_buffer u_b = u_;
-    plane_buffer ub = u;
-    plane_buffer v_b = v_;
-    plane_buffer vb = v;
-    plane_buffer w_b = w_;
-    plane_buffer wb = w;
+    plane_buffer       u_b = u_;
+    plane_buffer       ub  = u;
+    plane_buffer       v_b = v_;
+    plane_buffer       vb  = v;
+    plane_buffer       w_b = w_;
+    plane_buffer       wb  = w;
     const_plane_buffer p0b = p0;
     const_plane_buffer p1b = p1;
     const_plane_buffer p2b = p2;
@@ -2115,7 +2117,7 @@ static void pdtncc_primalRho2(
     const_plane_buffer v0b = v0;
     const_plane_buffer dXb = dX;
     const_plane_buffer dYb = dY;
-    const double eps = 1e-9;
+    const double       eps = 1e-9;
 
     gamv = static_cast<float>( sqrt( fmax(
         static_cast<double>( gamv ) * static_cast<double>( gamv ), eps ) ) );
@@ -2190,17 +2192,17 @@ static void pdtncc_primalRho2(
 ////////////////////////////////////////
 
 static vector_field runPD(
-    const plane &a,
-    const plane &b,
-    const plane &alpha,
-    const plane &alphaNext,
+    const plane &       a,
+    const plane &       b,
+    const plane &       alpha,
+    const plane &       alphaNext,
     const vector_field &initUV,
-    float lambda,
-    float gamv,
-    int innerIters,
-    int warpIters,
-    bool adaptiveIters,
-    float eta )
+    float               lambda,
+    float               gamv,
+    int                 innerIters,
+    int                 warpIters,
+    bool                adaptiveIters,
+    float               eta )
 {
     TODO(
         "Add ability to pass in initial u, v, and alpha channel to control diffusion" );
@@ -2216,7 +2218,7 @@ static vector_field runPD(
     std::vector<plane> hierAlpha, hierAlphaNext;
     if ( alpha.valid() && alphaNext.valid() )
     {
-        hierAlpha = make_pyramid( alpha, kPyramidFilter, eta, 0, 16 );
+        hierAlpha     = make_pyramid( alpha, kPyramidFilter, eta, 0, 16 );
         hierAlphaNext = make_pyramid( alphaNext, kPyramidFilter, eta, 0, 16 );
     }
 
@@ -2226,8 +2228,8 @@ static vector_field runPD(
                   << std::endl;
     }
 
-    constexpr float tau = float( 0.5 * M_SQRT1_2 );
-    float sigma = tau; // 1.F / L
+    constexpr float tau   = float( 0.5 * M_SQRT1_2 );
+    float           sigma = tau; // 1.F / L
 
     plane u, v;
     plane lumW;
@@ -2274,8 +2276,8 @@ static vector_field runPD(
                 p[i] = resize_bilinear( p[i], curW, curH );
         }
 
-        plane u_ = u.copy();
-        plane v_ = v.copy();
+        plane u_    = u.copy();
+        plane v_    = v.copy();
         plane lumw_ = lumW.copy();
 
         plane dX, dY;
@@ -2319,7 +2321,7 @@ static vector_field runPD(
             plane v0 = v.copy();
 
             vector_field curVecs = vector_field::create( u, v, false );
-            plane dT = warp_bilinear( curB, curVecs );
+            plane        dT      = warp_bilinear( curB, curVecs );
             if ( splitGrads )
             {
                 plane bX, bY;
@@ -2411,25 +2413,24 @@ static vector_field runZilch( const vector_field &a, const plane &alpha )
 
 namespace image
 {
-
 ////////////////////////////////////////
 
 vector_field oflow_ahtvl1(
-    const plane &a,
-    const plane &b,
-    const plane &alpha,
-    const plane &alphaNext,
+    const plane &       a,
+    const plane &       b,
+    const plane &       alpha,
+    const plane &       alphaNext,
     const vector_field &initUV,
-    float lambda,
-    float theta,
-    float epsilon,
-    float edgePower,
-    float edgeAlpha,
-    int edgeBorder,
-    int tvl1Iters,
-    int warpIters,
-    bool adaptiveIters,
-    float eta )
+    float               lambda,
+    float               theta,
+    float               epsilon,
+    float               edgePower,
+    float               edgeAlpha,
+    int                 edgeBorder,
+    int                 tvl1Iters,
+    int                 warpIters,
+    bool                adaptiveIters,
+    float               eta )
 {
     precondition(
         a.dims() == b.dims(),
@@ -2437,7 +2438,7 @@ vector_field oflow_ahtvl1(
         a.dims(),
         b.dims() );
     engine::dimensions d = a.dims();
-    d.planes = 2;
+    d.planes             = 2;
 
     return vector_field(
         false,
@@ -2463,17 +2464,17 @@ vector_field oflow_ahtvl1(
 ////////////////////////////////////////
 
 vector_field oflow_primaldual(
-    const plane &a,
-    const plane &b,
-    const plane &alpha,
-    const plane &alphaNext,
+    const plane &       a,
+    const plane &       b,
+    const plane &       alpha,
+    const plane &       alphaNext,
     const vector_field &initUV,
-    float lambda,
-    float sigma,
-    int innerIters,
-    int warpIters,
-    bool adaptiveIters,
-    float eta )
+    float               lambda,
+    float               sigma,
+    int                 innerIters,
+    int                 warpIters,
+    bool                adaptiveIters,
+    float               eta )
 {
     precondition(
         a.dims() == b.dims(),
@@ -2481,7 +2482,7 @@ vector_field oflow_primaldual(
         a.dims(),
         b.dims() );
     engine::dimensions d = a.dims();
-    d.planes = 2;
+    d.planes             = 2;
 
     return vector_field(
         false,

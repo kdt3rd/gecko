@@ -5,16 +5,18 @@
 
 #include "scanline.h"
 
-namespace engine { class registry; }
+namespace engine
+{
+class registry;
+}
 
 ////////////////////////////////////////
 
 namespace image
 {
-
 ///
 /// See plane_ops.h for the ability to call these in normal code
-/// 
+///
 /// declares the implementation following operators:
 ///
 /// void assign_value( scanline &dest, float v );
@@ -45,7 +47,7 @@ namespace image
 /// copysign( src, v )
 /// void plane_copysign( scanline &dest, const scanline &src, const scanline &v )
 ///
-/// src * src 
+/// src * src
 /// void plane_square( scanline &dest, const scanline &src )
 ///
 /// sqrt( src )
@@ -106,6 +108,3 @@ namespace image
 void add_plane_math( engine::registry &r );
 
 } // namespace image
-
-
-

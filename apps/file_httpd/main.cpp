@@ -6,15 +6,13 @@
 #include <base/posix_file_system.h>
 #include <base/scope_guard.h>
 #include <base/uri.h>
+#include <limits.h>
+#include <stdlib.h>
 #include <web/server.h>
 #include <web/socket.h>
 
-#include <limits.h>
-#include <stdlib.h>
-
 namespace
 {
-
 int safemain( int argc, char *argv[] )
 {
     // Parse command-line arguments
@@ -60,7 +58,7 @@ int safemain( int argc, char *argv[] )
 #else
     // Resolve relative paths (the simple way)
     {
-        char fullpath[PATH_MAX];
+        char  fullpath[PATH_MAX];
         char *p = realpath( master_dir.c_str(), fullpath );
         if ( p == nullptr )
             throw_errno( "realpath resolving {0}", master_dir );
@@ -73,7 +71,7 @@ int safemain( int argc, char *argv[] )
 
     // Create a web server
     web::server server( port, 10 );
-    server.default_resource( "GET" ) = [&]( web::request &req,
+    server.default_resource( "GET" ) = [&]( web::request &   req,
                                             net::tcp_socket &client ) {
         base::uri path( "file", "", master_dir, req.path().full_path() );
 

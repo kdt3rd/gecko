@@ -14,11 +14,10 @@
 
 namespace
 {
-
 void producer( base::bounded_safe_queue<size_t> &q, size_t n, size_t id )
 {
     unsigned int seed = id;
-    unsigned int xx = rand_r( &seed ) % 100;
+    unsigned int xx   = rand_r( &seed ) % 100;
     while ( xx > 0 )
     {
         std::this_thread::yield();
@@ -35,7 +34,7 @@ void producer( base::bounded_safe_queue<size_t> &q, size_t n, size_t id )
 void consumer( base::bounded_safe_queue<size_t> &q, size_t n, size_t id )
 {
     unsigned int seed = id;
-    unsigned int xx = rand_r( &seed ) % 100;
+    unsigned int xx   = rand_r( &seed ) % 100;
     while ( xx > 0 )
     {
         std::this_thread::yield();
@@ -74,8 +73,8 @@ int safemain( int argc, char *argv[] )
 
     test["mpmc_small"] = [&]( void ) {
         // hrm, how do we actually test that we get what we want?
-        std::vector<std::thread> producers;
-        std::vector<std::thread> consumers;
+        std::vector<std::thread>         producers;
+        std::vector<std::thread>         consumers;
         base::bounded_safe_queue<size_t> q( 4 );
         producers.resize( 4 );
         for ( size_t i = 0; i != 4; ++i )

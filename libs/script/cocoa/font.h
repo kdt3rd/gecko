@@ -5,31 +5,31 @@
 
 #include <script/font.h>
 
-
 ////////////////////////////////////////
 
-
-namespace script { namespace cocoa
+namespace script
 {
-
+namespace cocoa
+{
 /// @brief Font subclass for cocoa.
 class font : public ::script::font
 {
 public:
-	font( void *font, std::string fam, std::string style, points pts );
-	~font( void ) override;
+    font( void *font, std::string fam, std::string style, points pts );
+    ~font( void ) override;
 
-	void init_font( void ) override;
+    void init_font( void ) override;
 
-	points kerning( char32_t c1, char32_t c2 ) override;
+    points kerning( char32_t c1, char32_t c2 ) override;
 
 protected:
-	const text_extents &get_glyph( char32_t char_code ) override;
+    const text_extents &get_glyph( char32_t char_code ) override;
 
 private:
-	void *_font;
-	double _scalePixToPointsHoriz = 1.0;
-	double _scalePixToPointsVert = 1.0;
+    void * _font;
+    double _scalePixToPointsHoriz = 1.0;
+    double _scalePixToPointsVert  = 1.0;
 };
 
-} }
+} // namespace cocoa
+} // namespace script

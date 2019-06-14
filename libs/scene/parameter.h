@@ -7,20 +7,16 @@
 
 namespace scene
 {
-
 ///
 /// @brief Class parameter provides...
 ///
 class parameter
 {
 public:
-	parameter( void );
-	~parameter( void );
-private:
+    parameter( void );
+    ~parameter( void );
 
+private:
 };
 
 } // namespace scene
-
-
-

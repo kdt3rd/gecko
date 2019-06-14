@@ -9,10 +9,6 @@
 
 namespace image
 {
-
 engine::registry &op_registry( void );
 
 } // namespace image
-
-
-

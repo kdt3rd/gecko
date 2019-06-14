@@ -12,7 +12,6 @@
 
 namespace
 {
-
 ////////////////////////////////////////
 
 int safemain( int argc, char *argv[] )
@@ -41,7 +40,7 @@ int safemain( int argc, char *argv[] )
         test.message( "pid {0}", proc.id() );
 
         std::istream &out = proc.std_out();
-        std::string msg;
+        std::string   msg;
         std::getline( out, msg );
 
         if ( msg == "Hello World" )
@@ -66,7 +65,7 @@ int safemain( int argc, char *argv[] )
         proc.close_in();
 
         std::istream &out = proc.std_out();
-        std::string msg;
+        std::string   msg;
         std::getline( out, msg );
 
         if ( msg == "Hello World" )
@@ -87,7 +86,7 @@ int safemain( int argc, char *argv[] )
         test.message( "pid {0}", proc.id() );
 
         std::istream &err = proc.std_err();
-        std::string msg;
+        std::string   msg;
         std::getline( err, msg );
 
         if ( msg.find( "No such file" ) != std::string::npos )

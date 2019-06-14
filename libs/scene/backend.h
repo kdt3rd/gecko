@@ -7,7 +7,6 @@
 
 namespace scene
 {
-
 ///
 /// @brief Class backend provides the virtual base for a system that will consume a scene.
 ///
@@ -20,17 +19,14 @@ namespace scene
 class backend
 {
 public:
-	virtual ~backend( void );
+    virtual ~backend( void );
 
-    virtual void notify_changed( const node_reference &nr, uint32_t changeKind ) = 0;
-    virtual void notify_created( const node_reference &nr ) = 0;
+    virtual void
+                 notify_changed( const node_reference &nr, uint32_t changeKind ) = 0;
+    virtual void notify_created( const node_reference &nr )   = 0;
     virtual void notify_destroyed( const node_reference &nr ) = 0;
 
 private:
-
 };
 
 } // namespace scene
-
-
-

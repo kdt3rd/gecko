@@ -7,7 +7,6 @@
 
 namespace platform
 {
-
 ////////////////////////////////////////
 
 /// @brief Mouse device.
@@ -16,17 +15,15 @@ namespace platform
 class mouse : public waitable
 {
 public:
+    /// @brief Constructor.
+    mouse( system *s );
 
-	/// @brief Constructor.
-	mouse( system *s );
-
-	/// @brief Destructor.
-	virtual ~mouse( void );
+    /// @brief Destructor.
+    virtual ~mouse( void );
 
 private:
 };
 
 ////////////////////////////////////////
 
-}
-
+} // namespace platform

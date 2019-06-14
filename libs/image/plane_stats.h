@@ -3,28 +3,31 @@
 
 #pragma once
 
-#include <base/contract.h>
-#include "plane.h"
 #include "accum_buf.h"
 #include "op_registry.h"
+#include "plane.h"
+
+#include <base/contract.h>
 
 ////////////////////////////////////////
 
 namespace image
 {
-
 inline engine::computed_value<double> sum( const plane &p )
 {
-	engine::dimensions d;
-	d.bytes_per_item = static_cast<engine::dimensions::value_type>( sizeof(double) );
-	return engine::computed_value<double>( op_registry(), "p.sum", d, p );
+    engine::dimensions d;
+    d.bytes_per_item =
+        static_cast<engine::dimensions::value_type>( sizeof( double ) );
+    return engine::computed_value<double>( op_registry(), "p.sum", d, p );
 }
 
 inline engine::computed_value<double> sum( plane &&p )
 {
-	engine::dimensions d;
-	d.bytes_per_item = static_cast<engine::dimensions::value_type>( sizeof(double) );
-	return engine::computed_value<double>( op_registry(), "p.sum", d, std::move( p ) );
+    engine::dimensions d;
+    d.bytes_per_item =
+        static_cast<engine::dimensions::value_type>( sizeof( double ) );
+    return engine::computed_value<double>(
+        op_registry(), "p.sum", d, std::move( p ) );
 }
 
 // TODO: combine these into one local operator (mean/variance/skewness/kurtosis)?
@@ -44,16 +47,21 @@ plane local_variance( const accum_buf &sat, const accum_buf &sat2, int radius );
 plane mse( const plane &p1, const plane &p2, int radius );
 /// Computes structured similarity
 /// if sigma is negative, it auto computes it based on the radius
-plane ssim( const plane &p1, const plane &p2, int radius, float L = 1.f, float k1 = 0.01f, float k2 = 0.03f, float sigma = -1.f );
+plane ssim(
+    const plane &p1,
+    const plane &p2,
+    int          radius,
+    float        L     = 1.f,
+    float        k1    = 0.01f,
+    float        k2    = 0.03f,
+    float        sigma = -1.f );
 
 /// Computes a histogram of the plane
 ///
 /// pre-normalizes based on the low/high range and then computes bins
-engine::computed_value<std::vector<uint64_t>> histogram( const plane &p, int bins, float lowVal, float highVal );
+engine::computed_value<std::vector<uint64_t>>
+histogram( const plane &p, int bins, float lowVal, float highVal );
 
 void add_plane_stats( engine::registry &r );
 
 } // namespace image
-
-
-
