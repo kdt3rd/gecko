@@ -25,12 +25,11 @@
 
 namespace {
 
-static constexpr double padding = 12;
 static std::shared_ptr<gui::application> app;
 
 ////////////////////////////////////////
 
-int safemain( int argc, char **argv )
+int safemain( int /* argc */, char ** /* argv */ )
 {
 	app = std::make_shared<gui::application>();
 	app->push();

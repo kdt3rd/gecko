@@ -48,10 +48,10 @@ int safemain( int argc, char *argv[] )
 				{
 					const auto &curl = f->layers()[l];
 					std::cout << "   layer " << l << ": '" << curl.name() << "' " << curl.view_count() << " views (default: '" << curl.default_view_name() << "')\n";
-					for ( size_t v = 0, V = curl.view_count(); v != V; ++v )
+					for ( size_t cv = 0, V = curl.view_count(); cv != V; ++cv )
 					{
-						const auto &curv = curl[v];
-						std::cout << "      view " << v << ": " << curv.name() << '\n';
+						const auto &curv = curl[cv];
+						std::cout << "      view " << cv << ": " << curv.name() << '\n';
 						auto img = static_cast< std::shared_ptr<media::image> >( curv );
 						if ( img )
 						{

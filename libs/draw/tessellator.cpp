@@ -547,10 +547,11 @@ bool VertCCW( vertex *u, vertex *v, vertex *w )
 // even when a and b differ greatly in magnitude.
 inline double Interpolate( double a, double x, double b, double y )
 {
-	return (a = (a < 0) ? 0 : a, b = (b < 0) ? 0 : b,
-	 ((a <= b) ? (std::equal_to<double>()(b, 0) ? ((x+y) / 2)
+	a = std::max( a, 0.0 );
+	b = std::max( b, 0.0 );
+	return ((a <= b) ? (std::equal_to<double>()(b, 0) ? ((x+y) / 2)
 				  : (x + (y-x) * (a/(a+b))))
-	  : (y + (x-y) * (b/(a+b)))));
+	  : (y + (x-y) * (b/(a+b))));
 }
 
 // Given edges (o1,d1) and (o2,d2), compute their point of intersection.
@@ -1129,7 +1130,7 @@ public:
 						{
 							eNext = eSym->lnext();
 							delete_edge( eSym );
-							eCur = 0;
+							eCur = nullptr;
 						}
 					}
 				}

@@ -50,7 +50,7 @@ void quadrant::add( gl::api &ogl, const polylines &lines, const paint &c )
 
 ////////////////////////////////////////
 
-void quadrant::rebuild( platform::context &ctxt )
+void quadrant::rebuild( platform::context & )
 {
 	_meshes.clear();
 }

@@ -419,8 +419,8 @@ template<typename F1, typename F2, typename T = F1>
 inline point<T, 2> polar( F1 r, F2 a )
 {
 	static_assert( std::is_floating_point<F2>::value, "polar requires floating point type" );
-	return point<T, 2>( static_cast<T>( r * std::cos( a ) ),
-					    static_cast<T>( r * std::sin( a ) ) );
+	return point<T, 2>( static_cast<T>( r * static_cast<F1>( std::cos( a ) ) ),
+					    static_cast<T>( r * static_cast<F1>( std::sin( a ) ) ) );
 }
 
 ////////////////////////////////////////

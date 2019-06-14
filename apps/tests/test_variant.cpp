@@ -26,7 +26,7 @@ public:
 
 	// Compile-time check for any missing operator() implementation
 	template<typename T>
-	void operator()( T /*a*/ )
+	constexpr inline void operator()( T /*a*/ )
 	{
 		static_assert( base::always_false<T>::value, "missing operator() for variant types" );
 	}
@@ -57,7 +57,7 @@ public:
 
 	// Compile-time check for any missing operator() implementation
 	template<typename T1, typename T2>
-	void operator()( T1 /*a*/, T2 /*b*/ )
+	constexpr inline void operator()( T1 /*a*/, T2 /*b*/ )
 	{
 		static_assert( base::always_false<T1,T2>::value, "missing operator() for variant types" );
 	}

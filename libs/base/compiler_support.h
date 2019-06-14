@@ -38,13 +38,13 @@
 #  define GK_DEPRECATE(replmsg) __attribute__((deprecated("is deprecated", STRINGIZE(repl)))
 # endif
 
-# define EMIT_PRAGMA(x) _Pragma(#x)
-# define TODO(x) EMIT_PRAGMA(message ("TODO: " x " at line " DEFER(STRINGIZE,__LINE__)))
+# define GK_EMIT_PRAGMA(x) _Pragma(#x)
+# define TODO(x) GK_EMIT_PRAGMA(message (" TODO - " x))
 //# define TODO(x) _Pragma(STRINGIZE(GCC warning x " at line " DEFER(STRINGIZE,__LINE__)))
 
-# define GK_IGNORE_WARNING_BEGIN EMIT_PRAGMA(clang diagnostic push)
-# define GK_IGNORE_WARNING_END EMIT_PRAGMA(clang diagnostic pop)
-# define GK_IGNORE_WARNINGS EMIT_PRAGMA(clang diagnostic ignored "-Weverything")
+# define GK_IGNORE_WARNING_BEGIN GK_EMIT_PRAGMA(clang diagnostic push)
+# define GK_IGNORE_WARNING_END GK_EMIT_PRAGMA(clang diagnostic pop)
+# define GK_IGNORE_WARNINGS GK_EMIT_PRAGMA(clang diagnostic ignored "-Weverything")
 #elif defined(_MSC_VER)
 
 # ifndef GK_DEPRECATE
@@ -68,12 +68,12 @@
 #  define HAS_BAD_CODECVT_HEADER
 # endif
 //#  define TODO(x) _Pragma(STRINGIZE(GCC warning x " at line " DEFER(STRINGIZE,__LINE__)))
-# define EMIT_PRAGMA(x) _Pragma(#x)
-# define TODO(x) EMIT_PRAGMA(message ("TODO: " x " at line " DEFER(STRINGIZE,__LINE__)))
+# define GK_EMIT_PRAGMA(x) _Pragma(#x)
+# define TODO(x) GK_EMIT_PRAGMA(message ("TODO: " x " at line " DEFER(STRINGIZE,__LINE__)))
 
-# define GK_IGNORE_WARNING_BEGIN EMIT_PRAGMA(GCC diagnostic push)
-# define GK_IGNORE_WARNING_END EMIT_PRAGMA(GCC diagnostic pop)
-# define GK_IGNORE_WARNINGS EMIT_PRAGMA(GCC diagnostic ignored "-Wall")
+# define GK_IGNORE_WARNING_BEGIN GK_EMIT_PRAGMA(GCC diagnostic push)
+# define GK_IGNORE_WARNING_END GK_EMIT_PRAGMA(GCC diagnostic pop)
+# define GK_IGNORE_WARNINGS GK_EMIT_PRAGMA(GCC diagnostic ignored "-Wall")
 
 #else
 # error "compiler support not yet filled in for current compiler"

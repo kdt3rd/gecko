@@ -114,12 +114,12 @@ static void copyPlane( size_t, int s, int e, plane_buffer &out, const const_plan
 {
 	if ( out.stride() == src.stride() )
 	{
-		memcpy( out.line( s ), src.line( s ), (e-s)*sizeof(float)*out.stride() );
+		memcpy( out.line( s ), src.line( s ), static_cast<size_t>((e-s)*out.stride()) * sizeof(float) );
 	}
 	else
 	{
 		for ( int y = s; y < e; ++y )
-			memcpy( out.line( y ), src.line( y ), sizeof(float)*out.width() );
+			memcpy( out.line( y ), src.line( y ), static_cast<size_t>(out.width()) * sizeof(float) );
 	}
 }
 

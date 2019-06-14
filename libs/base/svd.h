@@ -102,7 +102,7 @@ svd<T>::decomp( void )
 	//*** Householder reduction to bidiagonal form
 	for ( size_t i = 0; i < n; ++i )
 	{
-		size_t l = i + 1;
+		l = i + 1;
 		rv1[i] = scale * g;
 		g = s = scale = float_type(0);
 
@@ -257,7 +257,7 @@ svd<T>::decomp( void )
 		for ( size_t its = 0; its < 30; ++its )
 		{
 			bool flag = true;
-			for ( l = k; l >= 0; --l )
+			for ( l = k; l <= k; --l )
 			{
 				nm = l - 1;
 
@@ -360,7 +360,7 @@ svd<T>::decomp( void )
 				z = pythag( f, h );
 				_w[j] = z;
 
-				if ( z )
+				if ( z != float_type(0) )
 				{
 					z = float_type(1) / z;
 					c = f*z;

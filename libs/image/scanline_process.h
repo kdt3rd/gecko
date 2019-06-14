@@ -174,7 +174,7 @@ class scanline_plane_functor : public engine::subgroup_function
 {
 public:
 	using engine::subgroup_function::subgroup_function;
-	virtual ~scanline_plane_functor( void );
+	~scanline_plane_functor( void ) override;
 
 	virtual bool in_place( void ) const = 0;
 	virtual void call( scanline &, int ) = 0;
@@ -200,45 +200,45 @@ public:
 	scanline_plane_operator( scanline_plane_operator && ) = default;
 	scanline_plane_operator&operator=( const scanline_plane_operator & ) = default;
 	scanline_plane_operator&operator=( scanline_plane_operator && ) = default;
-	virtual ~scanline_plane_operator( void )
+	~scanline_plane_operator( void ) override
 	{}
 
-	virtual bool in_place( void ) const override { return inplace; }
+	bool in_place( void ) const override { return inplace; }
 
-	virtual const std::vector<scanline> &inputs( void ) const override
+	const std::vector<scanline> &inputs( void ) const override
 	{
 		return _inputs;
 	}
 
-	virtual void update_inputs( int d ) override
+	void update_inputs( int d ) override
 	{
 		for ( auto &b: _binders )
 			b.update( d );
 	}
 
-	virtual void deref_inputs( void ) override
+	void deref_inputs( void ) override
 	{
 		for ( auto &b: _binders )
 			b.clear();
 	}
 
-	virtual void bind( std::vector<std::shared_ptr<engine::subgroup_function>> &funcs, engine::subgroup &sg, engine::node &n ) override
+	void bind( std::vector<std::shared_ptr<engine::subgroup_function>> &funcs, engine::subgroup &sg, engine::node &n ) override
 	{
 		process_bind( funcs, sg, n, base::gen_sequence<sizeof...(Args)>{} );
 	}
 
-	virtual void call( scanline &dest, int ) override
+	void call( scanline &dest, int ) override
 	{
 		process_call( dest, base::gen_sequence<sizeof...(Args)>{} );
 	}
 
-	virtual void set_input( size_t i, const scanline &s ) override
+	void set_input( size_t i, const scanline &s ) override
 	{
 		_binders[i].set( s );
 	}
 
 private:
-	inline void process_bind( std::vector<std::shared_ptr<engine::subgroup_function>> &funcs, engine::subgroup &sg, engine::node &n, const base::sequence<> & )
+	inline void process_bind( std::vector<std::shared_ptr<engine::subgroup_function>> &, engine::subgroup &, engine::node &, const base::sequence<> & )
 	{
 	}
 	template <size_t... S>
@@ -304,45 +304,45 @@ public:
 	n_scanline_plane_operator( n_scanline_plane_operator && ) = default;
 	n_scanline_plane_operator&operator=( const n_scanline_plane_operator & ) = default;
 	n_scanline_plane_operator&operator=( n_scanline_plane_operator && ) = default;
-	virtual ~n_scanline_plane_operator( void )
+	~n_scanline_plane_operator( void ) override
 	{}
 
-	virtual bool in_place( void ) const override { return inplace; }
+	bool in_place( void ) const override { return inplace; }
 
-	virtual const std::vector<scanline> &inputs( void ) const override
+	const std::vector<scanline> &inputs( void ) const override
 	{
 		return _inputs;
 	}
 
-	virtual void update_inputs( int d ) override
+	void update_inputs( int d ) override
 	{
 		for ( auto &b: _binders )
 			b.update( d );
 	}
 
-	virtual void deref_inputs( void ) override
+	void deref_inputs( void ) override
 	{
 		for ( auto &b: _binders )
 			b.clear();
 	}
 
-	virtual void bind( std::vector<std::shared_ptr<engine::subgroup_function>> &funcs, engine::subgroup &sg, engine::node &n ) override
+	void bind( std::vector<std::shared_ptr<engine::subgroup_function>> &funcs, engine::subgroup &sg, engine::node &n ) override
 	{
 		process_bind( funcs, sg, n, base::gen_sequence<sizeof...(Args)>{} );
 	}
 
-	virtual void call( scanline &dest, int y ) override
+	void call( scanline &dest, int y ) override
 	{
 		process_call( dest, y, base::gen_sequence<sizeof...(Args)>{} );
 	}
 
-	virtual void set_input( size_t i, const scanline &s ) override
+	void set_input( size_t i, const scanline &s ) override
 	{
 		_binders[i].set( s );
 	}
 
 private:
-	inline void process_bind( std::vector<std::shared_ptr<engine::subgroup_function>> &funcs, engine::subgroup &sg, engine::node &n, const base::sequence<> & )
+	inline void process_bind( std::vector<std::shared_ptr<engine::subgroup_function>> &, engine::subgroup &, engine::node &, const base::sequence<> & )
 	{
 	}
 	template <size_t... S>

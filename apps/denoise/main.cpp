@@ -33,7 +33,7 @@ using namespace image;
 //	plane highF = filt - lowF;
 //	return lowP + highF;
 //}
-
+TODO( "Do something" )
 int safemain( int argc, char *argv[] )
 {
     int spatX = 7;
@@ -287,10 +287,10 @@ int safemain( int argc, char *argv[] )
         spatY = spatX;
     auto &spatRW = options["spatial-radius-weight"];
     if ( spatRW )
-        spatSigmaD = atof( spatRW.value() );
+        spatSigmaD = static_cast<float>( atof( spatRW.value() ) );
     auto &spatIW = options["spatial-weight"];
     if ( spatIW )
-        spatSigmaI = atof( spatIW.value() );
+        spatSigmaI = static_cast<float>( atof( spatIW.value() ) );
 
     auto &waveL = options["wavelet-levels"];
     if ( waveL )
@@ -350,7 +350,7 @@ int safemain( int argc, char *argv[] )
             throw_runtime(
                 "MSE threshold only used when integration method is mse" );
 
-        mseThresh = atof( mseV.value() );
+        mseThresh = static_cast<float>( atof( mseV.value() ) );
     }
 
     auto &mseR = options["mse-radius"];
@@ -373,7 +373,7 @@ int safemain( int argc, char *argv[] )
 
     auto &confV = options["conf-thresh"];
     if ( confV )
-        confThresh = atof( confV.value() );
+        confThresh = static_cast<float>( atof( confV.value() ) );
 
     auto &confSafeV = options["conf-safety"];
     if ( confSafeV )
@@ -381,7 +381,7 @@ int safemain( int argc, char *argv[] )
 
     auto &vecFiltV = options["vec-filter"];
     if ( vecFiltV )
-        vecFilter = atof( vecFiltV.value() );
+        vecFilter = static_cast<float>( atof( vecFiltV.value() ) );
 
     estimateNoise = static_cast<bool>( options["estimate-noise"] );
     useLog = static_cast<bool>( options["use-log"] );
@@ -490,17 +490,17 @@ int safemain( int argc, char *argv[] )
                         std::string(),
                         std::string(),
                         { "R", "G", "B" } );
-                    if ( 0 ) //centerFrm->has_channel( "A" ) )
-                    {
-                        if ( f == fs )
-                            std::cout
-                                << "Using alpha channel in integration map"
-                                << std::endl;
+                    // if ( centerFrm->has_channel( "A" ) )
+                    // {
+                    //     if ( f == fs )
+                    //         std::cout
+                    //             << "Using alpha channel in integration map"
+                    //             << std::endl;
 
-                        image_buf tmpCA = extract_frame(
-                            *centerFrm, std::string(), std::string(), { "A" } );
-                        cenAlpha = tmpCA[0];
-                    }
+                    //     image_buf tmpCA = extract_frame(
+                    //         *centerFrm, std::string(), std::string(), { "A" } );
+                    //     cenAlpha = tmpCA[0];
+                    // }
 
                     if ( varU )
                     {

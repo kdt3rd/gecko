@@ -55,7 +55,7 @@ public:
 	}
 
 	/// @brief Allocate an object from the pool.
-	pointer allocate( size_type n = 1, const_pointer /*hint*/ = 0 )
+	pointer allocate( size_type n = 1, const_pointer /*hint*/ = nullptr )
 	{
 		precondition( n == 1, "memory pool can only allocate 1 item at a time" );
 

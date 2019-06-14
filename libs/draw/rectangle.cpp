@@ -26,7 +26,7 @@ rectangle::rectangle( dim x, dim y, dim w, dim h, const color &c )
 
 ////////////////////////////////////////
 
-void rectangle::rebuild( platform::context &ctxt )
+void rectangle::rebuild( platform::context & )
 {
 	_stash.reset();
 }

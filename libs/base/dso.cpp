@@ -498,9 +498,9 @@ public:
     inline const std::string &name( void ) const { return _name; }
     inline uintptr_t base( void ) const { return _base; }
 
-    bool is_closest( void *addr, const impl *curdso ) { throw_not_yet(); }
-    void load_syms( const char *fn ) { throw_not_yet(); }
-    std::string find_symbol( void *addr, bool include_offset = true )
+    bool is_closest( void *, const impl * ) { throw_not_yet(); }
+    void load_syms( const char * ) { throw_not_yet(); }
+    std::string find_symbol( void *, bool /* include_offset */ = true )
     {
         throw_not_yet();
     }

@@ -149,8 +149,17 @@ inline constexpr long double operator "" _deg( long double d ) noexcept
 	return base::deg2rad( d );
 }
 
-inline constexpr float operator "" _degf( long double d ) noexcept
+inline constexpr long double operator"" _deg( unsigned long long d ) noexcept
 {
-	return static_cast<float>( base::deg2rad( d ) );
+    return base::deg2rad( static_cast<long double>( d ) );
 }
 
+inline constexpr float operator"" _degf( long double d ) noexcept
+{
+    return static_cast<float>( base::deg2rad( d ) );
+}
+
+inline constexpr float operator"" _degf( unsigned long long d ) noexcept
+{
+    return static_cast<float>( base::deg2rad( static_cast<long double>( d ) ) );
+}

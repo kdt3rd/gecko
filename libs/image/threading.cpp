@@ -208,7 +208,7 @@ threading::init( int count )
 ////////////////////////////////////////
 
 void
-threading::donate( worker_bee &wb )
+threading::donate( worker_bee & )
 {
 }
 
@@ -222,7 +222,7 @@ threading::worker_bee::worker_bee( void )
 
 ////////////////////////////////////////
 
-threading::worker_bee::worker_bee( std::thread::id selfthread )
+threading::worker_bee::worker_bee( std::thread::id )
 	: _next( nullptr ), _func( nullptr ), _finished( true ), _shutdown( false )
 {
 }

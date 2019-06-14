@@ -186,9 +186,9 @@ int safemain( int argc, char *argv[] )
 		c->add_child( tmp );
 		for ( size_t j = 0; j <= i; ++j )
 		{
-			auto tmp = make_tree();
-			tmp->add_child( c );
-			c = tmp;
+			auto treetmp = make_tree();
+			treetmp->add_child( c );
+			c = treetmp;
 		}
 		tree->add_child( c );
 	}

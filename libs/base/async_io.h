@@ -7,9 +7,13 @@
 #include "streambuf.h"
 #include "contract.h"
 #ifdef __linux__
-#include <atomic>
-#include <memory>
-#include "unix_streambuf.h"
+# include <atomic>
+# include <memory>
+# include "unix_streambuf.h"
+#elif ( defined( __MACH__ ) && defined( __APPLE__ ) ) || \
+    defined( __FreeBSD__ ) || defined( __NetBSD__ ) || defined( __OpenBSD__ )
+# include <unistd.h>
+# define GK_ASYNC_USE_KQUEUE 1
 #endif
 
 ////////////////////////////////////////
@@ -58,6 +62,9 @@ public:
                 return retval;
             }
         }
+#elif defined(GK_ASYNC_USE_KQUEUE)
+        // TODO
+        std::forward<F>(idlefunc)();
 #endif
         if ( fileoff == sbuf->pubseekoff( fileoff, std::ios_base::beg, std::ios_base::in ) )
         {

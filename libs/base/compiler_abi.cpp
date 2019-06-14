@@ -4,7 +4,8 @@
 #include "compiler_abi.h"
 #include "contract.h"
 #include "scope_guard.h"
-#if defined(__GNUC__)
+#if defined(__clang__) || defined(__GNUC__)
+# define GK_HAVE_CXX_ABI 1
 # include <cxxabi.h>
 #endif
 
@@ -18,7 +19,7 @@ demangle( const char *sym )
 {
 	precondition( sym && sym[0] != '\0', "invalid symbol passed to demangle" );
 	std::string retval;
-#if defined(__GNUC__)
+#if defined(GK_HAVE_CXX_ABI)
 	int status = 0;
 	char *ptr = abi::__cxa_demangle( sym, nullptr, nullptr, &status );
 	on_scope_exit{ if ( ptr ) ::free( ptr ); }; // NOLINT
@@ -35,6 +36,7 @@ demangle( const char *sym )
 			break;
 	}
 #else
+	retval = sym;
 #endif
 	return retval;
 }

@@ -35,8 +35,8 @@ plane cross_bilateral( const plane &p1, const plane &ref, const engine::computed
 plane weighted_bilateral( const plane &p1, const plane &weight, const engine::computed_value<int> &dx, const engine::computed_value<int> &dy, const engine::computed_value<float> &sigD, const engine::computed_value<float> &sigI );
 
 /// Implements one form of undecimated wavelet filter
-plane wavelet_filter( const plane &p, size_t levels, float sigma );
-plane wavelet_filter( const plane &p, size_t levels, const plane &sigma );
+plane wavelet_filter( const plane &p, int levels, float sigma );
+plane wavelet_filter( const plane &p, int levels, const plane &sigma );
 
 plane guided_filter_mono( const plane &I, const plane &p, int r, float eps );
 plane guided_filter_mono( const plane &I, const plane &p, int r, const plane &eps, float epsScale = 1.F );

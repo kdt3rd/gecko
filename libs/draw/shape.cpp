@@ -43,7 +43,7 @@ void shape::add( gl::api &ogl, const polylines &lines, const paint &c )
 
 ////////////////////////////////////////
 
-void shape::rebuild( platform::context &ctxt )
+void shape::rebuild( platform::context & )
 {
 	_meshes.clear();
 }

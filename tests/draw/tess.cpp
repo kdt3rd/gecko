@@ -4,7 +4,7 @@
 #include <base/contract.h>
 #include <base/unit_test.h>
 #include <base/math_functions.h>
-#include <base/path.h>
+#include <draw/path.h>
 #include <draw/clipper.h>
 #include <draw/polylines.h>
 #include <draw/tessellator.h>
@@ -30,6 +30,7 @@ int safemain( int argc, char *argv[] )
 		return -1;
 	}
 
+#if 0
 	test["holes"] = [&]( void )
 	{
 		using namespace ClipperLib;
@@ -66,19 +67,19 @@ int safemain( int argc, char *argv[] )
 		tess.tessellate();
 		test.success( "successful" );
 	};
-
+#endif
 	test["star"] = [&]( void )
 	{
-		using namespace base::math;
+		using namespace base;
 		base::dpoint center { 500, 500 };
 		double side = 450;
 		std::vector<base::dpoint> points;
 		size_t p = 5;
 		size_t q = 2;
 		for ( size_t i = 0; i < p; ++i )
-			points.push_back( center + base::dpoint::polar( side, 360_deg * double(i) / double(p) ) );
+			points.push_back( center + polar( side, 360_deg * double(i) / double(p) ) );
 
-		base::path path;
+		draw::path path;
 		size_t i = q % points.size();
 		path.move_to( points[0] );
 		while( i != 0 )
@@ -91,7 +92,8 @@ int safemain( int argc, char *argv[] )
 		draw::polylines lines;
 		path.replay( lines );
 
-		auto mesh = lines.stroked( 10 ).filled();
+		gl::mesh m;
+		lines.stroked( 10 ).filled( m, "position" );
 		test.success( "successful" );
 	};
 

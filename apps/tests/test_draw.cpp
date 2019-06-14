@@ -126,9 +126,9 @@ int safemain( int /*argc*/, char * /*argv*/ [] )
 			bound.draw();
 		}
 
-		angle += 1.0_deg;
-		while ( angle > 360.0_deg )
-			angle -= 360.0_deg;
+		angle += 1_degf;
+		while ( angle > 360_degf )
+			angle -= 360_degf;
 
 		// Cause a redraw to continue the animation
 		win->invalidate( platform::rect() );
