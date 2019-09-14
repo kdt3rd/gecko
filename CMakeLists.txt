@@ -24,11 +24,11 @@ if(BUILD_TESTING)
   
   add_subdirectory(tests EXCLUDE_FROM_ALL)
   
-  add_custom_target(run_tests COMMAND ${CMAKE_CTEST_COMMAND})
+  add_custom_target(run_tests COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIG>)
   add_dependencies(run_tests build_tests)
   
   add_custom_target(run_valgrind
-    COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process --test-action memcheck
+    COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIG> --force-new-ctest-process --test-action memcheck
     COMMAND cat "${CMAKE_BINARY_DIR}/Testing/Temporary/MemoryChecker.*.log"
   )
   add_dependencies(run_valgrind build_tests)
