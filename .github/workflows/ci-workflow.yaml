@@ -14,6 +14,7 @@ jobs:
     - name: Wipe
       run: |
         rm -rf _build
+        mkdir _build
       shell: bash
     - name: Configure
       run: |
