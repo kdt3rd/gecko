@@ -15,7 +15,7 @@ jobs:
       run: |
         rm -rf _build
         mkdir _build
-        cmake -S . -B _build
+        cmake -S `pwd` -B _build
     - name: Compile
       run: |
         cmake --build _build -v
