@@ -16,17 +16,15 @@ jobs:
         rm -rf _build
         mkdir _build
         cmake --version
-        echo "Testing for Ninja"
-        which ninja
         echo "Configuring..."
         cd _build
-        cmake -G Ninja ..
+        cmake ..
     - name: Compile
-      run: ninja -C _build
+      run: make -C _build -j4
     - name: Build Tests
-      run: ninja -C _build build_tests
+      run: make -C _build -j4 build_tests
     - name: Test
-      run: ninja -C _build run_tests
+      run: make -C _build -j4 run_tests
 #    - name: Setup
 #      uses: ./.github/actions/setup-ubuntu-step
 #    - name: Compile
