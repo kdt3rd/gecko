@@ -11,27 +11,20 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v1
-    - name: Wipe
+    - name: Configure
       run: |
         rm -rf _build
         mkdir _build
-      shell: bash
-    - name: Configure
-      run: |
         cmake -S . -B _build
-      shell: bash
     - name: Compile
       run: |
-        cmake --build -v _build
-      shell: bash
+        cmake --build _build -v
     - name: Build Tests
       run: |
         cmake --build _build -v --target build_tests
-      shell: bash
     - name: Test
       run: |
         cmake --build _build -v --target run_tests
-      shell: bash
 #    - name: Setup
 #      uses: ./.github/actions/setup-ubuntu-step
 #    - name: Compile
