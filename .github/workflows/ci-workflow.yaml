@@ -16,19 +16,17 @@ jobs:
         rm -rf _build
         mkdir _build
         cmake --version
-        pwd
-        ls
+        echo "Testing for Ninja"
+        which ninja
+        echo "Configuring..."
         cd _build
-        cmake ..
+        cmake -G Ninja ..
     - name: Compile
-      run: |
-        cmake --build _build -v
+      run: ninja -C _build
     - name: Build Tests
-      run: |
-        cmake --build _build -v --target build_tests
+      run: ninja -C _build build_tests
     - name: Test
-      run: |
-        cmake --build _build -v --target run_tests
+      run: ninja -C _build run_tests
 #    - name: Setup
 #      uses: ./.github/actions/setup-ubuntu-step
 #    - name: Compile
