@@ -57,11 +57,14 @@ jobs:
         cd _build
         cmake ..
     - name: Compile
-      run: cmake --config RelWithDebInfo --build _build
+      shell: bash
+      run: cmake --build _build --config RelWithDebInfo -j 4
     - name: Build Tests
-      run: cmake --config RelWithDebInfo --build _build --target build_tests
+      shell: bash
+      run: cmake --build _build -t build_tests --config RelWithDebInfo -j 4
     - name: Test
-      run: cmake --config RelWithDebInfo --build _build --target run_tests
+      shell: bash
+      run: cmake --build _build -t run_tests --config RelWithDebInfo -j 4
 
 # should be able to put the above steps in their own file with parameters
 # eventually since actions are just a fork of azure
