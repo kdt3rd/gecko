@@ -1,0 +1,63 @@
+name: CI Build
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  Ubuntu:
+    name: Build Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Wipe
+      run: |
+        rm -rf _build
+      shell: bash
+    - name: Configure
+      run: |
+        cmake -S . -B _build
+      shell: bash
+    - name: Compile
+      run: |
+        cmake --build -v _build
+      shell: bash
+    - name: Build Tests
+      run: |
+        cmake --build _build -v --target build_tests
+      shell: bash
+    - name: Test
+      run: |
+        cmake --build _build -v --target run_tests
+      shell: bash
+#    - name: Setup
+#      uses: ./.github/actions/setup-ubuntu-step
+#    - name: Compile
+#      uses: ./.github/actions/build-unix-step
+#    - name: Test
+#      uses: ./.github/actions/test-unix-step
+#  macOS:
+#    name: Build MacOS
+#    runs-on: macos-latest
+#    steps:
+#    - name: Checkout
+#      uses: actions/checkout@v1
+#    - name: Setup
+#      uses: ./.github/actions/setup-step
+#    - name: Compile
+#      uses: ./.github/actions/build-step
+#    - name: Test
+#      uses: ./.github/actions/test-step
+#  Windows:
+#    name: Build Windows
+#    runs-on: windows-latest
+#    steps:
+#    - name: Checkout
+#      uses: actions/checkout@v1
+#    - name: Setup
+#      uses: ./.github/actions/setup-step
+#    - name: Compile
+#      uses: ./.github/actions/build-step
+#    - name: Test
+#      uses: ./.github/actions/test-step

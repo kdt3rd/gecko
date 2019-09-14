@@ -1,6 +1,8 @@
 gecko
 =====
 
+![](https://github.com/kdt3rd/gecko/workflows/CI%20Build/badge.svg)
+
 Gecko is a c++11 framework. Contained in it are support libraries, a
 GUI toolkit, media I/O framework and image processing toolbox based on
 years of production experience in the visual effects and post
