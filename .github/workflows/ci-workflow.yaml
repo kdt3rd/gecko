@@ -15,7 +15,11 @@ jobs:
       run: |
         rm -rf _build
         mkdir _build
-        cmake -S `pwd` -B _build
+        cmake --version
+        pwd
+        ls
+        cd _build
+        cmake ..
     - name: Compile
       run: |
         cmake --build _build -v
