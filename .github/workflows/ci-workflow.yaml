@@ -12,43 +12,59 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v1
     - name: Configure
+      shell: bash
       run: |
         rm -rf _build
         mkdir _build
-        cmake --version
-        echo "Configuring..."
         cd _build
         cmake ..
     - name: Compile
-      run: make -C _build -j4
+      run: cmake --build _build --parallel 4
     - name: Build Tests
-      run: make -C _build -j4 build_tests
+      run: cmake --build _build --parallel 4 --target build_tests
     - name: Test
-      run: make -C _build -j4 run_tests
-#    - name: Setup
-#      uses: ./.github/actions/setup-ubuntu-step
-#    - name: Compile
-#      uses: ./.github/actions/build-unix-step
-#    - name: Test
-#      uses: ./.github/actions/test-unix-step
-#  macOS:
-#    name: Build MacOS
-#    runs-on: macos-latest
-#    steps:
-#    - name: Checkout
-#      uses: actions/checkout@v1
-#    - name: Setup
-#      uses: ./.github/actions/setup-step
-#    - name: Compile
-#      uses: ./.github/actions/build-step
-#    - name: Test
-#      uses: ./.github/actions/test-step
-#  Windows:
-#    name: Build Windows
-#    runs-on: windows-latest
-#    steps:
-#    - name: Checkout
-#      uses: actions/checkout@v1
+      run: cmake --build _build --parallel 4 --target run_tests
+  macOS:
+    name: Build MacOS
+    runs-on: macos-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Configure
+      shell: bash
+      run: |
+        rm -rf _build
+        mkdir _build
+        cd _build
+        cmake ..
+    - name: Compile
+      run: cmake --build _build --parallel 4
+    - name: Build Tests
+      run: cmake --build _build --parallel 4 --target build_tests
+    - name: Test
+      run: cmake --build _build --parallel 4 --target run_tests
+  Windows:
+    name: Build Windows
+    runs-on: windows-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Configure
+      shell: bash
+      run: |
+        rm -rf _build
+        mkdir _build
+        cd _build
+        cmake ..
+    - name: Compile
+      run: cmake --build _build --parallel 4
+    - name: Build Tests
+      run: cmake --build _build --parallel 4 --target build_tests
+    - name: Test
+      run: cmake --build _build --parallel 4 --target run_tests
+
+# should be able to put the above steps in their own file with parameters
+# eventually since actions are just a fork of azure
 #    - name: Setup
 #      uses: ./.github/actions/setup-step
 #    - name: Compile
