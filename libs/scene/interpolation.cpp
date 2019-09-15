@@ -3,14 +3,20 @@
 
 #include "interpolation.h"
 
+#include <base/contract.h>
+
 ////////////////////////////////////////
 
 namespace scene
 {
+
 namespace
 {
 template <typename eval> class interp_impl : public interpolation
 {
+public:
+    using calc_type = interpolation::calc_type;
+
     interp_impl( void )           = default;
     ~interp_impl( void ) override = default;
 
@@ -36,10 +42,10 @@ template <> struct interp_eval<interp_style::constant>
     static constexpr size_t storage_size   = 0;
     static constexpr size_t control_points = 0;
 
-    static constexpr calc_type
+    static constexpr interpolation::calc_type
     offset( const time &, const time &, const time & )
     {
-        return calc_type( 0 );
+        return interpolation::calc_type( 0 );
     }
 };
 
@@ -66,6 +72,7 @@ std::unique_ptr<interpolation> interpolation::create( interp_style i )
 
         default: break;
     }
+    throw_logic( "Specified interpolation style not yet implemented" );
 }
 
 } // namespace scene

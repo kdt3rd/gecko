@@ -3,37 +3,45 @@
 
 #pragma once
 
+#include "node.h"
+
+#include <base/contract.h>
+#include <base/utility.h>
+
 #include <iterator>
 
 ////////////////////////////////////////
 
 namespace scene
 {
-class node;
+class scene;
 
 /// This provides a consistent view of a node during the iterator lifetime
 /// NB: if you implement a recursive algorithm to traverse the tree, you
-/// may end up locking out any other threads from manipulating the
+/// may end up locking out any other threads from manipulating, so just
+/// be aware of the lifetime of iterators.
+template <typename NodeRef>
 class const_node_iterator
     : public std::iterator<std::random_access_iterator_tag, size_t>
 {
-    typedef std::iterator_traits<I> _traits;
+    typedef std::iterator_traits<const_node_iterator> _traits;
 
 public:
+    using node_reference  = NodeRef;
     using difference_type = typename _traits::difference_type;
     /// unary operators
 
-    node_reference  operator*(void)const noexcept;
-    node_reference *operator->(void)const noexcept;
-    node_iterator & operator++( void );
-    node_iterator   operator++( int );
-    node_iterator & operator--( void );
-    node_iterator   operator--( int );
+    node_reference &     operator*(void)const noexcept;
+    node_reference *     operator->(void)const noexcept;
+    const_node_iterator &operator++( void );
+    const_node_iterator  operator++( int );
+    const_node_iterator &operator--( void );
+    const_node_iterator  operator--( int );
 
-    column_iterator &operator+=( difference_type i );
-    column_iterator &operator-=( difference_type i );
-    column_iterator  operator+( difference_type i ) const;
-    column_iterator  operator-( difference_type i ) const;
+    const_node_iterator &operator+=( difference_type i );
+    const_node_iterator &operator-=( difference_type i );
+    const_node_iterator  operator+( difference_type i ) const;
+    const_node_iterator  operator-( difference_type i ) const;
 
     difference_type operator-( const const_node_iterator &i ) const;
 
@@ -93,14 +101,14 @@ private:
 class node_reference
 {
 public:
-    using const_iterator = const_node_iterator;
+    using const_iterator = const_node_iterator<node_reference>;
 
-    constexpr node_reference( nullptr_t ) noexcept = default;
-    constexpr node_reference( void ) noexcept      = default;
+    constexpr node_reference( void ) noexcept = default;
+    constexpr node_reference( nullptr_t ) noexcept : _node( nullptr ) {}
     ~node_reference( void )
     {
-        if ( _node )
-            _node->read_unlock();
+        //TODO        if ( _node )
+        //TODO            _node->read_unlock();
     }
 
     node_reference( const node_reference &n )
@@ -109,7 +117,7 @@ public:
         // don't assign the node until we safely have the read lock
         if ( n._node )
         {
-            n._node->read_lock();
+            //TODO            n._node->read_lock();
             _node = n._node;
         }
     }
@@ -124,7 +132,7 @@ public:
             return node_reference( _scene, _node->parent() );
         return node_reference();
     }
-
+#if 0
     size_t size( void ) const { return _node ? _node->children().size() : 0; }
     node_reference operator[]( size_t i ) const
     {
@@ -134,7 +142,7 @@ public:
     {
         return node_reference( _scene, _node ? _node->find( n ) : nullptr );
     }
-
+#endif
     const_iterator begin( void ) const;
     const_iterator end( void ) const;
 
@@ -146,35 +154,37 @@ public:
 
     template <typename T> const T *as( void ) const
     {
-        return dynamic_cast<const T *>( _node->implementation() );
+        return dynamic_cast<const T *>( _node->impl() );
     }
 
     inline writable_node_ref make_writable( void )
     {
+        precondition(
+            _scene,
+            "attempt to create a writable node reference from a const-only object" );
         return writable_node_ref( *this );
     }
 
 protected:
-    explicit node_reference(
-        scene &s, node_reference &&parent, node *n ) noexcept
+    explicit node_reference( const scene *s, const node *n ) noexcept
         : _scene( s ), _node( nullptr )
     {
         if ( n )
         {
-            n->read_lock();
+            //TODO:            n->read_lock();
             _node = n;
         }
     }
 
-    node *get_raw( void ) const { return _node; }
+    node *get_raw( void ) const { return const_cast<node *>( _node ); }
     void  checkout_writable( void );
     void  checkin_writable( void );
 
     friend class scene;
     friend class writable_node_ref;
 
-    scene *_scene = nullptr;
-    node * _node  = nullptr;
+    const scene *_scene = nullptr;
+    const node  *_node  = nullptr;
 };
 
 ////////////////////////////////////////
@@ -189,11 +199,12 @@ inline writable_node_ref::writable_node_ref( node_reference &r )
     r.checkout_writable();
     _node_ref = &r;
 }
-inline writable_node_ref::writable_node_ref( writable_node_ref &&r )
+inline writable_node_ref::writable_node_ref( writable_node_ref &&r ) noexcept
     : _node_ref( base::exchange( _node_ref, nullptr ) )
 {}
 
-inline writable_node_ref &writable_node_ref::operator=( writable_node_ref &&r )
+inline writable_node_ref &writable_node_ref::
+                          operator=( writable_node_ref &&r ) noexcept
 {
     _node_ref = base::exchange( r._node_ref, _node_ref );
     return *this;
@@ -221,7 +232,7 @@ inline writable_node_ref::operator bool( void ) const
 
 template <typename T> inline T *writable_node_ref::as( void ) const
 {
-    return dynamic_cast<T *>( _node_ref.get_raw()->implementation() );
+    return dynamic_cast<T *>( _node_ref->get_raw()->impl() );
 }
 
 } // namespace scene

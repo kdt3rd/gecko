@@ -3,10 +3,17 @@
 
 #pragma once
 
+#include <cstdint>
+#include <cstddef>
+#include <memory>
+
+#include "time.h"
+
 ////////////////////////////////////////
 
 namespace scene
 {
+
 enum class interp_style : uint8_t
 {
     constant = 0,
