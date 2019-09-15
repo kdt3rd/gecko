@@ -19,6 +19,7 @@ std::string remove_extension( std::string &&file );
 ////////////////////////////////////////
 
 std::string basename( const std::string &file );
+std::string dirname( const std::string &file );
 
 ////////////////////////////////////////
 

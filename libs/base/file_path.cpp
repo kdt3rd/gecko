@@ -39,7 +39,11 @@ std::string remove_extension( std::string &&file )
 
 std::string basename( const std::string &file )
 {
+#ifdef _WIN32
+    size_t start = file.find_last_of( "\\/" );
+#else
     size_t start = file.find_last_of( '/' );
+#endif
     if ( start == std::string::npos )
         start = 0;
     else
@@ -50,6 +54,20 @@ std::string basename( const std::string &file )
         end = file.size();
 
     return file.substr( start, end - start );
+}
+
+////////////////////////////////////////
+
+std::string dirname( const std::string &file )
+{
+#ifdef _WIN32
+    size_t start = file.find_last_of( "\\/" );
+#else
+    size_t start = file.find_last_of( '/' );
+#endif
+    if ( start == std::string::npos )
+        return std::string();
+    return file.substr( 0, start );
 }
 
 ////////////////////////////////////////
