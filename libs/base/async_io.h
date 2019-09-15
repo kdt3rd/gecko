@@ -16,6 +16,8 @@
     defined( __FreeBSD__ ) || defined( __NetBSD__ ) || defined( __OpenBSD__ )
 #    include <unistd.h>
 #    define GK_ASYNC_USE_KQUEUE 1
+#elif defined( _WIN32 )
+#    include <windows.h>
 #endif
 
 ////////////////////////////////////////
@@ -38,14 +40,18 @@ public:
     /// todo: implement move ctor
     async_io( async_io && ) = delete;
     async_io &operator=( async_io && ) = delete;
-
+#ifdef _WIN32
+    using read_size = int64_t;
+#else // TODO: posix test?
+    using read_size = ssize_t;
+#endif
     template <typename F, typename C>
-    ssize_t idle_read(
+    read_size idle_read(
         F &&               idlefunc,
         void *             outbuf,
         size_t             bytes,
         base_streambuf<C> *sbuf,
-        ssize_t            fileoff )
+        read_size          fileoff )
     {
         if ( bytes == 0 )
             return 0;
@@ -70,6 +76,9 @@ public:
             }
         }
 #elif defined( GK_ASYNC_USE_KQUEUE )
+        // TODO
+        std::forward<F>( idlefunc )();
+#elif defined( _WIN32 )
         // TODO
         std::forward<F>( idlefunc )();
 #endif
