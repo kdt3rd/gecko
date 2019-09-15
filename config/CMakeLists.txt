@@ -29,13 +29,20 @@ else()
   mark_as_advanced(GECKO_RT_LIBRARY)
 endif()
 
-find_library(GECKO_ATOMIC_LIBRARY NAMES atomic atomic.so.1 libatomic.so.1)
-mark_as_advanced(GECKO_ATOMIC_LIBRARY)
-
 add_library(${PROJECT_NAME}_config INTERFACE)
+if(CMAKE_DL_LIBS)
+  target_link_libraries(${PROJECT_NAME}_config INTERFACE ${CMAKE_DL_LIBS})
+endif()
+if(GECKO_RT_LIBRARY)
+  target_link_libraries(${PROJECT_NAME}_config INTERFACE ${GECKO_RT_LIBRARY})
+endif()
 
-target_link_libraries(${PROJECT_NAME}_config INTERFACE ${CMAKE_DL_LIBS} ${GECKO_RT_LIBRARY} ${GECKO_ATOMIC_LIBRARY})
+# TODO: The CheckAtomic.cmake that is in llvm is far more complete
+find_library(GECKO_ATOMIC_LIBRARY NAMES atomic atomic.so.1 libatomic libatomic.so libatomic.so.1)
+mark_as_advanced(GECKO_ATOMIC_LIBRARY)
+if(GECKO_ATOMIC_LIBRARY)
+  target_link_libraries(${PROJECT_NAME}_config INTERFACE ${GECKO_ATOMIC_LIBRARY})
+endif()
 
 install(TARGETS ${PROJECT_NAME}_config EXPORT ${PROJECT_NAME})
-
 add_library(${PROJECT_NAME}::config ALIAS ${PROJECT_NAME}_config)
