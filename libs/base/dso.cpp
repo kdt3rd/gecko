@@ -9,9 +9,6 @@
 #    define HAS_CXXABI
 #    include <cxxabi.h>
 
-#    define HAS_DLFCN
-#    include <dlfcn.h>
-
 #    ifdef __linux__
 #        define HAS_VSYM
 #        define HAS_ELF_DLFCN
@@ -21,7 +18,13 @@
 #        include <sys/stat.h>
 #        include <sys/types.h>
 #    endif
-
+#    define HAS_DLFCN
+#    include <dlfcn.h>
+#    ifdef LM_ID_BASE
+#        define HAS_DLMOPEN
+#        include <vector>
+#        include <mutex>
+#    endif
 #else
 #    include <windows.h>
 #endif
@@ -32,6 +35,29 @@
 
 namespace
 {
+#ifdef HAS_DLMOPEN
+Lmid_t find_ns_id( const char *ns )
+{
+    static std::vector<std::string> theNSmap;
+    static std::mutex               theNSMapMutex;
+    std::lock_guard<std::mutex>     lk( theNSMapMutex );
+    Lmid_t                          nsid  = 1;
+    bool                            found = false;
+    for ( auto &n: theNSmap )
+    {
+        if ( n == ns )
+        {
+            found = true;
+            break;
+        }
+        ++nsid;
+    }
+    if ( !found )
+        theNSmap.push_back( std::string( ns ) );
+    return nsid;
+}
+#endif
+
 #ifdef HAS_CXXABI
 std::string demangle( const char *sym )
 {
@@ -60,13 +86,20 @@ std::string demangle( const char *sym )
 
 namespace base
 {
-////////////////////////////////////////
-
-dso::dso( const char *fn, bool makeGlobal ) { load( fn, makeGlobal ); }
 
 ////////////////////////////////////////
 
-dso::~dso( void ) { reset(); }
+dso::dso( const char *fn, bool makeGlobal, const char *ns )
+{
+    load( fn, makeGlobal, ns );
+}
+
+////////////////////////////////////////
+
+dso::~dso( void )
+{
+    reset();
+}
 
 ////////////////////////////////////////
 
@@ -108,7 +141,7 @@ void dso::reset( void )
 
 ////////////////////////////////////////
 
-void dso::load( const char *fn, bool makeGlobal )
+void dso::load( const char *fn, bool makeGlobal, const char *ns )
 {
     reset();
     if ( fn )
@@ -117,7 +150,13 @@ void dso::load( const char *fn, bool makeGlobal )
     int flags = RTLD_NOW;
     if ( makeGlobal )
         flags |= RTLD_GLOBAL;
-    _handle = dlopen( fn, flags );
+#    ifdef HAS_DLMOPEN
+    // we have namespace support, use that
+    if ( ns )
+        _handle = dlmopen( find_ns_id( ns ), fn, flags );
+    else
+#    endif
+        _handle = dlopen( fn, flags );
     if ( !_handle )
         _last_err = dlerror();
 #else
@@ -126,6 +165,12 @@ void dso::load( const char *fn, bool makeGlobal )
     bool    haderr = false;
     if ( fn )
     {
+        // prevent plugins from accidentally exposing us to
+        // injected dlls
+        SetDllDirectory( "" );
+        std::string bp = base::dirname( fn );
+        if ( !bp.empty() )
+            SetDllDirectory( bp.c_str() );
         t      = LoadLibrary( fn );
         haderr = ( t == nullptr );
     }
@@ -537,7 +582,10 @@ const std::string &active_shared_object::name( void ) const
 
 ////////////////////////////////////////
 
-uintptr_t active_shared_object::base( void ) const { return _impl->base(); }
+uintptr_t active_shared_object::base( void ) const
+{
+    return _impl->base();
+}
 
 ////////////////////////////////////////
 

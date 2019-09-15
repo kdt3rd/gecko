@@ -21,12 +21,35 @@ class dso
 public:
     dso( void ) = default;
 
-    /// @brief causes provided file name to be made available as a dynamic object for lookup.
+    /// @brief causes provided file name to be made available as a dynamic
+    ///        object for lookup.
     ///
-    /// if fn is nullptr, the main application is loaded, enabling symbol lookup in
-    /// the application and loaded (global) objects
+    /// if fn is nullptr, the main application is loaded, enabling symbol
+    /// lookup in the application and loaded (global) objects
     ///
-    explicit dso( const char *fn, bool makeGlobal = false );
+    /// Not all O.S. support this concept, but if the namespace is not null,
+    /// the constructor attempts to load the dso and place it in the
+    /// specified namespace (which basically puts it in a different link
+    /// map). This is usually a very limited resource, meaning only a small
+    /// number of namespaces are allowed (i.e. glibc allows a maximum of 16).
+    ///
+    /// So while the intent is to provide some isolation such that a loaded
+    /// dso does not pollute the main app namespace, one can not load each
+    /// plugin in a large application into a unique namespace. However, it
+    /// is probably best to avoid globalsymbol pollution by putting all
+    /// plugins into a separate (single) namespace, or into a small subset
+    /// of namespaces.
+    ///
+    /// Another potential use of a namespace may be to enable multiple
+    /// loads of the same dso, so to avoid the compression of a dlopen to
+    /// just incrementing the ref count on a specified dso.
+    ///
+    /// Or to be particularly clever, and application could enable multiple
+    /// versions of a library such as python 2 and python 3 to coexist at
+    /// the same time with a use of namespaces.
+    ///
+    explicit dso(
+        const char *fn, bool makeGlobal = false, const char *ns = nullptr );
     ~dso( void );
     dso( const dso & ) = delete;
     dso &operator=( const dso & ) = delete;
@@ -35,8 +58,13 @@ public:
 
     bool valid( void ) const { return _handle != nullptr; }
 
+    /// Clear and unload this instance of the dso (remember the DSO may
+    /// continue to be resident if there are other references to it)
     void reset( void );
-    void load( const char *fn, bool makeGlobal = false );
+
+    /// @sa dso comments in the constructor about the optional namespace
+    void
+    load( const char *fn, bool makeGlobal = false, const char *ns = nullptr );
 
     // todo: provide this to support finding c++ signatures in a
     // generic C-friendly way?
