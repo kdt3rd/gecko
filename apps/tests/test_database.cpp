@@ -1,5 +1,5 @@
-// Copyright (c) 2015 Ian Godin
 // SPDX-License-Identifier: MIT
+// Copyright contributors to the gecko project.
 
 #include <base/contract.h>
 #include <base/format.h>

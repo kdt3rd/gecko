@@ -1,5 +1,5 @@
-// Copyright (c) 2016 Ian Godin
 // SPDX-License-Identifier: MIT
+// Copyright contributors to the gecko project.
 
 #include <imgproc/environment.h>
 #include <imgproc/expr.h>

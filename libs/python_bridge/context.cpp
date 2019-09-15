@@ -1,5 +1,5 @@
-// Copyright (c) 2017 Kimball Thurston
 // SPDX-License-Identifier: MIT
+// Copyright contributors to the gecko project.
 
 #if defined( HAVE_PYTHON2 ) || defined( HAVE_PYTHON3 )
 #    define HAVE_PYTHON 1

@@ -1,5 +1,5 @@
-// Copyright (c) 2017 Kimball Thurston
 // SPDX-License-Identifier: MIT
+// Copyright contributors to the gecko project.
 
 #include "menu.h"
 

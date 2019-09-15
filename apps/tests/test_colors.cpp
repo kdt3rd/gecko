@@ -1,5 +1,5 @@
-// Copyright (c) 2014-2017 Ian Godin
 // SPDX-License-Identifier: MIT
+// Copyright contributors to the gecko project.
 
 #include <draw/colors.h>
 #include <gui/application.h>

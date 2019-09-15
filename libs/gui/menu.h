@@ -1,5 +1,5 @@
-// Copyright (c) 2014-2018 Kimball Thurston and Ian Godin
 // SPDX-License-Identifier: MIT
+// Copyright contributors to the gecko project.
 
 #pragma once
 

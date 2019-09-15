@@ -1,5 +1,5 @@
-// Copyright (c) 2016 Kimball Thurston
 // SPDX-License-Identifier: MIT
+// Copyright contributors to the gecko project.
 
 #include "exr_writer.h"
 #if defined( HAVE_OPENEXR )

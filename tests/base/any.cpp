@@ -1,5 +1,5 @@
-// Copyright (c) 2017 Kimball Thurston
 // SPDX-License-Identifier: MIT
+// Copyright contributors to the gecko project.
 
 #include <base/any.h>
 #include <base/contract.h>

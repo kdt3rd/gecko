@@ -1,5 +1,5 @@
-// Copyright (c) 2014-2016 Ian Godin and Kimball Thurston
 // SPDX-License-Identifier: MIT
+// Copyright contributors to the gecko project.
 
 #include "cmd_line.h"
 

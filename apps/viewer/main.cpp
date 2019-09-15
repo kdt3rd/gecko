@@ -1,5 +1,5 @@
-// Copyright (c) 2016-2017 Ian Godin and Kimball Thurston
 // SPDX-License-Identifier: MIT
+// Copyright contributors to the gecko project.
 
 #include <base/cmd_line.h>
 #include <base/posix_file_system.h>

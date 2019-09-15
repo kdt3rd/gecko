@@ -1,5 +1,5 @@
-// Copyright (c) 2016 Kimball Thurston
 // SPDX-License-Identifier: MIT
+// Copyright contributors to the gecko project.
 
 #include "thread_util.h"
 #ifdef _WIN32

@@ -1,5 +1,5 @@
-// Copyright (c) 2018 Kimball Thurston
 // SPDX-License-Identifier: MIT
+// Copyright contributors to the gecko project.
 
 #ifndef GK_BASE_UNITS_H
 #    error                                                                     \

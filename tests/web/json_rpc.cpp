@@ -1,5 +1,5 @@
-// Copyright (c) 2015-2017 Ian Godin
 // SPDX-License-Identifier: MIT
+// Copyright contributors to the gecko project.
 
 #include <base/unit_test.h>
 #include <iostream>

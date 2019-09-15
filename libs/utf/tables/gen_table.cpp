@@ -1,5 +1,5 @@
-// Copyright (c) 2014 Ian Godin
 // SPDX-License-Identifier: MIT
+// Copyright contributors to the gecko project.
 
 #include "compressed_table.h"
 #include "xml.h"

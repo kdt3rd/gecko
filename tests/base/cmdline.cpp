@@ -1,5 +1,5 @@
-// Copyright (c) 2015-2017 Ian Godin
 // SPDX-License-Identifier: MIT
+// Copyright contributors to the gecko project.
 
 #include <base/cmd_line.h>
 #include <base/scope_guard.h>

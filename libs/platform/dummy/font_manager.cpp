@@ -1,5 +1,5 @@
-// Copyright (c) 2013-2017 Ian Godin and Kimball Thurston
 // SPDX-License-Identifier: MIT
+// Copyright contributors to the gecko project.
 
 #include "font_manager.h"
 

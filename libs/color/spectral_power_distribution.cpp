@@ -1,5 +1,5 @@
-// Copyright (c) 2018 Kimball Thurston
 // SPDX-License-Identifier: MIT
+// Copyright contributors to the gecko project.
 
 #include "spectral_power_distribution.h"
 

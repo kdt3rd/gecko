@@ -1,5 +1,5 @@
-// Copyright (c) 2012 Kimball Thurston
 // SPDX-License-Identifier: MIT
+// Copyright contributors to the gecko project.
 
 #include "pack.h"
 

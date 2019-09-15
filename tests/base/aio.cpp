@@ -1,5 +1,5 @@
-// Copyright (c) 2019 Kimball Thurston
 // SPDX-License-Identifier: MIT
+// Copyright contributors to the gecko project.
 
 #include <base/async_io.h>
 #include <base/contract.h>
