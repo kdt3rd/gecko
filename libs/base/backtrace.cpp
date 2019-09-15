@@ -3,11 +3,14 @@
 
 #include "backtrace.h"
 #ifdef _WIN32
+#    include <windows.h>
+#    include <assert.h>
+#    include <stdio.h>
+#    include <tchar.h>
 #    include <dbghelp.h>
 #    include <iomanip>
 #    include <sstream>
 #    include <vector>
-#    include <windows.h>
 #else
 #    include <execinfo.h>
 #endif
