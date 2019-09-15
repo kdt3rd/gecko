@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright contributors to the gecko project.
 
+#ifdef _WIN32
+
 #include "win32_file_system.h"
 
 #include "contract.h"
@@ -407,3 +409,5 @@ fs_watch win32_file_system::watch(
 ////////////////////////////////////////
 
 } // namespace base
+
+#endif // _WIN32

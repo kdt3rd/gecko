@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright contributors to the gecko project.
 
 include(GNUInstallDirs)
 
@@ -8,8 +10,9 @@ endif()
 set(GECKO_CXX_STANDARD "${tmpcxx}" CACHE STRING "C++ standard to use")
 unset(tmpcxx)
 
+# "Standard" (conventional) options in cmake projects, but put
+# the option here so cmake-gui shows it
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
-option(BUILD_TESTING "Enable test code" ON)
 
 set(CMAKE_DEBUG_POSTFIX "_d" CACHE STRING "Suffix for debug builds")
 
@@ -17,7 +20,23 @@ set(CMAKE_DEBUG_POSTFIX "_d" CACHE STRING "Suffix for debug builds")
 #set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include_directories(${PROJECT_SOURCE_DIR}/libs)
 
-set(GECKO_LIB_SUFFIX "-${GECKO_VERSION}" CACHE STRING "String added to all libraries")
+# including CTest adds the option for BUILD_TESTING which
+# always wins, but this enables building tests when including
+# as an external project (otherwise doesn't add the tests)
+option(GECKO_EXTERN_BUILD_TESTS "Enables building the tests when building as external project" OFF)
+# when tests are enabled based on the above and other tests, whether
+# they are included in the default build or if they are placed in
+# separate targets only
+option(GECKO_COMPILE_TESTS_BY_DEFAULT "Enables building the unit tests by default" OFF)
+
+# when including as an external library, whether to install static libs
+# or not (ignored when BUILD_SHARED_LIBS is ON)
+option(GECKO_EXTERN_INSTALL_STATIC_LIBS "Enables installing static libraries when building as an included external project" OFF)
+
+# similarly, whether to build the applications or not
+option(GECKO_EXTERN_BUILD_APPS "Enables building the applications when building as an included external project" OFF)
+
+set(GECKO_LIB_SUFFIX "-${PROJECT_VERSION}" CACHE STRING "String added to all libraries")
 set(GECKO_STATIC_LIB_SUFFIX "_static" CACHE STRING "Suffix for static libraries")
 
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
@@ -44,23 +63,3 @@ if(NOT TARGET Threads::Threads)
     message(FATAL_ERROR ": Threading library is required")
   endif()
 endif()
-
-#######################################
-
-function(GECKO_UNIT_TEST test_name)
-  set(options)
-  set(singleargs)
-  set(multiargs SOURCES LIBS ARGS)
-  cmake_parse_arguments(GK_CURTEST "${options}" "${singleargs}" "${multiargs}" ${ARGN})
-
-  string(REPLACE "." "_" testtarg test_${test_name})
-
-  add_executable(${testtarg} ${GK_CURTEST_SOURCES})
-  if(GK_CURTEST_LIBS)
-    target_link_libraries(${testtarg} ${GK_CURTEST_LIBS})
-  endif()
-
-  add_test(NAME ${test_name} COMMAND $<TARGET_FILE:${testtarg}> ${GK_CURTEST_ARGS})
-
-  add_dependencies(build_tests ${testtarg})
-endfunction()

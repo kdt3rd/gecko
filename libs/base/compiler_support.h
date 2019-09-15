@@ -12,7 +12,7 @@
 // we need at this point
 
 #if __cplusplus >= 201402L
-#    define PROPER_CONSTEXPR constexpr
+#    define GK_PROPER_CONSTEXPR constexpr
 #    define GK_DEPRECATE( repl )                                               \
         [[deprecated( "use " STRINGIZE( repl ) " instead" )]]
 #    if __cplusplus >= 201703L
@@ -25,9 +25,17 @@
 #        ifndef GK_CHECK_RETURN
 #            define GK_CHECK_RETURN [[nodiscard]]
 #        endif
+#        ifndef GK_CONSTEXPR_INLINE
+#            define GK_CONSTEXPR_INLINE inline
+#        endif
+#    else
+#        ifndef GK_CONSTEXPR_INLINE
+#            define GK_CONSTEXPR_INLINE
+#        endif
 #    endif
 #else
-#    define PROPER_CONSTEXPR
+#    define GK_PROPER_CONSTEXPR
+#    define GK_CONSTEXPR_INLINE
 #endif
 
 #if defined( __clang__ )

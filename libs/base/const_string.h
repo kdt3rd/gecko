@@ -90,6 +90,9 @@ public:
     constexpr const_string( const value_type *s, size_type N ) noexcept
         : _str( s ), _sz( N )
     {}
+    constexpr const_string( const value_type *s, const value_type *e ) noexcept
+        : _str( s ), _sz( static_cast<size_type>( e - s ) )
+    {}
     template <typename allocTs>
     constexpr const_string(
         const std::basic_string<charT, traitsT, allocTs> &s ) noexcept // NOLINT
@@ -120,13 +123,6 @@ public:
     constexpr const_string( S &&s ) noexcept // NOLINT
         : _str( s ), _sz( ctor_len( std::forward<S>( s ) ) )
     {}
-
-    ~const_string( void ) = default;
-
-    constexpr const_string( const const_string & ) noexcept = default;
-    constexpr const_string( const_string && ) noexcept      = default;
-    const_string &operator=( const const_string & ) noexcept = default;
-    const_string &operator=( const_string && ) noexcept = default; // NOLINT
 
     /// @brief cast operator to std::basic_string
     constexpr operator std::basic_string<charT, traitsT>( void ) const

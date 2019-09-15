@@ -12,6 +12,12 @@
 
 namespace base
 {
+
+////////////////////////////////////////
+
+ini_section::ini_section( const std::string &name ) : _name( name )
+{}
+
 ////////////////////////////////////////
 
 void ini_section::parse( std::string v )

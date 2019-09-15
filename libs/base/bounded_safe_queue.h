@@ -7,6 +7,7 @@
 
 #include <atomic>
 #include <memory>
+#include <new>
 
 ////////////////////////////////////////
 
@@ -190,10 +191,11 @@ public:
 private:
     bounded_safe_queue( const bounded_safe_queue & ) = delete;
     bounded_safe_queue &operator=( const bounded_safe_queue & ) = delete;
-#if __cplusplus > 201402L
+#if ( _MSC_VER >= 1911 ) || ( __cpp_lib_hardware_interference_size >= 201603 )
     inline constexpr size_t alignment_offset =
         std::hardware_destructive_interference_size;
 #else
+    // TODO: find correct value for other HW types
     static constexpr size_t alignment_offset = 64;
 #endif
     struct storage_t

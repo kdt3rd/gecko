@@ -14,6 +14,7 @@
 #include <tuple>
 #include <type_traits>
 #include <vector>
+#include <functional>
 
 ////////////////////////////////////////
 
@@ -134,6 +135,8 @@ public:
         return static_cast<value_type>( _hash );
     }
 
+    constexpr value_type hash( void ) const { return _hash; }
+
     template <size_t N>
     constexpr static inline fnv1a compute( const uint8_t *v ) noexcept
     {
@@ -157,7 +160,7 @@ template <
     typename charT,
     typename traitsT = std::char_traits<charT>,
     typename allocT  = std::allocator<charT>>
-fnv1a<T> &
+inline fnv1a<T> &
 operator<<( fnv1a<T> &h, const std::basic_string<charT, traitsT, allocT> &v )
 {
     h.add( v.c_str(), v.size() * sizeof( charT ) );
@@ -168,7 +171,8 @@ template <
     typename T,
     typename charT,
     typename traitsT = std::char_traits<charT>>
-fnv1a<T> &operator<<( fnv1a<T> &h, const const_string<charT, traitsT> &v )
+inline fnv1a<T> &
+operator<<( fnv1a<T> &h, const const_string<charT, traitsT> &v )
 {
     h.add( v.c_str(), v.size() * sizeof( charT ) );
     return h;
@@ -183,7 +187,7 @@ template <typename T> inline fnv1a<T> &operator<<( fnv1a<T> &h, const char *s )
 // hrm, hashing w/ hash values, how meta... be careful doing this -
 // check the mixing
 template <typename T, typename Tx>
-fnv1a<T> &operator<<( fnv1a<T> &h, const fnv1a<Tx> &x )
+inline fnv1a<T> &operator<<( fnv1a<T> &h, const fnv1a<Tx> &x )
 {
     h << x();
     return h;
@@ -279,3 +283,20 @@ using fnv1a_32 = fnv1a<uint32_t>;
 using fnv1a_64 = fnv1a<uint64_t>;
 
 } // namespace base
+
+namespace std
+{
+// overload std::hash
+template <typename charT, typename traitsT>
+struct hash<base::const_string<charT, traitsT>>
+{
+    typedef base::const_string<charT, traitsT> argument_type;
+    typedef std::size_t                        result_type;
+    inline result_type operator()( argument_type const &s ) const noexcept
+    {
+        base::fnv1a<result_type> hfunc;
+        hfunc.add( s.c_str(), s.size() * sizeof( char ) );
+        return static_cast<result_type>( hfunc.hash() );
+    }
+};
+} // namespace std

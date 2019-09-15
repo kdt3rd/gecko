@@ -1,19 +1,66 @@
+# SPDX-License-Identifier: MIT
+# Copyright contributors to the gecko project.
 
-add_library(base
-  any.cpp
-  cmd_line.cpp
-  contract.cpp
-  format.cpp
-  string_util.cpp
-  unit_test.cpp
-  )
-
-target_compile_features(base PUBLIC cxx_std_${GECKO_CXX_STANDARD})
-
-set_target_properties(base PROPERTIES
-  CXX_STANDARD_REQUIRED ON
-  CXX_EXTENSIONS OFF
-  POSITION_INDEPENDENT_CODE ON
+gecko_library_declare(base
+  SOURCES
+    allocator.cpp
+    any.cpp
+    async_io.cpp
+    backtrace.cpp
+    base64.cpp
+    cmd_line.cpp
+    compiler_abi.cpp
+    context.cpp
+    contract.cpp
+    cpu_features.cpp
+    dso.cpp
+    env.cpp
+    event.cpp
+    file_path.cpp
+    file_system.cpp
+    format.cpp
+    fs_watch.cpp
+    half.cpp
+    ini.cpp
+    json.cpp
+    language.cpp
+    loadable.cpp
+    math_functions.cpp
+    pack.cpp
+    pipe.cpp
+    posix_file_system.cpp
+    process.cpp
+    ratio.cpp
+    sha160.cpp
+    sha256.cpp
+    skein512.cpp
+    shared_mutex.cpp
+    spooky_hash.cpp
+    string_pool.cpp
+    string_util.cpp
+    string_variable_util.cpp
+    thread_pool.cpp
+    thread_util.cpp
+    time_util.cpp
+    unit_test.cpp
+    unix_streambuf.cpp
+    uri.cpp
+    user_info.cpp
+    variable_set.cpp
+    wait.cpp
+    win32_file_system.cpp
+    win32_streambuf.cpp
+  PUBLIC_HEADERS
+    any.h
+    ansi.h
+    cmd_line.h
+    compiler_support.h
+    const_string.h
+    contract.h
+    format.h
+    likely.h
+    string_split.h
+    string_util.h
+  DEPENDENCIES
+    gecko::config Threads::Threads
 )
-
-add_library(Gecko::Base ALIAS base)

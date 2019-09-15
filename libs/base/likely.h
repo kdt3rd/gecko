@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "compiler_support.h"
+
 ////////////////////////////////////////
 
 // bleh, everyone and their uncle defines these, but there's no

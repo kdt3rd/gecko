@@ -69,7 +69,7 @@ public:
             cur, head, std::memory_order_release, std::memory_order_relaxed ) );
     }
 
-    value_type *try_pop( void )
+    inline value_type *try_pop( void )
     {
         lf_head cur = _head.load( std::memory_order_acquire );
         lf_head head;
@@ -87,13 +87,13 @@ public:
         return cur.ptr;
     }
 
-    void clear( void )
+    inline void clear( void )
     {
         lf_head head;
         _head.store( head );
     }
 
-    value_type *unsafe_front( void ) const
+    inline value_type *unsafe_front( void ) const
     {
         return _head.load( std::memory_order_relaxed ).ptr;
     }

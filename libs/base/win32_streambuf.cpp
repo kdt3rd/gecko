@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright contributors to the gecko project.
 
+#ifdef _WIN32
+
 #include "win32_streambuf.h"
 
 #include "contract.h"
@@ -325,3 +327,5 @@ void win32_streambuf::initFile( std::ios_base::openmode m )
 ////////////////////////////////////////
 
 } // namespace base
+
+#endif // _WIN32

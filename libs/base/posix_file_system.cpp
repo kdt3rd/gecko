@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright contributors to the gecko project.
 
+#ifndef _WIN32
+
 #include "posix_file_system.h"
 
 #include "contract.h"
@@ -588,3 +590,5 @@ fs_watch posix_file_system::watch(
 ////////////////////////////////////////
 
 } // namespace base
+
+#endif // _WIN32

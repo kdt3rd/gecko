@@ -179,7 +179,7 @@ int safemain( int argc, char *argv[] )
         constexpr int aBUFSIZE = 1024;
         char          buf[aBUFSIZE];
         uint64_t      hash[8];
-        for ( int i = 0; i != aBUFSIZE; ++i )
+        for ( int i = 0; i != (aBUFSIZE-8); ++i )
         {
             for ( int j = 0; j != 8; ++j )
             {
