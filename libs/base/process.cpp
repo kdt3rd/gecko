@@ -5,7 +5,6 @@
 
 #include "scope_guard.h"
 #include "stream.h"
-#include "unix_streambuf.h"
 
 #include <condition_variable>
 #include <map>
@@ -19,6 +18,7 @@
 #    include <sys/types.h>
 #    include <sys/wait.h>
 #    include <unistd.h>
+#    include "unix_streambuf.h"
 #endif
 
 namespace base

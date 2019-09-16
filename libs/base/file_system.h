@@ -43,6 +43,9 @@ public:
     constexpr static std::ios_base::openmode file_write_mode =
         ( std::ios_base::out | std::ios_base::trunc | std::ios_base::binary );
 
+#ifdef _WIN32
+    using mode_t = uint32_t;
+#endif
     constexpr static mode_t default_dir_mode = mode_t( 0777 );
 
     virtual ~file_system( void );

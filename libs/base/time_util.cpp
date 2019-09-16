@@ -25,14 +25,16 @@ std::string as_ISO8601( std::chrono::system_clock::time_point tp )
     // don't use std::localtime as it is not thread safe
     // according to docs, need to call tzset first to make sure it's initialized
     // when using _r functions
-    tzset();
+
     struct tm ltime;
 #ifdef _WIN32
+    _tzset();
     struct tm *ltimep = &ltime;
     errno_t    e      = localtime_s( ltimep, &stime );
     if ( e != 0 )
         throw_errno( "Unable to convert to local time" );
 #else
+    tzset();
     struct tm *ltimep = localtime_r( &stime, &ltime );
 #endif
 

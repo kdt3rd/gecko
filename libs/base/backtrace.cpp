@@ -13,11 +13,11 @@
 #    include <vector>
 #else
 #    include <execinfo.h>
+#    include <unistd.h>
 #endif
 #include "scope_guard.h"
 
 #include <memory>
-#include <unistd.h>
 
 #ifdef _WIN32
 int backtrace( void **stack, int n )

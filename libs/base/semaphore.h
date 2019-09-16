@@ -60,7 +60,7 @@ public:
 
 private:
 #ifdef _WIN32
-    void *_sem = static_cast<void *>( -1 );
+    HANDLE _sem = INVALID_HANDLE_VALUE;
 #elif defined( __MACH__ )
     semaphore_t   _sem;
 #elif defined( __unix__ )

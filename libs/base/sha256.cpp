@@ -155,17 +155,20 @@ std::string sha256::hash_string( void )
 {
     if ( !_finalized )
         finalize();
+    static char hex_table[16] { '0', '1', '2', '3', '4', '5', '6', '7',
+                                '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
     std::string result;
     uint8_t     buf[4];
-    char        tmp[3];
+
     for ( size_t i = 0; i < 8; i++ )
     {
         unpack32( _hash[i], buf );
 
         for ( size_t j = 0; j < 4; ++j )
         {
-            sprintf( tmp, "%02x", uint32_t( buf[j] ) );
-            result.append( tmp, tmp + 2 );
+            uint8_t bv = buf[j];
+            result.push_back( hex_table[bv >> 4] );
+            result.push_back( hex_table[bv & 0xf] );
         }
     }
 
