@@ -304,7 +304,7 @@ std::string skein512::hash_string( void )
 
     for ( size_t i = 0; i < _hash.size(); ++i )
     {
-        uint8_t hv = _hash[j];
+        uint8_t hv = _hash[i];
         result.push_back( hex_table[hv >> 4] );
         result.push_back( hex_table[hv & 0xf] );
     }
