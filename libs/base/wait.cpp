@@ -3,7 +3,9 @@
 
 #include "wait.h"
 #ifdef _WIN32
+#    define NOMINMAX
 #    include <windows.h>
+#    undef NOMINMAX
 #else
 #    include <sys/select.h>
 #endif

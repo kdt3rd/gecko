@@ -56,7 +56,7 @@ int64_t local_offset_to_UTC( void )
     struct tm ltime, gtime;
 #ifdef _WIN32
     _tzset();
-    errno_t e = gmtime_s( &ltime, &gtime );
+    errno_t e = gmtime_s( &gtime, &stime );
     if ( e != 0 )
         throw_errno( "Unable to convert to GMT" );
     e = localtime_s( &ltime, &stime );

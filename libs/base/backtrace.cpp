@@ -12,6 +12,7 @@
 #    include <iomanip>
 #    include <sstream>
 #    include <vector>
+#    define STDERR_FILENO _fileno( stderr )
 #else
 #    include <execinfo.h>
 #    include <unistd.h>
@@ -95,7 +96,7 @@ void backtrace( void )
 {
     void *array[10];
     int   size = ::backtrace( array, 10 );
-    ::backtrace_symbols_fd( array, size, fileno( stderr ) );
+    ::backtrace_symbols_fd( array, size, STDERR_FILENO );
 }
 
 ////////////////////////////////////////
