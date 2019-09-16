@@ -45,7 +45,7 @@ void backtrace_symbols_fd( void *const *stack, int n, int fd )
             << std::setw( 8 ) << std::setfill( '0' ) << symbol->Address
             << std::dec << '\n';
         std::string outb = msg.str();
-        _write( fd, outb.c_str(), outb.size() );
+        (void)_write( fd, outb.c_str(), static_cast<unsigned int>( outb.size() ) );
     }
 }
 

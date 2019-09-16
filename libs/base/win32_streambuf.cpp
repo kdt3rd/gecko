@@ -5,7 +5,9 @@
 
 #include "win32_streambuf.h"
 
+#define NOMINMAX
 #include <windows.h>
+#undef NOMINMAX
 
 #include "contract.h"
 

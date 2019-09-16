@@ -63,7 +63,7 @@ if(BUILD_TESTING AND (GECKO_EXTERN_BUILD_TESTS OR CMAKE_SOURCE_DIR STREQUAL PROJ
   add_subdirectory(tests EXCLUDE_FROM_ALL)
   
   add_custom_target(run_tests
-    COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIG> -E "slow.*"
+    COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIG> --output-on-failure -E "slow.*"
     VERBATIM
   )
   add_dependencies(run_tests build_tests)

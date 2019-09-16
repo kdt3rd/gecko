@@ -68,7 +68,7 @@ private:
 
     void initFile( std::ios_base::openmode m );
 
-    void       *_f = -1;
+    void       *_f = reinterpret_cast<void *>( intptr_t(-1) );
     std::string _path;
 };
 
