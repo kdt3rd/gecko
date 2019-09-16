@@ -300,7 +300,7 @@ std::string skein512::hash_string( void )
                                '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
     std::string result;
-    result.reserve( _hash_size() * 2 );
+    result.reserve( _hash.size() * 2 );
 
     for ( size_t i = 0; i < _hash.size(); ++i )
     {
