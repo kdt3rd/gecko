@@ -47,7 +47,7 @@ endif()
 # MSVC Does not enable stack unwinding by default, which seems
 # criminal in a modern era
 if(MSVC)
-  target_compile_options(${PROJECT_NAME}_config PUBLIC "/EHsc")
+  target_compile_options(${PROJECT_NAME}_config INTERFACE "/EHsc")
 endif()
 if(WIN32)
   target_link_libraries(${PROJECT_NAME}_config INTERFACE kernel32)
