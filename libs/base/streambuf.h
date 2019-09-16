@@ -194,14 +194,14 @@ protected:
     /// @brief Perform a read from the underlying store
     virtual std::streamsize read( void * /*outBuf*/, size_t /*numBytes*/ )
     {
-        return ssize_t( -1 );
+        return std::streamsize( -1 );
     }
 
     /// @brief Perform a write to the underlying store
     virtual std::streamsize
     write( const void * /*outBuf*/, size_t /*numBytes*/ )
     {
-        return ssize_t( -1 );
+        return std::streamsize( -1 );
     }
 
     virtual std::streamsize writev(

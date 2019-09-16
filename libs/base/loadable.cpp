@@ -1,8 +1,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright contributors to the gecko project.
 
+#include "loadable.h"
+
 #ifdef _WIN32
+#    define NOMINMAX
 #    include <windows.h>
+#    undef NOMINMAX
 #else
 #    ifdef __linux__
 #        ifndef _GNU_SOURCE
@@ -12,8 +16,8 @@
 #    include <atomic>
 #    include <dlfcn.h>
 #endif
+
 #include "contract.h"
-#include "loadable.h"
 
 ////////////////////////////////////////
 

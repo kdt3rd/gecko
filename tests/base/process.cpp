@@ -23,7 +23,7 @@ int safemain( int argc, char *argv[] )
 
 #ifndef _WIN32
     signal( SIGPIPE, SIG_IGN );
-#endif
+
     try
     {
         options.parse( argc, argv );
@@ -52,11 +52,7 @@ int safemain( int argc, char *argv[] )
     test["cat"] = [&]( void ) {
         base::process proc;
         proc.set_pipe( true, true, false );
-#ifdef __APPLE__
         proc.execute( "/bin/cat", {} );
-#else
-        proc.execute( "/usr/bin/cat", {} );
-#endif
         test.message( "pid {0}", proc.id() );
         {
             std::ostream &inp = proc.std_in();
@@ -77,11 +73,7 @@ int safemain( int argc, char *argv[] )
     test["error"] = [&]( void ) {
         base::process proc;
         proc.set_pipe( true, true, true );
-#ifdef __APPLE__
         proc.execute( "/bin/cat", { "/tmp/doesnt_exist" } );
-#else
-        proc.execute( "/usr/bin/cat", { "/tmp/doesnt_exist" } );
-#endif
 
         test.message( "pid {0}", proc.id() );
 
@@ -97,6 +89,7 @@ int safemain( int argc, char *argv[] )
 
     test.run( options );
     test.clean();
+#endif
 
     return -static_cast<int>( test.failure_count() );
 }

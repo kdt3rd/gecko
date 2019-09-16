@@ -296,12 +296,17 @@ std::string skein512::hash_string( void )
     if ( !_finalized )
         finalize( _hash );
 
+    static char hex_table[16]{ '0', '1', '2', '3', '4', '5', '6', '7',
+                               '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+
     std::string result;
-    char        tmp[3];
+    result.reserve( _hash_size() * 2 );
+
     for ( size_t i = 0; i < _hash.size(); ++i )
     {
-        sprintf( tmp, "%02x", uint32_t( _hash[i] ) );
-        result.append( tmp, tmp + 2 );
+        uint8_t hv = _hash[j];
+        result.push_back( hex_table[hv >> 4] );
+        result.push_back( hex_table[hv & 0xf] );
     }
 
     return result;

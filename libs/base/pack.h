@@ -16,7 +16,9 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <cmath>
 #include <vector>
+#include <algorithm>
 
 namespace base
 {

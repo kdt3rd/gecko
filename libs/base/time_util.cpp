@@ -52,17 +52,18 @@ int64_t local_offset_to_UTC( void )
     // don't use std::localtime as it is not thread safe
     // according to docs, need to call tzset first to make sure it's initialized
     // when using _r functions
-    tzset();
 
     struct tm ltime, gtime;
 #ifdef _WIN32
-    errno_t e = gmtime_s( &ltime, &stime );
+    _tzset();
+    errno_t e = gmtime_s( &ltime, &gtime );
     if ( e != 0 )
         throw_errno( "Unable to convert to GMT" );
     e = localtime_s( &ltime, &stime );
     if ( e != 0 )
         throw_errno( "Unable to convert to local time" );
 #else
+    tzset();
     gmtime_r( &stime, &gtime );
     localtime_r( &stime, &ltime );
 #endif

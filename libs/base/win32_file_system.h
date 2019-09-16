@@ -26,16 +26,8 @@ public:
 
     directory_iterator readdir( const uri &path ) override;
 
-    void mkdir(
-        const uri &path,
-        mode_t     mode = mode_t(
-            S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP |
-            S_IROTH | S_IWOTH | S_IXOTH ) ) override;
-    void mkdir_all(
-        const uri &path,
-        mode_t     mode = mode_t(
-            S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP |
-            S_IROTH | S_IWOTH | S_IXOTH ) ) override;
+    void mkdir( const uri &path, mode_t mode = mode_t( 0777 ) ) override;
+    void mkdir_all( const uri &path, mode_t mode = mode_t( 0777 ) ) override;
 
     void rmdir( const uri &path ) override;
     void unlink( const uri &path ) override;

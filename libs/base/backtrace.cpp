@@ -3,6 +3,7 @@
 
 #include "backtrace.h"
 #ifdef _WIN32
+#    include <io.h>
 #    include <windows.h>
 #    include <assert.h>
 #    include <stdio.h>
@@ -94,7 +95,7 @@ void backtrace( void )
 {
     void *array[10];
     int   size = ::backtrace( array, 10 );
-    ::backtrace_symbols_fd( array, size, STDERR_FILENO );
+    ::backtrace_symbols_fd( array, size, fileno( stderr ) );
 }
 
 ////////////////////////////////////////

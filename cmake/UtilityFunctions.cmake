@@ -6,7 +6,7 @@
 ### Boiler plate around defining a simple program
 ### and adding that to the list of tests to run
 function(GECKO_UNIT_TEST testsrc)
-  set(options SLOW)
+  set(options SLOW DISABLE)
   set(singleargs LIB)
   set(multiargs EXTRA_SOURCES EXTRA_LIBS ARGS)
   cmake_parse_arguments(GK_CURTEST "${options}" "${singleargs}" "${multiargs}" ${ARGN})
@@ -32,6 +32,9 @@ function(GECKO_UNIT_TEST testsrc)
   endif()
 
   add_test(NAME ${uniqtestname} COMMAND $<TARGET_FILE:${testtarg}> ${GK_CURTEST_ARGS})
+  if(GK_CURTEST_DISABLE)
+    set_tests_properties(${uniqtestname} PROPERTIES DISABLED true)
+  endif()
   add_dependencies(build_tests ${testtarg})
 endfunction()
 
