@@ -8,10 +8,10 @@ include(CheckCXXSourceCompiles)
 include(CheckCXXCompilerFlag)
 include(CheckSymbolExists)
 
-check_include_file(inttypes.h HAVE_INTTYPES_H)
-check_include_file(sys/time.h HAVE_SYS_TIME_H)
-check_include_file(unistd.h HAVE_UNISTD_H)
-check_include_file(windows.h HAVE_WINDOWS_H)
+#check_include_file(inttypes.h HAVE_INTTYPES_H)
+#check_include_file(sys/time.h HAVE_SYS_TIME_H)
+#check_include_file(unistd.h HAVE_UNISTD_H)
+#check_include_file(windows.h HAVE_WINDOWS_H)
 
 set(GECKO_LIB_DEPENDENCIES ${CMAKE_DL_LIBS})
 

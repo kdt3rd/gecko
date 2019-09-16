@@ -38,7 +38,7 @@ int safemain( int argc, char *argv[] )
 
         try
         {
-            base::locale::set( "en_US" );
+            base::locale::set( "C" );
             strtest.success( "set language to C" );
         }
         catch ( std::exception &e )

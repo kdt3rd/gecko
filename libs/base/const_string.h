@@ -297,11 +297,17 @@ public:
 
     constexpr const_string substr( size_type pos = 0, size_type n = npos ) const
     {
+#if ( __cplusplus > 201402L )
+        if ( pos > _sz )
+            throw std::out_of_range( "Invalid start position for constant string" );
+        return const_string( _str + pos, std::min( n, _sz - pos ) );
+#else
         return (
             pos <= _sz
                 ? const_string( _str + pos, ( n < _sz - pos ) ? n : _sz - pos )
                 : throw std::out_of_range(
                       "Invalid start position for constant string" ) );
+#endif
     }
 
     std::basic_string<value_type, traits_type> str( void ) const
