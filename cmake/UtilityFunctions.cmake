@@ -77,11 +77,6 @@ function(GECKO_LIBRARY_DECLARE libname)
     CXX_EXTENSIONS OFF
     POSITION_INDEPENDENT_CODE ON
   )
-  # MSVC Does not enable stack unwinding by default, which seems
-  # criminal in a modern era
-  if (MSVC)
-    target_compile_options(${uniqname} PUBLIC "/EHsc")
-  endif()
   set_property(TARGET ${uniqname} PROPERTY PUBLIC_HEADER ${GK_CURLIB_PUBLIC_HEADERS})
 
 # TODO: Handle shared libraries, and either set the execpath

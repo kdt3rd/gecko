@@ -30,6 +30,7 @@
 #endif
 
 #include "memory_map.h"
+#include "file_path.h"
 
 ////////////////////////////////////////
 

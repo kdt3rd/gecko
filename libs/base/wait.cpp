@@ -2,7 +2,9 @@
 // Copyright contributors to the gecko project.
 
 #include "wait.h"
-#ifndef _WIN32
+#ifdef _WIN32
+#    include <windows.h>
+#else
 #    include <sys/select.h>
 #endif
 #include "contract.h"

@@ -13,8 +13,8 @@
 #include <memory>
 
 /// @TODO: should we add our own stat / file_info buffer?
-#include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #if defined( _WIN32 )
 #    ifdef NO_OLDNAMES
 struct stat : public struct _stat64
@@ -43,9 +43,7 @@ public:
     constexpr static std::ios_base::openmode file_write_mode =
         ( std::ios_base::out | std::ios_base::trunc | std::ios_base::binary );
 
-    constexpr static mode_t default_dir_mode = mode_t(
-        S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH |
-        S_IWOTH | S_IXOTH );
+    constexpr static mode_t default_dir_mode = mode_t( 0777 );
 
     virtual ~file_system( void );
 
@@ -91,9 +89,9 @@ public:
     ///        specified mode.
     ///
     /// The mode should be either a bitwise OR of R_OK, W_OK, X_OK, or
-    /// the value F_OK
+    /// the value F_OK (not defined under windows, but 0)
     virtual bool access( const uri &path, int mode ) = 0;
-    inline bool  exists( const uri &path ) { return access( path, F_OK ); }
+    inline bool  exists( const uri &path ) { return access( path, /*F_OK*/0 ); }
 
     /// @brief Retrieves an iterator providing access to the entries
     /// in the provided path as a directory

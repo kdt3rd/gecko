@@ -7,7 +7,6 @@
 #include "uri.h"
 
 #include <string>
-#include <windows.h>
 
 ////////////////////////////////////////
 
@@ -29,7 +28,7 @@ public:
 
     win32_streambuf(
         std::ios_base::openmode m,
-        HANDLE                  f,
+        void                   *f,
         bool                    doDup,
         const std::string &     path  = std::string(),
         std::streamsize         bufSz = 0 );
@@ -69,7 +68,7 @@ private:
 
     void initFile( std::ios_base::openmode m );
 
-    HANDLE      _f = INVALID_HANDLE_VALUE;
+    void       *_f = static_cast<void *>(-1);;
     std::string _path;
 };
 

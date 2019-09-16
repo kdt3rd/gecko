@@ -7,7 +7,9 @@
 #include <tuple>
 #include <type_traits>
 #ifdef _WIN32
+#    define NOMINMAX
 #    include <windows.h>
+#    undef NOMINMAX
 #else
 #    include <pthread.h>
 #endif

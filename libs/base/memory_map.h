@@ -10,7 +10,9 @@
 #    include <sys/mman.h>
 #    include <unistd.h>
 #else
+#    define NOMINMAX
 #    include <windows.h>
+#    undef NOMINMAX
 #endif
 
 #include "contract.h"

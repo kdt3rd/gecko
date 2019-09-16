@@ -5,6 +5,8 @@
 
 #include "win32_streambuf.h"
 
+#include <windows.h>
+
 #include "contract.h"
 
 ////////////////////////////////////////

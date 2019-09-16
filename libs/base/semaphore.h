@@ -8,7 +8,9 @@
 #include <atomic>
 
 #ifdef _WIN32
+#    define NOMINMAX
 #    include <windows.h>
+#    undef NOMINMAX
 #elif defined( __MACH__ )
 #    include <mach/mach.h>
 #elif defined( __unix__ )
@@ -58,7 +60,7 @@ public:
 
 private:
 #ifdef _WIN32
-    HANDLE _sem = INVALID_HANDLE_VALUE;
+    void *_sem = static_cast<void *>( -1 );
 #elif defined( __MACH__ )
     semaphore_t   _sem;
 #elif defined( __unix__ )

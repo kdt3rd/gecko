@@ -17,7 +17,9 @@
 #    include <unistd.h>
 #    define GK_ASYNC_USE_KQUEUE 1
 #elif defined( _WIN32 )
+#    define NOMINMAX
 #    include <windows.h>
+#    undef NOMINMAX
 #endif
 
 ////////////////////////////////////////

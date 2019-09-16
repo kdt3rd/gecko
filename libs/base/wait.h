@@ -3,9 +3,8 @@
 
 #pragma once
 
-#ifdef _WIN32
-#    include <windows.h>
-#endif
+#include <cstdint>
+#include <cstddef>
 #include <vector>
 
 ////////////////////////////////////////
@@ -22,14 +21,14 @@ class wait
 {
 public:
 #ifdef _WIN32
-    using wait_type                     = LONG_PTR;
-    using poll_type                     = HANDLE;
-    static const wait_type INVALID_WAIT = LONG_PTR( -1 );
+    using wait_type = intptr_t;
+    using poll_type = void *;
 #else
-    using wait_type                         = int;
-    using poll_type                         = int;
-    static constexpr wait_type INVALID_WAIT = -1;
+    using wait_type = int;
+    using poll_type = int;
 #endif
+    static constexpr wait_type INVALID_WAIT = wait_type( -1 );
+
     wait( void ) = default;
     wait( wait_type w ) : _w( w ) {}
     wait( const wait & ) = default;
