@@ -22,6 +22,10 @@ struct stat : public struct _stat64
 using stat64 = _stat64;
 struct statvfs;
 #    endif
+#    define S_ISDIR( m ) ( (m) & _S_IFDIR )
+#    define F_OK 00
+#    define R_OK 04
+#    define W_OK 02
 #else
 #    include <sys/statvfs.h>
 #    include <unistd.h>
@@ -94,7 +98,7 @@ public:
     /// The mode should be either a bitwise OR of R_OK, W_OK, X_OK, or
     /// the value F_OK (not defined under windows, but 0)
     virtual bool access( const uri &path, int mode ) = 0;
-    inline bool  exists( const uri &path ) { return access( path, /*F_OK*/0 ); }
+    inline bool  exists( const uri &path ) { return access( path, F_OK ); }
 
     /// @brief Retrieves an iterator providing access to the entries
     /// in the provided path as a directory

@@ -77,11 +77,7 @@ void file_system::rmdir_all( const uri &path )
 {
     struct stat buf;
     lstat( path, &buf );
-#ifdef _WIN32
-    if ( buf.st_mode & _S_IFDIR )
-#else
     if ( S_ISDIR( buf.st_mode ) )
-#endif
     {
         std::vector<uri> paths;
         {
