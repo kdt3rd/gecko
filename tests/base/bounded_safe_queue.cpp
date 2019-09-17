@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <thread>
+#include <random>
 #ifndef _WIN32
 #    include <signal.h>
 #endif
@@ -16,8 +17,9 @@ namespace
 {
 void producer( base::bounded_safe_queue<size_t> &q, size_t n, size_t id )
 {
-    unsigned int seed = id;
-    unsigned int xx   = rand_r( &seed ) % 100;
+    std::mt19937_64                       rng( id );
+    std::uniform_int_distribution<size_t> distrib( 0, 100 );
+    unsigned int                          xx = distrib( rng );
     while ( xx > 0 )
     {
         std::this_thread::yield();
@@ -33,8 +35,9 @@ void producer( base::bounded_safe_queue<size_t> &q, size_t n, size_t id )
 
 void consumer( base::bounded_safe_queue<size_t> &q, size_t n, size_t id )
 {
-    unsigned int seed = id;
-    unsigned int xx   = rand_r( &seed ) % 100;
+    std::mt19937_64                       rng( id );
+    std::uniform_int_distribution<size_t> distrib( 0, 100 );
+    unsigned int                          xx = distrib( rng );
     while ( xx > 0 )
     {
         std::this_thread::yield();

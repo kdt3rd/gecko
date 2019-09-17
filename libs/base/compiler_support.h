@@ -58,11 +58,16 @@
 #elif defined( _MSC_VER )
 
 #    ifndef GK_DEPRECATE
-#        define GK_DEPRECATE( replmsg ) __declspec( deprecated )
+#        define GK_DEPRECATE( replmsg ) [[deprecated]]
 #    endif
 #    define TODO( x )                                                          \
         __pragma( STRINGIZE(                                                   \
             message( x " at line " DEFER( STRINGIZE, __LINE__ ) ) ) )
+
+#    define GK_EMIT_PRAGMA( x ) __pragma( x )
+#    define GK_IGNORE_WARNING_BEGIN __pragma( warning(push, 0) )
+#    define GK_IGNORE_WARNING_END __pragma( warning(pop) )
+#    define GK_IGNORE_WARNINGS
 
 #elif defined( __GNUC__ ) || defined( __INTEL_COMPILER )
 

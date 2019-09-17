@@ -133,8 +133,10 @@ constexpr inline bool begins_with(
 
 ////////////////////////////////////////
 
-template <typename stringT>
-inline bool ends_with( const stringT &s, const stringT &end )
+template <typename CharT, typename TraitsT>
+inline bool ends_with(
+    const std::basic_string<CharT, TraitsT> &s,
+    const std::basic_string<CharT, TraitsT> &end )
 {
     if ( GK_UNLIKELY( end.empty() ) )
         return true;
@@ -145,13 +147,12 @@ inline bool ends_with( const stringT &s, const stringT &end )
     return s.compare( s.size() - end.size(), end.size(), end ) == 0;
 }
 
-template <typename stringT>
+template <typename CharT, typename TraitsT>
 inline bool ends_with(
-    const stringT &s,
-    const const_string<
-        typename stringT::value_type,
-        typename stringT::traits_type> &end )
+    const std::basic_string<CharT, TraitsT> &s,
+    const CharT *endS )
 {
+    const_string<CharT, TraitsT> end( endS );
     if ( GK_UNLIKELY( end.empty() ) )
         return true;
 
@@ -173,6 +174,14 @@ constexpr inline bool ends_with(
                      ? false
                      : ( s.compare( s.size() - end.size(), end.size(), end ) ==
                          0 );
+}
+
+template <typename CharT, typename TraitsT>
+constexpr inline bool ends_with(
+    const const_string<CharT, TraitsT> &s,
+    const CharT *endS )
+{
+    return ends_with( s, const_string<CharT, TraitsT>( endS ) );
 }
 
 ////////////////////////////////////////

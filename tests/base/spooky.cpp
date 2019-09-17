@@ -240,7 +240,7 @@ int safemain( int argc, char *argv[] )
                         uint8_t buf2[dBUFSIZE];
                         int     done = 1;
                         for ( int l = 0; l != h; ++l )
-                            buf1[l] = buf2[l] = random.value();
+                            buf1[l] = buf2[l] = static_cast<uint8_t>( random.value() );
 
                         buf1[i / 8] ^= ( 1 << ( i % 8 ) );
                         if ( j != i )

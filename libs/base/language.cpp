@@ -7,6 +7,8 @@
 #include <cstdlib>
 #include <locale>
 
+#include "env.h"
+
 #ifdef _WIN32
 #    include <algorithm>
 #    include <iostream>
@@ -70,17 +72,14 @@ std::string language( void )
 
     if ( n.empty() )
     {
-        const char *envP = std::getenv( "LC_CTYPE" );
-        if ( envP && envP[0] )
-            return std::string( envP );
-        envP = std::getenv( "LC_ALL" );
-        if ( envP && envP[0] )
-            return std::string( envP );
-        envP = std::getenv( "LANG" );
-        if ( envP && envP[0] )
-            return std::string( envP );
-
-        return std::string();
+        std::string envP = env::global().get( "LC_CTYPE");
+        if ( envP.empty() )
+        {
+            envP = env::global().get( "LC_ALL" );
+            if ( envP.empty() )
+                envP = env::global().get( "LANG" );
+        }
+        return envP;
     }
 
     std::string::size_type nPos = n.find( "LC_NAME=" );
