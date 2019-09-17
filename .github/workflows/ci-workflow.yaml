@@ -58,7 +58,7 @@ jobs:
         cmake ..
     - name: Compile
       shell: bash
-      run: cmake --build _build --config RelWithDebInfo -j 4
+      run: cmake --build _build --config RelWithDebInfo
     - name: Build Tests
       shell: bash
       run: cmake --build _build -t build_tests --config RelWithDebInfo -j 4

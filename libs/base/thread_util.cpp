@@ -3,8 +3,8 @@
 
 #include "thread_util.h"
 #ifdef _WIN32
-#    include <tchar.h>
 #    include <windows.h>
+#    include <tchar.h>
 #else
 #    include <unistd.h>
 #endif

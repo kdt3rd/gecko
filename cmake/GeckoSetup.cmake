@@ -9,6 +9,7 @@ if(CMAKE_CXX_STANDARD)
 endif()
 set(GECKO_CXX_STANDARD "${tmpcxx}" CACHE STRING "C++ standard to use")
 unset(tmpcxx)
+message("-- Using c++${GECKO_CXX_STANDARD}")
 
 # "Standard" (conventional) options in cmake projects, but put
 # the option here so cmake-gui shows it
