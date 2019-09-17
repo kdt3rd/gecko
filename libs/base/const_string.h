@@ -305,7 +305,7 @@ public:
         return (
             pos <= _sz
             ? const_string( _str + pos, ( n < _sz - pos ) ? n : _sz - pos )
-            : throw_pos_failure();
+            : throw_pos_failure() );
 #endif
     }
 
