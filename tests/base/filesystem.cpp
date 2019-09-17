@@ -191,11 +191,13 @@ int safemain( int argc, char *argv[] )
             fstest.success( "write access okay on {0}", file1 );
         else
             fstest.failure( "write access not okay on {0}", file1 );
-
+#ifndef _WIN32
+        // X_OK check under win32 is meaningless (and not defined in this way)
         if ( fs->access( file1, X_OK ) )
             fstest.failure( "exec access okay on {0}", file1 );
         else
             fstest.success( "exec access not okay on {0}", file1 );
+#endif
     };
 
     fstest["mkdir_all"] = [&]( void ) {
