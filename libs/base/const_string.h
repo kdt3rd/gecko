@@ -304,9 +304,8 @@ public:
 #else
         return (
             pos <= _sz
-                ? const_string( _str + pos, ( n < _sz - pos ) ? n : _sz - pos )
-                : throw std::out_of_range(
-                      "Invalid start position for constant string" ) );
+            ? const_string( _str + pos, ( n < _sz - pos ) ? n : _sz - pos )
+            : throw_pos_failure();
 #endif
     }
 
@@ -316,6 +315,11 @@ public:
     }
 
 private:
+    constexpr const_string throw_pos_failure() const
+    {
+        throw std::out_of_range( "Invalid start position for constant string" );
+    }
+
     constexpr int compare_priv(
         const_iterator a, const_iterator b, size_type n, int eqret ) const
     {
