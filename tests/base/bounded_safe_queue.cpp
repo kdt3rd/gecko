@@ -19,7 +19,7 @@ void producer( base::bounded_safe_queue<size_t> &q, size_t n, size_t id )
 {
     std::mt19937_64                       rng( id );
     std::uniform_int_distribution<size_t> distrib( 0, 100 );
-    unsigned int                          xx = distrib( rng );
+    auto                                  xx = distrib( rng );
     while ( xx > 0 )
     {
         std::this_thread::yield();
@@ -37,7 +37,7 @@ void consumer( base::bounded_safe_queue<size_t> &q, size_t n, size_t id )
 {
     std::mt19937_64                       rng( id );
     std::uniform_int_distribution<size_t> distrib( 0, 100 );
-    unsigned int                          xx = distrib( rng );
+    auto                                  xx = distrib( rng );
     while ( xx > 0 )
     {
         std::this_thread::yield();

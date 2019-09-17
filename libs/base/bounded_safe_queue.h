@@ -33,12 +33,12 @@ public:
     /// is fully constructed before being made available to multiple
     /// threads
     bounded_safe_queue( size_t log2size )
-        : _buffer( new storage_t[1 << log2size] )
-        , _buffer_index_mask( ( 1 << log2size ) - 1 )
+        : _buffer( new storage_t[uint64_t(1) << log2size] )
+        , _buffer_index_mask( ( uint64_t(1) << log2size ) - 1 )
         , _push_pos( 0 )
         , _pop_pos( 0 )
     {
-        size_t N = 1 << log2size;
+        size_t N = uint64_t(1) << log2size;
         if ( N < 4 )
             throw_runtime(
                 "lock-free bounded queue of size {0} (log2 size {1}) is too small to be effective",

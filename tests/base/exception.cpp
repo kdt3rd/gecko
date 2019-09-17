@@ -5,6 +5,7 @@
 #include <base/contract.h>
 #include <base/scope_guard.h>
 #include <base/unit_test.h>
+#include <base/compiler_support.h>
 #include <fstream>
 
 namespace
@@ -61,10 +62,10 @@ int safemain( int argc, char *argv[] )
         try
         {
             tryit();
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunreachable-code"
+            GK_IGNORE_WARNING_BEGIN
+            GK_IGNORE_WARNINGS
             test.failure( "tried and didn't failed" );
-#pragma GCC diagnostic pop
+            GK_IGNORE_WARNING_END
         }
         catch ( std::exception &e )
         {
