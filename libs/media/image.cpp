@@ -67,7 +67,7 @@ void image::create_buffers(
         const plane_layout &pl    = _planes.front()._layout;
 
         int16_t bits          = static_cast<int16_t>( pl._bits );
-        size_t  bpc           = bits / 8;
+        size_t  bpc           = static_cast<size_t>( bits / 8 );
         size_t  linebytes     = static_cast<size_t>( ar.width() * chans ) * bpc;
         int64_t xstride       = static_cast<int64_t>( bpc ) * chans;
         int64_t ystride       = static_cast<int64_t>( linebytes );

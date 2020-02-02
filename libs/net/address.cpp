@@ -24,10 +24,10 @@ void address::lookup_name( const char *name )
     ::memset( &hints, 0, sizeof( hints ) );
     hints.ai_family = AF_INET;
 
-    struct addrinfo *res0 = NULL;
+    struct addrinfo *res0 = nullptr;
     int              err  = EAI_AGAIN;
     while ( err == EAI_AGAIN )
-        err = getaddrinfo( name, NULL, &hints, &res0 );
+        err = getaddrinfo( name, nullptr, &hints, &res0 );
 
     if ( err == 0 )
     {

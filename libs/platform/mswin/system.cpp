@@ -37,7 +37,7 @@ system::system( const std::string & )
 {
     _dispatcher = std::make_shared<dispatcher>( this );
 
-    EnumDisplayMonitors( NULL, NULL, monitorEnumCB, (LPARAM)&_screens );
+    EnumDisplayMonitors( nullptr, nullptr, monitorEnumCB, (LPARAM)&_screens );
 }
 
 ////////////////////////////////////////

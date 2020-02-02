@@ -42,7 +42,7 @@ public:
     /// @brief Style of the font.
     inline const std::string &style( void ) const { return _style; }
 
-    void load_dpi( int h, int v )
+    void load_dpi( float h, float v )
     {
         _dpi_h = h;
         _dpi_v = v;
@@ -185,8 +185,8 @@ protected:
     std::string _family;
     std::string _style;
     points      _size;
-    int         _dpi_h = 95;
-    int         _dpi_v = 95;
+    float         _dpi_h = 95.f;
+    float         _dpi_v = 95.f;
 };
 
 ////////////////////////////////////////

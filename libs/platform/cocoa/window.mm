@@ -26,15 +26,13 @@ struct window::objcwrapper
 ////////////////////////////////////////
 
 window::window(
-    window_type                                wt,
-    const std::shared_ptr<::platform::screen> &s,
-    const rect &                               p )
+    window_type wt, const std::shared_ptr<::platform::screen> &s, const rect &p )
     : ::platform::window( wt, s, p )
     , _impl( new objcwrapper )
     , _context( std::make_shared<context>() )
 {
-    int style = NSTitledWindowMask | NSClosableWindowMask |
-                NSMiniaturizableWindowMask | NSResizableWindowMask;
+    int style = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask |
+                NSResizableWindowMask;
 
     // window coordinates are flipped - 0 is at lower left
     rect scrbounds = s->bounds( true );
@@ -84,12 +82,7 @@ void window::show( void )
     [_impl->win makeKeyAndOrderFront:nil];
     rect r = query_geometry();
     process_event( event::window(
-        nullptr,
-        event_type::WINDOW_MOVE_RESIZE,
-        r.x(),
-        r.y(),
-        r.width(),
-        r.height() ) );
+        nullptr, event_type::WINDOW_MOVE_RESIZE, r.x(), r.y(), r.width(), r.height() ) );
     //                       static_cast<coord_type>( newSize.width * scale ),
     //                       static_cast<coord_type>( newSize.height * scale ) ) );
 }
@@ -145,8 +138,7 @@ void window::set_ns( void *v )
 
     _context->set_ns( _impl->win, v );
     _impl->view = view;
-    if ( [view respondsToSelector:@selector
-               ( setWantsBestResolutionOpenGLSurface: )] )
+    if ( [view respondsToSelector:@selector( setWantsBestResolutionOpenGLSurface: )] )
         [view setWantsBestResolutionOpenGLSurface:YES];
 
     //	double scale = scale_factor();
@@ -166,17 +158,18 @@ void window::make_current( const std::shared_ptr<cursor> & )
 
 rect window::query_geometry( void )
 {
-    NSRect cgr = [_impl->win frame];
+    NSRect cgr = [_impl->win contentRectForFrameRect:[_impl->win frame]];
 
-    cgr = [_impl->win contentRectForFrameRect:cgr];
-
-    rect scrbounds = query_screen()->bounds( true );
-    auto y         = scrbounds.height() - ( cgr.origin.y + cgr.size.height );
+    //rect scrbounds = query_screen()->bounds( true );
+    //auto y         = scrbounds.height() - ( cgr.origin.y + cgr.size.height );
 
     double sf = scale_factor();
     // this includes the title bar?
     return rect(
-        cgr.origin.x, cgr.origin.y, cgr.size.width * sf, cgr.size.height * sf );
+        static_cast<rect::coord_type>( cgr.origin.x ),
+        static_cast<rect::coord_type>( cgr.origin.y ),
+        static_cast<rect::coord_type>( cgr.size.width * sf ),
+        static_cast<rect::coord_type>( cgr.size.height * sf ) );
 }
 
 ////////////////////////////////////////
@@ -189,9 +182,6 @@ bool window::update_geometry( rect &r )
     cgr.origin.y    = r.y();
     cgr.size.width  = r.width() / sf;
     cgr.size.height = r.height() / sf;
-
-    rect scrbounds = query_screen()->bounds( true );
-    auto y         = scrbounds.height() - r.height() - r.y();
 
     cgr = [_impl->win frameRectForContentRect:cgr];
 

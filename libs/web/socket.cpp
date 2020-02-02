@@ -138,7 +138,6 @@ bool socket::wait( std::string &message, bool &bin )
             default:
                 // reserved
                 throw_runtime( "unknown WebSocket opcode" );
-                break;
         }
         _socket.read( &bits, sizeof( bits ) );
         bool masked = bits & 0x80;

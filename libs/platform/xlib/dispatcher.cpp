@@ -583,7 +583,7 @@ void dispatcher::run_event_loop_until( std::atomic<bool> *end )
         if ( firenow.empty() )
         {
             ++nWaits;
-            int selrv = select( nWaits, &waitreadobjs, NULL, NULL, tvptr );
+            int selrv = select( nWaits, &waitreadobjs, nullptr, nullptr, tvptr );
 
             // timeout if selrv == 0
             if ( selrv < 0 )

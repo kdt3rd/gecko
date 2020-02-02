@@ -251,7 +251,7 @@ std::shared_ptr<platform::window> system::new_window(
     auto ret = std::make_shared<::platform::cocoa::window>(
         wintype, s ? s : default_screen(), p );
     _dispatcher->add_window( ret );
-    return ret;
+    return std::move( ret );
 }
 
 ////////////////////////////////////////

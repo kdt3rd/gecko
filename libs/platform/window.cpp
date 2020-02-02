@@ -12,8 +12,7 @@ namespace platform
 {
 ////////////////////////////////////////
 
-window::window(
-    window_type wt, const std::shared_ptr<screen> &screen, const rect &p )
+window::window( window_type wt, const std::shared_ptr<screen> &screen, const rect &p )
     : _win_type( wt ), _rect( p ), _screen( screen )
 {}
 
@@ -43,21 +42,14 @@ bool window::process_event( const event &e )
         case event_type::WINDOW_EXPOSED:
         case event_type::WINDOW_REGION_EXPOSED:
         {
-            rect tmp{
-                e.window().x, e.window().y, e.window().width, e.window().height
-            };
+            rect tmp{ e.window().x, e.window().y, e.window().width, e.window().height };
             tmp.include( _invalid_rgn );
 
             _accumulate_expose = false;
             _invalid_rgn       = rect();
 
             event incE = event::window(
-                &e.source(),
-                e.type(),
-                tmp.x(),
-                tmp.y(),
-                tmp.width(),
-                tmp.height() );
+                &e.source(), e.type(), tmp.x(), tmp.y(), tmp.width(), tmp.height() );
 
             // shortcut since we've created a custom event to incorporate the region
             if ( event_handoff )
@@ -73,11 +65,7 @@ bool window::process_event( const event &e )
             _rect.set_size( e.window().width, e.window().height );
             break;
         case event_type::WINDOW_MOVE_RESIZE:
-            _rect.set(
-                e.window().x,
-                e.window().y,
-                e.window().width,
-                e.window().height );
+            _rect.set( e.window().x, e.window().y, e.window().width, e.window().height );
             break;
 
         case event_type::MOUSE_ENTER:
@@ -104,8 +92,7 @@ bool window::process_event( const event &e )
         case event_type::HID_SPINNER:
         case event_type::HID_DIAL_KNOB:
         case event_type::USER_EVENT:
-        case event_type::NUM_EVENTS:
-        default: break;
+        case event_type::NUM_EVENTS: break;
     }
 
     if ( event_handoff )
@@ -218,10 +205,7 @@ void window::invalidate( const rect &r )
 
 ////////////////////////////////////////
 
-phys_rect window::phys_bounds( void ) const
-{
-    return _screen->to_physical( _rect );
-}
+phys_rect window::phys_bounds( void ) const { return _screen->to_physical( _rect ); }
 
 ////////////////////////////////////////
 

@@ -27,8 +27,8 @@ protected:
 
 private:
     void * _font;
-    double _scalePixToPointsHoriz = 1.0;
-    double _scalePixToPointsVert  = 1.0;
+    float _scalePixToPointsHoriz = 1.f;
+    float _scalePixToPointsVert  = 1.f;
 };
 
 } // namespace cocoa

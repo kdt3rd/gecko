@@ -150,7 +150,7 @@ int dispatcher::execute( void )
         {
             ++nWaits;
             wl_display_flush( _display.get() );
-            int selrv = select( nWaits, &waitreadobjs, NULL, NULL, tvptr );
+            int selrv = select( nWaits, &waitreadobjs, nullptr, nullptr, tvptr );
 
             // timeout if selrv == 0
             if ( selrv < 0 )

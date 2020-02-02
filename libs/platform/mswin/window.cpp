@@ -28,7 +28,7 @@ window::window(
         SetThreadDpiAwarenessContext( DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE );
     on_scope_exit { SetThreadDpiAwarenessContext( context ); };
 #endif
-    HINSTANCE hInstance = GetModuleHandle( NULL );
+    HINSTANCE hInstance = GetModuleHandle( nullptr );
     _hwnd               = CreateWindowEx(
         WS_EX_CLIENTEDGE,
         "WindowClass",
@@ -38,10 +38,10 @@ window::window(
         CW_USEDEFAULT,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
-        NULL,
-        NULL,
+        nullptr,
+        nullptr,
         hInstance,
-        NULL );
+        nullptr );
 
     if ( _hwnd == nullptr )
         throw_runtime( "window creation failed" );
@@ -129,7 +129,7 @@ bool window::update_geometry( rect &r )
 {
     SetWindowPos(
         _hwnd,
-        NULL,
+        nullptr,
         r.x(),
         r.y(),
         r.width(),
@@ -150,9 +150,9 @@ void window::submit_delayed_expose( const rect &r )
                   LONG( std::ceil( r.y2() ) ) };
     if ( rect.left == rect.top && rect.left == rect.right &&
          rect.left == rect.bottom )
-        RedrawWindow( _hwnd, NULL, NULL, RDW_INTERNALPAINT | RDW_UPDATENOW );
+        RedrawWindow( _hwnd, nullptr, nullptr, RDW_INTERNALPAINT | RDW_UPDATENOW );
     else
-        RedrawWindow( _hwnd, &rect, NULL, RDW_INVALIDATE | RDW_UPDATENOW );
+        RedrawWindow( _hwnd, &rect, nullptr, RDW_INVALIDATE | RDW_UPDATENOW );
 }
 
 ////////////////////////////////////////

@@ -13,7 +13,7 @@ namespace base
 
 event::event( bool initState )
 #ifdef WIN32
-    : _event( CreateEvent( NULL, false, BOOL( initState ), NULL ) )
+    : _event( CreateEvent( nullptr, false, BOOL( initState ), nullptr ) )
 {
     if ( _event == INVALID_HANDLE_VALUE )
         throw_lasterror( "Unable to create event object" );

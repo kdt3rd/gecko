@@ -33,9 +33,10 @@ public:
 private:
     friend class script::font_manager;
     static std::shared_ptr<font_dpi_cache>
-    make( font_manager *fm, int dpih, int dpiv, int mgw, int mgh );
+    make( font_manager *fm, float dpih, float dpiv, int mgw, int mgh );
 
-    font_dpi_cache( font_manager *fm, int dpih, int dpiv, int mgw, int mgh );
+    font_dpi_cache(
+        font_manager *fm, float dpih, float dpiv, int mgw, int mgh );
 
     font_dpi_cache( const font_dpi_cache & ) = delete;
     font_dpi_cache( font_dpi_cache && )      = delete;
@@ -43,8 +44,8 @@ private:
     font_dpi_cache &operator=( font_dpi_cache && ) = delete;
 
     font_manager *_mgr         = nullptr;
-    int           _dpi_h       = 95;
-    int           _dpi_v       = 95;
+    float         _dpi_h       = 95.f;
+    float         _dpi_v       = 95.f;
     int           _max_glyph_w = 1024;
     int           _max_glyph_h = 1024;
 

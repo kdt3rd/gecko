@@ -148,9 +148,6 @@ int safemain( int argc, char *argv[] )
     gl::api &ogl          = win->hw_context().api();
     //ogl.setup_debugging();
 
-    // OpenGL information & initialization
-    gl::matrix4 matrix;
-
     // Create "widgets"
     widget<layout::packing> root( gl::white );
     root.set_padding( 5, 5, 5, 5 );

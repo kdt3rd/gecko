@@ -60,17 +60,11 @@ void window::hide( void ) { _window->hide(); }
 
 ////////////////////////////////////////
 
-void window::move( coord x, coord y )
-{
-    _window->move( to_native( point( x, y ) ) );
-}
+void window::move( coord x, coord y ) { _window->move( to_native( point( x, y ) ) ); }
 
 ////////////////////////////////////////
 
-void window::resize( coord w, coord h )
-{
-    _window->resize( to_native( size( w, h ) ) );
-}
+void window::resize( coord w, coord h ) { _window->resize( to_native( size( w, h ) ) ); }
 
 ////////////////////////////////////////
 
@@ -82,27 +76,19 @@ void window::set_widget( const std::shared_ptr<widget> &w )
         {
             _widget->build( *this );
             _widget->layout_target()->compute_bounds();
-            _widget->layout_target()->set_horizontal(
-                0.0, _window->width() - 1.0 );
-            _widget->layout_target()->set_vertical(
-                0.0, _window->height() - 1.0 );
+            _widget->layout_target()->set_horizontal( 0.0, _window->width() - 1.0 );
+            _widget->layout_target()->set_vertical( 0.0, _window->height() - 1.0 );
         }
     } );
 }
 
 ////////////////////////////////////////
 
-coord window::width( void ) const
-{
-    return from_native_horiz( _window->width() );
-}
+coord window::width( void ) const { return from_native_horiz( _window->width() ); }
 
 ////////////////////////////////////////
 
-coord window::height( void ) const
-{
-    return from_native_vert( _window->height() );
-}
+coord window::height( void ) const { return from_native_vert( _window->height() ); }
 
 ////////////////////////////////////////
 
@@ -135,8 +121,7 @@ point window::from_native( const platform::point &p ) const
 
 ////////////////////////////////////////
 
-point window::from_native(
-    platform::coord_type x, platform::coord_type y ) const
+point window::from_native( platform::coord_type x, platform::coord_type y ) const
 {
     return _window->query_screen()->to_physical( platform::point( x, y ) );
 }
@@ -213,10 +198,7 @@ void window::release_source( const event &e )
 
 ////////////////////////////////////////
 
-void window::set_focus( std::shared_ptr<widget> w )
-{
-    _key_focus = std::move( w );
-}
+void window::set_focus( std::shared_ptr<widget> w ) { _key_focus = std::move( w ); }
 
 ////////////////////////////////////////
 
@@ -277,12 +259,12 @@ bool window::process_event( const event &e )
 
         case event_type::WINDOW_MOVED: break;
         case event_type::WINDOW_RESIZED:
-            resized( from_native( platform::size(
-                e.raw_window().width, e.raw_window().height ) ) );
+            resized( from_native(
+                platform::size( e.raw_window().width, e.raw_window().height ) ) );
             break;
         case event_type::WINDOW_MOVE_RESIZE:
-            resized( from_native( platform::size(
-                e.raw_window().width, e.raw_window().height ) ) );
+            resized( from_native(
+                platform::size( e.raw_window().width, e.raw_window().height ) ) );
             break;
         case event_type::MOUSE_ENTER: break;
         case event_type::MOUSE_LEAVE: break;
@@ -392,8 +374,7 @@ bool window::process_event( const event &e )
                 in_context( [&, this] { _widget->user_event( e ); } );
             break;
 
-        case event_type::NUM_EVENTS:
-        default: break;
+        case event_type::NUM_EVENTS: break;
     }
 
     return true;
@@ -401,7 +382,7 @@ bool window::process_event( const event &e )
 
 ////////////////////////////////////////
 
-bool window::close_request( const event &e ) { return true; }
+bool window::close_request( const event & ) { return true; }
 
 ////////////////////////////////////////
 
@@ -414,19 +395,16 @@ void window::paint( const rect &r )
     platform::context &hwctxt = _window->hw_context();
     auto               guard  = hwctxt.begin_render();
 
-    auto clipguard =
-        hwctxt.push_clip( r.empty() ? _window->bounds() : to_native( r ) );
+    auto clipguard = hwctxt.push_clip( r.empty() ? _window->bounds() : to_native( r ) );
 
     gl::api &ogl = hwctxt.api();
     ogl.reset();
     ogl.enable( gl::capability::MULTISAMPLE );
     ogl.enable( gl::capability::BLEND );
-    ogl.blend_func(
-        gl::blend_style::SRC_ALPHA, gl::blend_style::ONE_MINUS_SRC_ALPHA );
+    ogl.blend_func( gl::blend_style::SRC_ALPHA, gl::blend_style::ONE_MINUS_SRC_ALPHA );
 
     ogl.clear_color( _style.background_color() );
-    ogl.set_projection(
-        gl::matrix4::ortho( 0, width().count(), 0, height().count() ) );
+    ogl.set_projection( gl::matrix4::ortho( 0, width().count(), 0, height().count() ) );
     ogl.clear();
 
     //	std::cout << "model matrix: " << ogl.model_matrix() << std::endl;
@@ -511,8 +489,8 @@ void window::key_down( const event &e )
         _key_focus->key_press( e );
     else if ( _widget )
     {
-        auto w = _widget->find_widget_under(
-            from_native( e.raw_key().x, e.raw_key().y ) );
+        auto w =
+            _widget->find_widget_under( from_native( e.raw_key().x, e.raw_key().y ) );
         if ( w )
             w->key_press( e );
     }

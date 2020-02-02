@@ -151,7 +151,7 @@ inline simple_semaphore::simple_semaphore( int initCount )
         initCount );
 
 #ifdef _WIN32
-    _sem = CreateSemaphore( NULL, initCount, MAXLONG, NULL );
+    _sem = CreateSemaphore( nullptr, initCount, MAXLONG, nullptr );
 #elif defined( __MACH__ )
     kern_return_t r;
     if ( ( r = semaphore_create(
@@ -201,7 +201,7 @@ inline void simple_semaphore::wait( void )
 inline void simple_semaphore::signal( void )
 {
 #ifdef _WIN32
-    ReleaseSemaphore( _sem, 1, NULL );
+    ReleaseSemaphore( _sem, 1, nullptr );
 #elif defined( __MACH__ )
     semaphore_signal( _sem );
 #elif defined( __unix__ )
@@ -214,7 +214,7 @@ inline void simple_semaphore::signal( void )
 inline void simple_semaphore::signal( int num )
 {
 #ifdef _WIN32
-    ReleaseSemaphore( _sem, num, NULL );
+    ReleaseSemaphore( _sem, num, nullptr );
 #elif defined( __MACH__ )
     while ( num-- > 0 )
         semaphore_signal( _sem );

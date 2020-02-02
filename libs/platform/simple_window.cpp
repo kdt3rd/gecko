@@ -16,9 +16,7 @@ namespace platform
 simple_window::simple_window( const std::shared_ptr<window> &win ) : _win( win )
 {
     precondition( _win, "expect valid window" );
-    _win->event_handoff = [this]( const event &e ) -> bool {
-        return process_event( e );
-    };
+    _win->event_handoff = [this]( const event &e ) -> bool { return process_event( e ); };
 }
 
 ////////////////////////////////////////
@@ -97,16 +95,12 @@ bool simple_window::process_event( const event &e )
         case event_type::MOUSE_DOWN:
             if ( mouse_pressed )
                 mouse_pressed(
-                    e.source(),
-                    point( e.mouse().x, e.mouse().y ),
-                    e.mouse().button );
+                    e.source(), point( e.mouse().x, e.mouse().y ), e.mouse().button );
             break;
         case event_type::MOUSE_UP:
             if ( mouse_released )
                 mouse_released(
-                    e.source(),
-                    point( e.mouse().x, e.mouse().y ),
-                    e.mouse().button );
+                    e.source(), point( e.mouse().x, e.mouse().y ), e.mouse().button );
             break;
         case event_type::MOUSE_WHEEL:
             if ( mouse_wheel )
@@ -148,8 +142,10 @@ bool simple_window::process_event( const event &e )
         case event_type::HID_SPINNER:
         case event_type::HID_DIAL_KNOB: break;
         case event_type::USER_EVENT: break;
-        case event_type::NUM_EVENTS:
-        default: break;
+
+        case event_type::DISPLAY_CHANGED: break;
+
+        case event_type::NUM_EVENTS: break;
     }
 
     if ( event_handoff )

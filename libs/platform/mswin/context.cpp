@@ -16,9 +16,9 @@ WINAPI ( *wglCreateContextAttribsARB )( HDC, HGLRC, const int * ) = nullptr;
 // prescribed method to enable nvidia GPU on laptops w/ dual GPU
 //extern "C" { _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001; }
 
-HMODULE libgl       = NULL;
-HWND    coreWindow  = NULL;
-HGLRC   coreContext = NULL;
+HMODULE libgl       = nullptr;
+HWND    coreWindow  = nullptr;
+HGLRC   coreContext = nullptr;
 
 std::once_flag opengl_init_flag;
 
@@ -61,10 +61,10 @@ HGLRC doCreate( HDC dc, HGLRC parContext )
                 CW_USEDEFAULT,
                 CW_USEDEFAULT,
                 CW_USEDEFAULT,
-                NULL,
-                NULL,
-                GetModuleHandle( NULL ),
-                NULL );
+                nullptr,
+                nullptr,
+                GetModuleHandle( nullptr ),
+                nullptr );
             if ( coreWindow == nullptr )
                 throw_runtime( "Unable to create window" );
         }
@@ -163,7 +163,7 @@ HGLRC doCreate( HDC dc, HGLRC parContext )
 
 void shutdown_libgl( void )
 {
-    wglMakeCurrent( NULL, NULL );
+    wglMakeCurrent( nullptr, nullptr );
     if ( coreContext )
     {
         wglDeleteContext( coreContext );
@@ -176,7 +176,7 @@ void shutdown_libgl( void )
     }
     if ( libgl )
         FreeLibrary( libgl );
-    libgl = NULL;
+    libgl = nullptr;
 }
 
 void init_libgl( void )
@@ -184,7 +184,7 @@ void init_libgl( void )
     libgl = LoadLibraryA( "opengl32.dll" );
     atexit( shutdown_libgl );
 
-    doCreate( NULL, NULL );
+    doCreate( nullptr, nullptr );
 }
 
 } // anonymous namespace
@@ -216,7 +216,7 @@ context::~context( void )
     {
         HGLRC oldCtxt = wglGetCurrentContext();
         if ( oldCtxt == _hrc )
-            wglMakeCurrent( _hdc, NULL );
+            wglMakeCurrent( _hdc, nullptr );
         wglDeleteContext( _hrc );
     }
 }
@@ -275,7 +275,7 @@ void context::acquire( void )
 
 ////////////////////////////////////////
 
-void context::release( void ) { wglMakeCurrent( NULL, NULL ); }
+void context::release( void ) { wglMakeCurrent( nullptr, nullptr ); }
 
 ////////////////////////////////////////
 

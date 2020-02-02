@@ -26,18 +26,18 @@ font::~font( void ) {}
 
 void font::init_font( void )
 {
-    _scalePixToPointsHoriz = 72.0 / double( _dpi_h );
-    _scalePixToPointsVert  = 72.0 / double( _dpi_v );
+    _scalePixToPointsHoriz = 72.f / _dpi_h;
+    _scalePixToPointsVert  = 72.f / _dpi_v;
     // we have the dpi now, so we can convert points to dots...
-    NSFont *nf             = reinterpret_cast<NSFont *>( _font );
-    _extents.ascent        = [nf ascender] * _scalePixToPointsVert;
-    _extents.descent       = [nf descender] * _scalePixToPointsHoriz;
-    NSRect bbox            = [nf boundingRectForFont];
-    NSSize madv            = [nf maximumAdvancement];
-    _extents.width         = NSWidth( bbox ) * _scalePixToPointsHoriz;
-    _extents.height        = NSHeight( bbox ) * _scalePixToPointsVert;
-    _extents.max_x_advance = madv.width * _scalePixToPointsHoriz;
-    _extents.max_y_advance = madv.height * _scalePixToPointsVert;
+    NSFont *nf       = reinterpret_cast<NSFont *>( _font );
+    _extents.ascent  = static_cast<float>( [nf ascender] ) * _scalePixToPointsVert;
+    _extents.descent = static_cast<float>( [nf descender] ) * _scalePixToPointsHoriz;
+    NSRect bbox      = [nf boundingRectForFont];
+    NSSize madv      = [nf maximumAdvancement];
+    _extents.width   = static_cast<float>( NSWidth( bbox ) ) * _scalePixToPointsHoriz;
+    _extents.height  = static_cast<float>( NSHeight( bbox ) ) * _scalePixToPointsVert;
+    _extents.max_x_advance = static_cast<float>( madv.width ) * _scalePixToPointsHoriz;
+    _extents.max_y_advance = static_cast<float>( madv.height ) * _scalePixToPointsVert;
     //std::cout << "font height: " << _extents.height << " asc desc " << _extents.ascent << ' ' << _extents.descent << " origin " << bbox.origin.x << ", " << bbox.origin.y << " size " << bbox.size.width << " x " << bbox.size.height << std::endl;
 }
 
@@ -54,12 +54,11 @@ const text_extents &font::get_glyph( char32_t char_code )
     {
         std::stringstream str;
         utf::write( str, char_code );
-        NSString *string = [NSString stringWithUTF8String:str.str().c_str()];
-        NSDictionary *attribs =
-            @{ NSFontAttributeName : static_cast<id>( _font ) };
-        NSSize size   = [string sizeWithAttributes:attribs];
-        int    width  = static_cast<int>( ceil( size.width ) );
-        int    height = static_cast<int>( ceil( size.height ) );
+        NSString *    string  = [NSString stringWithUTF8String:str.str().c_str()];
+        NSDictionary *attribs = @{ NSFontAttributeName : static_cast<id>( _font ) };
+        NSSize        size    = [string sizeWithAttributes:attribs];
+        int           width   = static_cast<int>( ceil( size.width ) );
+        int           height  = static_cast<int>( ceil( size.height ) );
 
         // Create the context and fill it with white background
         void *data = malloc( static_cast<size_t>( width * height ) );
@@ -86,17 +85,15 @@ const text_extents &font::get_glyph( char32_t char_code )
         NSDictionary *      attributes = [NSDictionary
             dictionaryWithObjectsAndKeys:static_cast<id>( _font ),
                                          kCTFontAttributeName,
-                                         CGColorGetConstantColor(
-                                             kCGColorWhite ),
+                                         CGColorGetConstantColor( kCGColorWhite ),
                                          kCTForegroundColorAttributeName,
                                          nil];
-        NSAttributedString *as =
-            [[NSAttributedString alloc] initWithString:string
-                                            attributes:attributes];
+        NSAttributedString *as         = [[NSAttributedString alloc] initWithString:string
+                                                                 attributes:attributes];
 
         // Figure out how big an image we need
-        CTLineRef line = CTLineCreateWithAttributedString(
-            static_cast<CFAttributedStringRef>( as ) );
+        CTLineRef line =
+            CTLineCreateWithAttributedString( static_cast<CFAttributedStringRef>( as ) );
         CGFloat descent = 0.0, ascent = 0.0, leading = 0.0;
         /*double fWidth =*/CTLineGetTypographicBounds(
             line, &ascent, &descent, &leading );
@@ -110,16 +107,12 @@ const text_extents &font::get_glyph( char32_t char_code )
         CGFloat y = descent;
         CGContextSetTextPosition( ctx, x, y );
         CTLineDraw( line, ctx );
-        double ws = CTLineGetTrailingWhitespaceWidth( line );
+        CGFloat ws = CTLineGetTrailingWhitespaceWidth( line );
         CFRelease( line );
 
         //std::cout << "add_glyph " << char_code << " w " << width << " h " << height << " descent " << descent << " ascent " << ascent << " leading " << leading << std::endl;
         add_glyph(
-            char_code,
-            static_cast<const uint8_t *>( data ),
-            width,
-            width,
-            height );
+            char_code, static_cast<const uint8_t *>( data ), width, width, height );
         text_extents &gle = _glyph_cache[char_code];
         // inch / dot * points / inch
         extent_type ptw = extent_type( width ) * _scalePixToPointsHoriz;
@@ -131,7 +124,7 @@ const text_extents &font::get_glyph( char32_t char_code )
                 _scalePixToPointsVert; //std::floor( extent_type(pth) / extent_type(2) ); //ascent + descent;
         gle.width     = static_cast<points>( ptw );
         gle.height    = static_cast<points>( pth );
-        gle.x_advance = ptw + ws * _scalePixToPointsVert;
+        gle.x_advance = ptw + static_cast<float>( ws ) * _scalePixToPointsVert;
         gle.y_advance = points( 0 );
 
         // Save as JPEG

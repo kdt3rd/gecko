@@ -24,13 +24,13 @@
 #ifdef _WIN32
 int backtrace( void **stack, int n )
 {
-    return CaptureStackBackTrace( 0, n, stack, NULL );
+    return CaptureStackBackTrace( 0, n, stack, nullptr );
 }
 
 void backtrace_symbols_fd( void *const *stack, int n, int fd )
 {
     HANDLE process = GetCurrentProcess();
-    SymInitialize( process, NULL, TRUE );
+    SymInitialize( process, nullptr, TRUE );
     std::unique_ptr<uint8_t[]> buf(
         new uint8_t[sizeof( SYMBOL_INFO ) + 256 * sizeof( char )] );
     SYMBOL_INFO *symbol  = reinterpret_cast<SYMBOL_INFO *>( buf.get() );
@@ -52,7 +52,7 @@ void backtrace_symbols_fd( void *const *stack, int n, int fd )
 char **backtrace_symbols( void *const *stack, int n )
 {
     HANDLE process = GetCurrentProcess();
-    SymInitialize( process, NULL, TRUE );
+    SymInitialize( process, nullptr, TRUE );
     std::unique_ptr<uint8_t[]> buf(
         new uint8_t[sizeof( SYMBOL_INFO ) + 256 * sizeof( char )] );
     SYMBOL_INFO *symbol  = reinterpret_cast<SYMBOL_INFO *>( buf.get() );

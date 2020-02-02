@@ -208,13 +208,13 @@ dispatcher::dispatcher( ::platform::system *sys )
     wc.lpfnWndProc   = WndProc;
     wc.cbClsExtra    = 0;
     wc.cbWndExtra    = 0;
-    wc.hInstance     = GetModuleHandle( NULL );
-    wc.hIcon         = LoadIcon( NULL, IDI_APPLICATION );
-    wc.hCursor       = LoadCursor( NULL, IDC_ARROW );
+    wc.hInstance     = GetModuleHandle( nullptr );
+    wc.hIcon         = LoadIcon( nullptr, IDI_APPLICATION );
+    wc.hCursor       = LoadCursor( nullptr, IDC_ARROW );
     wc.hbrBackground = ( HBRUSH )( COLOR_WINDOW + 1 );
     wc.lpszMenuName  = "WindowMenu";
     wc.lpszClassName = "WindowClass";
-    wc.hIconSm       = LoadIcon( NULL, IDI_APPLICATION );
+    wc.hIconSm       = LoadIcon( nullptr, IDI_APPLICATION );
 
     _normal_window_class = RegisterClassEx( &wc );
     if ( _normal_window_class == 0 )
@@ -227,7 +227,7 @@ dispatcher::~dispatcher( void )
 {
     the_glob_disp = nullptr;
     if ( _normal_window_class != 0 )
-        UnregisterClass( "WindowClass", GetModuleHandle( NULL ) );
+        UnregisterClass( "WindowClass", GetModuleHandle( nullptr ) );
 }
 
 ////////////////////////////////////////
@@ -273,7 +273,7 @@ int dispatcher::execute( void )
         }
 
         // TODO: convert to MsgWaitForMultipleObjectsEx
-        if ( PeekMessage( &Msg, NULL, 0, 0, PM_REMOVE ) )
+        if ( PeekMessage( &Msg, nullptr, 0, 0, PM_REMOVE ) )
         {
             TranslateMessage( &Msg );
             DispatchMessage( &Msg );
@@ -282,7 +282,7 @@ int dispatcher::execute( void )
         {
             DWORD w = MsgWaitForMultipleObjectsEx(
                 0,
-                NULL,
+                nullptr,
                 millis,
                 QS_ALLINPUT,
                 MWMO_ALERTABLE | MWMO_INPUTAVAILABLE );
@@ -384,7 +384,7 @@ bool dispatcher::dispatch_evt( const evt &e )
                 coord_type( rgn.top ),
                 coord_type( rgn.right - rgn.left + 1 ),
                 coord_type( rgn.bottom - rgn.top + 1 ) ) );
-            RedrawWindow( w->id(), &rgn, NULL, RDW_VALIDATE );
+            RedrawWindow( w->id(), &rgn, nullptr, RDW_VALIDATE );
             break;
         }
 
@@ -480,7 +480,7 @@ bool dispatcher::dispatch_evt( const evt &e )
         case WM_ERASEBKGND:
             w->process_event( event::window(
                 _ext_events.get(), event_type::WINDOW_EXPOSED, 0, 0, 0, 0 ) );
-            RedrawWindow( w->id(), NULL, NULL, RDW_VALIDATE );
+            RedrawWindow( w->id(), nullptr, nullptr, RDW_VALIDATE );
             break;
 
         case WM_CLEAR:

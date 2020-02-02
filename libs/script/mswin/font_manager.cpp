@@ -95,8 +95,8 @@ font_manager::~font_manager( void ) { delete _impl; }
 
 std::set<std::string> font_manager::get_families( void )
 {
-    HDC dc = CreateCompatibleDC( NULL );
-    if ( dc == NULL )
+    HDC dc = CreateCompatibleDC( nullptr );
+    if ( dc == nullptr )
         throw_lasterror( "unable to create device for text query" );
     on_scope_exit { DeleteDC( dc ); };
 
@@ -121,8 +121,8 @@ std::set<std::string> font_manager::get_families( void )
 
 std::set<std::string> font_manager::get_styles( const std::string &family )
 {
-    HDC dc = CreateCompatibleDC( NULL );
-    if ( dc == NULL )
+    HDC dc = CreateCompatibleDC( nullptr );
+    if ( dc == nullptr )
         throw_lasterror( "unable to create device for text query" );
     on_scope_exit { DeleteDC( dc ); };
 
@@ -151,8 +151,8 @@ std::shared_ptr<script::font> font_manager::get_font(
     const std::string &family,
     const std::string &style,
     points             pts,
-    int                dpih,
-    int                dpiv,
+    float              dpih,
+    float              dpiv,
     int                maxGlyphW,
     int                maxGlyphH )
 {
@@ -161,8 +161,8 @@ std::shared_ptr<script::font> font_manager::get_font(
     std::shared_ptr<script::font> ret;
 
     // TODO: is thie correct - an em could be different for different DPI??????
-    HDC dc = CreateCompatibleDC( NULL );
-    if ( dc == NULL )
+    HDC dc = CreateCompatibleDC( nullptr );
+    if ( dc == nullptr )
         throw_lasterror( "unable to create device for text query" );
     on_scope_exit { DeleteDC( dc ); };
 
@@ -206,7 +206,7 @@ std::shared_ptr<script::font> font_manager::get_font(
     }
 
     HFONT fnt = CreateFontIndirect( &fquery );
-    if ( fnt == NULL )
+    if ( fnt == nullptr )
         throw_lasterror(
             "Unable to create font with family '{0}', style '{1}'",
             family,
@@ -214,7 +214,7 @@ std::shared_ptr<script::font> font_manager::get_font(
 
     SelectObject( dc, fnt );
 
-    DWORD ttfsz = GetFontData( dc, 0, 0, NULL, 0 );
+    DWORD ttfsz = GetFontData( dc, 0, 0, nullptr, 0 );
     if ( ttfsz == GDI_ERROR )
         throw_lasterror( "unable to retrieve font data size" );
 

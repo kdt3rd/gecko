@@ -29,7 +29,7 @@ database::~database( void )
 
 void database::exec( const char *sql ) const
 {
-    check( sqlite3_exec( _db, sql, NULL, NULL, NULL ), sql );
+    check( sqlite3_exec( _db, sql, nullptr, nullptr, nullptr ), sql );
 }
 
 ////////////////////////////////////////

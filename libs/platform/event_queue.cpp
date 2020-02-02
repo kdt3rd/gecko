@@ -37,14 +37,14 @@ waitable::wait event_queue::poll_object( void ) { return _pipe.readable(); }
 
 ////////////////////////////////////////
 
-bool event_queue::poll_timeout( duration &when, const time_point &curtime )
+bool event_queue::poll_timeout( duration &, const time_point & )
 {
     return false;
 }
 
 ////////////////////////////////////////
 
-void event_queue::emit( const time_point &curtime )
+void event_queue::emit( const time_point & )
 {
     if ( _grabber )
         drain( _grabber );

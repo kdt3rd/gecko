@@ -52,7 +52,7 @@ public:
     int  num_textures( void ) const;
     void set_texture_offset( int offset );
 
-    void reset_position( int parw, int parh );
+    void reset_position( float parw, float parh );
 
     void rebuild( platform::context &ctxt ) override;
     void draw( platform::context &ctxt ) override;
@@ -62,7 +62,7 @@ private:
 
     void initialize( platform::context &ctxt );
 
-    int                          _dx = 0, _dy = 0;
+    int64_t                      _dx = 0, _dy = 0;
     float                        _w = 512, _h = 512;
     std::shared_ptr<gl::texture> _texture[4];
     gl::matrix4                  _rect;

@@ -169,7 +169,7 @@ directory_iterator win32_file_system::readdir( const uri &path )
 
 	auto next_entry = [=]( void )
 	{
-		struct dirent *result = NULL;
+		struct dirent *result = nullptr;
 		while ( ::readdir_r( dir.get(), dir_ent.get(), &result ) == 0 )
 		{
 			if ( result )

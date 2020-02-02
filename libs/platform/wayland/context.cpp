@@ -72,7 +72,7 @@ void context::create( EGLNativeWindowType nwin )
     if ( !_ctxt )
         throw std::runtime_error( "Unable to create egl context" );
 
-    _surface = eglCreateWindowSurface( _disp, config, nwin, NULL );
+    _surface = eglCreateWindowSurface( _disp, config, nwin, nullptr );
 
     acquire();
 }
@@ -112,7 +112,7 @@ void context::acquire( void )
 
 ////////////////////////////////////////
 
-void context::release( void ) { eglMakeCurrent( _disp, NULL, NULL, NULL ); }
+void context::release( void ) { eglMakeCurrent( _disp, nullptr, nullptr, nullptr ); }
 
 ////////////////////////////////////////
 

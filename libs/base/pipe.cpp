@@ -27,7 +27,7 @@ pipe::pipe( bool isPrivate, bool blocking )
 #ifdef _WIN32
     HANDLE rh = INVALID_HANDLE_VALUE;
     HANDLE wh = INVALID_HANDLE_VALUE;
-    if ( !CreatePipe( &rh, &wh, NULL, 0 ) )
+    if ( !CreatePipe( &rh, &wh, nullptr, 0 ) )
         throw_lasterror( "Unable to create pipe object" );
     _p[0] = (handle)rh;
     _p[1] = (handle)wh;
@@ -106,7 +106,7 @@ ssize_t pipe::read( void *d, size_t n )
         return -1;
     DWORD nToR = static_cast<DWORD>( n );
     DWORD nar  = 0;
-    if ( ReadFile( (HANDLE)_p[0], d, nToR, &nar, NULL ) )
+    if ( ReadFile( (HANDLE)_p[0], d, nToR, &nar, nullptr ) )
     {
         nr = static_cast<ssize_t>( nar );
     }
@@ -147,7 +147,7 @@ ssize_t pipe::write( const void *d, size_t n )
         return -1;
     DWORD nToW = static_cast<DWORD>( n );
     DWORD naw  = 0;
-    if ( WriteFile( (HANDLE)_p[1], d, nToW, &naw, NULL ) )
+    if ( WriteFile( (HANDLE)_p[1], d, nToW, &naw, nullptr ) )
     {
         totW = static_cast<ssize_t>( naw );
     }

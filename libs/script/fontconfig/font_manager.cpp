@@ -127,8 +127,8 @@ std::shared_ptr<script::font> font_manager::get_font(
     const std::string &family,
     const std::string &style,
     points             pts,
-    int                dpih,
-    int                dpiv,
+    float              dpih,
+    float              dpiv,
     int                maxGlyphW,
     int                maxGlyphH )
 {

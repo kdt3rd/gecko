@@ -12,6 +12,8 @@
 
 namespace color
 {
+engine::hash &operator<<( engine::hash &h, const state &p );
+
 /// \todo { do something smarter (fewer memory allocs) here than serialize to a string }
 engine::hash &operator<<( engine::hash &h, const state &p )
 {
@@ -108,7 +110,7 @@ image_buf colorspace(
             "Attempt to convert color space on an image with fewer than 3 planes" );
 
     engine::dimensions d = a.dims();
-    d.planes             = a.size();
+    d.planes             = static_cast<engine::dimensions::value_type>( a.size() );
     d.images             = 1;
     return image_buf( "i.colorspace", d, a, from, to );
 }

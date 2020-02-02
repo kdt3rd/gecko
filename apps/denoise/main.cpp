@@ -713,15 +713,15 @@ int safemain( int argc, char *argv[] )
                             std::string(),
                             std::string(),
                             { "R", "G", "B" } );
-                        if ( 0 ) //curFrm->has_channel( "A" ) )
-                        {
-                            image_buf tmpA = extract_frame(
-                                *curFrm,
-                                std::string(),
-                                std::string(),
-                                { "A" } );
-                            curAlpha = tmpA[0];
-                        }
+                        // if ( curFrm->has_channel( "A" ) )
+                        // {
+                        //     image_buf tmpA = extract_frame(
+                        //         *curFrm,
+                        //         std::string(),
+                        //         std::string(),
+                        //         { "A" } );
+                        //     curAlpha = tmpA[0];
+                        // }
 
                         image_buf tmpCen = centerImg;
                         image_buf tmpImg = img;
@@ -786,6 +786,7 @@ int safemain( int argc, char *argv[] )
                                 edgeBorder,
                                 tvl1Iters,
                                 warpIters,
+                                false, // adaptiveIters
                                 eta );
                             if ( confThresh > 0.F )
                                 vb = oflow_ahtvl1(
@@ -802,13 +803,14 @@ int safemain( int argc, char *argv[] )
                                     edgeBorder,
                                     tvl1Iters,
                                     warpIters,
+                                    false, // adaptiveIters
                                     eta );
                         }
                         else if ( temporalmethod == "pdtncc" )
                         {
                             TODO( "expose tracking parameters" );
-                            float lambda     = 20.F;
-                            float theta      = 0.1F;
+                            float lambda = 20.F;
+                            //float theta      = 0.1F;
                             float gamma      = 0.001F; //0.001F;
                             int   innerIters = 200;
                             int   warpIters  = 5;
@@ -825,10 +827,11 @@ int safemain( int argc, char *argv[] )
                                 plane(),
                                 vector_field(),
                                 lambda,
-                                theta,
+                                //theta,
                                 gamma,
                                 innerIters,
                                 warpIters,
+                                true, // adaptiveIters
                                 eta );
                             if ( confThresh > 0.F )
                                 vb = oflow_primaldual(
@@ -838,10 +841,11 @@ int safemain( int argc, char *argv[] )
                                     plane(),
                                     vector_field(),
                                     lambda,
-                                    theta,
+                                    //theta,
                                     gamma,
                                     innerIters,
                                     warpIters,
+                                    true, // adaptiveIters
                                     eta );
                         }
 
@@ -896,7 +900,7 @@ int safemain( int argc, char *argv[] )
                         if ( debugVecP )
                         {
                             std::stringstream fnb;
-                            int               offset = f - curF;
+                            int64_t           offset = f - curF;
                             fnb << debugVecP.value() << "_frm_"
                                 << std::setw( 7 ) << std::setfill( '0' ) << f
                                 << '_' << ( offset < 0 ? 'p' : 'm' )

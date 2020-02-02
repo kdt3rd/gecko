@@ -14,7 +14,7 @@ namespace script
 ////////////////////////////////////////
 
 font_dpi_cache::font_dpi_cache(
-    font_manager *fm, int dpih, int dpiv, int mgw, int mgh )
+    font_manager *fm, float dpih, float dpiv, int mgw, int mgh )
     : _mgr( fm )
     , _dpi_h( dpih )
     , _dpi_v( dpiv )
@@ -28,13 +28,13 @@ font_dpi_cache::~font_dpi_cache( void ) {}
 
 ////////////////////////////////////////
 
-std::shared_ptr<font_dpi_cache>
-font_dpi_cache::make( font_manager *fm, int dpih, int dpiv, int mgw, int mgh )
+std::shared_ptr<font_dpi_cache> font_dpi_cache::make(
+    font_manager *fm, float dpih, float dpiv, int mgw, int mgh )
 {
     struct rebind_dpi_cache : public font_dpi_cache
     {
         rebind_dpi_cache(
-            font_manager *fm, int dpih, int dpiv, int mgw, int mgh )
+            font_manager *fm, float dpih, float dpiv, int mgw, int mgh )
             : font_dpi_cache( fm, dpih, dpiv, mgw, mgh )
         {}
     };

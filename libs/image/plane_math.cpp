@@ -85,7 +85,7 @@ static void fill_pad( scanline &dest, int y, const plane &p, float val )
     }
     const float *line = p.line( y );
     int          inW  = p.width();
-    memcpy( i, line, inW * sizeof( float ) );
+    memcpy( i, line, static_cast<size_t>( inW ) * sizeof( float ) );
     i += inW;
 
     while ( i < e )
@@ -109,7 +109,7 @@ static void fill_pad_hold( scanline &dest, int y, const plane &p )
         ++curx;
     }
     int inW = p.width();
-    memcpy( i, line, inW * sizeof( float ) );
+    memcpy( i, line, static_cast<size_t>( inW ) * sizeof( float ) );
     i += inW;
 
     float rightV = line[inW - 1];

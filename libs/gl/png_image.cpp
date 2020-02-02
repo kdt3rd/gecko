@@ -205,14 +205,14 @@ void png_write_data(
 
     // Initialize write structure
     auto png_ptr =
-        png_create_write_struct( PNG_LIBPNG_VER_STRING, NULL, NULL, NULL );
-    if ( png_ptr == NULL )
+        png_create_write_struct( PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr );
+    if ( png_ptr == nullptr )
         throw_runtime( "could not allocate write structure" );
     on_scope_exit { png_destroy_write_struct( &png_ptr, nullptr ); };
 
     // Initialize info structure
     auto info_ptr = png_create_info_struct( png_ptr );
-    if ( info_ptr == NULL )
+    if ( info_ptr == nullptr )
         throw_runtime( "could not allocate info structure" );
     on_scope_exit { png_free_data( png_ptr, info_ptr, PNG_FREE_ALL, -1 ); };
 
@@ -248,7 +248,7 @@ void png_write_data(
     }
 
     // End write
-    png_write_end( png_ptr, NULL );
+    png_write_end( png_ptr, nullptr );
     std::cout << "Saved png image to '" << file_name << "'" << std::endl;
 }
 

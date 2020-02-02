@@ -99,8 +99,8 @@ dots_per_unit screen::dpi( void ) const
 dots_per_unit screen::dpmm( void ) const
 {
     HDC dc = CreateDC(
-        TEXT( "DISPLAY" ), (LPCTSTR)_disp_devname.c_str(), NULL, NULL );
-    if ( dc == NULL )
+        TEXT( "DISPLAY" ), (LPCTSTR)_disp_devname.c_str(), nullptr, nullptr );
+    if ( dc == nullptr )
         throw_lasterror( "unable to create device for DPI query" );
     on_scope_exit { DeleteDC( dc ); };
 

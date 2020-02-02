@@ -16,9 +16,12 @@ font_manager::~font_manager( void ) {}
 ////////////////////////////////////////
 
 std::shared_ptr<font_dpi_cache>
-font_manager::get_cache( int dpih, int dpiv, int maxGlyphW, int maxGlyphH )
+font_manager::get_cache( float dpih, float dpiv, int maxGlyphW, int maxGlyphH )
 {
-    std::pair<int, int> id = std::make_pair( dpih, dpiv );
+    constexpr float kDPIPrecision = 10.f;
+    std::pair<int, int> id = std::make_pair(
+        static_cast<int>( dpih * kDPIPrecision ),
+        static_cast<int>( dpiv * kDPIPrecision ) );
 
     std::shared_ptr<font_dpi_cache> ret;
 

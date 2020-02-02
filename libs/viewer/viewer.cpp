@@ -3,9 +3,11 @@
 
 #include "viewer.h"
 
-#include <algorithm>
+#include <base/compiler_support.h>
 #include <media/reader.h>
 #include <viewer/shaders.h>
+
+#include <algorithm>
 
 ////////////////////////////////////////
 
@@ -192,7 +194,7 @@ void viewer_w::update_frame( const media::sample &s, bool force_reload )
 
 ////////////////////////////////////////
 
-void viewer_w::build( context &ctxt ) {}
+void viewer_w::build( context & ) {}
 
 ////////////////////////////////////////
 
@@ -310,7 +312,8 @@ bool viewer_w::key_release( const event &e )
 {
     using namespace platform;
     scancode c = e.raw_key().keys[0];
-
+    GK_IGNORE_WARNING_BEGIN
+    GK_IGNORE_SOME_SWITCH_ENUMS
     switch ( c )
     {
         case scancode::KEY_ESCAPE: reset_positions(); return true;
@@ -330,6 +333,7 @@ bool viewer_w::key_release( const event &e )
             return true;
         default: break;
     }
+    GK_IGNORE_WARNING_END
     return widget::key_release( e );
 }
 

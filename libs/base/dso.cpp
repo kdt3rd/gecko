@@ -18,6 +18,10 @@
 #        include <sys/stat.h>
 #        include <sys/types.h>
 #    endif
+#    ifdef __APPLE__
+#        define HAS_MACH_DYLD
+#        include <mach-o/dyld.h>
+#    endif
 #    define HAS_DLFCN
 #    include <dlfcn.h>
 #    ifdef LM_ID_BASE
@@ -151,6 +155,15 @@ void dso::load( const char *fn, bool makeGlobal, const char *ns )
     int flags = RTLD_NOW;
     if ( makeGlobal )
         flags |= RTLD_GLOBAL;
+
+#    ifdef __APPLE__
+    if ( !dlopen_preflight( fn ) )
+    {
+        _last_err = "Incompatible mach-o binary";
+        return;
+    }
+#    endif
+
 #    ifdef HAS_DLMOPEN
     // we have namespace support, use that
     if ( ns )
@@ -158,6 +171,7 @@ void dso::load( const char *fn, bool makeGlobal, const char *ns )
     else
 #    endif
         _handle = dlopen( fn, flags );
+
     if ( !_handle )
         _last_err = dlerror();
 #else
@@ -527,6 +541,52 @@ static int fillActiveCB( struct dl_phdr_info *phdr, size_t size, void *data )
 
 } // namespace
 
+#elif defined( HAS_DLFCN )
+class active_shared_object::impl
+{
+public:
+    impl( const char *name, uintptr_t baseaddr )
+        : _name( name ), _base( baseaddr )
+    {}
+    inline const std::string &path( void ) const { return _name /*_path*/; }
+    inline const std::string &name( void ) const { return _name; }
+    inline uintptr_t base( void ) const { return _base; }
+
+    bool is_closest( void *addr, const impl *curdso )
+    {
+        uintptr_t aint = reinterpret_cast<uintptr_t>( addr );
+        if ( _base < aint )
+        {
+            uintptr_t off = aint - _base;
+            if ( curdso )
+            {
+                if ( curdso->base() < aint )
+                {
+                    uintptr_t ooff = aint - curdso->base();
+                    return ( off < ooff );
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    std::string find_symbol( void *addr, bool /* include_offset */ = true )
+    {
+        Dl_info info;
+        if ( 0 == dladdr( addr, &info ) )
+        {
+            if ( info.dli_sname )
+                return demangle( info.dli_sname );
+        }
+        return std::string();
+    }
+
+private:
+    std::string _path;
+    std::string _name;
+    uintptr_t _base = 0;
+};
 #else
 class active_shared_object::impl
 {
@@ -536,10 +596,10 @@ public:
     {}
     inline const std::string &path( void ) const { return _path; }
     inline const std::string &name( void ) const { return _name; }
-    inline uintptr_t base( void ) const { return _base; }
+    inline uintptr_t          base( void ) const { return _base; }
 
-    bool is_closest( void *, const impl * ) { throw_not_yet(); }
-    void load_syms( const char * ) { throw_not_yet(); }
+    bool        is_closest( void *, const impl * ) { throw_not_yet(); }
+    void        load_syms( const char * ) { throw_not_yet(); }
     std::string find_symbol( void *, bool /* include_offset */ = true )
     {
         throw_not_yet();
@@ -548,7 +608,7 @@ public:
 private:
     std::string _path;
     std::string _name;
-    uintptr_t _base = 0;
+    uintptr_t   _base = 0;
 };
 #endif // HAS_ELF_DLFCN
 
@@ -565,7 +625,16 @@ active_shared_object::active_shared_object( void *phdr )
 #ifdef HAS_ELF_DLFCN
     : _impl( new impl( static_cast<struct dl_phdr_info *>( phdr ) ) )
 #endif
-{}
+{
+#if !defined( HAS_ELF_DLFCN ) && defined( HAS_DLFCN )
+    Dl_info info;
+    if ( 0 == dladdr( phdr, &info ) )
+    {
+        if ( info.dli_fname )
+            _impl.reset( new impl( info.dli_fname, reinterpret_cast<uintptr_t>( info.dli_fbase ) ) );
+    }
+#endif
+}
 
 ////////////////////////////////////////
 
@@ -610,6 +679,12 @@ active_objects::active_objects()
 {
 #ifdef HAS_ELF_DLFCN
     dl_iterate_phdr( &fillActiveCB, &_dsos );
+#elif defined( HAS_MACH_DYLD )
+    // TODO: not thread safe...
+    uint32_t N = _dyld_image_count();
+    for ( uint32_t i = 0; i < N; ++i )
+        _dsos.push_back( std::make_shared<active_shared_object>(
+            _dyld_get_image_name( i ), _dyld_get_image_vmaddr_slide( i ) ) );
 #else
     throw_not_yet();
 #endif
@@ -639,6 +714,8 @@ void *find_next( const char *sig, const char *ver )
 #    ifdef HAS_VSYM
     if ( ver )
         return dlvsym( RTLD_NEXT, sig, ver );
+#    else
+    (void)ver;
 #    endif
 
     return dlsym( RTLD_NEXT, sig );

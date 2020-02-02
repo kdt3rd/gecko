@@ -30,7 +30,7 @@ loadable::loadable( std::string lpath, isolation iso )
 {
 #ifdef _WIN32
     HMODULE x = LoadLibrary( static_cast<LPCTSTR>( _loadpath.c_str() ) );
-    if ( x == NULL )
+    if ( x == nullptr )
         throw_lasterror( "Unable to load '{0}'", lpath );
     _dso.reset( static_cast<void *>( x ), []( void *p ) {
         FreeLibrary( reinterpret_cast<HMODULE>( p ) );
@@ -108,7 +108,7 @@ loadable::find_app_symbol( const cstring &symName, const cstring &symVersion )
 {
 #ifdef _WIN32
     return reinterpret_cast<void *>(
-        GetProcAddress( GetModuleHandle( NULL ), symName.c_str() ) );
+        GetProcAddress( GetModuleHandle( nullptr ), symName.c_str() ) );
 #elif defined __linux__
     if ( symVersion.empty() )
         return dlsym( RTLD_DEFAULT, symName.c_str() );

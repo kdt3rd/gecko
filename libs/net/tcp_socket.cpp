@@ -47,21 +47,21 @@ tcp_socket::tcp_socket( void )
              _socket,
              SOL_SOCKET,
              SO_REUSEADDR,
-             (const char *)&on,
+             reinterpret_cast<const char *>(&on),
              sizeof( on ) ) < 0 )
         throw_errno( "setsockopt/reuseaddr" );
     if ( setsockopt(
              _socket,
              SOL_SOCKET,
              SO_KEEPALIVE,
-             (const char *)&on,
+             reinterpret_cast<const char *>(&on),
              sizeof( on ) ) < 0 )
         throw_errno( "setsockopt/keepalive" );
     if ( setsockopt(
              _socket,
              IPPROTO_TCP,
              TCP_NODELAY,
-             (const char *)&on,
+             reinterpret_cast<const char *>(&on),
              sizeof( on ) ) < 0 )
         throw_errno( "setsockopt/nodelay" );
 #ifdef __linux__
@@ -136,8 +136,8 @@ void tcp_socket::connect( uint32_t host, uint16_t port, double timeout )
             _socket + 1,
             &readset,
             &writeset,
-            NULL,
-            ( timeout > 0.0 ) ? &tval : NULL );
+            nullptr,
+            ( timeout > 0.0 ) ? &tval : nullptr );
 
         if ( count < 0 )
             throw_errno( "connect/select" );
@@ -245,9 +245,9 @@ void tcp_socket::write( const void *buf, size_t bytes )
                 {
                     int s = 0;
                     if ( tval.tv_sec == 0 && tval.tv_usec == 0 )
-                        s = select( _socket + 1, NULL, &fds, NULL, NULL );
+                        s = select( _socket + 1, nullptr, &fds, nullptr, nullptr );
                     else
-                        s = select( _socket + 1, NULL, &fds, NULL, &tval );
+                        s = select( _socket + 1, nullptr, &fds, nullptr, &tval );
 
                     if ( s == -1 && errno == EINTR )
                         continue;
@@ -293,7 +293,7 @@ void tcp_socket::wait( void )
     FD_ZERO( &readset );
     FD_SET( _socket, &readset );
 
-    int count = ::select( _socket + 1, &readset, NULL, NULL, NULL );
+    int count = ::select( _socket + 1, &readset, nullptr, nullptr, nullptr );
     if ( count < 0 )
         throw_errno( "wait/select" );
 }

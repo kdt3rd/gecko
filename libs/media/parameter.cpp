@@ -64,7 +64,7 @@ parameter_value::parameter_value( int64_t val )
 ////////////////////////////////////////
 
 parameter_value::parameter_value( float val )
-    : _ptype( PARAM_FLOAT ), _dval( val )
+    : _ptype( PARAM_FLOAT ), _dval( static_cast<double>( val ) )
 {}
 
 ////////////////////////////////////////

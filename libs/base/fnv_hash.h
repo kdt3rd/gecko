@@ -219,7 +219,7 @@ namespace detail
 {
 template <std::size_t I = 0, typename T, typename... Tp>
 inline typename std::enable_if<I == sizeof...( Tp ), void>::type
-tuple_fnv_loop( fnv1a<T> &h, const std::tuple<Tp...> &t )
+tuple_fnv_loop( fnv1a<T> &, const std::tuple<Tp...> & )
 {}
 template <std::size_t I = 0, typename T, typename... Tp>
     inline typename std::enable_if <

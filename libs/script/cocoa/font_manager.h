@@ -28,8 +28,8 @@ public:
         const std::string &family,
         const std::string &style,
         points             pts,
-        int                dpiw,
-        int                dpih,
+        float              dpiw,
+        float              dpih,
         int                maxGlyphW,
         int                maxGlyphH ) override;
 

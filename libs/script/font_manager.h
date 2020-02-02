@@ -58,7 +58,7 @@ public:
     /// being used isn't constrained, pass in a suitable maximum glyph
     /// size for memory cache.
     std::shared_ptr<font_dpi_cache>
-    get_cache( int dpih, int dpiv, int maxGlyphW, int maxGlyphH );
+    get_cache( float dpih, float dpiv, int maxGlyphW, int maxGlyphH );
 
     /// @brief Get a particular font.
     ///
@@ -76,8 +76,8 @@ public:
         const std::string &family,
         const std::string &style,
         points             pts,
-        int                dpih,
-        int                dpiv,
+        float              dpih,
+        float              dpiv,
         int                maxGlyphW,
         int                maxGlyphH ) = 0;
 

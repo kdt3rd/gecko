@@ -249,7 +249,7 @@ static void colorize_thread_abs(
             float mV   = std::sqrt( uV * uV + vV * vV );
             magLine[x] = mV;
             maxFlowMag = std::max( maxFlowMag, mV );
-            maxFlowAve += mV;
+            maxFlowAve += static_cast<double>( mV );
             rLine[x] = ( atan2f( vV, uV ) + static_cast<float>( M_PI ) ) /
                        ( 2.F * static_cast<float>( M_PI ) );
         }
@@ -290,7 +290,7 @@ static void colorize_thread_rel(
             float mV   = std::sqrt( uV * uV + vV * vV );
             magLine[x] = mV;
             maxFlowMag = std::max( maxFlowMag, mV );
-            maxFlowAve += mV;
+            maxFlowAve += static_cast<double>( mV );
             rLine[x] = ( atan2f( vV, uV ) + static_cast<float>( M_PI ) ) /
                        ( 2.F * static_cast<float>( M_PI ) );
         }
@@ -403,7 +403,7 @@ static void colorize_thread_rel_alpha(
                 float mV   = std::sqrt( uV * uV + vV * vV );
                 magLine[x] = mV;
                 maxFlowMag = std::max( maxFlowMag, mV );
-                maxFlowAve += mV;
+                maxFlowAve += static_cast<double>( mV );
                 maxFlowAveSum += 1.0;
                 rLine[x] = ( atan2f( vV, uV ) + static_cast<float>( M_PI ) ) /
                            ( 2.F * static_cast<float>( M_PI ) );

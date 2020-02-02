@@ -55,6 +55,8 @@
 #    define GK_IGNORE_WARNING_END GK_EMIT_PRAGMA( clang diagnostic pop )
 #    define GK_IGNORE_WARNINGS                                                 \
         GK_EMIT_PRAGMA( clang diagnostic ignored "-Weverything" )
+#    define GK_IGNORE_SOME_SWITCH_ENUMS                                        \
+        GK_EMIT_PRAGMA( clang diagnostic ignored "-Wswitch-enum" )
 #elif defined( _MSC_VER )
 
 #    ifndef GK_DEPRECATE
@@ -94,6 +96,8 @@
 #    define GK_IGNORE_WARNING_BEGIN GK_EMIT_PRAGMA( GCC diagnostic push )
 #    define GK_IGNORE_WARNING_END GK_EMIT_PRAGMA( GCC diagnostic pop )
 #    define GK_IGNORE_WARNINGS GK_EMIT_PRAGMA( GCC diagnostic ignored "-Wall" )
+#    define GK_IGNORE_SOME_SWITCH_ENUMS                                        \
+        GK_EMIT_PRAGMA( GCC diagnostic ignored "-Wswitch-enum" )
 
 #else
 #    error "compiler support not yet filled in for current compiler"

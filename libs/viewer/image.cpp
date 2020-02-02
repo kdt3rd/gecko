@@ -6,7 +6,7 @@
 #include "shaders.h"
 
 #include <gl/opengl.h>
-#include <media/image_frame.h>
+#include <media/frame.h>
 
 namespace draw
 {
@@ -25,7 +25,7 @@ namespace draw
 
 ////////////////////////////////////////
 
-void image::set_color_state( const ::color::state &s )
+void image::set_color_state( const ::color::state & )
 {
     // TODO
 }
@@ -102,22 +102,24 @@ void image::set_color_state( const ::color::state &s )
 
 ////////////////////////////////////////
 
-void image::convert( gl::api &ogl, const media::frame &fr )
+void image::convert( gl::api &, const media::frame & )
 {
     throw_not_yet();
 #if 0
 	// TODO: enable interleaved frame
 	size_t nChannels = fr.size();
-	_dx = fr.x1();
-	_dy = fr.y1();
+    _dx = fr.x1();
+    _dy = fr.y1();
 
-	int w = static_cast<int>( fr.width() );
-	int h = static_cast<int>( fr.height() );
+    int w = static_cast<int>( fr.width() );
+    int h = static_cast<int>( fr.height() );
 
-	_w = static_cast<float>( w );
-	_h = static_cast<float>( h );
+    _w = static_cast<float>( w );
+    _h = static_cast<float>( h );
 
-	_interleaved = fr.is_interleaved();
+    _interleaved = fr.is_interleaved();
+
+
 	// never true for 1 channel images...
 	if ( _interleaved )
 	{
@@ -241,8 +243,9 @@ void image::set_pan( float x, float y ) { _rect.translate( x, y ); }
 
 void image::add_zoom( float pivx, float pivy, float zoom )
 {
-    // TODO: finish adding pivot once we have that
+    _rect.translate( -pivx, -pivy );
     _rect.scale( zoom, zoom );
+    _rect.translate( pivx, pivy );
 }
 
 ////////////////////////////////////////
@@ -265,19 +268,19 @@ void image::set_texture_offset( int offset ) { _texture_offset = offset; }
 
 ////////////////////////////////////////
 
-void image::reset_position( int parw, int parh )
+void image::reset_position( float parw, float parh )
 {
-    int cenx = parw / 2;
-    int ceny = parh / 2;
-    _rect    = gl::matrix4();
+    float cenx = parw / 2.f;
+    float ceny = parh / 2.f;
+    _rect      = gl::matrix4();
 
-    int imgcenx = _w / 2;
-    int imgceny = _h / 2;
+    float imgcenx = _w / 2.f;
+    float imgceny = _h / 2.f;
 
-    set_pan( float( cenx - imgcenx ), float( ceny - imgceny ) );
+    set_pan( cenx - imgcenx, ceny - imgceny );
 }
 
-void image::rebuild( platform::context &ctxt ) { _stash.reset(); }
+void image::rebuild( platform::context & ) { _stash.reset(); }
 
 ////////////////////////////////////////
 
@@ -286,21 +289,19 @@ void image::draw( platform::context &ctxt )
     initialize( ctxt );
     gl::filter gf = ( _filter == zoom_filter::nearest ) ? gl::filter::NEAREST
                                                         : gl::filter::LINEAR;
+    gl::matrix4 imat;
+    imat.translate( static_cast<float>( _dx ), static_cast<float>( _dy ) );
+    imat *= _rect;
+    imat *= ctxt.api().current_matrix();
 
     if ( _interleaved )
     {
         if ( _texture[0] )
         {
-            auto bt =
-                _texture[0]->bind( static_cast<size_t>( _texture_offset ) );
+            auto bt = _texture[0]->bind( static_cast<size_t>( _texture_offset ) );
             bt.set_filters( gf, gf );
-            auto bound = _mesh.bind();
-            //gl::matrix4 tmp = _rect;
-            //tmp.scale( 0.5, 0.5 );
-            //tmp.translate( -0.5, -0.5 );
-            //bound.set_uniform( _stash->_matrix_loc, tmp );
-            bound.set_uniform(
-                _stash->_i_matrix_loc, _rect * ctxt.api().current_matrix() );
+            auto        bound = _mesh.bind();
+            bound.set_uniform( _stash->_i_matrix_loc, imat );
             bound.set_uniform( _stash->_i_tex_unit_loc, _texture_offset );
             bound.draw();
         }
@@ -309,25 +310,20 @@ void image::draw( platform::context &ctxt )
     {
         if ( _texture[0] && _texture[1] && _texture[2] && _texture[3] )
         {
-            auto bt0 =
-                _texture[0]->bind( static_cast<size_t>( _texture_offset ) );
+            auto bt0 = _texture[0]->bind( static_cast<size_t>( _texture_offset ) );
             bt0.set_filters( gf, gf );
 
-            auto bt1 =
-                _texture[1]->bind( static_cast<size_t>( _texture_offset + 1 ) );
+            auto bt1 = _texture[1]->bind( static_cast<size_t>( _texture_offset + 1 ) );
             bt1.set_filters( gf, gf );
 
-            auto bt2 =
-                _texture[2]->bind( static_cast<size_t>( _texture_offset + 2 ) );
+            auto bt2 = _texture[2]->bind( static_cast<size_t>( _texture_offset + 2 ) );
             bt2.set_filters( gf, gf );
 
-            auto bt3 =
-                _texture[3]->bind( static_cast<size_t>( _texture_offset + 3 ) );
+            auto bt3 = _texture[3]->bind( static_cast<size_t>( _texture_offset + 3 ) );
             bt3.set_filters( gf, gf );
 
-            auto bound = _mesh.bind();
-            bound.set_uniform(
-                _stash->_p_matrix_loc, _rect * ctxt.api().current_matrix() );
+            auto        bound = _mesh.bind();
+            bound.set_uniform( _stash->_p_matrix_loc, imat );
             bound.set_uniform( _stash->_p_tex_unit0_loc, _texture_offset );
             bound.set_uniform( _stash->_p_tex_unit1_loc, _texture_offset + 1 );
             bound.set_uniform( _stash->_p_tex_unit2_loc, _texture_offset + 2 );
@@ -337,21 +333,17 @@ void image::draw( platform::context &ctxt )
         }
         else if ( _texture[0] && _texture[1] && _texture[2] )
         {
-            auto bt0 =
-                _texture[0]->bind( static_cast<size_t>( _texture_offset ) );
+            auto bt0 = _texture[0]->bind( static_cast<size_t>( _texture_offset ) );
             bt0.set_filters( gf, gf );
 
-            auto bt1 =
-                _texture[1]->bind( static_cast<size_t>( _texture_offset + 1 ) );
+            auto bt1 = _texture[1]->bind( static_cast<size_t>( _texture_offset + 1 ) );
             bt1.set_filters( gf, gf );
 
-            auto bt2 =
-                _texture[2]->bind( static_cast<size_t>( _texture_offset + 2 ) );
+            auto bt2 = _texture[2]->bind( static_cast<size_t>( _texture_offset + 2 ) );
             bt2.set_filters( gf, gf );
 
-            auto bound = _mesh.bind();
-            bound.set_uniform(
-                _stash->_p_matrix_loc, _rect * ctxt.api().current_matrix() );
+            auto        bound = _mesh.bind();
+            bound.set_uniform( _stash->_p_matrix_loc, imat );
             bound.set_uniform( _stash->_p_tex_unit0_loc, _texture_offset );
             bound.set_uniform( _stash->_p_tex_unit1_loc, _texture_offset + 1 );
             bound.set_uniform( _stash->_p_tex_unit2_loc, _texture_offset + 2 );
@@ -360,17 +352,14 @@ void image::draw( platform::context &ctxt )
         }
         else if ( _texture[0] && _texture[1] )
         {
-            auto bt0 =
-                _texture[0]->bind( static_cast<size_t>( _texture_offset ) );
+            auto bt0 = _texture[0]->bind( static_cast<size_t>( _texture_offset ) );
             bt0.set_filters( gf, gf );
 
-            auto bt1 =
-                _texture[1]->bind( static_cast<size_t>( _texture_offset + 1 ) );
+            auto bt1 = _texture[1]->bind( static_cast<size_t>( _texture_offset + 1 ) );
             bt1.set_filters( gf, gf );
 
             auto bound = _mesh.bind();
-            bound.set_uniform(
-                _stash->_p_matrix_loc, _rect * ctxt.api().current_matrix() );
+            bound.set_uniform( _stash->_p_matrix_loc, imat );
             bound.set_uniform( _stash->_p_tex_unit0_loc, _texture_offset );
             bound.set_uniform( _stash->_p_tex_unit1_loc, _texture_offset + 1 );
             bound.set_uniform( _stash->_p_num_chans, GLint( 2 ) );
@@ -378,13 +367,11 @@ void image::draw( platform::context &ctxt )
         }
         else if ( _texture[0] )
         {
-            auto bt0 =
-                _texture[0]->bind( static_cast<size_t>( _texture_offset ) );
+            auto bt0 = _texture[0]->bind( static_cast<size_t>( _texture_offset ) );
             bt0.set_filters( gf, gf );
 
             auto bound = _mesh.bind();
-            bound.set_uniform(
-                _stash->_p_matrix_loc, _rect * ctxt.api().current_matrix() );
+            bound.set_uniform( _stash->_p_matrix_loc, imat );
             bound.set_uniform( _stash->_p_tex_unit0_loc, _texture_offset );
             bound.set_uniform( _stash->_p_num_chans, GLint( 1 ) );
             bound.draw();
@@ -404,20 +391,20 @@ void image::initialize( platform::context &ctxt )
             try
             {
                 _stash->_interleave_prog = ogl.new_program();
-                _stash->_interleave_prog->attach( ogl.new_vertex_shader(
-                    viewer_shaders( "drawImage.vert" ) ) );
+                _stash->_interleave_prog->attach(
+                    ogl.new_vertex_shader( viewer_shaders( "drawImage.vert" ) ) );
                 //			_stash->_prog->attach( ogl.new_fragment_shader( viewer_shaders( "convertDisplay.frag" ) ) );
-                _stash->_interleave_prog->attach( ogl.new_fragment_shader(
-                    viewer_shaders( "drawImage.frag" ) ) );
+                _stash->_interleave_prog->attach(
+                    ogl.new_fragment_shader( viewer_shaders( "drawImage.frag" ) ) );
 
                 _stash->_interleave_prog->link();
 
                 _stash->_planar_prog = ogl.new_program();
-                _stash->_planar_prog->attach( ogl.new_vertex_shader(
-                    viewer_shaders( "drawImage.vert" ) ) );
+                _stash->_planar_prog->attach(
+                    ogl.new_vertex_shader( viewer_shaders( "drawImage.vert" ) ) );
                 //			_stash->_prog->attach( ogl.new_fragment_shader( viewer_shaders( "convertDisplay.frag" ) ) );
-                _stash->_planar_prog->attach( ogl.new_fragment_shader(
-                    viewer_shaders( "drawImagePlanar.frag" ) ) );
+                _stash->_planar_prog->attach(
+                    ogl.new_fragment_shader( viewer_shaders( "drawImagePlanar.frag" ) ) );
 
                 _stash->_planar_prog->link();
             }

@@ -247,11 +247,11 @@
     char32_t  c;
     if ( [chars getBytes:&c
                   maxLength:4
-                 usedLength:NULL
+                 usedLength:nullptr
                    encoding:NSUTF32LittleEndianStringEncoding
                     options:0
                       range:NSMakeRange( 0, 1 )
-             remainingRange:NULL] )
+             remainingRange:nullptr] )
     {
         c = NSSwapLittleIntToHost( c );
         if ( c < 0xE000 || c > 0xF8FF ) // Private area

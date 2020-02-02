@@ -163,7 +163,7 @@ public:
                 if ( errno == EAGAIN )
                 {
                     struct io_event ev = {};
-                    int             nr = io_getevents( _ctxt, 0, 1, &ev, NULL );
+                    int             nr = io_getevents( _ctxt, 0, 1, &ev, nullptr );
                     if ( nr < 0 )
                     {
                         if ( errno != EINTR )
